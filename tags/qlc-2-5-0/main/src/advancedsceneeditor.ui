@@ -1,0 +1,271 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>UI_AdvancedSceneEditor</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>UI_AdvancedSceneEditor</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>559</width>
+            <height>399</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Scene Editor</string>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout8</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>m_sceneNameLabel</cstring>
+                    </property>
+                    <property name="frameShape">
+                        <enum>Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="text">
+                        <string>Scene name:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>m_sceneNameEdit</cstring>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QListView">
+            <column>
+                <property name="text">
+                    <string>#</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Channel</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Preset</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Value</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Type</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property name="name">
+                <cstring>m_sceneContents</cstring>
+            </property>
+            <property name="allColumnsShowFocus">
+                <bool>true</bool>
+            </property>
+            <property name="resizeMode">
+                <enum>AllColumns</enum>
+            </property>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout7</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_editValue</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Edit Channel</string>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Edit current channel's value</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer4</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>40</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_applyButton</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Apply</string>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_ok</cstring>
+                    </property>
+                    <property name="text">
+                        <string>OK</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_cancel</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Cancel</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<connections>
+    <connection>
+        <sender>m_editValue</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotEditValueClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_cancel</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotCancelClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotOKClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_applyButton</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotApplyClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_sceneContents</sender>
+        <signal>contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotChannelsContextMenuRequested(QListViewItem*,const QPoint&amp;,int)</slot>
+    </connection>
+    <connection>
+        <sender>m_sceneContents</sender>
+        <signal>doubleClicked(QListViewItem*)</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotContentsDoubleClicked(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>m_sceneContents</sender>
+        <signal>selectionChanged(QListViewItem*)</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotContentsClicked(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>m_sceneNameEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotSceneNameTextChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>m_sceneContents</sender>
+        <signal>itemRenamed(QListViewItem*,int)</signal>
+        <receiver>UI_AdvancedSceneEditor</receiver>
+        <slot>slotItemRenamed(QListViewItem*,int)</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>m_sceneNameEdit</tabstop>
+    <tabstop>m_sceneContents</tabstop>
+    <tabstop>m_editValue</tabstop>
+    <tabstop>m_applyButton</tabstop>
+    <tabstop>m_ok</tabstop>
+    <tabstop>m_cancel</tabstop>
+</tabstops>
+<slots>
+    <slot>slotChannelsContextMenuRequested(QListViewItem*, const QPoint &amp;, int)</slot>
+    <slot>slotAddSceneClicked()</slot>
+    <slot>slotApplyClicked()</slot>
+    <slot>slotCancelClicked()</slot>
+    <slot>slotContentsClicked(QListViewItem*)</slot>
+    <slot>slotContentsDoubleClicked(QListViewItem*)</slot>
+    <slot>slotEditSceneNameClicked()</slot>
+    <slot>slotEditValueClicked()</slot>
+    <slot>slotOKClicked()</slot>
+    <slot>slotOutputDeviceActivated(const QString&amp;)</slot>
+    <slot>slotRemoveSceneClicked()</slot>
+    <slot>slotSceneDoubleClicked(QListViewItem*)</slot>
+    <slot>slotSceneNameTextChanged(const QString&amp;)</slot>
+    <slot>slotSceneSelected(QListViewItem*)</slot>
+    <slot>slotStoreButtonClicked()</slot>
+    <slot>slotStoreSceneInGroupClicked(int)</slot>
+    <slot>slotItemRenamed(QListViewItem*, int)</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

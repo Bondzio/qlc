@@ -1,0 +1,77 @@
+Q Light Controller 2
+
+Copyright (c) Heikki Junnila
+
+EMail: hjunnila@users.sf.net
+QLC at SourceForge: http://qlc.sf.net
+
+
+
+License
+-------
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+Version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details. The license is
+in the file "COPYING".
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+
+
+Requirements
+------------
+* GNU auto tools (automake, autoconf)
+* QT/X11 3.1 or newer
+* /dev/rtc (Real-time clock, usually enabled by default)
+* Recommended: dmx4linux 2.4
+
+
+
+Compiling & Installation
+------------------------
+See main/docs/compiling.html for more detailed information.
+In general, just say
+
+	./bootstrap
+
+and then
+
+        ./configure
+	
+then
+	
+	make
+
+as a regular user in the qlc root directory and finally
+
+	make install
+
+(as root) to install QLC (to /usr/local/qlc by default).
+
+If you do not tamper with the Makefiles & config.make too much, a default
+and working qlc.rc file should be placed under /etc/
+
+
+
+Support & Bug Reports
+---------------------
+In general, support requests and bug reports should be sent to 
+qlc-devel@lists.sf.net.
+
+For TODO-lists, known bugs and other related information, go to
+http://www.sf.net/projects/qlc
+
+
+
+List of people who have contributed to this piece of software
+-------------------------------------------------------------
+Heikki Junnila (Author) <hjunnila@users.sf.net>
+Stefan Krumm <stefankrumm@users.sf.net>
+Christian Sühs <dance-or-die@users.sf.net>

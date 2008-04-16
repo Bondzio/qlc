@@ -1,0 +1,88 @@
+* AssignHotKey, AssignSliderHotkey, KeyBind, SliderKeyBind
+	-> Exchange them to something faster and rational
+
+* AdvancedSceneEditor
+	-> REMOVE COMPLETELY and change to something slider-like, for
+	   example SceneEditor.
+	-> REMOVE COMPLETELY EditSceneValue
+
+* Put back old shortcut keys (application menus)
+
+* Rename BusProperties to BusManager
+* Enable BusManager item renaming (i.e. remove QInputDialog)
+
+* Remove startMutex from Chaser -- WTF is it for?
+
+* Add FunctionSelection to SF.net SVN
+
+* Remove plain selection capabilities from FunctionManager
+
+* ConsoleChannel's value menus...? Do they work, allocation & deletion.
+
+* Plugins', Fixtures, FixtureManager's RichText colors
+
+* Rename DMXMapEditor to OutputManager
+
+* Rename FunctionCollection to Collection (same for its editor)
+
+* All functions' editing capabilities don't need to be inside mutexes and
+  running locks, since all functions are stopped before switching to
+  design mode. And no editing is possible in operate mode. So remove the
+  locks.
+
+* FunctionCollection::stop() stops all of its member functions, regardless of
+  whether they have been started by the collection or some other (user,chaser,
+  another collection). Should be fixed somehow.
+
+* Workspace background & theme. Also saving & loading of.
+
+* REMOVE COMPLETELY dummyinplugin; it's completely useless now that
+  there is no "default" input plugin.
+
+* EFX's and EFXEditor to support 16bit values
+* EFXEditor to support channel groups (now it searches for "pan" or "tilt")
+
+* Should Fixture inherit QLCFixtureDef? Would it be nicer, are there any
+  benefits?
+
+* Put all gfx into a .qrc file and compile that into the binary with qmake
+
+* Put FixtureConsole inside QMdiSubWindow (in Fixture class)
+* FixtureConsole's window title (plus when fixture renamed) thru QMdiSubWindow
+* FixtureConsole multiple selection for bulk removal, maybe remove the
+  question dialog?
+* FixtureConsole reloads the whole list after each operation. Make smarter.
+
+* FixtureManager's window title thru QMdiSubWindow
+* FixtureManager::loader()
+* Removal of multiple fixtures from FixtureManager should be easier. Maybe
+  multiple selection?
+* FixtureManager's automatic function generation should be made smarter and
+  incorporated into FunctionManager. So that user can select, which groups
+  of functions to generate etc.. NEEDS MORE SPECS.
+* FixtureManager::slotClone() opens fixture properties. Could this be avoided?
+  It would be easier to create multiple clones without the properties dialog.
+
+* FunctionConsumer's timer type should be configurable
+
+* FunctionManager thru QMdiSubWindow and its window title & icon the same
+* FunctionManager shortcut keys
+* Check that FunctionManager tracks bus name changes correctly
+* Bus setting doesn't work since action signals don't send the action 
+  itself, and 32 individual slot connections seems like dumb.
+* FunctionManager::addFunction() -> check function creation failure when
+  maximum number of functions is reached.
+* Some sophisticated way for editing scenes now that AdvancedSceneEditor
+  has been removed.
+
+* Monitor title & icon thru QMdiSubWindow
+* Monitor loading doesn't work. Put its settings into a separate class 
+  inside Monitor and deal with them. The monitor itself can then be 
+  created and destroyed at will.
+* Multiple monitors for different universes?
+* Monitor scrolling - so that the display doesn't always start from channel 1
+* QApplication locks were removed from Monitor since they shouldn't be
+  necessary with a QTimer (if it were a thread, then locks would be needed).
+* Monitor drawing should be optimized so that slotTimeout() updates only
+  values and not labels at all, since they dont change unless something
+  passes over them (like another window).

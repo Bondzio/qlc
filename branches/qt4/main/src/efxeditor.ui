@@ -1,0 +1,536 @@
+<ui version="4.0" >
+ <class>EFXEditor</class>
+ <widget class="QDialog" name="EFXEditor" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>560</width>
+    <height>569</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>EFX Editor</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QLabel" name="m_nameLabel" >
+       <property name="text" >
+        <string>EFX name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="m_nameEdit" />
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="m_tab" >
+     <property name="currentIndex" >
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="basic" >
+      <attribute name="title" >
+       <string>Basic movement</string>
+      </attribute>
+      <layout class="QHBoxLayout" >
+       <item>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QFrame" name="m_previewFrame" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize" >
+            <size>
+             <width>255</width>
+             <height>255</height>
+            </size>
+           </property>
+           <property name="maximumSize" >
+            <size>
+             <width>255</width>
+             <height>255</height>
+            </size>
+           </property>
+           <property name="frameShape" >
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow" >
+            <enum>QFrame::Sunken</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="m_axesGroup" >
+           <property name="title" >
+            <string>Axes</string>
+           </property>
+           <layout class="QGridLayout" >
+            <item row="0" column="0" >
+             <widget class="QLabel" name="m_horizontalLabel" >
+              <property name="text" >
+               <string>Horizontal (X)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QComboBox" name="m_horizontalCombo" />
+            </item>
+            <item row="3" column="0" >
+             <widget class="QLabel" name="m_verticalLabel" >
+              <property name="text" >
+               <string>Vertical (Y)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" >
+             <widget class="QComboBox" name="m_verticalCombo" />
+            </item>
+            <item row="1" column="1" >
+             <widget class="QComboBox" name="m_horizontalFineCombo" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="m_horizontalFineLabel" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="text" >
+               <string>Horizontal Fine (X)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" >
+             <widget class="QLabel" name="m_verticalFineLabel" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="text" >
+               <string>Vertical Fine (Y)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" >
+             <widget class="QComboBox" name="m_verticalFineCombo" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QGroupBox" name="m_algorithmGroup" >
+           <property name="title" >
+            <string>Algorithm</string>
+           </property>
+           <layout class="QVBoxLayout" >
+            <item>
+             <widget class="QComboBox" name="m_algorithmCombo" />
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="m_parametersGroup" >
+           <property name="title" >
+            <string>Parameters</string>
+           </property>
+           <layout class="QVBoxLayout" >
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_widthLabel" >
+                <property name="text" >
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_widthSpin" >
+                <property name="maximum" >
+                 <number>127</number>
+                </property>
+                <property name="value" >
+                 <number>127</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_heightLabel" >
+                <property name="text" >
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_heightSpin" >
+                <property name="maximum" >
+                 <number>127</number>
+                </property>
+                <property name="value" >
+                 <number>127</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_xOffsetLabel" >
+                <property name="text" >
+                 <string>X offset</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_xOffsetSpin" >
+                <property name="maximum" >
+                 <number>255</number>
+                </property>
+                <property name="value" >
+                 <number>127</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_yOffsetLabel" >
+                <property name="text" >
+                 <string>Y offset</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_yOffsetSpin" >
+                <property name="maximum" >
+                 <number>255</number>
+                </property>
+                <property name="value" >
+                 <number>127</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_rotationLabel" >
+                <property name="text" >
+                 <string>Rotation</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_rotationSpin" >
+                <property name="maximum" >
+                 <number>359</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>20</width>
+                <height>16</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_xFrequencyLabel" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="text" >
+                 <string>X frequency</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_xFrequencySpin" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="maximum" >
+                 <number>5</number>
+                </property>
+                <property name="value" >
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_yFrequencyLabel" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="text" >
+                 <string>Y frequency</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_yFrequencySpin" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="maximum" >
+                 <number>5</number>
+                </property>
+                <property name="value" >
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_xPhaseLabel" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="text" >
+                 <string>X phase</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_xPhaseSpin" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="maximum" >
+                 <number>360</number>
+                </property>
+                <property name="value" >
+                 <number>90</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QLabel" name="m_yPhaseLabel" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="text" >
+                 <string>Y phase</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="m_yPhaseSpin" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="maximum" >
+                 <number>360</number>
+                </property>
+                <property name="value" >
+                 <number>90</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="advanced" >
+      <attribute name="title" >
+       <string>Advanced options</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
+        <widget class="QGroupBox" name="m_runOrderGroup" >
+         <property name="title" >
+          <string>Run order</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QRadioButton" name="m_loopModeButton" >
+            <property name="text" >
+             <string>Loop</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="m_singleShotModeButton" >
+            <property name="text" >
+             <string>Single shot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="m_pingPongModeButton" >
+            <property name="text" >
+             <string>Ping pong</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="1" >
+        <widget class="QGroupBox" name="m_directionGroup" >
+         <property name="title" >
+          <string>Direction</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QRadioButton" name="m_forwardDirectionButton" >
+            <property name="text" >
+             <string>Forward</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="m_backwardDirectionButton" >
+            <property name="text" >
+             <string>Backward</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QGroupBox" name="m_startSceneGroup" >
+         <property name="title" >
+          <string>Initialize fixture</string>
+         </property>
+         <property name="checkable" >
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QTreeWidget" name="m_startSceneList" >
+            <column>
+             <property name="text" >
+              <string>Scene</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QGroupBox" name="m_stopSceneGroup" >
+         <property name="title" >
+          <string>De-initialize fixture</string>
+         </property>
+         <property name="checkable" >
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QTreeWidget" name="m_stopSceneList" >
+            <column>
+             <property name="text" >
+              <string>Scene</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>EFXEditor</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>EFXEditor</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>Q Light Controller Documentation - Getting Started</TITLE>
+</HEAD>
+
+<BODY>
+<TABLE CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+<TR>
+<TD ALIGN="left">
+<IMG SRC="pics/qlc-logo.jpg" ALIGN="absmiddle" ALT="Q Light Controller">
+</TD>
+<TD ALIGN="right">
+<A HREF="index.html" CLASS="link">QLC Documentation</A>
+<BR>
+<A HREF="http://qlc.sourceforge.net" CLASS="link">QLC Homepage</A>
+<BR>
+<A HREF="http://www.sourceforge.net/projects/qlc" CLASS="link">QLC at SourceForge</A>
+<BR>
+</TD>
+</TR>
+</TABLE>
+
+<H1>Getting Started</H1>
+
+<H3>Starting QLC</H3>
+<P>
+<LI>Start qlc from the desktop menu or from a terminal with the command:</LI>
+<PRE>
+	qlc
+</PRE>
+</P>
+
+<P>
+After some messages the main window will open. If there are any errors, refer to
+<A HREF="errata.html" CLASS="link">Errata</A> and <A HREF="faq.html" CLASS="link">FAQ</A>.
+</P>
+
+<H3>Main Window</H3>
+<IMG SRC="pics/mainwindow.png" ALT="Main Window">
+
+<P>
+Most controls throughout the software have tooltips, which pop up after holding your mouse button
+over a control item (button, slider etc.) for a while. The menubar on the top of the workspace window
+contains vital operations which we will discuss a bit later. Below the menubar is the toolbar that
+contains the following buttons (from left to right): <B>new</B>, <B>open</B>, <B>save</B>,
+<B>device manager</B>, <B>virtual console</B>, <B>function manager</B>, <B>panic</B>, <B>blackout</B>
+and <B>mode change</B>.
+</P>
+
+<P>
+Notice also the status bar at the bottom of the window. There are the indicators for mode and blackout.
+The mode indicator says "Design" which means that the application is in design (edit) mode. The blackout
+indicator is not visible, but when you click the blackout button on the toolbar, the indicator starts
+flashing to notify that all channels are disabled and their values are set to zero (until you release
+the blackout by pressing the button once more).
+</P>
+
+<H3>Device Manager</H3>
+<P>
+The device manager is the heart of qlc's device-oriented architecture. As its name already says, you
+manage your DMX devices (i.e. fixtures) from the device manager.
+</P>
+
+<LI>Open the device manager now by pressing its button on the toolbar.</LI>
+
+<P>
+<IMG SRC="pics/devicemanager.png" ALT="Device Manager">
+</P>
+
+<P>
+The device manager also has a toolbar, containing the following buttons (from left to right):
+<B>Add</B>, <B>Clone</B>, <B>Remove</B>, <B>Properties</B>, <B>Monitor</B> and <B>Console</B>. In short,
+you can <B>add</B> new devices, create exact replicas <B>clones</B> of existing devices and their
+functions, edit the <B>properties</B> of your devices, <B>monitor</B> the devices' channel values and
+use the <B>console</B> to control the channel values of each device.
+</P>
+
+<LI>Add an input device (press the first button from left) to our workspace. You should see a the
+following dialog:</LI>
+
+<H3>New Device</H3>
+<IMG SRC="pics/newdevice.png" ALT="Add new device dialog">
+
+<P>
+On the left side you can see the list of available fixture manufacturers. Each manufacturer folder
+contains a number of fixtures produced by each manufacturer. You can find for example a "DJScan250"
+under "Futurelight" folder. As you click a fixture from the list, you can see the <B>channels</B>
+field on the right change to display the number of DMX channels required by the selected fixture.
+</P>
+
+<LI>Go ahead and select Futurelight DJScan250 but don't click OK just yet.</LI>
+
+<P>
+You can edit the new device's name in the <B>Name</B> field and its DMX address to the
+<B>Address</B> field. If you have only one DMX output device, you should use <B>universe</B> 1.
+</P>
+
+<P>
+If you don't understand the DMX addressing principles, please consult your lighting equipment
+manuals for more info. In general, the DMX address is the first DMX channel of your fixture. In the
+case of a DJScan250, assigning for example 205 as its DMX address, reserves channels 205, 206, 207,
+208, 209, and 210 (6 channels in all) to the fixture.
+</P>
+
+<H3>Back in the device manager</H3>
+
+<IMG SRC="pics/devicemanager.png" ALT="Device Manager with DJScan250 as an output device">
+
+<P>
+On the left pane you can see the devices that are present in your current workspace. On the right
+pane, you can see the currently selected device's information. You can edit the device's name,
+address and universe by clicking the <B>Properties</B> button. When you're happy with the properties
+we can move on to creating some functions.
+</P>
+
+</BODY>
+</HTML>

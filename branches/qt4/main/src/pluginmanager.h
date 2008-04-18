@@ -22,19 +22,17 @@
 #ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
-#include <qwidget.h>
+#include <QWidget>
 
-class QToolBar;
-class QToolButton;
+class QTreeWidgetItem;
+class QTextBrowser;
+class QTreeWidget;
 class QVBoxLayout;
-class QCloseEvent;
-class QDockArea;
 class QSplitter;
-class QListView;
-class QListViewItem;
-class QTextView;
+class QToolBar;
+class QAction;
 
-class Plugin;
+class QLCPlugin;
 
 class PluginManager : public QWidget
 {
@@ -47,10 +45,8 @@ public:
 	PluginManager(QWidget* parent);
 	~PluginManager();
 
-	void initView();
-
 protected:
-	void initTitle();
+	void initActions();
 	void initToolBar();
 	void initMenuBar();
 	void initDataView();
@@ -58,17 +54,25 @@ protected:
 	void fillPlugins();
 	
 	/*********************************************************************
-	 * Slots
+	 * Plugin tree
 	 *********************************************************************/
 protected slots:
-	void slotConfigureClicked();
-	void slotOutputMapClicked();
-	void slotInputMapClicked();
+	void slotConfigure();
+	void slotOutputMap();
+	void slotInputMap();
 
-	void slotSelectionChanged(QListViewItem* item);
-	void slotRightButtonClicked(QListViewItem* item,
-				    const QPoint& point,
-				    int col);
+	void slotSelectionChanged();
+	void slotContextMenuRequested(const QPoint& point);
+
+protected:
+	QAction* m_configureAction;
+	QAction* m_outputMapAction;
+	QAction* m_inputMapAction;
+
+	QToolBar* m_toolbar;
+	QSplitter* m_splitter;
+	QTreeWidget* m_listView;
+	QTextBrowser* m_textView;
 
 	/*********************************************************************
 	 * Default settings
@@ -76,30 +80,6 @@ protected slots:
 public:
 	void saveDefaults(const QString& path);
 	void loadDefaults(const QString& path);
-
-	/*********************************************************************
-	 * Event handlers
-	 *********************************************************************/
-protected:
-	void closeEvent(QCloseEvent* e);
-
-	/*********************************************************************
-	 * Signals
-	 *********************************************************************/
-signals:
-	void closed();
-	
-protected:
-	QVBoxLayout* m_layout;
-	QToolBar* m_toolbar;
-	QDockArea* m_dockArea;
-	QSplitter* m_splitter;
-	QListView* m_listView;
-	QTextView* m_textView;
-	
-	QToolButton* m_configureButton;
-	QToolButton* m_outputMapButton;
-	QToolButton* m_inputMapButton;
 };
 
 #endif

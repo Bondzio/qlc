@@ -19,127 +19,80 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qwidget.h>
-#include <qtoolbar.h>
-#include <qtoolbutton.h>
-#include <qlayout.h>
-#include <qpixmap.h>
-#include <qevent.h>
-#include <qdockarea.h>
-#include <qtextview.h>
-#include <qsplitter.h>
-#include <qlistview.h>
-#include <qstring.h>
-#include <qmessagebox.h>
-#include <qheader.h>
-#include <qpopupmenu.h>
-#include <qtooltip.h>
-#include <assert.h>
+#include <QTreeWidgetItem>
+#include <QTextBrowser>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QStringList>
+#include <QSplitter>
+#include <QToolBar>
+#include <QWidget>
+#include <QString>
+#include <QMenu>
+#include <QIcon>
 
-#include "app.h"
-#include "dmxmap.h"
-#include "inputmap.h"
 #include "pluginmanager.h"
+#include "inputmap.h"
+#include "dmxmap.h"
+#include "app.h"
 
 extern App* _app;
 
 static const QString KInputNode ("Input");
 static const QString KOutputNode ("Output");
 
-static const int KColumnName ( 0 );
+#define KColumnName 0
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-PluginManager::PluginManager(QWidget* parent)
-	: QWidget(parent, "Plugin Manager")
+PluginManager::PluginManager(QWidget* parent) : QWidget(parent)
 {
-	m_layout = NULL;
-	m_dockArea = NULL;
-	m_toolbar = NULL;
-	m_splitter = NULL;
-	m_listView = NULL;
-	m_textView = NULL;
+	new QVBoxLayout(this);
 
-	// Create a vertical layout to this widget
-	m_layout = new QVBoxLayout(this);
-  
-	// Init the title and icon
-	initTitle();
-  
-	// Set up toolbar
+	setWindowTitle("Plugin Manager");
+	setWindowIcon(QIcon(PIXMAPS "/plugin.png"));
+
+	initActions();
 	initToolBar();
-  
-	// Create the list and text views
 	initDataView();
 
-	// Update plugins to list view
 	fillPlugins();
-
-	// Update text view
-	slotSelectionChanged(NULL);
+	slotSelectionChanged();
 }
 
 PluginManager::~PluginManager()
 {
 }
 
-void PluginManager::initTitle()
+void PluginManager::initActions()
 {
-	// Set the name
-	setCaption(QString("Plugin Manager"));
-  
-	// Set an icon TODO: better icon for plugin idiom
-	setIcon(QString(PIXMAPS) + QString("/plugin.png"));
+	m_configureAction = new QAction(QIcon(PIXMAPS "/configure.png"),
+					"Configure plugin", this);
+	connect(m_configureAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotConfigure()));
+
+	m_outputMapAction = new QAction(QIcon(PIXMAPS "/attach.png"),
+					"Output Map", this);
+	connect(m_outputMapAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotOutputMap()));
+
+	m_inputMapAction = new QAction(QIcon(PIXMAPS "/attach.png"),
+				       "Input Map", this);
+	connect(m_inputMapAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotInputMap()));
 }
 
 void PluginManager::initToolBar()
 {
-	// Create a dock area for the toolbar
-	m_dockArea = new QDockArea(Horizontal, QDockArea::Normal, this);
-	m_dockArea->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  
-	// Add the dock area to the top of the vertical layout
-	m_layout->addWidget(m_dockArea);
-
 	// Add a toolbar to the dock area
-	m_toolbar = new QToolBar("Plugin Manager", _app, m_dockArea);
-	m_toolbar->setMovingEnabled(false);
-
-	// Configure button
-	m_configureButton =
-		new QToolButton(QPixmap(QString(PIXMAPS) +
-					QString("/configure.png")),
-				"Configure",
-				0,
-				this,
-				SLOT(slotConfigureClicked()),
-				m_toolbar);
-	m_configureButton->setUsesTextLabel(true);
-	QToolTip::add(m_configureButton, "Configure the plugin");
-
-	// Output Map button
-	m_outputMapButton = new QToolButton(QPixmap(QString(PIXMAPS) +
-						    QString("/attach.png")),
-					    "Output Map",
-					    0,
-					    this,
-					    SLOT(slotOutputMapClicked()),
-					    m_toolbar);
-	m_outputMapButton->setUsesTextLabel(true);
-	QToolTip::add(m_outputMapButton, "Patch QLC universes to output plugins");
-
-	// Output Map button
-	m_inputMapButton = new QToolButton(QPixmap(QString(PIXMAPS) +
-						   QString("/attach.png")),
-					   "Input Map",
-					   0,
-					   this,
-					   SLOT(slotInputMapClicked()),
-					   m_toolbar);
-	m_inputMapButton->setUsesTextLabel(true);
-	QToolTip::add(m_inputMapButton, "Patch input events to QLC components");
+	m_toolbar = new QToolBar("Plugin Manager", this);
+	layout()->addWidget(m_toolbar);
+	m_toolbar->addAction(m_configureAction);
+	m_toolbar->addAction(m_outputMapAction);
+	m_toolbar->addAction(m_inputMapAction);
 }
 
 void PluginManager::initDataView()
@@ -148,10 +101,13 @@ void PluginManager::initDataView()
 	m_splitter = new QSplitter(this);
 	m_splitter->setSizePolicy(QSizePolicy::Expanding,
 				  QSizePolicy::Expanding);
-	m_layout->addWidget(m_splitter);
+	layout()->addWidget(m_splitter);
 
 	// Create the list view
-	m_listView = new QListView(m_splitter);
+	m_listView = new QTreeWidget(this);
+	m_splitter->addWidget(m_listView);
+	m_listView->setHeaderLabels(QStringList("Plugins"));
+/*
 	m_splitter->setResizeMode(m_listView, QSplitter::Auto);
 
 	m_listView->setRootIsDecorated(true);
@@ -166,58 +122,61 @@ void PluginManager::initDataView()
 
 	m_listView->addColumn("Plugins");
 	m_listView->setResizeMode(QListView::LastColumn);
-
-	connect(m_listView,
-		SIGNAL(selectionChanged(QListViewItem*)),
-		this,
-		SLOT(slotSelectionChanged(QListViewItem*)));
+*/
+	connect(m_listView, SIGNAL(selectionChanged()),
+		this, SLOT(slotSelectionChanged()));
   
-	connect(m_listView,
-		SIGNAL(doubleClicked(QListViewItem*)),
-		this,
-		SLOT(slotConfigureClicked()));
+	connect(m_listView, SIGNAL(doubleClicked(QTreeWidgetItem*)),
+		this, SLOT(slotConfigure()));
 
-	connect(m_listView,
-		SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
-		this,
-		SLOT(slotRightButtonClicked(QListViewItem*, const QPoint&, int)));
+	connect(m_listView, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(slotContextMenuRequested(const QPoint&)));
 
 	// Create the text view
-	m_textView = new QTextView(m_splitter);
-	m_splitter->setResizeMode(m_textView, QSplitter::Auto);
+	m_textView = new QTextBrowser(this);
+	m_splitter->addWidget(m_textView);
+	//m_splitter->setResizeMode(m_textView, QSplitter::Auto);
 }
 
 void PluginManager::fillPlugins()
 {
-	QListViewItem* item = NULL;
-	QListViewItem* parent = NULL;
-	QStringList list;
+	QTreeWidgetItem* parent;
+	QTreeWidgetItem* item;
 	QStringList::iterator it;
+	QStringList list;
 
 	m_listView->clear();
 
 	/* Output plugins */
-	parent = new QListViewItem(m_listView, KOutputNode);
-	parent->setOpen(true);
+	parent = new QTreeWidgetItem(m_listView);
+	parent->setText(0, KOutputNode);
+	parent->setExpanded(true);
 	list = _app->dmxMap()->pluginNames();
 	for (it = list.begin(); it != list.end(); ++it)
-		new QListViewItem(parent, *it);
+	{
+		item = new QTreeWidgetItem(parent);
+		item->setText(KColumnName, *it);
+	}
 
 	/* Input plugins */
-	parent = new QListViewItem(m_listView, KInputNode);
-	parent->setOpen(true);
+	parent = new QTreeWidgetItem(m_listView);
+	parent->setText(0, KInputNode);
+	parent->setExpanded(true);
 	list = _app->inputMap()->pluginNames();
 	for (it = list.begin(); it != list.end(); ++it)
-		new QListViewItem(parent, *it);
+	{
+		item = new QTreeWidgetItem(parent);
+		item->setText(KColumnName, *it);
+	}
 }
 
 /*****************************************************************************
  * Menu & tool button slots
  *****************************************************************************/
 
-void PluginManager::slotConfigureClicked()
+void PluginManager::slotConfigure()
 {
-	QListViewItem* item = NULL;
+	QTreeWidgetItem* item;
 	QString parentName;
 	
 	item = m_listView->currentItem();
@@ -238,27 +197,29 @@ void PluginManager::slotConfigureClicked()
 				item->text(KColumnName));
 		}
 
-		slotSelectionChanged(item);
+		slotSelectionChanged();
 	}
 }
 
 
-void PluginManager::slotOutputMapClicked()
+void PluginManager::slotOutputMap()
 {
 	_app->dmxMap()->openEditor(this);
-	slotSelectionChanged(m_listView->currentItem());
+	slotSelectionChanged();
 }
 
-void PluginManager::slotInputMapClicked()
+void PluginManager::slotInputMap()
 {
+	QMessageBox::information(this, "TODO", "TODO");
 }
 
 /*****************************************************************************
  * List view slots
  *****************************************************************************/
 
-void PluginManager::slotSelectionChanged(QListViewItem* item)
+void PluginManager::slotSelectionChanged()
 {
+	QTreeWidgetItem* item = m_listView->currentItem();
 	QString status;
 	QString name;
 	QString parent;
@@ -269,7 +230,7 @@ void PluginManager::slotSelectionChanged(QListViewItem* item)
 
 		if (item->parent() == NULL)
 		{
-			m_configureButton->setEnabled(false);
+			m_configureAction->setEnabled(false);
 			if (name == KOutputNode)
 				status = _app->dmxMap()->pluginStatus();
 			else if (name == KInputNode)
@@ -277,7 +238,7 @@ void PluginManager::slotSelectionChanged(QListViewItem* item)
 		}
 		else
 		{
-			m_configureButton->setEnabled(true);
+			m_configureAction->setEnabled(true);
 			parent = item->parent()->text(KColumnName);
 
 			if (parent == KOutputNode)
@@ -288,7 +249,7 @@ void PluginManager::slotSelectionChanged(QListViewItem* item)
 	}
 	else
 	{
-		m_configureButton->setEnabled(false);
+		m_configureAction->setEnabled(false);
 	}
 
 	if (status.length() == 0)
@@ -301,22 +262,18 @@ void PluginManager::slotSelectionChanged(QListViewItem* item)
 	m_textView->setText(status);
 }
 
-void PluginManager::slotRightButtonClicked(QListViewItem* item,
-					   const QPoint& point,
-					   int col)
+void PluginManager::slotContextMenuRequested(const QPoint& point)
 {
+	QTreeWidgetItem* item = m_listView->currentItem();
 	if (item == NULL)
 		return;
 
-	QPopupMenu menu;
-	menu.setCheckable(false);
-	menu.insertItem(QPixmap(QString(PIXMAPS) + 
-				QString("/configure.png")),
-			"Configure...",
-			this,
-			SLOT(slotConfigureClicked()));
-
-	menu.exec(point, 0);
+	QMenu menu(this);
+	if (item != NULL)
+		menu.addAction(m_configureAction);
+	menu.addAction(m_outputMapAction);
+	menu.addAction(m_inputMapAction);
+	menu.exec(point);
 }
 
 /*****************************************************************************
@@ -325,17 +282,10 @@ void PluginManager::slotRightButtonClicked(QListViewItem* item,
 
 void PluginManager::saveDefaults(const QString& path)
 {
+	/* TODO */
 }
 
 void PluginManager::loadDefaults(const QString& path)
 {
-}
-
-/*****************************************************************************
- * Event handlers
- *****************************************************************************/
-
-void PluginManager::closeEvent(QCloseEvent* e)
-{
-	emit closed();
+	/* TODO */
 }

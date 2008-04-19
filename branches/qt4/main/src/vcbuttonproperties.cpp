@@ -19,235 +19,177 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
-#include <qcombobox.h>
-#include <qlineedit.h>
-#include <qspinbox.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <qmessagebox.h>
-#include <qcheckbox.h>
+#include <QRadioButton>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QSpinBox>
 
 #include "common/qlcfixturedef.h"
 #include "vcbuttonproperties.h"
-#include "function.h"
-#include "app.h"
-#include "doc.h"
+#include "functionselection.h"
+#include "virtualconsole.h"
 #include "assignhotkey.h"
+#include "function.h"
 #include "keybind.h"
 #include "fixture.h"
-#include "virtualconsole.h"
-#include "functionmanager.h"
+#include "app.h"
+#include "doc.h"
 
 extern App* _app;
 
 VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent)
-	: UI_VCButtonProperties(parent, "ButtonProperties", true),
-	  
-	  m_button     ( button ),
-	  m_keyBind    ( new KeyBind(button->keyBind()) ),
-	  m_functionID ( button->function() ),
-	  m_functionManager ( NULL )
+	: QDialog(parent)
 {
-}
+	setupUi(this);
 
+	/* Button text and function */
+	m_button = button;
+	m_nameEdit->setText(m_button->caption());
+	slotSetFunction(button->function());
+
+	/* KeyBind key */
+	m_keyBind = new KeyBind(button->keyBind());
+	m_keyEdit->setText(m_keyBind->keyString());
+
+	/* press action */
+	switch(m_keyBind->pressAction())
+	{
+	default:
+	case KeyBind::PressToggle:
+		m_toggle->setChecked(true);
+		break;
+	case KeyBind::PressFlash:
+		m_flash->setChecked(true);
+		break;
+	case KeyBind::PressStepForward:
+		m_forward->setChecked(true);
+		break;
+	case KeyBind::PressStepBackward:
+		m_backward->setChecked(true);
+		break;
+	}
+
+	/* Panic operation */
+	m_stopFunctionsCheck->setChecked(m_button->stopFunctions());
+
+	/* Button icons */
+	m_attachFunction->setIcon(QIcon(PIXMAPS "/attach.png"));
+	m_detachFunction->setIcon(QIcon(PIXMAPS "/detach.png"));
+	m_attachKey->setIcon(QIcon(PIXMAPS "/key_bindings.png"));
+	m_detachKey->setIcon(QIcon(PIXMAPS "/keyboard.png"));
+
+	/* Button connections */
+	connect(m_attachFunction, SIGNAL(clicked()),
+		this, SLOT(slotAttachFunction()));
+	connect(m_detachFunction, SIGNAL(clicked()),
+		this, SLOT(slotSetFunction()));
+	connect(m_attachKey, SIGNAL(clicked()), this, SLOT(slotAttachKey()));
+	connect(m_detachKey, SIGNAL(clicked()), this, SLOT(slotDetachKey()));
+}
 
 VCButtonProperties::~VCButtonProperties()
 {
 	delete m_keyBind;
 }
 
-
-void VCButtonProperties::initView()
+void VCButtonProperties::slotAttachFunction()
 {
-	QString keyString;
-
-	// Set name
-	m_nameEdit->setText(m_button->caption());
-
-	// Set function name
-	setFunctionName();
-
-	// KeyBind key
-	m_keyBind->keyString(keyString);
-	m_keyEdit->setText(keyString);
-
-	// Set press action
-	m_onButtonPressGroup->setButton(m_keyBind->pressAction());
-	slotPressGroupClicked(m_keyBind->pressAction());
-	m_stopFunctionsCheck->setChecked(m_button->stopFunctions());
-	
-	//
-	// TODO: Input stuff
-	//
-	// m_channelSpinBox->setValue(m_button->inputChannel());
-
-
-	//
-	// Pixmaps
-	//
-	m_attachFunction->setPixmap(QPixmap(QString(PIXMAPS) +
-					    QString("/attach.png")));
-	m_detachFunction->setPixmap(QPixmap(QString(PIXMAPS) +
-					    QString("/detach.png")));
-
-	m_attachKey->setPixmap(QPixmap(QString(PIXMAPS) +
-				       QString("/key_bindings.png")));
-	m_detachKey->setPixmap(QPixmap(QString(PIXMAPS) +
-				       QString("/keyboard.png")));
+	FunctionSelection sel(this, _app->doc(), false);
+	if (sel.exec() == QDialog::Accepted)
+	{
+		/* Get the first selected function */
+		slotSetFunction(sel.selection.at(0));
+	}
 }
 
-
-void VCButtonProperties::setFunctionName()
+void VCButtonProperties::slotSetFunction(t_function_id fid)
 {
-	Fixture* fxi = NULL;
-	Function* func = NULL;
-	QString func_name;
+	Function* func;
+	Fixture* fxi;
 
-	func = _app->doc()->function(m_functionID);
+	m_function = fid;
+	func = _app->doc()->function(m_function);
 	if (func == NULL)
 	{
-		func_name = "No Function";
+		m_functionEdit->setText("No function");
 	}
 	else
 	{
 		fxi = _app->doc()->fixture(func->fixture());
 		if (fxi != NULL)
 		{
-			func_name = fxi->name() +
-				QString(" / ") + func->name();
+			m_functionEdit->setText(QString("%1 / %2")
+						.arg(fxi->name())
+						.arg(func->name()));
 		}
 		else
 		{
-			func_name = QString("Global") +
-				QString(" / ") + func->name();
+			m_functionEdit->setText(QString("Global / %2")
+						.arg(fxi->name())
+						.arg(func->name()));
 		}
 	}
-
-	m_functionEdit->setText(func_name);
 }
 
-void VCButtonProperties::slotPressGroupClicked(int id)
+void VCButtonProperties::slotAttachKey()
 {
-	ASSERT(m_keyBind != NULL);
-
-	switch (id)
+	AssignHotKey ahk(this);
+	if (ahk.exec() == QDialog::Accepted)
 	{
-	case 1:
-		m_keyBind->setPressAction(KeyBind::PressToggle);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-		break;
+		QString keyString;
 
-	case 2:
-		m_keyBind->setPressAction(KeyBind::PressFlash);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseStop);
-		break;
+		Q_ASSERT(ahk.keyBind() != NULL);
 
-	case 3:
-		m_keyBind->setPressAction(KeyBind::PressStepForward);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-		break;
-
-	case 4:
-		m_keyBind->setPressAction(KeyBind::PressStepBackward);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-		break;
-
-	default:
-		break;
-	}
-}
-
-void VCButtonProperties::slotAttachFunctionClicked()
-{
-	m_functionManager = new FunctionManager(this,
-						FunctionManager::SelectionMode);
-	m_functionManager->init();
-
-	connect(m_functionManager, SIGNAL(closed()),
-		this, SLOT(slotFunctionManagerClosed()));
-
-	m_functionManager->show();
-}
-
-void VCButtonProperties::slotFunctionManagerClosed()
-{
-	FunctionIDList list;
-
-	assert(m_functionManager);
-
-	if (m_functionManager->result() == QDialog::Accepted)
-	{
-		m_functionManager->selection(list);
-
-		m_functionID = list.first();
-		setFunctionName();
-
-		list.clear();
-	}
-
-	delete m_functionManager;
-	m_functionManager = NULL;
-}
-
-
-void VCButtonProperties::slotDetachFunctionClicked()
-{
-	m_functionID = KNoID;
-	setFunctionName();
-}
-
-void VCButtonProperties::slotAttachKeyClicked()
-{
-	QString keyString;
-
-	AssignHotKey* a = new AssignHotKey(this);
-	if (a->exec() == QDialog::Accepted)
-	{
-		assert(a->keyBind());
-
-		if (m_keyBind)
-		{
+		if (m_keyBind != NULL)
 			delete m_keyBind;
-		}
-
-		m_keyBind = new KeyBind(a->keyBind());
-
-		m_keyBind->keyString(keyString);
-		m_keyEdit->setText(keyString);
+		m_keyBind = new KeyBind(ahk.keyBind());
+		m_keyEdit->setText(m_keyBind->keyString());
 	}
-
-	delete a;
 }
 
-void VCButtonProperties::slotDetachKeyClicked()
+void VCButtonProperties::slotDetachKey()
 {
-	QString keyString;
-
-	m_keyBind->setKey(Key_unknown);
-	m_keyBind->setMod(NoButton);
-
-	m_keyBind->keyString(keyString);
-	m_keyEdit->setText(keyString);
+	m_keyBind->setKey(Qt::Key_unknown);
+	m_keyBind->setMod(Qt::NoModifier);
+	m_keyEdit->setText(m_keyBind->keyString());
 }
 
-void VCButtonProperties::slotOKClicked()
+void VCButtonProperties::accept()
 {
 	m_button->setCaption(m_nameEdit->text());
-	m_button->setFunction(m_functionID);
+	m_button->setFunction(m_function);
+
+	Q_ASSERT(m_keyBind != NULL);
+
+	if (m_toggle->isChecked() == true)
+	{
+		m_keyBind->setPressAction(KeyBind::PressToggle);
+		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
+	}
+	else if (m_flash->isChecked() == true)
+	{
+		m_keyBind->setPressAction(KeyBind::PressFlash);
+		m_keyBind->setReleaseAction(KeyBind::ReleaseStop);
+	}
+	else if (m_forward->isChecked() == true)
+	{
+		m_keyBind->setPressAction(KeyBind::PressStepForward);
+		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
+	}
+	else if (m_backward->isChecked() == true)
+	{
+		m_keyBind->setPressAction(KeyBind::PressStepBackward);
+		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
+	}
+
 	m_button->setKeyBind(m_keyBind);
-	// TODO: m_button->setInputChannel(m_channelSpinBox->value());
         m_button->setStopFunctions(m_stopFunctionsCheck->isChecked());  
 
 	_app->doc()->setModified();
 
-	accept();
-}
-
-void VCButtonProperties::slotCancelClicked()
-{
-	reject();
+	QDialog::accept();
 }
 

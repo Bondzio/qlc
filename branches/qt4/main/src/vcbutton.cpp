@@ -19,33 +19,34 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qdom.h>
-#include <qevent.h>
-#include <qstring.h>
-#include <qcursor.h>
-#include <qtooltip.h>
-#include <limits.h>
-#include <qtimer.h>
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qobjectlist.h>
-#include <qmessagebox.h>
-#include <qpopupmenu.h>
+#include <QPaintEvent>
+#include <QMouseEvent>
+#include <QMessageBox>
+#include <iostream>
+#include <QPainter>
+#include <QString>
+#include <QEvent>
+#include <QTimer>
+#include <QBrush>
+#include <QtXml>
+#include <QMenu>
+#include <QSize>
+#include <QPen>
 
-#include "common/filehandler.h"
-#include "common/qlcimagepreview.h"
+#include "common/qlcfile.h"
 
-#include "app.h"
-#include "doc.h"
+#include "vcbuttonproperties.h"
+#include "functionselection.h"
+#include "virtualconsole.h"
 #include "vcbutton.h"
-#include "vcframe.h"
 #include "function.h"
+#include "vcframe.h"
 #include "fixture.h"
 #include "keybind.h"
-#include "virtualconsole.h"
-#include "vcbuttonproperties.h"
-#include "functionmanager.h"
+#include "app.h"
+#include "doc.h"
+
+using namespace std;
 
 extern App* _app;
 
@@ -53,28 +54,25 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-VCButton::VCButton(QWidget* parent) : VCWidget(parent, "Button")
+VCButton::VCButton(QWidget* parent) : VCWidget(parent)
 {
-	/* Just a pointer to the function selection dialog. This is used
-	   only when the menu item for selecting a function is clicked */
-	m_functionManager = NULL;
+	setObjectName("VCButton");
 
 	/* No function is initially attached to the button */
 	m_function = KNoID;
-	QToolTip::add(this, "No function");
 
 	/* Set the frame line width a bit thicker to make this look more
 	   like a button than a frame (which it actually is) */
 	setLineWidth(2);
 
-	setCaption("");
+	setCaption(QString::null);
 	setOn(false);
 	setExclusive(false);
-	m_stopFunctions = false;
+	setStopFunctions(false);
 
 	/* Initial size */
 	setMinimumSize(20, 20);
-	resize(QPoint(30, 30));
+	resize(QSize(30, 30));
 
 	/* Keybinding */
 	m_keyBind = new KeyBind();
@@ -91,14 +89,11 @@ VCButton::~VCButton()
 
 void VCButton::scram()
 {
-	QString msg;
-
-	msg = "Do you wish to delete this button?\n" + caption();
-	int result = QMessageBox::question(this, "Delete", msg,
-					   QMessageBox::Yes,
-					   QMessageBox::No);
-
-	if (result == QMessageBox::Yes)
+	if (QMessageBox::question(this, "Delete",
+				  QString("Delete button: %1?")
+				  .arg(caption()),
+				  QMessageBox::Yes,
+				  QMessageBox::No) == QMessageBox::Yes)
 	{
 		_app->virtualConsole()->setSelectedWidget(NULL);
 		_app->doc()->setModified();
@@ -113,10 +108,7 @@ void VCButton::scram()
 void VCButton::editProperties()
 {
 	VCButtonProperties prop(this, _app);
-	prop.initView();
-
-	if (prop.exec() == QDialog::Accepted)
-		_app->doc()->setModified();
+	prop.exec();
 }
 
 /*****************************************************************************
@@ -133,7 +125,7 @@ bool VCButton::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	if (root->tagName() != KXMLQLCVCButton)
 	{
-		qWarning("Button node not found!");
+		cout << "Button node not found!" << endl;
 		return false;
 	}
 
@@ -162,7 +154,7 @@ bool VCButton::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCButton)
 	{
-		qWarning("Button node not found!");
+		cout << "Button node not found!" << endl;
 		return false;
 	}
 
@@ -176,8 +168,8 @@ bool VCButton::loadXML(QDomDocument* doc, QDomElement* root)
 		tag = node.toElement();
 		if (tag.tagName() == KXMLQLCWindowState)
 		{
-			FileHandler::loadXMLWindowState(&tag, &x, &y, &w, &h,
-							&visible);
+			QLCFile::loadXMLWindowState(&tag, &x, &y, &w, &h,
+						    &visible);
 			setGeometry(x, y, w, h);
 		}
 		else if (tag.tagName() == KXMLQLCVCAppearance)
@@ -202,8 +194,9 @@ bool VCButton::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown button tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown button tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -240,7 +233,7 @@ bool VCButton::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	root.appendChild(tag);
 
 	/* Window state */
-	FileHandler::saveXMLWindowState(doc, &root, this);
+	QLCFile::saveXMLWindowState(doc, &root, this);
 
 	/* Appearance */
 	saveXMLAppearance(doc, &root);
@@ -269,7 +262,7 @@ void VCButton::setOn(bool on)
 
 void VCButton::setFrameStyle(const int style)
 {
-	/* Don't allow frame style setting because we need to simulate
+	/* Don't allow real frame style setting because we need to simulate
 	   button-look with a custom frame style */
 }
 
@@ -281,9 +274,8 @@ void VCButton::setKeyBind(const KeyBind* kb)
 {
 	Q_ASSERT(kb != NULL);
 
-	if (m_keyBind)
+	if (m_keyBind != NULL)
 		delete m_keyBind;
-
 	m_keyBind = new KeyBind(kb);
 
 	connect(m_keyBind, SIGNAL(pressed()), this, SLOT(pressFunction()));
@@ -294,65 +286,13 @@ void VCButton::setKeyBind(const KeyBind* kb)
  * Function attachment
  *****************************************************************************/
 
-void VCButton::selectFunction()
+void VCButton::setFunction(t_function_id fid)
 {
-	if (m_functionManager == NULL)
-	{
-		// Create a new function manager
-		m_functionManager = new FunctionManager(
-			this, FunctionManager::SelectionMode);
-
-		connect(m_functionManager, SIGNAL(closed()),
-			this, SLOT(slotFunctionManagerClosed()));
-
-		// Initialize the function manager dialog
-		m_functionManager->init();
-	}
-	
-	m_functionManager->show();
-}
-
-void VCButton::slotFunctionManagerClosed()
-{
-	FunctionIDList list;
-	FunctionIDList::iterator it;
-	Function* function = NULL;
-
-	Q_ASSERT(m_functionManager != NULL);
-
-	if (m_functionManager->result() == QDialog::Accepted)
-	{
-		// Just get the first of the selected items
-		m_functionManager->selection(list);
-		it = list.begin();
-
-		// Do the attachment only if something sensible was selected
-		if (it != list.end())
-			setFunction(*it);
-	}
-
-	delete m_functionManager;
-	m_functionManager = NULL;
-}
-
-void VCButton::setFunction(t_function_id function)
-{
-	Function* f = NULL;
-
-	f = _app->doc()->function(function);
-	if (f != NULL)
-	{
-		m_function = function;
-		QToolTip::add(this, f->name());
-	}
+	if (fid == KNoID || _app->doc()->function(fid) != NULL)
+		m_function = fid;
 	else
-	{
 		m_function = KNoID;
-		QToolTip::add(this, "No function");
-		qWarning("Unable to attach nonexistent function %d to button",
-			 function);
-	}
-
+	/* TODO: tooltips */
 	_app->doc()->setModified();
 }
 
@@ -372,9 +312,8 @@ void VCButton::pressFunction()
 	Function* f = NULL;
 
 	if (m_stopFunctions == true)
-	{
-		_app->slotPanic();
-	}
+		_app->slotControlPanic();
+	/* TODO: Should this return immediately? */
 
 	if (m_function == KNoID)
 	{
@@ -392,7 +331,8 @@ void VCButton::pressFunction()
 			}
 			else
 			{
-				if (f->engage(static_cast<QObject*> (this)) == true)
+				if (f->engage(static_cast<QObject*> (this))
+				    == true)
 				{
 					setOn(true);
 				}
@@ -400,40 +340,35 @@ void VCButton::pressFunction()
 		}
 		else
 		{
-			qDebug("Function has been deleted!");
+			cout << "Function has been deleted!" << endl;
 			setFunction(KNoID);
 		}
 	}
 	else if (m_keyBind->pressAction() == KeyBind::PressToggle &&
 		 m_isExclusive == true)
 	{
-		QObjectList* l = parentWidget()->queryList("VCButton");
-		QObjectListIt it(*l);
-		QObject* obj;
-		while ((obj = it.current()) != NULL)
-		{
-			++it;
-			if (((VCButton*)obj)->isOn() == true)
-			{
-				f = _app->doc()->function(
-					((VCButton*)obj)->function());
-				Q_ASSERT(f != NULL);
-				f->stop();
-			}
-		}
-		delete l;
+		/* Get a list of this button's siblings from this' parent */
+		QListIterator <VCButton*> it(
+			parentWidget()->findChildren<VCButton*>("VCButton"));
 
+		/* Stop all sibling buttons' functions */
+		while (it.hasNext() == true)
+		{
+			VCButton* sibling = it.next();
+			if (sibling != this)
+				sibling->setOn(false);
+		}
+
+		/* Start this button's function */
 		f = _app->doc()->function(m_function);
 		if (f != NULL)
 		{
 			if (f->engage(static_cast<QObject*> (this)) == true)
-			{
 				setOn(true);
-			}
 		}
 		else
 		{
-			qDebug("Function has been deleted!");
+			cout << "Function has been deleted!" << endl;
 			setFunction(KNoID);
 		}
 	}
@@ -443,13 +378,11 @@ void VCButton::pressFunction()
 		if (f != NULL)
 		{
 			if (f->engage(static_cast<QObject*> (this)) == true)
-			{
 				setOn(true);
-			}
 		}
 		else
 		{
-			qDebug("Function has been deleted!");
+			cout << "Function has been deleted!" << endl;
 			setFunction(KNoID);
 		}
 	}
@@ -469,21 +402,15 @@ void VCButton::releaseFunction()
 	}
 	else if (m_keyBind->releaseAction() == KeyBind::ReleaseStop)
 	{
-		Function* function = NULL;
-		function = _app->doc()->function(m_function);
-		if (function != NULL)
-		{
-			if (isOn() == true)
-			{
-				function->stop();
-			}
-		}
+		Function* function = _app->doc()->function(m_function);
+		if (function != NULL && isOn() == true)
+			function->stop();
 	}
 }
 
 void VCButton::functionStopEvent(FunctionStopEvent* e)
 {
-	if (e && e->functionID() == m_function)
+	if (e != NULL && e->functionID() == m_function)
 	{
 		setOn(false);
 		slotFlashReady();
@@ -497,9 +424,11 @@ void VCButton::slotFlashReady()
 {
 	// This function is called twice with same XOR mask,
 	// thus creating a brief opposite-color -- normal-color flash
-	QColor c(backgroundColor());
-	c.setRgb(c.red() ^ 0xff, c.green() ^ 0xff, c.blue() ^ 0xff);
-	setPaletteBackgroundColor(c);
+	QPalette pal = palette();
+	QColor color(pal.color(QPalette::Window));
+	color.setRgb(color.red()^0xff, color.green()^0xff, color.blue()^0xff);
+	pal.setColor(QPalette::Window, color);
+	setPalette(pal);
 }
 
 /*****************************************************************************
@@ -508,33 +437,28 @@ void VCButton::slotFlashReady()
 
 void VCButton::invokeMenu(QPoint point)
 {
-	QPopupMenu* menu = NULL;
+	QAction* attachAction;
+	QMenu* menu;
 
 	/* First, create the common widget menu and insert a separator to it */
 	menu = VCWidget::createMenu();
-	menu->insertSeparator();
+	menu->addSeparator();
 
 	/* Insert a menu item for attaching a function to this button */
-	menu->insertItem(QPixmap(QString(PIXMAPS) + QString("/attach.png")),
-			 "Set Function...", KVCMenuEditAttach);
-
+	attachAction = menu->addAction(QIcon(PIXMAPS "/attach.png"),
+				       "Set function...", this,
+				       SLOT(slotAttachFunction()));
+	
 	menu->exec(point);
-
 	delete menu;
+	delete attachAction;
 }
 
-void VCButton::slotMenuCallback(int item)
+void VCButton::slotAttachFunction()
 {
-	switch (item)
-	{
-	case KVCMenuEditAttach:
-		selectFunction();
-		break;
-
-	default:
-		VCWidget::slotMenuCallback(item);
-		break;
-	}
+	FunctionSelection sel(this, _app->doc(), false);
+	if (sel.exec() == QDialog::Accepted)
+		setFunction(sel.selection.at(0));
 }
 
 /*****************************************************************************
@@ -550,7 +474,7 @@ void VCButton::paintEvent(QPaintEvent* e)
 		/* TODO: Something better for marking a flash button */
 		QPainter p(this);
 		
-		QPen pen(red);
+		QPen pen(Qt::red);
 		p.setPen(pen);
 		p.drawEllipse(rect().width() - 14, rect().height() - 14,
 			      10, 10);
@@ -573,7 +497,7 @@ void VCButton::mouseReleaseEvent(QMouseEvent* e)
 		releaseFunction();
 }
 
-void VCButton::customEvent(QCustomEvent* e)
+void VCButton::customEvent(QEvent* e)
 {
 	if (e->type() == KFunctionStopEvent)
 		functionStopEvent(static_cast<FunctionStopEvent*> (e));

@@ -86,3 +86,11 @@
 * Monitor drawing should be optimized so that slotTimeout() updates only
   values and not labels at all, since they dont change unless something
   passes over them (like another window).
+
+* m_startMutex in Scene, again, wtf is it for??
+* m_startMutex comes from Function, is it really necessary ANYWHERE?
+
+* Tooltips to ALL widgets.
+
+* VC* widgets to use input mapping: BIG TODO
+

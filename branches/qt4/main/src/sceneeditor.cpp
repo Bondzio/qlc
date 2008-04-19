@@ -175,9 +175,9 @@ void SceneEditor::initActions()
 	connect(m_newAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotNewTriggered()));
 
-	m_saveAction = new QAction(QIcon(PIXMAPS "/filesave.png"),
+	m_storeAction = new QAction(QIcon(PIXMAPS "/filesave.png"),
 				   tr("Store"), this);
-	connect(m_saveAction, SIGNAL(triggered(bool)),
+	connect(m_storeAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotSaveTriggered()));
 
 	m_removeAction = new QAction(QIcon(PIXMAPS "editdelete.png"),
@@ -195,7 +195,7 @@ void SceneEditor::initMenu()
 {
 	m_menu = new QMenu(m_tools);
 	m_menu->addAction(m_activateAction);
-	m_menu->addAction(m_saveAction);
+	m_menu->addAction(m_storeAction);
 	m_menu->addSeparator();
 	m_menu->addAction(m_newAction);
 	m_menu->addAction(m_renameAction);
@@ -203,7 +203,7 @@ void SceneEditor::initMenu()
 	m_menu->addAction(m_removeAction);
 
 	m_tools->setMenu(m_menu);
-	m_tools->setPixmap(QPixmap(PIXMAPS "/scene.png"));
+	m_tools->setIcon(QIcon(PIXMAPS "/scene.png"));
 }
 
 void SceneEditor::slotSceneListContextMenu(const QPoint &point)
@@ -232,14 +232,14 @@ void SceneEditor::slotNew()
 				     tr("Scene name:"), QLineEdit::Normal,
 				     QString::null, &ok);
 
-	if (ok == true && text.isEmpty() == false)
+	if (ok == true && name.isEmpty() == false)
 	{
 		Scene* sc = static_cast<Scene*>
 			(_app->doc()->newFunction(Function::Scene,
 						  m_tempScene->fixture()));
 
 		sc->copyFrom(m_tempScene, m_tempScene->fixture());
-		sc->setName(text);
+		sc->setName(name);
 
 		m_sceneList->sortItems(KColumnName, Qt::AscendingOrder);
 		selectFunction(sc->id());
@@ -281,7 +281,7 @@ void SceneEditor::slotRename()
 	name = QInputDialog::getText(this, tr("Rename Scene"),
 				     tr("Scene name:"), QLineEdit::Normal,
 				     scene->name(), &ok);
-	if (ok == true && text.isEmpty() == false)
+	if (ok == true && name.isEmpty() == false)
 	{
 		scene->setName(name);
 		fillFunctions();
@@ -326,9 +326,10 @@ void SceneEditor::fillFunctions()
 		if (function->type() == Function::Scene &&
 		    function->fixture() == m_fixture)
 		{
+			QString str;
 			item = new QTreeWidgetItem(m_sceneList);
-			item->setText(KColumnName, f->name());
-			item->setText(KColumnID, f->id());
+			item->setText(KColumnName, function->name());
+			item->setText(KColumnID, str.setNum(id));
 		}
 	}
 
@@ -339,9 +340,13 @@ void SceneEditor::fillFunctions()
 
 QTreeWidgetItem* SceneEditor::getItem(t_function_id id)
 {
-	while (*it)
-		if (item->text(KColumnID).toInt() == id)
+	QTreeWidgetItemIterator it(m_sceneList);
+	while (*it != NULL)
+	{
+		if ((*it)->text(KColumnID).toInt() == id)
 			return *it;
+		++it;
+	}
   
 	return NULL;
 }

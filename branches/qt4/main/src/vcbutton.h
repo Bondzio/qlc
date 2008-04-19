@@ -22,26 +22,18 @@
 #ifndef VCBUTTON_H
 #define VCBUTTON_H
 
-#include <qptrlist.h>
-
 #include "vcwidget.h"
-#include "common/types.h"
-#include "app.h"
+#include "common/qlctypes.h"
 
-class QLineEdit;
-class QMouseEvent;
-class QPaintEvent;
-class QFile;
-class QString;
-class QColor;
-class QPixmap;
-class QPoint;
 class QDomDocument;
 class QDomElement;
+class QMouseEvent;
+class QPaintEvent;
+class QPoint;
+class QEvent;
 
-class KeyBind;
 class FunctionStopEvent;
-class FunctionManager;
+class KeyBind;
 
 #define KXMLQLCVCButton "Button"
 
@@ -141,20 +133,6 @@ protected:
 	/*********************************************************************
 	 * Function attachment
 	 *********************************************************************/
-protected:
-	/**
-	 * Invoke a function selection dialog to set (attach) a function to
-	 * this button.
-	 */
-	void selectFunction();
-
-protected slots:
-	/**
-	 * Slot that is called when OK/Cancel/Close has been clicked in the
-	 * function selection dialog.
-	 */
-	void slotFunctionManagerClosed();
-
 public:
 	/**
 	 * Attach a function to a VCButton. This function is started when the
@@ -189,10 +167,6 @@ public:
 	bool isExclusive() { return m_isExclusive; }
 
 protected:
-	/* Just a pointer to the function selection dialog. This is used
-	   only when the menu item for selecting a function is clicked */
-	FunctionManager* m_functionManager;
-
 	/** The function that this button is controlling */
 	t_function_id m_function;
 
@@ -232,10 +206,14 @@ protected slots:
 	 * Stop functions
 	 *********************************************************************/
 public:
+	/** Set this button to operate as a panic button */
 	void setStopFunctions(bool stop) { m_stopFunctions = stop; }
+
+	/** Check, whether this button should act as a panic button */
 	bool stopFunctions() const { return m_stopFunctions; }
 
 protected:
+	/** Does this button act as a panic button or not */
 	bool m_stopFunctions;
 
 	/*********************************************************************
@@ -246,8 +224,11 @@ protected:
 	void invokeMenu(QPoint point);
 
 protected slots:
-	/** Menu items' callback slot */
-	void slotMenuCallback(int item);
+	/**
+	 * Invoke a function selection dialog to set (attach) a function to
+	 * this button.
+	 */
+	void slotAttachFunction();
 
 	/*********************************************************************
 	 * Event Handlers
@@ -258,7 +239,7 @@ protected:
 	void mousePressEvent(QMouseEvent* e);
 	void mouseReleaseEvent(QMouseEvent* e);
 
-	void customEvent(QCustomEvent* e);
+	void customEvent(QEvent* e);
 };
 
 #endif

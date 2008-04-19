@@ -228,9 +228,14 @@ void VCWidget::chooseFont()
 
 void VCWidget::setCaption(const QString& text)
 {
-	QFrame::setCaption(text);
+	setWindowTitle(text);
 	repaint();
 	_app->doc()->setModified();
+}
+
+void VCWidget::caption() const
+{
+	return windowTitle();
 }
 
 void VCWidget::rename()

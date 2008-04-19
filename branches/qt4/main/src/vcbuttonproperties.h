@@ -22,14 +22,14 @@
 #ifndef VCBUTTONPROPERTIES_H
 #define VCBUTTONPROPERTIES_H
 
-#include "common/types.h"
+#include "common/qlctypes.h"
 #include "vcbutton.h"
-#include "uic_vcbuttonproperties.h"
+#include "ui_vcbuttonproperties.cpp"
 
 class FunctionManager;
 class KeyBind;
 
-class VCButtonProperties : public UI_VCButtonProperties
+class VCButtonProperties : public QDialog, public Ui_VCButtonProperties
 {
 	Q_OBJECT
 
@@ -37,29 +37,19 @@ public:
 	VCButtonProperties(VCButton* button, QWidget* parent);
 	~VCButtonProperties();
 
-	void initView();
+protected slots:
+	void slotAttachFunction();
+	void slotSetFunction(t_function_id fid = KNoID);
 
-public slots:
-	void slotPressGroupClicked(int);
+	void slotAttachKey();
+	void slotDetachKey();
 
-	void slotAttachFunctionClicked();
-	void slotDetachFunctionClicked();
-
-	void slotAttachKeyClicked();
-	void slotFunctionManagerClosed();
-	void slotDetachKeyClicked();
-
-	void slotOKClicked();
-	void slotCancelClicked();
-
-protected:
-	void setFunctionName();
+	void accept();
 
 protected:
 	VCButton* m_button;
 	KeyBind* m_keyBind;
-	t_function_id m_functionID;
-	FunctionManager* m_functionManager;
+	t_function_id m_function;
 };
 
 #endif

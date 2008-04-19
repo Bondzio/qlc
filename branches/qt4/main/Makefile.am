@@ -70,7 +70,6 @@ MOCS = \
 	src/moc_pluginmanager.cpp \
 	src/moc_scene.cpp \
 	src/moc_sceneeditor.cpp \
-	src/moc_sliderkeybind.cpp \
 	src/moc_vcbutton.cpp \
 	src/moc_vcbuttonproperties.cpp \
 	src/moc_vcdockarea.cpp \
@@ -129,7 +128,6 @@ qlc_SOURCES = \
 	src/pluginmanager.cpp \
 	src/scene.cpp \
 	src/sceneeditor.cpp \
-	src/sliderkeybind.cpp \
 	src/vcbutton.cpp \
 	src/vcbuttonproperties.cpp \
 	src/vcdockarea.cpp \

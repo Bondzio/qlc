@@ -22,19 +22,18 @@
 #ifndef VCWIDGET_H
 #define VCWIDGET_H
 
-#include <qframe.h>
-#include <qptrlist.h>
+#include <QFrame>
 
-#include "common/types.h"
+#include "common/qlctypes.h"
 #include "app.h"
 
-class QFile;
-class QString;
-class QPopupMenu;
-class QPaintEvent;
-class QMouseEvent;
 class QDomDocument;
 class QDomElement;
+class QPaintEvent;
+class QMouseEvent;
+class QString;
+class QMenu;
+class QFile;
 
 #define KXMLQLCVCWidgetAppearance "Appearance"
 #define KXMLQLCVCWidgetFrameStyle "FrameStyle"
@@ -60,7 +59,7 @@ class VCWidget : public QFrame
 protected:
 	/** Protected constructor so nobody makes an instance of this class
 	    unless inherited */
-	VCWidget(QWidget* parent, const char* name = 0);
+	VCWidget(QWidget* parent);
 
 public:
 	virtual ~VCWidget();
@@ -99,7 +98,7 @@ public:
 
 	/** Get the widget's background color. The color is invalid if the
 	    widget has a background image. */
-	virtual const QColor& backgroundColor() { return paletteBackgroundColor(); }
+	virtual const QColor& backgroundColor();// { return paletteBackgroundColor(); }
 
 	/** Check, whether the widget has a custom background color */
 	virtual bool hasCustomBackgroundColor() { return m_hasCustomBackgroundColor; }
@@ -121,7 +120,7 @@ public:
 	virtual void chooseForegroundColor();
 
 	/** Get the widget's foreground color */
-	virtual const QColor& foregroundColor() { return paletteForegroundColor(); }
+	virtual const QColor& foregroundColor();// { return paletteForegroundColor(); }
 
 	/** Check, whether the widget has a custom foreground color */
 	virtual bool hasCustomForegroundColor() { return m_hasCustomForegroundColor; }
@@ -157,6 +156,7 @@ protected:
 	 *********************************************************************/
 public:
 	virtual void setCaption(const QString& text);
+	virtual QString caption() const;
 	virtual void rename();
 
 	/*********************************************************************
@@ -187,7 +187,7 @@ protected slots:
 	 *********************************************************************/
 protected:
 	virtual void invokeMenu(QPoint point);
-	virtual QPopupMenu* createMenu();
+	virtual QMenu* createMenu();
 
 protected slots:
 	virtual void slotMenuCallback(int item);
@@ -196,7 +196,7 @@ protected slots:
 	 * Widget move & resize
 	 *********************************************************************/
 public:
-	virtual void resize(QPoint p);
+	virtual void resize(QSize p);
 	virtual void move(QPoint p);
 
 protected:

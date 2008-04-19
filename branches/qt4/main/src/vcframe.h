@@ -23,12 +23,12 @@
 #define VCFRAME_H
 
 #include "vcwidget.h"
-#include "common/types.h"
+#include "common/qlctypes.h"
 
-class QString;
-class QMouseEvent;
 class QDomDocument;
 class QDomElement;
+class QMouseEvent;
+class QString;
 
 #define KXMLQLCVCFrame "Frame"
 #define KXMLQLCVCFrameButtonBehaviour "ButtonBehaviour"

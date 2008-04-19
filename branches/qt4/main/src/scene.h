@@ -89,9 +89,6 @@ protected:
 	RunTimeData* m_runTimeData;
 	t_buffer_data* m_channelData;
 	
-	// This mutex is locked when the run time data is accessed
-	QMutex m_dataMutex;
-	
 	// Use ONLY at run time to prevent allocating a local variable
 	t_channel m_address;
 };

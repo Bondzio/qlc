@@ -25,7 +25,9 @@
 #include <QWidget>
 #include <QAction>
 #include <QList>
+
 #include "common/qlctypes.h"
+#include "function.h"
 
 class QTreeWidgetItem;
 class QTreeWidget;
@@ -33,7 +35,6 @@ class QSplitter;
 class QToolBar;
 class QMenu;
 
-class Function;
 class Fixture;
 
 class FunctionManager : public QWidget

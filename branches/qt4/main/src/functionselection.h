@@ -48,7 +48,7 @@ public:
 	 *                  a chaser, disable the chaser itself)
 	 */
 	FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
-			  t_function_id disableFunction);
+			  t_function_id disableFunction = KNoID);
 
 	/**
 	 * Destructor

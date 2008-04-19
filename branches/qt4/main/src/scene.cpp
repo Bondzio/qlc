@@ -19,22 +19,26 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qfile.h>
-#include <qptrlist.h>
+#include <QApplication>
+#include <iostream>
+#include <QList>
+#include <QFile>
+#include <QtXml>
+
 #include <time.h>
-#include <qapplication.h>
-#include <assert.h>
 
 #include "common/qlcfixturedef.h"
-#include "common/filehandler.h"
+#include "common/qlcfile.h"
 
+#include "functionconsumer.h"
+#include "eventbuffer.h"
+#include "dmxmap.h"
+#include "scene.h"
 #include "app.h"
 #include "doc.h"
 #include "bus.h"
-#include "dmxmap.h"
-#include "eventbuffer.h"
-#include "scene.h"
-#include "functionconsumer.h"
+
+using namespace std;
 
 extern App* _app;
 
@@ -45,7 +49,6 @@ Scene::Scene() :
 	m_elapsedTime (               0 ),
 	m_runTimeData (            NULL ),
 	m_channelData (            NULL ),
-	m_dataMutex   (           false ),
 	m_address     ( KChannelInvalid )
 {
 	setBus(KBusIDDefaultFade);
@@ -64,7 +67,8 @@ Scene::~Scene()
 	}
 	m_startMutex.unlock();
 	
-	if (m_values) delete [] m_values;
+	if (m_values != NULL)
+		delete [] m_values;
 }
 
 void Scene::copyFrom(Scene* sc, t_fixture_id to)
@@ -76,7 +80,8 @@ void Scene::copyFrom(Scene* sc, t_fixture_id to)
 	
 	setFixture(to);
 	
-	if (m_values) delete [] m_values;
+	if (m_values != NULL)
+		delete [] m_values;
 	m_values = new SceneValue[m_channels];
 	
 	for (t_channel ch = 0; ch < m_channels; ch++)
@@ -92,9 +97,7 @@ bool Scene::setFixture(t_fixture_id id)
 
 	fxi = _app->doc()->fixture(id);
 	if (fxi == NULL)
-	{
 		return false;
-	}
 	
 	t_channel newChannels = fxi->channels();
 	
@@ -124,7 +127,7 @@ bool Scene::setFixture(t_fixture_id id)
 
 Scene::ValueType Scene::valueType(t_channel ch)
 {
-	assert(ch < m_channels);
+	Q_ASSERT(ch < m_channels);
 	return m_values[ch].type;
 }
 
@@ -255,8 +258,9 @@ bool Scene::loadXML(QDomDocument* doc, QDomElement* root)
 			Q_ASSERT(set(ch, value, value_type) == true);
 		}
 		else
-			qWarning("Unknown scene tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown scene tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		
 		node = node.nextSibling();
 	}

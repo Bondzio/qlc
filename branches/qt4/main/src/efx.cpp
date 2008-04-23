@@ -1227,13 +1227,10 @@ void EFX::cleanup()
  */
 void EFX::init()
 {
-	t_bus_value speed;
-
 	m_removeAfterEmpty = false;
 
 	// Get speed
-	Bus::value(m_busID, speed);
-	busValueChanged(m_busID, speed);
+	busValueChanged(m_busID, Bus::value(m_busID));
 
 	// Append this function to running functions' list
 	_app->functionConsumer()->cue(this);

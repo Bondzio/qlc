@@ -389,7 +389,7 @@ void Chaser::init()
 	m_stopped = false;
 
 	// Get speed
-	Bus::value(m_busID, m_holdTime);
+	m_holdTime = Bus::value(m_busID);
 
 	// Add this to function consumer
 	_app->functionConsumer()->cue(this);

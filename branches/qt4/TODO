@@ -94,3 +94,7 @@
 
 * VC* widgets to use input mapping: BIG TODO
 
+* HTP channels to DMXMap. Maybe limit the number, since they are needed
+  only for dimmer fixtures. Or bind somehow to the generic fixture def.
+
+* VCWidgets should have object names

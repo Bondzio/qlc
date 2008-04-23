@@ -19,47 +19,37 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qlayout.h>
-#include <qdom.h>
+#include <QVBoxLayout>
+#include <iostream>
+#include <QString>
+#include <QtXml>
 
-#include "common/filehandler.h"
-#include "vcdockarea.h"
+#include "common/qlcfile.h"
 #include "vcdockslider.h"
+#include "vcdockarea.h"
 #include "bus.h"
 #include "app.h"
 
+using namespace std;
+
 extern App* _app;
 
-VCDockArea::VCDockArea(QWidget* parent) : QFrame(parent, "VCDockArea")
+VCDockArea::VCDockArea(QWidget* parent) : QFrame(parent)
 {
+	// Align widgets vertically in the area
+	new QVBoxLayout(this);
+
+	// Default fade time slider
+	m_defaultFadeSlider = new VCDockSlider(this, KBusIDDefaultFade);
+	layout()->addWidget(m_defaultFadeSlider);
+
+	// Default hold time slider
+	m_defaultHoldSlider = new VCDockSlider(this, KBusIDDefaultHold);
+	layout()->addWidget(m_defaultHoldSlider);
 }
 
 VCDockArea::~VCDockArea()
 {
-}
-
-void VCDockArea::init()
-{
-	t_bus_value min = 0;
-	t_bus_value max = 0;
-	QString value;
-
-	// Align widgets vertically in the area
-	m_layout = new QVBoxLayout(this);
-
-	// Default fade time slider
-	m_defaultFadeSlider = new VCDockSlider(this);
-	m_defaultFadeSlider->init();
-	m_layout->addWidget(m_defaultFadeSlider);
-	m_defaultFadeSlider->setBusID(KBusIDDefaultFade);
-	m_defaultFadeSlider->setBusRange(0, 5);
-
-	// Default hold time slider
-	m_defaultHoldSlider = new VCDockSlider(this);
-	m_defaultHoldSlider->init();
-	m_layout->addWidget(m_defaultHoldSlider);
-	m_defaultHoldSlider->setBusID(KBusIDDefaultHold);
-	m_defaultHoldSlider->setBusRange(0, 5);
 }
 
 /*****************************************************************************
@@ -79,7 +69,7 @@ bool VCDockArea::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCDockArea)
 	{
-		qWarning("Virtual Console Dock Area node not found!");
+		cout << "Virtual Console Dock Area node not found!" << endl;
 		return false;
 	}
 	
@@ -103,14 +93,15 @@ bool VCDockArea::loadXML(QDomDocument* doc, QDomElement* root)
 			else if (bus == KBusIDDefaultHold)
 				m_defaultHoldSlider->loadXML(doc, &tag);
 			else
-				qWarning("Not a default bus ID for a " \
-					 "virtual console dock slider: %d",
-					 bus);
+				cout << "Cannot bind default sliders to "
+				     << "other than Fade/Hold buses."
+				     << endl;
 		}
 		else
 		{
-			qWarning("Unknown dock slider tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown dock slider tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -139,7 +130,7 @@ bool VCDockArea::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	vc_root->appendChild(root);
 
 	/* Visibility */
-	str.setNum(static_cast<int> (isShown()));
+	str.setNum(static_cast<int> (isVisible()));
 	root.setAttribute(KXMLQLCVCDockAreaVisible, str);
 
 	/* Slider entries */

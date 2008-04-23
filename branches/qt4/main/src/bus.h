@@ -62,13 +62,13 @@ public:
 	static const BusEmitter* emitter() { return s_busEmitter; }
 
 	/** Get the value of a bus */
-	static const bool value(t_bus_id, t_bus_value&);
+	static t_bus_value value(t_bus_id);
 
 	/** Set the value of a bus (emits the value as well) */
 	static bool setValue(t_bus_id, t_bus_value);
 
 	/** Get the name of a bus */
-	static const QString name(t_bus_id);
+	static QString name(t_bus_id);
 
 	/** Set the name of a bus */
 	static bool setName(t_bus_id, QString);

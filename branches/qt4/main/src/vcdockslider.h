@@ -22,25 +22,24 @@
 #ifndef VCDOCKSLIDER_H
 #define VCDOCKSLIDER_H
 
-#include <qptrlist.h>
-#include <qstring.h>
-#include <qdatetime.h>
+#include <QWidget>
+#include <QTime>
 
-#include "common/types.h"
-#include "uic_vcdockslider.h"
+#include "common/qlctypes.h"
+#include "ui_vcdockslider.cpp"
 
-class QMouseEvent;
-class QFile;
-class QPoint;
 class QDomDocument;
 class QDomElement;
+class QMouseEvent;
+class QPoint;
+class QFile;
 
 #define KXMLQLCVCDockSlider "Slider"
 #define KXMLQLCVCDockSliderBus "Bus"
 #define KXMLQLCVCDockSliderBusLowLimit "LowLimit"
 #define KXMLQLCVCDockSliderBusHighLimit "HighLimit"
 
-class VCDockSlider : public UI_VCDockSlider
+class VCDockSlider : public QWidget, public Ui_VCDockSlider
 {
 	Q_OBJECT
     
@@ -48,10 +47,8 @@ class VCDockSlider : public UI_VCDockSlider
 	 * Initialization
 	 *********************************************************************/
 public:
-	VCDockSlider(QWidget* parent);
+	VCDockSlider(QWidget* parent, t_bus_id bus);
 	~VCDockSlider();
-
-	void init();
 
 	/*********************************************************************
 	 * Bus
@@ -129,7 +126,7 @@ protected:
 	 *
 	 * @param value The slider's value
 	 */
-	void slotSliderValueChanged(const int value);
+	void slotSliderValueChanged(int value);
 
 	/**
 	 * Slot for tap button clicks

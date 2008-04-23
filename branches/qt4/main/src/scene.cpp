@@ -406,7 +406,7 @@ void Scene::init()
 	m_elapsedTime = 0;
 	
 	// Get speed
-	Bus::value(m_busID, m_timeSpan);
+	m_timeSpan = Bus::value(m_busID);
 	
 	// Set speed
 	speedChange(m_timeSpan);

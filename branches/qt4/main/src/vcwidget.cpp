@@ -48,6 +48,8 @@ extern App* _app;
 
 VCWidget::VCWidget(QWidget* parent, const char* name) : QFrame(parent, name)
 {
+	setObjectName("VCWidget");
+
 	m_backgroundImage = QString::null;
 	m_hasCustomBackgroundColor = false;
 	m_hasCustomForegroundColor = false;

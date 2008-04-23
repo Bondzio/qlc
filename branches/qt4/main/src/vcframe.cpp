@@ -19,35 +19,34 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qcursor.h>
-#include <qpoint.h>
-#include <qpopupmenu.h>
-#include <stdio.h>
-#include <qbuttongroup.h>
-#include <qobjectlist.h>
-#include <qmessagebox.h>
+#include <QMessageBox>
+#include <QPoint>
+#include <QSize>
+#include <QMenu>
+#include <QList>
 
-#include "vcframe.h"
+#include "common/qlcfile.h"
+
+#include "vcframeproperties.h"
+#include "virtualconsole.h"
 #include "vcbutton.h"
+#include "vcslider.h"
+#include "vcframe.h"
 #include "vclabel.h"
 #include "vcxypad.h"
-#include "vcslider.h"
-
 #include "app.h"
 #include "doc.h"
-#include "virtualconsole.h"
-#include "vcframeproperties.h"
-#include "common/filehandler.h"
 
 extern App* _app;
 
-VCFrame::VCFrame(QWidget* parent) : VCWidget(parent, "VCFrame")
+VCFrame::VCFrame(QWidget* parent) : VCWidget(parent)
 {
-	m_buttonBehaviour = Normal;
+	setObjectName("VCFrame");
 
+	m_buttonBehaviour = Normal;
 	setFrameStyle(KVCWidgetFrameStyleSunken);
 	setMinimumSize(20, 20);
-	setCaption("");
+	setCaption(QString::null);
 }
 
 VCFrame::~VCFrame()
@@ -56,17 +55,14 @@ VCFrame::~VCFrame()
 
 void VCFrame::scram()
 {
+	/* Bottom frame cannot be destroyed */
 	if (isBottomFrame() == true)
 		return;
 
-	QString msg;
-	
-	msg = "Do you wish to delete this frame?\n" + caption();
-	int result = QMessageBox::question(this, "Delete", msg,
-					   QMessageBox::Yes,
-					   QMessageBox::No);
-	
-	if (result == QMessageBox::Yes)
+	if (QMessageBox::question(this, "Delete",
+				  QString("Delete frame: %1?").arg(caption()),
+				  QMessageBox::Yes,
+				  QMessageBox::No) == QMessageBox::Yes)
 	{
 		_app->virtualConsole()->setSelectedWidget(NULL);
 		_app->doc()->setModified();
@@ -106,52 +102,20 @@ void VCFrame::setButtonBehaviour(ButtonBehaviour b)
 {
 	m_buttonBehaviour = b;
 
-	if (buttonBehaviour() == VCFrame::Exclusive)
+	if (_app->virtualConsole()->selectedWidget() != NULL)
 	{
-		if (_app->virtualConsole()->selectedWidget())
+		QListIterator<VCButton*> it(_app->virtualConsole()
+					    ->selectedWidget()
+					    ->findChildren<VCButton*>("VCButton"));
+		if (b == VCFrame::Exclusive)
 		{
-			QObjectList* l = _app->virtualConsole()
-				->selectedWidget()->queryList("VCButton");
-			QObjectListIt it(*l);
-			QObject *obj;
-			while ((obj = it.current()) != 0)
-			{
-				++it;
-				((VCButton*)obj)->setExclusive(true);
-			}
-
-			delete l;
-			setFrameStyle(QFrame::GroupBoxPanel | QFrame::Sunken);
-			setLineWidth(2);
+			while (it.hasNext() == true)
+				it.next()->setExclusive(true);
 		}
 		else
 		{
-			setFrameStyle(QFrame::GroupBoxPanel | QFrame::Sunken);
-			setLineWidth(2);
-		}
-	}
-	else
-	{
-		if (_app->virtualConsole()->selectedWidget())
-		{
-			QObjectList* l = _app->virtualConsole()
-				->selectedWidget()->queryList("VCButton");
-			QObjectListIt it(*l);
-			QObject *obj;
-			while ((obj = it.current()) != 0)
-			{
-				++it;
-				((VCButton*)obj)->setExclusive(false);
-			}
-
-			delete l;
-			setFrameStyle(KFrameStyleSunken);
-			setLineWidth(1);
-		}
-		else
-		{
-			setFrameStyle(KFrameStyleSunken);
-			setLineWidth(1);
+			while (it.hasNext() == true)
+				it.next()->setExclusive(false);
 		}
 	}
 }
@@ -170,7 +134,7 @@ bool VCFrame::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	if (root->tagName() != KXMLQLCVCFrame)
 	{
-		qWarning("Frame node not found!");
+		cout << "Frame node not found!" << endl;
 		return false;
 	}
 
@@ -204,7 +168,7 @@ bool VCFrame::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCFrame)
 	{
-		qWarning("Frame node not found!");
+		cout << "Frame node not found!" << endl;
 		return false;
 	}
 
@@ -218,8 +182,8 @@ bool VCFrame::loadXML(QDomDocument* doc, QDomElement* root)
 		tag = node.toElement();
 		if (tag.tagName() == KXMLQLCWindowState)
 		{
-			FileHandler::loadXMLWindowState(&tag, &x, &y, &w, &h,
-							&visible);
+			QLCFile::loadXMLWindowState(&tag, &x, &y, &w, &h,
+						    &visible);
 			setGeometry(x, y, w, h);
 		}
 		else if (tag.tagName() == KXMLQLCVCAppearance)
@@ -248,8 +212,9 @@ bool VCFrame::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown frame tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown frame tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -260,8 +225,6 @@ bool VCFrame::loadXML(QDomDocument* doc, QDomElement* root)
 
 bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
 {
-	const QObjectList* objectList = NULL;
-	QObject* child = NULL;
 	QDomElement root;
 	QDomElement tag;
 	QDomText text;

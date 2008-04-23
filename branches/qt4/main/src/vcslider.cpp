@@ -51,8 +51,10 @@ static const t_bus_value KDefaultBusHighLimit ( 5 );
  * Initialization
  *****************************************************************************/
 
-VCSlider::VCSlider(QWidget* parent) : VCWidget(parent, "Slider")
+VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 {
+	setObjectName("VCSlider");
+
 	m_vbox = NULL;
 	m_hbox = NULL;
 	m_topLabel = NULL;

@@ -19,32 +19,19 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qslider.h>
-#include <qlabel.h>
-#include <qstring.h>
-#include <qpixmap.h>
-#include <qevent.h>
-#include <qtoolbutton.h>
-#include <qpopupmenu.h>
-#include <qcursor.h>
-#include <qpainter.h>
-#include <qfile.h>
-#include <qfiledialog.h>
-#include <qfontdialog.h>
-#include <qpixmap.h>
-#include <qcolor.h>
-#include <qcolordialog.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qinputdialog.h>
-#include <assert.h>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSlider>
+#include <QString>
+#include <QLabel>
+#include <QtXml>
 
+#include "common/qlcfile.h"
+
+#include "vcdockslider.h"
 #include "app.h"
 #include "doc.h"
 #include "bus.h"
-#include "vcdockslider.h"
-
-#include "common/filehandler.h"
 
 extern App* _app;
 
@@ -52,38 +39,33 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-VCDockSlider::VCDockSlider(QWidget* parent)
-	: UI_VCDockSlider(parent, "VCDockSlider"),
-	  m_busID        ( KBusIDDefaultFade ),
-	  m_busLowLimit  ( 0 ),
-	  m_busHighLimit ( 5 ),
-	  m_updateOnly   ( false )
+VCDockSlider::VCDockSlider(QWidget* parent, t_bus_id bus) : QWidget(parent)
 {
+	setupUi(this);
+
+	m_updateOnly = false;
+	m_busLowLimit = 0;
+	m_busHighLimit = 5;
+
+	setBusID(bus);
+
+	// Receive bus name change signals
+	connect(Bus::emitter(), SIGNAL(nameChanged(t_bus_id, const QString&)),
+		this, SLOT(slotBusNameChanged(t_bus_id, const QString&)));
+	
+	// Receive bus value change signals
+	connect(Bus::emitter(),	SIGNAL(valueChanged(t_bus_id, t_bus_value)),
+		this, SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
+	
+	connect(m_slider, SIGNAL(valueChanged(int)),
+		this, SLOT(slotSliderValueChanged(int)));
+	
+	m_time.start();
 }
 
 
 VCDockSlider::~VCDockSlider()
 {
-}
-
-void VCDockSlider::init()
-{
-	m_slider->setPageStep(1);
-	m_slider->setValue(0);
-
-	// Receive bus name change signals
-	connect(Bus::emitter(),
-		SIGNAL(nameChanged(t_bus_id, const QString&)),
-		this,
-		SLOT(slotBusNameChanged(t_bus_id, const QString&)));
-	
-	// Receive bus value change signals
-	connect(Bus::emitter(),
-		SIGNAL(valueChanged(t_bus_id, t_bus_value)),
-		this,
-		SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
-
-	m_time.start();
 }
 
 /*****************************************************************************
@@ -92,19 +74,16 @@ void VCDockSlider::init()
 
 void VCDockSlider::setBusID(t_bus_id id)
 {
-	Q_ASSERT(id >= KBusIDMin && id < KBusCount);
-
-	t_bus_value value = 0;
 	QString name;
 	
-	m_busID = id;
-	
+	Q_ASSERT(id >= KBusIDMin && id < KBusCount);
+
 	m_slider->setRange(m_busLowLimit * KFrequency,
 			   m_busHighLimit * KFrequency);
 
 	// Set slider value
-	Bus::value(m_busID, value);
-	slotBusValueChanged(m_busID, value);
+	m_busID = id;
+	slotBusValueChanged(m_busID, Bus::value(m_busID));
 
 	// Set slider name to the tap button
 	name = Bus::name(m_busID);
@@ -121,7 +100,6 @@ void VCDockSlider::setBusRange(t_bus_value lo, t_bus_value hi)
 	m_slider->setRange(m_busLowLimit * KFrequency,
 			   m_busHighLimit * KFrequency);
 }
-
 
 void VCDockSlider::busRange(t_bus_value &lo, t_bus_value &hi)
 {
@@ -149,7 +127,7 @@ void VCDockSlider::slotBusValueChanged(t_bus_id id, t_bus_value value)
  * Slider dragging & tap button clicks
  *****************************************************************************/
 
-void VCDockSlider::slotSliderValueChanged(const int value)
+void VCDockSlider::slotSliderValueChanged(int value)
 {
 	QString num;
 

@@ -92,29 +92,20 @@ bool Bus::setValue(t_bus_id id, t_bus_value value)
 	}
 }
 
-const bool Bus::value(t_bus_id id, t_bus_value& value)
+t_bus_value Bus::value(t_bus_id id)
 {
 	if (id >= KBusIDMin && id < KBusCount)
-	{
-		value = s_busArray[id].m_value;
-		return true;
-	}
+		return s_busArray[id].m_value;
 	else
-	{
-		return false;
-	}
+		return 0;
 }
 
-const QString Bus::name(t_bus_id id)
+QString Bus::name(t_bus_id id)
 {
 	if (id >= KBusIDMin && id < KBusCount)
-	{
 		return s_busArray[id].m_name;
-	}
 	else
-	{
 		return QString::null;
-	}
 }
 
 bool Bus::loadXML(QDomDocument* doc, QDomElement* root)
@@ -170,7 +161,6 @@ bool Bus::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	QDomElement tag;
 	QDomText text;
 	QString str;
-	t_bus_value value;
 
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(wksp_root != NULL);
@@ -179,8 +169,7 @@ bool Bus::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	{
 		/* Bus entry */
 		root = doc->createElement(KXMLQLCBus);
-		str.sprintf("%d", i);
-		root.setAttribute(KXMLQLCBusID, str);
+		root.setAttribute(KXMLQLCBusID, str.setNum(i));
 		wksp_root->appendChild(root);
 
 		/* Name */
@@ -192,9 +181,7 @@ bool Bus::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 		/* Value */
 		tag = doc->createElement(KXMLQLCBusValue);
 		root.appendChild(tag);
-		Bus::value(i, value);
-		str.sprintf("%ld", value);
-		text = doc->createTextNode(str);
+		text = doc->createTextNode(str.setNum(Bus::value(i)));
 		tag.appendChild(text);
 	}
 

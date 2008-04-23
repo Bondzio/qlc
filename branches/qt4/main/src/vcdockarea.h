@@ -23,11 +23,11 @@
 #define VCDOCKAREA_H
 
 #include <qframe.h>
-#include <qevent.h>
 
-class QVBoxLayout;
 class QDomDocument;
 class QDomElement;
+class QShowEvent;
+class QHideEvent;
 
 class VCDockSlider;
 
@@ -45,8 +45,6 @@ public:
 	VCDockArea(QWidget* parent);
 	~VCDockArea();
 
-	void init();
-	
 	/*********************************************************************
 	 * Load & Save
 	 *********************************************************************/
@@ -85,7 +83,6 @@ public:
 	VCDockSlider* defaultHoldSlider() { return m_defaultHoldSlider; }
 
 protected:
-	QVBoxLayout* m_layout;
 	VCDockSlider* m_defaultFadeSlider;
 	VCDockSlider* m_defaultHoldSlider;
 };

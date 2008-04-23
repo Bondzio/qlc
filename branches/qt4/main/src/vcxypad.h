@@ -22,18 +22,18 @@
 #ifndef VCXYPAD_H
 #define VCXYPAD_H
 
-#include <qptrlist.h>
-#include <qpixmap.h>
+#include <QPixmap>
+#include <QList>
 
 #include "vcwidget.h"
-#include "common/types.h"
+#include "common/qlctypes.h"
 
-class QFile;
-class QString;
-class QPaintEvent;
-class QMouseEvent;
 class QDomDocument;
 class QDomElement;
+class QPaintEvent;
+class QMouseEvent;
+class QString;
+class QFile;
 
 class XYChannelUnit;
 
@@ -59,7 +59,7 @@ class VCXYPad : public VCWidget
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
- public:
+public:
 	VCXYPad(QWidget* parent);
 	virtual ~VCXYPad();
 
@@ -113,14 +113,14 @@ public:
 	void clearChannels();
 
 	/** Get the pad's list of X axis channels */
-	QPtrList<XYChannelUnit>* channelsX() { return &m_channelsX; }
+	QList <XYChannelUnit*>* channelsX() { return &m_channelsX; }
 
 	/** Get the pad's list of Y axis channels */
-	QPtrList<XYChannelUnit>* channelsY() { return &m_channelsY; }
+	QList <XYChannelUnit*>* channelsY() { return &m_channelsY; }
 
-protected:  
-	QPtrList<XYChannelUnit> m_channelsX;
-	QPtrList<XYChannelUnit> m_channelsY;
+protected:
+	QList <XYChannelUnit*> m_channelsX;
+	QList <XYChannelUnit*> m_channelsY;
 
 	/*********************************************************************
 	 * Current position
@@ -149,7 +149,8 @@ public:
 	 * @param root A QDomElement containing a VCXYPad node tree
 	 * @param parent The parent widget that the loaded pad belongs to 
 	 */
-	static bool loader(QDomDocument* doc, QDomElement* root, QWidget* parent);
+	static bool loader(QDomDocument* doc, QDomElement* root,
+			   QWidget* parent);
 
 	/**
 	 * Load a VCXYPad's contents from the given XML node

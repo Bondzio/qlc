@@ -22,17 +22,19 @@
 #ifndef VCSLIDERPROPERTIES_H
 #define VCSLIDERPROPERTIES_H
 
-#include "uic_vcsliderproperties.h"
-#include "common/types.h"
+#include <QWidget>
 
+#include "ui_vcsliderproperties.cpp"
+#include "common/qlctypes.h"
+
+class QTreeWidgetItem;
+
+class QLCCapability;
+class QLCChannel;
 class VCSlider;
 class Fixture;
-class QLCChannel;
-class QLCCapability;
-class QCheckListItem;
-class QListViewItem;
 
-class VCSliderProperties : public UI_VCSliderProperties
+class VCSliderProperties : public QWidget, public Ui_VCSliderProperties
 {
 	Q_OBJECT
 
@@ -77,26 +79,26 @@ protected:
 	void levelUpdateFixtureNode(t_fixture_id id);
 
 	/** Get a fixture node from the listview on the level page */
-	QCheckListItem* levelFixtureNode(t_fixture_id id);
+	QTreeWidgetItem* levelFixtureNode(t_fixture_id id);
 
 	/** Update fixture channels to the listview on the level page */
-	void levelUpdateChannels(QCheckListItem* parent, Fixture* fxi);
+	void levelUpdateChannels(QTreeWidgetItem* parent, Fixture* fxi);
 
 	/** Update a fixture channel node to the listview on the level page */
-	void levelUpdateChannelNode(QCheckListItem* parent,
+	void levelUpdateChannelNode(QTreeWidgetItem* parent,
 				    Fixture* fxi,
 				    t_channel ch);
 
 	/** Update a channel's capabilities */
-	void levelUpdateCapabilities(QCheckListItem* parent,
+	void levelUpdateCapabilities(QTreeWidgetItem* parent,
 				     QLCChannel* channel);
 
 	/** Update a channel's capability node */
-	void levelUpdateCapabilityNode(QCheckListItem* parent,
+	void levelUpdateCapabilityNode(QTreeWidgetItem* parent,
 				       QLCCapability* cap);
 
 	/** Get a fixture channel node from the listview on the level page */
-	QCheckListItem* levelChannelNode(QCheckListItem* parent, t_channel ch);
+	QTreeWidgetItem* levelChannelNode(QTreeWidgetItem* parent, t_channel ch);
 
 	/** Update channel selections from the slider's level channel list */
 	void levelUpdateChannelSelections();
@@ -127,7 +129,7 @@ protected slots:
 	void slotLevelCapabilityButtonClicked();
 
 	/** Callback for level list item clicks */
-	void slotLevelListClicked(QListViewItem* item);
+	void slotLevelListClicked(QTreeWidgetItem* item);
 
 	/** Callback for "channel selection by group" button clicks */
 	void slotLevelByGroupButtonClicked();

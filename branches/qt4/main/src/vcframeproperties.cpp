@@ -19,51 +19,32 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <assert.h>
-#include <qbuttongroup.h>
-#include <qradiobutton.h>
+#include <QRadioButton>
 
-#include "vcframe.h"
 #include "vcframeproperties.h"
+#include "vcframe.h"
 
-VCFrameProperties::VCFrameProperties(QWidget* parent, const char* name)
-  : UI_VCFrameProperties(parent, name, true)
+VCFrameProperties::VCFrameProperties(QWidget* parent, VCFrame* frame)
+	: QDialog(parent)
 {
-  assert(parent);
-  m_frame = static_cast<VCFrame*> (parent);
+	Q_ASSERT(frame != NULL);
+	m_frame = frame;
+
+	if (m_frame->buttonBehaviour() == VCFrame::Exclusive)
+		m_exclusive->setChecked(true);
+	else
+		m_normal->setChecked(true);
 }
 
 VCFrameProperties::~VCFrameProperties()
 {
 }
 
-void VCFrameProperties::init()
+void VCFrameProperties::accept()
 {
-  if (m_frame->buttonBehaviour() == VCFrame::Exclusive)
-    {
-      m_behaviourGroup->setButton(1);
-    }
-  else
-    {
-      m_behaviourGroup->setButton(0);
-    }
-}
-
-void VCFrameProperties::slotOKClicked()
-{
-  if (m_behaviourGroup->selected() == static_cast<QButton*> (m_exclusive))
-    {
-      m_frame->setButtonBehaviour(VCFrame::Exclusive);
-    }
-  else
-    {
-      m_frame->setButtonBehaviour(VCFrame::Normal);
-    }
-
-  accept();
-}
-
-void VCFrameProperties::slotCancelClicked()
-{
-  reject();
+	if (m_exclusive->isChecked() == true)
+		m_frame->setButtonBehaviour(VCFrame::Exclusive);
+	else
+		m_frame->setButtonBehaviour(VCFrame::Normal);
+	QDialog::accept();
 }

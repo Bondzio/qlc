@@ -41,6 +41,25 @@
 
 * EFX's and EFXEditor to support 16bit values
 * EFXEditor to support channel groups (now it searches for "pan" or "tilt")
+* Phase parameter to EFX's so that multiple fixtures can do cooler effects.
+  -> Elie Roux:
+   Let's say for example you have 4 MAC in the back of the scene in a
+   concert, and the four of them make a circle (or an ellipse or
+   something). If the 4 do the same movement at the same time, you'll get
+   the feeling that it's "cheap". If, on the other side, you have the first
+   mac doing the circle, the next mac doing the circle but in advance of
+   Pi/2, the third in advance of Pi and the fourth in advance of 3Pi/2,
+   you'll still have the circle effect, but also a wave effect, which is
+   really sexy, and used a lot by all lighting engineers, at least in the
+   west of France. For this you have to give a phase to every movement (the
+   movement of the first mac will have a phase of 0, the second 90, the
+   third 180 and the fourth 270). I admit it is quite boring to use, but
+   with the actual state of qlc, I couldn't really do it another way. In
+   tables like GrandMa or Martin Case, you have a window in which you
+   represent physically  (and very basically, no ray tracing or other
+   complicated stuff) where you fixtures will be, with that the table
+   automatically generates the phases. That would be the kind of patches we
+   may create for qlc.
 
 * Should Fixture inherit QLCFixtureDef? Would it be nicer, are there any
   benefits?
@@ -98,3 +117,8 @@
   only for dimmer fixtures. Or bind somehow to the generic fixture def.
 
 * VCWidgets should have object names
+* Change VCWidget's moving threshold checks to use QPoint::manhattanLength()
+
+* Add message boxes to all editor windows to indicate if there are no
+  fixtures or functions, whichever is appropriate.
+  -> XYPad crashes if there are no fixtures.

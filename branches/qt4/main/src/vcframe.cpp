@@ -19,11 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMetaObject>
 #include <QMessageBox>
+#include <iostream>
+#include <QAction>
 #include <QPoint>
 #include <QSize>
 #include <QMenu>
 #include <QList>
+#include <QtXml>
 
 #include "common/qlcfile.h"
 
@@ -37,11 +41,14 @@
 #include "app.h"
 #include "doc.h"
 
+using namespace std;
+
 extern App* _app;
 
 VCFrame::VCFrame(QWidget* parent) : VCWidget(parent)
 {
-	setObjectName("VCFrame");
+	/* Set the class name "VCFrame" as the object name as well */
+	setObjectName(VCFrame::staticMetaObject.className());
 
 	m_buttonBehaviour = Normal;
 	setFrameStyle(KVCWidgetFrameStyleSunken);
@@ -76,10 +83,18 @@ void VCFrame::scram()
 
 bool VCFrame::isBottomFrame()
 {
-	if (parentWidget() != NULL && parentWidget()->className() != "VCFrame")
+	/* If this widget has a parent that is NOT a VCFrame, this widget
+	   is the bottom frame. */
+	if (parentWidget() != NULL &&
+	    QString(parentWidget()->metaObject()->className()) !=
+	    QString(VCFrame::staticMetaObject.className()))
+	{
 		return true;
+	}
 	else
+	{
 		return false;
+	}
 }
 
 /*****************************************************************************
@@ -88,8 +103,7 @@ bool VCFrame::isBottomFrame()
 
 void VCFrame::editProperties()
 {
-	VCFrameProperties prop(this);
-	prop.init();
+	VCFrameProperties prop(_app, this);
 	if (prop.exec() == QDialog::Accepted)
 		_app->doc()->setModified();
 }
@@ -104,9 +118,13 @@ void VCFrame::setButtonBehaviour(ButtonBehaviour b)
 
 	if (_app->virtualConsole()->selectedWidget() != NULL)
 	{
-		QListIterator<VCButton*> it(_app->virtualConsole()
-					    ->selectedWidget()
-					    ->findChildren<VCButton*>("VCButton"));
+		/* Find a list of child widgets, whose names match
+		   the class name of VCButton (i.e. "VCButton") */
+		QListIterator<VCButton*> it(
+			_app->virtualConsole()->selectedWidget()
+			->findChildren <VCButton*>(
+				VCButton::staticMetaObject.className()));
+
 		if (b == VCFrame::Exclusive)
 		{
 			while (it.hasNext() == true)
@@ -142,9 +160,9 @@ bool VCFrame::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 	frame = new VCFrame(parent);
 	frame->show();
 
-	/* If the current parent widget is anything else than VCFrame,
-	   the currently loaded VCFrame is the parent of all VC widgets */
-	if (parent->className() != "VCFrame")
+	/* If the current parent widget is anything else than a VCFrame,
+	   the currently loaded VCFrame becomes the parent of all VC widgets */
+	if (parent->objectName() != "VCFrame")
 		_app->virtualConsole()->setDrawArea(frame);
 
 	/* Continue loading */
@@ -249,20 +267,12 @@ bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
 
 	/* Save widget proportions only for child frames */
 	if (isBottomFrame() == false)
-		FileHandler::saveXMLWindowState(doc, &root, this);
+		QLCFile::saveXMLWindowState(doc, &root, this);
 
 	/* Save children */
-	objectList = children();
-	if (objectList != NULL)
-	{
-		QObjectListIterator it(*objectList);
-		while ( (child = it.current()) != NULL )
-		{
-			Q_ASSERT(child->inherits("VCWidget"));
-			static_cast<VCWidget*> (child)->saveXML(doc, &root);
-			++it;
-		}
-	}
+	QListIterator <VCWidget*> it(findChildren<VCWidget*>());
+	while (it.hasNext() == true)
+		it.next()->saveXML(doc, &root);
 
 	return true;
 }
@@ -273,66 +283,44 @@ bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
 
 void VCFrame::invokeMenu(QPoint point)
 {
-	QPopupMenu* menu = VCWidget::createMenu();
+	QAction* action;
+	QMenu* addMenu;
+	QMenu* menu;
 
-	// Add menu
-	QPopupMenu* addMenu = new QPopupMenu(menu);
-	addMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/button.png")),
-			    "&Button", KVCMenuAddButton);
-	addMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/slider.png")),
-			    "&Slider", KVCMenuAddSlider);
-	addMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/frame.png")),
-			    "&Frame", KVCMenuAddFrame);
-	addMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/xypad.png")),
-			    "&XY-Pad", KVCMenuAddXYPad);
-	addMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/label.png")),
-			    "L&abel", KVCMenuAddLabel);
+	menu = VCWidget::createMenu();
+	Q_ASSERT(menu != NULL);
+	
+	/* Create an "Add widget" menu */
+	addMenu = new QMenu(menu);
+	addMenu->setTitle("Add widget");
+	addMenu->addAction(QIcon(PIXMAPS "/button.png"), tr("Button"), 
+			   this, SLOT(slotAddButton()));	
+	addMenu->addAction(QIcon(PIXMAPS "/slider.png"), tr("Slider"),
+			   this, SLOT(slotAddSlider()));
+	addMenu->addAction(QIcon(PIXMAPS "/frame.png"), tr("Frame"),
+			   this, SLOT(slotAddFrame()));
+	addMenu->addAction(QIcon(PIXMAPS "/xypad.png"), tr("XY pad"),
+			   this, SLOT(slotAddXYPad()));
+	addMenu->addAction(QIcon(PIXMAPS "/label.png"), tr("Label"),
+			   this, SLOT(slotAddLabel()));
 
-	menu->insertSeparator();
+	/* Put the Add menu into the main menu, after a separator */
+	menu->addSeparator();
+	menu->addMenu(addMenu);
 
-	menu->insertItem("Add", addMenu);
-
-	connect(addMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-
+	/* Execute menu at the given point */
 	menu->exec(point);
 
+	/* Deletes also add menu and its actions */
 	delete menu;
 }
 
-void VCFrame::slotMenuCallback(int item)
+void VCFrame::slotAddButton()
 {
-	switch (item)
-	{
-	case KVCMenuAddButton:
-		addButton();
-		break;
-	case KVCMenuAddSlider:
-		addSlider();
-		break;
-	case KVCMenuAddFrame:
-		addFrame();
-		break;
-	case KVCMenuAddXYPad:
-		addXYPad();
-		break;
-	case KVCMenuAddLabel:
-		addLabel();
-		break;
+	VCButton* button;
+	QPoint at;
 
-	default:
-		VCWidget::slotMenuCallback(item);
-		break;
-	}
-}
-
-/*****************************************************************************
- * Widget adding functions
- *****************************************************************************/
-
-void VCFrame::addButton(QPoint at)
-{
-	VCButton* button = new VCButton(this);
+	button = new VCButton(this);
 	Q_ASSERT(button != NULL);
 	button->show();
 
@@ -351,11 +339,13 @@ void VCFrame::addButton(QPoint at)
 	_app->doc()->setModified();
 }
 
-void VCFrame::addSlider(QPoint at)
+void VCFrame::slotAddSlider()
 {
-	VCSlider* slider = new VCSlider(this);
+	VCSlider* slider;
+	QPoint at;
+
+	slider = new VCSlider(this);
 	Q_ASSERT(slider != NULL);
-	slider->init();
 	slider->show();
 
 	if (at.isNull() == false)
@@ -368,9 +358,12 @@ void VCFrame::addSlider(QPoint at)
 	_app->doc()->setModified();
 }
 
-void VCFrame::addFrame(QPoint at)
+void VCFrame::slotAddFrame()
 {
-	VCFrame* frame = new VCFrame(this);
+	VCFrame* frame;
+	QPoint at;
+
+	frame = new VCFrame(this);
 	Q_ASSERT(frame != NULL);
 	frame->show();
 
@@ -384,9 +377,12 @@ void VCFrame::addFrame(QPoint at)
 	_app->doc()->setModified();
 }
 
-void VCFrame::addXYPad(QPoint at)
+void VCFrame::slotAddXYPad()
 {
-	VCXYPad* xypad = new VCXYPad(this);
+	VCXYPad* xypad;
+	QPoint at;
+
+	xypad = new VCXYPad(this);
 	Q_ASSERT(xypad != NULL);
 	xypad->show();
 
@@ -400,9 +396,12 @@ void VCFrame::addXYPad(QPoint at)
 	_app->doc()->setModified();
 }
 
-void VCFrame::addLabel(QPoint at)
+void VCFrame::slotAddLabel()
 {
-	VCLabel* label = new VCLabel(this);
+	VCLabel* label;
+	QPoint at;
+
+	label = new VCLabel(this);
 	Q_ASSERT(label != NULL);
 	label->show();
 

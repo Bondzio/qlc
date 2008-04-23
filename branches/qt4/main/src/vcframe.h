@@ -86,23 +86,20 @@ public:
 	bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 
 	/*********************************************************************
-	 * Widget menu
+	 * Widget menu & actions
 	 *********************************************************************/
 protected:
 	void invokeMenu(QPoint point);
 
-protected slots:
-	void slotMenuCallback(int item);
-
 	/*********************************************************************
 	 * Widget adding
 	 *********************************************************************/
-public:
-	void addButton(QPoint at = QPoint());
-	void addSlider(QPoint at = QPoint());
-	void addFrame(QPoint at = QPoint());
-	void addXYPad(QPoint at = QPoint());
-	void addLabel(QPoint at = QPoint());
+public slots:
+	void slotAddButton();
+	void slotAddSlider();
+	void slotAddFrame();
+	void slotAddXYPad();
+	void slotAddLabel();
 
 	/*********************************************************************
 	 * Event handlers

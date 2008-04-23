@@ -19,27 +19,27 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qstring.h>
-#include <qpainter.h>
+#include <iostream>
+#include <QString>
+#include <QSize>
+#include <QtXml>
 
+#include "common/qlcfile.h"
+
+#include "virtualconsole.h"
 #include "vclabel.h"
 #include "app.h"
 #include "doc.h"
-#include "virtualconsole.h"
 
-#include "common/filehandler.h"
+using namespace std;
 
-extern App* _app;
-
-/**
- * TODO: VCLabel is pretty useless, because a VCFrame can do exactly
- * the same stuff that a label does. VCFrame could have a "label" property
- * which would make it impossible to add widgets to it...
- */
-VCLabel::VCLabel(QWidget* parent) : VCWidget(parent, "Label")
+VCLabel::VCLabel(QWidget* parent) : VCWidget(parent)
 {
+	/* Set the class name "VCLabel" as the object name as well */
+	setObjectName(VCLabel::staticMetaObject.className());
+
 	setCaption("Label");
-	resize(QPoint(100, 30));
+	resize(QSize(100, 30));
 }
 
 VCLabel::~VCLabel()
@@ -60,7 +60,7 @@ bool VCLabel::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	if (root->tagName() != KXMLQLCVCLabel)
 	{
-		qWarning("Label node not found!");
+		cout << "Label node not found!" << endl;
 		return false;
 	}
 
@@ -89,7 +89,7 @@ bool VCLabel::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCLabel)
 	{
-		qWarning("Label node not found!");
+		cout << "Label node not found!" << endl;
 		return false;
 	}
 
@@ -103,8 +103,8 @@ bool VCLabel::loadXML(QDomDocument* doc, QDomElement* root)
 		tag = node.toElement();
 		if (tag.tagName() == KXMLQLCWindowState)
 		{
-			FileHandler::loadXMLWindowState(&tag, &x, &y, &w, &h,
-							&visible);
+			QLCFile::loadXMLWindowState(&tag, &x, &y, &w, &h,
+						    &visible);
 			setGeometry(x, y, w, h);
 		}
 		else if (tag.tagName() == KXMLQLCVCAppearance)
@@ -113,8 +113,9 @@ bool VCLabel::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown label tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown label tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -141,7 +142,7 @@ bool VCLabel::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	root.setAttribute(KXMLQLCVCCaption, caption());
 
 	/* Window state */
-	FileHandler::saveXMLWindowState(doc, &root, this);
+	QLCFile::saveXMLWindowState(doc, &root, this);
 
 	/* Appearance */
 	saveXMLAppearance(doc, &root);

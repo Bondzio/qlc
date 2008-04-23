@@ -22,26 +22,24 @@
 #ifndef VCFRAMEPROPERTIES_H
 #define VCFRAMEPROPERTIES_H
 
-#include "uic_vcframeproperties.h"
+#include <QDialog>
+#include "ui_vcframeproperties.cpp"
 
 class VCFrame;
 
-class VCFrameProperties : public UI_VCFrameProperties
+class VCFrameProperties : public QDialog, public Ui_VCFrameProperties
 {
-  Q_OBJECT
+	Q_OBJECT
 
- public:
-  VCFrameProperties(QWidget* parent = NULL, const char* name = NULL);
-  ~VCFrameProperties();
+public:
+	VCFrameProperties(QWidget* parent, VCFrame* frame);
+	~VCFrameProperties();
 
-  void init();
+public slots:
+	void accept();
 
- public slots:
-  void slotOKClicked();
-  void slotCancelClicked();
-
- protected:
-  VCFrame* m_frame;
+protected:
+	VCFrame* m_frame;
 };
 
 #endif

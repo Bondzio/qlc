@@ -56,7 +56,8 @@ extern App* _app;
 
 VCButton::VCButton(QWidget* parent) : VCWidget(parent)
 {
-	setObjectName("VCButton");
+	/* Set the class name "VCButton" as the object name as well */
+	setObjectName(VCButton::staticMetaObject.className());
 
 	/* No function is initially attached to the button */
 	m_function = KNoID;

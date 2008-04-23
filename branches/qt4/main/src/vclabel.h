@@ -47,7 +47,8 @@ public:
 	 * Load & Save
 	 *********************************************************************/
 public:
-	static bool loader(QDomDocument* doc, QDomElement* root, QWidget* parent);
+	static bool loader(QDomDocument* doc, QDomElement* root,
+			   QWidget* parent);
 	bool loadXML(QDomDocument* doc, QDomElement* root);
 	bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 };

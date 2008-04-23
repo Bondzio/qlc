@@ -22,36 +22,37 @@
 #ifndef VCSLIDER_H
 #define VCSLIDER_H
 
-#include <qvaluelist.h>
-#include "vcwidget.h"
-#include "common/types.h"
+#include <QList>
 
-class QVBoxLayout;
-class QHBoxLayout;
-class QLabel;
-class QSlider;
-class QPushButton;
+#include "vcwidget.h"
+#include "common/qlctypes.h"
+
 class QDomDocument;
 class QDomElement;
+class QPushButton;
+class QVBoxLayout;
+class QHBoxLayout;
+class QSlider;
+class QLabel;
 class QTime;
 
-#define KXMLQLCVCSlider QString("Slider")
-#define KXMLQLCVCSliderMode QString("SliderMode")
+#define KXMLQLCVCSlider "Slider"
+#define KXMLQLCVCSliderMode "SliderMode"
 
-#define KXMLQLCVCSliderValueDisplayStyle QString("ValueDisplayStyle")
-#define KXMLQLCVCSliderValueDisplayStyleExact QString("Exact")
-#define KXMLQLCVCSliderValueDisplayStylePercentage QString("Percentage")
+#define KXMLQLCVCSliderValueDisplayStyle "ValueDisplayStyle"
+#define KXMLQLCVCSliderValueDisplayStyleExact "Exact"
+#define KXMLQLCVCSliderValueDisplayStylePercentage "Percentage"
 
-#define KXMLQLCVCSliderBus QString("Bus")
-#define KXMLQLCVCSliderBusLowLimit QString("LowLimit")
-#define KXMLQLCVCSliderBusHighLimit QString("HighLimit")
+#define KXMLQLCVCSliderBus "Bus"
+#define KXMLQLCVCSliderBusLowLimit "LowLimit"
+#define KXMLQLCVCSliderBusHighLimit "HighLimit"
 
-#define KXMLQLCVCSliderLevel QString("Level")
-#define KXMLQLCVCSliderLevelLowLimit QString("LowLimit")
-#define KXMLQLCVCSliderLevelHighLimit QString("HighLimit")
+#define KXMLQLCVCSliderLevel "Level"
+#define KXMLQLCVCSliderLevelLowLimit "LowLimit"
+#define KXMLQLCVCSliderLevelHighLimit "HighLimit"
 
-#define KXMLQLCVCSliderChannel QString("Channel")
-#define KXMLQLCVCSliderChannelFixture QString("Fixture")
+#define KXMLQLCVCSliderChannel "Channel"
+#define KXMLQLCVCSliderChannelFixture "Fixture"
 
 class VCSlider : public VCWidget
 {
@@ -268,7 +269,7 @@ public:
 	 * Get the list of channels that this slider controls
 	 *
 	 */
-	QValueList<int> levelChannels();
+	QList <int> levelChannels();
 
 	/**
 	 * Set low limit for levels set thru the slider
@@ -302,7 +303,7 @@ protected:
 	 *
 	 * @param combined A combined integer containing fixture & channel
 	 */
-	QValueList<int>::iterator levelChannel(int combined);
+	QListIterator <int> levelChannel(int combined);
 
 	/**
 	 * Get an iterator to a level channel.
@@ -310,8 +311,8 @@ protected:
 	 * @param fixture A fixture ID
 	 * @param channel A channel from the fixture
 	 */
-	QValueList<int>::iterator levelChannel(t_fixture_id fixture,
-					       t_channel channel);
+	QListIterator <int> levelChannel(t_fixture_id fixture,
+					 t_channel channel);
 
 	/**
 	 * Set the level to all channels that have been assigned to
@@ -322,7 +323,7 @@ protected:
 	void setLevelValue(t_value value);
 
 protected:
-	QValueList <int> m_levelChannels;
+	QList <int> m_levelChannels;
 	t_value m_levelLowLimit;
 	t_value m_levelHighLimit;
 

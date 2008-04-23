@@ -48,7 +48,8 @@ extern App* _app;
 
 VCWidget::VCWidget(QWidget* parent, const char* name) : QFrame(parent, name)
 {
-	setObjectName("VCWidget");
+	/* Set the class name "VCWidget" as the object name as well */
+	setObjectName(VCWidget::staticMetaObject.className());
 
 	m_backgroundImage = QString::null;
 	m_hasCustomBackgroundColor = false;

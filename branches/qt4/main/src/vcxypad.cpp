@@ -52,9 +52,12 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-VCXYPad::VCXYPad(QWidget* parent) : VCWidget(parent, "XYPad")
+VCXYPad::VCXYPad(QWidget* parent) : VCWidget(parent)
 {
-	setCaption("");
+	/* Set the class name "VCXYPad" as the object name as well */
+	setObjectName(VCXYPad::staticMetaObject.className());
+
+	setCaption(QString::null);
 	setMinimumSize(20, 20);
 	
 	resize(QPoint(120, 120));

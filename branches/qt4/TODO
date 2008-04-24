@@ -122,3 +122,8 @@
 * Add message boxes to all editor windows to indicate if there are no
   fixtures or functions, whichever is appropriate.
   -> XYPad crashes if there are no fixtures.
+
+* Some way of printing an address map to printer to help fixture patching.
+* Graphical view of stage and fixture layout. Plain top view will do for now.
+* Fixture type icons (head, scanner and also: 6-bar, 12-bar etc. for dimmers)
+* Gobo icons (from vendor's websites)

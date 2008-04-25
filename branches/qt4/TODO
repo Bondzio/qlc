@@ -127,3 +127,6 @@
 * Graphical view of stage and fixture layout. Plain top view will do for now.
 * Fixture type icons (head, scanner and also: 6-bar, 12-bar etc. for dimmers)
 * Gobo icons (from vendor's websites)
+
+* VCSliderProperties & VCSlider value display style setting doesn't work.
+

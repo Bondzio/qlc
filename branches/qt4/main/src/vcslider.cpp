@@ -19,28 +19,31 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qstring.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qslider.h>
-#include <qpushbutton.h>
-#include <qdatetime.h>
-#include <qmessagebox.h>
-#include <qdatetime.h>
-#include <qevent.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qdom.h>
-#include <math.h>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
+#include <iostream>
+#include <QString>
+#include <QSlider>
+#include <QLabel>
+#include <QTime>
+#include <QSize>
+#include <QtXml>
+#include <QPen>
 
-#include "app.h"
-#include "doc.h"
-#include "dmxmap.h"
-#include "vcslider.h"
 #include "vcsliderproperties.h"
 #include "virtualconsole.h"
+#include "vcslider.h"
+#include "dmxmap.h"
+#include "app.h"
+#include "doc.h"
 
-#include "common/filehandler.h"
+#include "common/qlcfile.h"
+
+using namespace std;
 
 extern App* _app;
 
@@ -56,7 +59,6 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 	/* Set the class name "VCSlider" as the object name as well */
 	setObjectName(VCSlider::staticMetaObject.className());
 
-	m_vbox = NULL;
 	m_hbox = NULL;
 	m_topLabel = NULL;
 	m_slider = NULL;
@@ -81,6 +83,8 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 	m_time = NULL;
 
 	m_feedbackChannel = -1;
+
+	init();
 }
 
 VCSlider::~VCSlider()
@@ -92,20 +96,21 @@ VCSlider::~VCSlider()
 
 void VCSlider::init()
 {
-	setCaption("");
+	setCaption(QString::null);
 
 	/* Main VBox */
-	m_vbox = new QVBoxLayout(this);
-	m_vbox->setMargin(10);
-	m_vbox->setSpacing(10);
+	new QVBoxLayout(this);
+	layout()->setMargin(10);
+	layout()->setSpacing(10);
 	
 	/* Top label */
 	m_topLabel = new QLabel(this);
-	m_vbox->addWidget(m_topLabel);
-	m_topLabel->setAlignment(AlignCenter);
+	layout()->addWidget(m_topLabel);
+	m_topLabel->setAlignment(Qt::AlignCenter);
 
 	/* Slider & its HBox */
-	m_hbox = new QHBoxLayout(m_vbox);
+	m_hbox = new QHBoxLayout(this);
+	layout()->addItem(m_hbox);
 	m_hbox->insertSpacing(-1, 10);
 
 	m_slider = new QSlider(this);
@@ -124,18 +129,18 @@ void VCSlider::init()
 
 	/* Tap button */
 	m_tapButton = new QPushButton(this);
-	m_vbox->addWidget(m_tapButton);
+	layout()->addWidget(m_tapButton);
 	connect(m_tapButton, SIGNAL(clicked()),
 		this, SLOT(slotTapButtonClicked()));
 	m_time = new QTime();
 
 	/* Bottom label */
 	m_bottomLabel = new QLabel(this);
-	m_vbox->addWidget(m_bottomLabel);
-	m_bottomLabel->setAlignment(AlignCenter);
+	layout()->addWidget(m_bottomLabel);
+	m_bottomLabel->setAlignment(Qt::AlignCenter);
 	m_bottomLabel->hide();
 
-	resize(QPoint(60, 220));
+	resize(QSize(60, 220));
 
 	/* Initialize to bus mode by default */
 	setBus(KBusIDDefaultFade);
@@ -202,7 +207,6 @@ void VCSlider::rename()
 void VCSlider::editProperties()
 {
 	VCSliderProperties prop(_app, this);
-	prop.init();
 	prop.exec();
 }
 
@@ -449,15 +453,16 @@ void VCSlider::addLevelChannel(t_fixture_id fixture, t_channel channel)
 {
 	int combined = combineFixtureAndChannel(fixture, channel);
 
-	if (levelChannel(combined) == m_levelChannels.end())
+	if (m_levelChannels.contains(combined) == false)
 	{
 		m_levelChannels.append(combined);
-		qHeapSort(m_levelChannels);
+		qSort(m_levelChannels.begin(), m_levelChannels.end());
 	}
 	else
 	{
-		qWarning("Fixture %d and channel %d already in list",
-			 fixture, channel);
+		cout << QString("Fixture %1 and channel %2 already in list")
+			.arg(fixture).arg(channel).toStdString()
+		     << endl;
 	}
 }
 
@@ -465,10 +470,11 @@ void VCSlider::removeLevelChannel(t_fixture_id fixture, t_channel channel)
 {
 	int combined = combineFixtureAndChannel(fixture, channel);
 
-	if (m_levelChannels.remove(combined) == 0)
+	if (m_levelChannels.removeAll(combined) == 0)
 	{
-		qWarning("Fixture %d and channel %d not found",
-			 fixture, channel);
+		cout << QString("Fixture %1 and channel %2 not found")
+			.arg(fixture).arg(channel).toStdString()
+		     << endl;
 	}
 }
 
@@ -477,7 +483,7 @@ void VCSlider::clearLevelChannels()
 	m_levelChannels.clear();
 }
 
-QValueList<int> VCSlider::levelChannels()
+QList <int> VCSlider::levelChannels()
 {
 	return m_levelChannels;
 }
@@ -502,18 +508,6 @@ t_value VCSlider::levelHighLimit()
 	return m_levelHighLimit;
 }
 
-QValueList<int>::iterator VCSlider::levelChannel(int combined)
-{
-	return qFind(m_levelChannels.begin(), m_levelChannels.end(), combined);
-}
-
-QValueList<int>::iterator VCSlider::levelChannel(t_fixture_id fixture,
-						 t_channel channel)
-{
-	int combined = combineFixtureAndChannel(fixture, channel);
-	return levelChannel(combined);
-}
-
 void VCSlider::setLevelValue(t_value value)
 {
 	Fixture* fxi = NULL;
@@ -521,10 +515,10 @@ void VCSlider::setLevelValue(t_value value)
 	t_channel ch = 0;
 	int dmx_ch = 0;
 
-	QValueList<int>::iterator it;
-	for (it = m_levelChannels.begin(); it != m_levelChannels.end(); ++it)
+	QListIterator <int> it(m_levelChannels);
+	while (it.hasNext() == true)
 	{
-		splitCombinedValue(*it, &fxi_id, &ch);
+		splitCombinedValue(it.next(), &fxi_id, &ch);
 		fxi = _app->doc()->fixture(fxi_id);
 		if (fxi != NULL)
 			dmx_ch = fxi->channelAddress(ch);
@@ -743,7 +737,7 @@ bool VCSlider::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCSlider)
 	{
-		qWarning("Slider node not found!");
+		cout << "Slider node not found!" << endl;
 		return false;
 	}
 
@@ -757,8 +751,8 @@ bool VCSlider::loadXML(QDomDocument* doc, QDomElement* root)
 		tag = node.toElement();
 		if (tag.tagName() == KXMLQLCWindowState)
 		{
-			FileHandler::loadXMLWindowState(&tag, &x, &y, &w, &h,
-							&visible);
+			QLCFile::loadXMLWindowState(&tag, &x, &y, &w, &h,
+						    &visible);
 			setGeometry(x, y, w, h);
 		}
 		else if (tag.tagName() == KXMLQLCVCAppearance)
@@ -786,8 +780,9 @@ bool VCSlider::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown slider tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown slider tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -837,8 +832,9 @@ bool VCSlider::loadXMLLevel(QDomDocument* doc, QDomElement* level_root)
 		}
 		else
 		{
-			qWarning("Unknown slider level tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown slider level tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -854,7 +850,6 @@ bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	QDomElement chtag;
 	QDomText text;
 	QString str;
-	QValueList<int>::iterator it;
 	t_fixture_id fxi_id = KNoID;
 	t_channel ch = 0;
 
@@ -869,7 +864,7 @@ bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	root.setAttribute(KXMLQLCVCCaption, caption());
 
 	/* Window state */
-	FileHandler::saveXMLWindowState(doc, &root, this);
+	QLCFile::saveXMLWindowState(doc, &root, this);
 
 	/* Appearance */
 	saveXMLAppearance(doc, &root);
@@ -912,9 +907,10 @@ bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	tag.setAttribute(KXMLQLCVCSliderLevelHighLimit, str);
 
 	/* Level channels */
-	for (it = m_levelChannels.begin(); it != m_levelChannels.end(); ++it)
+	QListIterator <int> it(m_levelChannels);
+	while (it.hasNext() == true)
 	{
-		splitCombinedValue(*it, &fxi_id, &ch);
+		splitCombinedValue(it.next(), &fxi_id, &ch);
 
 		chtag = doc->createElement(KXMLQLCVCSliderChannel);
 		tag.appendChild(chtag);
@@ -950,13 +946,13 @@ void VCSlider::paintEvent(QPaintEvent* e)
 	    _app->virtualConsole()->selectedWidget() == this)
 	{
 		// Draw a dotted line around the widget
-		QPen pen(DotLine);
+		QPen pen(Qt::DotLine);
 		pen.setWidth(2);
 		painter.setPen(pen);
 		painter.drawRect(1, 1, rect().width() - 1, rect().height() - 1);
 
 		// Draw a resize handle
-		QBrush b(SolidPattern);
+		QBrush b(Qt::SolidPattern);
 		painter.fillRect(rect().width() - 10,
 				 rect().height() - 10, 10, 10, b);
 	}

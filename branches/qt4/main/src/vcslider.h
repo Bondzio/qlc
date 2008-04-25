@@ -30,11 +30,12 @@
 class QDomDocument;
 class QDomElement;
 class QPushButton;
-class QVBoxLayout;
 class QHBoxLayout;
 class QSlider;
 class QLabel;
 class QTime;
+
+class VCSliderProperties;
 
 #define KXMLQLCVCSlider "Slider"
 #define KXMLQLCVCSliderMode "SliderMode"
@@ -58,6 +59,8 @@ class VCSlider : public VCWidget
 {
 	Q_OBJECT
 
+	friend class VCSliderProperties;
+
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
@@ -68,11 +71,12 @@ public:
 	/** Destructor */
 	~VCSlider();
 
-	/* Second stage construction */
-	void init();
-
 	/** Destroy and delete were already taken, so... */
 	void scram();
+
+protected:
+	/* Second stage construction */
+	void init();
 
 	/*********************************************************************
 	 * Caption
@@ -299,22 +303,6 @@ public:
 
 protected:
 	/**
-	 * Get an iterator to a level channel.
-	 *
-	 * @param combined A combined integer containing fixture & channel
-	 */
-	QListIterator <int> levelChannel(int combined);
-
-	/**
-	 * Get an iterator to a level channel.
-	 *
-	 * @param fixture A fixture ID
-	 * @param channel A channel from the fixture
-	 */
-	QListIterator <int> levelChannel(t_fixture_id fixture,
-					 t_channel channel);
-
-	/**
 	 * Set the level to all channels that have been assigned to
 	 * the slider.
 	 *
@@ -326,13 +314,6 @@ protected:
 	QList <int> m_levelChannels;
 	t_value m_levelLowLimit;
 	t_value m_levelHighLimit;
-
-	/*********************************************************************
-	 * Layout
-	 *********************************************************************/
-protected:
-	QVBoxLayout* m_vbox;
-	QHBoxLayout* m_hbox;
 
 	/*********************************************************************
 	 * Top label
@@ -371,7 +352,9 @@ public slots:
 	void slotSliderReleased();
 
 protected:
+	QHBoxLayout* m_hbox;
 	QSlider* m_slider;
+
 	int m_sliderValue;
 	bool m_sliderPressed;
 	bool m_moveSliderOnly;

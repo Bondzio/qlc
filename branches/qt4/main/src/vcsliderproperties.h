@@ -22,7 +22,7 @@
 #ifndef VCSLIDERPROPERTIES_H
 #define VCSLIDERPROPERTIES_H
 
-#include <QWidget>
+#include <QDialog>
 
 #include "ui_vcsliderproperties.cpp"
 #include "common/qlctypes.h"
@@ -34,7 +34,7 @@ class QLCChannel;
 class VCSlider;
 class Fixture;
 
-class VCSliderProperties : public QWidget, public Ui_VCSliderProperties
+class VCSliderProperties : public QDialog, public Ui_VCSliderProperties
 {
 	Q_OBJECT
 
@@ -48,8 +48,12 @@ public:
 	 * General page
 	 *********************************************************************/
 protected slots:
-	void slotSliderModeClicked(int button);
-	void slotDisplayStyleClicked(int button);
+	void slotBusModeClicked();
+	void slotLevelModeClicked();
+	void slotSubmasterModeClicked();
+
+	void slotExactStyleClicked();
+	void slotPercentageStyleClicked();
 
 	/*********************************************************************
 	 * Bus page

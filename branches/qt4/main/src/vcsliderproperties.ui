@@ -44,7 +44,7 @@
          </property>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QRadioButton" name="m_busRadio" >
+           <widget class="QRadioButton" name="m_modeBusRadio" >
             <property name="text" >
              <string>Bus</string>
             </property>
@@ -54,14 +54,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="m_levelRadio" >
+           <widget class="QRadioButton" name="m_modeLevelRadio" >
             <property name="text" >
              <string>Level</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="m_submasterRadio" >
+           <widget class="QRadioButton" name="m_modeSubmasterRadio" >
             <property name="enabled" >
              <bool>false</bool>
             </property>

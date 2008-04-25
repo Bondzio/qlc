@@ -48,12 +48,12 @@ public:
 	 * General page
 	 *********************************************************************/
 protected slots:
-	void slotBusModeClicked();
-	void slotLevelModeClicked();
-	void slotSubmasterModeClicked();
+	void slotModeBusClicked();
+	void slotModeLevelClicked();
+	void slotModeSubmasterClicked();
 
-	void slotExactStyleClicked();
-	void slotPercentageStyleClicked();
+	void slotValueExactClicked();
+	void slotValuePercentageClicked();
 
 	/*********************************************************************
 	 * Bus page

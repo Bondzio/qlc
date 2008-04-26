@@ -53,14 +53,16 @@ public:
 	VCButton(QWidget* parent);
 	~VCButton();
 
-	/** Destroy and delete were already taken, so... */
-	void scram();
+public slots:
+	/** Delete this widget */
+	void slotDelete();
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public:
-	void editProperties();
+public slots:
+	/** Edit this widget's properties */
+	void slotProperties();
 
 	/*********************************************************************
 	 * Load & Save

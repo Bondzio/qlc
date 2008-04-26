@@ -60,7 +60,23 @@ VCFrame::~VCFrame()
 {
 }
 
-void VCFrame::scram()
+bool VCFrame::isBottomFrame()
+{
+	/* If this widget has a parent that is NOT a VCFrame, this widget
+	   is the bottom frame. */
+	if (parentWidget() != NULL &&
+	    QString(parentWidget()->metaObject()->className()) !=
+	    QString(VCFrame::staticMetaObject.className()))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void VCFrame::slotDelete()
 {
 	/* Bottom frame cannot be destroyed */
 	if (isBottomFrame() == true)
@@ -78,30 +94,10 @@ void VCFrame::scram()
 }
 
 /*****************************************************************************
- * Bottom frame
- *****************************************************************************/
-
-bool VCFrame::isBottomFrame()
-{
-	/* If this widget has a parent that is NOT a VCFrame, this widget
-	   is the bottom frame. */
-	if (parentWidget() != NULL &&
-	    QString(parentWidget()->metaObject()->className()) !=
-	    QString(VCFrame::staticMetaObject.className()))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-/*****************************************************************************
  * Properties
  *****************************************************************************/
 
-void VCFrame::editProperties()
+void VCFrame::slotProperties()
 {
 	VCFrameProperties prop(_app, this);
 	if (prop.exec() == QDialog::Accepted)

@@ -39,7 +39,7 @@ VCLabel::VCLabel(QWidget* parent) : VCWidget(parent)
 	setObjectName(VCLabel::staticMetaObject.className());
 
 	setCaption("Label");
-	resize(QSize(100, 30));
+	resize(QPoint(100, 30));
 }
 
 VCLabel::~VCLabel()

@@ -64,8 +64,13 @@ protected:
 public:
 	virtual ~VCWidget();
 
-	/** Destroy and delete were already taken, so... */
-	virtual void scram();
+public slots:
+	virtual void slotCut();
+	virtual void slotCopy();
+	virtual void slotPaste();
+
+	/** Delete this widget */
+	virtual void slotDelete();
 
 	/*********************************************************************
 	 * Background image
@@ -75,10 +80,11 @@ public:
 	virtual void setBackgroundImage(const QString& path);
 
 	/** Get the widget's background image */
-	virtual const QString& backgroundImage();
+	virtual const QString& backgroundImage() { return m_backgroundImage; }
 
+public slots:
 	/** Invoke an image choosing dialog */
-	virtual void chooseBackgroundImage();
+	virtual void slotChooseBackgroundImage();
 
 protected:
 	QString m_backgroundImage;
@@ -90,18 +96,21 @@ public:
 	/** Set the widget's background color and invalidate background image */
 	virtual void setBackgroundColor(const QColor& color);
 
-	/** Reset the widget's background color to whatever the platform uses */
-	virtual void resetBackgroundColor();
-
-	/** Invoke a color choosing dialog */
-	virtual void chooseBackgroundColor();
-
 	/** Get the widget's background color. The color is invalid if the
 	    widget has a background image. */
-	virtual const QColor& backgroundColor();// { return paletteBackgroundColor(); }
+	virtual const QColor& backgroundColor() {
+		return palette().color(QPalette::Window); }
 
 	/** Check, whether the widget has a custom background color */
-	virtual bool hasCustomBackgroundColor() { return m_hasCustomBackgroundColor; }
+	virtual bool hasCustomBackgroundColor() {
+		return m_hasCustomBackgroundColor; }
+
+public slots:
+	/** Invoke a color choosing dialog */
+	virtual void slotChooseBackgroundColor();
+
+	/** Reset the widget's background color to whatever the platform uses */
+	virtual void slotResetBackgroundColor();
 
 protected:
 	bool m_hasCustomBackgroundColor;
@@ -113,17 +122,21 @@ public:
 	/** Set the widget's foreground color */
 	virtual void setForegroundColor(const QColor& color);
 
-	/** Reset the widget's background color to whatever the platform uses */
-	virtual void resetForegroundColor();
-
-	/** Invoke a color choosing dialog */
-	virtual void chooseForegroundColor();
-
+public:
 	/** Get the widget's foreground color */
-	virtual const QColor& foregroundColor();// { return paletteForegroundColor(); }
+	virtual const QColor& foregroundColor() { 
+		return palette().color(QPalette::WindowText); }
 
 	/** Check, whether the widget has a custom foreground color */
-	virtual bool hasCustomForegroundColor() { return m_hasCustomForegroundColor; }
+	virtual bool hasCustomForegroundColor() {
+		return m_hasCustomForegroundColor; }
+
+public slots:
+	/** Invoke a color choosing dialog */
+	virtual void slotChooseForegroundColor();
+
+	/** Reset the widget's background color to whatever the platform uses */
+	virtual void slotResetForegroundColor();
 
 protected:
 	bool m_hasCustomForegroundColor;
@@ -138,15 +151,16 @@ public:
 	/** Get the font used for the widget's caption */
 	virtual QFont font() { return QWidget::font(); }
 
-	/** Reset the font used for the widget's caption to whatever the
-	    platform uses */
-	virtual void resetFont();
-
-	/** Invoke a font choosing dialog */
-	virtual void chooseFont();
-
 	/** Check, whether the widget has a custom font */
 	virtual bool hasCustomFont() { return m_hasCustomFont; }
+
+public slots:
+	/** Invoke a font choosing dialog */
+	virtual void slotChooseFont();
+
+	/** Reset the font used for the widget's caption to whatever the
+	    platform uses */
+	virtual void slotResetFont();
 
 protected:
 	bool m_hasCustomFont;
@@ -155,15 +169,29 @@ protected:
 	 * Caption
 	 *********************************************************************/
 public:
+	/** Set this widget's caption text */
 	virtual void setCaption(const QString& text);
-	virtual QString caption() const;
-	virtual void rename();
+
+	/** Get this widget's caption text */
+	virtual QString caption() const { return windowTitle(); }
+
+public slots:
+	/** Invoke a dialog to rename this widget */
+	virtual void slotRename();
+
+	/*********************************************************************
+	 * Frame style
+	 *********************************************************************/
+public slots:
+	virtual void slotSetFrameSunken();
+	virtual void slotSetFrameRaised();
+	virtual void slotResetFrame();
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public:
-	virtual void editProperties();
+public slots:
+	virtual void slotProperties();
 
 	/*********************************************************************
 	 * Load & Save
@@ -196,7 +224,7 @@ protected slots:
 	 * Widget move & resize
 	 *********************************************************************/
 public:
-	virtual void resize(QSize p);
+	virtual void resize(QPoint p);
 	virtual void move(QPoint p);
 
 protected:

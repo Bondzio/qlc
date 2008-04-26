@@ -19,34 +19,38 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qcursor.h>
-#include <qpoint.h>
-#include <qpixmap.h>
-#include <qpopupmenu.h>
-#include <qptrlist.h>
-#include <stdio.h>
-#include <qmessagebox.h>
-#include <qpainter.h>
-#include <qbuttongroup.h>
-#include <qobjectlist.h>
-#include <assert.h>
-#include <qcolordialog.h>
-#include <qfiledialog.h>
-#include <qfontdialog.h>
-#include <qinputdialog.h>
-#include <math.h>
+#include <QApplication>
+#include <QInputDialog>
+#include <QColorDialog>
+#include <QFileDialog>
+#include <QFontDialog>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPalette>
+#include <iostream>
+#include <QCursor>
+#include <QPixmap>
+#include <QBrush>
+#include <QPoint>
+#include <QSize>
+#include <QMenu>
+#include <QList>
+#include <QtXml>
 
-#include "common/filehandler.h"
-#include "common/qlcimagepreview.h"
+#include <cmath>
+#include "common/qlcfile.h"
 
+#include "virtualconsole.h"
 #include "vcwidget.h"
 #include "app.h"
 #include "doc.h"
-#include "virtualconsole.h"
+
+using namespace std;
 
 extern App* _app;
 
-VCWidget::VCWidget(QWidget* parent, const char* name) : QFrame(parent, name)
+VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 {
 	/* Set the class name "VCWidget" as the object name as well */
 	setObjectName(VCWidget::staticMetaObject.className());
@@ -73,7 +77,22 @@ VCWidget::~VCWidget()
 {
 }
 
-void VCWidget::scram()
+void VCWidget::slotCut()
+{
+	QMessageBox::information(this, "TODO", "Not implemented");
+}
+
+void VCWidget::slotCopy()
+{
+	QMessageBox::information(this, "TODO", "Not implemented");
+}
+
+void VCWidget::slotPaste()
+{
+	QMessageBox::information(this, "TODO", "Not implemented");
+}
+
+void VCWidget::slotDelete()
 {
 	QString msg;
 
@@ -90,49 +109,63 @@ void VCWidget::scram()
 	}
 }
 
-/*********************************************************************
+/*****************************************************************************
  * Background image
- *********************************************************************/
+ *****************************************************************************/
+
 void VCWidget::setBackgroundImage(const QString& path)
 {
+	QPalette pal = palette();
+
 	m_hasCustomBackgroundColor = false;
 	m_backgroundImage = path;
-	setPaletteBackgroundPixmap(QPixmap(path));
+
+	setAutoFillBackground(true);
+	pal.setBrush(QPalette::Window, QBrush(QPixmap(path)));
+	setPalette(pal);
+
+	_app->doc()->setModified();
 }
 
-const QString& VCWidget::backgroundImage()
+void VCWidget::slotChooseBackgroundImage()
 {
-	return m_backgroundImage;
+	QString path;
+	path = QFileDialog::getOpenFileName(this,
+					    tr("Select background image"),
+					    m_backgroundImage,
+					    "Images (*.png *.xpm *.jpg *.gif)");
+	if (path.isEmpty() == false)
+		setBackgroundImage(path);
 }
 
-void VCWidget::chooseBackgroundImage()
-{
-	QLCImagePreview* preview = new QLCImagePreview();
-	QFileDialog* fd = new QFileDialog(this);
-	fd->setContentsPreviewEnabled(true);
-	fd->setContentsPreview(preview, preview);
-	fd->setPreviewMode(QFileDialog::Contents);
-	fd->setFilter("Images (*.png *.xpm *.jpg *.gif)");
-	fd->setSelection(backgroundImage());
-	
-	if (fd->exec() == QDialog::Accepted)
-		setBackgroundImage(fd->selectedFile());
-	
-	delete preview;
-	delete fd;
-}
-
-/*********************************************************************
+/*****************************************************************************
  * Background color
- *********************************************************************/
+ *****************************************************************************/
+
 void VCWidget::setBackgroundColor(const QColor& color)
 {
+	QPalette pal = palette();
+
 	m_hasCustomBackgroundColor = true;
 	m_backgroundImage = QString::null;
-	setPaletteBackgroundColor(color);
+
+	setAutoFillBackground(true);
+	pal.setColor(QPalette::Window, color);
+	setPalette(pal);
+
+	_app->doc()->setModified();
 }
 
-void VCWidget::resetBackgroundColor()
+void VCWidget::slotChooseBackgroundColor()
+{
+	QColor color;
+
+	color = QColorDialog::getColor(palette().color(QPalette::Window));
+	if (color.isValid() == true)
+		setBackgroundColor(color);
+}
+
+void VCWidget::slotResetBackgroundColor()
 {
 	QColor fg;
 
@@ -141,36 +174,49 @@ void VCWidget::resetBackgroundColor()
 
 	/* Store foreground color */
 	if (m_hasCustomForegroundColor == true)
-		fg = paletteForegroundColor();
-
-	/* Reset the whole palette */
-	unsetPalette();
+		fg = palette().color(QPalette::WindowText);
+	
+	/* Reset the whole palette to application palette */
+	setPalette(QApplication::palette());
+	setAutoFillBackground(false);
 
 	/* Restore foreground color */
 	if (fg.isValid() == true)
-		setPaletteForegroundColor(fg);
+	{
+		QPalette pal = palette();
+		pal.setColor(QPalette::WindowText, fg);
+		setPalette(pal);
+	}
 
 	_app->doc()->setModified();
 }
 
-void VCWidget::chooseBackgroundColor()
-{
-	QColor color;
-	color = QColorDialog::getColor(backgroundColor());
-	if (color.isValid())
-		setBackgroundColor(color);
-}
-
-/*********************************************************************
+/*****************************************************************************
  * Foreground color
- *********************************************************************/
+ *****************************************************************************/
+
 void VCWidget::setForegroundColor(const QColor& color)
 {
+	QPalette pal = palette();
+
 	m_hasCustomForegroundColor = true;
-	setPaletteForegroundColor(color);
+
+	pal.setColor(QPalette::WindowText, color);
+	setPalette(pal);
+
+	_app->doc()->setModified();
 }
 
-void VCWidget::resetForegroundColor()
+void VCWidget::slotChooseForegroundColor()
+{
+	QColor color;
+
+	color = QColorDialog::getColor(palette().color(QPalette::WindowText));
+	if (color.isValid() == true)
+		setForegroundColor(color);
+}
+
+void VCWidget::slotResetForegroundColor()
 {
 	QColor bg;
 
@@ -178,51 +224,44 @@ void VCWidget::resetForegroundColor()
 
 	/* Store background color */
 	if (m_hasCustomBackgroundColor == true)
-		bg = paletteBackgroundColor();
+		bg = palette().color(QPalette::Window);
 
-	/* Reset the whole palette */
-	unsetPalette();
+	/* Reset the whole palette to application palette */
+	setPalette(QApplication::palette());
 
 	/* Restore foreground color */
 	if (bg.isValid() == true)
-		setPaletteBackgroundColor(bg);
+		setBackgroundColor(bg);
 	else if (m_backgroundImage.isEmpty() == false)
-		setPaletteBackgroundPixmap(QPixmap(m_backgroundImage));
+		setBackgroundImage(m_backgroundImage);
 
 	_app->doc()->setModified();
 }
 
-void VCWidget::chooseForegroundColor()
-{
-	QColor color;
-	color = QColorDialog::getColor(foregroundColor());
-	if (color.isValid())
-		setForegroundColor(color);
-}
-
-/*********************************************************************
+/*****************************************************************************
  * Font
- *********************************************************************/
+ *****************************************************************************/
 
 void VCWidget::setFont(const QFont& font)
 {
 	m_hasCustomFont = true;
 	QWidget::setFont(font);
-}
-
-void VCWidget::resetFont()
-{
-	m_hasCustomFont = false;
-	unsetFont();
 	_app->doc()->setModified();
 }
 
-void VCWidget::chooseFont()
+void VCWidget::slotChooseFont()
 {
 	bool ok = false;
 	QFont f = QFontDialog::getFont(&ok, font());
 	if (ok == true)
 		setFont(f);
+}
+
+void VCWidget::slotResetFont()
+{
+	m_hasCustomFont = false;
+	setFont(QFont());
+	_app->doc()->setModified();
 }
 
 /*****************************************************************************
@@ -236,35 +275,48 @@ void VCWidget::setCaption(const QString& text)
 	_app->doc()->setModified();
 }
 
-void VCWidget::caption() const
-{
-	return windowTitle();
-}
-
-void VCWidget::rename()
+void VCWidget::slotRename()
 {
 	QString text;
 	bool ok = false;
 
-	text = QInputDialog::getText("Rename widget",
-				     "Set widget caption:",
-				     QLineEdit::Normal,
-				     caption(),
-				     &ok,
-				     this);
-
+	text = QInputDialog::getText(this, tr("Rename widget"),
+				     tr("Set widget caption:"),
+				     QLineEdit::Normal, caption(), &ok);
 	if (ok == true)
 		setCaption(text);
+}
+
+/*****************************************************************************
+ * Frame style
+ *****************************************************************************/
+
+void VCWidget::slotSetFrameSunken()
+{
+	setFrameStyle(KVCWidgetFrameStyleSunken);
+	_app->doc()->setModified();
+}
+
+void VCWidget::slotSetFrameRaised()
+{
+	setFrameStyle(KVCWidgetFrameStyleRaised);
+	_app->doc()->setModified();
+}
+
+void VCWidget::slotResetFrame()
+{
+	setFrameStyle(KVCWidgetFrameStyleNone);
+	_app->doc()->setModified();
 }
 
 /*****************************************************************************
  * Properties
  *****************************************************************************/
 
-void VCWidget::editProperties()
+void VCWidget::slotProperties()
 {
-	QMessageBox::information(_app, className(),
-				 "This widget has no properties");
+	QMessageBox::information(_app, staticMetaObject.className(),
+				 tr("This widget has no properties"));
 }
 
 /*****************************************************************************
@@ -282,7 +334,7 @@ bool VCWidget::loadXMLAppearance(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCAppearance)
 	{
-		qWarning("Appearance node not found!");
+		cout << "Appearance node not found!" << endl;
 		return false;
 	}
 
@@ -326,8 +378,9 @@ bool VCWidget::loadXMLAppearance(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown appearance tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown appearance tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -358,7 +411,7 @@ bool VCWidget::saveXMLAppearance(QDomDocument* doc, QDomElement* frame_root)
 	tag = doc->createElement(KXMLQLCVCWidgetForegroundColor);
 	root.appendChild(tag);
 	if (hasCustomForegroundColor() == true)
-		str.setNum(paletteForegroundColor().rgb());
+		str.setNum(foregroundColor().rgb());
 	else
 		str = KXMLQLCVCWidgetColorDefault;
 	text = doc->createTextNode(str);
@@ -368,7 +421,7 @@ bool VCWidget::saveXMLAppearance(QDomDocument* doc, QDomElement* frame_root)
 	tag = doc->createElement(KXMLQLCVCWidgetBackgroundColor);
 	root.appendChild(tag);
 	if (hasCustomBackgroundColor() == true)
-		str.setNum(paletteBackgroundColor().rgb());
+		str.setNum(backgroundColor().rgb());
 	else
 		str = KXMLQLCVCWidgetColorDefault;
 	text = doc->createTextNode(str);
@@ -400,6 +453,7 @@ bool VCWidget::saveXMLAppearance(QDomDocument* doc, QDomElement* frame_root)
 /*****************************************************************************
  * QLC Mode change
  *****************************************************************************/
+
 void VCWidget::slotModeChanged(App::Mode mode)
 {
 	repaint();
@@ -411,175 +465,89 @@ void VCWidget::slotModeChanged(App::Mode mode)
 
 void VCWidget::invokeMenu(QPoint point)
 {
-	QPopupMenu* menu = createMenu();
+	QMenu* menu = createMenu();
 	menu->exec(point);
 	delete menu;
 }
 
-QPopupMenu* VCWidget::createMenu()
+QMenu* VCWidget::createMenu()
 {
+	QAction* action;
+
 	// Create edit menu here so that all submenus can be its children
 	/* DO NOT set this as the menu's parent object. Otherwise deleting this
 	   thru the menu will crash the whole program. */
-	QPopupMenu* editMenu = new QPopupMenu(NULL);
-
-	// Foreground menu
-	QPopupMenu* fgMenu = new QPopupMenu(editMenu);
-	fgMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/color.png")),
-			   "&Color...", KVCMenuForegroundColor);
-	fgMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/undo.png")),
-			   "&Default", KVCMenuForegroundDefault);
+	QMenu* editMenu = new QMenu(NULL);
+	action = editMenu->addAction(QIcon(PIXMAPS "/editcut.png"), "Cut",
+				     this, SLOT(slotCut()));
+	action->setEnabled(false);
+	action = editMenu->addAction(QIcon(PIXMAPS "/editcopy.png"), "Copy",
+				     this, SLOT(slotCopy()));
+	action->setEnabled(false);
+	action = editMenu->addAction(QIcon(PIXMAPS "/editpaste.png"), "Paste",
+				     this, SLOT(slotPaste()));
+	action->setEnabled(false);
+	editMenu->addAction(QIcon(PIXMAPS "/editdelete.png"), "Delete",
+			    this, SLOT(slotDelete()));
+	editMenu->addSeparator();
+	editMenu->addAction(QIcon(PIXMAPS "/configure.png"), "Properties...",
+			    this, SLOT(slotProperties()));
+	editMenu->addAction(QIcon(PIXMAPS "/editclear.png"), "Rename...",
+			    this, SLOT(slotRename()));
+	editMenu->addSeparator();
 
 	// Background menu
-	QPopupMenu* bgMenu = new QPopupMenu(editMenu);
-	bgMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/color.png")),
-			   "&Color...", KVCMenuBackgroundColor);
-	bgMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/image.png")),
-			   "&Image...", KVCMenuBackgroundImage);
-	bgMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/undo.png")),
-			   "&Default", KVCMenuBackgroundDefault);
+	QMenu* bgMenu = new QMenu(editMenu);
+	bgMenu->setTitle("Background");
+	bgMenu->addAction(QIcon(PIXMAPS "/color.png"), "Color...",
+			  this, SLOT(slotChooseBackgroundColor()));
+	bgMenu->addAction(QIcon(PIXMAPS "/image.png"), "Image...",
+			  this, SLOT(slotChooseBackgroundImage()));
+	bgMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
+			  this, SLOT(slotResetBackgroundColor()));
+
+	// Foreground menu
+	QMenu* fgMenu = new QMenu(editMenu);
+	fgMenu->setTitle("Foreground");
+	fgMenu->addAction(QIcon(PIXMAPS "/color.png"), "Color...",
+			  this, SLOT(slotChooseForegroundColor()));
+	fgMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
+			  this, SLOT(slotResetForegroundColor()));
 
 	// Font menu
-	QPopupMenu* fontMenu = new QPopupMenu(editMenu);
-	fontMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/fonts.png")),
-			     "&Font...", KVCMenuFont);
-	fontMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/undo.png")),
-			   "&Default", KVCMenuFontDefault);
+	QMenu* fontMenu = new QMenu(editMenu);
+	fontMenu->setTitle("Font");
+	fontMenu->addAction(QIcon(PIXMAPS "/fonts.png"), "Font...",
+			   this, SLOT(slotChooseFont()));
+	fontMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
+			    this, SLOT(slotResetFont()));
 
 	// Frame menu
-	QPopupMenu* frameMenu = new QPopupMenu(editMenu);
-	frameMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/framesunken.png")),
-			      "&Sunken", KVCMenuFrameSunken);
-	frameMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/frameraised.png")),
-			      "&Raised", KVCMenuFrameRaised);
-	frameMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/framenone.png")),
-			      "&None", KVCMenuFrameNone);
+	QMenu* frameMenu = new QMenu(editMenu);
+	frameMenu->setTitle("Frame");
+	frameMenu->addAction(QIcon(PIXMAPS "/framesunken.png"), "Sunken",
+			     this, SLOT(slotSetFrameSunken()));
+	frameMenu->addAction(QIcon(PIXMAPS "/frameraised.png"), "Raised",
+			     this, SLOT(slotSetFrameRaised()));
+	frameMenu->addAction(QIcon(PIXMAPS "/framenone.png"), "None",
+			     this, SLOT(slotResetFrame()));
 
 	// Stacking order menu
-	QPopupMenu* stackMenu = new QPopupMenu(editMenu);
-	stackMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/up.png")),
-			      "Bring to &Front", KVCMenuStackingRaise);
-	stackMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/down.png")),
-			      "Send to &Back", KVCMenuStackingLower);
+	QMenu* stackMenu = new QMenu(editMenu);
+	stackMenu->setTitle("Stacking order");
+	stackMenu->addAction(QIcon(PIXMAPS "/up.png"), "Raise",
+			     this, SLOT(raise()));
+	stackMenu->addAction(QIcon(PIXMAPS "/down.png"), "Lower",
+			     this, SLOT(lower()));
 
-	// Edit menu
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/editcut.png")),
-			     "Cut", KVCMenuEditCut);
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/editcopy.png")),
-			     "Copy", KVCMenuEditCopy);
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/editpaste.png")),
-			     "Paste", KVCMenuEditPaste);
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/editdelete.png")),
-			     "Delete", KVCMenuEditDelete);
-
-	editMenu->insertSeparator();
-
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/configure.png")),
-			       "&Properties...", KVCMenuEditProperties);
-	editMenu->insertItem(QPixmap(QString(PIXMAPS) + QString("/editclear.png")),
-			       "&Rename...", KVCMenuEditRename);
-
-	editMenu->setItemEnabled(KVCMenuEditCut, false);
-	editMenu->setItemEnabled(KVCMenuEditCopy, false);
-	editMenu->setItemEnabled(KVCMenuEditPaste, false);
-
-	editMenu->insertSeparator();
-
-	editMenu->insertItem("Background", bgMenu);
-	editMenu->insertItem("Foreground", fgMenu);
-	editMenu->insertItem("Font", fontMenu);
-	editMenu->insertItem("Frame", frameMenu);
-	editMenu->insertItem("Stacking Order", stackMenu);
-
-	connect(editMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-	connect(bgMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-	connect(fgMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-	connect(fontMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-	connect(frameMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
-	connect(stackMenu, SIGNAL(activated(int)),
-		this, SLOT(slotMenuCallback(int)));
+	// Menu construction
+	editMenu->addMenu(bgMenu);
+	editMenu->addMenu(fgMenu);
+	editMenu->addMenu(fontMenu);
+	editMenu->addMenu(frameMenu);
+	editMenu->addMenu(stackMenu);
 
 	return editMenu;
-}
-
-void VCWidget::slotMenuCallback(int item)
-{
-	switch (item)
-	{
-	case KVCMenuEditCut:
-		break;
-	case KVCMenuEditCopy:
-		break;
-	case KVCMenuEditPaste:
-		break;
-	case KVCMenuEditDelete:
-		scram();
-		break;
-
-	case KVCMenuEditRename:
-		rename();
-		break;
-
-	case KVCMenuEditProperties:
-		editProperties();
-		break;
-
-	case KVCMenuForegroundColor:
-		chooseForegroundColor();
-		break;
-
-	case KVCMenuForegroundDefault:
-		resetForegroundColor();
-		break;
-
-	case KVCMenuBackgroundColor:
-		chooseBackgroundColor();
-		break;
-	
-	case KVCMenuBackgroundImage:
-		chooseBackgroundImage();
-		break;
-	
-	case KVCMenuBackgroundDefault:
-		resetBackgroundColor();
-		break;
-
-	case KVCMenuFont:
-		chooseFont();
-		break;
-
-	case KVCMenuFontDefault:
-		resetFont();
-		break;
-
-	case KVCMenuFrameSunken:
-		setFrameStyle(KVCWidgetFrameStyleSunken);
-		break;
-
-	case KVCMenuFrameRaised:
-		setFrameStyle(KVCWidgetFrameStyleRaised);
-		break;
-
-	case KVCMenuFrameNone:
-		setFrameStyle(KVCWidgetFrameStyleNone);
-		break;
-
-	case KVCMenuStackingRaise:
-		raise();
-		break;
-
-	case KVCMenuStackingLower:
-		lower();
-		break;
-
-	default:
-		break;
-	}
 }
 
 /*****************************************************************************
@@ -681,7 +649,7 @@ void VCWidget::paintEvent(QPaintEvent* e)
 	// Draw the widget's caption
 	QPainter painter(this);
 	QFontMetrics metrics = painter.fontMetrics();
-	QSize textSize = metrics.size(SingleLine, caption());
+	QSize textSize = metrics.size(Qt::TextSingleLine, caption());
 	
 	caption_x = static_cast<int> (floor((width() / 2.0) -
 					   (textSize.width() / 2.0)));	
@@ -695,13 +663,13 @@ void VCWidget::paintEvent(QPaintEvent* e)
 	    _app->virtualConsole()->selectedWidget() == this)
 	{
 		// Draw a dotted line around the widget
-		QPen pen(DotLine);
+		QPen pen(Qt::DotLine);
 		pen.setWidth(2);
 		painter.setPen(pen);
 		painter.drawRect(1, 1, rect().width() - 1, rect().height() - 1);
 
 		// Draw a resize handle
-		QBrush b(SolidPattern);
+		QBrush b(Qt::SolidPattern);
 		painter.fillRect(rect().width() - 10,
 				 rect().height() - 10, 10, 10, b);
 	}
@@ -719,22 +687,22 @@ void VCWidget::mousePressEvent(QMouseEvent* e)
 			m_resizeMode = false;
 		}
 
-		if (e->button() & LeftButton || e->button() & MidButton)
+		if (e->button() & Qt::LeftButton || e->button() & Qt::MidButton)
 		{
 			if (e->x() > rect().width() - 10 &&
 			    e->y() > rect().height() - 10)
 			{
 				m_resizeMode = true;
 				setMouseTracking(true);
-				setCursor(QCursor(SizeFDiagCursor));
+				setCursor(QCursor(Qt::SizeFDiagCursor));
 			}
 			else
 			{
 				m_mousePressPoint = QPoint(e->x(), e->y());
-				setCursor(QCursor(SizeAllCursor));
+				setCursor(QCursor(Qt::SizeAllCursor));
 			}
 		}
-		else if (e->button() & RightButton)
+		else if (e->button() & Qt::RightButton)
 		{
 			m_mousePressPoint = QPoint(e->x(), e->y());
 			invokeMenu(mapToGlobal(e->pos()));
@@ -763,7 +731,7 @@ void VCWidget::mouseReleaseEvent(QMouseEvent* e)
 void VCWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {
 	if (_app->mode() == App::Design)
-		slotMenuCallback(KVCMenuEditProperties);
+		slotProperties();
 }
 
 void VCWidget::mouseMoveEvent(QMouseEvent* e)
@@ -776,7 +744,8 @@ void VCWidget::mouseMoveEvent(QMouseEvent* e)
 			resize(mapFromGlobal(p));
 			_app->doc()->setModified();
 		}
-		else if (e->state() & LeftButton || e->state() & MidButton)
+		else if (e->buttons() & Qt::LeftButton ||
+			 e->buttons() & Qt::MidButton)
 		{
 			QPoint p(parentWidget()->mapFromGlobal(QCursor::pos()));
 			p.setX(p.x() - m_mousePressPoint.x());

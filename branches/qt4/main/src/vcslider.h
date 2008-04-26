@@ -71,25 +71,25 @@ public:
 	/** Destructor */
 	~VCSlider();
 
-	/** Destroy and delete were already taken, so... */
-	void scram();
-
-protected:
-	/* Second stage construction */
-	void init();
+public slots:
+	/** Delete this widget */
+	void slotDelete();
 
 	/*********************************************************************
 	 * Caption
 	 *********************************************************************/
 public:
 	void setCaption(const QString& text);
-	void rename();
+
+public slots:
+	void slotRename();
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public:
-	void editProperties();
+public slots:
+	/** Edit this widget's properties */
+	void slotProperties();
 
 	/*********************************************************************
 	 * QLC Mode

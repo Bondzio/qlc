@@ -40,23 +40,25 @@ class VCFrame : public VCWidget
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
- public:
+public:
 	VCFrame(QWidget* parent);
 	virtual ~VCFrame();
 
 	void init(bool bottomFrame = false);
 
-	/* Destroy and delete were already taken, so...*/
-	void scram();
-
 	/* Check if this is the virtual console's draw area */
 	bool isBottomFrame();
+
+public slots:
+	/* Delete this widget */
+	void slotDelete();
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public:
-	void editProperties();
+public slots:
+	/** Edit this widget's properties */
+	void slotProperties();
 
 	/*********************************************************************
 	 * Button behaviour

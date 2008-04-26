@@ -84,18 +84,6 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 
 	m_feedbackChannel = -1;
 
-	init();
-}
-
-VCSlider::~VCSlider()
-{
-	if (m_time != NULL)
-		delete m_time;
-	m_time = NULL;
-}
-
-void VCSlider::init()
-{
 	setCaption(QString::null);
 
 	/* Main VBox */
@@ -140,7 +128,7 @@ void VCSlider::init()
 	m_bottomLabel->setAlignment(Qt::AlignCenter);
 	m_bottomLabel->hide();
 
-	resize(QSize(60, 220));
+	resize(QPoint(60, 220));
 
 	/* Initialize to bus mode by default */
 	setBus(KBusIDDefaultFade);
@@ -152,7 +140,14 @@ void VCSlider::init()
 	slotModeChanged(_app->mode());
 }
 
-void VCSlider::scram()
+VCSlider::~VCSlider()
+{
+	if (m_time != NULL)
+		delete m_time;
+	m_time = NULL;
+}
+
+void VCSlider::slotDelete()
 {
 	QString msg;
 
@@ -184,7 +179,7 @@ void VCSlider::setCaption(const QString& text)
 		setTapButtonText(text);
 }
 
-void VCSlider::rename()
+void VCSlider::slotRename()
 {
 	QString text;
 	bool ok = false;
@@ -197,14 +192,14 @@ void VCSlider::rename()
 					 "The bus' name is used as the " \
 					 "slider's name instead.");
 	else
-		VCWidget::rename();
+		VCWidget::slotRename();
 }
 
 /*****************************************************************************
  * Properties
  *****************************************************************************/
 
-void VCSlider::editProperties()
+void VCSlider::slotProperties()
 {
 	VCSliderProperties prop(_app, this);
 	prop.exec();
@@ -711,7 +706,6 @@ bool VCSlider::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	/* Create a new slider into its parent */
 	slider = new VCSlider(parent);
-	slider->init();
 	slider->show();
 
 	/* Continue loading */

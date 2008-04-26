@@ -73,7 +73,7 @@ VCButton::VCButton(QWidget* parent) : VCWidget(parent)
 
 	/* Initial size */
 	setMinimumSize(20, 20);
-	resize(QSize(30, 30));
+	resize(QPoint(30, 30));
 
 	/* Keybinding */
 	m_keyBind = new KeyBind();
@@ -88,7 +88,7 @@ VCButton::~VCButton()
 	m_keyBind = NULL;
 }
 
-void VCButton::scram()
+void VCButton::slotDelete()
 {
 	if (QMessageBox::question(this, "Delete",
 				  QString("Delete button: %1?")
@@ -106,7 +106,7 @@ void VCButton::scram()
  * Properties
  *****************************************************************************/
 
-void VCButton::editProperties()
+void VCButton::slotProperties()
 {
 	VCButtonProperties prop(this, _app);
 	prop.exec();

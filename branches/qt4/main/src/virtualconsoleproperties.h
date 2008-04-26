@@ -22,10 +22,13 @@
 #ifndef VIRTUALCONSOLEPROPERTIES_H
 #define VIRTUALCONSOLEPROPERTIES_H
 
-#include "uic_virtualconsoleproperties.h"
-#include "common/types.h"
+#include <QDialog>
 
-class VirtualConsoleProperties : public UI_VirtualConsoleProperties
+#include "ui_virtualconsoleproperties.cpp"
+#include "common/qlctypes.h"
+
+class VirtualConsoleProperties : public QDialog,
+	public Ui_VirtualConsoleProperties
 {
 	Q_OBJECT
 
@@ -36,12 +39,10 @@ public:
 	VirtualConsoleProperties(QWidget* parent);
 	~VirtualConsoleProperties();
 
-	void init();
-
 	/*********************************************************************
 	 * Grid
 	 *********************************************************************/
- public:
+public:
 	void setGridEnabled(bool set) { m_gridEnabled = set; }
 	bool isGridEnabled() { return m_gridEnabled; }
 
@@ -51,10 +52,7 @@ public:
 	void setGridY(int y) { m_gridY = y; }
 	int gridY() { return m_gridY; }
 
- protected slots:
-	void slotGridEnabledCheckToggled(bool state);
-
- protected:
+protected:
 	bool m_gridEnabled;
 	int m_gridX;
 	int m_gridY;
@@ -62,21 +60,21 @@ public:
 	/*********************************************************************
 	 * Key repeat
 	 *********************************************************************/
- public:
+public:
 	void setKeyRepeatOff(bool set) { m_keyRepeatOff = set; }
 	bool isKeyRepeatOff() { return m_keyRepeatOff; }
 
- protected:
+protected:
 	bool m_keyRepeatOff;
 
 	/*********************************************************************
 	 * Key repeat
 	 *********************************************************************/
- public:
+public:
 	void setGrabKeyboard(bool set) { m_grabKeyboard = set; }
 	bool isGrabKeyboard() { return m_grabKeyboard; }
 
- protected:
+protected:
 	bool m_grabKeyboard;
 
 	/*********************************************************************
@@ -98,7 +96,7 @@ protected:
 	/*********************************************************************
 	 * OK/Cancel
 	 *********************************************************************/
- protected slots:
+protected slots:
 	void accept();
 };
 

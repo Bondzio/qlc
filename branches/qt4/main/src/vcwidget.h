@@ -188,6 +188,13 @@ public slots:
 	virtual void slotResetFrame();
 
 	/*********************************************************************
+	 * Stacking
+	 *********************************************************************/
+public slots:
+	virtual void raise();
+	virtual void lower();
+
+	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
 public slots:
@@ -216,9 +223,6 @@ protected slots:
 protected:
 	virtual void invokeMenu(QPoint point);
 	virtual QMenu* createMenu();
-
-protected slots:
-	virtual void slotMenuCallback(int item);
 
 	/*********************************************************************
 	 * Widget move & resize

@@ -65,84 +65,10 @@ class VCDockArea;
 #define KXMLQLCVCBackgroundImage "BackgroundImage"
 #define KXMLQLCVCBackgroundImageNone "None"
 
-const int KFrameStyleSunken ( QFrame::StyledPanel | QFrame::Sunken );
-const int KFrameStyleRaised ( QFrame::StyledPanel | QFrame::Raised );
-const int KFrameStyleNone ( QFrame::NoFrame );
-
-// Menu stuff
-const int KVCMenuEvent            ( 2000 );
-
-// Add Menu >>>
-const int KVCMenuAddMin           ( 100 );
-const int KVCMenuAddButton        ( 101 );
-const int KVCMenuAddSlider        ( 102 );
-const int KVCMenuAddFrame         ( 103 );
-const int KVCMenuAddLabel         ( 104 );
-const int KVCMenuAddXYPad         ( 105 );
-const int KVCMenuAddMax           ( 199 );
-// <<< Add Menu
-
-// Tools Menu >>>
-const int KVCMenuToolsMin         ( 200 );
-const int KVCMenuToolsSettings    ( 200 );
-const int KVCMenuToolsSliders     ( 201 );
-const int KVCMenuToolsPanic       ( 202 );
-const int KVCMenuToolsMax         ( 299 );
-// <<< Tools Menu
-
-// Edit Menu >>>
-const int KVCMenuEditMin          ( 300 );
-const int KVCMenuEditCut          ( 300 );
-const int KVCMenuEditCopy         ( 301 );
-const int KVCMenuEditPaste        ( 302 );
-const int KVCMenuEditDelete       ( 303 );
-const int KVCMenuEditProperties   ( 304 );
-const int KVCMenuEditRename       ( 305 );
-const int KVCMenuEditAttach       ( 306 );
-const int KVCMenuEditMax          ( 399 );
-// <<< Edit Menu
-
-// Foreground Menu >>>
-const int KVCMenuForegroundMin     ( 400 );
-const int KVCMenuForegroundFont    ( 400 );
-const int KVCMenuForegroundColor   ( 401 );
-const int KVCMenuForegroundNone    ( 402 );
-const int KVCMenuForegroundDefault ( 499 );
-const int KVCMenuForegroundMax     ( 499 );
-// <<< Foreground Menu
-
-// Background Menu >>>
-const int KVCMenuBackgroundMin     ( 500 );
-const int KVCMenuBackgroundFrame   ( 500 );
-const int KVCMenuBackgroundColor   ( 501 );
-const int KVCMenuBackgroundPixmap  ( 502 );
-const int KVCMenuBackgroundImage   ( 502 );
-const int KVCMenuBackgroundNone    ( 503 );
-const int KVCMenuBackgroundDefault ( 599 );
-const int KVCMenuBackgroundMax     ( 599 );
-// <<< Foreground Menu
-
-// Font Menu >>>
-const int KVCMenuFontMin          ( 600 );
-const int KVCMenuFont             ( 600 );
-const int KVCMenuFontDefault      ( 699 );
-const int KVCMenuFontMax          ( 699 );
-// <<< Font Menu
-
-// Frame Menu >>>
-const int KVCMenuFrameMin         ( 700 );
-const int KVCMenuFrameSunken      ( 700 );
-const int KVCMenuFrameRaised      ( 701 );
-const int KVCMenuFrameNone        ( 799 );
-const int KVCMenuFrameMax         ( 799 );
-// <<< Frame Menu
-
-// Stacking Menu >>>
-const int KVCMenuStackingMin      ( 800 );
-const int KVCMenuStackingRaise    ( 800 );
-const int KVCMenuStackingLower    ( 801 );
-const int KVCMenuStackingMax      ( 899 );
-// <<< Stacking Menu
+/** Frame styles */
+#define KFrameStyleSunken QFrame::StyledPanel | QFrame::Sunken
+#define KFrameStyleRaised QFrame::StyledPanel | QFrame::Raised
+#define KFrameStyleNone   QFrame::NoFrame
 
 class VirtualConsole : public QWidget
 {
@@ -154,8 +80,6 @@ class VirtualConsole : public QWidget
 public:
 	VirtualConsole(QWidget* parent);
 	~VirtualConsole();
-
-	void initView();
 
 protected:
 	void initMenuBar();
@@ -282,7 +206,7 @@ public:
 	 *
 	 * @param widgets A list of widget pointers to cut
 	 */
-	void cut(QList <QWidget*> *widgets);
+	void cut(QList <VCWidget*> *widgets);
 
 	/**
 	 * Copy the given widgets from their parents to get pasted to another
@@ -290,7 +214,7 @@ public:
 	 *
 	 * @param widgets A list of widget pointers to copy
 	 */
-	void copy(QList <QWidget*> *widgets);
+	void copy(QList <VCWidget*> *widgets);
 
 	/**
 	 * Paste clipboard contents to the given parent widget. Items can be
@@ -311,7 +235,7 @@ protected:
 	 * @param parent The parent frame for the copy
 	 * @param point The point in the parent to paste to
 	 */
-	void copyWidget(QWidget* widget, VCFrame* parent, QPoint point);
+	void copyWidget(VCWidget* widget, VCFrame* parent, QPoint point);
 
 	/**
 	 * Clear the contents of the widget clipboard. This should be done at
@@ -332,7 +256,7 @@ protected:
 	} ClipboardAction;
 
 	ClipboardAction m_clipboardAction;
-	QList <QWidget*> m_clipboard;
+	QList <VCWidget*> m_clipboard;
 
 	/*********************************************************************
 	 * Draw area
@@ -357,20 +281,19 @@ protected:
 	 * Menus
 	 *********************************************************************/
 public:
-	QPopupMenu* toolsMenu() { return m_toolsMenu; }
-	QPopupMenu* editMenu() { return m_editMenu; }
-	QPopupMenu* addMenu() { return m_addMenu; }
+	QMenu* toolsMenu() { return m_toolsMenu; }
+	QMenu* editMenu() { return m_editMenu; }
+	QMenu* addMenu() { return m_addMenu; }
 
 protected:
-	QPopupMenu* m_toolsMenu;
-	QPopupMenu* m_addMenu;
-	QPopupMenu* m_editMenu;
+	QMenu* m_toolsMenu;
+	QMenu* m_addMenu;
+	QMenu* m_editMenu;
 
 	/*********************************************************************
 	 * Misc slots
 	 *********************************************************************/
  public slots:
-	void slotDockAreaVisibilityChanged(bool isVisible);
 	void slotModeChanged(App::Mode mode);
 
 	/*********************************************************************
@@ -448,15 +371,9 @@ protected:
 	void keyReleaseEvent(QKeyEvent* e);
 
 	/*********************************************************************
-	 * Misc member attributes
+	 * Key event receivers
 	 *********************************************************************/
 protected:
-	// Master layout
-	QHBoxLayout* m_layout; 
-
-	// Virtual console menu bar
-	QMenuBar* m_menuBar;
-
 	// Key receiver bind objects
 	QList <KeyBind*> m_keyReceivers;
 };

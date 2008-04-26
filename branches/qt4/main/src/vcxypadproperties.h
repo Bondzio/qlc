@@ -22,73 +22,67 @@
 #ifndef VCXYPADROPERTIES_H
 #define VCXYPADROPERTIES_H
 
-#include "common/types.h"
-#include "uic_vcxypadproperties.h"
+#include <QDialog>
+
+#include "common/qlctypes.h"
+#include "ui_vcxypadproperties.cpp"
 
 class VCXYPad;
 class XYChannelUnit;
 
-class VCXYPadProperties : public UI_VCXYPadProperties
+class VCXYPadProperties : public QDialog, public Ui_VCXYPadProperties
 {
 	Q_OBJECT
 
 public:
-	VCXYPadProperties(QWidget* parent, const char* name = 0);
+	VCXYPadProperties(QWidget* parent, VCXYPad* xypad);
 	~VCXYPadProperties();
-
-	void init();
     
 protected:
 	/**
 	* Fill a channel list with XYChannelUnit objects
 	*/
-	void fillChannelList(QListView *list, 
-			     QPtrList<XYChannelUnit>* channels);
+	void fillChannelList(QTreeWidget *list,
+			     QList <XYChannelUnit*>* channels);
 
 	/**
 	* Create a channel entry to the given parent listview
 	*/
-	QListViewItem* createChannelEntry(QListView* parent,
-					t_fixture_id fixtureID,
-					t_channel channel,
-					t_value lo,
-					t_value hi,
-					bool reverse);
+	QTreeWidgetItem* createChannelEntry(QTreeWidget* parent,
+					    t_fixture_id fixtureID,
+					    t_channel channel,
+					    t_value lo,
+					    t_value hi,
+					    bool reverse);
 	/**
 	* Create an XY channel unit from the given list item
 	*/
-	XYChannelUnit* createChannelUnit(QListViewItem* item);
+	XYChannelUnit* createChannelUnit(QTreeWidgetItem* item);
 
-	/**
-	* Display a DMX value menu, divided into submenus of 16 values
-	*/
-	int invokeDMXValueMenu(const QPoint &point);
+protected:
+	void addChannel(QTreeWidget* list);
 
 protected slots:
 	void slotAddX();
 	void slotRemoveX();
 	void slotAddY();
 	void slotRemoveY();
-	void slotAdd(QListView *list);
 
 	void slotMaxXChanged(const QString& text);
 	void slotMinXChanged(const QString& text);
 	void slotMaxYChanged(const QString& text);
 	void slotMinYChanged(const QString& text);
 
-	void slotReverseXActivated(const QString& text);
-	void slotReverseYActivated(const QString& text);
+	void slotReverseXToggled(bool state);
+	void slotReverseYToggled(bool state);
 
-	void slotSelectionXChanged(QListViewItem* item);
-	void slotSelectionYChanged(QListViewItem* item);
+	void slotSelectionXChanged();
+	void slotSelectionYChanged();
 
-	void slotContextMenuRequested(QListViewItem* item,
-				      const QPoint &point, int column);
-
-	void slotOKClicked();
+	void accept();
 
 protected:
-	VCXYPad* m_parent;
+	VCXYPad* m_xypad;
 };
 
 #endif

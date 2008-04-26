@@ -53,9 +53,6 @@ protected slots:
 	/** Add a step */
 	void slotAddClicked();
 
-	/** Add another step until Cancel is clicked */
-	void slotAddAnother();
-
 	/** Remove the selected step */
 	void slotRemoveClicked();
 

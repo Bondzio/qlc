@@ -22,7 +22,7 @@
 #ifndef XYCHANNELUNIT_H
 #define XYCHANNELUNIT_H
 
-#include "common/types.h"
+#include "common/qlctypes.h"
 
 class Fixture;
 

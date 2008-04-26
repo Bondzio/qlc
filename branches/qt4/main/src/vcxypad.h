@@ -63,15 +63,16 @@ public:
 	VCXYPad(QWidget* parent);
 	virtual ~VCXYPad();
 
-	/** Destroy and delete were already taken, so... */
-	void scram();
+public slots:
+	/** Delete this widget */
+	void slotDelete();
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public:
+public slots:
 	/** Display a properties dialog */
-	void editProperties();
+	void slotProperties();
 
 	/*********************************************************************
 	 * Channels

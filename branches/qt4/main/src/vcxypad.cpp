@@ -19,32 +19,31 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <qcursor.h>
-#include <qpoint.h>
-#include <qpixmap.h>
-#include <qpopupmenu.h>
-#include <qptrlist.h>
-#include <qfiledialog.h>
-#include <qobjectlist.h>
-#include <qmessagebox.h>
-#include <qpainter.h>
-#include <qlistview.h>
-#include <qcolordialog.h>
-#include <qfontdialog.h>
-#include <qfiledialog.h>
-#include <qinputdialog.h>
+#include <QTreeWidgetItem>
+#include <QTreeWidget>
+#include <QMouseEvent>
+#include <QMessageBox>
+#include <QPainter>
+#include <iostream>
+#include <QPixmap>
+#include <QCursor>
+#include <QPoint>
+#include <QMenu>
+#include <QList>
+#include <QtXml>
 
-#include "common/filehandler.h"
-#include "common/qlcimagepreview.h"
+#include "common/qlcfile.h"
 
+#include "vcxypadproperties.h"
+#include "virtualconsole.h"
+#include "xychannelunit.h"
+#include "vcxypad.h"
+#include "fixture.h"
+#include "dmxmap.h"
 #include "app.h"
 #include "doc.h"
-#include "dmxmap.h"
-#include "vcxypad.h"
-#include "vcxypadproperties.h"
-#include "xychannelunit.h"
-#include "fixture.h"
-#include "virtualconsole.h"
+
+using namespace std;
 
 extern App* _app;
 
@@ -63,7 +62,7 @@ VCXYPad::VCXYPad(QWidget* parent) : VCWidget(parent)
 	resize(QPoint(120, 120));
 	setFrameStyle(KVCWidgetFrameStyleSunken);
 	
-	m_xyPosPixmap = QPixmap(QString(PIXMAPS) + QString("/xypad-point.png"));
+	m_xyPosPixmap = QPixmap(PIXMAPS "/xypad-point.png");
 	
 	/* Set initial position to center */
 	m_currentXYPosition.setX(width() / 2);
@@ -75,7 +74,7 @@ VCXYPad::~VCXYPad()
 	clearChannels();
 }
 
-void VCXYPad::scram()
+void VCXYPad::slotDelete()
 {
 	QString msg;
 
@@ -96,11 +95,9 @@ void VCXYPad::scram()
  * Properties
  *****************************************************************************/
 
-void VCXYPad::editProperties()
+void VCXYPad::slotProperties()
 {
-	VCXYPadProperties prop(this);
-	prop.init();
-	
+	VCXYPadProperties prop(_app, this);
 	if (prop.exec() == QDialog::Accepted)
 		_app->doc()->setModified();
 }
@@ -110,13 +107,11 @@ void VCXYPad::editProperties()
  *****************************************************************************/
 void VCXYPad::clearChannels()
 {
-	m_channelsX.setAutoDelete(true);
-	m_channelsX.clear();
-	m_channelsX.setAutoDelete(false);
+	while (m_channelsX.isEmpty() == false)
+		delete m_channelsX.takeFirst();
 
-	m_channelsY.setAutoDelete(true);
-	m_channelsY.clear();
-	m_channelsY.setAutoDelete(false);
+	while (m_channelsY.isEmpty() == false)
+		delete m_channelsY.takeFirst();
 }
 
 void VCXYPad::appendChannel(t_axis axis, t_fixture_id fixture,
@@ -139,21 +134,21 @@ void VCXYPad::appendChannel(t_axis axis, t_fixture_id fixture,
 void VCXYPad::removeChannel(t_axis axis, t_fixture_id fixture,
 			    t_channel channel)
 {
-	XYChannelUnit* xyc = NULL;
-	QPtrList<XYChannelUnit>* list = NULL;
+	QList <XYChannelUnit*>* list;
 
 	if (axis == KAxisX)
 		list = &m_channelsX;
 	else
 		list = &m_channelsY;
 
-	for (int i = 0; i < list->count(); i++)
+	QMutableListIterator <XYChannelUnit*> it(*list);
+	while (it.hasNext() == true)
 	{
-		xyc = list->at(i);
-		if (xyc != NULL &&
-		    xyc->fixtureID() == fixture && xyc->channel() == channel)
+		XYChannelUnit* xyc = it.next();
+		if (xyc != NULL && xyc->fixtureID() == fixture &&
+		    xyc->channel() == channel)
 		{
-			list->remove(i);
+			it.remove();
 			delete xyc;
 			break;
 		}
@@ -163,23 +158,23 @@ void VCXYPad::removeChannel(t_axis axis, t_fixture_id fixture,
 XYChannelUnit* VCXYPad::channel(t_axis axis, t_fixture_id fixture,
 				t_channel channel)
 {
-	XYChannelUnit* xyc = NULL;
-	QPtrList<XYChannelUnit>* list = NULL;
+	XYChannelUnit* xyc;
+	QList <XYChannelUnit*>* list;
 
 	if (axis == KAxisX)
 		list = &m_channelsX;
 	else
 		list = &m_channelsY;
-		
-	QPtrListIterator<XYChannelUnit> it(*list);
-	while ( (xyc = it.current()) != 0 )
+
+	QListIterator <XYChannelUnit*> it(*list);
+	while (it.hasNext() == true)
 	{
+		xyc = it.next();
 		if (xyc->fixtureID() == fixture && xyc->channel() == channel)
-			break;
-		++it;
+			return xyc;
 	}
 
-	return xyc;
+	return NULL;
 }
 
 /*****************************************************************************
@@ -211,7 +206,7 @@ bool VCXYPad::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	if (root->tagName() != KXMLQLCVCXYPad)
 	{
-		qWarning("XY Pad node not found!");
+		cout << "XY Pad node not found!" << endl;
 		return false;
 	}
 
@@ -243,7 +238,7 @@ bool VCXYPad::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCVCXYPad)
 	{
-		qWarning("XY Pad node not found!");
+		cout << "XY Pad node not found!" << endl;
 		return false;
 	}
 
@@ -257,8 +252,8 @@ bool VCXYPad::loadXML(QDomDocument* doc, QDomElement* root)
 		tag = node.toElement();
 		if (tag.tagName() == KXMLQLCWindowState)
 		{
-			FileHandler::loadXMLWindowState(&tag, &x, &y, &w, &h,
-							&visible);
+			QLCFile::loadXMLWindowState(&tag, &x, &y, &w, &h,
+						    &visible);
 		}
 		else if (tag.tagName() == KXMLQLCVCAppearance)
 		{
@@ -312,8 +307,9 @@ bool VCXYPad::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			qWarning("Unknown XY Pad tag: %s",
-				 (const char*) tag.tagName());
+			cout << "Unknown XY Pad tag: "
+			     << tag.tagName().toStdString()
+			     << endl;
 		}
 		
 		node = node.nextSibling();
@@ -354,12 +350,14 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	root.appendChild(tag);
 
 	/* Window state */
-	FileHandler::saveXMLWindowState(doc, &root, this);
+	QLCFile::saveXMLWindowState(doc, &root, this);
 
 	/* X Channels */
-	QPtrListIterator<XYChannelUnit> xit(m_channelsX);
-	while ( (xyc = xit.current()) != 0 )
+	QListIterator <XYChannelUnit*> xit(m_channelsX);
+	while (xit.hasNext() == true)
 	{
+		xyc = xit.next();
+
 		tag = doc->createElement(KXMLQLCVCXYPadChannel);
 
 		/* This is an X axis channel */
@@ -388,14 +386,14 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
 		tag.appendChild(text);
 
 		root.appendChild(tag);
-
-		++xit;
 	}
 
 	/* Y Channels */
-	QPtrListIterator<XYChannelUnit> yit(m_channelsY);
-	while ( (xyc = yit.current()) != 0 )
+	QListIterator <XYChannelUnit*> yit(m_channelsY);
+	while (yit.hasNext() == true)
 	{
+		xyc = yit.next();
+
 		tag = doc->createElement(KXMLQLCVCXYPadChannel);
 
 		/* This is an Y axis channel */
@@ -420,8 +418,6 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
 		tag.appendChild(text);
 
 		root.appendChild(tag);
-
-		++yit;
 	}
 
 	/* Appearance */
@@ -443,8 +439,8 @@ void VCXYPad::paintEvent(QPaintEvent* e)
 	QPen pen;
 
 	/* Draw crosshairs to indicate the center position */
-	pen.setStyle(DotLine);
-	pen.setColor(paletteForegroundColor());
+	pen.setStyle(Qt::DotLine);
+	pen.setColor(palette().color(QPalette::WindowText));
 	pen.setWidth(1);
 	p.setPen(pen);
 	p.drawLine(width() / 2, 0, width() / 2, height());
@@ -531,14 +527,14 @@ void VCXYPad::outputDMX(int x, int y)
 	int delta;
 	int xx;
 
-	QPtrListIterator<XYChannelUnit> xit(*channelsX());
-	XYChannelUnit *xyc;
-
-	while ( (xyc = xit.current()) != 0 )
+	QListIterator <XYChannelUnit*> xit(*channelsX());
+	while (xit.hasNext() == true)
 	{
-		++xit;
+		XYChannelUnit* xyc = xit.next();
+
 		delta = xyc->hi() - xyc->lo();
-		xx = xyc->lo() + int(delta*x/rect().width());
+		xx = xyc->lo() + int((delta * x) / rect().width());
+
 		if (xyc->reverse() == false)
 		{
 			_app->dmxMap()->setValue(
@@ -554,12 +550,14 @@ void VCXYPad::outputDMX(int x, int y)
 		}
 	}
 
-	QPtrListIterator<XYChannelUnit> yit(*channelsY());
-	while ( (xyc = yit.current()) != 0 )
+	QListIterator <XYChannelUnit*> yit(*channelsY());
+	while (yit.hasNext() == true)
 	{
-		++yit;
+		XYChannelUnit* xyc = yit.next();
+
 		delta = xyc->hi() - xyc->lo();
-		xx = xyc->lo() + int(delta*y/rect().height());
+		xx = xyc->lo() + int((delta * y) / rect().height());
+
 		if (xyc->reverse() == false)
 		{
 			_app->dmxMap()->setValue(

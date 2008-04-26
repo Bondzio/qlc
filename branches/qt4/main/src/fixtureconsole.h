@@ -28,7 +28,6 @@
 #include "common/qlctypes.h"
 #include "consolechannel.h"
 
-class QCloseEvent;
 class QDomDocument;
 class QDomElement;
 
@@ -54,9 +53,6 @@ public:
 
 signals:
 	void closed();
-
-protected:
-	void closeEvent(QCloseEvent*);
 
 protected:
 	SceneEditor* m_sceneEditor;

@@ -54,6 +54,7 @@
 
 class QDomDocument;
 class QDomElement;
+class QPixmap;
 class QFile;
 
 class VirtualController;
@@ -153,7 +154,7 @@ class Function : public QThread
 	// Convert a string to type enum
 	static Type stringToType(QString);
 	
-	// Get a pixmap representing the function's type to be used in lists etc.
+	// Get a pixmap representing the function's type to be used in lists
 	virtual QPixmap pixmap();
 	
 	// Return the name of this function

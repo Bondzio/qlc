@@ -1,8 +1,8 @@
 /*
   Q Light Controller
-  vcbuttonproperties.h
+  vcxypadproperties.h
 
-  Copyright (C) 2005, Stefan Krumm, Heikki Junnila
+  Copyright (C) Stefan Krumm, Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,123 +19,140 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <assert.h>
-#include <qlistview.h>
-#include <qptrlist.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qpopupmenu.h>
-#include <qcombobox.h>
-#include <qpushbutton.h>
+#include <QTreeWidgetItem>
+#include <QTreeWidget>
+#include <QToolButton>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QMenu>
+#include <QIcon>
 
 #include "common/qlcfixturedef.h"
 #include "common/qlcchannel.h"
-#include "common/filehandler.h"
+#include "common/qlcfile.h"
 
-#include "vcxypad.h"
-#include "xychannelunit.h"
 #include "vcxypadproperties.h"
+#include "xychannelunit.h"
 #include "fixturelist.h"
+#include "vcxypad.h"
 #include "fixture.h"
 #include "app.h"
 #include "doc.h"
 
 extern App* _app;
 
-const int KColumnFixtureName    ( 0 );
+const int KColumnFixtureName   ( 0 );
 const int KColumnChannelName   ( 1 );
 const int KColumnLo            ( 2 );
 const int KColumnHi            ( 3 );
 const int KColumnReverse       ( 4 );
-const int KColumnFixtureID      ( 5 );
+const int KColumnFixtureID     ( 5 );
 const int KColumnChannelNumber ( 6 );
 
-const int KComboItemReverse    ( 0 );
-const int KComboItemNormal     ( 1 );
-
-VCXYPadProperties::VCXYPadProperties(QWidget* parent, const char* name)
-	: UI_VCXYPadProperties(parent, name, true)
+VCXYPadProperties::VCXYPadProperties(QWidget* parent, VCXYPad* xypad)
+	: QDialog(parent)
 {
-	m_parent = static_cast<VCXYPad*> (parent);
-}
+	m_xypad = xypad;
 
+	/* Add X axis */
+	m_addX->setIcon(QIcon(PIXMAPS "/edit_add.png"));
+	connect(m_addX, SIGNAL(clicked()), this, SLOT(slotAddX()));
+
+	/* Add Y axis */
+	m_addY->setIcon(QIcon(PIXMAPS "/edit_add.png"));
+	connect(m_addY, SIGNAL(clicked()), this, SLOT(slotAddY()));
+
+	/* Remove X axis */
+	m_removeX->setIcon(QIcon(PIXMAPS "/edit_remove.png"));
+	connect(m_removeX, SIGNAL(clicked()), this, SLOT(slotRemoveX()));
+
+	/* Remove Y axis */
+	m_removeY->setIcon(QIcon(PIXMAPS "/edit_remove.png"));
+	connect(m_removeY, SIGNAL(clicked()), this, SLOT(slotRemoveY()));
+
+	/* Min X spin */
+	m_minXSpin->setValue(0);
+	connect(m_minXSpin, SIGNAL(valueChanged(const QString&)),
+		this, SLOT(slotMinXChanged(const QString&)));
+
+	/* Max X spin */
+	m_maxXSpin->setValue(255);
+	connect(m_maxXSpin, SIGNAL(valueChanged(const QString&)),
+		this, SLOT(slotMaxXChanged(const QString&)));
+
+	/* Min Y spin */
+	m_minYSpin->setValue(0);
+	connect(m_minYSpin, SIGNAL(valueChanged(const QString&)),
+		this, SLOT(slotMinYChanged(const QString&)));
+
+	/* Max Y spin */
+	m_maxYSpin->setValue(255);
+	connect(m_maxYSpin, SIGNAL(valueChanged(const QString&)),
+		this, SLOT(slotMaxYChanged(const QString&)));
+
+	/* X axis reverse */
+	m_reverseX->setChecked(false);
+	connect(m_reverseX, SIGNAL(toggled(bool)),
+		this, SLOT(slotReverseXToggled(bool)));
+
+	/* Y axis reverse */
+	m_reverseY->setChecked(false);
+	connect(m_reverseY, SIGNAL(toggled(bool)),
+		this, SLOT(slotReverseYToggled(bool)));
+
+	/* X list */
+	connect(m_listX, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotSelectionXChanged()));
+	fillChannelList(m_listX, m_xypad->channelsX());
+	m_listX->setCurrentItem(m_listX->topLevelItem(0));
+
+	/* Y list */
+	connect(m_listY, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotSelectionYChanged()));
+	fillChannelList(m_listY, m_xypad->channelsY());
+	m_listY->setCurrentItem(m_listY->topLevelItem(0));
+}
 
 VCXYPadProperties::~VCXYPadProperties()
 {
 }
 
-
-void VCXYPadProperties::init()
-{
-	m_addX->setPixmap(QPixmap(QString(PIXMAPS) + QString("/edit_add.png")));
-	m_addY->setPixmap(QPixmap(QString(PIXMAPS) + QString("/edit_add.png")));
-
-	m_removeX->setPixmap(QPixmap(QString(PIXMAPS) + QString("/edit_remove.png")));
-	m_removeY->setPixmap(QPixmap(QString(PIXMAPS) + QString("/edit_remove.png")));
-
-	fillChannelList(m_listX, m_parent->channelsX());
-	fillChannelList(m_listY, m_parent->channelsY());
-
-	m_maxYSpin->setValue(255);
-	m_maxXSpin->setValue(255);
-
-	m_reverseXCombo->insertItem(KXMLQLCTrue, KComboItemReverse);
-	m_reverseXCombo->insertItem(KXMLQLCFalse, KComboItemNormal);
-
-	m_reverseYCombo->insertItem(KXMLQLCTrue, KComboItemReverse);
-	m_reverseYCombo->insertItem(KXMLQLCFalse, KComboItemNormal);
-
-	m_listX->setSelected(m_listX->firstChild(), true);
-	slotSelectionXChanged(m_listX->firstChild());
-
-	m_listY->setSelected(m_listY->firstChild(), true);
-	slotSelectionYChanged(m_listY->firstChild());
-}
-
 /**
  * Fill a channel list with XYChannelUnit objects
  */
-void VCXYPadProperties::fillChannelList(QListView *list,
-					QPtrList<XYChannelUnit>* channels)
+void VCXYPadProperties::fillChannelList(QTreeWidget *list,
+					QList <XYChannelUnit*>* channels)
 {
-	QPtrListIterator<XYChannelUnit> it(*channels);
-	XYChannelUnit *unit = NULL;
-
-	while ( (unit = *it) != NULL)
+	QListIterator <XYChannelUnit*> it(*channels);
+	while (it.hasNext() == true)
 	{
-		++it;
-
-		createChannelEntry(list,
-				   unit->fixtureID(),
-				   unit->channel(),
-				   unit->lo(),
-				   unit->hi(),
-				   unit->reverse());
+		XYChannelUnit* xyc = it.next();
+		createChannelEntry(list, xyc->fixtureID(), xyc->channel(),
+				   xyc->lo(), xyc->hi(), xyc->reverse());
 	}
 }
 
 /**
  * Create a channel entry to the given parent listview
  */
-QListViewItem* VCXYPadProperties::createChannelEntry(QListView* parent,
-						     t_fixture_id fixtureID,
-						     t_channel channel,
-						     t_value lo,
-						     t_value hi,
-						     bool reverse)
+QTreeWidgetItem* VCXYPadProperties::createChannelEntry(QTreeWidget* parent,
+						       t_fixture_id fixtureID,
+						       t_channel channel,
+						       t_value lo,
+						       t_value hi,
+						       bool reverse)
 {
-	Fixture* fxi = NULL;
-	QLCChannel* ch = NULL;
-	QListViewItem* item = NULL;
+	QTreeWidgetItem* item;
+	QLCChannel* ch;
+	Fixture* fxi;
 	QString s;
 
 	fxi = _app->doc()->fixture(fixtureID);
 	if (fxi == NULL)
-	{
 		return NULL;
-	}
 
-	item = new QListViewItem(parent);
+	item = new QTreeWidgetItem(parent);
 
 	// Fixture name
 	item->setText(KColumnFixtureName, fxi->name());
@@ -155,42 +172,54 @@ QListViewItem* VCXYPadProperties::createChannelEntry(QListView* parent,
 	}
 
 	// High limit
-	s.sprintf("%.3d", hi);
-	item->setText(KColumnHi, s);
+	item->setText(KColumnHi, s.sprintf("%.3d", hi));
 
 	// Low limit
-	s.sprintf("%.3d", lo);
-	item->setText(KColumnLo, s);
+	item->setText(KColumnLo, s.sprintf("%.3d", lo));
 
 	// Reverse
 	if (reverse == true)
-	{
-		item->setText(KColumnReverse, KXMLQLCTrue);
-	}
+		item->setText(KColumnReverse, "Reversed");
 	else
-	{
-		item->setText(KColumnReverse, KXMLQLCFalse);
-	}
+		item->setText(KColumnReverse, "Normal");
 
 	// Fixture ID
-	s.setNum(fixtureID);
-	item->setText(KColumnFixtureID, s);
+	item->setText(KColumnFixtureID, s.setNum(fixtureID));
 
 	// Channel number
-	s.sprintf("%.3d", channel);
-	item->setText(KColumnChannelNumber, s);
+	item->setText(KColumnChannelNumber, s.sprintf("%.3d", channel));
 
 	return item;
 }
 
+void VCXYPadProperties::addChannel(QTreeWidget* list)
+{
+	FixtureList fl(this);
+
+	if (list == m_listX)
+		fl.setWindowTitle("Add a channel to the list of horizontal axes");
+	else
+		fl.setWindowTitle("Add a channel to the list of vertical axes");
+
+	if (fl.exec() == QDialog::Accepted)
+	{
+		t_fixture_id fxi_id = fl.selectedFixtureID();
+		t_channel ch = fl.selectedChannel();
+
+		if (fxi_id != KNoID && ch != KChannelInvalid)
+			createChannelEntry(list, fxi_id, ch, KChannelValueMin,
+					   KChannelValueMax, false);
+	}
+}
+
 void VCXYPadProperties::slotAddY()
 {
-	slotAdd(m_listY);
+	addChannel(m_listY);
 }
 
 void VCXYPadProperties::slotAddX()
 {
-	slotAdd(m_listX);
+	addChannel(m_listX);
 }
 
 void VCXYPadProperties::slotRemoveX()
@@ -203,292 +232,121 @@ void VCXYPadProperties::slotRemoveY()
 	delete(m_listY->currentItem());
 }
 
-void VCXYPadProperties::slotAdd(QListView *list)
-{
-	FixtureList* fl = new FixtureList(this);
-	fl->init();
-
-	if (list == m_listX)
-	{
-		fl->setCaption("Add a channel to the list of horizontal axes");
-	}
-	else
-	{
-		fl->setCaption("Add a channel to the list of vertical axes");
-	}
-
-	if (fl->exec() == QDialog::Accepted)
-	{
-		t_fixture_id fxi_id = fl->selectedFixtureID();
-		t_channel ch = fl->selectedChannel();
-
-		if (fxi_id != KNoID && ch != KChannelInvalid)
-		{
-			createChannelEntry(list, fxi_id, ch,
-					   KChannelValueMin,
-					   KChannelValueMax,
-					   false);
-		}
-	}
-
-	delete fl;
-}
-
 void VCXYPadProperties::slotMaxXChanged(const QString& text)
 {
-	QListViewItem* item = m_listX->currentItem();
-	if (item)
-	{
+	QTreeWidgetItem* item = m_listX->currentItem();
+	if (item != NULL)
 		item->setText(KColumnHi, text);
-	}
 }
 
 void VCXYPadProperties::slotMinXChanged(const QString& text)
 {
-	QListViewItem* item = m_listX->currentItem();
-	if (item)
-	{
+	QTreeWidgetItem* item = m_listX->currentItem();
+	if (item != NULL)
 		item->setText(KColumnLo, text);
-	}
-
 }
 
 void VCXYPadProperties::slotMaxYChanged(const QString& text)
 {
-	QListViewItem* item = m_listY->currentItem();
-	if (item)
-	{
+	QTreeWidgetItem* item = m_listY->currentItem();
+	if (item != NULL)
 		item->setText(KColumnHi, text);
-	}
 }
 
 void VCXYPadProperties::slotMinYChanged(const QString& text)
 {
-	QListViewItem* item = m_listY->currentItem();
-	if (item)
-	{
+	QTreeWidgetItem* item = m_listY->currentItem();
+	if (item != NULL)
 		item->setText(KColumnLo, text);
-	}
 }
 
-void VCXYPadProperties::slotReverseXActivated(const QString& text)
+void VCXYPadProperties::slotReverseXToggled(bool state)
 {
-	QListViewItem* item = m_listX->currentItem();
-	if (item)
-	{
-		item->setText(KColumnReverse, text);
-	}
+	QTreeWidgetItem* item = m_listX->currentItem();
+	if (item != NULL)
+		item->setText(KColumnReverse, (state) ? "Reversed" : "Normal");
 }
 
-void VCXYPadProperties::slotReverseYActivated(const QString& text)
+void VCXYPadProperties::slotReverseYToggled(bool state)
 {
-	QListViewItem* item = m_listY->currentItem();
-	if (item)
-	{
-		item->setText(KColumnReverse, text);
-	}
+	QTreeWidgetItem* item = m_listY->currentItem();
+	if (item != NULL)
+		item->setText(KColumnReverse, (state) ? "Reversed" : "Normal");
 }
 
-void VCXYPadProperties::slotSelectionXChanged(QListViewItem* item)
+void VCXYPadProperties::slotSelectionXChanged()
 {
-	if (item)
+	QTreeWidgetItem* item = m_listX->currentItem();
+	if (item != NULL)
 	{
 		m_minXSpin->setValue(item->text(KColumnLo).toInt());
 		m_maxXSpin->setValue(item->text(KColumnHi).toInt());
-		if (item->text(KColumnReverse) == KXMLQLCTrue)
-		{
-			m_reverseXCombo->setCurrentItem(KComboItemReverse);
-		}
+
+		if (item->text(KColumnReverse) == "Reversed")
+			m_reverseX->setChecked(true);
 		else
-		{
-			m_reverseXCombo->setCurrentItem(KComboItemNormal);
-		}
+			m_reverseX->setChecked(false);
 	}
 }
 
-void VCXYPadProperties::slotSelectionYChanged(QListViewItem* item)
+void VCXYPadProperties::slotSelectionYChanged()
 {
-	if (item)
+	QTreeWidgetItem* item = m_listY->currentItem();
+	if (item != NULL)
 	{
 		m_minYSpin->setValue(item->text(KColumnLo).toInt());
 		m_maxYSpin->setValue(item->text(KColumnHi).toInt());
-		if (item->text(KColumnReverse) == KXMLQLCTrue)
-		{
-			m_reverseYCombo->setCurrentItem(KComboItemReverse);
-		}
+
+		if (item->text(KColumnReverse) == "Reversed")
+			m_reverseY->setChecked(true);
 		else
-		{
-			m_reverseYCombo->setCurrentItem(KComboItemNormal);
-		}
+			m_reverseY->setChecked(false);
 	}
 }
 
-/**
- * Set a value to a min/max/reverse column using a context menu
- */
-void VCXYPadProperties::slotContextMenuRequested(QListViewItem* item,
-						 const QPoint &point,
-						 int column)
+void VCXYPadProperties::accept()
 {
-	int result;
-	QString s;
-
-	if (column == KColumnLo)
-	{
-		result = invokeDMXValueMenu(point);
-
-		if (result <= KChannelValueMax &&
-		result >= KChannelValueMin)
-		{
-			s.sprintf("%.3d", result);
-			item->setText(KColumnLo, s);
-
-			slotSelectionXChanged(m_listX->currentItem());
-			slotSelectionYChanged(m_listY->currentItem());
-		}
-	}
-	else if (column == KColumnHi)
-	{
-		result = invokeDMXValueMenu(point);
-
-		if (result <= KChannelValueMax &&
-		result >= KChannelValueMin)
-		{
-			s.sprintf("%.3d", result);
-			item->setText(KColumnHi, s);
-
-			slotSelectionXChanged(m_listX->currentItem());
-			slotSelectionYChanged(m_listY->currentItem());
-		}
-	}
-	else if (column == KColumnReverse)
-	{
-		QPopupMenu* menu = new QPopupMenu();
-		menu->insertItem("Reverse", KNoID);
-		menu->insertSeparator();
-		menu->insertItem(KXMLQLCTrue, KComboItemReverse);
-		menu->insertItem(KXMLQLCFalse, KComboItemNormal);
-
-		result = menu->exec(point);
-		if (result == KComboItemNormal)
-		{
-			item->setText(KColumnReverse, KXMLQLCFalse);
-		}
-		else if (result == KComboItemReverse)
-		{
-			item->setText(KColumnReverse, KXMLQLCTrue);
-		}
-
-		slotSelectionXChanged(m_listX->currentItem());
-		slotSelectionYChanged(m_listY->currentItem());
-
-		delete menu;
-	}
-}
-
-/**
- * Display a DMX value menu, divided into submenus of 16 values
- */
-int VCXYPadProperties::invokeDMXValueMenu(const QPoint &point)
-{
-	int result;
-
-	QPopupMenu* menu = new QPopupMenu;
-	QPtrList <QPopupMenu> deleteList;
-
-	menu->insertItem("Value", KNoID);
-	menu->insertSeparator();
-
-	menu->insertItem(QString::number(KChannelValueMin), KChannelValueMin);
-	menu->insertItem(QString::number(KChannelValueMax), KChannelValueMax);
-	for (t_value i = 0; i != KChannelValueMax; i += 15)
-	{
-		QPopupMenu* sub = new QPopupMenu();
-		deleteList.append(sub);
-
-		QString top;
-		top.sprintf("%d - %d", i+1, i + 15);
-
-		for (t_value j = 1; j < 16; j++)
-		{
-			QString num;
-			num.setNum(i + j);
-			sub->insertItem(num, i + j);
-		}
-
-		menu->insertItem(top, sub);
-	}
-
-	result = menu->exec(point);
-
-	while (deleteList.isEmpty() == false)
-	{
-		delete deleteList.take(0);
-	}
-
-	delete menu;
-
-	return result;
-}
-
-void VCXYPadProperties::slotOKClicked()
-{
-	QPtrList<XYChannelUnit>* list;
+	QList <XYChannelUnit*>* list;
 
 	// Update the X list
-	list = m_parent->channelsX();
+	list = m_xypad->channelsX();
+	while (list->isEmpty() == false)
+		delete list->takeFirst();
 
-	list->setAutoDelete(true);
-	list->clear();
-	list->setAutoDelete(false);
-
-	QListViewItemIterator xit(m_listX);
-
-	while (xit.current())
+	QTreeWidgetItemIterator xit(m_listX);
+	while (*xit != NULL)
 	{
 		list->append(createChannelUnit(*xit));
 		++xit;
 	}
 
 	// Update the Y list
-	list = m_parent->channelsY();
+	list = m_xypad->channelsY();
+	while (list->isEmpty() == false)
+		delete list->takeFirst();
 
-	list->setAutoDelete(true);
-	list->clear();
-	list->setAutoDelete(false);
-
-	QListViewItemIterator yit(m_listY);
-
-	while (yit.current())
+	QTreeWidgetItemIterator yit(m_listY);
+	while (*yit != NULL)
 	{
 		list->append(createChannelUnit(*yit));
 		++yit;
 	}
-       accept();
+	
+	QDialog::accept();
 }
 
 /**
  * Create an XY channel unit from the given list item
  */
-XYChannelUnit* VCXYPadProperties::createChannelUnit(QListViewItem* item)
+XYChannelUnit* VCXYPadProperties::createChannelUnit(QTreeWidgetItem* item)
 {
 	if (item == NULL)
-	{
 		return NULL;
-	}
-	else
-	{
-		return new XYChannelUnit(
-			item->text(KColumnFixtureID).toInt(),
-			item->text(KColumnChannelNumber).toInt(),
-			item->text(KColumnLo).toInt(),
-			item->text(KColumnHi).toInt(),
-			item->text(KColumnReverse) == KXMLQLCTrue
-		);
-	}
+
+	return new XYChannelUnit(
+		item->text(KColumnFixtureID).toInt(),
+		item->text(KColumnChannelNumber).toInt(),
+		item->text(KColumnLo).toInt(),
+		item->text(KColumnHi).toInt(),
+		(item->text(KColumnReverse) == "Reversed") ? true : false);
 }
-
-
-
-
-

@@ -130,3 +130,6 @@
 
 * VCSliderProperties & VCSlider value display style setting doesn't work.
 
+* VCXYPadProperties - possibility to add/select/edit multiple channels
+
+* Cut, copy paste to virtual console

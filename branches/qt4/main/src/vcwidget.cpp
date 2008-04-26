@@ -67,10 +67,9 @@ VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 	connect(_app, SIGNAL(modeChanged(App::Mode)), 
 		this, SLOT(slotModeChanged(App::Mode)));
 
-	setCaption("Widget");
 	setFrameStyle(KVCWidgetFrameStyleSunken);
 	setMinimumSize(20, 20);
-	resize(QPoint(120, 120));
+	QFrame::resize(QSize(120, 120));
 }
 
 VCWidget::~VCWidget()

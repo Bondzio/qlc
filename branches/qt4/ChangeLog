@@ -1,3 +1,17 @@
+2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/app.cpp:
+	* main/src/app.h:
+	* main/src/main.cpp:
+	* main/src/vcframe.cpp:
+	* main/src/vcwidget.cpp:
+	* main/src/virtualconsole.cpp:
+	* main/src/virtualconsole.h:
+	* main/src/virtualconsoleproperties.cpp:
+
+	QLC doesn't crash instantly, but there's LOTS of crashes, missing
+	signal-slot-connections etc.
+	
 2008-01-30  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* libs/common/plugin.cpp:

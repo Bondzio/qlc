@@ -53,7 +53,6 @@ VCFrame::VCFrame(QWidget* parent) : VCWidget(parent)
 	m_buttonBehaviour = Normal;
 	setFrameStyle(KVCWidgetFrameStyleSunken);
 	setMinimumSize(20, 20);
-	setCaption(QString::null);
 }
 
 VCFrame::~VCFrame()

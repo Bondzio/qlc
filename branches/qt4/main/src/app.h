@@ -168,7 +168,8 @@ signals:
 	void modeChanged(App::Mode mode);
 
 public slots:
-	void slotSetMode(App::Mode mode);
+	void slotModeOperate();
+	void slotModeDesign();
 
 protected:
 	/** Main operating mode */

@@ -81,6 +81,9 @@ public:
 	VirtualConsole(QWidget* parent);
 	~VirtualConsole();
 
+	/** Second stage initialization */
+	void init();
+
 protected:
 	void initMenuBar();
 	void initDockArea();

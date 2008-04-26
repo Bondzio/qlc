@@ -41,6 +41,8 @@ VirtualConsoleProperties::VirtualConsoleProperties(QWidget* parent)
 	m_holdLowLimit = 0;
 	m_holdHighLimit = 0;
 
+	setupUi(this);
+
 	m_grabKeyboardCheck->setChecked(m_grabKeyboard);
 	m_keyRepeatOffCheck->setChecked(m_keyRepeatOff);
 

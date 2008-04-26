@@ -202,6 +202,7 @@ void App::init()
 
 	// The main view
 	initStatusBar();
+	initActions();
 	initMenuBar();
 	initToolBar();
 
@@ -468,78 +469,83 @@ QLCFixtureDef* App::fixtureDef(const QString& manufacturer,
  * Main application Mode
  *****************************************************************************/
 
-void App::slotSetMode(Mode mode)
+void App::slotModeOperate()
 {
 	/* Nothing to do if we're already in the desired mode */
-	if (m_mode == mode)
+	if (m_mode == Operate)
 		return;
 
-	if (mode == Design)
+	m_modeIndicator->setText(KModeTextOperate);
+	m_modeDesignAction->setEnabled(false);
+	m_modeOperateAction->setEnabled(true);
+	
+	m_fileNewAction->setEnabled(false);
+	m_fileOpenAction->setEnabled(false);
+	m_fileQuitAction->setEnabled(false);
+	m_fixtureManagerAction->setEnabled(false);
+	m_functionManagerAction->setEnabled(false);
+	m_pluginManagerAction->setEnabled(false);
+	m_busManagerAction->setEnabled(false);
+	
+	/* Close function manager if it's open */
+	if (m_functionManager != NULL)
+		m_functionManager->close();
+	
+	/* Close fixture manager if it's open */
+	if (m_fixtureManager != NULL)
+		m_fixtureManager->close();
+	
+	/* Close bus manager if it's open */
+	if (m_busManager != NULL)
+		m_busManager->close();
+	
+	/* Start function consumer */
+	m_functionConsumer->start();
+
+	m_mode = Operate;
+	emit modeChanged(Operate);
+}
+
+void App::slotModeDesign()
+{
+	/* Nothing to do if we're already in the desired mode */
+	if (m_mode == Design)
+		return;
+
+	if (m_functionConsumer->runningFunctions())
 	{
-		if (m_functionConsumer->runningFunctions())
-		{
-			int result = QMessageBox::warning(
-				this,
-				tr("Switch to Design Mode"),
-				tr("There are still running functions.\n"
-				   "Really stop them and switch back to "
-				   "Design mode?"),
-				QMessageBox::Yes,
-				QMessageBox::No);
-
-			if (result == QMessageBox::No)
-				return;
-			else
-				m_functionConsumer->purge();
-		}
-
-		/* Stop function consumer */
-		m_functionConsumer->stop();
-
-		m_modeIndicator->setText(KModeTextDesign);
-		m_modeDesignAction->setEnabled(true);
-		m_modeOperateAction->setEnabled(false);
-
-		m_fileNewAction->setEnabled(true);
-		m_fileOpenAction->setEnabled(true);
-		m_fileQuitAction->setEnabled(true);
-		m_fixtureManagerAction->setEnabled(true);
-		m_functionManagerAction->setEnabled(true);
-		m_pluginManagerAction->setEnabled(true);
-		m_busManagerAction->setEnabled(true);
+		int result = QMessageBox::warning(
+			this,
+			tr("Switch to Design Mode"),
+			tr("There are still running functions.\n"
+			   "Really stop them and switch back to "
+			   "Design mode?"),
+			QMessageBox::Yes,
+			QMessageBox::No);
+		
+		if (result == QMessageBox::No)
+			return;
+		else
+			m_functionConsumer->purge();
 	}
-	else
-	{
-		m_modeIndicator->setText(KModeTextOperate);
-		m_modeDesignAction->setEnabled(false);
-		m_modeOperateAction->setEnabled(true);
+	
+	/* Stop function consumer */
+	m_functionConsumer->stop();
+	
+	m_modeIndicator->setText(KModeTextDesign);
+	m_modeDesignAction->setEnabled(true);
+	m_modeOperateAction->setEnabled(false);
+	
+	m_fileNewAction->setEnabled(true);
+	m_fileOpenAction->setEnabled(true);
+	m_fileQuitAction->setEnabled(true);
+	m_fixtureManagerAction->setEnabled(true);
+	m_functionManagerAction->setEnabled(true);
+	m_pluginManagerAction->setEnabled(true);
+	m_busManagerAction->setEnabled(true);
 
-		m_fileNewAction->setEnabled(false);
-		m_fileOpenAction->setEnabled(false);
-		m_fileQuitAction->setEnabled(false);
-		m_fixtureManagerAction->setEnabled(false);
-		m_functionManagerAction->setEnabled(false);
-		m_pluginManagerAction->setEnabled(false);
-		m_busManagerAction->setEnabled(false);
-
-		/* Close function manager if it's open */
-		if (m_functionManager != NULL)
-			m_functionManager->close();
-
-		/* Close fixture manager if it's open */
-		if (m_fixtureManager != NULL)
-			m_fixtureManager->close();
-
-		/* Close bus manager if it's open */
-		if (m_busManager != NULL)
-			m_busManager->close();
-
-		/* Start function consumer */
-		m_functionConsumer->start();
-	}
-
-	m_mode = mode;
-	emit modeChanged(m_mode);
+	m_mode = Design;
+	emit modeChanged(Design);
 }
 
 /*****************************************************************************
@@ -553,6 +559,7 @@ void App::initVirtualConsole(void)
 
 	QMdiSubWindow* sub = new QMdiSubWindow(centralWidget());
 	m_virtualConsole = new VirtualConsole(sub);
+	m_virtualConsole->init();
 	m_virtualConsole->show();
 
 	sub->setWidget(m_virtualConsole);
@@ -698,17 +705,18 @@ void App::initMenuBar()
 	m_managerMenu->addSeparator();
 	m_managerMenu->addAction(m_pluginManagerAction);
 
+	/* Control Menu */
+	m_controlMenu = new QMenu(menuBar());
+	m_controlMenu->setTitle(tr("Control"));
+	menuBar()->addMenu(m_controlMenu);
+	
 	/* Mode menu */
-	m_modeMenu = new QMenu(menuBar());
+	m_modeMenu = new QMenu(m_controlMenu);
 	m_modeMenu->setTitle(tr("Mode"));
 	m_modeMenu->addAction(m_modeDesignAction);
 	m_modeMenu->addAction(m_modeOperateAction);
-
-	/* Control Menu */
-	m_controlMenu = new QMenu(menuBar());
-	m_modeMenu->setTitle(tr("Control"));
-	menuBar()->addMenu(m_controlMenu);
 	m_controlMenu->addMenu(m_modeMenu);
+
 	m_controlMenu->addSeparator();
 	m_controlMenu->addAction(m_controlVCAction);
 	m_controlMenu->addAction(m_controlMonitorAction);
@@ -743,6 +751,7 @@ void App::initStatusBar()
 void App::initToolBar()
 {
 	m_toolbar = new QToolBar(tr("Workspace"), this);
+	addToolBar(m_toolbar);
 	m_toolbar->addAction(m_fileNewAction);
 	m_toolbar->addAction(m_fileOpenAction);
 	m_toolbar->addAction(m_fileSaveAction);

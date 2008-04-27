@@ -1,5 +1,11 @@
 2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/sceneeditor.cpp:
+
+	Fixed scene editor to work as previously.
+	
+2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* fixtures/Futurelight-DJScan250.qxf:
 	* gfx/Makefile.am:
 	* main/src/addfixture.cpp:

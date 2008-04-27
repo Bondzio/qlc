@@ -54,20 +54,35 @@ extern App* _app;
 
 SceneEditor::SceneEditor(QWidget* parent) : QWidget(parent)
 {
+	QPalette pal;
+
 	m_fixture = KNoID;
 	m_tempScene = NULL;
 
 	setupUi(this);
 
-	m_sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-	connect(m_sceneList,
-		SIGNAL(customContextMenuRequested(const QPoint&)),
-		this,
-		SLOT(slotSceneListContextMenu(const QPoint&)));
-
+	/* Actions and tools menu */
 	initActions();
 	initMenu();
+
+	/* Tools menu button */
+	m_tools->setPopupMode(QToolButton::InstantPopup);
+	m_tools->setIcon(QIcon(PIXMAPS "/scene.png"));
+	m_tools->setText(tr("Scene editor"));
+	m_tools->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+	/* Scene list */
+	m_sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_sceneList->setRootIsDecorated(false);
+	connect(m_sceneList, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(slotSceneListContextMenu(const QPoint&)));
+	connect(m_sceneList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotActivate()));
+
+	/* Status label */
+	pal.setColor(QPalette::Window, QColor(0, 0, 0));
+	m_statusLabel->setPalette(pal);
+	m_statusLabel->setAutoFillBackground(true);
 }
 
 SceneEditor::~SceneEditor()
@@ -170,42 +185,41 @@ void SceneEditor::initActions()
 	m_activateAction = new QAction(QIcon(PIXMAPS "/apply.png"),
 				       tr("Activate"), this);
 	connect(m_activateAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotActivateTriggered()));
+		this, SLOT(slotActivate()));
 
 	m_newAction = new QAction(QIcon(PIXMAPS "/wizard.png"),
 				  tr("New scene..."), this);
 	connect(m_newAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotNewTriggered()));
+		this, SLOT(slotNew()));
 
 	m_storeAction = new QAction(QIcon(PIXMAPS "/filesave.png"),
 				   tr("Store"), this);
 	connect(m_storeAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotSaveTriggered()));
+		this, SLOT(slotStore()));
 
-	m_removeAction = new QAction(QIcon(PIXMAPS "editdelete.png"),
+	m_removeAction = new QAction(QIcon(PIXMAPS "/editdelete.png"),
 				     tr("Remove"), this);
 	connect(m_removeAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotRemoveTriggered()));
+		this, SLOT(slotRemove()));
 
-	m_renameAction = new QAction(QIcon(PIXMAPS "editclear.png"),
+	m_renameAction = new QAction(QIcon(PIXMAPS "/editclear.png"),
 				     tr("Rename..."), this);
 	connect(m_renameAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotRenameTriggered()));
+		this, SLOT(slotRename()));
 }
 
 void SceneEditor::initMenu()
 {
 	m_menu = new QMenu(m_tools);
+	m_menu->setTitle(tr("Scene editor"));
 	m_menu->addAction(m_activateAction);
-	m_menu->addAction(m_storeAction);
 	m_menu->addSeparator();
 	m_menu->addAction(m_newAction);
+	m_menu->addAction(m_storeAction);
 	m_menu->addAction(m_renameAction);
-	m_menu->addSeparator();
 	m_menu->addAction(m_removeAction);
 
 	m_tools->setMenu(m_menu);
-	m_tools->setIcon(QIcon(PIXMAPS "/scene.png"));
 }
 
 void SceneEditor::slotSceneListContextMenu(const QPoint &point)
@@ -230,9 +244,9 @@ void SceneEditor::slotNew()
 {
 	bool ok = false;
 	QString name;
-	name = QInputDialog::getText(this, tr("New scene"),
-				     tr("Scene name:"), QLineEdit::Normal,
-				     QString::null, &ok);
+
+	name = QInputDialog::getText(this, tr("New scene"), tr("Scene name:"),
+				     QLineEdit::Normal, QString::null, &ok);
 
 	if (ok == true && name.isEmpty() == false)
 	{
@@ -245,7 +259,6 @@ void SceneEditor::slotNew()
 
 		m_sceneList->sortItems(KColumnName, Qt::AscendingOrder);
 		selectFunction(sc->id());
-		m_sceneList->scrollToItem(getItem(sc->id()));
 
 		setStatusText(KStatusStored, KStatusColorStored);
 	}
@@ -255,7 +268,7 @@ void SceneEditor::slotStore()
 {
 	Scene* sc = currentScene();
 	if (sc == NULL)
-		return;
+		slotNew();
 
 	// Save name & bus because copyFrom overwrites them
 	QString name = sc->name();
@@ -360,10 +373,11 @@ void SceneEditor::selectFunction(t_function_id fid)
 	{
 		if ((*it)->text(KColumnID).toInt() == fid)
 		{
-			(*it)->setSelected(true);
+			m_sceneList->setCurrentItem(*it);
 			m_sceneList->scrollToItem(*it);
 			break;
 		}
+		++it;
 	}
 }
 

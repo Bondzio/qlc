@@ -86,8 +86,8 @@ protected slots:
 
 protected:
 	QSplitter* m_splitter;
-	QTreeWidget* m_listView;
-	QTextBrowser* m_textView;
+	QTreeWidget* m_tree;
+	QTextBrowser* m_info;
 
 	/********************************************************************
 	 * Menu & Toolbar & Actions

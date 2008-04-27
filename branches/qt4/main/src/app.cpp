@@ -476,8 +476,8 @@ void App::slotModeOperate()
 		return;
 
 	m_modeIndicator->setText(KModeTextOperate);
-	m_modeDesignAction->setEnabled(false);
-	m_modeOperateAction->setEnabled(true);
+	m_modeDesignAction->setEnabled(true);
+	m_modeOperateAction->setEnabled(false);
 	
 	m_fileNewAction->setEnabled(false);
 	m_fileOpenAction->setEnabled(false);
@@ -533,8 +533,8 @@ void App::slotModeDesign()
 	m_functionConsumer->stop();
 	
 	m_modeIndicator->setText(KModeTextDesign);
-	m_modeDesignAction->setEnabled(true);
-	m_modeOperateAction->setEnabled(false);
+	m_modeDesignAction->setEnabled(false);
+	m_modeOperateAction->setEnabled(true);
 	
 	m_fileNewAction->setEnabled(true);
 	m_fileOpenAction->setEnabled(true);

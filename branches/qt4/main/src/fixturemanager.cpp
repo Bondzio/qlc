@@ -101,19 +101,21 @@ void FixtureManager::slotFixtureAdded(t_fixture_id id)
 	if (fxi != NULL)
 	{
 		// Create a new list view item
-		QTreeWidgetItem* item = new QTreeWidgetItem(m_listView);
+		QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
 
 		// Fill fixture information to the item
 		updateItem(item, fxi);
 
-		// Select the item
-		item->setSelected(true);
+		/* Select the item (fixtures can be added only manually,
+		   so if this signal comes, a fixture was added with
+		   the fixture manager) */
+		m_tree->setCurrentItem(item);
 	}
 }
 
 void FixtureManager::slotFixtureRemoved(t_fixture_id id)
 {
-	QTreeWidgetItemIterator it(m_listView);
+	QTreeWidgetItemIterator it(m_tree);
 	while (*it != NULL)
 	{
 		if ((*it)->text(KColumnID).toInt() == id)
@@ -123,15 +125,11 @@ void FixtureManager::slotFixtureRemoved(t_fixture_id id)
 				QTreeWidgetItem* nextItem;
 
 				// Try to select the closest neighbour
-				if (m_listView->itemAbove(*it) != NULL)
-					nextItem = m_listView->itemAbove(*it);
+				if (m_tree->itemAbove(*it) != NULL)
+					nextItem = m_tree->itemAbove(*it);
 				else
-					nextItem = m_listView->itemBelow(*it);
-
-				if (nextItem != NULL)
-					nextItem->setSelected(true);
-
-				slotSelectionChanged();
+					nextItem = m_tree->itemBelow(*it);
+				m_tree->setCurrentItem(nextItem);
 			}
 
 			delete (*it);
@@ -175,38 +173,29 @@ void FixtureManager::initDataView()
 				  QSizePolicy::Expanding);
 
 	// Create the list view
-	m_listView = new QTreeWidget(this);
-	m_splitter->addWidget(m_listView);
-	//m_splitter->setResizeMode(m_listView, QSplitter::Auto);
+	m_tree = new QTreeWidget(this);
+	m_splitter->addWidget(m_tree);
+	//m_splitter->setResizeMode(m_tree, QSplitter::Auto);
 
 	QStringList labels;
 	labels << "Universe" << "Address" << "Name";
-	m_listView->setHeaderLabels(labels);
-/*
-	m_listView->setMultiSelection(false);
-	m_listView->setAllColumnsShowFocus(true);
-	m_listView->setSorting(KColumnAddress, true);
-	m_listView->setShowSortIndicator(true);
-	m_listView->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	m_tree->setHeaderLabels(labels);
+	m_tree->setRootIsDecorated(false);
+	m_tree->setSortingEnabled(true);
 
-	m_listView->header()->setClickEnabled(true);
-	m_listView->header()->setResizeEnabled(true);
-	m_listView->header()->setMovingEnabled(false);
-	m_listView->setResizeMode(QListView::LastColumn);
-*/
-	connect(m_listView, SIGNAL(selectionChanged()),
+	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));
 
-	connect(m_listView, SIGNAL(doubleClicked(QTreeWidgetItem*)),
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*)),
 		this, SLOT(slotDoubleClicked(QTreeWidgetItem*)));
 
-	connect(m_listView, SIGNAL(customContextMenuRequested(const QPoint&)),
+	connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(slotContextMenuRequested(const QPoint&)));
 
 	// Create the text view
-	m_textView = new QTextBrowser(this);
-	m_splitter->addWidget(m_textView);
-	//m_splitter->setResizeMode(m_textView, QSplitter::Auto);
+	m_info = new QTextBrowser(this);
+	m_splitter->addWidget(m_info);
+	//m_splitter->setResizeMode(m_info, QSplitter::Auto);
 
 	slotSelectionChanged();
 }
@@ -219,12 +208,12 @@ void FixtureManager::updateView()
 	Fixture* fxt = NULL;
 
 	// Store the currently selected fixture's ID
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	if (item != NULL)
 		currentId = item->text(KColumnID).toInt();
 
 	// Clear the view
-	m_listView->clear();
+	m_tree->clear();
 
 	// Add all fixtures
 	for (id = 0; id < KFixtureArraySize; id++)
@@ -233,7 +222,7 @@ void FixtureManager::updateView()
 		if (fxt == NULL)
 			continue;
 
-		item = new QTreeWidgetItem(m_listView);
+		item = new QTreeWidgetItem(m_tree);
 
 		// Update fixture information to the item
 		updateItem(item, fxt);
@@ -316,7 +305,7 @@ void FixtureManager::copyFunction(Function* function, Fixture* fxi)
 
 void FixtureManager::slotSelectionChanged()
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item == NULL)
 	{
 		// Add is not available in operate mode
@@ -337,7 +326,7 @@ void FixtureManager::slotSelectionChanged()
 		info += QString("Click \"Add\" on the ");
 		info += QString("toolbar to add a new fixture.");
 		info += QString("</BODY></HTML>");
-		m_textView->setText(info);
+		m_info->setText(info);
 	}
 	else
 	{
@@ -349,13 +338,14 @@ void FixtureManager::slotSelectionChanged()
 		fxi = _app->doc()->fixture(id);
 		Q_ASSERT(fxi != NULL);
 
-		m_textView->setText(fxi->status());
+		m_info->setText(fxi->status());
 
 		// Enable/disable actions
 		if (_app->mode() == App::Design)
 		{
 			m_addAction->setEnabled(true);
 			m_removeAction->setEnabled(true);
+			m_consoleAction->setEnabled(true);
 			m_cloneAction->setEnabled(true);
 			m_propertiesAction->setEnabled(true);
 		}
@@ -363,6 +353,7 @@ void FixtureManager::slotSelectionChanged()
 		{
 			m_addAction->setEnabled(false);
 			m_removeAction->setEnabled(false);
+			m_consoleAction->setEnabled(false);
 			m_cloneAction->setEnabled(false);
 			m_propertiesAction->setEnabled(false);
 		}
@@ -479,7 +470,7 @@ void FixtureManager::slotAdd()
 
 void FixtureManager::slotProperties()
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item != NULL)
 	{
 		t_fixture_id id = item->text(KColumnID).toInt();
@@ -501,7 +492,7 @@ void FixtureManager::slotProperties()
 
 void FixtureManager::slotConsole()
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item != NULL)
 	{
 		t_fixture_id id = item->text(KColumnID).toInt();
@@ -523,7 +514,7 @@ void FixtureManager::slotClone()
 	QString new_name;
 
 	/* Get the selected listview item */
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	Q_ASSERT(item != NULL);
 
 	/* Get the old fixture instance */
@@ -558,16 +549,6 @@ void FixtureManager::slotClone()
 				copyFunction(function, new_fxi);
 		}
 
-		// Select the newly-created clone
-		QString new_id;
-		QList <QTreeWidgetItem*> list;
-		new_id.setNum(new_fxi->id());
-		list = m_listView->findItems(new_id, Qt::MatchExactly,
-					     KColumnID);
-		item = list.takeFirst();
-		if (item != NULL)
-			item->setSelected(true);
-
 		/* Open properties so that the user can rename the fixture,
 		   set its address, etc... */
 		slotProperties();
@@ -576,7 +557,7 @@ void FixtureManager::slotClone()
 
 void FixtureManager::slotRemove()
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item == NULL)
 		return;
 
@@ -600,7 +581,7 @@ void FixtureManager::slotAutoFunction()
 	t_fixture_id fxi_id;
 	Fixture* fxi;
 
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	if (item == NULL)
 		return;
 
@@ -638,7 +619,6 @@ void FixtureManager::slotAutoFunction()
 		}
 	}
 
-	fxi->slotConsoleClosed();
 	fxi->viewConsole();
 }
 

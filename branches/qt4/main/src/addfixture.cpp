@@ -27,6 +27,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QSpinBox>
+#include <iostream>
 #include <QLabel>
 
 #include "common/qlcfixturedef.h"
@@ -35,6 +36,8 @@
 #include "addfixture.h"
 #include "app.h"
 #include "doc.h"
+
+using namespace std;
 
 extern App* _app;
 
@@ -49,11 +52,23 @@ AddFixture::AddFixture(QWidget *parent) : QDialog(parent)
 	m_amountValue = 1;
 	m_gapValue = 0;
 	m_channelsValue = 0;
+	m_fixtureDef = NULL;
+	m_mode = NULL;
 
 	setupUi(this);
 
-	fillTree();
+	connect(m_tree, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotSelectionChanged()));
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotTreeDoubleClicked(QTreeWidgetItem*)));
+	connect(m_modeCombo, SIGNAL(activated(const QString&)),
+		this, SLOT(slotModeActivated(const QString&)));
+	connect(m_channelsSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotChannelsChanged(int)));
+	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+		this, SLOT(slotNameEdited(const QString&)));
 
+	fillTree();
 	m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 }
 
@@ -131,8 +146,6 @@ void AddFixture::fillTree()
 
 void AddFixture::fillModeCombo(const QString& text)
 {
-	QLCFixtureMode* mode = NULL;
-
 	m_modeCombo->clear();
 
 	if (m_fixtureDef == NULL)
@@ -147,7 +160,7 @@ void AddFixture::fillModeCombo(const QString& text)
 
 		QListIterator <QLCFixtureMode*> it(*m_fixtureDef->modes());
 		while (it.hasNext() == true)
-			m_modeCombo->addItem(mode->name());
+			m_modeCombo->addItem(it.next()->name());
 
 		/* Select the first mode by default */
 		m_modeCombo->setCurrentIndex(0);
@@ -176,20 +189,22 @@ void AddFixture::slotModeActivated(const QString& modeName)
 	m_mode = m_fixtureDef->mode(modeName);
 	if (m_mode == NULL)
 	{
-		slotSelectionChanged(NULL);
+		slotSelectionChanged();
 		return;
 	}
 
 	m_channelsSpin->setValue(m_mode->channels());
 }
 
-void AddFixture::slotSelectionChanged(QTreeWidgetItem* item, int column)
+void AddFixture::slotSelectionChanged()
 {
+	QTreeWidgetItem* item;
 	QString manuf;
 	QString model;
 
 	/* If there is no valid selection, i.e. the user has selected
 	   only the manufacturer, don't let the user press OK */
+	item = m_tree->currentItem();
 	if (item == NULL || item->parent() == NULL)
 	{
 		/* Reset the selected fixture pointer */
@@ -260,9 +275,9 @@ void AddFixture::slotSelectionChanged(QTreeWidgetItem* item, int column)
 	}
 }
 
-void AddFixture::slotTreeDoubleClicked(QTreeWidgetItem* item, int column)
+void AddFixture::slotTreeDoubleClicked(QTreeWidgetItem* item)
 {
-	slotSelectionChanged(item, column);
+	slotSelectionChanged();
 	if (item != NULL && item->parent() != NULL)
 		accept();
 }
@@ -286,5 +301,5 @@ void AddFixture::accept()
 
 	m_channelsValue = m_channelsSpin->value();
 	
-	accept();
+	QDialog::accept();
 }

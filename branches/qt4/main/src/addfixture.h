@@ -109,25 +109,17 @@ protected slots:
 	 /** Callback for mode selection changes */
 	 void slotModeActivated(const QString& modeName);
 
-	 /**
-	  * Callback for tree view selection changes
-	  */
-	void slotSelectionChanged(QTreeWidgetItem* item, int column = 0);
-
-	/**
-	 * Callback for tree double clicks (same as select + OK)
-	 */
-	void slotTreeDoubleClicked(QTreeWidgetItem* item, int column = 0);
-
-	/**
-	 * Callback for friendly name editing
-	 */
-	void slotNameEdited(const QString &text);
-
-	/**
-	 * OK button pressed
-	 */
-	void accept();
+	 /** Callback for tree view selection changes */
+	 void slotSelectionChanged();
+	 
+	 /** Callback for tree double clicks (same as select + OK) */
+	 void slotTreeDoubleClicked(QTreeWidgetItem* item);
+	 
+	 /** Callback for friendly name editing */
+	 void slotNameEdited(const QString &text);
+	 
+	 /** OK button pressed */
+	 void accept();
 };
 
 #endif

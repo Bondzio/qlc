@@ -40,11 +40,13 @@ class FixtureConsole : public QWidget
 	Q_OBJECT
 
 public:
-	FixtureConsole(QWidget *parent);
+	FixtureConsole(QWidget* parent, t_fixture_id fxi_id);
 	~FixtureConsole();
 
+protected:
 	void setFixture(t_fixture_id id);
 
+public:
 	QList <ConsoleChannel*> unitList() { return m_unitList; }
 	SceneEditor* sceneEditor() { return m_sceneEditor; }
 

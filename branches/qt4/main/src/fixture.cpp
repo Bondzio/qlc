@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiSubWindow>
+#include <QMdiArea>
+#include <QPalette>
 #include <iostream>
 #include <QString>
 #include <QtXml>
@@ -103,7 +106,7 @@ void Fixture::setName(QString name)
 	m_name = name;
 
 	if (m_console != NULL)
-		m_console->setWindowTitle(m_name + " Console");
+		m_console->parentWidget()->setWindowTitle(m_name + " Console");
 
 	emit changed(m_id);
 }
@@ -133,12 +136,6 @@ void Fixture::setUniverse(t_channel universe)
 	/* The universe part is stored in the highest 7 bits */
 	m_address = (m_address & 0x01FF) | (universe << 9);
 
-	if (m_console != NULL)
-	{
-		slotConsoleClosed();
-		viewConsole();
-	}
-
 	emit changed(m_id);
 }
 
@@ -156,12 +153,6 @@ void Fixture::setAddress(t_channel address)
 {
 	/* The address part is stored in the lowest 9 bits */
 	m_address = (m_address & 0xFE00) | (address & 0x01FF);
-
-	if (m_console != NULL)
-	{
-		slotConsoleClosed();
-		viewConsole();
-	}
 
 	emit changed(m_id);
 }
@@ -244,7 +235,7 @@ Fixture* Fixture::loader(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLFixture)
 	{
-		qWarning("Fixture instance node not found!");
+		cout << "Fixture instance node not found!" << endl;
 		return NULL;
 	}
 
@@ -382,8 +373,8 @@ Fixture* Fixture::loader(QDomDocument* doc, QDomElement* root)
 		/* Load the fixture's console settings */
 		if (consoletag.tagName() == KXMLQLCFixtureConsole)
 		{
-			if (fxi->createConsole() == true)
-				fxi->m_console->loadXML(doc, &tag);
+			fxi->viewConsole();
+			fxi->m_console->loadXML(doc, &tag);
 		}
 	}
 
@@ -482,8 +473,9 @@ bool Fixture::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 QString Fixture::status()
 {
-	QString t;
+	QPalette pal;
 	QString info;
+	QString t;
 
 	// HTML header
 	info += QString("<HTML>");
@@ -496,10 +488,10 @@ QString Fixture::status()
 	info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += _app->colorGroup().highlight().name();
+	info += pal.color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += _app->colorGroup().highlightedText().name();
+	info += pal.color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += name();
 	info += QString("</FONT>");
@@ -597,35 +589,34 @@ QString Fixture::status()
 	
 	// Relative channel column title
 	info += QString("<TD BGCOLOR=\"");
-	//info += _app->colorGroup().highlight().name();
+	info += pal.color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += _app->colorGroup().highlightedText().name();
-	info += QString("\" SIZE=\"3\">");
-	info += QString("Channel");
+	info += pal.color(QPalette::HighlightedText).name();
+	info += QString("\">");
+	info += QString("<B>Channel</B>");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 	
 	// DMX channel column title
 	info += QString("<TD BGCOLOR=\"");
-	//info += _app->colorGroup().highlight().name();
+	info += pal.color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += _app->colorGroup().highlightedText().name();
-	info += QString("\" SIZE=\"3\">");
-	info += QString("DMX");
+	info += pal.color(QPalette::HighlightedText).name();
+	info += QString("\">");
+	info += QString("<B>DMX</B>");
 	info += QString("</FONT>");
 	info += QString("</TD>");
-	info += QString("</TR>");
 
 	// Channel name column title
 	info += QString("<TD BGCOLOR=\"");
-	//info += _app->colorGroup().highlight().name();
+	info += pal.color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += _app->colorGroup().highlightedText().name();
+	info += pal.color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"3\">");
-	info += QString("Name");
+	info += QString("<B>Name</B>");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 	info += QString("</TR>");
@@ -668,47 +659,33 @@ QString Fixture::status()
  * Console
  *****************************************************************************/
 
-bool Fixture::createConsole()
-{
-	if (m_console == NULL)
-	{
-		m_console = new FixtureConsole(_app);
-		Q_ASSERT(m_console != NULL);
-
-		m_console->setFixture(m_id);
-		
-		// Set window title
-		m_console->setWindowTitle(m_name + " Console");
-		
-		// Catch close event
-		connect(m_console, SIGNAL(closed()),
-			this, SLOT(slotConsoleClosed()));
-	}
-	else
-	{
-		return true;
-	}
-}
-
 void Fixture::viewConsole()
 {
 	if (m_console == NULL)
 	{
-		if (createConsole() == true)
-			m_console->show();
-		else
-			Q_ASSERT(0);
-	}
-	else
-	{
-		m_console->hide();
+		QMdiSubWindow* sub;
+
+		sub = new QMdiSubWindow(_app->centralWidget());
+		m_console = new FixtureConsole(_app, m_id);
+
+		sub->setWidget(m_console);
+		sub->setAttribute(Qt::WA_DeleteOnClose);
+		sub->setWindowIcon(QIcon(PIXMAPS "/console.png"));
+		sub->setWindowTitle(m_name + " console");
+
+		qobject_cast <QMdiArea*>
+			(_app->centralWidget())->addSubWindow(sub);
+
 		m_console->show();
+		sub->show();
+
+		connect(m_console, SIGNAL(destroyed(QObject*)),
+			this, SLOT(slotConsoleDestroyed(QObject*)));
 	}
 }
 
-void Fixture::slotConsoleClosed()
+void Fixture::slotConsoleDestroyed(QObject* object)
 {
-	disconnect(m_console);
-	delete m_console;
+	Q_ASSERT(object == m_console);
 	m_console = NULL;
 }

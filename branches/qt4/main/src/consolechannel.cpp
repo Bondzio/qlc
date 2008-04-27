@@ -176,7 +176,28 @@ void ConsoleChannel::initMenu()
 	
 	// Create a popup menu and set the channel name as its title
 	m_menu = new QMenu(this);
+	m_presetButton->setMenu(m_menu);
+	m_presetButton->setPopupMode(QToolButton::InstantPopup);
 	m_menu->setTitle(ch->name());
+
+	if (ch->group() == KQLCChannelGroupPan)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/pan.png"));
+	else if (ch->group() == KQLCChannelGroupTilt)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/tilt.png"));
+	else if (ch->group() == KQLCChannelGroupColour)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/color.png"));
+	else if (ch->group() == KQLCChannelGroupGobo)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/gobo.png"));
+	else if (ch->group() == KQLCChannelGroupShutter)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/shutter.png"));
+	else if (ch->group() == KQLCChannelGroupSpeed)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/speed.png"));
+	else if (ch->group() == KQLCChannelGroupPrism)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/prism.png"));
+	else if (ch->group() == KQLCChannelGroupMaintenance)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/configure.png"));
+	else if (ch->group() == KQLCChannelGroupIntensity)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/intensity.png"));
 
 	// Initialize the preset menu only for normal fixtures,
 	// i.e. not for Generic dimmer fixtures
@@ -214,8 +235,8 @@ void ConsoleChannel::initCapabilityMenu(QLCChannel* ch)
 		cap = it.next();
 
 		// Set the value range and name as the menu item's name
-		s.sprintf("%s: %.3d - %.3d", cap->name().unicode(), 
-			  cap->min(), cap->max());
+		s = QString("%1: %2 - %3").arg(cap->name())
+			.arg(cap->min()).arg(cap->max());
 
 		if (cap->max() - cap->min() > 0)
 		{

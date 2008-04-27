@@ -316,12 +316,8 @@ public slots:
 	 * Callback for console close signals. This has to be public because
 	 * this is used from fixture manager
 	 */
-	void slotConsoleClosed();
+	void slotConsoleDestroyed(QObject* object);
 
-protected:
-	/** Create a console view for the fixture but don't show it */
-	bool createConsole();
-	
 protected:
 	/** The fixture's console */
 	FixtureConsole* m_console;

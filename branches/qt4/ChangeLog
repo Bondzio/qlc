@@ -1,5 +1,27 @@
 2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* fixtures/Futurelight-DJScan250.qxf:
+	* gfx/Makefile.am:
+	* main/src/addfixture.cpp:
+	* main/src/addfixture.h:
+	* main/src/addfixture.ui:
+	* main/src/app.cpp:
+	* main/src/consolechannel.cpp:
+	* main/src/consolechannel.ui:
+	* main/src/fixture.cpp:
+	* main/src/fixture.h:
+	* main/src/fixtureconsole.cpp:
+	* main/src/fixtureconsole.h:
+	* main/src/fixturemanager.cpp:
+	* main/src/fixturemanager.h:
+	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.ui:
+
+	FixtureManager works 99%.
+	FixtureConsole works 50% (lacking scene editor and is too big).
+
+2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/app.cpp:
 	* main/src/app.h:
 	* main/src/main.cpp:

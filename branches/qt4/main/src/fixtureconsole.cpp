@@ -36,9 +36,11 @@ extern App* _app;
 
 using namespace std;
 
-FixtureConsole::FixtureConsole(QWidget *parent) : QWidget(parent)
+FixtureConsole::FixtureConsole(QWidget* parent, t_fixture_id fxi_id)
+	: QWidget(parent)
 {
 	m_sceneEditor = NULL;
+	setFixture(fxi_id);
 }
 
 FixtureConsole::~FixtureConsole()
@@ -60,9 +62,6 @@ void FixtureConsole::setFixture(t_fixture_id id)
 
 	fxi = _app->doc()->fixture(m_fixture);
 	Q_ASSERT(fxi != NULL);
-
-	// Set an icon -- TODO: this is done in App now...?
-	setWindowIcon(QIcon(PIXMAPS "/console.png"));
 
 	// Set the main horizontal layout
 	new QHBoxLayout(this);

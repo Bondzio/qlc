@@ -43,22 +43,30 @@ dist_appicons_DATA = \
 	frameraised.png \
 	function.png \
 	global.png \
+	gobo.png \
 	help.png \
 	image.png \
+	intensity.png \
 	key_bindings.png \
 	keyboard.png \
 	label.png \
+	maintenance.png \
 	monitor.png \
+	pan.png \
 	panic.png \
 	plugin.png \
 	player_play.png \
 	player_stop.png \
+	prism.png \
 	qlc-big.png \
 	qlc-fixtureeditor.png \
 	qlc.png \
 	scene.png \
 	sequence.png \
+	shutter.png \
 	slider.png \
+	speed.png \
+	tilt.png \
 	undo.png \
 	up.png \
 	view_left_right.png \

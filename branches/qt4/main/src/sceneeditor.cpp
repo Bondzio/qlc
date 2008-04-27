@@ -57,6 +57,8 @@ SceneEditor::SceneEditor(QWidget* parent) : QWidget(parent)
 	m_fixture = KNoID;
 	m_tempScene = NULL;
 
+	setupUi(this);
+
 	m_sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	connect(m_sceneList,

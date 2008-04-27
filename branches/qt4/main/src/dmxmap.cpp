@@ -398,8 +398,6 @@ void DMXMap::initPatch()
 	m_dummyOut = new DummyOutPlugin();
 	appendPlugin(m_dummyOut);
 
-	m_patch.resize(m_universes);
-
 	for (i = 0; i < m_universes; i++)
 	{
 		/* The dummy output plugin provides always as many outputs
@@ -618,7 +616,7 @@ bool DMXMap::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	wksp_root->appendChild(root);
 
 	/* Patches */
-	for (i = 0; i < m_patch.count(); i++)
+	for (i = 0; i < m_patch.size(); i++)
 		m_patch[i]->saveXML(doc, &root, i);
 
 	return true;

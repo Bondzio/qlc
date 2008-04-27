@@ -1,5 +1,11 @@
 2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/dmxmap.cpp:
+
+	Fixed porting mistakes and omissions in dmxmap.
+
+2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/monitor.cpp:
 	* main/src/monitor.h:
 

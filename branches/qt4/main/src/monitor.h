@@ -30,7 +30,6 @@
 
 class QDomDocument;
 class QDomElement;
-class QMenuBar;
 class QPixmap;
 class QAction;
 class QColor;
@@ -94,14 +93,23 @@ protected:
 	 * Menu
 	 *********************************************************************/
 protected:
+	void initActions();
 	void initMenu();
 	void slotMenuTriggered(QAction* action);
 
+protected slots:
+	void slotUniverseTriggered(QAction* action);
+	void slotFont();
+	void slot16Hz();
+	void slot32Hz();
+	void slot64Hz();
+
 protected:
-	QMenuBar* m_menuBar;
-	QMenu* m_universeMenu;
-	QMenu* m_displayMenu;
-	QMenu* m_speedMenu;
+	QList <QAction*> m_universeActions;
+	QAction* m_fontAction;
+	QAction* m_16HzAction;
+	QAction* m_32HzAction;
+	QAction* m_64HzAction;
 
 	/*********************************************************************
 	 * Painting

@@ -19,12 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiSubWindow>
+#include <QActionGroup>
 #include <QPaintEvent>
 #include <QFontDialog>
 #include <QVBoxLayout>
 #include <QMenuBar>
 #include <QPainter>
 #include <iostream>
+#include <QAction>
 #include <QTimer>
 #include <QColor>
 #include <QRect>
@@ -66,10 +69,6 @@ Monitor::Monitor(QWidget* parent, DMXMap* dmxMap) : QWidget(parent)
 	m_dmxMap          = dmxMap;
 	m_timer           = NULL;
 	m_updateFrequency = 16;
-	m_menuBar         = NULL;
-	m_universeMenu    = NULL;
-	m_displayMenu     = NULL;
-	m_speedMenu       = NULL;
 
 	init();
 }
@@ -78,6 +77,9 @@ Monitor::~Monitor()
 {
 	if (m_timer != NULL)
 		delete m_timer;
+
+	while (m_universeActions.isEmpty() == false)
+		m_universeActions.takeFirst();
 
 	/* Wait for painter to stop */
 	while (m_painter.isActive());
@@ -88,91 +90,139 @@ Monitor::~Monitor()
 
 void Monitor::init()
 {
+	Q_ASSERT(parentWidget() != NULL);
+
+	/* Master layout */
 	new QVBoxLayout(this);
 
-	/* TODO: Set thru QMdiSubWindow */
-	setWindowIcon(QIcon(PIXMAPS "/monitor.png"));
-	setWindowTitle("DMX Monitor - Universe 1");
-	
-	// Set background color
-	// setBackgroundColor(colorGroup().base());
+	/* Create menu bar & actions */
+	initActions();
+	initMenu();
 
-	// Init the arrays that hold the values
+	/* Icon & window title */
+	qobject_cast <QMdiSubWindow*> 
+		(parentWidget())->setWindowIcon(QIcon(PIXMAPS "/monitor.png"));
+	qobject_cast <QMdiSubWindow*> 
+		(parentWidget())->setWindowTitle("DMX Monitor - Universe 1");
+	
+	/* Init the arrays that hold the values */
 	m_newValues = new t_value[512];
 	m_oldValues = new t_value[512];
 	for (t_channel i = 0; i < 512; i++)
 		m_newValues[i] = m_oldValues[i] = 0;
 
-	// Create the menu bar
-	initMenu();
+	/* Start with the first universe */
+	setUniverse(0);
 
-	// Connect and start the update timer with 16Hz
+	/* Connect and start the update timer with 16Hz */
 	setFrequency(16);
 
-	// Set a reasonable default size
-	resize(280, 150);
+	/* Set a reasonable default size */
+	parentWidget()->resize(280, 150);
+}
+
+void Monitor::initActions()
+{
+	/* Universe actions */
+	QActionGroup* universeGroup = new QActionGroup(this);
+	for (t_channel i = 0; i < KUniverseCount; i++)
+	{
+		QAction* action;
+		action = new QAction(QString(tr("Universe %1")).arg(i+1), this);
+		m_universeActions.append(action);
+		universeGroup->addAction(action);
+		action->setCheckable(true);
+	}
+
+	/* Font */
+	m_fontAction = new QAction(QIcon(PIXMAPS "/fonts.png"), tr("Font"), this);
+	connect(m_fontAction, SIGNAL(triggered(bool)), this, SLOT(slotFont()));
+
+	QActionGroup* speedGroup = new QActionGroup(this);
+
+	/* 16Hz update speed */
+	m_16HzAction = new QAction(tr("16x per second"), this);
+	connect(m_16HzAction, SIGNAL(triggered(bool)), this, SLOT(slot16Hz()));
+	speedGroup->addAction(m_16HzAction);
+	m_16HzAction->setCheckable(true);
+
+	/* 32Hz update speed */
+	m_32HzAction = new QAction(tr("32x per second"), this);
+	connect(m_32HzAction, SIGNAL(triggered(bool)), this, SLOT(slot32Hz()));
+	speedGroup->addAction(m_32HzAction);
+	m_32HzAction->setCheckable(true);
+
+	/* 64Hz update speed */
+	m_64HzAction = new QAction(tr("64x per second"), this);
+	connect(m_64HzAction, SIGNAL(triggered(bool)), this, SLOT(slot64Hz()));
+	speedGroup->addAction(m_64HzAction);
+	m_64HzAction->setCheckable(true);
 }
 
 void Monitor::initMenu()
 {
-	// Menu bar
+	/* Menu bar */
 	Q_ASSERT(layout() != NULL);
 	layout()->setMenuBar(new QMenuBar(this));
 	
-	// Universe menu
-	m_universeMenu = new QMenu(layout()->menuBar());
-	m_universeMenu->setTitle("Universe");
-	for (t_channel i = 0; i < KUniverseCount; i++)
-		m_universeMenu->addAction(QString("Universe %1").arg(i + 1));
+	/* Universe menu */
+	QMenu* universeMenu = new QMenu(layout()->menuBar());
+	universeMenu->setTitle(tr("Universe"));
+	qobject_cast <QMenuBar*> (layout()->menuBar())->addMenu(universeMenu);
+	QListIterator <QAction*> it(m_universeActions);
+	while (it.hasNext() == true)
+		universeMenu->addAction(it.next());
 
-	// Display menu
-	m_displayMenu = new QMenu(layout()->menuBar());
-	m_displayMenu->setTitle("Display");
-	m_displayMenu->addAction("Font");
-	m_displayMenu->addSeparator();
+	/* Display menu */
+	QMenu* displayMenu = new QMenu(layout()->menuBar());
+	displayMenu->setTitle("Display");
+	qobject_cast <QMenuBar*> (layout()->menuBar())->addMenu(displayMenu);
+	displayMenu->addAction(m_fontAction);
+	displayMenu->addSeparator();
 
-	// Update speed (inside display menu)
-	m_speedMenu = new QMenu(m_displayMenu);
-	m_speedMenu->setTitle("Update speed");
-	m_speedMenu->setIcon(QIcon(PIXMAPS "/clock.png"));
-	m_speedMenu->addAction("16Hz");
-	m_speedMenu->addAction("32Hz");
-	m_speedMenu->addAction("64Hz");
+	/* Update speed (inside display menu) */
+	QMenu* speedMenu = new QMenu(displayMenu);
+	displayMenu->addMenu(speedMenu);
+	speedMenu->setTitle("Update speed");
+	speedMenu->setIcon(QIcon(PIXMAPS "/clock.png"));
+	speedMenu->addAction(m_16HzAction);
+	speedMenu->addAction(m_32HzAction);
+	speedMenu->addAction(m_64HzAction);
 
-	// Menu bar construction
-	m_menuBar->addMenu(m_universeMenu);
-	m_menuBar->addMenu(m_displayMenu);
-	m_displayMenu->addMenu(m_speedMenu);
-
-	connect(layout()->menuBar(), SIGNAL(triggered(QAction*)),
-		this, SLOT(slotMenuTriggered(QAction*)));
+	connect(universeMenu, SIGNAL(triggered(QAction*)),
+		this, SLOT(slotUniverseTriggered(QAction*)));
 }
 
-void Monitor::slotMenuTriggered(QAction* action)
+void Monitor::slotUniverseTriggered(QAction* action)
 {
 	Q_ASSERT(action != NULL);
+	setUniverse(action->text().remove("Universe").toInt() - 1);
+}
 
-	if (action->text().contains("Universe") == true)
+void Monitor::slotFont()
+{
+	bool ok = false;
+	QFont font = QFontDialog::getFont(&ok, m_font, this);
+	if (ok == true)
 	{
-		t_channel universe = action->text().remove("Universe").toInt();
-		setUniverse(universe);
+		m_font = font;
+		update();
 	}
-	else if (action->text().contains("Font") == true)
-	{
-		bool ok = false;
-		QFont font = QFontDialog::getFont(&ok, m_font, this);
-		if (ok == true)
-		{
-			m_font = font;
-			// repaint(true); // Paint all
-			update();
-		}
-	}
-	else
-	{
-		int freq = action->text().remove("Hz").toInt();
-		setFrequency(freq);
-	}
+}
+
+void Monitor::slot16Hz()
+{
+	setFrequency(16);
+}
+
+void Monitor::slot32Hz()
+{
+	setFrequency(32);
+}
+
+void Monitor::slot64Hz()
+{
+	setFrequency(64);
 }
 
 void Monitor::setUniverse(t_channel universe)
@@ -180,25 +230,25 @@ void Monitor::setUniverse(t_channel universe)
 	QString s;
 	
 	Q_ASSERT(universe < KUniverseCount);
+	Q_ASSERT(parentWidget() != NULL);
 
-	//m_universeMenu->setItemChecked(m_universe, false);
+	m_universeActions.at(universe)->setChecked(true);
 	m_universe = universe;
-	//m_universeMenu->setItemChecked(m_universe, true);
 	
-	setWindowTitle(s.sprintf("DMX Monitor - Universe %d", universe + 1));
+	qobject_cast <QMdiSubWindow*> (parentWidget())->setWindowTitle(
+		s.sprintf("DMX Monitor - Universe %d", universe + 1));
 
-	// TODO optimization
-	// repaint(true);
 	update();
 }
 
 void Monitor::setFrequency(int freq)
 {
-	if (m_speedMenu != NULL)
-	{
-		//m_speedMenu->setItemChecked(m_updateFrequency, false);
-		//m_speedMenu->setItemChecked(freq, true);
-	}
+	if (freq == 16)
+		m_16HzAction->setChecked(true);
+	else if (freq == 32)
+		m_32HzAction->setEnabled(true);
+	else
+		m_64HzAction->setEnabled(true);
 
 	m_updateFrequency = freq;
 
@@ -241,7 +291,7 @@ void Monitor::paintEvent(QPaintEvent* e)
 	int unitW = metrics.width(QString("000")) + X_OFFSET;
 	int unitH = metrics.height();
 	int unitsX = (rect().width() - X_OFFSET) / (unitW);
-	int y_offset = m_menuBar->height() + Y_OFFSET;
+	int y_offset = layout()->menuBar()->height() + Y_OFFSET;
 	int x_offset = X_OFFSET;
 	
 	// Wait until previous painter is finished
@@ -346,7 +396,7 @@ void Monitor::paintFixtureLabelAll(QRegion region, int x_offset, int y_offset,
 void Monitor::paintFixtureLabel(int x, int y, int w, int h, QString label)
 {
 	m_painter.fillRect(x, y, w, h, palette().color(QPalette::Highlight));
-		
+
 	m_painter.setPen(palette().color(QPalette::Shadow));
 	m_painter.drawRect(x, y, w, h);
 
@@ -389,9 +439,9 @@ void Monitor::paintChannelLabelAll(QRegion region, int x_offset, int y_offset,
 //
 void Monitor::paintChannelLabel(int x, int y, int w, int h, QString label)
 {
-	m_painter.setPen(palette().color(QPalette::Midlight));
+	m_painter.setPen(palette().color(QPalette::WindowText));
 	m_painter.eraseRect(x, y, w, h);
-	m_painter.drawText(x, y, w, h, Qt::AlignBottom, label);
+	m_painter.drawText(x, y, w, h, Qt::AlignLeft | Qt::AlignVCenter, label);
 }
 
 //

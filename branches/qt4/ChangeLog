@@ -1,5 +1,12 @@
 2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/monitor.cpp:
+	* main/src/monitor.h:
+
+	Fixed porting mistakes and omissions in monitor.
+
+2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/sceneeditor.cpp:
 
 	Fixed scene editor to work as previously.

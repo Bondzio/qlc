@@ -198,6 +198,8 @@ void ConsoleChannel::initMenu()
 		m_presetButton->setIcon(QIcon(PIXMAPS "/configure.png"));
 	else if (ch->group() == KQLCChannelGroupIntensity)
 		m_presetButton->setIcon(QIcon(PIXMAPS "/intensity.png"));
+	else if (ch->group() == KQLCChannelGroupBeam)
+		m_presetButton->setIcon(QIcon(PIXMAPS "/beam.png"));
 
 	// Initialize the preset menu only for normal fixtures,
 	// i.e. not for Generic dimmer fixtures

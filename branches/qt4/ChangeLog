@@ -1,6 +1,13 @@
 2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* gfx/Makefile.am:
+	* main/src/consolechannel.cpp:
+
+	Added an icon (bad one) for beam group.
+
+2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* gfx/Makefile.am:
 	* main/src/addfixture.cpp:
 	* main/src/addfixture.ui:
 	* main/src/app.cpp:

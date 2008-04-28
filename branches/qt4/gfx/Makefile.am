@@ -10,6 +10,7 @@ dist_appicons_DATA = \
 	apply.png \
 	attach.png \
 	back.png \
+	beam.png \
 	blackout.png \
 	bus.png \
 	button.png \

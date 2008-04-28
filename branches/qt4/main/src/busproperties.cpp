@@ -34,7 +34,15 @@
 
 BusProperties::BusProperties(QWidget* parent) : QWidget(parent)
 {
+	Q_ASSERT(parentWidget() != NULL);
+
 	setupUi(this);
+
+	connect(m_list, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotEdit()));
+	connect(m_edit, SIGNAL(clicked()), this, SLOT(slotEdit()));
+	connect(m_close, SIGNAL(clicked()), parentWidget(), SLOT(close()));
+
 	fillTree();
 }
 
@@ -42,7 +50,7 @@ BusProperties::~BusProperties()
 {
 }
 
-void BusProperties::slotEditClicked()
+void BusProperties::slotEdit()
 {
 	QTreeWidgetItem* item = m_list->currentItem();
 
@@ -59,8 +67,10 @@ void BusProperties::slotEditClicked()
 					     QLineEdit::Normal, Bus::name(id),
 					     &ok);
 		if (ok == true)
+		{
 			Bus::setName(id, name);
-		item->setText(KColumnID, name);
+			item->setText(KColumnName, name);
+		}
 	}
 }
 

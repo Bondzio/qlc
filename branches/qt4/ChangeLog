@@ -1,3 +1,11 @@
+2008-04-28  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/busproperties.cpp:
+	* main/src/busproperties.h:
+	* main/src/busproperties.ui:
+
+	Fixed porting mistakes in busproperties dialog.
+
 2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/dmxmap.cpp:

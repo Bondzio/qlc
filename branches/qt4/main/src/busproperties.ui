@@ -10,11 +10,20 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Form</string>
+   <string>Bus properties</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
     <widget class="QTreeWidget" name="m_list" >
+     <property name="rootIsDecorated" >
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable" >
+      <bool>false</bool>
+     </property>
+     <property name="allColumnsShowFocus" >
+      <bool>true</bool>
+     </property>
      <column>
       <property name="text" >
        <string>Bus ID</string>
@@ -30,7 +39,7 @@
    <item>
     <layout class="QHBoxLayout" >
      <item>
-      <widget class="QPushButton" name="m_editButton" >
+      <widget class="QPushButton" name="m_edit" >
        <property name="text" >
         <string>Edit</string>
        </property>
@@ -50,7 +59,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="m_closeButton" >
+      <widget class="QPushButton" name="m_close" >
        <property name="text" >
         <string>Close</string>
        </property>

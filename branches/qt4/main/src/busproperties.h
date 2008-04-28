@@ -35,11 +35,8 @@ public:
 	BusProperties(QWidget* parent);
 	~BusProperties();
 
-signals:
-	void closed();
-
 protected slots:
-	void slotEditClicked();
+	void slotEdit();
 
 protected:
 	void fillTree();

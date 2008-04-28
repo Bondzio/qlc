@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QHeaderView>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QSpinBox>
@@ -56,6 +57,8 @@ AddFixture::AddFixture(QWidget *parent) : QDialog(parent)
 	m_mode = NULL;
 
 	setupUi(this);
+
+	m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
 	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));

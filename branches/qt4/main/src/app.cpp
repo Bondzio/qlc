@@ -95,6 +95,7 @@ App::App() : QMainWindow()
 	m_blackoutIndicatorTimer = NULL;
 
 	init();
+	slotModeDesign();
 }
 
 App::~App()
@@ -278,7 +279,8 @@ void App::slotDMXMapBlackoutChanged(bool state)
 {
 	if (state == true)
 	{
-		m_blackoutIndicator->setText(tr("Blackout"));
+		m_blackoutIndicator->show();
+		m_controlBlackoutAction->setChecked(true);
 
 		connect(m_blackoutIndicatorTimer, SIGNAL(timeout()),
 			this, SLOT(slotFlashBlackoutIndicator()));
@@ -286,7 +288,8 @@ void App::slotDMXMapBlackoutChanged(bool state)
  	}
 	else
 	{
-		m_blackoutIndicator->setText(QString::null);
+		m_blackoutIndicator->hide();
+		m_controlBlackoutAction->setChecked(false);
 
 		m_blackoutIndicatorTimer->stop();
 		disconnect(m_blackoutIndicatorTimer, SIGNAL(timeout()),
@@ -475,9 +478,16 @@ void App::slotModeOperate()
 	if (m_mode == Operate)
 		return;
 
+	/* Set highlighted palette to mode indicator */
 	m_modeIndicator->setText(KModeTextOperate);
-	m_modeDesignAction->setEnabled(true);
-	m_modeOperateAction->setEnabled(false);
+	QPalette pal = palette();
+	pal.setColor(QPalette::Window,
+		     QApplication::palette().color(QPalette::Highlight));
+	pal.setColor(QPalette::WindowText,
+		     QApplication::palette().color(QPalette::HighlightedText));
+	m_modeIndicator->setPalette(pal);
+
+	m_modeOperateAction->setChecked(true);
 	
 	m_fileNewAction->setEnabled(false);
 	m_fileOpenAction->setEnabled(false);
@@ -532,9 +542,16 @@ void App::slotModeDesign()
 	/* Stop function consumer */
 	m_functionConsumer->stop();
 	
+	/* Set normal palette to mode indicator */
 	m_modeIndicator->setText(KModeTextDesign);
-	m_modeDesignAction->setEnabled(false);
-	m_modeOperateAction->setEnabled(true);
+	QPalette pal = palette();
+	pal.setColor(QPalette::Window,
+		     QApplication::palette().color(QPalette::Window));
+	pal.setColor(QPalette::WindowText,
+		     QApplication::palette().color(QPalette::WindowText));
+	m_modeIndicator->setPalette(pal);
+
+	m_modeDesignAction->setChecked(true);
 	
 	m_fileNewAction->setEnabled(true);
 	m_fileOpenAction->setEnabled(true);
@@ -631,15 +648,19 @@ void App::initActions()
 		this, SLOT(slotPluginManager()));
 
 	/* Mode actions */
-	m_modeOperateAction = new QAction(QIcon(PIXMAPS "/operate.png"),
-					  tr("Operate"), this);
-	connect(m_modeOperateAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotModeOperate()));
-
-	m_modeDesignAction = new QAction(QIcon(PIXMAPS "/design.png"),
-					 tr("Design"), this);
+	QActionGroup* modeGroup = new QActionGroup(this);
+	m_modeDesignAction = new QAction(tr("Design"), this);
+	m_modeDesignAction->setCheckable(true);
+	m_modeDesignAction->setChecked(true);
+	modeGroup->addAction(m_modeDesignAction);
 	connect(m_modeDesignAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotModeDesign()));
+
+	m_modeOperateAction = new QAction(tr("Operate"), this);
+	m_modeOperateAction->setCheckable(true);
+	modeGroup->addAction(m_modeOperateAction);
+	connect(m_modeOperateAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotModeOperate()));
 
 	/* Control actions */
 	m_controlVCAction = new QAction(QIcon(PIXMAPS "/virtualconsole.png"),
@@ -654,6 +675,7 @@ void App::initActions()
 
 	m_controlBlackoutAction = new QAction(QIcon(PIXMAPS "/blackout.png"),
 					      tr("Toggle Blackout"), this);
+	m_controlBlackoutAction->setCheckable(true);
 	connect(m_controlBlackoutAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotControlBlackout()));
 	
@@ -739,13 +761,19 @@ void App::initStatusBar()
 {
 	/* Mode Indicator */
 	m_modeIndicator = new QLabel(statusBar());
+	m_modeIndicator->setMargin(2);
 	m_modeIndicator->setText(KModeTextDesign);
-	statusBar()->addWidget(m_modeIndicator, 0);
+	m_modeIndicator->setAutoFillBackground(true);
+	statusBar()->addWidget(m_modeIndicator);
 
 	/* Blackout Indicator */
 	m_blackoutIndicatorTimer = new QTimer(this);
 	m_blackoutIndicator = new QLabel(statusBar());
-	statusBar()->addWidget(m_blackoutIndicator, 0);
+	m_blackoutIndicator->setMargin(2);
+	m_blackoutIndicator->setText(tr("Blackout"));
+	m_blackoutIndicator->setAutoFillBackground(true);
+	m_blackoutIndicator->hide();
+	statusBar()->addWidget(m_blackoutIndicator);
 }
 
 void App::initToolBar()
@@ -763,8 +791,6 @@ void App::initToolBar()
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_controlMonitorAction);
 	m_toolbar->addAction(m_controlBlackoutAction);
-	m_toolbar->addAction(m_modeDesignAction);
-	m_toolbar->addAction(m_modeOperateAction);
 }
 
 /*****************************************************************************
@@ -1012,6 +1038,7 @@ void App::slotFixtureManager()
 
 		m_fixtureManager->show();
 		sub->show();
+		sub->resize(600, 350);
 	}
 }
 
@@ -1031,14 +1058,12 @@ void App::slotFunctionManager()
 		sub->setWidget(m_functionManager);
 		sub->setAttribute(Qt::WA_DeleteOnClose);
 		sub->setWindowIcon(QIcon(PIXMAPS "/function.png"));
+		sub->setWindowTitle("Function Manager");
 
 		qobject_cast <QMdiArea*> (centralWidget())->addSubWindow(sub);
 
 		connect(m_functionManager, SIGNAL(destroyed(QObject*)),
 			this, SLOT(slotFunctionManagerDestroyed(QObject*)));
-
-		connect(m_functionManager, SIGNAL(closed()),
-			this, SLOT(slotFunctionManagerClosed()));
 
 		connect(m_doc, SIGNAL(fixtureAdded(t_fixture_id)),
 			m_functionManager,
@@ -1063,6 +1088,10 @@ void App::slotFunctionManager()
 		connect(m_doc, SIGNAL(functionChanged(t_function_id)),
 			m_functionManager,
 			SLOT(slotFunctionChanged(t_function_id)));
+
+		m_functionManager->show();
+		sub->show();
+		sub->resize(600, 450);
 	}
 }
 

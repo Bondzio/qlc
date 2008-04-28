@@ -23,6 +23,7 @@
 #include <QTreeWidgetItem>
 #include <QInputDialog>
 #include <QTreeWidget>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QCheckBox>
@@ -65,10 +66,6 @@ FunctionManager::FunctionManager(QWidget* parent) : QWidget(parent)
 	m_blockAddFunctionSignal = false;
 	m_blockRemoveFunctionSignal = false;
 
-	setWindowTitle("Function Manager");
-	setWindowIcon(QIcon(PIXMAPS "/function.png"));
-	resize(640, 480);
-
 	new QVBoxLayout(this);
 
 	initActions();
@@ -91,8 +88,7 @@ FunctionManager::FunctionManager(QWidget* parent) : QWidget(parent)
 	m_clipboard.clear();
 
 	// Select the first fixture
-	if (m_fixtureTree->topLevelItem(0) != NULL)
-		m_fixtureTree->topLevelItem(0)->setSelected(true);
+	m_fixtureTree->setCurrentItem(m_fixtureTree->topLevelItem(0));
 }
 
 FunctionManager::~FunctionManager()
@@ -235,26 +231,33 @@ void FunctionManager::slotFunctionChanged(t_function_id id)
 
 void FunctionManager::initActions()
 {
-	/* Add actions */
+	Q_ASSERT(parentWidget() != NULL);
+
+	/* Manage actions */
 	m_addSceneAction = new QAction(QIcon(PIXMAPS "/scene.png"),
-				       tr("Scene"), this);
+				       tr("New scene"), this);
 	connect(m_addSceneAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddScene()));
 
 	m_addChaserAction = new QAction(QIcon(PIXMAPS "/chaser.png"),
-					tr("Chaser"), this);
+					tr("New chaser"), this);
 	connect(m_addChaserAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddChaser()));
 
 	m_addCollectionAction = new QAction(QIcon(PIXMAPS "/collection.png"),
-					    tr("Collection"), this);
+					    tr("New collection"), this);
 	connect(m_addCollectionAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddCollection()));
 
 	m_addEFXAction = new QAction(QIcon(PIXMAPS "/efx.png"),
-				     tr("EFX"), this);
+				     tr("New EFX"), this);
 	connect(m_addEFXAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddEFX()));
+
+	m_closeAction = new QAction(QIcon(PIXMAPS "/close.png"),
+				    tr("Close"), this);
+	connect(m_closeAction, SIGNAL(triggered(bool)),
+		parentWidget(), SLOT(close()));
 
 	/* Edit actions */
 	m_editAction = new QAction(QIcon(PIXMAPS "/edit.png"),
@@ -294,8 +297,18 @@ void FunctionManager::initMenu()
 
 	layout()->setMenuBar(new QMenuBar(this));
 
+	/* Function menu */
+	m_manageMenu = new QMenu(this);
+	m_manageMenu->setTitle(tr("Manage"));
+	m_manageMenu->addAction(m_addSceneAction);
+	m_manageMenu->addAction(m_addChaserAction);
+	m_manageMenu->addAction(m_addCollectionAction);
+	m_manageMenu->addAction(m_addEFXAction);
+	m_manageMenu->addSeparator();
+	m_manageMenu->addAction(m_closeAction);
+
 	/* Edit menu */
-	m_editMenu = new QMenu(layout()->menuBar());
+	m_editMenu = new QMenu(this);
 	m_editMenu->setTitle("Edit");
 	m_editMenu->addAction(m_editAction);
 	m_editMenu->addSeparator();
@@ -308,14 +321,16 @@ void FunctionManager::initMenu()
 	m_editMenu->addSeparator();
 
 	/* Bus menu */
-	m_busMenu = new QMenu(layout()->menuBar());
+	QActionGroup* busGroup = new QActionGroup(this);
+	m_busMenu = new QMenu(this);
 	m_busMenu->setTitle("Bus");
-	m_editMenu->addMenu(m_busMenu);
 	for (t_bus_id id = KBusIDMin; id < KBusCount; id++)
 	{
 		/* <num>: <name> */
-		action = new QAction(
-			QString("%1: %2").arg(id).arg(Bus::name(id)), this);
+		action = new QAction(QString("%1: %2").arg(id)
+				     .arg(Bus::name(id)), this);
+		action->setCheckable(true);
+		busGroup->addAction(action);
 		m_busActions.append(action);
 		m_busMenu->addAction(action);
 	}
@@ -324,15 +339,10 @@ void FunctionManager::initMenu()
 	connect(Bus::emitter(), SIGNAL(nameChanged(t_bus_id, const QString&)),
 		this, SLOT(slotBusNameChanged(t_bus_id, const QString&)));
 
-	/* Add menu */
-	m_addMenu = new QMenu(layout()->menuBar());
-	m_addMenu->addAction(m_addSceneAction);
-	m_addMenu->addAction(m_addChaserAction);
-	m_addMenu->addAction(m_addCollectionAction);
-	m_addMenu->addAction(m_addEFXAction);
-
-	static_cast<QMenuBar*>(layout()->menuBar())->addMenu(m_addMenu);
+	/* Construct menu bar */
+	static_cast<QMenuBar*>(layout()->menuBar())->addMenu(m_manageMenu);
 	static_cast<QMenuBar*>(layout()->menuBar())->addMenu(m_editMenu);
+	m_editMenu->addMenu(m_busMenu);
 }
 
 void FunctionManager::initToolbar()
@@ -639,9 +649,11 @@ void FunctionManager::updateActionStatus()
 			m_deleteAction->setEnabled(true);
 			m_selectAllAction->setEnabled(true);
 
-			QListIterator <QAction*> it(m_busActions);
-			while (it.hasNext() == true)
-				it.next()->setEnabled(true);
+			m_busMenu->setEnabled(true);
+
+			/* TODO: Set the bus action selected, whose ID matches
+			   the currently selected function item (first of
+			   multiple selection?) */
 		}
 		else
 		{
@@ -653,9 +665,7 @@ void FunctionManager::updateActionStatus()
 			m_deleteAction->setEnabled(false);
 			m_selectAllAction->setEnabled(false);
 
-			QListIterator <QAction*> it(m_busActions);
-			while (it.hasNext() == true)
-				it.next()->setEnabled(false);
+			m_busMenu->setEnabled(false);
 		}
 
 		/* Check, whether clipboard contains something to paste */
@@ -665,7 +675,7 @@ void FunctionManager::updateActionStatus()
 		}
 		else
 		{
-			m_pasteAction->setEnabled(true);
+			m_pasteAction->setEnabled(false);
 			m_clipboardAction = ClipboardNone;
 		}
 	}
@@ -680,30 +690,20 @@ void FunctionManager::initFixtureTree()
 	// Create the tree view as the first child of the splitter
 	m_fixtureTree = new QTreeWidget(m_splitter);
 	m_splitter->addWidget(m_fixtureTree);
-/*
-	m_fixtureTree->setMultiSelection(false);
-	m_fixtureTree->setAllColumnsShowFocus(true);
-	m_fixtureTree->setSorting(KColumnName, true);
-	m_fixtureTree->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
-	m_fixtureTree->header()->setClickEnabled(true);
-	m_fixtureTree->header()->setResizeEnabled(false);
-	m_fixtureTree->header()->setMovingEnabled(false);
-	m_fixtureTree->header()->setSortIndicator(KColumnName, Ascending);
-*/
 	// Add the one and only column
-	QStringList labels;
-	labels << "Fixture";
-	m_fixtureTree->setHeaderLabels(labels);
-	//m_fixtureTree->setResizeMode(QListView::AllColumns);
+	m_fixtureTree->setHeaderLabel(tr("Fixture"));
+	m_fixtureTree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
 	// Catch selection changes
-	connect(m_fixtureTree, SIGNAL(selectionChanged()),
+	connect(m_fixtureTree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotFixtureTreeSelectionChanged()));
 
 	// Catch right-mouse clicks
-	connect(m_fixtureTree, SIGNAL(contextMenuRequested(const QPoint&)),
-		this, SLOT(slotFixtureTreeContextMenuRequested(const QPoint&)));
+	connect(m_fixtureTree,
+		SIGNAL(customContextMenuRequested(const QPoint&)),
+		this,
+		SLOT(slotFixtureTreeContextMenuRequested(const QPoint&)));
 
 	updateFixtureTree();
 }
@@ -771,7 +771,7 @@ void FunctionManager::slotFixtureTreeContextMenuRequested(const QPoint& pos)
 {
 	QMenu contextMenu(this);
 	contextMenu.setTitle("Fixture");
-	contextMenu.addMenu(m_addMenu);
+	contextMenu.addMenu(m_manageMenu);
 	contextMenu.addMenu(m_editMenu);
 
 	updateActionStatus();
@@ -798,35 +798,26 @@ void FunctionManager::initFunctionTree()
 	// Create the tree view as the second child of the splitter
 	m_functionTree = new QTreeWidget(m_splitter);
 	m_splitter->addWidget(m_functionTree);
-/*
-	// Normal multi-selection behaviour
-	m_functionTree->setSelectionMode(QListView::Extended);
-	m_functionTree->setAllColumnsShowFocus(true);
-	m_functionTree->setSorting(KColumnName, true);
-	m_functionTree->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
-	m_functionTree->header()->setClickEnabled(true);
-	m_functionTree->header()->setResizeEnabled(true);
-	m_functionTree->header()->setMovingEnabled(false);
-	m_functionTree->header()->setSortIndicator(KColumnName, Ascending);
-*/
 	// Add two columns for function and bus
 	QStringList labels;
 	labels << "Function" << "Bus";
 	m_functionTree->setHeaderLabels(labels);
-	// m_functionTree->setResizeMode(QListView::LastColumn);
+	m_functionTree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
 	// Catch selection changes
-	connect(m_functionTree, SIGNAL(selectionChanged()),
+	connect(m_functionTree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotFunctionTreeSelectionChanged()));
 
 	// Catch mouse double clicks
-	connect(m_functionTree,	SIGNAL(doubleClicked(QTreeWidgetItem*)),
+	connect(m_functionTree,	SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
 		this, SLOT(slotEdit()));
 
 	// Catch right-mouse clicks
-	connect(m_functionTree,	SIGNAL(contextMenuRequested(const QPoint&)),
-		this, SLOT(slotFunctionTreeContextMenuRequested(const QPoint&)));
+	connect(m_functionTree,
+		SIGNAL(customContextMenuRequested(const QPoint&)),
+		this,
+		SLOT(slotFunctionTreeContextMenuRequested(const QPoint&)));
 }
 
 void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
@@ -867,8 +858,7 @@ void FunctionManager::slotFunctionTreeSelectionChanged()
 void FunctionManager::slotFunctionTreeContextMenuRequested(const QPoint& pos)
 {
 	QMenu contextMenu(this);
-	contextMenu.setTitle("Function");
-	contextMenu.addMenu(m_addMenu);
+	contextMenu.addMenu(m_manageMenu);
 	contextMenu.addMenu(m_editMenu);
 
 	updateActionStatus();

@@ -175,7 +175,6 @@ void FixtureManager::initDataView()
 	// Create the list view
 	m_tree = new QTreeWidget(this);
 	m_splitter->addWidget(m_tree);
-	//m_splitter->setResizeMode(m_tree, QSplitter::Auto);
 
 	QStringList labels;
 	labels << "Universe" << "Address" << "Name";
@@ -186,7 +185,7 @@ void FixtureManager::initDataView()
 	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));
 
-	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*)),
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
 		this, SLOT(slotDoubleClicked(QTreeWidgetItem*)));
 
 	connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -195,7 +194,9 @@ void FixtureManager::initDataView()
 	// Create the text view
 	m_info = new QTextBrowser(this);
 	m_splitter->addWidget(m_info);
-	//m_splitter->setResizeMode(m_info, QSplitter::Auto);
+
+	m_splitter->setStretchFactor(0, 1);
+	m_splitter->setStretchFactor(1, 0);
 
 	slotSelectionChanged();
 }

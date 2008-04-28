@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>504</width>
     <height>447</height>
    </rect>
   </property>
@@ -49,7 +49,7 @@
             <item>
              <widget class="QLineEdit" name="m_nameEdit" >
               <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>

@@ -1,3 +1,18 @@
+2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* gfx/Makefile.am:
+	* main/src/addfixture.cpp:
+	* main/src/addfixture.ui:
+	* main/src/app.cpp:
+	* main/src/efxeditor.ui:
+	* main/src/fixturemanager.cpp:
+	* main/src/functionmanager.cpp:
+	* main/src/functionmanager.h:
+
+	Renamed player_play.png to operate.png and player_stop.png to design.png
+	Fixed some very basic things in function manager.
+	Fixed addfixture dialog's initial size and header widths.
+	
 2008-04-28  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/busproperties.cpp:

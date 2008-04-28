@@ -169,7 +169,7 @@ protected:
 	void updateActionStatus();
 
 protected:
-	QMenu* m_addMenu;
+	QMenu* m_manageMenu;
 	QMenu* m_editMenu;
 	QMenu* m_busMenu;
 
@@ -179,6 +179,7 @@ protected:
 	QAction* m_addChaserAction;
 	QAction* m_addCollectionAction;
 	QAction* m_addEFXAction;
+	QAction* m_closeAction;
 
 	QAction* m_cutAction;
 	QAction* m_copyAction;

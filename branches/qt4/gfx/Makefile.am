@@ -20,6 +20,7 @@ dist_appicons_DATA = \
 	configure.png \
 	console.png \
 	detach.png \
+	design.png \
 	down.png \
 	efx.png \
 	editclear.png \
@@ -52,11 +53,10 @@ dist_appicons_DATA = \
 	label.png \
 	maintenance.png \
 	monitor.png \
+	operate.png \
 	pan.png \
 	panic.png \
 	plugin.png \
-	player_play.png \
-	player_stop.png \
 	prism.png \
 	qlc-big.png \
 	qlc-fixtureeditor.png \

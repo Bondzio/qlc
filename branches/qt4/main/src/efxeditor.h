@@ -61,7 +61,7 @@ protected:
 	void fillSceneLists();
 
 protected slots:
-	void slotNameChanged(const QString &text);
+	void slotNameEdited(const QString &text);
 
 	void slotAlgorithmSelected(const QString &text);
 	void slotWidthSpinChanged(int value);
@@ -75,17 +75,21 @@ protected slots:
 	void slotXPhaseSpinChanged(int value);
 	void slotYPhaseSpinChanged(int value);
 
-	void slotHorizontalChannelSelected(int index);
-	void slotVerticalChannelSelected(int index);
+	void slotLoopClicked();
+	void slotSingleShotClicked();
+	void slotPingPongClicked();
+
+	void slotForwardClicked();
+	void slotBackwardClicked();
+
+	void slotXAxisActivated(int index);
+	void slotYAxisActivated(int index);
   
-	void slotStartSceneCheckboxToggled(bool);
-	void slotStopSceneCheckboxToggled(bool);
+	void slotStartSceneGroupToggled(bool);
+	void slotStopSceneGroupToggled(bool);
 
 	void slotStartSceneListSelectionChanged();
 	void slotStopSceneListSelectionChanged();
-
-	void slotDirectionClicked(int item);
-	void slotRunOrderClicked(int item);
 
 protected:
 	EFXPreviewArea* m_previewArea;

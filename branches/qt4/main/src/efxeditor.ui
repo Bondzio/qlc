@@ -81,7 +81,7 @@
              </widget>
             </item>
             <item row="0" column="1" >
-             <widget class="QComboBox" name="m_horizontalCombo" />
+             <widget class="QComboBox" name="m_xCombo" />
             </item>
             <item row="3" column="0" >
              <widget class="QLabel" name="m_verticalLabel" >
@@ -91,10 +91,10 @@
              </widget>
             </item>
             <item row="3" column="1" >
-             <widget class="QComboBox" name="m_verticalCombo" />
+             <widget class="QComboBox" name="m_yCombo" />
             </item>
             <item row="1" column="1" >
-             <widget class="QComboBox" name="m_horizontalFineCombo" >
+             <widget class="QComboBox" name="m_xFineCombo" >
               <property name="enabled" >
                <bool>false</bool>
               </property>
@@ -121,7 +121,7 @@
              </widget>
             </item>
             <item row="4" column="1" >
-             <widget class="QComboBox" name="m_verticalFineCombo" >
+             <widget class="QComboBox" name="m_yFineCombo" >
               <property name="enabled" >
                <bool>false</bool>
               </property>
@@ -394,21 +394,24 @@
          </property>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QRadioButton" name="m_loopModeButton" >
+           <widget class="QRadioButton" name="m_loop" >
             <property name="text" >
              <string>Loop</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="m_singleShotModeButton" >
+           <widget class="QRadioButton" name="m_singleShot" >
             <property name="text" >
              <string>Single shot</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="m_pingPongModeButton" >
+           <widget class="QRadioButton" name="m_pingPong" >
             <property name="text" >
              <string>Ping pong</string>
             </property>
@@ -424,14 +427,17 @@
          </property>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QRadioButton" name="m_forwardDirectionButton" >
+           <widget class="QRadioButton" name="m_forward" >
             <property name="text" >
              <string>Forward</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="m_backwardDirectionButton" >
+           <widget class="QRadioButton" name="m_backward" >
             <property name="text" >
              <string>Backward</string>
             </property>

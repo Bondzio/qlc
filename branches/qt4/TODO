@@ -40,6 +40,10 @@
   there is no "default" input plugin.
 
 * EFX's and EFXEditor to support 16bit values
+* Preview point array away from EFX and into EFXEditor
+* EFXEditor to support Cancel (now it just edits the EFX directly)
+  -> Do it with EFX's copy constructor: edit the copied version and
+   copy the duplicate's properties back to the actual one in accept() slot.
 * EFXEditor to support channel groups (now it searches for "pan" or "tilt")
 * Phase parameter to EFX's so that multiple fixtures can do cooler effects.
   -> Elie Roux:
@@ -133,3 +137,4 @@
 * VCXYPadProperties - possibility to add/select/edit multiple channels
 
 * Cut, copy paste to virtual console
+

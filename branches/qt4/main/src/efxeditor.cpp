@@ -40,14 +40,66 @@
 
 extern App* _app;
 
-EFXEditor::EFXEditor(QWidget* parent, EFX* efx)
-	: QDialog(parent)
+EFXEditor::EFXEditor(QWidget* parent, EFX* efx) : QDialog(parent)
 {
 	Q_ASSERT(efx != NULL);
 
 	setupUi(this);
 
 	m_previewArea = new EFXPreviewArea(m_previewFrame);
+
+	/* General page UI connections */
+	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+		this, SLOT(slotNameEdited(const QString&)));
+
+	connect(m_xCombo, SIGNAL(activated(int)),
+		this, SLOT(slotXAxisActivated(int)));
+	connect(m_yCombo, SIGNAL(activated(int)),
+		this, SLOT(slotYAxisActivated(int)));
+
+	connect(m_algorithmCombo, SIGNAL(activated(const QString&)),
+		this, SLOT(slotAlgorithmSelected(const QString&)));
+	connect(m_widthSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotWidthSpinChanged(int)));
+	connect(m_heightSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotHeightSpinChanged(int)));
+	connect(m_xOffsetSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotXOffsetSpinChanged(int)));
+	connect(m_yOffsetSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotYOffsetSpinChanged(int)));
+	connect(m_rotationSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotRotationSpinChanged(int)));
+
+	connect(m_xFrequencySpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotXFrequencySpinChanged(int)));
+	connect(m_yFrequencySpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotYFrequencySpinChanged(int)));
+	connect(m_xPhaseSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotXPhaseSpinChanged(int)));
+	connect(m_yPhaseSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotYPhaseSpinChanged(int)));
+
+	/* Advanced page UI connections */
+	connect(m_loop, SIGNAL(clicked()),
+		this, SLOT(slotLoopClicked()));
+	connect(m_singleShot, SIGNAL(clicked()),
+		this, SLOT(slotSingleShotClicked()));
+	connect(m_pingPong, SIGNAL(clicked()),
+		this, SLOT(slotPingPongClicked()));
+
+	connect(m_forward, SIGNAL(clicked()),
+		this, SLOT(slotForwardClicked()));
+	connect(m_backward, SIGNAL(clicked()),
+		this, SLOT(slotBackwardClicked()));
+
+	connect(m_startSceneGroup, SIGNAL(toggled(bool)),
+		this, SLOT(slotStartSceneGroupToggled(bool)));
+	connect(m_stopSceneGroup, SIGNAL(toggled(bool)),
+		this, SLOT(slotStopSceneGroupToggled(bool)));	
+	connect(m_startSceneList, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotStartSceneListSelectionChanged()));
+	connect(m_stopSceneList, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotStopSceneListSelectionChanged()));
 
 	/* Get supported algorithms and fill the algorithm combo with them */
 	QStringList list;
@@ -77,6 +129,7 @@ void EFXEditor::setEFX(EFX* efx)
 
 	/* Set the algorithm's name to the name field */
 	m_nameEdit->setText(m_efx->name());
+	slotNameEdited(m_efx->name());
 
 	/* Causes the EFX function to update the preview point array */
 	slotAlgorithmSelected(m_efx->algorithm());
@@ -111,13 +164,13 @@ void EFXEditor::setEFX(EFX* efx)
 	{
 	default:
 	case Function::Loop:
-		m_loopModeButton->setChecked(true);
+		m_loop->setChecked(true);
 		break;
 	case Function::SingleShot:
-		m_singleShotModeButton->setChecked(true);
+		m_singleShot->setChecked(true);
 		break;
 	case Function::PingPong:
-		m_pingPongModeButton->setChecked(true);
+		m_pingPong->setChecked(true);
 		break;
 	}
 
@@ -125,10 +178,10 @@ void EFXEditor::setEFX(EFX* efx)
 	{
 	default:
 	case Function::Forward:
-		m_forwardDirectionButton->setChecked(true);
+		m_forward->setChecked(true);
 		break;
 	case Function::Backward:
-		m_backwardDirectionButton->setChecked(true);
+		m_backward->setChecked(true);
 		break;
 	}
 
@@ -153,16 +206,16 @@ void EFXEditor::fillChannelCombos()
 			// Insert ch:name strings to combos for
 			// normal fixtures
 			s = QString("%1: %2").arg(i + 1).arg(ch->name());
-			m_horizontalCombo->addItem(s);
-			m_verticalCombo->addItem(s);
+			m_xCombo->addItem(s);
+			m_yCombo->addItem(s);
 		}
 		else
 		{
 			// Insert ch:Level strings to combos
 			// for generic dimmer fixtures
 			s = QString("%1: Level").arg(i + 1);
-			m_horizontalCombo->addItem(s);
-			m_verticalCombo->addItem(s);
+			m_xCombo->addItem(s);
+			m_yCombo->addItem(s);
 		}
 	}
 
@@ -170,7 +223,7 @@ void EFXEditor::fillChannelCombos()
 	if (m_efx->xChannel() != KChannelInvalid)
 	{
 		/* If the EFX already has a valid x channel, select it instead */
-		m_horizontalCombo->setCurrentIndex(m_efx->xChannel());
+		m_xCombo->setCurrentIndex(m_efx->xChannel());
 	}
 	else if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)
 	{
@@ -183,7 +236,7 @@ void EFXEditor::fillChannelCombos()
 			// Select the first channel that contains "pan"
 			if (ch->name().contains("pan", Qt::CaseInsensitive))
 			{
-				m_horizontalCombo->setCurrentIndex(i);
+				m_xCombo->setCurrentIndex(i);
 				m_efx->setXChannel(i);
 				break;
 			}
@@ -191,7 +244,7 @@ void EFXEditor::fillChannelCombos()
 	}
 	else
 	{
-		m_horizontalCombo->setCurrentIndex(0);
+		m_xCombo->setCurrentIndex(0);
 		m_efx->setXChannel(0);
 	}
 
@@ -199,7 +252,7 @@ void EFXEditor::fillChannelCombos()
 	if (m_efx->yChannel() != KChannelInvalid)
 	{
 		/* If the EFX already has valid y channel, select it instead */
-		m_verticalCombo->setCurrentIndex(m_efx->yChannel());
+		m_yCombo->setCurrentIndex(m_efx->yChannel());
 	}
 	else if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)
 	{
@@ -213,7 +266,7 @@ void EFXEditor::fillChannelCombos()
 			// Select the first channel that contains "tilt"
 			if (ch->name().contains("tilt", Qt::CaseInsensitive))
 			{
-				m_verticalCombo->setCurrentIndex(i);
+				m_yCombo->setCurrentIndex(i);
 				m_efx->setYChannel(i);
 				break;
 			}
@@ -221,15 +274,15 @@ void EFXEditor::fillChannelCombos()
 	}
 	else
 	{
-		m_horizontalCombo->setCurrentIndex(0);
+		m_yCombo->setCurrentIndex(0);
 		m_efx->setXChannel(0);
 	}
 }
 
 void EFXEditor::fillSceneLists()
 {
-	Function* function = NULL;
-	QTreeWidgetItem* item = NULL;
+	Function* function;
+	QTreeWidgetItem* item;
 	QTreeWidgetItem* startItem = NULL;
 	QTreeWidgetItem* stopItem = NULL;
 	QString s;
@@ -253,7 +306,7 @@ void EFXEditor::fillSceneLists()
 			/* Select the scene from the start scene list */
 			if (m_efx->startScene() == function->id())
 			{
-				item->setSelected(true);
+				m_startSceneList->setCurrentItem(item);
 				startItem = item;
 			}
 
@@ -265,48 +318,34 @@ void EFXEditor::fillSceneLists()
 			/* Select the scene from the stop scene list */
 			if (m_efx->stopScene() == function->id())
 			{
-				item->setSelected(true);
+				m_stopSceneList->setCurrentItem(item);
 				stopItem = item;
 			}
 		}
 	}
   
+	/* Make sure that the selected start scene item is visible */
 	if (startItem != NULL)
-	{
-		/* Make sure that the selected item is visible */
 		m_startSceneList->scrollToItem(startItem);
-	}
 
+	/* Make sure that the selected stop scene item is visible */
 	if (stopItem != NULL)
-	{
-		/* Make sure that the selected item is visible */
 		m_stopSceneList->scrollToItem(stopItem);
-	}
 
+	/* Start scene enabled status */
 	if (m_efx->startSceneEnabled() == true)
-	{
 		m_startSceneGroup->setChecked(true);
-		m_startSceneList->setEnabled(true);
-	}
 	else
-	{
 		m_startSceneGroup->setChecked(false);
-		m_startSceneList->setEnabled(false);
-	}
 
+	/* Stop scene enabled status */
 	if (m_efx->stopSceneEnabled() == true)
-	{
 		m_stopSceneGroup->setChecked(true);
-		m_stopSceneList->setEnabled(true);
-	}
 	else
-	{
 		m_stopSceneGroup->setChecked(false);
-		m_stopSceneList->setEnabled(false);
-	}
 }
 
-void EFXEditor::slotNameChanged(const QString &text)
+void EFXEditor::slotNameEdited(const QString &text)
 {
 	Q_ASSERT(m_efx != NULL);
 
@@ -440,7 +479,7 @@ void EFXEditor::slotYPhaseSpinChanged(int value)
 	m_previewArea->repaint();
 }
 
-void EFXEditor::slotHorizontalChannelSelected(int channel)
+void EFXEditor::slotXAxisActivated(int channel)
 {
 	Q_ASSERT(m_efx != NULL);
 
@@ -449,7 +488,7 @@ void EFXEditor::slotHorizontalChannelSelected(int channel)
 	m_previewArea->repaint();
 }
 
-void EFXEditor::slotVerticalChannelSelected(int channel)
+void EFXEditor::slotYAxisActivated(int channel)
 {
 	Q_ASSERT(m_efx != NULL);
 
@@ -458,24 +497,56 @@ void EFXEditor::slotVerticalChannelSelected(int channel)
 	m_previewArea->repaint();
 }
 
-void EFXEditor::slotStartSceneCheckboxToggled(bool state)
+/*****************************************************************************
+ * Run order
+ *****************************************************************************/
+
+void EFXEditor::slotLoopClicked()
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setRunOrder(Function::Loop);
+}
+
+void EFXEditor::slotSingleShotClicked()
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setRunOrder(Function::SingleShot);
+}
+
+void EFXEditor::slotPingPongClicked()
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setRunOrder(Function::PingPong);
+}
+
+/*****************************************************************************
+ * Direction
+ *****************************************************************************/
+
+void EFXEditor::slotForwardClicked()
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setDirection(Function::Forward);
+}
+
+void EFXEditor::slotBackwardClicked()
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setDirection(Function::Backward);
+}
+
+/*****************************************************************************
+ * Start scene
+ *****************************************************************************/
+
+void EFXEditor::slotStartSceneGroupToggled(bool state)
 {
 	Q_ASSERT(m_efx != NULL);
 
-	m_startSceneList->setEnabled(state);
+	//m_startSceneList->setEnabled(state);
 	m_efx->setStartSceneEnabled(state);
 
 	slotStartSceneListSelectionChanged();
-}
-
-void EFXEditor::slotStopSceneCheckboxToggled(bool state)
-{
-	Q_ASSERT(m_efx != NULL);
-
-	m_stopSceneList->setEnabled(state);
-	m_efx->setStopSceneEnabled(state);
-
-	slotStopSceneListSelectionChanged();
 }
 
 void EFXEditor::slotStartSceneListSelectionChanged()
@@ -487,6 +558,20 @@ void EFXEditor::slotStartSceneListSelectionChanged()
 		m_efx->setStartScene(item->text(1).toInt());
 }
 
+/*****************************************************************************
+ * Stop scene
+ *****************************************************************************/
+
+void EFXEditor::slotStopSceneGroupToggled(bool state)
+{
+	Q_ASSERT(m_efx != NULL);
+
+	//m_stopSceneList->setEnabled(state);
+	m_efx->setStopSceneEnabled(state);
+
+	slotStopSceneListSelectionChanged();
+}
+
 void EFXEditor::slotStopSceneListSelectionChanged()
 {
 	Q_ASSERT(m_efx != NULL);
@@ -494,20 +579,6 @@ void EFXEditor::slotStopSceneListSelectionChanged()
 	QTreeWidgetItem* item = m_stopSceneList->currentItem();
 	if (item != NULL)
 		m_efx->setStopScene(item->text(1).toInt());
-}
-
-void EFXEditor::slotDirectionClicked(int item)
-{
-	Q_ASSERT(m_efx != NULL);
-
-	m_efx->setDirection((EFX::Direction) item);
-}
-
-void EFXEditor::slotRunOrderClicked(int item)
-{
-	Q_ASSERT(m_efx != NULL);
-
-	m_efx->setRunOrder((EFX::RunOrder) item);
 }
 
 /*****************************************************************************

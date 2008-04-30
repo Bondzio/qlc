@@ -499,15 +499,15 @@ void App::slotModeOperate()
 	
 	/* Close function manager if it's open */
 	if (m_functionManager != NULL)
-		m_functionManager->close();
+		m_functionManager->parentWidget()->close();
 	
 	/* Close fixture manager if it's open */
 	if (m_fixtureManager != NULL)
-		m_fixtureManager->close();
+		m_fixtureManager->parentWidget()->close();
 	
 	/* Close bus manager if it's open */
 	if (m_busManager != NULL)
-		m_busManager->close();
+		m_busManager->parentWidget()->close();
 	
 	/* Start function consumer */
 	m_functionConsumer->start();
@@ -1020,6 +1020,7 @@ void App::slotFixtureManager()
 		sub->setWidget(m_fixtureManager);
 		sub->setAttribute(Qt::WA_DeleteOnClose);
 		sub->setWindowIcon(QIcon(PIXMAPS "/fixture.png"));
+		sub->setWindowTitle(tr("Fixture Manager"));
 
 		qobject_cast <QMdiArea*> (centralWidget())->addSubWindow(sub);
 

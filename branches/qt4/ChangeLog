@@ -1,3 +1,14 @@
+2008-04-30  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
+	* main/src/app.cpp:
+	* main/src/efxeditor.cpp:
+	* main/src/efxeditor.h:
+	* main/src/efxeditor.ui:
+	* main/src/fixturemanager.cpp:
+
+	Fixed EFXEditor.
+	
 2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* gfx/Makefile.am:

@@ -75,10 +75,6 @@ FixtureManager::FixtureManager(QWidget* parent) : QWidget(parent)
 {
 	new QVBoxLayout(this);
 
-	// Name and icon
-	setWindowTitle(QString("Fixture Manager"));
-	setWindowIcon(QIcon(PIXMAPS "/fixture.png"));
-
 	initActions();
 	initToolBar();
 	initDataView();

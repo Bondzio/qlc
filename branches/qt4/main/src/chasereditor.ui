@@ -30,7 +30,13 @@
    <item>
     <layout class="QHBoxLayout" >
      <item>
-      <widget class="QTreeWidget" name="m_stepList" >
+      <widget class="QTreeWidget" name="m_tree" >
+       <property name="rootIsDecorated" >
+        <bool>false</bool>
+       </property>
+       <property name="allColumnsShowFocus" >
+        <bool>true</bool>
+       </property>
        <column>
         <property name="text" >
          <string>Step</string>
@@ -56,28 +62,28 @@
      <item>
       <layout class="QVBoxLayout" >
        <item>
-        <widget class="QToolButton" name="m_addButton" >
+        <widget class="QToolButton" name="m_add" >
          <property name="text" >
           <string>...</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="m_removeButton" >
+        <widget class="QToolButton" name="m_remove" >
          <property name="text" >
           <string>...</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="m_raiseButton" >
+        <widget class="QToolButton" name="m_raise" >
          <property name="text" >
           <string>...</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="m_lowerButton" >
+        <widget class="QToolButton" name="m_lower" >
          <property name="text" >
           <string>...</string>
          </property>

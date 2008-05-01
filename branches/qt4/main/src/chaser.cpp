@@ -103,9 +103,9 @@ void Chaser::addStep(t_function_id id)
 	m_startMutex.unlock();
 }
 
-void Chaser::removeStep(int index)
+void Chaser::removeStep(unsigned int index)
 {
-	Q_ASSERT(((unsigned int)index) < m_steps.count());
+	Q_ASSERT(index < m_steps.size());
 
 	m_startMutex.lock();
 
@@ -298,7 +298,7 @@ bool Chaser::loadXML(QDomDocument* doc, QDomElement* root)
 				tag.attribute(KXMLQLCFunctionNumber).toInt();
 			step_fxi = tag.text().toInt();
 
-			if (step_number > m_steps.size())
+			if (step_number >= m_steps.size())
 				m_steps.append(step_fxi);
 			else
 				m_steps.insert(m_steps.at(step_number),

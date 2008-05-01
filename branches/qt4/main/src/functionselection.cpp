@@ -90,13 +90,22 @@ QTreeWidgetItem* FunctionSelection::fixtureItem(t_fixture_id fxi_id, Doc* doc)
 			return item; // Fixture item found, return immediately
 	}
 
-	/* Fixture item was not found. So create one. */
+	/* Fixture item was not found, so create one. */
 	fxi = doc->fixture(fxi_id);
-	Q_ASSERT(fxi != NULL);
-
-	parent = new QTreeWidgetItem(m_tree);
-	parent->setText(KColumnName, fxi->name());
-	parent->setText(KColumnID, str.setNum(fxi->id()));
+	if (fxi != NULL)
+	{
+		/* The function is a fixture function (Scene/EFX) */
+		parent = new QTreeWidgetItem(m_tree);
+		parent->setText(KColumnName, fxi->name());
+		parent->setText(KColumnID, str.setNum(fxi->id()));
+	}
+	else
+	{
+		/* The function is a global function (Chaser/Collection) */
+		parent = new QTreeWidgetItem(m_tree);
+		parent->setText(KColumnName, tr("Global"));
+		parent->setText(KColumnID, str.setNum(KNoID));
+	}
 
 	/* Removes all other flags (including Qt::ItemIsSelectable)
 	   which should prevent us from having to check, whether the user

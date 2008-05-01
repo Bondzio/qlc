@@ -50,6 +50,9 @@ protected:
 protected slots:
 	void accept();
 
+	/** Name has been edited */
+	void slotNameEdited(const QString& text);
+
 	/** Add a step */
 	void slotAddClicked();
 
@@ -63,9 +66,12 @@ protected slots:
 	void slotLowerClicked();
 
 protected:
+	/** The copied chaser that is being edited */
 	Chaser* m_chaser;
+
+	/** The original chaser, whose contents will be replaced with the
+	    contents of m_chaser, only if OK is clicked. */
 	Chaser* m_original;
-	FunctionSelection* m_functionSelection;
 };
 
 #endif

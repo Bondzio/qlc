@@ -1,3 +1,11 @@
+* "Delete something" and "Remove something" are used here and there,
+   without consistency. Pick either one and update all dialogs to use
+   the same term. i.e. "Do you want to delete/remove these fixtures?"
+
+* Editor dialogs should put an asterisk (*) after the title to signify
+  modified state when appropriate: "<Editor name> - <Edited object>(*)"
+  e.g. "EFXEditor - New EFX*"
+
 * AssignHotKey, AssignSliderHotkey, KeyBind, SliderKeyBind
 	-> Exchange them to something faster and rational
 
@@ -12,12 +20,6 @@
 * Enable BusManager item renaming (i.e. remove QInputDialog)
 
 * Remove startMutex from Chaser -- WTF is it for?
-
-* Add FunctionSelection to SF.net SVN
-
-* Remove plain selection capabilities from FunctionManager
-
-* ConsoleChannel's value menus...? Do they work, allocation & deletion.
 
 * Plugins', Fixtures, FixtureManager's RichText colors
 

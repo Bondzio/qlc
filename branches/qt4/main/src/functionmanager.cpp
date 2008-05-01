@@ -30,6 +30,7 @@
 #include <QSplitter>
 #include <QToolBar>
 #include <QMenuBar>
+#include <iostream>
 #include <QPixmap>
 #include <QMenu>
 #include <QList>
@@ -52,6 +53,8 @@
 #define KColumnName 0
 #define KColumnBus  1
 #define KColumnID   2
+
+using namespace std;
 
 extern App* _app;
 
@@ -694,6 +697,9 @@ void FunctionManager::initFixtureTree()
 	// Add the one and only column
 	m_fixtureTree->setHeaderLabel(tr("Fixture"));
 	m_fixtureTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+	m_fixtureTree->setRootIsDecorated(false);
+	m_fixtureTree->setAllColumnsShowFocus(true);
+	m_fixtureTree->setSelectionMode(QAbstractItemView::SingleSelection);
 
 	// Catch selection changes
 	connect(m_fixtureTree, SIGNAL(itemSelectionChanged()),
@@ -804,6 +810,9 @@ void FunctionManager::initFunctionTree()
 	labels << "Function" << "Bus";
 	m_functionTree->setHeaderLabels(labels);
 	m_functionTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+	m_functionTree->setRootIsDecorated(false);
+	m_functionTree->setAllColumnsShowFocus(true);
+	m_functionTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	// Catch selection changes
 	connect(m_functionTree, SIGNAL(itemSelectionChanged()),
@@ -834,20 +843,23 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
 
 void FunctionManager::deleteSelectedFunctions()
 {
-	QTreeWidgetItem* item;
-	t_function_id fid;
-
-	// Delete functions and listview items
-	while ((item = m_functionTree->selectedItems().takeFirst()) != NULL)
+	m_blockRemoveFunctionSignal = true;
+	QListIterator <QTreeWidgetItem*> it(m_functionTree->selectedItems());
+	while (it.hasNext() == true)
 	{
-		fid = item->text(KColumnID).toInt();
+		QTreeWidgetItem* item;
+		t_function_id fid;
 
-		m_blockRemoveFunctionSignal = true;
+		item = it.next();
+		fid = item->text(KColumnID).toInt();
 		_app->doc()->deleteFunction(fid);
-		m_blockRemoveFunctionSignal = false;
-		
+
+		/* This is pretty weird, since QTreeWidget::selectedItems()
+		   is const, but this seems to work so let's ship it... */
 		delete item;
 	}
+
+	m_blockRemoveFunctionSignal = false;
 }
 
 void FunctionManager::slotFunctionTreeSelectionChanged()

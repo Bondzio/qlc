@@ -1,3 +1,16 @@
+2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
+	* main/src/chaser.cpp:
+	* main/src/chaser.h:
+	* main/src/chasereditor.cpp:
+	* main/src/chasereditor.h:
+	* main/src/chasereditor.ui:
+	* main/src/functionmanager.cpp:
+	* main/src/functionselection.cpp:
+
+	Fixed ChaserEditor and FunctionManager::remove.
+	
 2008-04-30  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* TODO:

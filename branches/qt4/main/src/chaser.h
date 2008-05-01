@@ -63,7 +63,7 @@ public:
 	void addStep(t_function_id);
 
 	/** Remove a function from the given step index */
-	void removeStep(int index = 0);
+	void removeStep(unsigned int index = 0);
 
 	/** Raise the given step once (move it one step earlier) */
 	bool raiseStep(unsigned int index);

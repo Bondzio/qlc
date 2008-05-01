@@ -492,7 +492,7 @@ void App::slotModeOperate()
 	m_fileNewAction->setEnabled(false);
 	m_fileOpenAction->setEnabled(false);
 	m_fileQuitAction->setEnabled(false);
-	m_fixtureManagerAction->setEnabled(false);
+
 	m_functionManagerAction->setEnabled(false);
 	m_pluginManagerAction->setEnabled(false);
 	m_busManagerAction->setEnabled(false);
@@ -500,10 +500,6 @@ void App::slotModeOperate()
 	/* Close function manager if it's open */
 	if (m_functionManager != NULL)
 		m_functionManager->parentWidget()->close();
-	
-	/* Close fixture manager if it's open */
-	if (m_fixtureManager != NULL)
-		m_fixtureManager->parentWidget()->close();
 	
 	/* Close bus manager if it's open */
 	if (m_busManager != NULL)
@@ -556,7 +552,7 @@ void App::slotModeDesign()
 	m_fileNewAction->setEnabled(true);
 	m_fileOpenAction->setEnabled(true);
 	m_fileQuitAction->setEnabled(true);
-	m_fixtureManagerAction->setEnabled(true);
+
 	m_functionManagerAction->setEnabled(true);
 	m_pluginManagerAction->setEnabled(true);
 	m_busManagerAction->setEnabled(true);
@@ -611,7 +607,7 @@ void App::initActions()
 	connect(m_fileSaveAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotFileSave()));
 
-	m_fileSaveAsAction = new QAction(QIcon(PIXMAPS "/filesave.png"),
+	m_fileSaveAsAction = new QAction(QIcon(PIXMAPS "/filesaveas.png"),
 					 tr("Save As..."), this);
 	connect(m_fileSaveAsAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotFileSaveAs()));
@@ -1026,7 +1022,12 @@ void App::slotFixtureManager()
 
 		connect(m_fixtureManager, SIGNAL(destroyed(QObject*)),
 			this, SLOT(slotFixtureManagerDestroyed(QObject*)));
-		
+
+		/* To disable some actions when switching to operate mode */
+		connect(this, SIGNAL(modeChanged(App::Mode)),
+			m_fixtureManager, SLOT(slotModeChanged(App::Mode)));
+
+		/* Listen to fixture additions/removals */
 		connect(m_doc,
 			SIGNAL(fixtureAdded(t_fixture_id)),
 			m_fixtureManager,

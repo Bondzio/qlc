@@ -24,8 +24,9 @@
 
 #include <QWidget>
 
-#include "fixture.h"
 #include "function.h"
+#include "fixture.h"
+#include "app.h"
 
 class QTreeWidgetItem;
 class QTextBrowser;
@@ -59,7 +60,7 @@ public slots:
 	void slotFixtureRemoved(t_fixture_id id);
 
 	/** Callback that listens to App mode change signals */
-	void slotModeChanged();
+	void slotModeChanged(App::Mode mode);
 
 	/********************************************************************
 	 * Data view
@@ -101,22 +102,20 @@ protected:
 
 protected slots:
 	void slotAdd();
+	void slotRemove();
 	void slotProperties();
 	void slotConsole();
-	void slotClone();
-	void slotRemove();
 	void slotAutoFunction();
 
 	/** Callback for right mouse button clicks over a fixture item */
 	void slotContextMenuRequested(const QPoint& pos);
 
 protected:
-	QAction* m_addAction;
-	QAction* m_propertiesAction;
-	QAction* m_cloneAction;
-	QAction* m_consoleAction;
-	QAction* m_removeAction;
 	QToolBar* m_toolbar;
+	QAction* m_addAction;
+	QAction* m_removeAction;
+	QAction* m_propertiesAction;
+	QAction* m_consoleAction;
 
 	/********************************************************************
 	 * Save & Load

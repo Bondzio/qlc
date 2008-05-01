@@ -33,44 +33,52 @@
 
 extern App* _app;
 
-FixtureProperties::FixtureProperties(QWidget* parent, t_fixture_id fixture)
+FixtureProperties::FixtureProperties(QWidget* parent, t_fixture_id fxi_id)
 	: QDialog(parent)
 {
 	setupUi(this);
 
-	m_fixture = fixture;
-	Fixture* fxi = _app->doc()->fixture(m_fixture);
+	Fixture* fxi = _app->doc()->fixture(fxi_id);
 	Q_ASSERT(fxi != NULL);
+	m_fxi = fxi;
 
 	// Name
-	m_nameEdit->setText(fxi->name());
+	m_nameEdit->setText(m_fxi->name());
+	setWindowTitle(tr("Fixture properties - ") + m_fxi->name());
+	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+		this, SLOT(slotNameEdited(const QString&)));
 
 	// Address
-	m_addressSpin->setRange(1, 513 - fxi->channels());
-	m_addressSpin->setValue(fxi->address() + 1);
+	m_addressSpin->setRange(1, 513 - m_fxi->channels());
+	m_addressSpin->setValue(m_fxi->address() + 1);
 
 	// Universe
 	m_universeSpin->setRange(1, KUniverseCount);
-	m_universeSpin->setValue(fxi->universe() + 1);
+	m_universeSpin->setValue(m_fxi->universe() + 1);
 }
 
 FixtureProperties::~FixtureProperties()
 {
 }
 
+void FixtureProperties::slotNameEdited(const QString& text)
+{
+	Q_ASSERT(m_fxi != NULL);
+	setWindowTitle(tr("Fixture properties - ") + text);
+}
+
 void FixtureProperties::accept()
 {
-	Fixture* fxi = _app->doc()->fixture(m_fixture);
-	Q_ASSERT(fxi != NULL);
+	Q_ASSERT(m_fxi != NULL);
 
 	// Name
-	fxi->setName(m_nameEdit->text());
+	m_fxi->setName(m_nameEdit->text());
 
 	// Address
-	fxi->setAddress(m_addressSpin->value() - 1);
+	m_fxi->setAddress(m_addressSpin->value() - 1);
 
 	// Universe
-	fxi->setUniverse(m_universeSpin->value() - 1);
+	m_fxi->setUniverse(m_universeSpin->value() - 1);
 
 	QDialog::accept();
 }

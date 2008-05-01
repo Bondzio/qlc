@@ -1,3 +1,7 @@
+* Automatic fixture address assignment to fixture manager, to find the
+  next adequate address space for selected fixture(s).
+* Multiple selection to fixture manager.
+
 * "Delete something" and "Remove something" are used here and there,
    without consistency. Pick either one and update all dialogs to use
    the same term. i.e. "Do you want to delete/remove these fixtures?"

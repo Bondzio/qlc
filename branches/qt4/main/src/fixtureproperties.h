@@ -23,6 +23,7 @@
 #define FIXTUREPROPERTIES_H
 
 #include <QDialog>
+
 #include "ui_fixtureproperties.cpp"
 #include "common/qlctypes.h"
 
@@ -34,17 +35,20 @@ class FixtureProperties : public QDialog, public Ui_FixtureProperties
 
 public:
 	/** Constructor */
-	FixtureProperties(QWidget* parent, t_fixture_id fixture);
+	FixtureProperties(QWidget* parent, t_fixture_id fxi_id);
 
 	/** Destructor */
 	~FixtureProperties();
 
 protected slots:
+	/** Name edited */
+	void slotNameEdited(const QString& text);
+
 	/** QDialog accept() slot for OK button clicks */
 	void accept();
 
 protected:
-	t_fixture_id m_fixture;
+	Fixture* m_fxi;
 };
 
 #endif

@@ -37,6 +37,7 @@ dist_appicons_DATA = \
 	filenew.png \
 	fileopen.png \
 	filesave.png \
+	filesaveas.png \
 	fixture.png \
 	fonts.png \
 	forward.png \

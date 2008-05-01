@@ -136,21 +136,19 @@ void FixtureManager::slotFixtureRemoved(t_fixture_id id)
 	}
 }
 
-void FixtureManager::slotModeChanged()
+void FixtureManager::slotModeChanged(App::Mode mode)
 {
-	if (_app->mode() == App::Operate)
+	if (mode == App::Operate)
 	{
 		m_addAction->setEnabled(false);
-		m_propertiesAction->setEnabled(false);
-		m_cloneAction->setEnabled(false);
 		m_removeAction->setEnabled(false);
+		m_propertiesAction->setEnabled(false);
 	}
 	else
 	{
 		m_addAction->setEnabled(true);
-		m_propertiesAction->setEnabled(true);
-		m_cloneAction->setEnabled(true);
 		m_removeAction->setEnabled(true);
+		m_propertiesAction->setEnabled(true);
 	}
 
 	slotSelectionChanged();
@@ -177,6 +175,9 @@ void FixtureManager::initDataView()
 	m_tree->setHeaderLabels(labels);
 	m_tree->setRootIsDecorated(false);
 	m_tree->setSortingEnabled(true);
+	m_tree->setAllColumnsShowFocus(true);
+	m_tree->sortByColumn(KColumnAddress, Qt::AscendingOrder);
+	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));
@@ -226,7 +227,7 @@ void FixtureManager::updateView()
 
 		// Select this if it was selected before update
 		if (currentId == id)
-			item->setSelected(true);
+			m_tree->setCurrentItem(item);
 	}
 
 	slotSelectionChanged();
@@ -238,8 +239,7 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
 	Q_ASSERT(fxi != NULL);
 
 	// Universe column
-	item->setText(KColumnUniverse,
-		      QString("%1").arg(fxi->universe() + 1));
+	item->setText(KColumnUniverse, QString("%1").arg(fxi->universe() + 1));
 
 	// Address column
 	QString s;
@@ -252,52 +252,6 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
 
 	// ID column
 	item->setText(KColumnID, QString("%1").arg(fxi->id()));
-}
-
-void FixtureManager::copyFunction(Function* function, Fixture* fxi)
-{
-	switch(function->type())
-	{
-	case Function::Scene:
-	{
-		Scene* scene = static_cast<Scene*>
-			(_app->doc()->newFunction(Function::Scene, 
-						  fxi->id()));
-
-		scene->copyFrom(static_cast<Scene*> (function), fxi->id());
-	}
-	break;
-
-	case Function::Chaser:
-	{
-		Chaser* chaser = static_cast<Chaser*>
-			(_app->doc()->newFunction(Function::Chaser, KNoID));
-
-		chaser->copyFrom(static_cast<Chaser*> (function));
-	}
-	break;
-
-	case Function::Collection:
-	{
-		Collection* fc = static_cast<Collection*>
-			(_app->doc()->newFunction(Function::Collection, KNoID));
-
-		fc->copyFrom(static_cast<Collection*> (function));
-	}
-	break;
-
-	case Function::EFX:
-	{
-		EFX* efx = static_cast<EFX*>
-			(_app->doc()->newFunction(Function::EFX, KNoID));
-
-		efx->copyFrom(static_cast<EFX*> (function), fxi->id());
-	}
-	break;
-
-	default:
-		break;
-	}
 }
 
 void FixtureManager::slotSelectionChanged()
@@ -313,9 +267,8 @@ void FixtureManager::slotSelectionChanged()
 
 		// Disable all other actions
 		m_removeAction->setEnabled(false);
-		m_consoleAction->setEnabled(false);
-		m_cloneAction->setEnabled(false);
 		m_propertiesAction->setEnabled(false);
+		m_consoleAction->setEnabled(false);
 
 		QString info;
 		info = QString("<HTML><BODY>");
@@ -337,21 +290,20 @@ void FixtureManager::slotSelectionChanged()
 
 		m_info->setText(fxi->status());
 
+		/* Console is always available as long as there is a fixture */
+		m_consoleAction->setEnabled(true);
+
 		// Enable/disable actions
 		if (_app->mode() == App::Design)
 		{
 			m_addAction->setEnabled(true);
 			m_removeAction->setEnabled(true);
-			m_consoleAction->setEnabled(true);
-			m_cloneAction->setEnabled(true);
 			m_propertiesAction->setEnabled(true);
 		}
 		else
 		{
 			m_addAction->setEnabled(false);
 			m_removeAction->setEnabled(false);
-			m_consoleAction->setEnabled(false);
-			m_cloneAction->setEnabled(false);
 			m_propertiesAction->setEnabled(false);
 		}
 	}
@@ -369,30 +321,25 @@ void FixtureManager::slotDoubleClicked(QTreeWidgetItem* item)
 
 void FixtureManager::initActions()
 {
-	m_addAction = new QAction(QIcon(PIXMAPS "/wizard.png"),
+	m_addAction = new QAction(QIcon(PIXMAPS "/edit_add.png"),
 				  tr("Add fixture..."), this);
 	connect(m_addAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAdd()));
+
+	m_removeAction = new QAction(QIcon(PIXMAPS "/edit_remove.png"),
+				     tr("Remove fixture"), this);
+	connect(m_removeAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotRemove()));
 
 	m_propertiesAction = new QAction(QIcon(PIXMAPS "/configure.png"),
 					 tr("Configure fixture..."), this);
 	connect(m_propertiesAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotProperties()));
 
-	m_cloneAction = new QAction(QIcon(PIXMAPS "/editcopy.png"),
-				    tr("Clone fixture"), this);
-	connect(m_cloneAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotClone()));
-
 	m_consoleAction = new QAction(QIcon(PIXMAPS "/console.png"),
 				      tr("Fixture console"), this);
 	connect(m_consoleAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotConsole()));
-
-	m_removeAction = new QAction(QIcon(PIXMAPS "/editdelete.png"),
-				     tr("Remove fixture"), this);
-	connect(m_removeAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotRemove()));
 }
 
 void FixtureManager::initToolBar()
@@ -400,12 +347,10 @@ void FixtureManager::initToolBar()
 	m_toolbar = new QToolBar("Fixture Manager", this);
 	layout()->addWidget(m_toolbar);
 	m_toolbar->addAction(m_addAction);
+	m_toolbar->addAction(m_removeAction);
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_propertiesAction);
-	m_toolbar->addAction(m_cloneAction);
 	m_toolbar->addAction(m_consoleAction);
-	m_toolbar->addSeparator();
-	m_toolbar->addAction(m_removeAction);
 }
 
 void FixtureManager::slotAdd()
@@ -465,6 +410,26 @@ void FixtureManager::slotAdd()
 	}
 }
 
+void FixtureManager::slotRemove()
+{
+	QTreeWidgetItem* item = m_tree->currentItem();
+	if (item == NULL)
+		return;
+
+	// Get the fixture id
+	t_fixture_id id = item->text(KColumnID).toInt();
+
+	// Display a question
+	if (QMessageBox::question(this, "Remove fixture",
+				  QString("Do you want to remove %1?")
+					.arg(item->text(KColumnName)),
+				  QMessageBox::Yes, QMessageBox::No)
+	    == QMessageBox::Yes)
+	{
+		_app->doc()->deleteFixture(id);
+	}
+}
+
 void FixtureManager::slotProperties()
 {
 	QTreeWidgetItem* item = m_tree->currentItem();
@@ -497,78 +462,6 @@ void FixtureManager::slotConsole()
 		Q_ASSERT(fxi != NULL);
 
 		fxi->viewConsole();
-	}
-}
-
-void FixtureManager::slotClone()
-{
-	QLCFixtureMode* fixtureMode;
-	QLCFixtureDef* fixtureDef;
-	QTreeWidgetItem* item;
-	t_fixture_id old_id;
-	Fixture* old_fxi;
-	Fixture* new_fxi;
-	QString new_name;
-
-	/* Get the selected listview item */
-	item = m_tree->currentItem();
-	Q_ASSERT(item != NULL);
-
-	/* Get the old fixture instance */
-	old_id = item->text(KColumnID).toInt();
-	old_fxi = _app->doc()->fixture(old_id);
-	Q_ASSERT(old_fxi != NULL);
-
-	/* Get the old fixture instance's fixture definition */
-	fixtureDef = old_fxi->fixtureDef();
-	Q_ASSERT(fixtureDef != NULL);
-
-	/* Get the old fixture instance's mode */
-	fixtureMode = old_fxi->fixtureMode();
-	Q_ASSERT(fixtureMode != NULL);
-
-	new_name = "Copy of ";
-	new_name += item->text(KColumnName);
-
-	// Add new fixture
-	new_fxi = _app->doc()->newFixture(fixtureDef, fixtureMode,
-					  0, 0, new_name);
-	if (new_fxi != NULL)
-	{
-		for (t_function_id id = 0; id < KFunctionArraySize; id++)
-		{
-			Function* function = _app->doc()->function(id);
-			if (function == NULL)
-				continue;
-
-			// Copy only functions that belong to the old fixture
-			if (function->fixture() == old_id)
-				copyFunction(function, new_fxi);
-		}
-
-		/* Open properties so that the user can rename the fixture,
-		   set its address, etc... */
-		slotProperties();
-	}
-}
-
-void FixtureManager::slotRemove()
-{
-	QTreeWidgetItem* item = m_tree->currentItem();
-	if (item == NULL)
-		return;
-
-	// Get the fixture id
-	t_fixture_id id = item->text(KColumnID).toInt();
-
-	// Display a question
-	if (QMessageBox::question(this, "Remove fixture",
-				  QString("Do you want to remove %1?")
-					.arg(item->text(KColumnName)),
-				  QMessageBox::Yes, QMessageBox::No)
-	    == QMessageBox::Yes)
-	{
-		_app->doc()->deleteFixture(id);
 	}
 }
 
@@ -625,11 +518,10 @@ void FixtureManager::slotContextMenuRequested(const QPoint& point)
 	menu.addAction(m_addAction);
 	menu.addSeparator();
 	menu.addAction(m_propertiesAction);
-	menu.addAction(m_cloneAction);
 	menu.addAction(m_consoleAction);
 	menu.addSeparator();
 	menu.addAction(m_removeAction);
-	menu.exec(point);
+	menu.exec(m_tree->mapToGlobal(point));
 }
 
 /*****************************************************************************

@@ -1,6 +1,20 @@
 2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* TODO:
+	* gfx/Makefile.am:
+	* main/src/app.cpp:
+	* main/src/fixturemanager.cpp:
+	* main/src/fixturemanager.h:
+	* main/src/fixtureproperties.cpp:
+	* main/src/fixtureproperties.h:
+	* main/src/fixtureproperties.ui:
+
+	Changed most of the icons to 32x32.
+	Fixed fixture manager's mode change handling.
+
+2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
 	* main/Makefile.am:
 	* main/src/addfixture.ui:
 	* main/src/chasereditor.ui:

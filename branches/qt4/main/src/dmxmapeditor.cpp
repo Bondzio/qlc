@@ -22,6 +22,7 @@
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
 #include <QStringList>
+#include <iostream>
 #include <QAction>
 #include <QMenu>
 
@@ -31,39 +32,44 @@
 #include "dmxmapeditor.h"
 #include "dmxmap.h"
 
+using namespace std;
+
 #define KColumnUniverse 0
 #define KColumnPlugin   1
 #define KColumnOutput   2
 
 DMXMapEditor::DMXMapEditor(QWidget* parent, DMXMap* dmxMap) : QDialog(parent)
 {
-	QTreeWidgetItem* item;
-	DMXPatch* dmxPatch;
-	QString str;
-
 	Q_ASSERT(dmxMap != NULL);
 	m_dmxMap = dmxMap;
+	m_pluginList = m_dmxMap->pluginNames();
 
 	setupUi(this);
 
-	m_pluginList = m_dmxMap->pluginNames();
+	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	/* Clear the mapping list first */
-	m_listView->clear();
+	connect(m_edit, SIGNAL(clicked()), this, SLOT(slotEditClicked()));
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotEditClicked()));
+	connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(slotContextMenuRequested(const QPoint&)));
 
+	/* Clear the mapping list just in case and fill with plugins */
+	m_tree->clear();
 	for (int i = 0; i < KUniverseCount; i++)
 	{
+		QTreeWidgetItem* item;
+		DMXPatch* dmxPatch;
+		QString str;
+
 		dmxPatch = m_dmxMap->patch(i);
 		Q_ASSERT(dmxPatch != NULL);
 
-		item = new QTreeWidgetItem(m_listView);
+		item = new QTreeWidgetItem(m_tree);
 		item->setText(KColumnUniverse, str.setNum(i + 1));
 		item->setText(KColumnPlugin, dmxPatch->plugin->name());
 		item->setText(KColumnOutput, str.setNum(dmxPatch->output + 1));
 	}
-
-	connect(m_listView, SIGNAL(customContextMenuRequested(const QPoint&)),
-		this, SLOT(slotListViewContextMenuRequested(const QPoint&)));
 }
 
 DMXMapEditor::~DMXMapEditor()
@@ -74,14 +80,14 @@ DMXMapEditor::~DMXMapEditor()
  *
  *****************************************************************************/
 
-void DMXMapEditor::slotEditMappingButtonClicked()
+void DMXMapEditor::slotEditClicked()
 {
 	QTreeWidgetItem* item;
 	int universe;
 	QString str;
 	int output;
 
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	if (item == NULL)
 		return;
 
@@ -92,14 +98,13 @@ void DMXMapEditor::slotEditMappingButtonClicked()
 	DMXPatchEditor dpe(this, m_dmxMap, universe, str, output);
 	if (dpe.exec() == QDialog::Accepted)
 	{
-		m_dmxMap->setPatch(universe, dpe.pluginName(), dpe.output());
 		item->setText(KColumnUniverse, str.setNum(universe + 1));
 		item->setText(KColumnPlugin, dpe.pluginName());
 		item->setText(KColumnOutput, str.setNum(dpe.output() + 1));
 	}
 }
 
-void DMXMapEditor::slotListViewContextMenuRequested(const QPoint& point)
+void DMXMapEditor::slotContextMenuRequested(const QPoint& point)
 {
 	QStringList::Iterator it;
 	QTreeWidgetItem* item;
@@ -109,7 +114,7 @@ void DMXMapEditor::slotListViewContextMenuRequested(const QPoint& point)
 	int outputs;
 	QString str;
 
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	if (item == NULL)
 		return;
 
@@ -140,7 +145,7 @@ void DMXMapEditor::slotListViewContextMenuRequested(const QPoint& point)
 	}
 
 	/* Execute menu and check, whether something was selected */
-	action = pluginMenu.exec(point);
+	action = pluginMenu.exec(m_tree->mapToGlobal(point));
 	if (action == NULL)
 		return;
 
@@ -161,13 +166,13 @@ void DMXMapEditor::slotListViewContextMenuRequested(const QPoint& point)
 
 void DMXMapEditor::accept()
 {
-	QTreeWidgetItemIterator it(m_listView);
-	QString pluginName;
-	int universe;
-	int output;
-
+	QTreeWidgetItemIterator it(m_tree);
 	while (*it != NULL)
 	{
+		QString pluginName;
+		int universe;
+		int output;
+
 		universe = (*it)->text(KColumnUniverse).toInt() - 1;
 		pluginName = (*it)->text(KColumnPlugin);
 		output = (*it)->text(KColumnOutput).toInt() - 1;

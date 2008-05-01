@@ -957,19 +957,20 @@ void App::slotPluginManager()
 
 		sub = new QMdiSubWindow(centralWidget());
 		m_pluginManager = new PluginManager(sub);
+		m_pluginManager->show();
 
 		sub->setWidget(m_pluginManager);
 		sub->setAttribute(Qt::WA_DeleteOnClose);
+		sub->setWindowTitle(tr("Plugin Manager"));
 		sub->setWindowIcon(QIcon(PIXMAPS "/plugin.png"));
 
 		qobject_cast <QMdiArea*> (centralWidget())->addSubWindow(sub);
 
-		m_pluginManager->show();
-		sub->resize(700, 400);
-		sub->show();
-
 		connect(m_pluginManager, SIGNAL(destroyed(QObject*)),
 			this, SLOT(slotPluginManagerDestroyed(QObject*)));
+
+		sub->resize(700, 400);
+		sub->show();
 	}
 }
 

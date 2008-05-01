@@ -10,11 +10,23 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Output map editor</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
-    <widget class="QTreeWidget" name="m_listView" >
+    <widget class="QTreeWidget" name="m_tree" >
+     <property name="rootIsDecorated" >
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable" >
+      <bool>false</bool>
+     </property>
+     <property name="sortingEnabled" >
+      <bool>false</bool>
+     </property>
+     <property name="allColumnsShowFocus" >
+      <bool>true</bool>
+     </property>
      <column>
       <property name="text" >
        <string>Universe</string>
@@ -35,7 +47,7 @@
    <item>
     <layout class="QHBoxLayout" >
      <item>
-      <widget class="QPushButton" name="m_editMappingButton" >
+      <widget class="QPushButton" name="m_edit" >
        <property name="text" >
         <string>Edit Mapping</string>
        </property>
@@ -64,8 +76,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>248</x>
-     <y>254</y>
+     <x>350</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel" >
      <x>157</x>
@@ -80,8 +92,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>316</x>
-     <y>260</y>
+     <x>418</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel" >
      <x>286</x>

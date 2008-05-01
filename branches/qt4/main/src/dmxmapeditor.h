@@ -41,19 +41,19 @@ protected slots:
 	/**
 	 * Slot for edit button clicks
 	 */
-	void slotEditMappingButtonClicked();
+	void slotEditClicked();
 
 	/**
 	 * Slot for context menu requests (RMB clicks) on the mapping view
 	 *
 	 * @param point The exact clicking point
 	 */
-	void slotListViewContextMenuRequested(const QPoint& point);
+	void slotContextMenuRequested(const QPoint& point);
 
 	/*********************************************************************
 	 * OK & Cancel
 	 *********************************************************************/
-public slots:
+protected slots:
 	/** Slot for OK button */
 	void accept();
 

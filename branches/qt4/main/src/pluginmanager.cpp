@@ -33,14 +33,15 @@
 #include <QIcon>
 
 #include "pluginmanager.h"
+#include "dmxmapeditor.h"
 #include "inputmap.h"
 #include "dmxmap.h"
 #include "app.h"
 
 extern App* _app;
 
-static const QString KInputNode ("Input");
-static const QString KOutputNode ("Output");
+#define KInputNode  "Input"
+#define KOutputNode "Output"
 
 #define KColumnName 0
 
@@ -51,9 +52,6 @@ static const QString KOutputNode ("Output");
 PluginManager::PluginManager(QWidget* parent) : QWidget(parent)
 {
 	new QVBoxLayout(this);
-
-	setWindowTitle("Plugin Manager");
-	setWindowIcon(QIcon(PIXMAPS "/plugin.png"));
 
 	initActions();
 	initToolBar();
@@ -70,29 +68,30 @@ PluginManager::~PluginManager()
 void PluginManager::initActions()
 {
 	m_configureAction = new QAction(QIcon(PIXMAPS "/configure.png"),
-					"Configure plugin", this);
+					tr("Configure plugin"), this);
 	connect(m_configureAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotConfigure()));
 
-	m_outputMapAction = new QAction(QIcon(PIXMAPS "/attach.png"),
-					"Output Map", this);
-	connect(m_outputMapAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotOutputMap()));
-
-	m_inputMapAction = new QAction(QIcon(PIXMAPS "/attach.png"),
-				       "Input Map", this);
+	m_inputMapAction = new QAction(QIcon(PIXMAPS "/input.png"),
+				       tr("Input Map"), this);
 	connect(m_inputMapAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotInputMap()));
+	
+	m_outputMapAction = new QAction(QIcon(PIXMAPS "/output.png"),
+					tr("Output Map"), this);
+	connect(m_outputMapAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotOutputMap()));
 }
 
 void PluginManager::initToolBar()
 {
 	// Add a toolbar to the dock area
-	m_toolbar = new QToolBar("Plugin Manager", this);
+	m_toolbar = new QToolBar(tr("Plugin manager"), this);
 	layout()->addWidget(m_toolbar);
 	m_toolbar->addAction(m_configureAction);
-	m_toolbar->addAction(m_outputMapAction);
+	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_inputMapAction);
+	m_toolbar->addAction(m_outputMapAction);
 }
 
 void PluginManager::initDataView()
@@ -104,38 +103,27 @@ void PluginManager::initDataView()
 	layout()->addWidget(m_splitter);
 
 	// Create the list view
-	m_listView = new QTreeWidget(this);
-	m_splitter->addWidget(m_listView);
-	m_listView->setHeaderLabels(QStringList("Plugins"));
-/*
-	m_splitter->setResizeMode(m_listView, QSplitter::Auto);
+	m_tree = new QTreeWidget(this);
+	m_splitter->addWidget(m_tree);
+	m_tree->setHeaderLabel(tr("Plugins"));
+	m_tree->setRootIsDecorated(true);
+	m_tree->setSortingEnabled(true);
+	m_tree->setAllColumnsShowFocus(true);
+	m_tree->sortByColumn(KColumnName, Qt::AscendingOrder);
+	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	m_listView->setRootIsDecorated(true);
-	m_listView->setMultiSelection(false);
-	m_listView->setAllColumnsShowFocus(true);
-	m_listView->setSorting(KColumnName, true);
-	m_listView->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-
-	m_listView->header()->setClickEnabled(true);
-	m_listView->header()->setResizeEnabled(false);
-	m_listView->header()->setMovingEnabled(false);
-
-	m_listView->addColumn("Plugins");
-	m_listView->setResizeMode(QListView::LastColumn);
-*/
-	connect(m_listView, SIGNAL(selectionChanged()),
+	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));
   
-	connect(m_listView, SIGNAL(doubleClicked(QTreeWidgetItem*)),
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*)),
 		this, SLOT(slotConfigure()));
 
-	connect(m_listView, SIGNAL(customContextMenuRequested(const QPoint&)),
+	connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(slotContextMenuRequested(const QPoint&)));
 
 	// Create the text view
-	m_textView = new QTextBrowser(this);
-	m_splitter->addWidget(m_textView);
-	//m_splitter->setResizeMode(m_textView, QSplitter::Auto);
+	m_info = new QTextBrowser(this);
+	m_splitter->addWidget(m_info);
 }
 
 void PluginManager::fillPlugins()
@@ -145,10 +133,10 @@ void PluginManager::fillPlugins()
 	QStringList::iterator it;
 	QStringList list;
 
-	m_listView->clear();
+	m_tree->clear();
 
 	/* Output plugins */
-	parent = new QTreeWidgetItem(m_listView);
+	parent = new QTreeWidgetItem(m_tree);
 	parent->setText(0, KOutputNode);
 	parent->setExpanded(true);
 	list = _app->dmxMap()->pluginNames();
@@ -159,7 +147,7 @@ void PluginManager::fillPlugins()
 	}
 
 	/* Input plugins */
-	parent = new QTreeWidgetItem(m_listView);
+	parent = new QTreeWidgetItem(m_tree);
 	parent->setText(0, KInputNode);
 	parent->setExpanded(true);
 	list = _app->inputMap()->pluginNames();
@@ -179,7 +167,7 @@ void PluginManager::slotConfigure()
 	QTreeWidgetItem* item;
 	QString parentName;
 	
-	item = m_listView->currentItem();
+	item = m_tree->currentItem();
 	if (item != NULL && item->parent() != NULL)
 	{
 		/* Find out the parent node name to determine, whether
@@ -204,8 +192,9 @@ void PluginManager::slotConfigure()
 
 void PluginManager::slotOutputMap()
 {
-	_app->dmxMap()->openEditor(this);
-	slotSelectionChanged();
+	DMXMapEditor editor(this, _app->dmxMap());
+	if (editor.exec() == QDialog::Accepted)
+		slotSelectionChanged();
 }
 
 void PluginManager::slotInputMap()
@@ -219,7 +208,7 @@ void PluginManager::slotInputMap()
 
 void PluginManager::slotSelectionChanged()
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	QString status;
 	QString name;
 	QString parent;
@@ -259,12 +248,12 @@ void PluginManager::slotSelectionChanged()
 		status += QString("Select a plugin to begin.");
 	}
 
-	m_textView->setText(status);
+	m_info->setText(status);
 }
 
 void PluginManager::slotContextMenuRequested(const QPoint& point)
 {
-	QTreeWidgetItem* item = m_listView->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item == NULL)
 		return;
 
@@ -273,7 +262,7 @@ void PluginManager::slotContextMenuRequested(const QPoint& point)
 		menu.addAction(m_configureAction);
 	menu.addAction(m_outputMapAction);
 	menu.addAction(m_inputMapAction);
-	menu.exec(point);
+	menu.exec(m_tree->mapToGlobal(point));
 }
 
 /*****************************************************************************

@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <dlfcn.h>
 #include <stdlib.h>
+#include <dlfcn.h>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -376,16 +376,6 @@ void DMXMap::setValueRange(t_channel address, t_value* values, t_channel num)
 }
 
 /*****************************************************************************
- * Editor UI
- *****************************************************************************/
-
-void DMXMap::openEditor(QWidget* parent)
-{
-	DMXMapEditor editor(parent, this);
-	editor.exec();
-}
-
-/*****************************************************************************
  * Patch
  *****************************************************************************/
 
@@ -426,7 +416,8 @@ bool DMXMap::setPatch(int universe, const QString& pluginName,
 	if (outputPlugin == NULL)
 	{
 		cout << QString("Unable to patch universe %1. Plugin %2 not "
-				"found.").arg(universe).arg(pluginName).toStdString()
+				"found.")
+			.arg(universe).arg(pluginName).toStdString()
 		     << endl;
 		return false;
 	}
@@ -509,10 +500,12 @@ QString DMXMap::pluginStatus(const QString& pluginName)
 		info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 		info += QString("<TR>");
 		info += QString("<TD BGCOLOR=\"");
-		//info += _app->colorGroup().highlight().name();
+		info += QApplication::palette()
+			.color(QPalette::Highlight).name();
 		info += QString("\">");
 		info += QString("<FONT COLOR=\"");
-		//info += _app->colorGroup().highlightedText().name();
+		info += QApplication::palette()
+			.color(QPalette::HighlightedText).name();
 		info += QString("\" SIZE=\"5\">");
 		info += QString("Universe mapping status");
 		info += QString("</FONT>");
@@ -533,7 +526,8 @@ QString DMXMap::pluginStatus(const QString& pluginName)
 			else
 			{
 				info += QString("<TR BGCOLOR=\"");
-				//info += _app->colorGroup().midlight().name();
+				info += QApplication::palette()
+					.color(QPalette::Midlight).name();
 				info += QString("\">");
 			}
 

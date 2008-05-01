@@ -1,5 +1,21 @@
 2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* gfx/Makefile.am:
+	* main/src/app.cpp:
+	* main/src/dmxmap.cpp:
+	* main/src/dmxmap.h:
+	* main/src/dmxmapeditor.cpp:
+	* main/src/dmxmapeditor.h:
+	* main/src/dmxmapeditor.ui:
+	* main/src/dmxpatcheditor.ui:
+	* main/src/pluginmanager.cpp:
+	* main/src/pluginmanager.h:
+
+	Fixed some basic issues in plugin manager and added icons for
+	input and output map.
+	
+2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* TODO:
 	* gfx/Makefile.am:
 	* main/src/app.cpp:

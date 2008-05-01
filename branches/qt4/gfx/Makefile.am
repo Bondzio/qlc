@@ -49,6 +49,7 @@ dist_appicons_DATA = \
 	gobo.png \
 	help.png \
 	image.png \
+	input.png \
 	intensity.png \
 	key_bindings.png \
 	keyboard.png \
@@ -56,6 +57,7 @@ dist_appicons_DATA = \
 	maintenance.png \
 	monitor.png \
 	operate.png \
+	output.png \
 	pan.png \
 	panic.png \
 	plugin.png \

@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  functioncollection.cpp
+  collection.cpp
   
   Copyright (c) Heikki Junnila
   
@@ -28,9 +28,9 @@
 
 #include "common/qlcfile.h"
 
-#include "functioncollection.h"
 #include "functionconsumer.h"
 #include "eventbuffer.h"
+#include "collection.h"
 #include "function.h"
 #include "app.h"
 #include "doc.h"
@@ -39,12 +39,12 @@ extern App* _app;
 
 using namespace std;
 
-FunctionCollection::FunctionCollection() : Function(Function::Collection)
+Collection::Collection() : Function(Function::Collection)
 {
 	m_childCount = 0;
 }
 
-void FunctionCollection::copyFrom(FunctionCollection* fc, bool append)
+void Collection::copyFrom(Collection* fc, bool append)
 {
 	Q_ASSERT(fc != NULL);
 
@@ -59,7 +59,7 @@ void FunctionCollection::copyFrom(FunctionCollection* fc, bool append)
 		m_steps.append(it.next());
 }
 
-FunctionCollection::~FunctionCollection()
+Collection::~Collection()
 {
 	stop();
 
@@ -69,7 +69,7 @@ FunctionCollection::~FunctionCollection()
 	m_steps.clear();
 }
 
-bool FunctionCollection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
+bool Collection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
 	QDomElement root;
 	QDomElement tag;
@@ -109,7 +109,7 @@ bool FunctionCollection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	return true;
 }
 
-bool FunctionCollection::loadXML(QDomDocument* doc, QDomElement* root)
+bool Collection::loadXML(QDomDocument* doc, QDomElement* root)
 {
 	t_fixture_id step_fxi = KNoID;
 	
@@ -149,7 +149,7 @@ bool FunctionCollection::loadXML(QDomDocument* doc, QDomElement* root)
 	return true;
 }
 
-bool FunctionCollection::addItem(t_function_id id)
+bool Collection::addItem(t_function_id id)
 {
 	m_startMutex.lock();
 
@@ -164,7 +164,7 @@ bool FunctionCollection::addItem(t_function_id id)
 	return false;
 }
 
-bool FunctionCollection::removeItem(t_function_id id)
+bool Collection::removeItem(t_function_id id)
 {
 	m_startMutex.lock();
 
@@ -179,24 +179,24 @@ bool FunctionCollection::removeItem(t_function_id id)
 	return false;
 }
 
-void FunctionCollection::speedChange()
+void Collection::speedChange()
 {
 }
 
-void FunctionCollection::arm()
+void Collection::arm()
 {
 	if (m_eventBuffer == NULL)
 		m_eventBuffer = new EventBuffer(0, 0);
 }
 
-void FunctionCollection::disarm()
+void Collection::disarm()
 {
 	if (m_eventBuffer != NULL)
 		delete m_eventBuffer;
 	m_eventBuffer = NULL;
 }
 
-void FunctionCollection::stop()
+void Collection::stop()
 {
 	/* TODO: this stops these functions, regardless of whether they
 	   were started by this collection or not */
@@ -209,7 +209,7 @@ void FunctionCollection::stop()
 	}
 }
 
-void FunctionCollection::cleanup()
+void Collection::cleanup()
 {
 	Q_ASSERT(m_childCount == 0);
 
@@ -234,14 +234,14 @@ void FunctionCollection::cleanup()
 }
 
 
-void FunctionCollection::childFinished()
+void Collection::childFinished()
 {
 	m_childCountMutex.lock();
 	m_childCount--;
 	m_childCountMutex.unlock();
 }
 
-void FunctionCollection::init()
+void Collection::init()
 {
 	m_childCountMutex.lock();
 	m_childCount = 0;
@@ -254,7 +254,7 @@ void FunctionCollection::init()
 	_app->functionConsumer()->cue(this);
 }
 
-void FunctionCollection::run()
+void Collection::run()
 {
 	QListIterator <t_function_id> it(m_steps);
 

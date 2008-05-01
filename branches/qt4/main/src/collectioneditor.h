@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  functioncollectioneditor.h
+  collectioneditor.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,26 +19,27 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef FUNCTIONCOLLECTIONEDITOR_H
-#define FUNCTIONCOLLECTIONEDITOR_H
+#ifndef COLLECTIONEDITOR_H
+#define COLLECTIONEDITOR_H
 
 #include <QDialog>
-#include "ui_functioncollectioneditor.cpp"
+
+#include "ui_collectioneditor.cpp"
 #include "common/qlctypes.h"
 
 class FunctionSelection;
-class FunctionCollection;
+class Collection;
 
-class FunctionCollectionEditor : public QDialog,
-				 public Ui_FunctionCollectionEditor
+class CollectionEditor : public QDialog, public Ui_CollectionEditor
 {
 	Q_OBJECT
 
 public:
-	FunctionCollectionEditor(QWidget* parent, FunctionCollection* fc);
-	~FunctionCollectionEditor();
+	CollectionEditor(QWidget* parent, Collection* fc);
+	~CollectionEditor();
 
 protected slots:
+	void slotNameEdited(const QString& text);
 	void slotAdd();
 	void slotRemove();
 	void accept();
@@ -48,8 +49,8 @@ protected:
 	void updateFunctionList();
 
 protected:
-	FunctionCollection* m_fc;
-	FunctionCollection* m_original;
+	Collection* m_fc;
+	Collection* m_original;
 };
 
 #endif

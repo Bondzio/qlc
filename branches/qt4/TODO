@@ -2,6 +2,10 @@
    without consistency. Pick either one and update all dialogs to use
    the same term. i.e. "Do you want to delete/remove these fixtures?"
 
+* Change Function classes' copyFrom() contents to copy constructors,
+  but preserve copyFrom() because they are needed in editor dialogs to
+  keep the same function ID when copying function contents.
+
 * Editor dialogs should put an asterisk (*) after the title to signify
   modified state when appropriate: "<Editor name> - <Edited object>(*)"
   e.g. "EFXEditor - New EFX*"
@@ -18,6 +22,7 @@
 
 * Rename BusProperties to BusManager
 * Enable BusManager item renaming (i.e. remove QInputDialog)
+* Refactor bus concept so that namespace FunctionNS is no longer needed
 
 * Remove startMutex from Chaser -- WTF is it for?
 

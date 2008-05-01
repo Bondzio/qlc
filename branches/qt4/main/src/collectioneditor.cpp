@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  functioncollectioneditor.cpp
+  collectioneditor.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -29,9 +29,9 @@
 
 #include "common/qlcfixturedef.h"
 
-#include "functioncollectioneditor.h"
-#include "functioncollection.h"
 #include "functionselection.h"
+#include "collectioneditor.h"
+#include "collection.h"
 #include "function.h"
 #include "fixture.h"
 #include "app.h"
@@ -39,37 +39,50 @@
 
 extern App* _app;
 
-FunctionCollectionEditor::FunctionCollectionEditor(QWidget* parent,
-						   FunctionCollection* fc)
+#define KColumnFixture  0
+#define KColumnFunction 1
+#define KColumnType     2
+#define KColumnID       3
+
+CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
 	: QDialog(parent)
 {
 	Q_ASSERT(fc != NULL);
 	m_original = fc;
 
-	m_fc = new FunctionCollection();
+	setupUi(this);
+
+	m_add->setIcon(QIcon(PIXMAPS "/edit_add.png"));
+	m_remove->setIcon(QIcon(PIXMAPS "/edit_remove.png"));
+
+	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+		this, SLOT(slotNameEdited(const QString&)));
+	connect(m_add, SIGNAL(clicked()), this, SLOT(slotAdd()));
+	connect(m_remove, SIGNAL(clicked()), this, SLOT(slotRemove()));
+
+	m_fc = new Collection();
 	m_fc->copyFrom(fc);
 	Q_ASSERT(m_fc != NULL);
 
-	setupUi(this);
-
-	m_addButton->setIcon(QIcon(PIXMAPS "/edit_add.png"));
-	connect(m_addButton, SIGNAL(clicked()), this, SLOT(slotAdd()));
-
-	m_removeButton->setIcon(QIcon(PIXMAPS "/edit_remove.png"));
-	connect(m_removeButton, SIGNAL(clicked()), this, SLOT(slotRemove()));
-
 	m_nameEdit->setText(m_fc->name());
+	setWindowTitle("Chaser editor - " + m_fc->name());
+
 	updateFunctionList();
 }
 
-FunctionCollectionEditor::~FunctionCollectionEditor()
+CollectionEditor::~CollectionEditor()
 {
 	Q_ASSERT(m_fc != NULL);
 	delete m_fc;
 	m_fc = NULL;
 }
 
-void FunctionCollectionEditor::slotAdd()
+void CollectionEditor::slotNameEdited(const QString& text)
+{
+	setWindowTitle("Chaser editor - " + text);
+}
+
+void CollectionEditor::slotAdd()
 {
 	FunctionSelection sel(this, _app->doc(), true, m_fc->id());
 	if (sel.exec() == QDialog::Accepted)
@@ -88,12 +101,12 @@ void FunctionCollectionEditor::slotAdd()
 	}
 }
 
-void FunctionCollectionEditor::slotRemove()
+void CollectionEditor::slotRemove()
 {
-	QTreeWidgetItem* item = m_functionList->currentItem();
+	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item != NULL)
 	{
-		t_function_id id = item->text(2).toInt();
+		t_function_id id = item->text(KColumnID).toInt();
 		if (m_fc->removeItem(id) == true)
 			delete item;
 		else
@@ -101,7 +114,7 @@ void FunctionCollectionEditor::slotRemove()
 	}
 }
 
-void FunctionCollectionEditor::accept()
+void CollectionEditor::accept()
 {
 	m_fc->setName(m_nameEdit->text());
 	m_original->copyFrom(m_fc);
@@ -110,9 +123,9 @@ void FunctionCollectionEditor::accept()
 	QDialog::accept();
 }
 
-void FunctionCollectionEditor::updateFunctionList()
+void CollectionEditor::updateFunctionList()
 {
-	m_functionList->clear();
+	m_tree->clear();
 
 	QListIterator <t_function_id> it(*m_fc->steps());
 	while (it.hasNext() == true)
@@ -151,15 +164,15 @@ void FunctionCollectionEditor::updateFunctionList()
 		}
 
 		QString s;
-		QTreeWidgetItem* item = new QTreeWidgetItem(m_functionList);
-		item->setText(0, fxi_name);
-		item->setText(1, func_name);
-		item->setText(2, func_type);
-		item->setText(3, s.setNum(fid));
+		QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
+		item->setText(KColumnFixture, fxi_name);
+		item->setText(KColumnFunction, func_name);
+		item->setText(KColumnType, func_type);
+		item->setText(KColumnID, s.setNum(fid));
 	}
 }
 
-bool FunctionCollectionEditor::isAlreadyMember(t_function_id id)
+bool CollectionEditor::isAlreadyMember(t_function_id id)
 {
 	QListIterator <t_function_id> it(*m_fc->steps());
 

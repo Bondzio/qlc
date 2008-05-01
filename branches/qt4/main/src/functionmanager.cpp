@@ -37,10 +37,10 @@
 
 #include "common/qlcfixturedef.h"
 
-#include "functioncollectioneditor.h"
-#include "functioncollection.h"
+#include "collectioneditor.h"
 #include "functionmanager.h"
 #include "chasereditor.h"
+#include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
 #include "fixture.h"
@@ -432,7 +432,7 @@ int FunctionManager::slotEdit()
 
 	case Function::Collection:
 	{
-		FunctionCollectionEditor fce(this, static_cast<FunctionCollection*> (function));
+		CollectionEditor fce(this, static_cast<Collection*> (function));
 		result = fce.exec();
 	}
 	break;
@@ -977,11 +977,9 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 	{
 		newFunction =
 			_app->doc()->newFunction(Function::Collection, KNoID);
-			
-		FunctionCollection* fc =
-			static_cast<FunctionCollection*> (newFunction);
 
-		fc->copyFrom(static_cast<FunctionCollection*> (function));
+		Collection* fc = static_cast<Collection*> (newFunction);
+		fc->copyFrom(static_cast<Collection*> (function));
 	}
 	break;
 

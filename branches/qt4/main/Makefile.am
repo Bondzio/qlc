@@ -22,7 +22,7 @@ UICS = \
 	src/ui_efxeditor.cpp \
 	src/ui_fixturelist.cpp \
 	src/ui_fixtureproperties.cpp \
-	src/ui_functioncollectioneditor.cpp \
+	src/ui_collectioneditor.cpp \
 	src/ui_functionselection.cpp \
 	src/ui_sceneeditor.cpp \
 	src/ui_vcbuttonproperties.cpp \
@@ -41,6 +41,8 @@ MOCS = \
 	src/moc_busproperties.cpp \
 	src/moc_chaser.cpp \
 	src/moc_chasereditor.cpp \
+	src/moc_collection.cpp \
+	src/moc_collectioneditor.cpp \
 	src/moc_consolechannel.cpp \
 	src/moc_dmxaddresstool.cpp \
 	src/moc_dmxmap.cpp \
@@ -57,8 +59,6 @@ MOCS = \
 	src/moc_fixturelist.cpp \
 	src/moc_fixturemanager.cpp \
 	src/moc_fixtureproperties.cpp \
-	src/moc_functioncollection.cpp \
-	src/moc_functioncollectioneditor.cpp \
 	src/moc_functionconsumer.cpp \
 	src/moc_function.cpp \
 	src/moc_functionmanager.cpp \
@@ -97,6 +97,8 @@ qlc_SOURCES = \
 	src/busproperties.cpp \
 	src/chaser.cpp \
 	src/chasereditor.cpp \
+	src/collection.cpp \
+	src/collectioneditor.cpp \
 	src/consolechannel.cpp \
 	src/dmxaddresstool.cpp \
 	src/dmxmap.cpp \
@@ -113,8 +115,6 @@ qlc_SOURCES = \
 	src/fixturelist.cpp \
 	src/fixturemanager.cpp \
 	src/fixtureproperties.cpp \
-	src/functioncollection.cpp \
-	src/functioncollectioneditor.cpp \
 	src/functionconsumer.cpp \
 	src/function.cpp \
 	src/functionmanager.cpp \

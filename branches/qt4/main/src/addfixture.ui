@@ -5,18 +5,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
+    <width>499</width>
     <height>447</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Add fixture</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
     <layout class="QHBoxLayout" >
      <item>
       <widget class="QTreeWidget" name="m_tree" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <column>
         <property name="text" >
          <string>Fixture Model</string>
@@ -49,7 +55,7 @@
             <item>
              <widget class="QLineEdit" name="m_nameEdit" >
               <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -68,7 +74,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="m_modeCombo" />
+             <widget class="QComboBox" name="m_modeCombo" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -83,6 +96,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_addressSpin" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum" >
                <number>1</number>
               </property>
@@ -104,6 +123,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_universeSpin" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum" >
                <number>1</number>
               </property>
@@ -132,6 +157,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_channelsSpin" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum" >
                <number>1</number>
               </property>
@@ -144,19 +175,6 @@
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2" >
@@ -175,6 +193,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_amountSpin" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum" >
                <number>1</number>
               </property>
@@ -196,6 +220,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_gapSpin" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="maximum" >
                <number>128</number>
               </property>

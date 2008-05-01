@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Chaser editor</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
@@ -32,6 +32,9 @@
      <item>
       <widget class="QTreeWidget" name="m_tree" >
        <property name="rootIsDecorated" >
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable" >
         <bool>false</bool>
        </property>
        <property name="allColumnsShowFocus" >
@@ -119,6 +122,9 @@
           <property name="text" >
            <string>Loop</string>
           </property>
+          <property name="checked" >
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -148,6 +154,9 @@
          <widget class="QRadioButton" name="m_forward" >
           <property name="text" >
            <string>Forward</string>
+          </property>
+          <property name="checked" >
+           <bool>true</bool>
           </property>
          </widget>
         </item>

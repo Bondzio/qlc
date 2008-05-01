@@ -28,10 +28,7 @@
 
 #include "common/qlcfile.h"
 
-#include "functioncollection.h"
 #include "function.h"
-#include "chaser.h"
-#include "scene.h"
 #include "bus.h"
 #include "app.h"
 #include "doc.h"

@@ -132,6 +132,7 @@ void SceneEditor::slotFunctionAdded(t_function_id id)
 		item = new QTreeWidgetItem(m_sceneList);
 		item->setText(KColumnName, function->name());
 		item->setText(KColumnID, QString("%1").arg(id));
+		item->setIcon(KColumnName, QIcon(PIXMAPS "/scene.png"));
 	}
 }
 
@@ -345,6 +346,7 @@ void SceneEditor::fillFunctions()
 			item = new QTreeWidgetItem(m_sceneList);
 			item->setText(KColumnName, function->name());
 			item->setText(KColumnID, str.setNum(id));
+			item->setIcon(KColumnName, QIcon(PIXMAPS "/scene.png"));
 		}
 	}
 

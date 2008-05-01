@@ -31,10 +31,10 @@
 #include "common/qlcfixturemode.h"
 #include "common/qlcfile.h"
 
-#include "functioncollection.h"
 #include "functionconsumer.h"
 #include "virtualconsole.h"
 #include "fixturemanager.h"
+#include "collection.h"
 #include "function.h"
 #include "fixture.h"
 #include "monitor.h"
@@ -571,7 +571,7 @@ Function* Doc::newFunction(Function::Type type)
 	case Function::Chaser:
 		return new Chaser();
 	case Function::Collection:
-		return new FunctionCollection();
+		return new Collection();
 	case Function::EFX:
 		return new EFX();
 	default:

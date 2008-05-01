@@ -16,7 +16,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle" >
-   <string>Scene Editor</string>
+   <string>Scene editor</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
@@ -34,6 +34,18 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="m_sceneList" >
+     <property name="rootIsDecorated" >
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable" >
+      <bool>false</bool>
+     </property>
+     <property name="sortingEnabled" >
+      <bool>true</bool>
+     </property>
+     <property name="allColumnsShowFocus" >
+      <bool>true</bool>
+     </property>
      <column>
       <property name="text" >
        <string>Scenes</string>

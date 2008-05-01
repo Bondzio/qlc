@@ -1,6 +1,34 @@
 2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* TODO:
+	* main/Makefile.am:
+	* main/src/addfixture.ui:
+	* main/src/chasereditor.ui:
+	* main/src/collection.cpp:
+	* main/src/collection.h:
+	* main/src/collectioneditor.cpp:
+	* main/src/collectioneditor.h:
+	* main/src/collectioneditor.ui:
+	* main/src/doc.cpp:
+	* main/src/fixturemanager.cpp:
+	* main/src/function.cpp:
+	* main/src/functioncollection.cpp:
+	* main/src/functioncollection.h:
+	* main/src/functioncollectioneditor.cpp:
+	* main/src/functioncollectioneditor.h:
+	* main/src/functioncollectioneditor.ui:
+	* main/src/functionmanager.cpp:
+	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.ui:
+
+	Renamed FunctionCollection* to Collection* and fixed CollectionEditor.
+	Added scene icon to scene editor (hmm.. is it really necessary?)
+	Fixed function editor dialogs' tree widgets to have no decorated roots
+	and all columns to show focus.
+
+2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
 	* main/src/chaser.cpp:
 	* main/src/chaser.h:
 	* main/src/chasereditor.cpp:

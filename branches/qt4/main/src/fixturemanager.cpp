@@ -41,11 +41,11 @@
 #include "common/qlcchannel.h"
 #include "common/qlcfile.h"
 
-#include "functioncollection.h"
 #include "fixtureproperties.h"
 #include "consolechannel.h"
 #include "fixturemanager.h"
 #include "addfixture.h"
+#include "collection.h"
 #include "fixture.h"
 #include "chaser.h"
 #include "scene.h"
@@ -279,10 +279,10 @@ void FixtureManager::copyFunction(Function* function, Fixture* fxi)
 
 	case Function::Collection:
 	{
-		FunctionCollection* fc = static_cast<FunctionCollection*>
+		Collection* fc = static_cast<Collection*>
 			(_app->doc()->newFunction(Function::Collection, KNoID));
 
-		fc->copyFrom(static_cast<FunctionCollection*> (function));
+		fc->copyFrom(static_cast<Collection*> (function));
 	}
 	break;
 

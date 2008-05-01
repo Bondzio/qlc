@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  functioncollection.h
+  collection.h
   
   Copyright (c) Heikki Junnila
   
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef FUNCTIONCOLLECTION_H
-#define FUNCTIONCOLLECTION_H
+#ifndef COLLECTION_H
+#define COLLECTION_H
 
 #include <QMutex>
 #include <QList>
@@ -29,17 +29,17 @@
 
 class QDomDocument;
 
-class FunctionCollection : public Function
+class Collection : public Function
 {
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
 public:
-	FunctionCollection();
-	virtual ~FunctionCollection();
+	Collection();
+	virtual ~Collection();
 
 	/** Copy given function's contents to this */
-	void copyFrom(FunctionCollection* fc, bool append = false);
+	void copyFrom(Collection* fc, bool append = false);
 
 	/** Collections don't belong to any particular fixture */
 	bool setFixtureInstance(t_fixture_id) { return false; }

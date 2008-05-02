@@ -32,7 +32,6 @@ class QTreeWidgetItem;
 class QTextBrowser;
 class QTreeWidget;
 class QSplitter;
-class QToolBar;
 class QAction;
 
 #define KXMLQLCFixtureManager "FixtureManager"
@@ -111,7 +110,6 @@ protected slots:
 	void slotContextMenuRequested(const QPoint& pos);
 
 protected:
-	QToolBar* m_toolbar;
 	QAction* m_addAction;
 	QAction* m_removeAction;
 	QAction* m_propertiesAction;

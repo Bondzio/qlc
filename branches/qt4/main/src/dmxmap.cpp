@@ -103,7 +103,6 @@ bool DMXPatch::loader(QDomDocument* doc, QDomElement* root, DMXMap* dmxMap)
 
 	/* QLC universe that this patch has been made for */
 	universe = root->attribute(KXMLQLCDMXPatchUniverse).toInt();
-	universe = CLAMP(universe, 0, KUniverseCount);
 
 	/* Load patch contents */
 	node = root->firstChild();
@@ -129,9 +128,7 @@ bool DMXPatch::loader(QDomDocument* doc, QDomElement* root, DMXMap* dmxMap)
 		node = node.nextSibling();
 	}
 
-	dmxMap->setPatch(universe, pluginName, output);
-
-	return true;
+	return dmxMap->setPatch(universe, pluginName, output);
 }
 
 /*****************************************************************************
@@ -398,21 +395,18 @@ void DMXMap::initPatch()
 	}
 }
 
-bool DMXMap::setPatch(int universe, const QString& pluginName,
-		      int pluginUniverse)
+bool DMXMap::setPatch(unsigned int universe, const QString& pluginName,
+		      unsigned int output)
 {
-	QLCOutPlugin* outputPlugin = NULL;
-	DMXPatch* dmxPatch = NULL;
-
-	if (universe < 0 || universe > m_patch.size())
+	if (universe >= m_patch.size())
 	{
-		cout << QString("Unable to patch universe %1. Value is out of "
+		cout << QString("Unable to patch universe %1. Number is out of "
 				"bounds.").arg(universe).toStdString()
 		     << endl;
 		return false;
 	}
 
-	outputPlugin = plugin(pluginName);
+	QLCOutPlugin* outputPlugin = plugin(pluginName);
 	if (outputPlugin == NULL)
 	{
 		cout << QString("Unable to patch universe %1. Plugin %2 not "
@@ -423,12 +417,8 @@ bool DMXMap::setPatch(int universe, const QString& pluginName,
 	}
 	else
 	{
-		/* Get rid of the old patch */
-		delete m_patch[universe];
-
-		/* Create a new patch */
-		dmxPatch = new DMXPatch(outputPlugin, pluginUniverse);
-		m_patch.insert(universe, dmxPatch);
+		m_patch[universe]->plugin = outputPlugin;
+		m_patch[universe]->output = output;
 	}
 }
 
@@ -468,9 +458,8 @@ void DMXMap::configurePlugin(const QString& pluginName)
 {
 	QLCOutPlugin* outputPlugin = plugin(pluginName);
 	if (outputPlugin == NULL)
-		QMessageBox::warning(_app,
-				     "Unable to configure plugin",
-				     pluginName + " not found!");
+		QMessageBox::warning(_app, tr("Unable to configure plugin"),
+				     tr("%1 not found").arg(pluginName));
 	else
 		outputPlugin->configure(_app);
 }

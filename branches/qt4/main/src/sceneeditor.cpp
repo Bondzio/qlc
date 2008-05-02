@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QMessageBox>
 #include <QToolButton>
+#include <QLayout>
 #include <QLabel>
 #include <QMenu>
 
@@ -60,6 +61,8 @@ SceneEditor::SceneEditor(QWidget* parent) : QWidget(parent)
 	m_tempScene = NULL;
 
 	setupUi(this);
+
+	layout()->setContentsMargins(1, 1, 1, 1);
 
 	/* Actions and tools menu */
 	initActions();

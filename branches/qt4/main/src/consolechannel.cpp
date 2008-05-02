@@ -23,6 +23,7 @@
 #include <QToolButton>
 #include <QPalette>
 #include <iostream>
+#include <QLayout>
 #include <QPixmap>
 #include <QSlider>
 #include <QLabel>
@@ -71,6 +72,7 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, t_fixture_id fixtureID,
 	m_menu = NULL;
 
 	setupUi(this);
+	layout()->setContentsMargins(1, 1, 1, 1);
 	init();
 }
 

@@ -86,12 +86,12 @@ void PluginManager::initActions()
 void PluginManager::initToolBar()
 {
 	// Add a toolbar to the dock area
-	m_toolbar = new QToolBar(tr("Plugin manager"), this);
-	layout()->addWidget(m_toolbar);
-	m_toolbar->addAction(m_configureAction);
-	m_toolbar->addSeparator();
-	m_toolbar->addAction(m_inputMapAction);
-	m_toolbar->addAction(m_outputMapAction);
+	QToolBar* toolbar = new QToolBar(tr("Plugin manager"), this);
+	layout()->setMenuBar(toolbar);
+	toolbar->addAction(m_configureAction);
+	toolbar->addSeparator();
+	toolbar->addAction(m_inputMapAction);
+	toolbar->addAction(m_outputMapAction);
 }
 
 void PluginManager::initDataView()
@@ -115,7 +115,7 @@ void PluginManager::initDataView()
 	connect(m_tree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(slotSelectionChanged()));
   
-	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*)),
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
 		this, SLOT(slotConfigure()));
 
 	connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),

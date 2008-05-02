@@ -1,3 +1,21 @@
+2008-05-02  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* libs/usbdmxout/usbdmxout.cpp:
+	* libs/usbdmxout/usbdmxout.h:
+	* main/src/consolechannel.cpp:
+	* main/src/dmxmap.cpp:
+	* main/src/dmxmap.h:
+	* main/src/dummyoutplugin.cpp:
+	* main/src/fixturemanager.cpp:
+	* main/src/fixturemanager.h:
+	* main/src/pluginmanager.cpp:
+	* main/src/pluginmanager.h:
+	* main/src/sceneeditor.cpp:
+
+	Fixed plugin manager's info view colors.
+	Fixed DMXPatch save/load and setPatch.
+	Set fixture console's layout margins smaller.
+	
 2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* gfx/Makefile.am:

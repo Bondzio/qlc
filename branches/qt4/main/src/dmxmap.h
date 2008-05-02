@@ -233,11 +233,11 @@ protected:
 	 *
 	 * @param universe The universe to patch
 	 * @param pluginName The name of the plugin to patch to the universe
-	 * @param pluginUniverse A universe provided by the plugin to patch to
+	 * @param output A universe provided by the plugin to patch to
 	 * @return true if successful, otherwise false
 	 */
-	bool setPatch(int universe, const QString& pluginName,
-		      int pluginUniverse = 0);
+	bool setPatch(unsigned int universe, const QString& pluginName,
+		      unsigned int output = 0);
 
 	/**
 	 * Get the output mapping for a QLC universe.

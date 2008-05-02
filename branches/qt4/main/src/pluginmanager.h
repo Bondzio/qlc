@@ -29,7 +29,6 @@ class QTextBrowser;
 class QTreeWidget;
 class QVBoxLayout;
 class QSplitter;
-class QToolBar;
 class QAction;
 
 class QLCPlugin;
@@ -69,7 +68,6 @@ protected:
 	QAction* m_outputMapAction;
 	QAction* m_inputMapAction;
 
-	QToolBar* m_toolbar;
 	QSplitter* m_splitter;
 	QTreeWidget* m_tree;
 	QTextBrowser* m_info;

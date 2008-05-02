@@ -344,13 +344,13 @@ void FixtureManager::initActions()
 
 void FixtureManager::initToolBar()
 {
-	m_toolbar = new QToolBar("Fixture Manager", this);
-	layout()->addWidget(m_toolbar);
-	m_toolbar->addAction(m_addAction);
-	m_toolbar->addAction(m_removeAction);
-	m_toolbar->addSeparator();
-	m_toolbar->addAction(m_propertiesAction);
-	m_toolbar->addAction(m_consoleAction);
+	QToolBar* toolbar = new QToolBar(tr("Fixture manager"), this);
+	layout()->setMenuBar(toolbar);
+	toolbar->addAction(m_addAction);
+	toolbar->addAction(m_removeAction);
+	toolbar->addSeparator();
+	toolbar->addAction(m_propertiesAction);
+	toolbar->addAction(m_consoleAction);
 }
 
 void FixtureManager::slotAdd()

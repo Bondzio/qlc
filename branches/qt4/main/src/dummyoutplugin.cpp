@@ -68,8 +68,8 @@ int DummyOutPlugin::outputs()
 int DummyOutPlugin::configure(QWidget* parentWidget)
 {
 	QMessageBox::information(parentWidget,
-				 "Dummy Output Configuration",
-				 "This plugin has no configurable options");
+				 tr("Dummy output configuration"),
+				 tr("This plugin has no configurable options"));
 }
 
 /*****************************************************************************
@@ -91,10 +91,10 @@ QString DummyOutPlugin::infoText()
 	str += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	str += QString("<TR>");
 	str += QString("<TD BGCOLOR=\"");
-	//str += QApplication::palette().active().highlight().name();
+	str += QApplication::palette().color(QPalette::Highlight).name();
 	str += QString("\">");
 	str += QString("<FONT COLOR=\"");
-	//str += QApplication::palette().active().highlightedText().name();
+	str += QApplication::palette().color(QPalette::HighlightedText).name();
 	str += QString("\" SIZE=\"5\">");
 	str += name();
 	str += QString("</FONT>");
@@ -120,9 +120,11 @@ QString DummyOutPlugin::infoText()
 
 	/* Note */
 	str += QString("<H3>NOTE</H3>");
-	str += QString("<P>This plugin does absolutely nothing; ");
+	str += QString("<P>");
+	str += QString("This plugin does absolutely nothing; ");
 	str += QString("you can use this if you don't have ");
-	str += QString("the necessary hardware for real control.</P>");
+	str += QString("the necessary hardware for real control.");
+	str += QString("</P>");
 
 	str += QString("</BODY>");
 	str += QString("</HTML>");

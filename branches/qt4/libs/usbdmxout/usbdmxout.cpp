@@ -30,14 +30,13 @@
 #include <errno.h>
 
 #include <QApplication>
+#include <QPalette>
 #include <iostream>
 #include <QString>
-#include <QMutex>
+#include <QColor>
 
 #include "usbdmxout.h"
 #include "configureusbdmxout.h"
-
-static QMutex _mutex;
 
 /*****************************************************************************
  * Peperoni Rodin interface macro definitions
@@ -241,10 +240,10 @@ QString USBDMXOut::infoText()
 	info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += name();
 	info += QString("</FONT>");
@@ -274,20 +273,20 @@ QString USBDMXOut::infoText()
 	info += QString("<TABLE COLS=\"3\" WIDTH=\"100%\">");
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\">");
 	info += QString("Output");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\">");
 	info += QString("Device name");
 	info += QString("</FONT>");
@@ -334,7 +333,7 @@ int USBDMXOut::writeChannel(t_channel channel, t_value value)
 	int channelNo = channel % 512;
 	int r = 0;
 	
-	_mutex.lock();
+	m_mutex.lock();
 
 	m_values[channel] = value;
 	
@@ -348,7 +347,7 @@ int USBDMXOut::writeChannel(t_channel channel, t_value value)
 			::perror("USBDMXOut::writeChannel");
 	}
 
-	_mutex.unlock();
+	m_mutex.unlock();
 
 	return r;
 }
@@ -361,7 +360,7 @@ int USBDMXOut::writeRange(t_channel address, t_value* values, t_channel num)
 	int firstChannel = address % 512;
 	int r = 0;
 	
-	_mutex.lock();
+	m_mutex.lock();
 
 	memcpy(m_values + address, values, num * sizeof(t_value));
 
@@ -375,16 +374,16 @@ int USBDMXOut::writeRange(t_channel address, t_value* values, t_channel num)
 			perror("USBDMXOut::writeRange");
 	}
   
-	_mutex.unlock();
+	m_mutex.unlock();
 
 	return r;
 }
 
 int USBDMXOut::readChannel(t_channel channel, t_value &value)
 {
-	_mutex.lock();
+	m_mutex.lock();
 	value = m_values[channel];
-	_mutex.unlock();
+	m_mutex.unlock();
 
 	return 0;
 }
@@ -393,9 +392,9 @@ int USBDMXOut::readRange(t_channel address, t_value* values, t_channel num)
 {
 	Q_ASSERT(values != NULL);
 
-	_mutex.lock();
+	m_mutex.lock();
 	memcpy(values, m_values + address, num * sizeof(t_value));
-	_mutex.unlock();
+	m_mutex.unlock();
 
 	return 0;
 }

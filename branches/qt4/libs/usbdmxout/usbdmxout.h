@@ -24,6 +24,8 @@
 #ifndef USBDMXOUT_H
 #define USBDMXOUT_H
 
+#include <QMutex>
+
 #include "common/qlcoutplugin.h"
 #include "common/qlctypes.h"
 
@@ -88,6 +90,7 @@ public:
 
 protected:
 	t_value m_values[MAX_USBDMX_DEVICES * 512];
+	QMutex m_mutex;
 };
 
 #endif

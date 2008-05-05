@@ -23,16 +23,17 @@
 #define FUNCTIONMANAGER_H
 
 #include <QWidget>
-#include <QAction>
 #include <QList>
 
 #include "common/qlctypes.h"
 #include "function.h"
 
 class QTreeWidgetItem;
+class QActionGroup;
 class QTreeWidget;
 class QSplitter;
 class QToolBar;
+class QAction;
 class QMenu;
 
 class Fixture;
@@ -121,7 +122,7 @@ protected:
 
 protected slots:
 	/** Set the selected bus to all selected functions */
-	void slotBusActivated(int busID);
+	void slotBusTriggered(QAction* action);
 
 	/*********************************************************************
 	 * Clipboard
@@ -167,6 +168,7 @@ protected slots:
 protected:
 	/** Update action enabled status */
 	void updateActionStatus();
+	void updateBusActions();
 
 protected:
 	QMenu* m_manageMenu;
@@ -188,6 +190,7 @@ protected:
 	QAction* m_deleteAction;
 	QAction* m_selectAllAction;
 
+	QActionGroup* m_busGroup;
 	QList <QAction*> m_busActions;
 
 	/*********************************************************************

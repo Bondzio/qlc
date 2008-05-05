@@ -257,7 +257,7 @@ void FunctionManager::initActions()
 	connect(m_addEFXAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddEFX()));
 
-	m_closeAction = new QAction(QIcon(PIXMAPS "/close.png"),
+	m_closeAction = new QAction(QIcon(PIXMAPS "/fileclose.png"),
 				    tr("Close"), this);
 	connect(m_closeAction, SIGNAL(triggered(bool)),
 		parentWidget(), SLOT(close()));
@@ -324,19 +324,24 @@ void FunctionManager::initMenu()
 	m_editMenu->addSeparator();
 
 	/* Bus menu */
-	QActionGroup* busGroup = new QActionGroup(this);
+	m_busGroup = new QActionGroup(this);
 	m_busMenu = new QMenu(this);
 	m_busMenu->setTitle("Bus");
 	for (t_bus_id id = KBusIDMin; id < KBusCount; id++)
 	{
-		/* <num>: <name> */
-		action = new QAction(QString("%1: %2").arg(id)
+		/* <xx>: <name> */
+		action = new QAction(QString("%1: %2").arg(id + 1, 2, 10,
+							   QChar('0'))
 				     .arg(Bus::name(id)), this);
 		action->setCheckable(true);
-		busGroup->addAction(action);
+		m_busGroup->addAction(action);
 		m_busActions.append(action);
 		m_busMenu->addAction(action);
 	}
+
+	/* Catch bus assignment changes */
+	connect(m_busGroup, SIGNAL(triggered(QAction*)),
+		this, SLOT(slotBusTriggered(QAction*)));
 
 	/* Catch bus name changes */
 	connect(Bus::emitter(), SIGNAL(nameChanged(t_bus_id, const QString&)),
@@ -365,6 +370,30 @@ void FunctionManager::initToolbar()
 	m_toolbar->addAction(m_pasteAction);
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_deleteAction);
+}
+
+void FunctionManager::slotBusTriggered(QAction* action)
+{
+	/* Bus actions are in ascending order in the list so the index of
+	   the triggered action is also the ID of the bus represented by
+	   the action. */
+	t_bus_id busID = m_busActions.indexOf(action);
+
+	/* Set the selected bus to all selected functions */
+	QListIterator <QTreeWidgetItem*> it(m_functionTree->selectedItems());
+	while (it.hasNext() == true)
+	{
+		QTreeWidgetItem* item;
+		Function* function;
+
+		item = it.next();
+		Q_ASSERT(item != NULL);
+		function = _app->doc()->function(item->text(KColumnID).toInt());
+		Q_ASSERT(function != NULL);
+
+		function->setBus(busID);
+		updateFunctionItem(item, function);
+	}
 }
 
 void FunctionManager::slotBusNameChanged(t_bus_id id, const QString& name)
@@ -593,12 +622,8 @@ void FunctionManager::slotSelectAll()
 
 void FunctionManager::updateActionStatus()
 {
-	QTreeWidgetItem* fixtureitem = m_fixtureTree->currentItem();
-
-	t_fixture_id fxi_id = KNoID;
-	t_function_id fid = KNoID;
-
-	if (fixtureitem == NULL)
+	QTreeWidgetItem* fixtureItem = m_fixtureTree->currentItem();
+	if (fixtureItem == NULL)
 	{
 		// There are no fixtures (at least none is selected)
 		// so nothing can be done in function manager
@@ -613,15 +638,11 @@ void FunctionManager::updateActionStatus()
 		m_pasteAction->setEnabled(false);
 		m_deleteAction->setEnabled(false);
 		m_selectAllAction->setEnabled(false);
-
-		QListIterator <QAction*> it(m_busActions);
-		while (it.hasNext() == true)
-			it.next()->setEnabled(false);
 	}
 	else
 	{
 		// Get the selected fixture
-		fxi_id = fixtureitem->text(KColumnID).toInt();
+		t_fixture_id fxi_id = fixtureItem->text(KColumnID).toInt();
 		if (fxi_id == KNoID)
 		{
 			// Global fixture has been selected
@@ -651,12 +672,6 @@ void FunctionManager::updateActionStatus()
 
 			m_deleteAction->setEnabled(true);
 			m_selectAllAction->setEnabled(true);
-
-			m_busMenu->setEnabled(true);
-
-			/* TODO: Set the bus action selected, whose ID matches
-			   the currently selected function item (first of
-			   multiple selection?) */
 		}
 		else
 		{
@@ -667,8 +682,6 @@ void FunctionManager::updateActionStatus()
 
 			m_deleteAction->setEnabled(false);
 			m_selectAllAction->setEnabled(false);
-
-			m_busMenu->setEnabled(false);
 		}
 
 		/* Check, whether clipboard contains something to paste */
@@ -680,6 +693,47 @@ void FunctionManager::updateActionStatus()
 		{
 			m_pasteAction->setEnabled(false);
 			m_clipboardAction = ClipboardNone;
+		}
+	}
+
+	/* Update bus menu actions in both cases */
+	updateBusActions();
+}
+
+void FunctionManager::updateBusActions()
+{
+	QTreeWidgetItem* functionItem = m_functionTree->currentItem();
+	if (functionItem == NULL)
+	{
+		/* No current function item selection, disable bus actions */
+		m_busGroup->setEnabled(false);
+	}
+	else
+	{
+		Function* function;
+		t_function_id fid;
+		QAction* action;
+
+		/* Find the selected function */
+		fid = functionItem->text(KColumnID).toInt();
+		function = _app->doc()->function(fid);
+		Q_ASSERT(function != NULL);
+
+		/* Collections don't have a bus ID and it's always KNoID.
+		   Other functions' bus ID's can never be KNoID so it is
+		   safe to check the function's bus-assignability this way */
+		if (function->busID() == KNoID)
+		{
+			m_busGroup->setEnabled(false);
+		}
+		else
+		{
+			m_busGroup->setEnabled(true);
+
+			/* Set the current function's bus checked */
+			action = m_busActions.at(function->busID());
+			Q_ASSERT(action != NULL);
+			action->setChecked(true);
 		}
 	}
 }
@@ -700,6 +754,7 @@ void FunctionManager::initFixtureTree()
 	m_fixtureTree->setRootIsDecorated(false);
 	m_fixtureTree->setAllColumnsShowFocus(true);
 	m_fixtureTree->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_fixtureTree->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	// Catch selection changes
 	connect(m_fixtureTree, SIGNAL(itemSelectionChanged()),
@@ -789,7 +844,7 @@ void FunctionManager::slotFixtureTreeContextMenuRequested(const QPoint& pos)
 	m_editAction->setEnabled(false);
 	m_selectAllAction->setEnabled(false);
 
-	contextMenu.exec(pos);
+	contextMenu.exec(QCursor::pos());
 
 	// Enable the menu items again
 	updateActionStatus();
@@ -813,6 +868,7 @@ void FunctionManager::initFunctionTree()
 	m_functionTree->setRootIsDecorated(false);
 	m_functionTree->setAllColumnsShowFocus(true);
 	m_functionTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_functionTree->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	// Catch selection changes
 	connect(m_functionTree, SIGNAL(itemSelectionChanged()),
@@ -875,27 +931,12 @@ void FunctionManager::slotFunctionTreeContextMenuRequested(const QPoint& pos)
 
 	updateActionStatus();
 
-	contextMenu.exec(pos);
+	contextMenu.exec(QCursor::pos());
 }
 
 /*****************************************************************************
  * Helpers
  *****************************************************************************/
-
-void FunctionManager::slotBusActivated(int busID)
-{
-	QTreeWidgetItemIterator it(m_functionTree);
-	while (*it != NULL)
-	{
-		Function* function = _app->doc()->function(
-			(*it)->text(KColumnID).toInt());
-		Q_ASSERT(function != NULL);
-
-		function->setBus(busID);
-		updateFunctionItem(*it, function);
-		++it;
-	}
-}
 
 Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 {

@@ -1,3 +1,11 @@
+2008-05-05  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
+	* main/src/functionmanager.cpp:
+	* main/src/functionmanager.h:
+
+	Fixed bus menus and context menus in function manager.
+
 2008-05-02  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* libs/usbdmxout/usbdmxout.cpp:

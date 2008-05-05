@@ -149,3 +149,6 @@
 
 * Cut, copy paste to virtual console
 
+* Move the contents of Function::setBus() to subclasses and leave only the
+  common parts.
+

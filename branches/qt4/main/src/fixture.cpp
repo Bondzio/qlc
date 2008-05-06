@@ -74,6 +74,7 @@ Fixture::Fixture(t_channel address, t_channel universe, t_channel channels,
 	m_address = (m_address & 0x01FF) | (universe << 9);
 
 	m_console = NULL;
+	m_genericChannel = NULL;
 }
 
 Fixture::~Fixture()

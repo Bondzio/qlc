@@ -1,3 +1,11 @@
+2008-05-06  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* main/src/fixture.cpp:
+
+	Fixed generic fixtures' channel to be initially NULL until
+	it is requested for the first time. This caused ConsoleChannel to
+	crash with generic dimmers.
+
 2008-05-05  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* TODO:

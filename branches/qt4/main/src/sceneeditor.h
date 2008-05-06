@@ -69,7 +69,7 @@ protected:
 
 protected slots:
 	void slotActivate();
-	void slotNew();
+	bool slotNew();
 	void slotStore();
 	void slotRename();
 	void slotRemove();
@@ -97,6 +97,9 @@ protected:
 	void selectFunction(t_function_id fid);
 
 protected slots:
+	/** Item selection changed */
+	void slotItemSelectionChanged();
+
 	/** Context menu has been requested for the scene list */
 	void slotSceneListContextMenu(const QPoint& pos);
 

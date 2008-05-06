@@ -31,8 +31,8 @@
 #include <iostream>
 #include <QLabel>
 
-#include "common/qlcfixturedef.h"
 #include "common/qlcfixturemode.h"
+#include "common/qlcfixturedef.h"
 
 #include "addfixture.h"
 #include "app.h"
@@ -289,13 +289,14 @@ void AddFixture::slotNameEdited(const QString &text)
 {
 	/* If the user clears the text in the name field,
 	   start substituting the name with the model again. */
-	m_nameValue = text;
 	if (text.length() == 0)
 		m_nameEdit->setModified(false);
 }
 
 void AddFixture::accept()
 {
+	m_nameValue = m_nameEdit->text();
+
 	m_addressValue = m_addressSpin->value() - 1;
 	m_universeValue = m_universeSpin->value() - 1;
 	

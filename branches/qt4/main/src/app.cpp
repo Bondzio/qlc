@@ -1122,8 +1122,9 @@ void App::slotControlVirtualConsole()
 {
 	Q_ASSERT(m_virtualConsole != NULL);
 
+	m_virtualConsole->show();
 	m_virtualConsole->parentWidget()->show();
-	m_virtualConsole->setFocus();
+	m_virtualConsole->parentWidget()->setFocus();
 }
 
 void App::slotVirtualConsoleClosed()

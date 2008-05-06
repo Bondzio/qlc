@@ -1,3 +1,17 @@
+2008-05-06  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/addfixture.cpp:
+	* main/src/app.cpp:
+	* main/src/fixturemanager.cpp:
+	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.h:
+	* main/src/vcbuttonproperties.ui:
+
+	Fixed initial name of a fixture.
+	Fixed fixture manager's & scene editor's context menu positions.
+	Fixed crashing scene editor when an empty scene was stored.
+	Scene editor actions are enabled/disabled according to selection.
+
 2008-05-06  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* main/src/fixture.cpp:

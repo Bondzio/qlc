@@ -521,7 +521,7 @@ void FixtureManager::slotContextMenuRequested(const QPoint& point)
 	menu.addAction(m_consoleAction);
 	menu.addSeparator();
 	menu.addAction(m_removeAction);
-	menu.exec(m_tree->mapToGlobal(point));
+	menu.exec(QCursor::pos());
 }
 
 /*****************************************************************************

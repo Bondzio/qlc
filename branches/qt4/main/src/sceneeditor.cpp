@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QMessageBox>
 #include <QToolButton>
+#include <iostream>
 #include <QLayout>
 #include <QLabel>
 #include <QMenu>
@@ -77,10 +78,14 @@ SceneEditor::SceneEditor(QWidget* parent) : QWidget(parent)
 	/* Scene list */
 	m_sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_sceneList->setRootIsDecorated(false);
+	m_sceneList->setContextMenuPolicy(Qt::CustomContextMenu);
+
 	connect(m_sceneList, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(slotSceneListContextMenu(const QPoint&)));
 	connect(m_sceneList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
 		this, SLOT(slotActivate()));
+	connect(m_sceneList, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotItemSelectionChanged()));
 
 	/* Status label */
 	pal.setColor(QPalette::Window, QColor(0, 0, 0));
@@ -210,6 +215,9 @@ void SceneEditor::initActions()
 				     tr("Rename..."), this);
 	connect(m_renameAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotRename()));
+
+	/* Update action statuses */
+	slotItemSelectionChanged();
 }
 
 void SceneEditor::initMenu()
@@ -226,11 +234,6 @@ void SceneEditor::initMenu()
 	m_tools->setMenu(m_menu);
 }
 
-void SceneEditor::slotSceneListContextMenu(const QPoint &point)
-{
-	m_menu->exec(point);
-}
-
 void SceneEditor::slotActivate()
 {
 	Scene* scene = currentScene();
@@ -244,7 +247,7 @@ void SceneEditor::slotActivate()
 	setStatusText(KStatusUnchanged, KStatusColorUnchanged);
 }
 
-void SceneEditor::slotNew()
+bool SceneEditor::slotNew()
 {
 	bool ok = false;
 	QString name;
@@ -266,13 +269,15 @@ void SceneEditor::slotNew()
 
 		setStatusText(KStatusStored, KStatusColorStored);
 	}
+
+	return ok;
 }
 
 void SceneEditor::slotStore()
 {
 	Scene* sc = currentScene();
 	if (sc == NULL)
-		slotNew();
+		return;
 
 	// Save name & bus because copyFrom overwrites them
 	QString name = sc->name();
@@ -374,7 +379,7 @@ QTreeWidgetItem* SceneEditor::getItem(t_function_id id)
 void SceneEditor::selectFunction(t_function_id fid)
 {
 	QTreeWidgetItemIterator it(m_sceneList);
-	while (*it)
+	while (*it != NULL)
 	{
 		if ((*it)->text(KColumnID).toInt() == fid)
 		{
@@ -383,6 +388,29 @@ void SceneEditor::selectFunction(t_function_id fid)
 			break;
 		}
 		++it;
+	}
+}
+
+void SceneEditor::slotSceneListContextMenu(const QPoint &point)
+{
+	m_menu->exec(QCursor::pos());
+}
+
+void SceneEditor::slotItemSelectionChanged()
+{
+	if (m_sceneList->currentItem() == NULL)
+	{
+		m_activateAction->setEnabled(false);
+		m_storeAction->setEnabled(false);
+		m_renameAction->setEnabled(false);
+		m_removeAction->setEnabled(false);
+	}
+	else
+	{
+		m_activateAction->setEnabled(true);
+		m_storeAction->setEnabled(true);
+		m_renameAction->setEnabled(true);
+		m_removeAction->setEnabled(true);
 	}
 }
 

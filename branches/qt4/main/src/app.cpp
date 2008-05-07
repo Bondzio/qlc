@@ -775,6 +775,8 @@ void App::initStatusBar()
 void App::initToolBar()
 {
 	m_toolbar = new QToolBar(tr("Workspace"), this);
+	m_toolbar->setFloatable(false);
+	m_toolbar->setMovable(false);
 	addToolBar(m_toolbar);
 	m_toolbar->addAction(m_fileNewAction);
 	m_toolbar->addAction(m_fileOpenAction);

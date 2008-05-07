@@ -68,6 +68,10 @@ VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 		this, SLOT(slotModeChanged(App::Mode)));
 
 	setFrameStyle(KVCWidgetFrameStyleSunken);
+
+	setBackgroundRole(QPalette::Window);
+	setAutoFillBackground(true);
+
 	setMinimumSize(20, 20);
 	QFrame::resize(QSize(120, 120));
 }
@@ -119,7 +123,7 @@ void VCWidget::setBackgroundImage(const QString& path)
 	m_hasCustomBackgroundColor = false;
 	m_backgroundImage = path;
 
-	setAutoFillBackground(true);
+	/* setAutoFillBackground(true); */
 	pal.setBrush(QPalette::Window, QBrush(QPixmap(path)));
 	setPalette(pal);
 
@@ -148,7 +152,7 @@ void VCWidget::setBackgroundColor(const QColor& color)
 	m_hasCustomBackgroundColor = true;
 	m_backgroundImage = QString::null;
 
-	setAutoFillBackground(true);
+	/* setAutoFillBackground(true); */
 	pal.setColor(QPalette::Window, color);
 	setPalette(pal);
 
@@ -177,7 +181,7 @@ void VCWidget::slotResetBackgroundColor()
 	
 	/* Reset the whole palette to application palette */
 	setPalette(QApplication::palette());
-	setAutoFillBackground(false);
+	/* setAutoFillBackground(false); */
 
 	/* Restore foreground color */
 	if (fg.isValid() == true)

@@ -452,7 +452,6 @@ void VCButton::invokeMenu(QPoint point)
 	
 	menu->exec(point);
 	delete menu;
-	delete attachAction;
 }
 
 void VCButton::slotAttachFunction()

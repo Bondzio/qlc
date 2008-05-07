@@ -326,7 +326,7 @@ void FunctionManager::initMenu()
 	/* Bus menu */
 	m_busGroup = new QActionGroup(this);
 	m_busMenu = new QMenu(this);
-	m_busMenu->setTitle("Bus");
+	m_busMenu->setTitle("Assign bus");
 	for (t_bus_id id = KBusIDMin; id < KBusCount; id++)
 	{
 		/* <xx>: <name> */
@@ -357,6 +357,8 @@ void FunctionManager::initToolbar()
 {
 	// Add a toolbar to the dock area
 	m_toolbar = new QToolBar("Function Manager", this);
+	m_toolbar->setFloatable(false);
+	m_toolbar->setMovable(false);
 	layout()->addWidget(m_toolbar);
 	m_toolbar->addAction(m_addSceneAction);
 	m_toolbar->addAction(m_addChaserAction);

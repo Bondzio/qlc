@@ -1,3 +1,20 @@
+2008-05-07  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/app.cpp:
+	* main/src/fixturemanager.cpp:
+	* main/src/functionmanager.cpp:
+	* main/src/vcbutton.cpp:
+	* main/src/vcdockslider.ui:
+	* main/src/vcwidget.cpp:
+	* main/src/virtualconsole.cpp:
+
+	Fixed crash during VCButton::slotDelete().
+	Set app & function & fixture manager toolbars non-movable and
+	non-floatable.
+	Changed "Bus" menu name in function manager to "Assign bus".
+	Fixed VC widget adding to the selected frame thru main menu.
+	Set all VCWidgets to have an opaque background.
+
 2008-05-06  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/addfixture.cpp:

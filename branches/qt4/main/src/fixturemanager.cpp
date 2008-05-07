@@ -345,6 +345,8 @@ void FixtureManager::initActions()
 void FixtureManager::initToolBar()
 {
 	QToolBar* toolbar = new QToolBar(tr("Fixture manager"), this);
+	toolbar->setFloatable(false);
+	toolbar->setMovable(false);
 	layout()->setMenuBar(toolbar);
 	toolbar->addAction(m_addAction);
 	toolbar->addAction(m_removeAction);

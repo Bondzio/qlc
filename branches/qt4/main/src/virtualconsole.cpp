@@ -447,32 +447,67 @@ void VirtualConsole::setDrawArea(VCFrame* drawArea)
 
 void VirtualConsole::slotAddButton()
 {
-	Q_ASSERT(m_drawArea != NULL);
-	m_drawArea->slotAddButton();
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddButton();
 }
 
 void VirtualConsole::slotAddSlider()
 {
-	Q_ASSERT(m_drawArea != NULL);
-	m_drawArea->slotAddSlider();
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddSlider();
 }
 
 void VirtualConsole::slotAddFrame()
 {
-	Q_ASSERT(m_drawArea != NULL);
-	m_drawArea->slotAddFrame();
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddFrame();
 }
 
 void VirtualConsole::slotAddXYPad()
 {
-	Q_ASSERT(m_drawArea != NULL);
-	m_drawArea->slotAddXYPad();
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddXYPad();
 }
 
 void VirtualConsole::slotAddLabel()
 {
-	Q_ASSERT(m_drawArea != NULL);
-	m_drawArea->slotAddLabel();
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddLabel();
 }
 
 /*********************************************************************

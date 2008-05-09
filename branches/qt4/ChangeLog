@@ -1,5 +1,42 @@
 2008-05-09  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
+	* docs/Makefile.am:
+	* docs/advancedsceneeditor-pic.html:
+	* docs/advancedsceneeditor.html:
+	* docs/busproperties-pic.html:
+	* docs/busproperties.html:
+	* docs/coding-convention.html:
+	* docs/compiling.html:
+	* docs/concept.html:
+	* docs/console-pic.html:
+	* docs/console.html:
+	* docs/deviceclasseditor-pic.html:
+	* docs/deviceclasseditor.html:
+	* docs/devicemanager-pic.html:
+	* docs/devicemanager.html:
+	* docs/errata.html:
+	* docs/faq.html:
+	* docs/functionmanager-pic.html:
+	* docs/functionmanager.html:
+	* docs/getting-started.html:
+	* docs/index.html:
+	* docs/mainwindow-pic.html:
+	* docs/mainwindow.html:
+	* docs/monitor-pic.html:
+	* docs/monitor.html:
+	* docs/selectfunction-pic.html:
+	* docs/settings-pic.html:
+	* docs/settings.html:
+	* docs/virtualconsole.html:
+	* libs/common/qlcdocbrowser.cpp:
+	* libs/common/qlcdocbrowser.h:
+
+	Fixed documentbrowser to open up as a separate main window.
+	Changed qlc-logo.jpg to qlc-logo.png and made the appropriate
+	changes in documentation files.
+
+2008-05-09  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
 	* main/src/app.cpp:
 
 	Fixed fixture loading messages (there was no space between

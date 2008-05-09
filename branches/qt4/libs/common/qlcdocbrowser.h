@@ -22,33 +22,27 @@
 #ifndef QLCDOCBROWSER_H
 #define QLCDOCBROWSER_H
 
-#include <QWidget>
+#include <QMainWindow>
 
 class QTextBrowser;
-class QToolBar;
 class QAction;
 
-class QLCDocBrowser : public QWidget
+class QLCDocBrowser : public QMainWindow
 {
 	Q_OBJECT
 
 public:
 	QLCDocBrowser(QWidget* parent);
 	~QLCDocBrowser();
-	
-	void init();
-	void updateButtons();
-	
-public slots:
-	void slotPrevious();
+
+protected slots:
 	void slotBackwardAvailable(bool);
-	void slotNext();
 	void slotForwardAvailable(bool);
 
 protected:
-	QToolBar* m_toolbar;
-	QAction* m_previousAction;
-	QAction* m_nextAction;
+	QAction* m_backwardAction;
+	QAction* m_forwardAction;
+	QAction* m_homeAction;
 
 	QTextBrowser* m_browser;
 };

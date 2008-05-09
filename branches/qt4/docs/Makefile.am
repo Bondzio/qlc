@@ -40,6 +40,6 @@ dist_pics_DATA = \
 	pics/mainwindow.png \
 	pics/monitor.png \
 	pics/newdevice.png \
-	pics/qlc-logo.jpg \
+	pics/qlc-logo.png \
 	pics/selectfunction.png \
 	pics/settings.png

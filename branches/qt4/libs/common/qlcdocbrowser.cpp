@@ -27,38 +27,32 @@
 
 #include "qlcdocbrowser.h"
 
-QLCDocBrowser::QLCDocBrowser(QWidget* parent) : QWidget(parent)
-{
-	init();
-}
-
-QLCDocBrowser::~QLCDocBrowser()
-{
-}
-
-void QLCDocBrowser::init()
+QLCDocBrowser::QLCDocBrowser(QWidget* parent) : QMainWindow(parent)
 {
 	setWindowTitle("Q Light Controller - Document Browser");
 	resize(600, 600);
-	
-	new QVBoxLayout(this);
 
 	/* Actions */
-	m_previousAction = new QAction(QIcon(PIXMAPS "/back.png"),
-				       tr("Previous"), this);
-	m_previousAction->setEnabled(false);
-	m_nextAction = new QAction(QIcon(PIXMAPS "/forward.png"),
-				   tr("Next"), this);
-	m_nextAction->setEnabled(false);
+	m_backwardAction = new QAction(QIcon(PIXMAPS "/back.png"),
+				       tr("Backward"), this);
+	m_backwardAction->setEnabled(false);
 
+	m_forwardAction = new QAction(QIcon(PIXMAPS "/forward.png"),
+				   tr("Forward"), this);
+	m_forwardAction->setEnabled(false);
+
+	m_homeAction = new QAction(QIcon(PIXMAPS "/help.png"),
+				   tr("Index"), this);
 	/* Toolbar */
-	m_toolbar = new QToolBar("Document Browser", this);
-	m_toolbar->addAction(m_previousAction);
-	m_toolbar->addAction(m_nextAction);
-	
+	QToolBar* toolbar = new QToolBar("Document Browser", this);
+	this->addToolBar(toolbar);
+	toolbar->addAction(m_backwardAction);
+	toolbar->addAction(m_forwardAction);
+	toolbar->addAction(m_homeAction);
+
 	/* Browser */
 	m_browser = new QTextBrowser(this);
-	layout()->addWidget(m_browser);
+	this->setCentralWidget(m_browser);
 
 	connect(m_browser, SIGNAL(backwardAvailable(bool)),
 		this, SLOT(slotBackwardAvailable(bool)));
@@ -66,24 +60,25 @@ void QLCDocBrowser::init()
 		this, SLOT(slotForwardAvailable(bool)));
 
 	m_browser->setSource(QUrl(DOCUMENTS "/index.html"));
+
+	connect(m_backwardAction, SIGNAL(triggered(bool)),
+		m_browser, SLOT(backward()));
+	connect(m_forwardAction, SIGNAL(triggered(bool)),
+		m_browser, SLOT(forward()));
+	connect(m_homeAction, SIGNAL(triggered(bool)), 
+		m_browser, SLOT(home()));
 }
 
-void QLCDocBrowser::slotPrevious()
+QLCDocBrowser::~QLCDocBrowser()
 {
-	m_browser->backward();
 }
 
 void QLCDocBrowser::slotBackwardAvailable(bool available)
 {
-	m_previousAction->setEnabled(available);
-}
-
-void QLCDocBrowser::slotNext()
-{
-	m_browser->forward();
+	m_backwardAction->setEnabled(available);
 }
 
 void QLCDocBrowser::slotForwardAvailable(bool available)
 {
-	m_nextAction->setEnabled(available);
+	m_forwardAction->setEnabled(available);
 }

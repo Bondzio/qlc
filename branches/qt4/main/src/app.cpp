@@ -435,9 +435,10 @@ bool App::initFixtureDefinitions()
 		path = QString(FIXTURES) + QDir::separator() + *it;
 		fixtureDef = new QLCFixtureDef(path);
 
-		cout << "Loaded fixture definition for "
-		     << fixtureDef->manufacturer().toStdString()
-		     << fixtureDef->model().toStdString()
+		cout << QString("Loaded fixture definition for %1 %2")
+		        .arg(fixtureDef->manufacturer())
+		        .arg(fixtureDef->model())
+			.toStdString()
 		     << endl;
 
 		if (fixtureDef != NULL)

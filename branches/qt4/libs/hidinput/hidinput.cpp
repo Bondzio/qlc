@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QStringList>
+#include <iostream>
 #include <QDir>
 
 #include "hidinput.h"
@@ -84,8 +85,11 @@ int HIDInput::close()
 {
 	HIDDevice* hidDevice = NULL;
 
-	while ((hidDevice = m_devices.takeFirst()) != NULL)
+	while (m_devices.isEmpty() == false)
 	{
+		hidDevice = m_devices.takeFirst();
+		Q_ASSERT(hidDevice != NULL);
+		
 		hidDevice->close();
 		delete hidDevice;
 	}

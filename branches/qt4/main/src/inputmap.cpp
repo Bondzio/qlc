@@ -44,9 +44,8 @@ InputMap::InputMap()
 
 InputMap::~InputMap()
 {
-	QLCInPlugin* inputPlugin;
-	while ((inputPlugin = m_plugins.takeFirst()) != NULL)
-		delete inputPlugin;
+	while (m_plugins.isEmpty() == false)
+		delete m_plugins.takeFirst();
 }
 
 /*****************************************************************************

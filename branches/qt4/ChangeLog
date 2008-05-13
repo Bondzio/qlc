@@ -1,3 +1,11 @@
+2008-05-13  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* libs/hidinput/hidinput.cpp:
+	* main/src/inputmap.cpp:
+
+	Fixed two crash bugs resulting from using QList::takeFirst() in
+	while() conditional clause.
+
 2008-05-13  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* main/src/addfixture.cpp:

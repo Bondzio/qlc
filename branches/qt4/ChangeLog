@@ -1,3 +1,11 @@
+2008-05-13  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* main/src/addfixture.cpp:
+	* main/src/addfixture.ui:
+
+	Added a channel list to AddFixture UI, since plain mode names
+	("Mode 1", "Mode 2" etc...) don't tell anything of their contents. 
+
 2008-05-09  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* docs/Makefile.am:

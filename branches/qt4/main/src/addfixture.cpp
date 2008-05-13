@@ -71,8 +71,11 @@ AddFixture::AddFixture(QWidget *parent) : QDialog(parent)
 	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
 		this, SLOT(slotNameEdited(const QString&)));
 
+	/* Fill fixture definition tree */
 	fillTree();
-	m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
+
+	/* Simulate the first selection change (none) */
+	slotSelectionChanged();
 }
 
 AddFixture::~AddFixture()
@@ -192,11 +195,22 @@ void AddFixture::slotModeActivated(const QString& modeName)
 	m_mode = m_fixtureDef->mode(modeName);
 	if (m_mode == NULL)
 	{
-		slotSelectionChanged();
+		/* Generic dimmers don't have modes, so bail out */
+		// slotSelectionChanged();
 		return;
 	}
 
 	m_channelsSpin->setValue(m_mode->channels());
+
+	/* Show all selected mode channels in the list */
+	m_channelList->clear();
+	for (int i = 0; i < m_mode->channels(); i++)
+	{
+		QLCChannel* channel = m_mode->channel(i);
+		Q_ASSERT(channel != NULL);
+
+		new QListWidgetItem(channel->name(), m_channelList);
+	}
 }
 
 void AddFixture::slotSelectionChanged()
@@ -219,6 +233,7 @@ void AddFixture::slotSelectionChanged()
 		m_nameEdit->setEnabled(false);
 		
 		m_channelsSpin->setValue(0);
+		m_channelList->clear();
 		m_addressSpin->setEnabled(false);
 		m_universeSpin->setEnabled(false);
 		
@@ -238,6 +253,7 @@ void AddFixture::slotSelectionChanged()
 			m_fixtureDef = NULL;
 			fillModeCombo(KXMLFixtureGeneric);
 			m_channelsSpin->setEnabled(true);
+			m_channelList->clear();
 
 			/* Set the model name as the fixture's friendly name ONLY
 			   if the user hasn't modified the friendly name field. */	

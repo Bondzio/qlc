@@ -157,7 +157,7 @@ bool VCFrame::loader(QDomDocument* doc, QDomElement* root, QWidget* parent)
 
 	/* If the current parent widget is anything else than a VCFrame,
 	   the currently loaded VCFrame becomes the parent of all VC widgets */
-	if (parent->objectName() != "VCFrame")
+	if (parent->objectName() != VCFrame::staticMetaObject.className())
 		_app->virtualConsole()->setDrawArea(frame);
 
 	/* Continue loading */
@@ -267,7 +267,17 @@ bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	/* Save children */
 	QListIterator <VCWidget*> it(findChildren<VCWidget*>());
 	while (it.hasNext() == true)
-		it.next()->saveXML(doc, &root);
+	{
+		VCWidget* widget = it.next();
+
+		/* findChildren() is recursive, so the list contains all
+		   possible child widgets below this frame. Each frame must
+		   save only its direct children to preserve hierarchy, so
+		   save only such widgets that have this widget as their
+		   direct parent. */
+		if (widget->parentWidget() == this)
+			widget->saveXML(doc, &root);
+	}
 
 	return true;
 }

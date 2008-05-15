@@ -1,3 +1,10 @@
+2008-05-15  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/vcframe.cpp:
+
+	Fixed virtual console save bug, which caused all widgets to get
+	saved multiple times.
+
 2008-05-13  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* libs/hidinput/hidinput.cpp:

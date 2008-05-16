@@ -38,6 +38,7 @@ VCDockArea::VCDockArea(QWidget* parent) : QFrame(parent)
 {
 	// Align widgets vertically in the area
 	new QVBoxLayout(this);
+	layout()->setMargin(0);
 
 	// Default fade time slider
 	m_defaultFadeSlider = new VCDockSlider(this, KBusIDDefaultFade);

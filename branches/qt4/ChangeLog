@@ -1,5 +1,18 @@
 2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/vcdockarea.cpp:
+	* main/src/vcdockslider.cpp:
+	* main/src/vcdockslider.h:
+	* main/src/vcdockslider.ui:
+	* main/src/virtualconsole.cpp:
+	* main/src/virtualconsoleproperties.cpp:
+	* main/src/virtualconsoleproperties.h:
+	* main/src/virtualconsoleproperties.ui:
+
+	Fixed vcdockslider and virtual console properties.
+
+2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/virtualconsole.cpp:
 
 	Fixed virtual console visible state and geometry loading.

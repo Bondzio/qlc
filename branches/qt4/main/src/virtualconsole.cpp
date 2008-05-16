@@ -76,6 +76,8 @@ VirtualConsole::~VirtualConsole()
 void VirtualConsole::init()
 {
 	new QHBoxLayout(this);
+	layout()->setMargin(0);
+	layout()->setSpacing(0);
 
 	setWindowIcon(QIcon(PIXMAPS "/virtualconsole.png"));
 	setWindowTitle(tr("Virtual Console"));
@@ -169,8 +171,6 @@ void VirtualConsole::initMenuBar()
 	m_editMenu->addMenu(bgMenu);
 	bgMenu->addAction(QIcon(PIXMAPS "/color.png"), "Color",
 			  this, SLOT(slotBackgroundColor()));
-	bgMenu->addAction(QIcon(PIXMAPS "/fonts.png"), "Font",
-			  this, SLOT(slotBackgroundFont()));
 	bgMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
 			  this, SLOT(slotBackgroundNone()));
 
@@ -191,7 +191,7 @@ void VirtualConsole::initDockArea()
 
 	m_dockArea = new VCDockArea(this);
 	m_dockArea->setSizePolicy(QSizePolicy::Maximum,
-				  QSizePolicy::Maximum);
+				  QSizePolicy::Expanding);
 	
 	// Add the dock area into the master horizontal layout
 	layout()->addWidget(m_dockArea);
@@ -519,11 +519,11 @@ void VirtualConsole::slotToolsSettings()
 
 	Q_ASSERT(m_dockArea != NULL);
 
-	prop.setGridEnabled(m_gridEnabled);
-	prop.setGridX(m_gridX);
-	prop.setGridY(m_gridY);
 	prop.setKeyRepeatOff(m_keyRepeatOff);
 	prop.setGrabKeyboard(m_grabKeyboard);
+
+	prop.setGrid(m_gridEnabled, m_gridX, m_gridY);
+
 	m_dockArea->defaultFadeSlider()->busRange(lo, hi);
 	prop.setFadeLimits(lo, hi);
 	m_dockArea->defaultHoldSlider()->busRange(lo, hi);
@@ -538,10 +538,12 @@ void VirtualConsole::slotToolsSettings()
 		setKeyRepeatOff(prop.isKeyRepeatOff());
 		setGrabKeyboard(prop.isGrabKeyboard());
 
-		prop.fadeLimits(lo, hi);
+		lo = prop.fadeLowLimit();
+		hi = prop.fadeHighLimit();
 		m_dockArea->defaultFadeSlider()->setBusRange(lo, hi);
 
-		prop.holdLimits(lo, hi);
+		lo = prop.holdLowLimit();
+		hi = prop.holdHighLimit();
 		m_dockArea->defaultHoldSlider()->setBusRange(lo, hi);
 	}
 }

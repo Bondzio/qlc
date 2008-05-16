@@ -31,34 +31,65 @@ extern App* _app;
 VirtualConsoleProperties::VirtualConsoleProperties(QWidget* parent)
 	: QDialog(parent)
 {
-	m_grabKeyboard = false;
-	m_keyRepeatOff = false;
-	m_gridEnabled = false;
-	m_gridX = 10;
-	m_gridY = 10;
-	m_fadeLowLimit = 0;
-	m_fadeHighLimit = 0;
-	m_holdLowLimit = 0;
-	m_holdHighLimit = 0;
-
 	setupUi(this);
-
-	m_grabKeyboardCheck->setChecked(m_grabKeyboard);
-	m_keyRepeatOffCheck->setChecked(m_keyRepeatOff);
-
-	m_gridGroup->setChecked(m_gridEnabled);
-	m_gridXSpin->setValue(m_gridX);
-	m_gridYSpin->setValue(m_gridY);
-
-	m_fadeLowSpin->setValue(m_fadeLowLimit);
-	m_fadeHighSpin->setValue(m_fadeHighLimit);
-
-	m_holdLowSpin->setValue(m_holdLowLimit);
-	m_holdHighSpin->setValue(m_holdHighLimit);
 }
 
 VirtualConsoleProperties::~VirtualConsoleProperties()
 {
+}
+
+/*****************************************************************************
+ * Grid
+ *****************************************************************************/
+
+void VirtualConsoleProperties::setGrid(bool enabled, int x, int y)
+{
+	m_gridGroup->setChecked(enabled);
+	m_gridXSpin->setValue(x);
+	m_gridYSpin->setValue(y);
+}
+
+bool VirtualConsoleProperties::isGridEnabled()
+{
+	return m_gridGroup->isChecked();
+}
+
+int VirtualConsoleProperties::gridX()
+{
+	return m_gridXSpin->value();
+}
+
+int VirtualConsoleProperties::gridY()
+{
+	return m_gridYSpin->value();
+}
+
+/*****************************************************************************
+ * Key repeat
+ *****************************************************************************/
+
+void VirtualConsoleProperties::setKeyRepeatOff(bool set)
+{
+	m_keyRepeatOffCheck->setChecked(set);
+}
+
+bool VirtualConsoleProperties::isKeyRepeatOff()
+{
+	return m_keyRepeatOffCheck->isChecked();
+}
+
+/*****************************************************************************
+ * Grab keyboard
+ *****************************************************************************/
+
+void VirtualConsoleProperties::setGrabKeyboard(bool set)
+{
+	m_grabKeyboardCheck->setChecked(set);
+}
+
+bool VirtualConsoleProperties::isGrabKeyboard()
+{
+	return m_grabKeyboardCheck->isChecked();
 }
 
 /*****************************************************************************
@@ -67,42 +98,32 @@ VirtualConsoleProperties::~VirtualConsoleProperties()
 
 void VirtualConsoleProperties::setFadeLimits(t_bus_value low, t_bus_value high)
 {
-	m_fadeLowLimit = low;
-	m_fadeHighLimit = high;
+	m_fadeLowSpin->setValue(low);
+	m_fadeHighSpin->setValue(high);
 }
 
-void VirtualConsoleProperties::fadeLimits(t_bus_value& low, t_bus_value& high)
+t_bus_value VirtualConsoleProperties::fadeLowLimit()
 {
-	low = m_fadeLowLimit;
-	high = m_fadeHighLimit;
+	return m_fadeLowSpin->value();
+}
+
+t_bus_value VirtualConsoleProperties::fadeHighLimit()
+{
+	return m_fadeHighSpin->value();
 }
 
 void VirtualConsoleProperties::setHoldLimits(t_bus_value low, t_bus_value high)
 {
-	m_holdLowLimit = low;
-	m_holdHighLimit = high;
+	m_holdLowSpin->setValue(low);
+	m_holdHighSpin->setValue(high);
 }
 
-void VirtualConsoleProperties::holdLimits(t_bus_value& low, t_bus_value& high)
+t_bus_value VirtualConsoleProperties::holdLowLimit()
 {
-	low = m_holdLowLimit;
-	high = m_holdHighLimit;
+	return m_holdLowSpin->value();
 }
 
-void VirtualConsoleProperties::accept()
+t_bus_value VirtualConsoleProperties::holdHighLimit()
 {
-	m_grabKeyboard = m_grabKeyboardCheck->isChecked();
-	m_keyRepeatOff = m_keyRepeatOffCheck->isChecked();
-
-	m_gridEnabled = m_gridGroup->isChecked();
-	m_gridX = m_gridXSpin->value();
-	m_gridY = m_gridYSpin->value();
-
-	m_fadeLowLimit = m_fadeLowSpin->value();
-	m_fadeHighLimit = m_fadeHighSpin->value();
-
-	m_holdLowLimit = m_holdLowSpin->value();
-	m_holdHighLimit = m_holdHighSpin->value();
-
-	QDialog::accept();
+	return m_holdHighSpin->value();
 }

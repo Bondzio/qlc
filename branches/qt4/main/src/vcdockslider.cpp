@@ -21,6 +21,7 @@
 
 #include <QMessageBox>
 #include <QPushButton>
+#include <iostream>
 #include <QSlider>
 #include <QString>
 #include <QLabel>
@@ -39,15 +40,18 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-VCDockSlider::VCDockSlider(QWidget* parent, t_bus_id bus) : QWidget(parent)
+VCDockSlider::VCDockSlider(QWidget* parent, t_bus_id bus) : QFrame(parent)
 {
-	setupUi(this);
-
 	m_updateOnly = false;
 	m_busLowLimit = 0;
 	m_busHighLimit = 5;
 
+	setupUi(this);
+	layout()->setMargin(0);
+
 	setBusID(bus);
+
+	setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
 	// Receive bus name change signals
 	connect(Bus::emitter(), SIGNAL(nameChanged(t_bus_id, const QString&)),
@@ -56,9 +60,14 @@ VCDockSlider::VCDockSlider(QWidget* parent, t_bus_id bus) : QWidget(parent)
 	// Receive bus value change signals
 	connect(Bus::emitter(),	SIGNAL(valueChanged(t_bus_id, t_bus_value)),
 		this, SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
-	
+
+	/* Slider dragging */
 	connect(m_slider, SIGNAL(valueChanged(int)),
 		this, SLOT(slotSliderValueChanged(int)));
+
+	/* Tap button clicks */
+	connect(m_tapButton, SIGNAL(clicked()),
+		this, SLOT(slotTapButtonClicked()));
 	
 	m_time.start();
 }
@@ -115,12 +124,10 @@ void VCDockSlider::slotBusNameChanged(t_bus_id id, const QString &name)
 
 void VCDockSlider::slotBusValueChanged(t_bus_id id, t_bus_value value)
 {
+	m_updateOnly = true;
 	if (id == m_busID)
-	{
-		m_updateOnly = true;
 		m_slider->setValue(value);
-		m_updateOnly = false;
-	}
+	m_updateOnly = false;
 }
 
 /*****************************************************************************
@@ -131,7 +138,7 @@ void VCDockSlider::slotSliderValueChanged(int value)
 {
 	QString num;
 
-	if (m_updateOnly == false)
+	if (m_updateOnly == true)
 	{
 		if (Bus::setValue(m_busID, m_slider->value()) == false)
 		{

@@ -43,61 +43,37 @@ public:
 	 * Grid
 	 *********************************************************************/
 public:
-	void setGridEnabled(bool set) { m_gridEnabled = set; }
-	bool isGridEnabled() { return m_gridEnabled; }
+	void setGrid(bool enabled, int x, int y);
 
-	void setGridX(int x) { m_gridX = x; }
-	int gridX() { return m_gridX; }
-
-	void setGridY(int y) { m_gridY = y; }
-	int gridY() { return m_gridY; }
-
-protected:
-	bool m_gridEnabled;
-	int m_gridX;
-	int m_gridY;
+	bool isGridEnabled();
+	int gridX();
+	int gridY();
 
 	/*********************************************************************
 	 * Key repeat
 	 *********************************************************************/
 public:
-	void setKeyRepeatOff(bool set) { m_keyRepeatOff = set; }
-	bool isKeyRepeatOff() { return m_keyRepeatOff; }
-
-protected:
-	bool m_keyRepeatOff;
+	void setKeyRepeatOff(bool set);
+	bool isKeyRepeatOff();
 
 	/*********************************************************************
-	 * Key repeat
+	 * Grab keyboard
 	 *********************************************************************/
 public:
-	void setGrabKeyboard(bool set) { m_grabKeyboard = set; }
-	bool isGrabKeyboard() { return m_grabKeyboard; }
-
-protected:
-	bool m_grabKeyboard;
+	void setGrabKeyboard(bool set);
+	bool isGrabKeyboard();
 
 	/*********************************************************************
 	 * Slider value ranges
 	 *********************************************************************/
 public:
 	void setFadeLimits(t_bus_value low, t_bus_value high);
-	void fadeLimits(t_bus_value& low, t_bus_value& high);
+	t_bus_value fadeLowLimit();
+	t_bus_value fadeHighLimit();
 
 	void setHoldLimits(t_bus_value low, t_bus_value high);
-	void holdLimits(t_bus_value& low, t_bus_value& high);
-
-protected:
-	t_bus_value m_fadeLowLimit;
-	t_bus_value m_fadeHighLimit;
-	t_bus_value m_holdLowLimit;
-	t_bus_value m_holdHighLimit;
-
-	/*********************************************************************
-	 * OK/Cancel
-	 *********************************************************************/
-protected slots:
-	void accept();
+	t_bus_value holdLowLimit();
+	t_bus_value holdHighLimit();
 };
 
 #endif

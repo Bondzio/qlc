@@ -39,7 +39,7 @@ class QFile;
 #define KXMLQLCVCDockSliderBusLowLimit "LowLimit"
 #define KXMLQLCVCDockSliderBusHighLimit "HighLimit"
 
-class VCDockSlider : public QWidget, public Ui_VCDockSlider
+class VCDockSlider : public QFrame, public Ui_VCDockSlider
 {
 	Q_OBJECT
     
@@ -120,7 +120,7 @@ protected:
 	/*********************************************************************
 	 * User input slots
 	 *********************************************************************/
-protected:
+protected slots:
 	/**
 	 * Slot for slider value changes (user input)
 	 *

@@ -1,3 +1,9 @@
+2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/virtualconsole.cpp:
+
+	Fixed virtual console visible state and geometry loading.
+
 2008-05-15  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/vcframe.cpp:

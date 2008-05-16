@@ -206,8 +206,6 @@ bool VirtualConsole::loader(QDomDocument* doc, QDomElement* vc_root)
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(vc_root != NULL);
 
-	/* TODO: Make sure that VC is really created anew */
-
 	return _app->virtualConsole()->loadXML(doc, vc_root);
 }
 
@@ -225,7 +223,7 @@ bool VirtualConsole::loadXML(QDomDocument* doc, QDomElement* root)
 	
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(root != NULL);
-	
+
 	if (root->tagName() != KXMLQLCVirtualConsole)
 	{
 		cout << "Virtual Console node not found!" << endl;
@@ -270,12 +268,11 @@ bool VirtualConsole::loadXML(QDomDocument* doc, QDomElement* root)
 		node = node.nextSibling();
 	}
 
-	hide();
-	setGeometry(x, y, w, h);
-	if (visible == false)
-		showMinimized();
+	parentWidget()->setGeometry(x, y, w, h);
+	if (visible == true)
+		parentWidget()->showNormal();
 	else
-		showNormal();
+		parentWidget()->hide();
 
 	return true;
 }

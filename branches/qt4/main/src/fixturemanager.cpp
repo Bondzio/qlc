@@ -369,6 +369,8 @@ void FixtureManager::slotAdd()
 		QLCFixtureDef* fixtureDef = af.fixtureDef();
 		QLCFixtureMode* mode = af.mode();
 
+		QString modname;
+
 		if (fixtureDef != NULL && mode != NULL)
 		{
 			/* Add a normal fixture with an existing definition */
@@ -376,17 +378,33 @@ void FixtureManager::slotAdd()
 			/* If an empty name was given use the model instead */
 			if (name.simplified() == QString::null)
 				name = fixtureDef->model();
-
-			// Add the first fixture without gap
+			
+			/* If we're adding more than one fixture,
+			   append a number to the end of the name */
+			if (af.amount() > 1)
+				modname = QString("%1 #1").arg(name);
+			else
+				modname = name;
+				
+			/* Add the first fixture without gap */
 			_app->doc()->newFixture(fixtureDef, mode, address,
-						universe, name);
+						universe, modname);
 
-			// Add the rest (if any) with address gap
+			/* Add the rest (if any) with address gap */
 			for (int i = 1; i < af.amount(); i++)
 			{
+				/* If we're adding more than one fixture,
+				   append a number to the end of the name */
+				if (af.amount() > 1)
+					modname = QString("%1 #%2").arg(name)
+						.arg(i + 1);
+				else
+					modname = name;
+				
+				/* Add the fixture */
 				_app->doc()->newFixture(fixtureDef, mode,
-					address + (i * channels) + gap,
-					universe, name);
+						address + (i * channels) + gap,
+						universe, modname);
 			}
 		}
 		else
@@ -397,13 +415,29 @@ void FixtureManager::slotAdd()
 			if (name.simplified() == QString::null)
 				name = KXMLFixtureGeneric;
 
+			/* If we're adding more than one fixture,
+			   append a number to the end of the name */
+			if (af.amount() > 1)
+				modname = QString("%1 #1").arg(name);
+			else
+				modname = name;
+				
 			// Add the first fixture without gap
 			_app->doc()->newGenericFixture(address, universe,
-						       channels, name);
+						       channels, modname);
 
 			// Add the rest (if any) with address gap
 			for (int i = 1; i < af.amount(); i++)
 			{
+				/* If we're adding more than one fixture,
+				   append a number to the end of the name */
+				if (af.amount() > 1)
+					modname = QString("%1 #%2").arg(name)
+						.arg(i + 1);
+				else
+					modname = name;
+				
+				/* Add the fixture */
 				_app->doc()->newGenericFixture(
 					address + (i * channels) + gap,
 					universe, channels, name);

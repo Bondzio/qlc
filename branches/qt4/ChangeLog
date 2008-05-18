@@ -1,5 +1,12 @@
 2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/fixturemanager.cpp:
+
+	Adding multiple fixtures at a time will now append a number to the
+	end of the fixture name.
+	
+2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/addfixture.ui:
 	* main/src/busproperties.ui:
 	* main/src/chasereditor.ui:

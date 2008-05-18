@@ -217,6 +217,9 @@ protected:
 protected slots:
 	virtual void slotModeChanged(App::Mode mode);
 
+signals:
+	void modeChanged(App::Mode);
+
 	/*********************************************************************
 	 * Widget menu
 	 *********************************************************************/

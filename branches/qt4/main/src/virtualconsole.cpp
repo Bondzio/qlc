@@ -67,21 +67,14 @@ VirtualConsole::VirtualConsole(QWidget* parent) : QWidget(parent)
 	m_clipboardAction = ClipboardNone;
 
 	m_editMenu = NULL;
-}
 
-VirtualConsole::~VirtualConsole()
-{
-}
-
-void VirtualConsole::init()
-{
 	new QHBoxLayout(this);
 	layout()->setMargin(0);
 	layout()->setSpacing(0);
 
-	setWindowIcon(QIcon(PIXMAPS "/virtualconsole.png"));
-	setWindowTitle(tr("Virtual Console"));
-	resize(300, 400);
+	parentWidget()->setWindowIcon(QIcon(PIXMAPS "/virtualconsole.png"));
+	parentWidget()->setWindowTitle(tr("Virtual Console"));
+	parentWidget()->resize(300, 400);
 
 	// Init top menu bar
 	initMenuBar();
@@ -91,13 +84,10 @@ void VirtualConsole::init()
 
 	// Init right drawing area
 	setDrawArea(new VCFrame(this));
+}
 
-	// Update this according to current mode
-	// slotModeChanged(_app->mode());
-
-	// Connect to catch mode change events
-	connect(_app, SIGNAL(modeChanged(App::Mode)),
-		this, SLOT(slotModeChanged(App::Mode)));
+VirtualConsole::~VirtualConsole()
+{
 }
 
 void VirtualConsole::initMenuBar()
@@ -705,6 +695,9 @@ void VirtualConsole::slotModeChanged(App::Mode mode)
 		m_editMenu->setEnabled(true);
 		m_addMenu->setEnabled(true);
 	}
+
+	/* Patch the event thru to all children */
+	emit modeChanged(mode);
 }
 
 /*********************************************************************

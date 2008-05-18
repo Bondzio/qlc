@@ -203,6 +203,9 @@ bool VCButton::loadXML(QDomDocument* doc, QDomElement* root)
 		node = node.nextSibling();
 	}
 
+	/* All buttons start raised... */
+	setOn(false);
+
 	return true;
 }
 
@@ -256,9 +259,9 @@ void VCButton::setOn(bool on)
 	/* Simulate button-look with a frame (line width has been set a bit
 	   thicker in constructor to emphasize this) */
 	if (on == true)
-		VCWidget::setFrameStyle(KFrameStyleSunken);
+		VCWidget::setFrameStyle(QFrame::Panel | QFrame::Sunken);
 	else
-		VCWidget::setFrameStyle(KFrameStyleRaised);
+		VCWidget::setFrameStyle(QFrame::Panel | QFrame::Raised);
 }
 
 void VCButton::setFrameStyle(const int style)

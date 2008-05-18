@@ -52,6 +52,8 @@ extern App* _app;
 
 VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 {
+	Q_ASSERT(parent != NULL);
+
 	/* Set the class name "VCWidget" as the object name as well */
 	setObjectName(VCWidget::staticMetaObject.className());
 
@@ -64,9 +66,6 @@ VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 	m_ypos = 0;
 	m_resizeMode = false;
 
-	connect(_app, SIGNAL(modeChanged(App::Mode)), 
-		this, SLOT(slotModeChanged(App::Mode)));
-
 	setFrameStyle(KVCWidgetFrameStyleSunken);
 
 	setBackgroundRole(QPalette::Window);
@@ -74,6 +73,9 @@ VCWidget::VCWidget(QWidget* parent) : QFrame(parent)
 
 	setMinimumSize(20, 20);
 	QFrame::resize(QSize(120, 120));
+
+	connect(parent, SIGNAL(modeChanged(App::Mode)), 
+		this, SLOT(slotModeChanged(App::Mode)));
 }
 
 VCWidget::~VCWidget()
@@ -476,6 +478,9 @@ bool VCWidget::saveXMLAppearance(QDomDocument* doc, QDomElement* frame_root)
 void VCWidget::slotModeChanged(App::Mode mode)
 {
 	repaint();
+
+	/* Patch the signal thru to all children */
+	emit modeChanged(mode);
 }
 
 /*****************************************************************************

@@ -65,9 +65,6 @@ Doc::Doc() : QObject()
 	for (t_function_id i = 0; i < KFunctionArraySize; i++)
 		m_functionArray[i] = NULL;
 
-	connect(_app, SIGNAL(modeChanged(App::Mode)),
-		this, SLOT(slotModeChanged(App::Mode)));
-
 	resetModified();
 }
 

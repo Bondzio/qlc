@@ -81,9 +81,6 @@ public:
 	VirtualConsole(QWidget* parent);
 	~VirtualConsole();
 
-	/** Second stage initialization */
-	void init();
-
 protected:
 	void initMenuBar();
 	void initDockArea();
@@ -296,12 +293,16 @@ protected:
 	/*********************************************************************
 	 * Misc slots
 	 *********************************************************************/
- public slots:
+public slots:
 	void slotModeChanged(App::Mode mode);
+
+signals:
+	void modeChanged(App::Mode);
 
 	/*********************************************************************
 	 * Add menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotAddButton();
 	void slotAddSlider();
 	void slotAddFrame();
@@ -311,6 +312,7 @@ protected:
 	/*********************************************************************
 	 * Tools menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotToolsSliders();
 	void slotToolsSettings();
 	void slotToolsPanic();
@@ -318,6 +320,7 @@ protected:
 	/*********************************************************************
 	 * Edit menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotEditCut();
 	void slotEditCopy();
 	void slotEditPaste();
@@ -328,6 +331,7 @@ protected:
 	/*********************************************************************
 	 * Foreground menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotForegroundFont();
 	void slotForegroundColor();
 	void slotForegroundNone();
@@ -335,6 +339,7 @@ protected:
 	/*********************************************************************
 	 * Background menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotBackgroundColor();
 	void slotBackgroundImage();
 	void slotBackgroundNone();
@@ -342,6 +347,7 @@ protected:
 	/*********************************************************************
 	 * Stacking menu callbacks
 	 *********************************************************************/
+public slots:
 	void slotStackingRaise();
 	void slotStackingLower();
 

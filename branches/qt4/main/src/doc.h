@@ -214,7 +214,7 @@ public:
 	 */
 	void emitFunctionChanged(t_function_id id);
 
-protected slots:
+public slots:
 	/** Catch QLC App mode changes */
 	void slotModeChanged(App::Mode mode);
 

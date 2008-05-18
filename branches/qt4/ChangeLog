@@ -1,5 +1,21 @@
 2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/app.cpp:
+	* main/src/doc.cpp:
+	* main/src/doc.h:
+	* main/src/vcbutton.cpp:
+	* main/src/vcwidget.cpp:
+	* main/src/vcwidget.h:
+	* main/src/virtualconsole.cpp:
+	* main/src/virtualconsole.h:
+
+	Fixed connect() asserts during application initialization.
+	Changed VCButton's panel style from StyledPanel to Panel, since
+	StyledPanel behavior is quite nonexistent in some QT styles
+	(cleanlooks for example).
+	
+2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/fixturemanager.cpp:
 
 	Adding multiple fixtures at a time will now append a number to the

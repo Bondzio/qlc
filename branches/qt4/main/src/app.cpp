@@ -356,9 +356,12 @@ void App::initDoc()
 	
 	// Create a new document object
 	m_doc = new Doc();
+
 	connect(m_doc, SIGNAL(modified(bool)),
 		this, SLOT(slotDocModified(bool)));
 	
+	connect(this, SIGNAL(modeChanged(App::Mode)),
+		m_doc, SLOT(slotModeChanged(App::Mode)));
 	
 	/* Connect fixture list change signals from the new document object */
 	if (m_fixtureManager != NULL)
@@ -573,16 +576,16 @@ void App::initVirtualConsole(void)
 
 	QMdiSubWindow* sub = new QMdiSubWindow(centralWidget());
 	m_virtualConsole = new VirtualConsole(sub);
-	m_virtualConsole->init();
 	m_virtualConsole->show();
 
 	sub->setWidget(m_virtualConsole);
-	sub->setWindowIcon(QIcon(PIXMAPS "/virtualconsole.png"));
 
 	connect(m_virtualConsole, SIGNAL(closed()),
 		this, SLOT(slotVirtualConsoleClosed()));
 
-	sub->resize(300, 300);
+	connect(this, SIGNAL(modeChanged(App::Mode)),
+		m_virtualConsole, SLOT(slotModeChanged(App::Mode)));
+
 	sub->hide();
 }
 

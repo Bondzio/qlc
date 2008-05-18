@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Bus properties</string>
+   <string>Bus manager</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
@@ -40,6 +40,9 @@
     <layout class="QHBoxLayout" >
      <item>
       <widget class="QPushButton" name="m_edit" >
+       <property name="toolTip" >
+        <string>Edit the name of the selected bus</string>
+       </property>
        <property name="text" >
         <string>Edit</string>
        </property>
@@ -50,7 +53,7 @@
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0" >
         <size>
          <width>201</width>
          <height>20</height>
@@ -60,6 +63,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="m_close" >
+       <property name="toolTip" >
+        <string>Close the bus manager</string>
+       </property>
        <property name="text" >
         <string>Close</string>
        </property>

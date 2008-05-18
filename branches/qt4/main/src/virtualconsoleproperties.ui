@@ -23,6 +23,9 @@
        <layout class="QVBoxLayout" >
         <item>
          <widget class="QCheckBox" name="m_grabKeyboardCheck" >
+          <property name="toolTip" >
+           <string>Make virtual console to take exclusive keyboard control during operate mode</string>
+          </property>
           <property name="text" >
            <string>Grab keyboard in operate mode</string>
           </property>
@@ -30,6 +33,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="m_keyRepeatOffCheck" >
+          <property name="toolTip" >
+           <string>Prevent flickering when a keyboard hotkey has been pressed in operate mode</string>
+          </property>
           <property name="text" >
            <string>Turn off key repeat in operate mode</string>
           </property>
@@ -40,6 +46,9 @@
      </item>
      <item>
       <widget class="QGroupBox" name="m_gridGroup" >
+       <property name="toolTip" >
+        <string>Use a grid layout for virtual console widgets</string>
+       </property>
        <property name="title" >
         <string>Grid</string>
        </property>
@@ -56,11 +65,17 @@
         </item>
         <item row="0" column="1" >
          <widget class="QSpinBox" name="m_gridXSpin" >
+          <property name="toolTip" >
+           <string>Widget grid layout X resolution</string>
+          </property>
           <property name="suffix" >
            <string>px</string>
           </property>
           <property name="minimum" >
            <number>1</number>
+          </property>
+          <property name="value" >
+           <number>10</number>
           </property>
          </widget>
         </item>
@@ -73,11 +88,17 @@
         </item>
         <item row="1" column="1" >
          <widget class="QSpinBox" name="m_gridYSpin" >
+          <property name="toolTip" >
+           <string>Widget grid layout Y resolution</string>
+          </property>
           <property name="suffix" >
            <string>px</string>
           </property>
           <property name="minimum" >
            <number>1</number>
+          </property>
+          <property name="value" >
+           <number>10</number>
           </property>
          </widget>
         </item>
@@ -114,6 +135,9 @@
       </item>
       <item row="0" column="2" >
        <widget class="QSpinBox" name="m_fadeLowSpin" >
+        <property name="toolTip" >
+         <string>Lowest value that can be set to the 'fade' bus with the default sliders</string>
+        </property>
         <property name="suffix" >
          <string>s</string>
         </property>
@@ -144,6 +168,9 @@
       </item>
       <item row="0" column="5" >
        <widget class="QSpinBox" name="m_fadeHighSpin" >
+        <property name="toolTip" >
+         <string>Highest value that can be set to the 'fade' bus with the default sliders</string>
+        </property>
         <property name="suffix" >
          <string>s</string>
         </property>
@@ -152,6 +179,9 @@
         </property>
         <property name="maximum" >
          <number>999</number>
+        </property>
+        <property name="value" >
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -177,6 +207,9 @@
       </item>
       <item row="1" column="2" >
        <widget class="QSpinBox" name="m_holdLowSpin" >
+        <property name="toolTip" >
+         <string>Lowest value that can be set to the 'hold' bus with the default sliders</string>
+        </property>
         <property name="suffix" >
          <string>s</string>
         </property>
@@ -207,6 +240,9 @@
       </item>
       <item row="1" column="5" >
        <widget class="QSpinBox" name="m_holdHighSpin" >
+        <property name="toolTip" >
+         <string>Highest value that can be set to the 'hold' bus with the default sliders</string>
+        </property>
         <property name="suffix" >
          <string>s</string>
         </property>
@@ -215,6 +251,9 @@
         </property>
         <property name="maximum" >
          <number>999</number>
+        </property>
+        <property name="value" >
+         <number>5</number>
         </property>
        </widget>
       </item>

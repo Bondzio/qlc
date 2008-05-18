@@ -23,7 +23,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="m_nameEdit" />
+      <widget class="QLineEdit" name="m_nameEdit" >
+       <property name="toolTip" >
+        <string>Fixture's friendly name</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -37,7 +41,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="m_addressSpin" />
+      <widget class="QSpinBox" name="m_addressSpin" >
+       <property name="toolTip" >
+        <string>Fixture's DMX address</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -51,7 +59,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="m_universeSpin" />
+      <widget class="QSpinBox" name="m_universeSpin" >
+       <property name="toolTip" >
+        <string>The universe that the fixture is controlled through</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -61,7 +73,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

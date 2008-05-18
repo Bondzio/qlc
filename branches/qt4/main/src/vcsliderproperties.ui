@@ -15,10 +15,21 @@
   <layout class="QVBoxLayout" >
    <item>
     <widget class="QTabWidget" name="tabWidget" >
+     <property name="toolTip" >
+      <string/>
+     </property>
      <property name="currentIndex" >
       <number>0</number>
      </property>
      <widget class="QWidget" name="General" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>436</width>
+        <height>455</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>General</string>
       </attribute>
@@ -33,7 +44,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="m_nameEdit" />
+          <widget class="QLineEdit" name="m_nameEdit" >
+           <property name="toolTip" >
+            <string>Name of the slider</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -45,6 +60,9 @@
          <layout class="QVBoxLayout" >
           <item>
            <widget class="QRadioButton" name="m_modeBusRadio" >
+            <property name="toolTip" >
+             <string>Use this slider to control a bus</string>
+            </property>
             <property name="text" >
              <string>Bus</string>
             </property>
@@ -55,6 +73,9 @@
           </item>
           <item>
            <widget class="QRadioButton" name="m_modeLevelRadio" >
+            <property name="toolTip" >
+             <string>Use this slider to control the level of selected channels</string>
+            </property>
             <property name="text" >
              <string>Level</string>
             </property>
@@ -81,6 +102,9 @@
          <layout class="QVBoxLayout" >
           <item>
            <widget class="QRadioButton" name="m_valueExactRadio" >
+            <property name="toolTip" >
+             <string>Show exact DMX values</string>
+            </property>
             <property name="text" >
              <string>Exact</string>
             </property>
@@ -91,6 +115,9 @@
           </item>
           <item>
            <widget class="QRadioButton" name="m_valuePercentageRadio" >
+            <property name="toolTip" >
+             <string>Show value as percentage</string>
+            </property>
             <property name="text" >
              <string>Percentage</string>
             </property>
@@ -104,7 +131,7 @@
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0" >
           <size>
            <width>20</width>
            <height>40</height>
@@ -115,6 +142,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Bus" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>436</width>
+        <height>455</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Bus</string>
       </attribute>
@@ -140,6 +175,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="toolTip" >
+             <string>The lowest value that can be set with this slider for a bus</string>
+            </property>
             <property name="suffix" >
              <string>s</string>
             </property>
@@ -157,6 +195,9 @@
           </item>
           <item row="1" column="1" >
            <widget class="QSpinBox" name="m_busHighLimitSpin" >
+            <property name="toolTip" >
+             <string>The highest value that can be set with this slider for a bus</string>
+            </property>
             <property name="suffix" >
              <string>s</string>
             </property>
@@ -191,7 +232,7 @@
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0" >
           <size>
            <width>418</width>
            <height>241</height>
@@ -202,6 +243,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Level" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>436</width>
+        <height>455</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Level</string>
       </attribute>
@@ -221,6 +270,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="m_levelLowLimitSpin" >
+            <property name="toolTip" >
+             <string>Lowest DMX value that can be se with this slider</string>
+            </property>
             <property name="maximum" >
              <number>255</number>
             </property>
@@ -235,6 +287,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="m_levelHighLimitSpin" >
+            <property name="toolTip" >
+             <string>Highest DMX value that can be set with this slider</string>
+            </property>
             <property name="maximum" >
              <number>255</number>
             </property>
@@ -248,7 +303,7 @@
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" >
+            <property name="sizeHint" stdset="0" >
              <size>
               <width>40</width>
               <height>20</height>
@@ -258,6 +313,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="m_levelCapabilityButton" >
+            <property name="toolTip" >
+             <string>Set value range from the selected capability</string>
+            </property>
             <property name="text" >
              <string>Capability</string>
             </property>
@@ -279,6 +337,9 @@
         <layout class="QHBoxLayout" >
          <item>
           <widget class="QPushButton" name="m_levelAllButton" >
+           <property name="toolTip" >
+            <string>Select all channels</string>
+           </property>
            <property name="text" >
             <string>All</string>
            </property>
@@ -286,6 +347,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="m_levelNoneButton" >
+           <property name="toolTip" >
+            <string>Unselect everything</string>
+           </property>
            <property name="text" >
             <string>None</string>
            </property>
@@ -293,6 +357,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="m_levelInvertButton" >
+           <property name="toolTip" >
+            <string>Invert selection</string>
+           </property>
            <property name="text" >
             <string>Invert</string>
            </property>
@@ -303,7 +370,7 @@
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -313,6 +380,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="m_levelByGroupButton" >
+           <property name="toolTip" >
+            <string>Choose channels by channel group</string>
+           </property>
            <property name="text" >
             <string>By group...</string>
            </property>
@@ -323,6 +393,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Submaster" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>436</width>
+        <height>455</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Submaster</string>
       </attribute>
@@ -347,7 +425,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

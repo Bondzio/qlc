@@ -5,14 +5,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>421</height>
+    <width>550</width>
+    <height>504</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Add fixture</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2" >
+  <layout class="QGridLayout" name="gridLayout_3" >
    <item rowspan="2" row="0" column="0" >
     <widget class="QTreeWidget" name="m_tree" >
      <property name="sizePolicy" >
@@ -54,6 +54,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip" >
+         <string>A friendly name for the new fixture</string>
+        </property>
        </widget>
       </item>
       <item row="1" column="0" >
@@ -71,6 +74,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip" >
+         <string>Selected fixture mode</string>
+        </property>
        </widget>
       </item>
       <item row="2" column="0" >
@@ -87,6 +93,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>The starting address of the (first) added fixture</string>
         </property>
         <property name="minimum" >
          <number>1</number>
@@ -110,6 +119,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>The universe thru which the added fixtures are controlled</string>
         </property>
         <property name="minimum" >
          <number>1</number>
@@ -137,6 +149,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip" >
+         <string>Number of channels in the selected fixture</string>
+        </property>
         <property name="minimum" >
          <number>1</number>
         </property>
@@ -150,6 +165,9 @@
       </item>
       <item row="5" column="0" colspan="2" >
        <widget class="QListWidget" name="m_channelList" >
+        <property name="toolTip" >
+         <string>List of channels in the selected fixture mode</string>
+        </property>
         <property name="alternatingRowColors" >
          <bool>true</bool>
         </property>
@@ -166,57 +184,55 @@
      <property name="title" >
       <string>Multiple Fixtures</string>
      </property>
-     <layout class="QVBoxLayout" >
-      <item>
-       <layout class="QHBoxLayout" >
-        <item>
-         <widget class="QLabel" name="m_amountLabel" >
-          <property name="text" >
-           <string>Amount</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="m_amountSpin" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimum" >
-           <number>1</number>
-          </property>
-          <property name="maximum" >
-           <number>128</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="m_amountLabel" >
+        <property name="text" >
+         <string>Amount</string>
+        </property>
+       </widget>
       </item>
-      <item>
-       <layout class="QHBoxLayout" >
-        <item>
-         <widget class="QLabel" name="m_gapLabel" >
-          <property name="text" >
-           <string>Address gap</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="m_gapSpin" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximum" >
-           <number>128</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="0" column="1" >
+       <widget class="QSpinBox" name="m_amountSpin" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Number of fixtures to add</string>
+        </property>
+        <property name="minimum" >
+         <number>1</number>
+        </property>
+        <property name="maximum" >
+         <number>128</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="m_gapLabel" >
+        <property name="text" >
+         <string>Address gap</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QSpinBox" name="m_gapSpin" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Number of empty channels to leave between added fixtures</string>
+        </property>
+        <property name="maximum" >
+         <number>128</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

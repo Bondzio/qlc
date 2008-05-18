@@ -52,15 +52,21 @@
        <layout class="QVBoxLayout" >
         <item>
          <widget class="QToolButton" name="m_addX" >
+          <property name="toolTip" >
+           <string>Add a channel to this pad's X axis</string>
+          </property>
           <property name="text" >
-           <string>...</string>
+           <string>+</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QToolButton" name="m_removeX" >
+          <property name="toolTip" >
+           <string>Remove the selected channel from this pad's X axis</string>
+          </property>
           <property name="text" >
-           <string>...</string>
+           <string>-</string>
           </property>
          </widget>
         </item>
@@ -69,7 +75,7 @@
           <property name="orientation" >
            <enum>Qt::Vertical</enum>
           </property>
-          <property name="sizeHint" >
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>20</width>
             <height>40</height>
@@ -89,7 +95,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="m_minXSpin" />
+         <widget class="QSpinBox" name="m_minXSpin" >
+          <property name="toolTip" >
+           <string>Lowest value for the selected channel on the X axis</string>
+          </property>
+          <property name="maximum" >
+           <number>255</number>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="m_maxXLabel" >
@@ -99,10 +112,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="m_maxXSpin" />
+         <widget class="QSpinBox" name="m_maxXSpin" >
+          <property name="toolTip" >
+           <string>Highest value for the selected channel on the X axis</string>
+          </property>
+          <property name="maximum" >
+           <number>255</number>
+          </property>
+          <property name="value" >
+           <number>255</number>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="m_reverseX" >
+          <property name="toolTip" >
+           <string>Reverse the selected channel's X axis</string>
+          </property>
           <property name="text" >
            <string>Reverse</string>
           </property>
@@ -152,15 +178,21 @@
        <layout class="QVBoxLayout" >
         <item>
          <widget class="QToolButton" name="m_addY" >
+          <property name="toolTip" >
+           <string>Add a channel to this pad's Y axis</string>
+          </property>
           <property name="text" >
-           <string>...</string>
+           <string>+</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QToolButton" name="m_removeY" >
+          <property name="toolTip" >
+           <string>Remove the selected channel from this pad's Y axis</string>
+          </property>
           <property name="text" >
-           <string>...</string>
+           <string>-</string>
           </property>
          </widget>
         </item>
@@ -169,7 +201,7 @@
           <property name="orientation" >
            <enum>Qt::Vertical</enum>
           </property>
-          <property name="sizeHint" >
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>20</width>
             <height>40</height>
@@ -189,7 +221,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="m_minYSpin" />
+         <widget class="QSpinBox" name="m_minYSpin" >
+          <property name="toolTip" >
+           <string>Lowest value for the selected channel on the Y axis</string>
+          </property>
+          <property name="maximum" >
+           <number>255</number>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="m_maxYLabel" >
@@ -199,10 +238,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="m_maxYSpin" />
+         <widget class="QSpinBox" name="m_maxYSpin" >
+          <property name="toolTip" >
+           <string>Highest value for the selected channel on the Y axis</string>
+          </property>
+          <property name="maximum" >
+           <number>255</number>
+          </property>
+          <property name="value" >
+           <number>255</number>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="m_reverseY" >
+          <property name="toolTip" >
+           <string>Reverse the selected channel's Y axis</string>
+          </property>
           <property name="text" >
            <string>Reverse</string>
           </property>
@@ -219,7 +271,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

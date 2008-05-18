@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>407</width>
-    <height>106</height>
+    <height>108</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -32,6 +32,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip" >
+          <string>DMX output plugin</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -44,7 +47,7 @@
        <property name="sizeType" >
         <enum>QSizePolicy::Maximum</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0" >
         <size>
          <width>40</width>
          <height>20</height>
@@ -69,6 +72,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip" >
+          <string>DMX output universe provided by the selected plugin</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -81,7 +87,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

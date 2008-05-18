@@ -55,6 +55,9 @@
    </item>
    <item>
     <widget class="QLabel" name="m_statusLabel" >
+     <property name="toolTip" >
+      <string>Current scene status</string>
+     </property>
      <property name="frameShape" >
       <enum>QFrame::StyledPanel</enum>
      </property>

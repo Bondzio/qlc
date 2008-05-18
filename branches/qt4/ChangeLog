@@ -1,3 +1,21 @@
+2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/addfixture.ui:
+	* main/src/busproperties.ui:
+	* main/src/chasereditor.ui:
+	* main/src/collectioneditor.ui:
+	* main/src/dmxmapeditor.ui:
+	* main/src/dmxpatcheditor.ui:
+	* main/src/efxeditor.ui:
+	* main/src/fixtureproperties.ui:
+	* main/src/sceneeditor.ui:
+	* main/src/vcbuttonproperties.ui:
+	* main/src/vcsliderproperties.ui:
+	* main/src/vcxypadproperties.ui:
+	* main/src/virtualconsoleproperties.ui:
+
+	Updated tooltips for dialogs.
+	
 2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/vcdockarea.cpp:

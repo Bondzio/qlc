@@ -32,7 +32,6 @@ class QPaintEvent;
 class QPoint;
 class QEvent;
 
-class FunctionStopEvent;
 class KeyBind;
 
 #define KXMLQLCVCButton "Button"
@@ -180,6 +179,16 @@ protected:
 	 *********************************************************************/
 public slots:
 	/**
+	 * Handler for function running signal
+	 */
+	void slotFunctionRunning(t_function_id fid);
+
+	/**
+	 * Handler for function stop signal
+	 */
+	void slotFunctionStopped(t_function_id fid);
+
+	/**
 	 * Handler for button press i.e. (mouse/key)button down, not click.
 	 */
 	void pressFunction();
@@ -188,14 +197,6 @@ public slots:
 	 * Handler for button release i.e. (mouse/key)button up, not click.
 	 */
 	void releaseFunction();
-
-protected:
-	/** 
-	 * Event sent by the controlled function when it has (been) stopped
-	 *
-	 * @param e A FunctionStopEvent sent by the controlled function
-	 */
-	void functionStopEvent(FunctionStopEvent* e);
 
 protected slots:
 	/**
@@ -240,8 +241,6 @@ protected:
 
 	void mousePressEvent(QMouseEvent* e);
 	void mouseReleaseEvent(QMouseEvent* e);
-
-	void customEvent(QEvent* e);
 };
 
 #endif

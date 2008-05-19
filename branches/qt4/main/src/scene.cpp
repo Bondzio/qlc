@@ -42,31 +42,23 @@ using namespace std;
 
 extern App* _app;
 
-Scene::Scene() : 
-	Function      ( Function::Scene ),
-	m_values      (            NULL ),
-	m_timeSpan    (             255 ),
-	m_elapsedTime (               0 ),
-	m_runTimeData (            NULL ),
-	m_channelData (            NULL ),
-	m_address     ( KChannelInvalid )
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
+Scene::Scene(QObject* parent) : Function(parent, Function::Scene)
 {
+	m_values = NULL;
+	m_timeSpan = 255;
+	m_elapsedTime = 0;
+	m_runTimeData = NULL;
+	m_channelData = NULL;
+	
 	setBus(KBusIDDefaultFade);
 }
 
 Scene::~Scene()
 {
-	stop();
-	
-	m_startMutex.lock();
-	while (m_running)
-	{
-		m_startMutex.unlock();
-		sched_yield();
-		m_startMutex.lock();
-	}
-	m_startMutex.unlock();
-	
 	if (m_values != NULL)
 		delete [] m_values;
 }
@@ -91,13 +83,17 @@ void Scene::copyFrom(Scene* sc, t_fixture_id to)
 	}
 }
 
-bool Scene::setFixture(t_fixture_id id)
+/*****************************************************************************
+ * Fixture
+ *****************************************************************************/
+
+void Scene::setFixture(t_fixture_id id)
 {
 	Fixture* fxi = NULL;
 
 	fxi = _app->doc()->fixture(id);
 	if (fxi == NULL)
-		return false;
+		return;
 	
 	t_channel newChannels = fxi->channels();
 	
@@ -120,9 +116,35 @@ bool Scene::setFixture(t_fixture_id id)
 	
 	m_fixture = id;
 	
+	_app->doc()->setModified();
 	_app->doc()->emitFunctionChanged(m_id);
-	
-	return true;
+}
+
+/*****************************************************************************
+ * Values
+ *****************************************************************************/
+
+bool Scene::set(t_channel ch, t_value value, ValueType type)
+{
+	if (ch < m_channels)
+	{
+		m_values[ch].value = value;
+		m_values[ch].type = type;
+		
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+SceneValue Scene::channelValue(t_channel ch)
+{
+	return m_values[ch];
 }
 
 Scene::ValueType Scene::valueType(t_channel ch)
@@ -131,9 +153,6 @@ Scene::ValueType Scene::valueType(t_channel ch)
 	return m_values[ch].type;
 }
 
-//
-// Return one channel's value type as string
-//
 QString Scene::valueTypeString(t_channel ch)
 {
 	switch(m_values[ch].type)
@@ -163,8 +182,10 @@ Scene::ValueType Scene::stringToValueType(QString type)
 		return Scene::NoSet;
 }
 
+/*****************************************************************************
+ * Load & Save
+ *****************************************************************************/
 
-// Save this function to an XML document
 bool Scene::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
 	Fixture* fxi = NULL;
@@ -245,7 +266,7 @@ bool Scene::loadXML(QDomDocument* doc, QDomElement* root)
 			str = tag.attribute(KXMLQLCBusRole);
 			Q_ASSERT(str == KXMLQLCBusFade);
 
-			Q_ASSERT(setBus(tag.text().toInt()) == true);
+			setBus(tag.text().toInt());
 		}
 		else if (tag.tagName() == KXMLQLCFunctionValue)
 		{
@@ -268,70 +289,21 @@ bool Scene::loadXML(QDomDocument* doc, QDomElement* root)
 	return true;
 }
 
-//
-// Set one channel value for this scene
-//
-bool Scene::set(t_channel ch, t_value value, ValueType type)
-{
-	m_startMutex.lock();
-	if (m_running)
-	{
-		m_startMutex.unlock();
-		return false;
-	}
-	else if (ch < m_channels)
-	{
-		m_values[ch].value = value;
-		m_values[ch].type = type;
-		
-		m_startMutex.unlock();
-		return true;
-	}
-	else
-	{
-		m_startMutex.unlock();
-		return false;
-	}
-}
+/*****************************************************************************
+ * Bus
+ *****************************************************************************/
 
-
-//
-// Return one channel value & type from this scene
-//
-SceneValue Scene::channelValue(t_channel ch)
-{
-	return m_values[ch];
-}
-
-
-//
-// Bus value has changed
-//
-void Scene::busValueChanged(t_bus_id id, t_bus_value value)
+void Scene::slotBusValueChanged(t_bus_id id, t_bus_value value)
 {
 	if (id != m_busID)
-	{
 		return;
-	}
-	
-	m_startMutex.lock();
-	
-	if (m_running)
-	{
+
+	if (isRunning() == true)
 		speedChange(value);
-	}
 	else
-	{
 		m_timeSpan = value;
-	}
-	
-	m_startMutex.unlock();
 }
 
-
-//
-// Calculate new values
-//
 void Scene::speedChange(t_bus_value newTimeSpan)
 {
 	m_timeSpan = newTimeSpan;
@@ -342,19 +314,15 @@ void Scene::speedChange(t_bus_value newTimeSpan)
 	}
 }
 
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
 
-//
-// Allocate space for some run time stuff
-//
 void Scene::arm()
 {
-	// Fetch the fixture address for run time access.
-	// It cannot change when functions have been armed for running
-	m_address = _app->doc()->fixture(fixture())->universeAddress();
-	
 	if (m_runTimeData == NULL)
 		m_runTimeData = new RunTimeData[m_channels];
-	
+
 	if (m_channelData == NULL)
 		m_channelData = new t_buffer_data[m_channels];
 	
@@ -362,97 +330,83 @@ void Scene::arm()
 		m_eventBuffer = new EventBuffer(m_channels, KFrequency >> 1);
 }
 
-
-//
-// Free any run-time data
-//
 void Scene::disarm()
 {
-	// Just a nuisance to prevent using this at non-run-time :)
-	m_address = KChannelInvalid;
-	
-	if (m_runTimeData) delete [] m_runTimeData;
+	if (m_runTimeData != NULL)
+		delete [] m_runTimeData;
 	m_runTimeData = NULL;
 	
-	if (m_channelData) delete [] m_channelData;
+	if (m_channelData != NULL)
+		delete [] m_channelData;
 	m_channelData = NULL;
 	
-	if (m_eventBuffer) delete m_eventBuffer;
+	if (m_eventBuffer != NULL)
+		delete m_eventBuffer;
 	m_eventBuffer = NULL;
 }
 
-
-//
-// Get starting values
-//
-void Scene::init()
+void Scene::stop()
 {
-	m_removeAfterEmpty = false;
+	m_stopped = true;
+}
+
+void Scene::run()
+{
+	t_channel ch = 0;
+	t_channel ready = 0;
+	t_channel address = 0;
+	
+	// Initialize this scene for running
 	m_stopped = false;
 	
-	for (t_channel i = 0; i < m_channels; i++)
-	{
-		m_runTimeData[i].current = m_runTimeData[i].start =
-			static_cast<float> 
-			(_app->dmxMap()->getValue(m_address + i));
-		
-		m_runTimeData[i].target = 
-			static_cast<float> (m_values[i].value);
-		
-		m_runTimeData[i].ready = false;
-	}
-	
+	// Fetch the fixture address for run time access.
+	address = _app->doc()->fixture(fixture())->universeAddress();
+
 	// No time has yet passed for this scene.
 	m_elapsedTime = 0;
 	
 	// Get speed
 	m_timeSpan = Bus::value(m_busID);
 	
-	// Set speed
+	// Set initial speed
 	speedChange(m_timeSpan);
 
 	// Append this function to running functions' list
 	_app->functionConsumer()->cue(this);
-}
-
-
-//
-// The main scene producer thread
-//
-void Scene::run()
-{
-	t_channel ch = 0;
-	t_channel ready = 0;
 	
-	// Initialize this scene for running
-	init();
-	
-	// Check if this scene needs to play
+	// Check if this scene needs to play and fill some stuff just in case
 	for (t_channel i = 0; i < m_channels; i++)
 	{
-		if (m_values[i].type == Set ||
-		    m_values[i].type == Fade)
+		if (m_values[i].type == Set || m_values[i].type == Fade)
 		{
 			if (m_values[i].value == (int) m_runTimeData[i].current)
-			{
 				ready++;
-			}
 		}
 		else
 		{
 			// NoSet values are treated as ready
 			ready++;
 		}
+
+		/* Fill run-time buffers with the data for the first step */
+		m_runTimeData[i].current = m_runTimeData[i].start =
+			static_cast<float> 
+			(_app->dmxMap()->getValue(address + i));
+		
+		m_runTimeData[i].target = 
+			static_cast<float> (m_values[i].value);
+		
+		m_runTimeData[i].ready = false;
+
 	}
 	
 	// This scene does not need to be played because all target
 	// values are already where they are supposed to be.
 	if (ready == m_channels)
-	{
 		m_stopped = true;
-	}
-	
-	for (m_elapsedTime = 0; m_elapsedTime < m_timeSpan && !m_stopped;
+
+	for (m_elapsedTime = 0;
+	     m_elapsedTime < m_timeSpan && m_stopped == false;
 	     m_elapsedTime++)
 	{
 		for (ch = 0; ch < m_channels; ch++)
@@ -471,7 +425,7 @@ void Scene::run()
 			else if (m_values[ch].type == Set)
 			{
 				// Just set the target value
-				m_channelData[ch] = (m_address + ch) << 8;
+				m_channelData[ch] = (address + ch) << 8;
 				m_channelData[ch] |= static_cast<t_buffer_data>
 					(m_values[ch].value);
 				
@@ -489,7 +443,7 @@ void Scene::run()
 					   - m_runTimeData[ch].start)
 					* ((float)m_elapsedTime / m_timeSpan);
 				
-				m_channelData[ch] = (m_address + ch) << 8;
+				m_channelData[ch] = (address + ch) << 8;
 				
 				m_channelData[ch] |= static_cast<t_buffer_data>
 					(m_runTimeData[ch].current);
@@ -513,7 +467,7 @@ void Scene::run()
 		else
 		{
 			// Just set the target value
-			m_channelData[ch] = (m_address + ch) << 8;
+			m_channelData[ch] = (address + ch) << 8;
 			m_channelData[ch] |= 
 				static_cast<t_buffer_data> (m_values[ch].value);
 			
@@ -522,8 +476,9 @@ void Scene::run()
 		}
 	}
 	
-	if (!m_stopped)
+	if (m_stopped == false)
 	{
+		/* Put the last values to the buffer */
 		m_eventBuffer->put(m_channelData);
 	}
 	else
@@ -534,35 +489,6 @@ void Scene::run()
 		//
 		m_eventBuffer->purge();
 	}
-	
-	// No more items produced -> this scene can be removed from
-	// the list after the buffer is empty.
-	m_removeAfterEmpty = true;
-}
 
-
-//
-// This fuction must be called ONLY from functionconsumer AFTER
-// this function is REALLY stopped.
-//
-void Scene::cleanup()
-{
-	m_stopped = false;
-	
-	if (m_virtualController)
-	{
-		QApplication::postEvent(m_virtualController,
-					new FunctionStopEvent(m_id));
-		m_virtualController = NULL;
-	}
-	
-	if (m_parentFunction)
-	{
-		m_parentFunction->childFinished();
-		m_parentFunction = NULL;
-	}
-	
-	m_startMutex.lock();
-	m_running = false;
-	m_startMutex.unlock();
+	emit stopped(m_id);
 }

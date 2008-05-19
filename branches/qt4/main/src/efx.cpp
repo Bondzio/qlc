@@ -50,50 +50,48 @@ static const char* KDiamondAlgorithmName   ( "Diamond" );
 static const char* KTriangleAlgorithmName  ( "Triangle" );
 static const char* KLissajousAlgorithmName ( "Lissajous" );
 
-/**
- * Standard constructor
- */
-EFX::EFX() :
-	Function            ( Function::EFX ),
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
 
-	pointFunc           ( NULL ),
-
-	m_width             ( 127 ),
-	m_height            ( 127 ),
-	m_xOffset           ( 127 ),
-	m_yOffset           ( 127 ),
-	m_rotation	      ( 0 ),
-
-	m_xFrequency        ( 2 ),
-	m_yFrequency        ( 3 ),
-	m_xPhase            ( 1.5707963267 ),
-	m_yPhase            ( 0 ),
-
-	m_xChannel          ( KChannelInvalid ),
-	m_yChannel          ( KChannelInvalid ),
-
-	m_runOrder          ( EFX::Loop ),
-	m_direction         ( EFX::Forward ),
-
-	m_modulationBus     ( KBusIDDefaultHold ),
-
-	m_startSceneID      ( KNoID ),
-	m_startSceneEnabled ( false ),
-
-	m_stopSceneID       ( KNoID ),
-	m_stopSceneEnabled  ( false ),
-
-	m_previewPointArray ( NULL ),
-
-	m_algorithm         ( KCircleAlgorithmName ),
-
-	m_stepSize          ( 0 ),
-	m_cycleDuration     ( KFrequency ),
-
-	m_channelData       ( NULL ),
-
-	m_address           ( KChannelInvalid )
+EFX::EFX(QObject* parent) : Function(parent, Function::EFX)
 {
+	pointFunc = NULL;
+
+	m_width = 127;
+	m_height = 127;
+	m_xOffset = 127;
+	m_yOffset = 127;
+	m_rotation = 0;
+
+	m_xFrequency = 2;
+	m_yFrequency = 3;
+	m_xPhase = 1.5707963267;
+	m_yPhase = 0;
+
+	m_xChannel = KChannelInvalid;
+	m_yChannel = KChannelInvalid;
+
+	m_runOrder = EFX::Loop;
+	m_direction = EFX::Forward;
+
+	m_startSceneID = KNoID;
+	m_startSceneEnabled = false;
+
+	m_stopSceneID = KNoID;
+	m_stopSceneEnabled = false;
+
+	m_previewPointArray = NULL;
+
+	m_algorithm = KCircleAlgorithmName;
+
+	m_stepSize = 0;
+	m_cycleDuration = KFrequency;
+
+	m_channelData = NULL;
+
+	m_address = KChannelInvalid;
+
 	/* Set Default Fade as the speed bus */
 	setBus(KBusIDDefaultFade);
 }
@@ -103,17 +101,62 @@ EFX::EFX() :
  */
 EFX::~EFX()
 {
-	stop();
-
-	m_startMutex.lock();
-	while (m_running == true)
-	{
-		m_startMutex.unlock();
-		sched_yield();
-		m_startMutex.lock();
-	}
-	m_startMutex.unlock();
 }
+
+/**
+ * Copy function contents from another function
+ *
+ * @param efx EFX function from which to copy contents to this function
+ * @param to The new parent fixture instance for this function
+ */
+bool EFX::copyFrom(EFX* efx, t_fixture_id to)
+{
+	Q_ASSERT(efx != NULL);
+
+	Function::setFixture(to);
+	Function::setName(efx->name());
+	Function::setBus(efx->busID());
+
+	m_width = efx->width();
+	m_height = efx->height();
+	m_xOffset = efx->xOffset();
+	m_yOffset = efx->yOffset();
+	m_rotation = efx->rotation();
+
+	m_xFrequency = efx->xFrequency();
+	m_yFrequency = efx->yFrequency();
+	m_xPhase = efx->xPhase();
+	m_yPhase = efx->yPhase();
+
+	m_xChannel = efx->xChannel();
+	m_yChannel = efx->yChannel();
+
+	m_runOrder = efx->runOrder();
+	m_direction = efx->direction();
+
+	m_startSceneID = efx->startScene();
+	m_startSceneEnabled = efx-startSceneEnabled();
+
+	m_stopSceneID = efx->stopScene();
+	m_stopSceneEnabled = efx-stopSceneEnabled();
+
+	m_previewPointArray = NULL;
+
+	m_algorithm = QString(efx->algorithm());
+
+	m_stepSize = 0;
+	m_cycleDuration = KFrequency;
+
+	m_channelData = NULL;
+
+	m_address = KChannelInvalid;
+
+	return true;
+}
+
+/*****************************************************************************
+ * Preview
+ *****************************************************************************/
 
 /**
  * Set a pointer to a point array for updating the
@@ -223,6 +266,9 @@ void EFX::updatePreview()
 	delete y;
 }
 
+/*****************************************************************************
+ * Algorithm
+ *****************************************************************************/
 
 /**
  * Get the supported algorithms as a string list
@@ -269,6 +315,10 @@ void EFX::setAlgorithm(QString algorithm)
 	updatePreview();
 }
 
+/*****************************************************************************
+ * Width
+ *****************************************************************************/
+
 /**
  * Set the pattern width
  *
@@ -289,6 +339,10 @@ int EFX::width()
 {
 	return static_cast<int> (m_width);
 }
+
+/*****************************************************************************
+ * Height
+ *****************************************************************************/
 
 /**
  * Set the pattern height
@@ -311,6 +365,10 @@ int EFX::height()
 	return static_cast<int> (m_height);
 }
 
+/*****************************************************************************
+ * Rotation
+ *****************************************************************************/
+
 /**
  * Set the pattern rotation
  *
@@ -332,6 +390,9 @@ int EFX::rotation()
 	return static_cast<int> (m_rotation);
 }
 
+/*****************************************************************************
+ * Offset
+ *****************************************************************************/
 
 /**
  * Set the pattern offset on the X-axis
@@ -375,6 +436,10 @@ int EFX::yOffset()
 	return static_cast<int> (m_yOffset);
 }
 
+/*****************************************************************************
+ * Frequency
+ *****************************************************************************/
+
 /**
  * Set the lissajous pattern frequency  on the X-axis
  *
@@ -416,6 +481,25 @@ int EFX::yFrequency()
 {
 	return static_cast<int> (m_yFrequency);
 }
+
+/**
+ * Returns true when lissajous has been selected
+ */
+bool EFX::isFrequencyEnabled()
+{
+	if (m_algorithm == KLissajousAlgorithmName)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+/*****************************************************************************
+ * Phase
+ *****************************************************************************/
 
 /**
  * Set the lissajous pattern phase on the X-axis
@@ -462,21 +546,6 @@ int EFX::yPhase()
 /**
  * Returns true when lissajous has been selected
  */
-bool EFX::isFrequencyEnabled()
-{
-	if (m_algorithm == KLissajousAlgorithmName)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-/**
- * Returns true when lissajous has been selected
- */
 bool EFX::isPhaseEnabled()
 {
 	if (m_algorithm == KLissajousAlgorithmName)
@@ -488,6 +557,10 @@ bool EFX::isPhaseEnabled()
 		return false;
 	}
 }
+
+/*****************************************************************************
+ * Channels
+ *****************************************************************************/
 
 /**
  * Set a channel from a fixture instance to be used as the X axis.
@@ -553,65 +626,9 @@ t_channel EFX::yChannel()
 	return m_yChannel;
 }
 
-/**
- * Set the run order
- *
- * @param runOrder Run Order
- */
-void EFX::setRunOrder(EFX::RunOrder runOrder)
-{
-	m_runOrder = runOrder;
-}
-
-/**
- * Get the run order
- *
- */
-EFX::RunOrder EFX::runOrder()
-{
-	return m_runOrder;
-}
-
-/**
- * Set the running direction
- *
- * @param dir Direction
- */
-void EFX::setDirection(EFX::Direction dir)
-{
-	m_direction = dir;
-}
-
-/**
- * Get the direction
- *
- */
-EFX::Direction EFX::direction()
-{
-	return m_direction;
-}
-
-/**
- * Set the modulation speed bus
- *
- */
-void EFX::setModulationBus(t_bus_id bus)
-{
-	if (bus > KBusIDMin && bus < KBusCount)
-	{
-		m_modulationBus = bus;
-	}
-}
-
-/**
- * Get the modulation speed bus
- *
- */
-t_bus_id EFX::modulationBus()
-{
-	return m_modulationBus;
-}
-
+/*****************************************************************************
+ * Start & Stop scenes
+ *****************************************************************************/
 
 void EFX::setStartScene(t_function_id scene)
 {
@@ -683,58 +700,9 @@ bool EFX::stopSceneEnabled()
 	return m_stopSceneEnabled;
 }
 
-/**
- * Copy function contents from another function
- *
- * @param efx EFX function from which to copy contents to this function
- * @param to The new parent fixture instance for this function
- */
-bool EFX::copyFrom(EFX* efx, t_fixture_id to)
-{
-	Q_ASSERT(efx != NULL);
-
-	Function::setFixture(to);
-	Function::setName(efx->name());
-	Function::setBus(efx->busID());
-
-	m_width = efx->width();
-	m_height = efx->height();
-	m_xOffset = efx->xOffset();
-	m_yOffset = efx->yOffset();
-	m_rotation = efx->rotation();
-
-	m_xFrequency = efx->xFrequency();
-	m_yFrequency = efx->yFrequency();
-	m_xPhase = efx->xPhase();
-	m_yPhase = efx->yPhase();
-
-	m_xChannel = efx->xChannel();
-	m_yChannel = efx->yChannel();
-
-	m_runOrder = efx->runOrder();
-	m_direction = efx->direction();
-
-	m_modulationBus = efx->modulationBus();
-
-	m_startSceneID = efx->startScene();
-	m_startSceneEnabled = efx-startSceneEnabled();
-
-	m_stopSceneID = efx->stopScene();
-	m_stopSceneEnabled = efx-stopSceneEnabled();
-
-	m_previewPointArray = NULL;
-
-	m_algorithm = QString(efx->algorithm());
-
-	m_stepSize = 0;
-	m_cycleDuration = KFrequency;
-
-	m_channelData = NULL;
-
-	m_address = KChannelInvalid;
-
-	return true;
-}
+/*****************************************************************************
+ * Load & Save
+ *****************************************************************************/
 
 /**
  * Save the function's contents to an XML document
@@ -904,7 +872,6 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	return true;
 }
 
-
 bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 {
 	QString str;
@@ -916,7 +883,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCFunction)
 	{
-		qWarning("Function node not found!");
+		cout << "Function node not found!" << endl;
 		return false;
 	}
 
@@ -930,7 +897,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 		{
 			/* Bus */
 			str = tag.attribute(KXMLQLCBusRole);
-			Q_ASSERT(setBus(tag.text().toInt()) == true);
+			setBus(tag.text().toInt());
 		}
 		else if (tag.tagName() == KXMLQLCFunctionEFXAlgorithm)
 		{
@@ -1018,7 +985,7 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCFunctionEFXAxis)
 	{
-		qWarning("EFX axis node not found!");
+		cout << "EFX axis node not found!" << endl;
 		return false;
 	}
 
@@ -1079,6 +1046,10 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 	return true;
 }
 
+/*****************************************************************************
+ * Bus
+ *****************************************************************************/
+
 /**
  * This is called by buses for each function when the
  * bus value is changed.
@@ -1086,224 +1057,21 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
  * @param id ID of the bus that has changed its value
  * @param value Bus' new value
  */
-void EFX::busValueChanged(t_bus_id id, t_bus_value value)
+void EFX::slotBusValueChanged(t_bus_id id, t_bus_value value)
 {
 	if (id != m_busID)
-	{
-		/* Not our bus */
 		return;
-	}
-
-	m_startMutex.lock();
 
 	/* Basically number of steps required to complete a full cycle */
 	m_cycleDuration = static_cast<double> (value);
 
 	/* Size of one step */
 	m_stepSize = (double)(1) / ((double)(m_cycleDuration) / (M_PI * 2));
-
-	m_startMutex.unlock();
 }
 
-/**
- * Prepare this function for running. This is called when
- * the user sets the mode to Operate. Basically allocates everything
- * that is needed to run the function.
- */
-void EFX::arm()
-{
-	Fixture* fxi = NULL;
-
-	/* Allocate space for channel data set to eventbuffer.
-	 * There are only two channels to set.
-	 */
-	if (m_channelData == NULL)
-		m_channelData = new unsigned int[2];
-
-	/* Allocate space for the event buffer.
-	 * There are only two channels to set.
-	 */
-	if (m_eventBuffer == NULL)
-		m_eventBuffer = new EventBuffer(2, KFrequency >> 1);
-
-	/* Set the run time address for channel data */
-	fxi = _app->doc()->fixture(fixture());
-	if (fxi != NULL)
-	{
-		m_address = fxi->universeAddress();
-	}
-	else
-	{
-		cout << "No fixture instance for EFX: "
-		     << Function::name().toStdString()
-		     << endl;
-	}
-
-	m_stopped = false;
-
-	/* Choose a point calculation function depending on the algorithm */
-	if (m_algorithm == KCircleAlgorithmName)
-	{
-		pointFunc = circlePoint;
-	}
-	else if (m_algorithm == KEightAlgorithmName)
-	{
-		pointFunc = eightPoint;
-	}
-	else if (m_algorithm == KLineAlgorithmName)
-	{
-		pointFunc = linePoint;
-	}
-	else if (m_algorithm == KTriangleAlgorithmName)
-	{
-		pointFunc = trianglePoint;
-	}
-	else if (m_algorithm == KDiamondAlgorithmName)
-	{
-		pointFunc = diamondPoint;
-	}
-	else if (m_algorithm == KLissajousAlgorithmName)
-	{
-		pointFunc = lissajousPoint;
-	}
-	else
-	{
-		/* There's something wrong, don't run this function */
-		pointFunc = NULL;
-		m_stopped = true;
-
-		cout << "Unknown algorithm used in EFX: "
-		     << m_name.toStdString()
-		     << endl;
-	}
-}
-
-/**
- * Free all run-time allocations. This is called respectively when
- * the user sets the mode back to Design.
- */
-void EFX::disarm()
-{
-	if (m_channelData) delete [] m_channelData;
-	m_channelData = NULL;
-
-	if (m_eventBuffer) delete m_eventBuffer;
-	m_eventBuffer = NULL;
-
-	m_address = KChannelInvalid;
-
-	pointFunc = NULL;
-}
-
-/**
- * Called by FunctionConsumer after the function has stopped running.
- * Usually notifies parent function and/or virtual console that the
- * function has been stopped.
- */
-void EFX::cleanup()
-{
-	m_stopped = false;
-
-	if (m_virtualController)
-	{
-		QApplication::postEvent(m_virtualController,
-					new FunctionStopEvent(m_id));
-		m_virtualController = NULL;
-	}
-
-	if (m_parentFunction)
-	{
-		m_parentFunction->childFinished();
-		m_parentFunction = NULL;
-	}
-
-	m_startMutex.lock();
-	m_running = false;
-	m_startMutex.unlock();
-}
-
-/**
- * Pre-run initialization that is run just before the function is started.
- */
-void EFX::init()
-{
-	m_removeAfterEmpty = false;
-
-	// Get speed
-	busValueChanged(m_busID, Bus::value(m_busID));
-
-	// Append this function to running functions' list
-	_app->functionConsumer()->cue(this);
-}
-
-/**
- * The worker thread that takes care of filling the function's
- * buffer with event data
- */
-void EFX::run()
-{
-	float i = 0;
-	float x = 0;
-	float y = 0;
-	Direction dir = direction();
-
-	// Initialize this function for running
-	init();
-
-	if (!m_stopped)
-	{
-		if (startScene() != KNoID && startSceneEnabled())
-		{
-			_app->doc()->function(startScene())->engage(this);
-		}
-	}
-
-	while (!m_stopped)
-	{
-		if (dir == Forward)
-		{
-			for (i = 0; i < (M_PI * 2.0) && !m_stopped; i += m_stepSize)
-			{
-				/* Calculate the next point */
-				pointFunc(this, i, &x, &y);
-	      
-				/* Write the point to event buffer */
-				setPoint(static_cast<t_value> (x), static_cast<t_value> (y));
-			}
-		}
-		else
-		{
-			for (i = (M_PI * 2.0); i > 0 && !m_stopped; i -= m_stepSize)
-			{
-				/* Calculate the next point */
-				pointFunc(this, i, &x, &y);
-	      
-				/* Write the point to event buffer */
-				setPoint(static_cast<t_value> (x), static_cast<t_value> (y));
-			}
-		}
-
-		if (runOrder() == PingPong)
-		{
-			if (dir == Forward)
-				dir = Backward;
-			else
-				dir = Forward;
-		}
-		else if (runOrder() == SingleShot)
-		{
-			m_stopped = true;
-		}
-	}
-
-	if (stopScene() != KNoID && stopSceneEnabled())
-	{
-		_app->doc()->function(stopScene())->engage(this);
-	}
-
-	/* Finished */
-	m_removeAfterEmpty = true;
-}
+/*****************************************************************************
+ * Point calculation functions
+ *****************************************************************************/
 
 /**
  * Calculate a single point in a circle pattern based on
@@ -1430,7 +1198,6 @@ void EFX::setPoint(t_value x, t_value y)
 	m_eventBuffer->put(m_channelData);
 }
 
-
 /**
  * Rotate a single point in a  pattern by
  * the value of rot, scale height and width
@@ -1450,4 +1217,166 @@ void EFX::rotateAndScale(EFX* efx, float* x, float* y, int rot)
 	*y = efx->m_yOffset + (-xx * sin(r) + yy * cos(r))  * efx->m_height;
 }
 
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
 
+/**
+ * Prepare this function for running. This is called when
+ * the user sets the mode to Operate. Basically allocates everything
+ * that is needed to run the function.
+ */
+void EFX::arm()
+{
+	Fixture* fxi = NULL;
+
+	/* Allocate space for channel data set to eventbuffer.
+	 * There are only two channels to set (X & Y).
+	 */
+	if (m_channelData == NULL)
+		m_channelData = new unsigned int[2];
+
+	/* Allocate space for the event buffer.
+	 * There are only two channels to set (X & Y).
+	 */
+	if (m_eventBuffer == NULL)
+		m_eventBuffer = new EventBuffer(2, KFrequency >> 1);
+
+	/* Set the run time address for channel data */
+	fxi = _app->doc()->fixture(fixture());
+	if (fxi != NULL)
+	{
+		m_address = fxi->universeAddress();
+		m_stopped = false;
+	}
+	else
+	{
+		m_stopped = true;
+		cout << "No fixture instance for EFX: "
+		     << Function::name().toStdString()
+		     << endl;
+	}
+
+	/* Choose a point calculation function depending on the algorithm */
+	if (m_algorithm == KCircleAlgorithmName)
+		pointFunc = circlePoint;
+	else if (m_algorithm == KEightAlgorithmName)
+		pointFunc = eightPoint;
+	else if (m_algorithm == KLineAlgorithmName)
+		pointFunc = linePoint;
+	else if (m_algorithm == KTriangleAlgorithmName)
+		pointFunc = trianglePoint;
+	else if (m_algorithm == KDiamondAlgorithmName)
+		pointFunc = diamondPoint;
+	else if (m_algorithm == KLissajousAlgorithmName)
+		pointFunc = lissajousPoint;
+	else
+	{
+		/* There's something wrong, don't run this function */
+		pointFunc = NULL;
+		m_stopped = true;
+
+		cout << "Unknown algorithm used in EFX: "
+		     << m_name.toStdString()
+		     << endl;
+	}
+}
+
+/**
+ * Free all run-time allocations. This is called respectively when
+ * the user sets the mode back to Design.
+ */
+void EFX::disarm()
+{
+	if (m_channelData != NULL)
+		delete [] m_channelData;
+	m_channelData = NULL;
+
+	if (m_eventBuffer != NULL)
+		delete m_eventBuffer;
+	m_eventBuffer = NULL;
+
+	m_address = KChannelInvalid;
+
+	pointFunc = NULL;
+}
+
+/**
+ * Stop this EFX
+ */
+void EFX::stop()
+{
+	m_stopped = true;
+}
+
+/**
+ * The worker thread that takes care of filling the function's
+ * buffer with event data
+ */
+void EFX::run()
+{
+	float i = 0;
+	float x = 0;
+	float y = 0;
+	Direction dir = direction();
+
+	m_stopped = false;
+
+	// Set initial speed
+	slotBusValueChanged(m_busID, Bus::value(m_busID));
+
+	// Append this function to running functions' list
+	_app->functionConsumer()->cue(this);
+
+	// Initialize with start scene
+	if (startScene() != KNoID && startSceneEnabled() == true)
+		_app->doc()->function(startScene())->start();
+
+	while (m_stopped == false)
+	{
+		if (dir == Forward)
+		{
+			for (i = 0; i < (M_PI * 2.0) && !m_stopped;
+			     i += m_stepSize)
+			{
+				/* Calculate the next point */
+				pointFunc(this, i, &x, &y);
+	      
+				/* Write the point to event buffer */
+				setPoint(static_cast<t_value> (x),
+					 static_cast<t_value> (y));
+			}
+		}
+		else
+		{
+			for (i = (M_PI * 2.0); i > 0 && !m_stopped;
+			     i -= m_stepSize)
+			{
+				/* Calculate the next point */
+				pointFunc(this, i, &x, &y);
+	      
+				/* Write the point to event buffer */
+				setPoint(static_cast<t_value> (x),
+					 static_cast<t_value> (y));
+			}
+		}
+
+		if (runOrder() == PingPong)
+		{
+			if (dir == Forward)
+				dir = Backward;
+			else
+				dir = Forward;
+		}
+		else if (runOrder() == SingleShot)
+		{
+			m_stopped = true;
+		}
+	}
+
+	// De-initialize with stop scene
+	if (stopScene() != KNoID && stopSceneEnabled())
+		_app->doc()->function(stopScene())->start();
+
+	emit stopped(m_id);
+}

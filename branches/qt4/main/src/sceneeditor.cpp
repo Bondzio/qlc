@@ -107,7 +107,7 @@ void SceneEditor::setFixture(t_fixture_id id)
 	// The scene that contains all the edited values
 	if (m_tempScene)
 		delete m_tempScene;
-	m_tempScene = new Scene();
+	m_tempScene = new Scene(this);
 	m_tempScene->setFixture(id);
 
 	fillFunctions();

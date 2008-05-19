@@ -1,3 +1,30 @@
+2008-05-19  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/chaser.cpp:
+	* main/src/chaser.h:
+	* main/src/chasereditor.cpp:
+	* main/src/collection.cpp:
+	* main/src/collection.h:
+	* main/src/collectioneditor.cpp:
+	* main/src/doc.cpp:
+	* main/src/efx.cpp:
+	* main/src/efx.h:
+	* main/src/function.cpp:
+	* main/src/function.h:
+	* main/src/functionconsumer.cpp:
+	* main/src/functionconsumer.h:
+	* main/src/main.cpp:
+	* main/src/scene.cpp:
+	* main/src/scene.h:
+	* main/src/sceneeditor.cpp:
+	* main/src/vcbutton.cpp:
+	* main/src/vcbutton.h:
+	* main/src/vcbuttonproperties.cpp:
+
+	Revised the function running system (not working yet, though).
+	Everything works with signals and slots now, no more weird FunctionNS
+	or FunctionStopEvents etc...
+
 2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/app.cpp:

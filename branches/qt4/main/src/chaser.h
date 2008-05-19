@@ -32,12 +32,14 @@ class QDomDocument;
 
 class Chaser : public Function
 {
+	Q_OBJECT
+
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
 public:
 	/** Constructor */
-	Chaser();
+	Chaser(QObject* parent);
 
 	/**
 	 * Copy the contents of the given chaser into this chaser.
@@ -52,15 +54,15 @@ public:
 	/** Destructor */
 	virtual ~Chaser();
 
-	/** Chasers are not attached to a particular fixture */
-	bool setFixtureInstance(t_fixture_id) { return false; }
+	/** Chasers are not attached to fixtures */
+	void setFixture(t_fixture_id fxi_id) { /* NOP */ }
 
 	/*********************************************************************
 	 * Chaser contents
 	 *********************************************************************/
 public:
 	/** Add the given function to the end of this chaser's step list */
-	void addStep(t_function_id);
+	void addStep(t_function_id fid);
 
 	/** Remove a function from the given step index */
 	void removeStep(unsigned int index = 0);
@@ -71,26 +73,11 @@ public:
 	/** Lower the given step once (move it one step later) */
 	bool lowerStep(unsigned int index);
 
-	/** Set this chaser's running order */
-	void setRunOrder(RunOrder ro);
-
-	/** Get this chaser's running order */
-	RunOrder runOrder() { return m_runOrder; }
-
-	/** Set this chaser's initial running direction */
-	void setDirection(Direction dir);
-
-	/** Get this chaser's initial running direction */
-	Direction direction() { return m_direction; }
-
 	/** Get this chaser's list of steps */
 	QList <t_function_id> *steps() { return &m_steps; }
 
 protected:
 	QList <t_function_id> m_steps;
-
-	RunOrder m_runOrder;
-	Direction m_direction;
 
 	/*********************************************************************
 	 * Save & Load
@@ -105,37 +92,30 @@ public:
 	/*********************************************************************
 	 * Running
 	 *********************************************************************/
-public:
+protected slots:
 	/** Initiate a speed change (from a speed bus) */
-	void busValueChanged(t_bus_id, t_bus_value);
+	void slotBusValueChanged(t_bus_id, t_bus_value);
 
+	/** Slot that receives child functions' stopped() signals and
+	    toggles next chaser step. */
+	void slotChildStopped(t_function_id id);
+
+public:
 	/** Allocate everything needed in run-time */
 	void arm();
 
 	/** Delete everything needed in run-time */
 	void disarm();
 
-	/** Stop this function */
-	void stop();
-
 	/** Do some post-run cleanup (called by FunctionConsumer) */
 	void cleanup();
 
-	/**
-	 * Currently running child function calls this function when it is
-	 * ready. This wakes up the chaser producer thread.
-	 */
-	void childFinished();
-
 protected:
-	/** Initialize some run-time values */
-	void init();
-
 	/** Main producer thread */
 	void run();
 
 	/** Start a step function at the given index */
-	bool startMemberAt(int index);
+	void startMemberAt(int index);
 
 	/** Stop a step function at the given index */
 	void stopMemberAt(int index);
@@ -145,6 +125,7 @@ protected:
 
 protected:
 	bool m_childRunning;
+	bool m_stopped;
 
 	t_bus_value m_holdTime;
 	t_bus_value m_holdStart;

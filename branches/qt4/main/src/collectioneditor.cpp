@@ -60,7 +60,7 @@ CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
 	connect(m_add, SIGNAL(clicked()), this, SLOT(slotAdd()));
 	connect(m_remove, SIGNAL(clicked()), this, SLOT(slotRemove()));
 
-	m_fc = new Collection();
+	m_fc = new Collection(this);
 	m_fc->copyFrom(fc);
 	Q_ASSERT(m_fc != NULL);
 
@@ -107,10 +107,8 @@ void CollectionEditor::slotRemove()
 	if (item != NULL)
 	{
 		t_function_id id = item->text(KColumnID).toInt();
-		if (m_fc->removeItem(id) == true)
-			delete item;
-		else
-			Q_ASSERT(false);
+		m_fc->removeItem(id);
+		delete item;
 	}
 }
 

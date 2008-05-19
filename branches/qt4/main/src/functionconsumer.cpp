@@ -32,12 +32,12 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "functionconsumer.h"
+#include "eventbuffer.h"
+#include "function.h"
+#include "dmxmap.h"
 #include "app.h"
 #include "doc.h"
-#include "dmxmap.h"
-#include "function.h"
-#include "eventbuffer.h"
-#include "functionconsumer.h"
 
 /*****************************************************************************
  * Initialization
@@ -49,7 +49,7 @@ FunctionConsumer::FunctionConsumer(DMXMap* dmxMap) : QThread()
 	m_dmxMap = dmxMap;
 
 	m_timerType = RTCTimer;
-	m_running = 0;
+	m_running = false;
 	m_fdRTC = -1;
 	m_timeCode = 0;
 
@@ -422,7 +422,13 @@ void FunctionConsumer::stop()
 	m_running = false;
 	
 	while (runningFunctions() > 0)
+	{
+#ifndef __APPLE__
 		pthread_yield();
+#else
+		pthread_yield_np();
+#endif
+	}
 }
 
 
@@ -464,16 +470,13 @@ void FunctionConsumer::event(time_t)
 		
 		if (m_function->eventBuffer()->get(m_event) == -1)
 		{
-			if (m_function->removeAfterEmpty())
+			if (m_function->isRunning() == false)
 			{
 				/* Lock before remove */
 				m_functionListMutex.lock(); 
 
 				/* Remove the current function */
 				it.remove();
-
-				/* Cleanup after removal */
-				m_function->cleanup();
 
 				/* Unlock after remove */
 				m_functionListMutex.unlock();

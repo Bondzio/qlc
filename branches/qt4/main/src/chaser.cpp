@@ -44,10 +44,8 @@ using namespace std;
  * Initialization
  *****************************************************************************/
 
-Chaser::Chaser() : Function(Function::Chaser)
+Chaser::Chaser(QObject* parent) : Function(parent, Function::Chaser)
 {
-	m_runOrder = Loop;
-	m_direction = Forward;
 	m_childRunning = false;
 
 	m_holdTime = 0;
@@ -78,7 +76,6 @@ void Chaser::copyFrom(Chaser* ch, bool append)
 
 Chaser::~Chaser()
 {
-	stop();
 	m_steps.clear();
 }
 
@@ -88,102 +85,54 @@ Chaser::~Chaser()
 
 void Chaser::addStep(t_function_id id)
 {
-	m_startMutex.lock();
-
-	if (m_running == false)
-	{
-		m_steps.append(id);
-		_app->doc()->setModified();
-	}
-	else
-	{
-		cout << "Chaser is running. Cannot modify steps!" << endl;
-	}  
-
-	m_startMutex.unlock();
+	m_steps.append(id);
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
 void Chaser::removeStep(unsigned int index)
 {
 	Q_ASSERT(index < m_steps.size());
 
-	m_startMutex.lock();
-
-	if (m_running == false)
-	{
-		m_steps.removeAt(index);
-		_app->doc()->setModified();
-	}
-	else
-	{
-		cout << "Chaser is running. Cannot modify steps!" << endl;
-	}
-
-	m_startMutex.unlock();
+	m_steps.removeAt(index);
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
 bool Chaser::raiseStep(unsigned int index)
 {
-	bool result = false;
-
-	m_startMutex.lock();
-
-	if (m_running == false)
+	if (index > 0 && index < m_steps.count())
 	{
-		if (index > 0 && index < m_steps.count())
-		{
-			t_function_id fid = m_steps.takeAt(index);
-			m_steps.insert(index - 1, fid);
+		t_function_id fid = m_steps.takeAt(index);
+		m_steps.insert(index - 1, fid);
+		
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
 
-			_app->doc()->setModified();
-			result = true;
-		}
+		return true;
 	}
 	else
 	{
-		cout << "Chaser is running. Cannot modify steps!" << endl;
+		return false;
 	}
-
-	m_startMutex.unlock();
-
-	return result;
 }
 
 bool Chaser::lowerStep(unsigned int index)
 {
-	bool result = false;
-
-	m_startMutex.lock();
-
-	if (m_running == false)
+	if (index < m_steps.count() - 1 && index >= 0)
 	{
-		if (index < m_steps.count() - 1 && index >= 0)
-		{
-			t_function_id fid = m_steps.takeAt(index);
-			m_steps.insert(index + 1, fid);
+		t_function_id fid = m_steps.takeAt(index);
+		m_steps.insert(index + 1, fid);
+		
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
 
-			_app->doc()->setModified();
-			result = true;
-		}
+		return true;
 	}
 	else
 	{
-		cout << "Chaser is running. Cannot modify steps!" << endl;
+		return false;
 	}
-
-	m_startMutex.unlock();
-
-	return result;
-}
-
-void Chaser::setRunOrder(RunOrder ro)
-{
-	m_runOrder = ro;
-}
-
-void Chaser::setDirection(Direction dir)
-{
-	m_direction = dir;
 }
 
 /*****************************************************************************
@@ -280,7 +229,7 @@ bool Chaser::loadXML(QDomDocument* doc, QDomElement* root)
 			str = tag.attribute(KXMLQLCBusRole);
 			Q_ASSERT(str == KXMLQLCBusHold);
 
-			Q_ASSERT(setBus(tag.text().toInt()) == true);
+			setBus(tag.text().toInt());
 		}
 		else if (tag.tagName() == KXMLQLCFunctionDirection)
 		{
@@ -322,11 +271,23 @@ bool Chaser::loadXML(QDomDocument* doc, QDomElement* root)
  * Running
  *****************************************************************************/
 
-void Chaser::busValueChanged(t_bus_id id, t_bus_value value)
+void Chaser::slotBusValueChanged(t_bus_id id, t_bus_value value)
 {
 	if (id == m_busID)
-	{
 		m_holdTime = value;
+}
+
+void Chaser::slotChildStopped(t_function_id id)
+{
+	Function* function = _app->doc()->function(m_runTimePosition);
+	Q_ASSERT(function != NULL);
+
+	/* Check that the stopped function is this chaser's current step */
+	if (id == function->id())
+	{
+		disconnect(function, SIGNAL(stopped(t_function_id)),
+			   this, SLOT(slotChildStopped(t_function_id)));
+		m_childRunning = false;
 	}
 }
 
@@ -341,64 +302,22 @@ void Chaser::arm()
 
 void Chaser::disarm()
 {
-	if (m_eventBuffer) delete m_eventBuffer;
+	if (m_eventBuffer != NULL)
+		delete m_eventBuffer;
 	m_eventBuffer = NULL;
-}
-
-void Chaser::stop()
-{
-	Function::stop();
-}
-
-void Chaser::cleanup()
-{
-	if (m_virtualController)
-	{
-		QApplication::postEvent(m_virtualController,
-					new FunctionStopEvent(m_id));
-
-		m_virtualController = NULL;
-	}
-
-	if (m_parentFunction)
-	{
-		m_parentFunction->childFinished();
-		m_parentFunction = NULL;
-	}
-
-	m_stopped = false;
-
-	m_startMutex.lock();
-	m_running = false;
-	m_startMutex.unlock();
-}
-
-void Chaser::childFinished()
-{
-	m_childRunning = false;
 }
 
 /*****************************************************************************
  * Running
  *****************************************************************************/
 
-void Chaser::init()
+void Chaser::run()
 {
 	m_childRunning = false;
-	m_removeAfterEmpty = false;
 	m_stopped = false;
 
 	// Get speed
 	m_holdTime = Bus::value(m_busID);
-
-	// Add this to function consumer
-	_app->functionConsumer()->cue(this);
-}
-
-void Chaser::run()
-{
-	// Calculate starting values
-	init();
 
 	m_runTimeDirection = m_direction;
 
@@ -406,6 +325,9 @@ void Chaser::run()
 		m_runTimePosition = 0;
 	else
 		m_runTimePosition = m_steps.count() - 1;
+
+	// Add this to function consumer
+	_app->functionConsumer()->cue(this);
 
 	while (m_stopped == false)
 	{
@@ -415,54 +337,20 @@ void Chaser::run()
 			while (m_runTimePosition < (int) m_steps.count() &&
 			       m_stopped == false)
 			{
-				m_childRunning =
-					startMemberAt(m_runTimePosition);
-	      
-				// Wait for child to complete or stop signal
-				while (m_childRunning == true &&
-				       m_stopped == false)
-				{
-					// sched_yield();
-				}
+				startMemberAt(m_runTimePosition);
 
-				if (m_stopped == true)
-				{
-					stopMemberAt(m_runTimePosition);
-					break;
-				}
-				else
-				{
-					// Wait for m_holdTime
-					hold();
-					m_runTimePosition++;
-				}
+				/* Going forwards, next step */
+				m_runTimePosition++;
 			}
 		}
 		else
 		{
 			while (m_runTimePosition >= 0 && !m_stopped)
 			{
-				m_childRunning =
-					startMemberAt(m_runTimePosition);
-
-				// Wait for child to complete or stop signal
-				while (m_childRunning == true &&
-				       m_stopped == false)
-				{
-					// sched_yield;
-				}
-
-				if (m_stopped == true)
-				{
-					stopMemberAt(m_runTimePosition);
-					break;
-				}
-				else
-				{
-					// Wait for m_holdTime
-					hold();
-					m_runTimePosition--;
-				}
+				startMemberAt(m_runTimePosition);
+				
+				/* Going backwards, previous step */
+				m_runTimePosition--;
 			}
 		}
 
@@ -486,7 +374,7 @@ void Chaser::run()
 				m_runTimeDirection = Backward;
 	      
 				// -2: Don't run the last function again
-				m_runTimePosition = m_steps.count() - 2; 
+				m_runTimePosition = m_steps.count() - 2;
 			}
 			else
 			{
@@ -498,30 +386,54 @@ void Chaser::run()
 		}
 	}
 
-	// This chaser can be removed from the list after the buffer is empty.
-	// (meaning immediately because this doesn't produce any events).
-	m_removeAfterEmpty = true;
+	emit stopped(m_id);
 }
 
-bool Chaser::startMemberAt(int index)
+void Chaser::startMemberAt(int index)
 {
 	t_function_id id = m_steps.at(index);
   	Function* function = _app->doc()->function(id);
+
+	/* Check that the function exists */
+	m_childRunning = false;
 	if (function == NULL)
-		return false;
-  
-	if (function->engage(this))
-		return true;
+		return;
+
+	/* Connect to the child function's stopped event so that we can
+	   trigger the next chaser step */
+	connect(function, SIGNAL(stopped(t_function_id)),
+		this, SLOT(slotChildStopped(t_function_id)));
+
+	/* Start the child function */
+	m_childRunning = true;
+	function->start();
+
+	/* Wait for the child function to complete or the user to stop this
+	   chaser altogether */
+	while (m_childRunning == true && m_stopped == false)
+	{
+#ifndef __APPLE__
+ 		pthread_yield();
+#else
+		pthread_yield_np();
+#endif
+	}
+	
+	if (m_stopped == true)
+		stopMemberAt(m_runTimePosition);
 	else
-		return false;
+		hold();
 }
 
 void Chaser::stopMemberAt(int index)
 {
 	t_function_id id = m_steps.at(index);
 	Function* function = _app->doc()->function(id);
-	if (function != NULL)
-		function->stop();
+
+	if (function == NULL)
+		return;
+
+	function->stop();
 }
 
 void Chaser::hold()
@@ -535,6 +447,8 @@ void Chaser::hold()
 			m_timeCode = _app->functionConsumer()->timeCode();
 			if ((m_timeCode - m_holdStart) >= m_holdTime)
 				break;
+			else
+				msleep(KFrequency);
 		}
 	}
 }

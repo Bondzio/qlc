@@ -128,7 +128,6 @@ void VCButtonProperties::slotSetFunction(t_function_id fid)
 		else
 		{
 			m_functionEdit->setText(QString("Global / %2")
-						.arg(fxi->name())
 						.arg(func->name()));
 		}
 	}

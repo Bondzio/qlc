@@ -564,13 +564,17 @@ Function* Doc::newFunction(Function::Type type)
 	switch (type)
 	{
 	case Function::Scene:
-		return new Scene();
+		return new Scene(this);
+
 	case Function::Chaser:
-		return new Chaser();
+		return new Chaser(this);
+
 	case Function::Collection:
-		return new Collection();
+		return new Collection(this);
+
 	case Function::EFX:
-		return new EFX();
+		return new EFX(this);
+
 	default:
 		return NULL;
 	}

@@ -39,7 +39,11 @@ extern App* _app;
 
 using namespace std;
 
-Collection::Collection() : Function(Function::Collection)
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
+Collection::Collection(QObject* parent) : Function(parent, Function::Collection)
 {
 	m_childCount = 0;
 }
@@ -61,13 +65,12 @@ void Collection::copyFrom(Collection* fc, bool append)
 
 Collection::~Collection()
 {
-	stop();
-
-	while (m_running == true)
-		pthread_yield();
-
 	m_steps.clear();
 }
+
+/*****************************************************************************
+ * Load & Save
+ *****************************************************************************/
 
 bool Collection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
@@ -149,42 +152,33 @@ bool Collection::loadXML(QDomDocument* doc, QDomElement* root)
 	return true;
 }
 
-bool Collection::addItem(t_function_id id)
+/*****************************************************************************
+ * Contents
+ *****************************************************************************/
+
+void Collection::addItem(t_function_id id)
 {
-	m_startMutex.lock();
-
-	if (m_running == false)
-	{
-		m_steps.append(id);
-		m_startMutex.unlock();
-		return true;
-	}
-
-	m_startMutex.unlock();
-	return false;
+	m_steps.append(id);
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
-bool Collection::removeItem(t_function_id id)
+void Collection::removeItem(t_function_id id)
 {
-	m_startMutex.lock();
-
-	if (m_running == false)
-	{
-		m_steps.takeAt(m_steps.indexOf(id));
-		m_startMutex.unlock();
-		return true;
-	}
-
-	m_startMutex.unlock();
-	return false;
+	m_steps.takeAt(m_steps.indexOf(id));
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
-void Collection::speedChange()
-{
-}
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
 
 void Collection::arm()
 {
+	// There's actually no need for an eventbuffer, but
+	// because FunctionConsumer does EventBuffer::get() calls, it must be
+	// there... So allocate a zero length buffer.
 	if (m_eventBuffer == NULL)
 		m_eventBuffer = new EventBuffer(0, 0);
 }
@@ -209,72 +203,52 @@ void Collection::stop()
 	}
 }
 
-void Collection::cleanup()
-{
-	Q_ASSERT(m_childCount == 0);
-
-	m_stopped = false;
-
-	if (m_virtualController)
-	{
-		QApplication::postEvent(m_virtualController,
-					new FunctionStopEvent(m_id));
-		m_virtualController = NULL;
-	}
-
-	if (m_parentFunction)
-	{
-		m_parentFunction->childFinished();
-		m_parentFunction = NULL;
-	}
-
-	m_startMutex.lock();
-	m_running = false;
-	m_startMutex.unlock();
-}
-
-
-void Collection::childFinished()
-{
-	m_childCountMutex.lock();
-	m_childCount--;
-	m_childCountMutex.unlock();
-}
-
-void Collection::init()
-{
-	m_childCountMutex.lock();
-	m_childCount = 0;
-	m_childCountMutex.unlock();
-
-	m_stopped = false;
-	m_removeAfterEmpty = false;
-
-	// Append this function to running functions list
-	_app->functionConsumer()->cue(this);
-}
-
 void Collection::run()
 {
-	QListIterator <t_function_id> it(m_steps);
+	m_childCount = 0;
 
-	// Calculate starting values and set this function to functionconsumer
-	init();
+	// Append this function to the list of running functions
+	_app->functionConsumer()->cue(this);
   
+	QListIterator <t_function_id> it(m_steps);
 	while (it.hasNext() == true)
 	{
 		Function* function = _app->doc()->function(it.next());
-		if (function != NULL && function->engage(this))
+		if (function != NULL)
 		{
 			m_childCountMutex.lock();
 			m_childCount++;
 			m_childCountMutex.unlock();
+
+			connect(function, SIGNAL(stopped(t_function_id)),
+				this, SLOT(slotChildStopped(t_function_id)));
+
+			function->start();
 		}
 	}
 
 	// Wait for all children to stop
 	while (m_childCount > 0)
-		pthread_yield();
+	{
+#ifndef __APPLE__
+ 		pthread_yield();
+#else
+		pthread_yield_np();
+#endif
+	}
 
-	m_removeAfterEmpty = true;
+	emit stopped(m_id);
+}
+
+void Collection::slotChildStopped(t_function_id fid)
+{
+	Function* function = _app->doc()->function(fid);
+	Q_ASSERT(function != NULL);
+
+	disconnect(function, SIGNAL(stopped(t_function_id)),
+		   this, SLOT(slotChildStopped(t_function_id)));	
+	
+	m_childCountMutex.lock();
+	m_childCount--;
+	m_childCountMutex.unlock();
 }

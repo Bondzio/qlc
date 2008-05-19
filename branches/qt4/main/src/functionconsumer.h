@@ -23,6 +23,7 @@
 #define FUNCTIONCONSUMER_H
 
 #include <QThread>
+#include <QMutex>
 #include <QList>
 
 #include "common/qlctypes.h"
@@ -32,12 +33,13 @@ class DMXMap;
 
 class FunctionConsumer : public QThread
 {
-public:
+	Q_OBJECT
+
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
-
-	/** 
+public:
+	/**
 	 * Create a new FunctionConsumer instance. A FunctionConsumer takes
 	 * care of running functions when the application is in operate mode.
 	 *
@@ -45,7 +47,9 @@ public:
 	 */
 	FunctionConsumer(DMXMap* dmxMap);
 
-	/** Destroy a FunctionConsumer instance */
+	/**
+	 * Destroy a FunctionConsumer instance
+	 */
 	virtual ~FunctionConsumer();
 	
 	/**
@@ -57,11 +61,7 @@ public:
 	 * Timer type
 	 *********************************************************************/
 public:
-	enum TimerType
-	{
-		RTCTimer,
-		NanoSleepTimer
-	};
+	enum TimerType { RTCTimer, NanoSleepTimer };
 
 	/**
 	 * Set the timer type for function consumer. Best results are achieved
@@ -81,7 +81,6 @@ public:
 	TimerType timerType() const { return m_timerType; }
 
 protected:
-	/** Currently used timer type */
 	TimerType m_timerType;
 
 	/*********************************************************************
@@ -157,7 +156,7 @@ public:
 	 * @param function The function to start running
 	 */
 	void cue(Function* function);
-	
+
 	/**
 	 * Clear the list of running functions. This will stop all functions.
 	 */
@@ -171,7 +170,7 @@ public:
 	 */
 	t_bus_value timeCode();
 	
-	/** 
+	/**
 	 * Stop the FunctionConsumer alltogether. No functions will be run
 	 * if FC is stopped.
 	 */
@@ -182,7 +181,7 @@ public:
 	 *********************************************************************/
 protected:
 	/**
-	 * Thhe main thread function that reads periodical interrupts
+	 * The main thread function that reads periodical interrupts
 	 * from /dev/rtc.
 	 */
 	virtual void run();

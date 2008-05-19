@@ -292,11 +292,34 @@ void VCButton::setKeyBind(const KeyBind* kb)
 
 void VCButton::setFunction(t_function_id fid)
 {
-	if (fid == KNoID || _app->doc()->function(fid) != NULL)
+	Function* function = _app->doc()->function(fid);
+
+	if (function != NULL)
+	{
+		Function* old = _app->doc()->function(m_function);
+		if (old != NULL)
+		{
+			disconnect(old, SIGNAL(running(t_function_id)),
+				   this, SLOT(slotFunctionRunning(t_function_id)));
+			disconnect(old, SIGNAL(stopped(t_function_id)),
+				   this, SLOT(slotFunctionStopped(t_function_id)));
+		}
+
+		connect(function, SIGNAL(running(t_function_id)),
+			this, SLOT(slotFunctionRunning(t_function_id)));
+		connect(function, SIGNAL(stopped(t_function_id)),
+			this, SLOT(slotFunctionStopped(t_function_id)));
+
 		m_function = fid;
+
+		setToolTip(function->name());
+	}
 	else
+	{
 		m_function = KNoID;
-	/* TODO: tooltips */
+		setToolTip(QString::null);
+	}
+
 	_app->doc()->setModified();
 }
 
@@ -311,13 +334,28 @@ void VCButton::setExclusive(bool exclusive)
  * Button press / release handlers
  *****************************************************************************/
 
+void VCButton::slotFunctionRunning(t_function_id fid)
+{
+	Q_ASSERT(fid == m_function);
+	setOn(true);
+}
+
+void VCButton::slotFunctionStopped(t_function_id fid)
+{
+	Q_ASSERT(fid == m_function);
+
+	setOn(false);
+	slotFlashReady();
+	QTimer::singleShot(200, this, SLOT(slotFlashReady()));
+}
+
 void VCButton::pressFunction()
 {
 	Function* f = NULL;
 
+	/* TODO: Should this return immediately? */
 	if (m_stopFunctions == true)
 		_app->slotControlPanic();
-	/* TODO: Should this return immediately? */
 
 	if (m_function == KNoID)
 	{
@@ -330,17 +368,9 @@ void VCButton::pressFunction()
 		if (f != NULL)
 		{
 			if (isOn() == true)
-			{
 				f->stop();
-			}
 			else
-			{
-				if (f->engage(static_cast<QObject*> (this))
-				    == true)
-				{
-					setOn(true);
-				}
-			}
+				f->start();
 		}
 		else
 		{
@@ -359,16 +389,18 @@ void VCButton::pressFunction()
 		while (it.hasNext() == true)
 		{
 			VCButton* sibling = it.next();
-			if (sibling != this)
+			if (sibling != this &&
+			    sibling->parentWidget() == parentWidget())
+			{
 				sibling->setOn(false);
+			}
 		}
 
 		/* Start this button's function */
 		f = _app->doc()->function(m_function);
 		if (f != NULL)
 		{
-			if (f->engage(static_cast<QObject*> (this)) == true)
-				setOn(true);
+			f->start();
 		}
 		else
 		{
@@ -381,8 +413,7 @@ void VCButton::pressFunction()
 		f = _app->doc()->function(m_function);
 		if (f != NULL)
 		{
-			if (f->engage(static_cast<QObject*> (this)) == true)
-				setOn(true);
+			f->start();
 		}
 		else
 		{
@@ -409,18 +440,6 @@ void VCButton::releaseFunction()
 		Function* function = _app->doc()->function(m_function);
 		if (function != NULL && isOn() == true)
 			function->stop();
-	}
-}
-
-void VCButton::functionStopEvent(FunctionStopEvent* e)
-{
-	if (e != NULL && e->functionID() == m_function)
-	{
-		setOn(false);
-		slotFlashReady();
-
-		/* Flash the button for 100ms */
-		QTimer::singleShot(100, this, SLOT(slotFlashReady()));
 	}
 }
 
@@ -499,10 +518,3 @@ void VCButton::mouseReleaseEvent(QMouseEvent* e)
 	else
 		releaseFunction();
 }
-
-void VCButton::customEvent(QEvent* e)
-{
-	if (e->type() == KFunctionStopEvent)
-		functionStopEvent(static_cast<FunctionStopEvent*> (e));
-}
-

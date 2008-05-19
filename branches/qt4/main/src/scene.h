@@ -36,6 +36,28 @@ class QDomElement;
 
 class Scene : public Function
 {
+	Q_OBJECT
+
+	/*********************************************************************
+	 * Initialization
+	 *********************************************************************/
+public:
+	Scene(QObject* parent);
+	~Scene();
+	
+	/** Copy scene contents and assign it to a fixture */
+	void copyFrom(Scene* sc, t_fixture_id to);
+
+	/*********************************************************************
+	 * Fixture
+	 *********************************************************************/
+public:
+	/** Set the fixture that this scene is assigned to */
+	void setFixture(t_fixture_id id);
+
+	/*********************************************************************
+	 * Values
+	 *********************************************************************/
 public:
 	enum ValueType
 	{
@@ -44,19 +66,6 @@ public:
 		NoSet = 2  // Ignored value
 	};
 
-public:
-	/** Standard constructor */
-	Scene();
-
-	/** Destructor */
-	~Scene();
-	
-	/** Copy scene contents and assign it to a fixture */
-	void copyFrom(Scene* sc, t_fixture_id to);
-
-	/** Set the fixture that this scene is assigned to */
-	bool setFixture(t_fixture_id id);
-	
 	SceneValue* values() { return m_values; }
 	
 	bool set(t_channel ch, t_value value, ValueType type);
@@ -65,19 +74,32 @@ public:
 	ValueType valueType(t_channel ch);
 	QString valueTypeString(t_channel ch);
 	static ValueType stringToValueType(QString type);
-	
+
+	/*********************************************************************
+	 * Load & Save
+	 *********************************************************************/
+public:	
 	bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 	bool loadXML(QDomDocument* doc, QDomElement* root);
 	
-	void busValueChanged(t_bus_id, t_bus_value);
-	void speedChange(t_bus_value);
+	/*********************************************************************
+	 * Bus
+	 *********************************************************************/
+public slots:
+	void slotBusValueChanged(t_bus_id id, t_bus_value value);
+
+public:
+	void speedChange(t_bus_value value);
 	
+	/*********************************************************************
+	 * Running
+	 *********************************************************************/
+public:
 	void arm();
 	void disarm();
-	void cleanup();
+	void stop();
 	
 protected:
-	void init();
 	void run();
 	
 protected:
@@ -88,9 +110,8 @@ protected:
 	
 	RunTimeData* m_runTimeData;
 	t_buffer_data* m_channelData;
-	
-	// Use ONLY at run time to prevent allocating a local variable
-	t_channel m_address;
+
+	bool m_stopped;
 };
 
 class RunTimeData

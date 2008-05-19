@@ -20,6 +20,7 @@
 */
 
 #include <QApplication>
+#include <QMetaType>
 #include <iostream>
 #include <QString>
 
@@ -123,6 +124,10 @@ int main(int argc, char **argv)
 	Display* display;
 	int result = 0;
 
+	/* Registering needed for Function::running(t_function_id) and
+	   Function::stopped(t_function_id) meta-signals */
+	qRegisterMetaType <t_function_id>("t_function_id");
+	
 	/* Initialize QApplication object */
 	_qapp = new QApplication(argc, argv);
 

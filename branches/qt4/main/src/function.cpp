@@ -37,11 +37,10 @@ using namespace std;
 
 extern App* _app;
 
-const QString KCollectionString ( "Collection" );
 const QString KSceneString      (      "Scene" );
 const QString KChaserString     (     "Chaser" );
-const QString KSequenceString   (   "Sequence" );
 const QString KEFXString        (        "EFX" );
+const QString KCollectionString ( "Collection" );
 const QString KUndefinedString  (  "Undefined" );
 
 const QString KLoopString       (       "Loop" );
@@ -51,60 +50,125 @@ const QString KSingleShotString ( "SingleShot" );
 const QString KBackwardString   (   "Backward" );
 const QString KForwardString    (    "Forward" );
 
-//
-// Standard constructor (protected)
-//
-Function::Function(Type type) : QThread()
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
+Function::Function(QObject* parent, Type type) : QThread(parent)
 {
+	m_id = KNoID;
 	m_name = QString::null;
 	m_type = type;
-	m_id = KNoID;
+	m_runOrder = Loop;
+	m_direction = Forward;
 	m_fixture = KNoID;
 	m_busID = KBusIDInvalid;
 	m_channels = 0;
 	m_eventBuffer = NULL;
-	m_virtualController = NULL;
-	m_parentFunction = NULL;
-	m_running = false;
-	m_stopped = false;
-	m_removeAfterEmpty = false;
-	m_listener = NULL;
+
+	// Receive bus value change signals
+	connect(Bus::emitter(),	SIGNAL(valueChanged(t_bus_id, t_bus_value)),
+		this, SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
 }
 
-
-//
-// Standard destructor
-//
 Function::~Function()
 {
-	delete m_listener;
-	m_listener = NULL;
 }
 
-//
-// Set the ID
-//
+/*****************************************************************************
+ * ID
+ *****************************************************************************/
+
 void Function::setID(t_function_id id)
 {
 	m_id = id;
-	
-	if (m_listener)
-		delete m_listener;
-
-	m_listener = new FunctionNS::BusListener(m_id);
 }
 
-//
-// Return the type of this function as a string
-//
+/*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+void Function::setName(QString name)
+{
+	m_name = QString(name);
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
+}
+
+/*****************************************************************************
+ * Type
+ *****************************************************************************/
+
 QString Function::typeString() const
 {
 	return Function::typeToString(type());
 }
 
-//
-// Convert a RunOrder to string
-//
+QString Function::typeToString(const Type type)
+{
+	switch (type)
+	{
+	case Scene:
+		return KSceneString;
+	case Chaser:
+		return KChaserString;
+	case EFX:
+		return KEFXString;
+	case Collection:
+		return KCollectionString;
+	case Undefined:
+	default:
+		return KUndefinedString;
+	}
+}
+
+Function::Type Function::stringToType(QString string)
+{
+	if (string == KSceneString)
+		return Scene;
+	else if (string == KChaserString)
+		return Chaser;
+	else if (string == KEFXString)
+		return EFX;
+	else if (string == KCollectionString)
+		return Collection;
+	else
+		return Undefined;
+}
+
+QPixmap Function::pixmap() const
+{
+	switch (m_type)
+	{
+		case Scene:
+			return QPixmap(QString(PIXMAPS) +
+					QString("/scene.png"));
+		case Chaser:
+			return QPixmap(QString(PIXMAPS) +
+					QString("/chaser.png"));
+		case EFX:
+			return QPixmap(QString(PIXMAPS) +
+					QString("/efx.png"));
+		case Collection:
+			return QPixmap(QString(PIXMAPS) +
+					QString("/collection.png"));
+		default:
+			return QPixmap(QString(PIXMAPS) +
+					QString("/function.png"));
+	}
+}
+
+/*****************************************************************************
+ * Running order
+ *****************************************************************************/
+
+void Function::setRunOrder(Function::RunOrder order)
+{
+	m_runOrder = order;
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);	
+}
+
 QString Function::runOrderToString(RunOrder order)
 {
 	switch (order)
@@ -127,9 +191,6 @@ QString Function::runOrderToString(RunOrder order)
 	}
 }
 
-//
-// Convert a string to RunOrder
-//
 Function::RunOrder Function::stringToRunOrder(QString str)
 {
 	if (str == KLoopString)
@@ -142,9 +203,17 @@ Function::RunOrder Function::stringToRunOrder(QString str)
 		return Loop;
 }
 
-//
-// Convert a Direction to string
-//
+/*****************************************************************************
+ * Direction
+ *****************************************************************************/
+
+void Function::setDirection(Function::Direction dir)
+{
+	m_direction = dir;
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);	
+}
+
 QString Function::directionToString(Direction dir)
 {
 	switch (dir)
@@ -163,9 +232,6 @@ QString Function::directionToString(Direction dir)
 	}
 }
 
-//
-// Convert a string to Direction
-//
 Function::Direction Function::stringToDirection(QString str)
 {
 	if (str == KForwardString)
@@ -176,153 +242,42 @@ Function::Direction Function::stringToDirection(QString str)
 		return Forward;
 }
 
-//
-// Return the type as a string
-//
-QString Function::typeToString(const Type type)
+/*****************************************************************************
+ * Fixture
+ *****************************************************************************/
+
+void Function::setFixture(t_fixture_id id)
 {
-	switch (type)
-	{
-	case Collection:
-		return KCollectionString;
-		break;
-		
-	case Scene:
-		return KSceneString;
-		break;
-		
-	case Chaser:
-		return KChaserString;
-		break;
-		
-	case Sequence:
-		return KSequenceString;
-		break;
-		
-	case EFX:
-		return KEFXString;
-		break;
-		
-	case Undefined:
-	default:
-		return KUndefinedString;
-		break;
-	}
+	m_fixture = id;
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
+/*****************************************************************************
+ * Bus
+ *****************************************************************************/
 
-//
-// Return the given string as a type enum
-//
-Function::Type Function::stringToType(QString string)
+void Function::setBus(t_bus_id id)
 {
-	if (string == KCollectionString)
+	if (id < KBusIDMin || id >= KBusCount)
 	{
-		return Collection;
-	}
-	else if (string == KSceneString)
-	{
-		return Scene;
-	}
-	else if (string == KChaserString)
-	{
-		return Chaser;
-	}
-	else if (string == KSequenceString)
-	{
-		return Sequence;
-	}
-	else if (string == KEFXString)
-	{
-		return EFX;
+		if (m_type == Scene)
+			m_busID = KBusIDDefaultFade;
+		else if (m_type == Chaser)
+			m_busID = KBusIDDefaultHold;
+		else
+			m_busID = KNoID;
 	}
 	else
 	{
-		return Undefined;
+		m_busID = id;
 	}
+	
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
 }
 
-//
-// Get a pixmap representing the function's type to be used in lists etc.
-//
-QPixmap Function::pixmap()
-{
-	switch (m_type)
-	{
-		case Scene:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/scene.png"));
-		case Chaser:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/chaser.png"));
-		case Collection:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/collection.png"));
-		case Sequence:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/sequence.png"));
-		case EFX:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/efx.png"));
-		default:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/function.png"));
-	}
-}
-
-
-//
-// Set a name to this function
-//
-bool Function::setName(QString name)
-{
-	m_startMutex.lock();
-	if (m_running)
-	{
-		m_startMutex.unlock();
-		return false;
-	}
-	else
-	{
-		m_name = QString(name);
-		_app->doc()->setModified();
-		m_startMutex.unlock();
-		
-		_app->doc()->emitFunctionChanged(m_id);
-		
-		return true;
-	}
-}
-
-
-//
-// Assign a fixture instance to this function (or vice versa, whichever
-// sounds right)
-//
-bool Function::setFixture(t_fixture_id id)
-{
-	m_startMutex.lock();
-	if (m_running)
-	{
-		m_startMutex.unlock();
-		return false;
-	}
-	else
-	{
-		m_fixture = id;
-		_app->doc()->setModified();
-		m_startMutex.unlock();
-		
-		_app->doc()->emitFunctionChanged(m_id);
-		
-		return true;
-	}
-}
-
-//
-// Get a textual representation of the function's bus (ID: Name)
-//
-QString Function::busName()
+QString Function::busName() const
 {
 	QString text;
 	
@@ -339,47 +294,9 @@ QString Function::busName()
 	return text;
 }
 
-//
-// Set the speed bus
-//
-bool Function::setBus(t_bus_id id)
-{
-	m_startMutex.lock();
-	if (m_running)
-	{
-		m_startMutex.unlock();
-		return false;
-	}
-	else
-	{
-		if (id < KBusIDMin || id >= KBusCount)
-		{
-			if (m_type == Scene)
-			{
-				m_busID = KBusIDDefaultFade;
-			}
-			else if (m_type == Chaser || m_type == Sequence)
-			{
-				m_busID = KBusIDDefaultHold;
-			}
-			else
-			{
-				m_busID = KNoID;
-			}
-		}
-		else
-		{
-			m_busID = id;
-		}
-		
-		_app->doc()->setModified();
-		
-		_app->doc()->emitFunctionChanged(m_id);
-		
-		m_startMutex.unlock();
-		return true;
-	}
-}
+/*****************************************************************************
+ * Load & Save
+ *****************************************************************************/
 
 Function* Function::loader(QDomDocument* doc, QDomElement* root)
 {
@@ -417,107 +334,21 @@ Function* Function::loader(QDomDocument* doc, QDomElement* root)
 					fxi_id, doc, root);
 }
 
-////////////////////////
-// Start the function //
-////////////////////////
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
 
-//
-// This function is used by VCButton to pass itself as a virtual controller
-// to this function. m_virtualController is signaled when this function stops.
-//
-bool Function::engage(QObject* virtualController)
+bool Function::start()
 {
-	Q_ASSERT(virtualController != NULL);
-	
-	m_startMutex.lock();
-	if (m_running)
+	if (isRunning() == true)
 	{
-		m_startMutex.unlock();
 		cout << "Function " << name().toStdString()
 		     << " is already running!" << endl;
 		return false;
 	}
 	else
 	{
-		m_virtualController = virtualController;
-		m_running = true;
-		start();
-		m_startMutex.unlock();
-		
+		QThread::start();
 		return true;
 	}
-}
-
-//
-// This function is used by Chaser & Collection to pass themselves as
-// a parent function to this function. m_parentFunction->childFinished()
-// is called when this function stops.
-//
-bool Function::engage(Function* parentFunction)
-{
-	Q_ASSERT(parentFunction != NULL);
-	
-	m_startMutex.lock();
-	if (m_running == true)
-	{
-		m_startMutex.unlock();
-		cout << "Function " << name().toStdString()
-		     << " is already running!" << endl;
-		return false;
-	}
-	else
-	{
-		m_parentFunction = parentFunction;
-		m_running = true;
-		start();
-		m_startMutex.unlock();
-		
-		return true;
-	}
-}
-
-
-//
-// Stop this function
-//
-void Function::stop()
-{
-	m_stopped = true;
-}
-
-
-
-///////////////////////////
-// namespace FunctionNS ///
-///////////////////////////
-
-//
-// Bus Listener Constructor
-//
-FunctionNS::BusListener::BusListener(t_function_id id)
-{
-	m_functionID = id;
-	connect(Bus::emitter(), SIGNAL(valueChanged(t_bus_id, t_bus_value)),
-		this, SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
-}
-
-//
-// Bus Listener destructor
-//
-FunctionNS::BusListener::~BusListener()
-{
-	disconnect(Bus::emitter(), SIGNAL(valueChanged(t_bus_id, t_bus_value)),
-		   this, SLOT(slotBusValueChanged(t_bus_id, t_bus_value)));
-}
-
-
-//
-// Bus Listener slot
-//
-void FunctionNS::BusListener::slotBusValueChanged(t_bus_id id,
-						  t_bus_value value)
-{
-	Function* function = _app->doc()->function(m_functionID);
-	Q_ASSERT(function != NULL);
-	function->busValueChanged(id, value);
 }

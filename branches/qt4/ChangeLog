@@ -1,4 +1,12 @@
-2008-05-19  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-19  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/functionselection.cpp:
+	* main/src/functionselection.h:
+
+	Added double click handler to function selection dialog.
+	Changed all my addresses in ChangeLog to hjunnila@users.sf.net.
+
+2008-05-19  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/chaser.cpp:
 	* main/src/chaser.h:
@@ -25,7 +33,7 @@
 	Everything works with signals and slots now, no more weird FunctionNS
 	or FunctionStopEvents etc...
 
-2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-18  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/app.cpp:
 	* main/src/doc.cpp:
@@ -41,14 +49,14 @@
 	StyledPanel behavior is quite nonexistent in some QT styles
 	(cleanlooks for example).
 	
-2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-18  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/fixturemanager.cpp:
 
 	Adding multiple fixtures at a time will now append a number to the
 	end of the fixture name.
 	
-2008-05-18  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-18  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/addfixture.ui:
 	* main/src/busproperties.ui:
@@ -66,7 +74,7 @@
 
 	Updated tooltips for dialogs.
 	
-2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-16  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/vcdockarea.cpp:
 	* main/src/vcdockslider.cpp:
@@ -79,20 +87,20 @@
 
 	Fixed vcdockslider and virtual console properties.
 
-2008-05-16  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-16  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/virtualconsole.cpp:
 
 	Fixed virtual console visible state and geometry loading.
 
-2008-05-15  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-15  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/vcframe.cpp:
 
 	Fixed virtual console save bug, which caused all widgets to get
 	saved multiple times.
 
-2008-05-13  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-13  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/hidinput/hidinput.cpp:
 	* main/src/inputmap.cpp:
@@ -100,7 +108,7 @@
 	Fixed two crash bugs resulting from using QList::takeFirst() in
 	while() conditional clause.
 
-2008-05-13  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-05-13  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/addfixture.cpp:
 	* main/src/addfixture.ui:
@@ -108,7 +116,7 @@
 	Added a channel list to AddFixture UI, since plain mode names
 	("Mode 1", "Mode 2" etc...) don't tell anything of their contents. 
 
-2008-05-09  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-05-09  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* docs/Makefile.am:
 	* docs/advancedsceneeditor-pic.html:
@@ -145,14 +153,14 @@
 	Changed qlc-logo.jpg to qlc-logo.png and made the appropriate
 	changes in documentation files.
 
-2008-05-09  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-05-09  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/app.cpp:
 
 	Fixed fixture loading messages (there was no space between
 	manufacturer and model).
 
-2008-05-07  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-07  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/app.cpp:
 	* main/src/fixturemanager.cpp:
@@ -169,7 +177,7 @@
 	Fixed VC widget adding to the selected frame thru main menu.
 	Set all VCWidgets to have an opaque background.
 
-2008-05-06  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-06  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/addfixture.cpp:
 	* main/src/app.cpp:
@@ -183,7 +191,7 @@
 	Fixed crashing scene editor when an empty scene was stored.
 	Scene editor actions are enabled/disabled according to selection.
 
-2008-05-06  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-05-06  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/fixture.cpp:
 
@@ -191,7 +199,7 @@
 	it is requested for the first time. This caused ConsoleChannel to
 	crash with generic dimmers.
 
-2008-05-05  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-05  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/src/functionmanager.cpp:
@@ -199,7 +207,7 @@
 
 	Fixed bus menus and context menus in function manager.
 
-2008-05-02  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-02  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/usbdmxout/usbdmxout.cpp:
 	* libs/usbdmxout/usbdmxout.h:
@@ -217,7 +225,7 @@
 	Fixed DMXPatch save/load and setPatch.
 	Set fixture console's layout margins smaller.
 	
-2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* gfx/Makefile.am:
 	* main/src/app.cpp:
@@ -233,7 +241,7 @@
 	Fixed some basic issues in plugin manager and added icons for
 	input and output map.
 	
-2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* gfx/Makefile.am:
@@ -247,7 +255,7 @@
 	Changed most of the icons to 32x32.
 	Fixed fixture manager's mode change handling.
 
-2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/Makefile.am:
@@ -275,7 +283,7 @@
 	Fixed function editor dialogs' tree widgets to have no decorated roots
 	and all columns to show focus.
 
-2008-05-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/src/chaser.cpp:
@@ -288,7 +296,7 @@
 
 	Fixed ChaserEditor and FunctionManager::remove.
 	
-2008-04-30  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-30  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/src/app.cpp:
@@ -299,14 +307,14 @@
 
 	Fixed EFXEditor.
 	
-2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-04-28  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* gfx/Makefile.am:
 	* main/src/consolechannel.cpp:
 
 	Added an icon (bad one) for beam group.
 
-2008-04-28  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-04-28  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* gfx/Makefile.am:
 	* main/src/addfixture.cpp:
@@ -329,26 +337,26 @@
 
 	Fixed porting mistakes in busproperties dialog.
 
-2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-27  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/dmxmap.cpp:
 
 	Fixed porting mistakes and omissions in dmxmap.
 
-2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-27  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/monitor.cpp:
 	* main/src/monitor.h:
 
 	Fixed porting mistakes and omissions in monitor.
 
-2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-27  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/sceneeditor.cpp:
 
 	Fixed scene editor to work as previously.
 	
-2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-27  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* fixtures/Futurelight-DJScan250.qxf:
 	* gfx/Makefile.am:
@@ -370,7 +378,7 @@
 	FixtureManager works 99%.
 	FixtureConsole works 50% (lacking scene editor and is too big).
 
-2008-04-27  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-04-27  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/app.cpp:
 	* main/src/app.h:
@@ -384,7 +392,7 @@
 	QLC doesn't crash instantly, but there's LOTS of crashes, missing
 	signal-slot-connections etc.
 	
-2008-01-30  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-01-30  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/common/plugin.cpp:
 	* libs/hidinput/Makefile.am:

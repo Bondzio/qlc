@@ -70,7 +70,12 @@ protected:
 	 */
 	QTreeWidgetItem* fixtureItem(t_fixture_id fxi_id, Doc* doc);
 
-public slots:
+protected slots:
+	/**
+	 * Item double clicks
+	 */
+	void slotItemDoubleClicked(QTreeWidgetItem* item, int col);
+
 	/**
 	 * OK button click
 	 */

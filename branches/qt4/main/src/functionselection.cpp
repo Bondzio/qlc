@@ -45,6 +45,9 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
 	else
 		m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
 
+	connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*,int)));
+
 	/* Fill the tree */
 	for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
 	{
@@ -113,6 +116,17 @@ QTreeWidgetItem* FunctionSelection::fixtureItem(t_fixture_id fxi_id, Doc* doc)
 	parent->setFlags(Qt::ItemIsEnabled);
 
 	return parent;
+}
+
+void FunctionSelection::slotItemDoubleClicked(QTreeWidgetItem* item, int col)
+{
+	if (item == NULL)
+		return;
+
+	if (item->parent() == NULL)
+		return;
+
+	accept();
 }
 
 void FunctionSelection::accept()

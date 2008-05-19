@@ -60,9 +60,6 @@
        <property name="invertedAppearance" >
         <bool>true</bool>
        </property>
-       <property name="invertedControls" >
-        <bool>true</bool>
-       </property>
       </widget>
      </item>
     </layout>

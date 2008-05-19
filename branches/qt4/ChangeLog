@@ -1,3 +1,14 @@
+2008-05-19  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/app.cpp:
+	* main/src/vcdockslider.cpp:
+	* main/src/vcdockslider.ui:
+	* main/src/vcslider.cpp:
+
+	Fixed vcdockslider's bus value setting and removed its
+	invertedControls property. Fixed app's quit icon. Made vcdockslider's
+	margins considerably smaller.
+
 2008-05-19  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/functionselection.cpp:

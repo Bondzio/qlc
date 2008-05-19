@@ -88,8 +88,8 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 
 	/* Main VBox */
 	new QVBoxLayout(this);
-	layout()->setMargin(10);
-	layout()->setSpacing(10);
+	layout()->setMargin(0);
+	layout()->setSpacing(0);
 	
 	/* Top label */
 	m_topLabel = new QLabel(this);
@@ -97,7 +97,7 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 	m_topLabel->setAlignment(Qt::AlignCenter);
 
 	/* Slider & its HBox */
-	m_hbox = new QHBoxLayout(this);
+	m_hbox = new QHBoxLayout();
 	layout()->addItem(m_hbox);
 	m_hbox->insertSpacing(-1, 10);
 
@@ -106,6 +106,7 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 	m_slider->setRange(KDefaultBusLowLimit * KFrequency, 
 			   KDefaultBusHighLimit * KFrequency);
 	m_slider->setPageStep(1);
+	m_slider->setInvertedAppearance(true);
 	connect(m_slider, SIGNAL(sliderPressed()),
 		this, SLOT(slotSliderPressed()));
 	connect(m_slider, SIGNAL(valueChanged(int)),

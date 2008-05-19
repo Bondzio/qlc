@@ -138,7 +138,7 @@ void VCDockSlider::slotSliderValueChanged(int value)
 {
 	QString num;
 
-	if (m_updateOnly == true)
+	if (m_updateOnly == false)
 	{
 		if (Bus::setValue(m_busID, m_slider->value()) == false)
 		{

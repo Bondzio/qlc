@@ -621,7 +621,7 @@ void App::initActions()
 	connect(m_fileSaveDefaultsAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotFileSaveDefaults()));
 
-	m_fileQuitAction = new QAction(QIcon(PIXMAPS "exit.png"),
+	m_fileQuitAction = new QAction(QIcon(PIXMAPS "/exit.png"),
 				       tr("Quit"), this);
 	connect(m_fileQuitAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotFileQuit()));

@@ -114,15 +114,6 @@ protected:
 	void levelSelectChannelsByGroup(QString group);
 
 protected slots:
-	/** Callback for All button clicks */
-	void slotLevelAllClicked();
-
-	/** Callback for None button clicks */
-	void slotLevelNoneClicked();
-
-	/** Callback for Invert button clicks */
-	void slotLevelInvertClicked();
-
 	/** Callback for low level limit spin value changes */
 	void slotLevelLowSpinChanged(int value);
 
@@ -135,8 +126,17 @@ protected slots:
 	/** Callback for level list item clicks */
 	void slotLevelListClicked(QTreeWidgetItem* item);
 
+	/** Callback for All button clicks */
+	void slotLevelAllClicked();
+
+	/** Callback for None button clicks */
+	void slotLevelNoneClicked();
+
+	/** Callback for Invert button clicks */
+	void slotLevelInvertClicked();
+
 	/** Callback for "channel selection by group" button clicks */
-	void slotLevelByGroupButtonClicked();
+	void slotLevelByGroupClicked();
 	
 	/*********************************************************************
 	 * OK & Cancel

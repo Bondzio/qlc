@@ -19,7 +19,7 @@
       <string/>
      </property>
      <property name="currentIndex" >
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="General" >
       <property name="geometry" >
@@ -325,13 +325,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTreeWidget" name="m_levelList" >
-         <column>
-          <property name="text" >
-           <string>1</string>
-          </property>
-         </column>
-        </widget>
+        <widget class="QTreeWidget" name="m_levelList" />
        </item>
        <item>
         <layout class="QHBoxLayout" >

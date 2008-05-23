@@ -1320,6 +1320,8 @@ void EFX::run()
 	float y = 0;
 	Direction dir = direction();
 
+	emit running(m_id);
+
 	m_stopped = false;
 
 	// Set initial speed
@@ -1377,6 +1379,4 @@ void EFX::run()
 	// De-initialize with stop scene
 	if (stopScene() != KNoID && stopSceneEnabled())
 		_app->doc()->function(stopScene())->start();
-
-	emit stopped(m_id);
 }

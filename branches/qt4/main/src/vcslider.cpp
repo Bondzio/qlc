@@ -78,7 +78,6 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 	m_sliderValue = 0;
 	m_sliderPressed = false;
 	m_moveSliderOnly = false;
-	m_trackSliderValue = true;
 
 	m_time = NULL;
 
@@ -576,7 +575,7 @@ void VCSlider::slotSliderValueChanged(int value)
 	{
 		/* Set bus value only if this callback is a result of
 		   user dragging the slider and slider tracking is on */
-		if (m_sliderPressed == true && m_trackSliderValue == true)
+		if (m_sliderPressed == true)
 			setBusValue(value);
 		
 		/* Set text for the top label */
@@ -592,9 +591,7 @@ void VCSlider::slotSliderValueChanged(int value)
 	
 	case Level:
 	{
-		/* Set level value only if slider tracking is on */
-		if (m_trackSliderValue == true)
-			setLevelValue(value);
+		setLevelValue(value);
 		
 		/* Set text for the top label */
 		if (valueDisplayStyle() == ExactValue)
@@ -618,11 +615,6 @@ void VCSlider::slotSliderValueChanged(int value)
 void VCSlider::slotSliderReleased()
 {
 	m_sliderPressed = false;
-
-	/* If slider tracking is off, set the value only when the
-	   slider is released. */
-	if (m_trackSliderValue == false)
-		setLevelValue(sliderValue());
 }
 
 /*****************************************************************************
@@ -655,7 +647,9 @@ QString VCSlider::tapButtonText()
 void VCSlider::slotTapButtonClicked()
 {
 	int t = m_time->elapsed();
+	slotSliderPressed();
 	setSliderValue(static_cast<int> (t * 0.001 * KFrequency));
+	slotSliderReleased();
 	m_time->restart();
 }
 

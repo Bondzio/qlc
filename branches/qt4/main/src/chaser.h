@@ -101,6 +101,9 @@ protected slots:
 	void slotChildStopped(t_function_id id);
 
 public:
+	/** Stop this function */
+	void stop();
+
 	/** Allocate everything needed in run-time */
 	void arm();
 

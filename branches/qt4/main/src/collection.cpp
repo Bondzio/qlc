@@ -205,6 +205,8 @@ void Collection::stop()
 
 void Collection::run()
 {
+	emit running(m_id);
+
 	m_childCount = 0;
 
 	// Append this function to the list of running functions
@@ -236,8 +238,6 @@ void Collection::run()
 		pthread_yield_np();
 #endif
 	}
-
-	emit stopped(m_id);
 }
 
 void Collection::slotChildStopped(t_function_id fid)

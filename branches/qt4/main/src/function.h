@@ -345,9 +345,17 @@ public:
 	virtual bool start();
 	
 	/**
-	 * Stop this function
+	 * Stop the function
 	 */
-	virtual void stop() { /* NOP */ }
+	virtual void stop() = 0;
+
+	/**
+	 * Tell this function that it has been removed from FunctionConsumer's
+	 * list of running functions (as a result of having an emptied-down
+	 * EventBuffer, and having finished its run() method). Usually,
+	 * functions have little more to do than emit a stopped() signal.
+	 */
+	virtual void finale() { emit stopped(m_id); }
 
 signals:
 	/**
@@ -358,7 +366,8 @@ signals:
 
 	/**
 	 * Signal that is emitted to this function's parent(s) when this
-	 * function is finished
+	 * function is really finished (i.e. removed from FunctionConsumer's
+	 * list of running functions).
 	 */
 	void stopped(t_function_id id);
 
@@ -367,7 +376,7 @@ signals:
 	 *********************************************************************/
 public:
 	/**
-	 * Return the eventbuffer object. Only for FunctionFonsumer's use.
+	 * Return the eventbuffer object. Only for FunctionConsumer's use.
 	 */
 	EventBuffer* eventBuffer() const { return m_eventBuffer; }
 

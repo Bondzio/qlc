@@ -1,3 +1,23 @@
+2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/chaser.cpp:
+	* main/src/chaser.h:
+	* main/src/collection.cpp:
+	* main/src/efx.cpp:
+	* main/src/function.h:
+	* main/src/functionconsumer.cpp:
+	* main/src/scene.cpp:
+	* main/src/vcslider.cpp:
+	* main/src/vcslider.h:
+	* main/src/vcsliderproperties.cpp:
+	* main/src/vcsliderproperties.h:
+	* main/src/vcsliderproperties.ui:
+	* main/src/virtualconsole.cpp:
+
+	Fixed function running stuff. At least scenes and chasers should
+	work. Removed FunctionNS and all event stuff from functions since
+	they are now QObjects with normal signal-slot-connections.
+
 2008-05-19  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/app.cpp:

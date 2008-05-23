@@ -41,10 +41,10 @@
 
 extern App* _app;
 
-#define KColumnName 0
-#define KColumnType 1
+#define KColumnName  0
+#define KColumnType  1
 #define KColumnRange 2
-#define KColumnID 3
+#define KColumnID    3
 
 VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
 	: QDialog(parent)
@@ -54,8 +54,38 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
 
 	setupUi(this);
 
+	/* General page connections */
+	connect(m_modeBusRadio, SIGNAL(clicked()),
+		this, SLOT(slotModeBusClicked()));
+	connect(m_modeLevelRadio, SIGNAL(clicked()),
+		this, SLOT(slotModeLevelClicked()));
+	connect(m_modeSubmasterRadio, SIGNAL(clicked()),
+		this, SLOT(slotModeSubmasterClicked()));
+	connect(m_valueExactRadio, SIGNAL(clicked()),
+		this, SLOT(slotValueExactClicked()));
+	connect(m_valuePercentageRadio, SIGNAL(clicked()),
+		this, SLOT(slotValuePercentageClicked()));
+
+	/* Level page connections */
+	connect(m_levelLowLimitSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotLevelLowSpinChanged(int)));
+	connect(m_levelHighLimitSpin, SIGNAL(valueChanged(int)),
+		this, SLOT(slotLevelHighSpinChanged(int)));
+	connect(m_levelCapabilityButton, SIGNAL(clicked()),
+		this, SLOT(slotLevelCapabilityButtonClicked()));
+	connect(m_levelList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
+		this, SLOT(slotLevelListClicked(QTreeWidgetItem*)));
+	connect(m_levelAllButton, SIGNAL(clicked()),
+		this, SLOT(slotLevelAllClicked()));
+	connect(m_levelNoneButton, SIGNAL(clicked()),
+		this, SLOT(slotLevelNoneClicked()));
+	connect(m_levelInvertButton, SIGNAL(clicked()),
+		this, SLOT(slotLevelInvertClicked()));
+	connect(m_levelByGroupButton, SIGNAL(clicked()),
+		this, SLOT(slotLevelByGroupClicked()));
+
 	/*********************************************************************
-	 * Generic page
+	 * General page
 	 *********************************************************************/
 
 	/* Name */
@@ -67,12 +97,15 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
 	default:
 	case VCSlider::Bus:
 		m_modeBusRadio->setChecked(true);
+		slotModeBusClicked();
 		break;
 	case VCSlider::Level:
 		m_modeLevelRadio->setChecked(true);
+		slotModeLevelClicked();
 		break;
 	case VCSlider::Submaster:
 		m_modeSubmasterRadio->setChecked(true);
+		slotModeLevelClicked();
 		break;
 	}
 
@@ -87,18 +120,6 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
 		m_valuePercentageRadio->setChecked(true);
 		break;
 	}
-
-	/* Connections */
-	connect(m_modeBusRadio, SIGNAL(clicked()),
-		this, SLOT(slotModeBusClicked()));
-	connect(m_modeLevelRadio, SIGNAL(clicked()),
-		this, SLOT(slotModeLevelClicked()));
-	connect(m_modeSubmasterRadio, SIGNAL(clicked()),
-		this, SLOT(slotModeSubmasterClicked()));
-	connect(m_valueExactRadio, SIGNAL(clicked()),
-		this, SLOT(slotValueExactClicked()));
-	connect(m_valuePercentageRadio, SIGNAL(clicked()),
-		this, SLOT(slotValuePercentageClicked()));
 
 	/*********************************************************************
 	 * Bus page
@@ -251,24 +272,26 @@ void VCSliderProperties::levelUpdateFixtureNode(t_fixture_id id)
 	if (item == NULL)
 	{
 		item = new QTreeWidgetItem(m_levelList);
-		item->setText(KColumnName, fxi->name());
+		item->setText(KColumnID, str.setNum(id));
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 	}
 
+	item->setText(KColumnName, fxi->name());
 	item->setText(KColumnType, fxi->type());
-	item->setText(KColumnID, str.setNum(id));
 	
 	levelUpdateChannels(item, fxi);
 }
 
 QTreeWidgetItem* VCSliderProperties::levelFixtureNode(t_fixture_id id)
 {
-	QTreeWidgetItemIterator it(m_levelList);
-	while (*it != NULL)
+	QTreeWidgetItem* item;
+	int i;
+
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		if ((*it)->text(KColumnID).toInt() == id)
-			return *it;
-		++it;
+		item = m_levelList->topLevelItem(i);
+		if (item->text(KColumnID).toInt() == id)
+			return item;
 	}
 
 	return NULL;
@@ -304,12 +327,13 @@ void VCSliderProperties::levelUpdateChannelNode(QTreeWidgetItem* parent,
 	if (item == NULL)
 	{
 		item = new QTreeWidgetItem(parent);
-		item->setText(KColumnName, channel->name());
+		item->setText(KColumnID, str.setNum(ch));
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(KColumnName, Qt::Unchecked);
 	}
 
+	item->setText(KColumnName, channel->name());
 	item->setText(KColumnType, channel->group());
-	item->setText(KColumnID, str.setNum(ch));
 
 	levelUpdateCapabilities(item, channel);
 }
@@ -317,14 +341,16 @@ void VCSliderProperties::levelUpdateChannelNode(QTreeWidgetItem* parent,
 QTreeWidgetItem* VCSliderProperties::levelChannelNode(QTreeWidgetItem* parent,
 						      t_channel ch)
 {
+	QTreeWidgetItem* item;
+	int i;
+
 	Q_ASSERT(parent != NULL);
 
-	QTreeWidgetItemIterator it(parent);
-	while (*it != NULL)
+	for (i = 0; i < parent->childCount(); i++)
 	{
-		if ((*it)->text(KColumnID).toInt() == ch)
-			return *it;
-		++it;
+		item = parent->child(i);
+		if (item->text(KColumnID).toInt() == ch)
+			return item;
 	}
 
 	return NULL;
@@ -498,7 +524,7 @@ void VCSliderProperties::slotLevelInvertClicked()
 	}
 }
 
-void VCSliderProperties::slotLevelByGroupButtonClicked()
+void VCSliderProperties::slotLevelByGroupClicked()
 {
 	bool ok = false;
 	QString group;
@@ -530,7 +556,7 @@ void VCSliderProperties::storeLevelChannels()
 		fxi_id = (*fxit)->text(KColumnID).toInt();
 
 		QTreeWidgetItemIterator chit(*fxit);
-		while (*fxit != NULL)
+		while (*chit != NULL)
 		{
 			if ((*fxit)->checkState(KColumnName) == Qt::Checked)
 			{

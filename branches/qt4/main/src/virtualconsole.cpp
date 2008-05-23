@@ -282,7 +282,7 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	wksp_root->appendChild(root);
 
 	/* Save window state */
-	QLCFile::saveXMLWindowState(doc, &root, this);
+	QLCFile::saveXMLWindowState(doc, &root, parentWidget());
 
 	/* Grid */
 	tag = doc->createElement(KXMLQLCVirtualConsoleGrid);

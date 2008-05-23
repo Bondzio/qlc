@@ -355,6 +355,8 @@ void Scene::run()
 	t_channel ch = 0;
 	t_channel ready = 0;
 	t_channel address = 0;
+
+	emit running(m_id);
 	
 	// Initialize this scene for running
 	m_stopped = false;
@@ -374,7 +376,20 @@ void Scene::run()
 	// Append this function to running functions' list
 	_app->functionConsumer()->cue(this);
 	
-	// Check if this scene needs to play and fill some stuff just in case
+	/* Fill run-time buffers with the data for the first step */
+	for (t_channel i = 0; i < m_channels; i++)
+	{
+		m_runTimeData[i].current = m_runTimeData[i].start =
+			static_cast<float> 
+			(_app->dmxMap()->getValue(address + i));
+		
+		m_runTimeData[i].target = 
+			static_cast<float> (m_values[i].value);
+		
+		m_runTimeData[i].ready = false;
+	}
+
+	/* Check whether this scene needs to play at all */
 	for (t_channel i = 0; i < m_channels; i++)
 	{
 		if (m_values[i].type == Set || m_values[i].type == Fade)
@@ -387,23 +402,15 @@ void Scene::run()
 			// NoSet values are treated as ready
 			ready++;
 		}
-
-		/* Fill run-time buffers with the data for the first step */
-		m_runTimeData[i].current = m_runTimeData[i].start =
-			static_cast<float> 
-			(_app->dmxMap()->getValue(address + i));
-		
-		m_runTimeData[i].target = 
-			static_cast<float> (m_values[i].value);
-		
-		m_runTimeData[i].ready = false;
-
 	}
 	
 	// This scene does not need to be played because all target
 	// values are already where they are supposed to be.
 	if (ready == m_channels)
+	{
+		cout << QString("%1 ready").arg(m_id).toStdString() << endl;
 		m_stopped = true;
+	}
 
 	for (m_elapsedTime = 0;
 	     m_elapsedTime < m_timeSpan && m_stopped == false;
@@ -457,7 +464,7 @@ void Scene::run()
 	// been set to a smaller amount than what has elapsed. Also, because
 	// floats are NEVER exact numbers, it might be that we never quite reach
 	// the target within the given timespan (in case values don't add up).
-	for (ch = 0; ch < m_channels; ch++)
+	for (ch = 0; ch < m_channels && m_stopped == false; ch++)
 	{
 		if (m_values[ch].type == NoSet || m_runTimeData[ch].ready)
 		{
@@ -489,6 +496,4 @@ void Scene::run()
 		//
 		m_eventBuffer->purge();
 	}
-
-	emit stopped(m_id);
 }

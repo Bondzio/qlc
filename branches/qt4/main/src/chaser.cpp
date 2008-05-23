@@ -271,6 +271,11 @@ bool Chaser::loadXML(QDomDocument* doc, QDomElement* root)
  * Running
  *****************************************************************************/
 
+void Chaser::stop()
+{
+	m_stopped = true;
+}
+
 void Chaser::slotBusValueChanged(t_bus_id id, t_bus_value value)
 {
 	if (id == m_busID)
@@ -279,16 +284,12 @@ void Chaser::slotBusValueChanged(t_bus_id id, t_bus_value value)
 
 void Chaser::slotChildStopped(t_function_id id)
 {
-	Function* function = _app->doc()->function(m_runTimePosition);
+	Function* function = _app->doc()->function(id);
 	Q_ASSERT(function != NULL);
 
-	/* Check that the stopped function is this chaser's current step */
-	if (id == function->id())
-	{
-		disconnect(function, SIGNAL(stopped(t_function_id)),
-			   this, SLOT(slotChildStopped(t_function_id)));
-		m_childRunning = false;
-	}
+	disconnect(function, SIGNAL(stopped(t_function_id)),
+		   this, SLOT(slotChildStopped(t_function_id)));
+	m_childRunning = false;
 }
 
 void Chaser::arm()
@@ -313,6 +314,8 @@ void Chaser::disarm()
 
 void Chaser::run()
 {
+	emit running(m_id);
+
 	m_childRunning = false;
 	m_stopped = false;
 
@@ -345,7 +348,7 @@ void Chaser::run()
 		}
 		else
 		{
-			while (m_runTimePosition >= 0 && !m_stopped)
+			while (m_runTimePosition >= 0 && m_stopped == false)
 			{
 				startMemberAt(m_runTimePosition);
 				
@@ -385,8 +388,6 @@ void Chaser::run()
 			}
 		}
 	}
-
-	emit stopped(m_id);
 }
 
 void Chaser::startMemberAt(int index)
@@ -399,17 +400,15 @@ void Chaser::startMemberAt(int index)
 	if (function == NULL)
 		return;
 
-	/* Connect to the child function's stopped event so that we can
-	   trigger the next chaser step */
+	/* Start the child function */
 	connect(function, SIGNAL(stopped(t_function_id)),
 		this, SLOT(slotChildStopped(t_function_id)));
-
-	/* Start the child function */
 	m_childRunning = true;
 	function->start();
 
 	/* Wait for the child function to complete or the user to stop this
-	   chaser altogether */
+	   chaser altogether. Mutexes should not be needed here, although
+	   m_childRunning is set false from FunctionConsumer's context. */
 	while (m_childRunning == true && m_stopped == false)
 	{
 #ifndef __APPLE__
@@ -439,16 +438,25 @@ void Chaser::stopMemberAt(int index)
 void Chaser::hold()
 {
 	/* Don't engage sleeping at all if holdtime is zero */
-	if (m_holdTime > 0)
+	if (m_holdTime <= 0)
+		return;
+
+	m_holdStart = _app->functionConsumer()->timeCode();
+	while (m_stopped == false)
 	{
-		m_holdStart = _app->functionConsumer()->timeCode();
-		while (m_stopped == false)
+		m_timeCode = _app->functionConsumer()->timeCode();
+		if ((m_timeCode - m_holdStart) >= m_holdTime)
 		{
-			m_timeCode = _app->functionConsumer()->timeCode();
-			if ((m_timeCode - m_holdStart) >= m_holdTime)
-				break;
-			else
-				msleep(KFrequency);
+			break;
 		}
+		else
+		{
+#ifndef __APPLE__
+			pthread_yield();
+#else
+			pthread_yield_np();
+#endif
+		}
+
 	}
 }

@@ -358,7 +358,6 @@ protected:
 	int m_sliderValue;
 	bool m_sliderPressed;
 	bool m_moveSliderOnly;
-	bool m_trackSliderValue;
 
 	/*********************************************************************
 	 * Bottom label

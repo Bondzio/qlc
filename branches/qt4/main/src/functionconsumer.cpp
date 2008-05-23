@@ -452,8 +452,8 @@ void FunctionConsumer::run()
 
 
 /**
- * Actual consumer function. Nothing should be allocated here
- * (not even local variables) to keep this as fast as possible.
+ * Actual consumer function. Nothing^H^H^H^H^H As little as possible should
+ * be allocated here to keep this as fast as possible.
  */
 void FunctionConsumer::event(time_t)
 {
@@ -473,10 +473,13 @@ void FunctionConsumer::event(time_t)
 			if (m_function->isRunning() == false)
 			{
 				/* Lock before remove */
-				m_functionListMutex.lock(); 
+				m_functionListMutex.lock();
 
 				/* Remove the current function */
 				it.remove();
+
+				/* Tell the function that it has been removed */
+				m_function->finale();
 
 				/* Unlock after remove */
 				m_functionListMutex.unlock();

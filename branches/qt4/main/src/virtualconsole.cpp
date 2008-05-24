@@ -240,6 +240,14 @@ bool VirtualConsole::loadXML(QDomDocument* doc, QDomElement* root)
 			str = tag.attribute(KXMLQLCVirtualConsoleGridEnabled);
 			setGridEnabled((bool) str.toInt());
 		}
+		else if (tag.tagName() == KXMLQLCVirtualConsoleKeyboard)
+		{
+			str = tag.attribute(KXMLQLCVirtualConsoleKeyboardGrab);
+			setGrabKeyboard((bool) str.toInt());
+
+			str = tag.attribute(KXMLQLCVirtualConsoleKeyboardRepeat);
+			setKeyRepeatOff((bool) str.toInt());
+		}
 		else if (tag.tagName() == KXMLQLCVCDockArea)
 		{
 			m_dockArea->loadXML(doc, &tag);
@@ -296,6 +304,7 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 	/* Keyboard settings */
 	tag = doc->createElement(KXMLQLCVirtualConsoleKeyboard);
+	root.appendChild(tag);
 	str.setNum((m_grabKeyboard) ? 1 : 0);
 	tag.setAttribute(KXMLQLCVirtualConsoleKeyboardGrab, str);
 	str.setNum((m_keyRepeatOff) ? 1 : 0);
@@ -535,6 +544,8 @@ void VirtualConsole::slotToolsSettings()
 		lo = prop.holdLowLimit();
 		hi = prop.holdHighLimit();
 		m_dockArea->defaultHoldSlider()->setBusRange(lo, hi);
+
+		_app->doc()->setModified();
 	}
 }
 

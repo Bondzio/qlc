@@ -1,5 +1,14 @@
 2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/doc.cpp:
+	* main/src/virtualconsole.cpp:
+
+	Fixed virtual console keyboard settings saving.
+	Moved bus loading as the last thing in Doc::saveXML() to fix
+	vcslider's initial position.
+
+2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/chaser.cpp:
 	* main/src/chaser.h:
 	* main/src/collection.cpp:

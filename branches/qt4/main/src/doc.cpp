@@ -281,9 +281,6 @@ bool Doc::saveXML(const QString& fileName)
 			if (m_functionArray[i] != NULL)
 				m_functionArray[i]->saveXML(doc, &root);
 
-		/* Write buses */
-		Bus::saveXML(doc, &root);
-
 		/* Write Monitor state */
 		if (_app->monitor() != NULL)
 			_app->monitor()->saveXML(doc, &root);
@@ -294,6 +291,9 @@ bool Doc::saveXML(const QString& fileName)
 
 		/* Write virtual console */
 		_app->virtualConsole()->saveXML(doc, &root);
+
+		/* Write buses */
+		Bus::saveXML(doc, &root);
 
 		/* Set the current file name and write the document
 		   into the stream */

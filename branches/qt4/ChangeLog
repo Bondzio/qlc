@@ -1,3 +1,16 @@
+2008-05-26  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
+	* main/src/virtualconsole.cpp:
+	* main/src/virtualconsole.h:
+	* main/src/virtualconsoleproperties.cpp:
+	* main/src/virtualconsoleproperties.h:
+	* main/src/virtualconsoleproperties.ui:
+
+	Updated some TODO items. Added timer type selection to virtual console
+	settings dialog. Changed all VC menu items to actions and disabled
+	tools during operate mode.
+	
 2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/doc.cpp:

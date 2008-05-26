@@ -6,16 +6,14 @@
    without consistency. Pick either one and update all dialogs to use
    the same term. i.e. "Do you want to delete/remove these fixtures?"
 
-* Change Function classes' copyFrom() contents to copy constructors,
-  but preserve copyFrom() because they are needed in editor dialogs to
-  keep the same function ID when copying function contents.
+* Change Function classes' copyFrom() contents to copy constructors.
 
 * Editor dialogs should put an asterisk (*) after the title to signify
   modified state when appropriate: "<Editor name> - <Edited object>(*)"
   e.g. "EFXEditor - New EFX*"
 
 * AssignHotKey, AssignSliderHotkey, KeyBind, SliderKeyBind
-	-> Exchange them to something faster and rational
+	-> Change them to something faster and rational
 
 * AdvancedSceneEditor
 	-> REMOVE COMPLETELY and change to something slider-like, for
@@ -26,11 +24,7 @@
 
 * Rename BusProperties to BusManager
 * Enable BusManager item renaming (i.e. remove QInputDialog)
-* Refactor bus concept so that namespace FunctionNS is no longer needed
-
-* Remove startMutex from Chaser -- WTF is it for?
-
-* Plugins', Fixtures, FixtureManager's RichText colors
+* Change Bus concept so that everybody can just connect() to buses.
 
 * Rename DMXMapEditor to OutputManager
 
@@ -43,7 +37,7 @@
 
 * FunctionCollection::stop() stops all of its member functions, regardless of
   whether they have been started by the collection or some other (user,chaser,
-  another collection). Should be fixed somehow.
+  another collection). Should be fixed somehow, if possible.
 
 * Workspace background & theme. Also saving & loading of.
 
@@ -54,7 +48,7 @@
 * Preview point array away from EFX and into EFXEditor
 * EFXEditor to support Cancel (now it just edits the EFX directly)
   -> Do it with EFX's copy constructor: edit the copied version and
-   copy the duplicate's properties back to the actual one in accept() slot.
+   copy the duplicate's properties back to the actual one in accept() slot?
 * EFXEditor to support channel groups (now it searches for "pan" or "tilt")
 * Phase parameter to EFX's so that multiple fixtures can do cooler effects.
   -> Elie Roux:
@@ -83,9 +77,11 @@
 
 * Put FixtureConsole inside QMdiSubWindow (in Fixture class)
 * FixtureConsole's window title (plus when fixture renamed) thru QMdiSubWindow
-* FixtureConsole multiple selection for bulk removal, maybe remove the
-  question dialog?
-* FixtureConsole reloads the whole list after each operation. Make smarter.
+* FixtureConsole scene editor multiple selection for bulk removal, storing
+  a scene will only overwrite the last selected scene (is there any reason
+  for storing the same contents to multiple scenes?)
+* FixtureConsole reloads the whole scene list after every operation. Make it
+  smarter.
 
 * FixtureManager's window title thru QMdiSubWindow
 * FixtureManager::loader()
@@ -94,10 +90,8 @@
 * FixtureManager's automatic function generation should be made smarter and
   incorporated into FunctionManager. So that user can select, which groups
   of functions to generate etc.. NEEDS MORE SPECS.
-* FixtureManager::slotClone() opens fixture properties. Could this be avoided?
-  It would be easier to create multiple clones without the properties dialog.
 
-* FunctionConsumer's timer type should be configurable
+* FunctionConsumer's timer type should be configurable with a settings dialog.
 
 * FunctionManager thru QMdiSubWindow and its window title & icon the same
 * FunctionManager shortcut keys

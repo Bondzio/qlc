@@ -28,19 +28,15 @@
 
 #include "app.h"
 
-class QMenuBar;
-class QPopupMenu;
-class QToolBar;
-class QHBoxLayout;
-class QFile;
 class QDomDocument;
 class QDomElement;
+class QAction;
+class QMenu;
 
+class VCDockArea;
 class VCWidget;
 class VCFrame;
 class KeyBind;
-class Bus;
-class VCDockArea;
 
 #define KXMLQLCVirtualConsole "VirtualConsole"
 
@@ -54,6 +50,10 @@ class VCDockArea;
 #define KXMLQLCVirtualConsoleKeyboard "Keyboard"
 #define KXMLQLCVirtualConsoleKeyboardGrab "Grab"
 #define KXMLQLCVirtualConsoleKeyboardRepeat "Repeat"
+
+#define KXMLQLCVirtualConsoleTimerType "Timer"
+#define KXMLQLCVirtualConsoleTimerSoftware "Software"
+#define KXMLQLCVirtualConsoleTimerHardware "Hardware"
 
 #define KXMLQLCVCAppearance "Appearance"
 #define KXMLQLCVCFrameStyle "FrameStyle"
@@ -82,6 +82,7 @@ public:
 	~VirtualConsole();
 
 protected:
+	void initActions();
 	void initMenuBar();
 	void initDockArea();
 
@@ -278,12 +279,40 @@ protected:
 	VCFrame* m_drawArea;
 
 	/*********************************************************************
-	 * Menus
+	 * Menus & actions
 	 *********************************************************************/
 public:
 	QMenu* toolsMenu() { return m_toolsMenu; }
 	QMenu* editMenu() { return m_editMenu; }
 	QMenu* addMenu() { return m_addMenu; }
+
+protected:
+	QAction* m_addButtonAction;
+	QAction* m_addSliderAction;
+	QAction* m_addFrameAction;
+	QAction* m_addXYPadAction;
+	QAction* m_addLabelAction;
+
+	QAction* m_toolsSettingsAction;
+	QAction* m_toolsSlidersAction;
+	QAction* m_toolsPanicAction;
+
+	QAction* m_editCutAction;
+	QAction* m_editCopyAction;
+	QAction* m_editPasteAction;
+	QAction* m_editDeleteAction;
+	QAction* m_editPropertiesAction;
+	QAction* m_editRenameAction;
+
+	QAction* m_fgColorAction;
+	QAction* m_fgFontAction;
+	QAction* m_fgDefaultAction;
+
+	QAction* m_bgColorAction;
+	QAction* m_bgDefaultAction;
+
+	QAction* m_stackingRaiseAction;
+	QAction* m_stackingLowerAction;
 
 protected:
 	QMenu* m_toolsMenu;

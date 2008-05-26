@@ -26,6 +26,7 @@
 
 #include "ui_virtualconsoleproperties.cpp"
 #include "common/qlctypes.h"
+#include "functionconsumer.h"
 
 class VirtualConsoleProperties : public QDialog,
 	public Ui_VirtualConsoleProperties
@@ -74,6 +75,13 @@ public:
 	void setHoldLimits(t_bus_value low, t_bus_value high);
 	t_bus_value holdLowLimit();
 	t_bus_value holdHighLimit();
+
+	/*********************************************************************
+	 * Timer type
+	 *********************************************************************/
+public:
+	void setTimerType(FunctionConsumer::TimerType type);
+	FunctionConsumer::TimerType timerType();
 };
 
 #endif

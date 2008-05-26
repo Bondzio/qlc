@@ -127,3 +127,23 @@ t_bus_value VirtualConsoleProperties::holdHighLimit()
 {
 	return m_holdHighSpin->value();
 }
+
+/*****************************************************************************
+ * Timer type
+ *****************************************************************************/
+
+void VirtualConsoleProperties::setTimerType(FunctionConsumer::TimerType type)
+{
+	if (type == FunctionConsumer::RTCTimer)
+		m_hardwareTimerRadio->setChecked(true);
+	else
+		m_softwareTimerRadio->setChecked(true);
+}
+
+FunctionConsumer::TimerType VirtualConsoleProperties::timerType()
+{
+	if (m_hardwareTimerRadio->isChecked() == true)
+		return FunctionConsumer::RTCTimer;
+	else
+		return FunctionConsumer::NanoSleepTimer;
+}

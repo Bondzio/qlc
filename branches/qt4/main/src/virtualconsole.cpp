@@ -68,15 +68,17 @@ VirtualConsole::VirtualConsole(QWidget* parent) : QWidget(parent)
 
 	m_editMenu = NULL;
 
+	// Main layout
 	new QHBoxLayout(this);
 	layout()->setMargin(0);
 	layout()->setSpacing(0);
 
+	// Window title & icon
 	parentWidget()->setWindowIcon(QIcon(PIXMAPS "/virtualconsole.png"));
 	parentWidget()->setWindowTitle(tr("Virtual Console"));
-	parentWidget()->resize(300, 400);
 
-	// Init top menu bar
+	// Init top menu bar & actions
+	initActions();
 	initMenuBar();
 
 	// Init left dock area
@@ -84,94 +86,195 @@ VirtualConsole::VirtualConsole(QWidget* parent) : QWidget(parent)
 
 	// Init right drawing area
 	setDrawArea(new VCFrame(this));
+
+	// Set some default size
+	parentWidget()->resize(300, 400);
 }
 
 VirtualConsole::~VirtualConsole()
 {
 }
 
+void VirtualConsole::initActions()
+{
+	/* Add menu actions */
+	m_addButtonAction = new QAction(QIcon(PIXMAPS "/button.png"),
+					tr("Button"), this);
+	connect(m_addButtonAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddButton()));
+
+	m_addSliderAction = new QAction(QIcon(PIXMAPS "/slider.png"),
+					tr("Slider"), this);
+	connect(m_addSliderAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddSlider()));
+
+	m_addFrameAction = new QAction(QIcon(PIXMAPS "/frame.png"),
+				       tr("Frame"), this);
+	connect(m_addFrameAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddFrame()));
+
+	m_addXYPadAction = new QAction(QIcon(PIXMAPS "/xypad.png"),
+				       tr("XY Pad"), this);
+	connect(m_addXYPadAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddXYPad()));
+
+	m_addLabelAction = new QAction(QIcon(PIXMAPS "/label.png"),
+				       tr("Label"), this);
+	connect(m_addLabelAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddLabel()));
+
+	/* Tools menu actions */
+	m_toolsSettingsAction = new QAction(QIcon(PIXMAPS "/configure.png"),
+					    tr("Settings"), this);
+	connect(m_toolsSettingsAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotToolsSettings()));
+
+	m_toolsSlidersAction = new QAction(QIcon(PIXMAPS "/slider.png"),
+					   tr("Default sliders"), this);
+	connect(m_toolsSlidersAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotToolsSliders()));
+
+	m_toolsPanicAction = new QAction(QIcon(PIXMAPS "/panic.png"),
+					 tr("Stop ALL functions!"), this);
+	connect(m_toolsPanicAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotToolsPanic()));
+
+	/* Edit menu actions */
+	m_editCutAction = new QAction(QIcon(PIXMAPS "/editcut.png"),
+				      tr("Cut"), this);
+	connect(m_editCutAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditCut()));
+	
+	m_editCopyAction = new QAction(QIcon(PIXMAPS "/editcopy.png"),
+				       tr("Copy"), this);
+	connect(m_editCopyAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditCopy()));
+	
+	m_editPasteAction = new QAction(QIcon(PIXMAPS "/editpaste.png"),
+					tr("Paste"), this);
+	connect(m_editPasteAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditPaste()));
+	
+	m_editDeleteAction = new QAction(QIcon(PIXMAPS "/editdelete.png"),
+					 tr("Delete"), this);
+	connect(m_editDeleteAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditDelete()));
+	
+	m_editPropertiesAction = new QAction(QIcon(PIXMAPS "/configure.png"),
+					     tr("Properties"), this);
+	connect(m_editPropertiesAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditProperties()));
+	
+	m_editRenameAction = new QAction(QIcon(PIXMAPS "/editclear.png"),
+					 tr("Rename"), this);
+	connect(m_editRenameAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotEditRename()));
+
+	/* Foreground menu actions */
+	m_fgColorAction = new QAction(QIcon(PIXMAPS "/color.png"),
+				      tr("Color"), this);
+	connect(m_fgColorAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotForegroundColor()));
+
+	m_fgFontAction = new QAction(QIcon(PIXMAPS "/fonts.png"),
+				     tr("Font"), this);
+	connect(m_fgFontAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotForegroundFont()));
+
+	m_fgDefaultAction = new QAction(QIcon(PIXMAPS "/undo.png"),
+					tr("Default"), this);
+	connect(m_fgDefaultAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotForegroundNone()));
+
+	/* Background menu actions */
+	m_bgColorAction = new QAction(QIcon(PIXMAPS "/color.png"),
+				      tr("Color"), this);
+	connect(m_bgColorAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotBackgroundColor()));
+
+	m_bgDefaultAction = new QAction(QIcon(PIXMAPS "/undo.png"),
+					tr("Default"), this);
+	connect(m_bgDefaultAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotBackgroundNone()));
+
+	/* Stacking menu actions */
+	m_stackingRaiseAction = new QAction(QIcon(PIXMAPS "/up.png"),
+					    tr("Raise"), this);
+	connect(m_stackingRaiseAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotStackingRaise()));
+
+	m_stackingLowerAction = new QAction(QIcon(PIXMAPS "/down.png"),
+					    tr("Lower"), this);
+	connect(m_stackingLowerAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotStackingLower()));
+
+	/* TODO */
+	m_editCutAction->setEnabled(false);
+	m_editCopyAction->setEnabled(false);
+	m_editPasteAction->setEnabled(false);
+}
+
 void VirtualConsole::initMenuBar()
 {
-	QAction* a;
+	QMenuBar* menuBar;
 
-	layout()->setMenuBar(new QMenuBar(this));
+	menuBar = new QMenuBar(this);
+	layout()->setMenuBar(menuBar);
 
-	// Add menu
-	m_addMenu = new QMenu(layout()->menuBar());
-	m_addMenu->setTitle("Add");
-	qobject_cast<QMenuBar*> (layout()->menuBar())->addMenu(m_addMenu);
-	m_addMenu->addAction(QIcon(PIXMAPS "/button.png"), "Button",
-			     this, SLOT(slotAddButton()));
-	m_addMenu->addAction(QIcon(PIXMAPS "/slider.png"), "Slider",
-			     this, SLOT(slotAddSlider()));
-	m_addMenu->addAction(QIcon(PIXMAPS "/frame.png"), "Frame",
-			     this, SLOT(slotAddFrame()));
-	m_addMenu->addAction(QIcon(PIXMAPS "/xypad.png"), "XY pad",
-			     this, SLOT(slotAddXYPad()));
-	m_addMenu->addAction(QIcon(PIXMAPS "/label.png"), "Label",
-			     this, SLOT(slotAddLabel()));
+	/* Add menu */
+	m_addMenu = new QMenu(menuBar);
+	m_addMenu->setTitle(tr("Add"));
+	menuBar->addMenu(m_addMenu);
+	m_addMenu->addAction(m_addButtonAction);
+	m_addMenu->addAction(m_addSliderAction);
+	m_addMenu->addAction(m_addXYPadAction);
+	m_addMenu->addSeparator();
+	m_addMenu->addAction(m_addFrameAction);
+	m_addMenu->addAction(m_addLabelAction);
 
-	// Tools menu
-	m_toolsMenu = new QMenu(layout()->menuBar());
-	m_toolsMenu->setTitle("Tools");
-	qobject_cast<QMenuBar*> (layout()->menuBar())->addMenu(m_toolsMenu);
-	m_toolsMenu->addAction(QIcon(PIXMAPS "/configure.png"), "Settings",
-			       this, SLOT(slotToolsSettings()));
-	m_toolsMenu->addAction(QIcon(PIXMAPS "/slider.png"), "Default sliders",
-			       this, SLOT(slotToolsSliders()));
-	m_toolsMenu->addAction(QIcon(PIXMAPS "/panic.png"), "Stop ALL functions!",
-			       this, SLOT(slotToolsPanic()));
+	/* Tools menu */
+	m_toolsMenu = new QMenu(menuBar);
+	m_toolsMenu->setTitle(tr("Tools"));
+	menuBar->addMenu(m_toolsMenu);
+	m_toolsMenu->addAction(m_toolsPanicAction);
+	m_toolsMenu->addAction(m_toolsSlidersAction);
+	m_toolsMenu->addSeparator();
+	m_toolsMenu->addAction(m_toolsSettingsAction);
 
-	// Edit menu
-	m_editMenu = new QMenu(layout()->menuBar());
-	m_editMenu->setTitle("Edit");
-	qobject_cast<QMenuBar*> (layout()->menuBar())->addMenu(m_editMenu);
-	a = m_editMenu->addAction(QIcon(PIXMAPS "/editcut.png"), "Cut",
-				  this, SLOT(slotEditCut()));
-	a->setEnabled(false);
-	a = m_editMenu->addAction(QIcon(PIXMAPS "/editcopy.png"), "Copy",
-				  this, SLOT(slotEditCopy()));
-	a->setEnabled(false);
-	a = m_editMenu->addAction(QIcon(PIXMAPS "/editpaste.png"), "Paste",
-				  this, SLOT(slotEditPaste()));
-	a->setEnabled(false);
-	m_editMenu->addAction(QIcon(PIXMAPS "/editdelete.png"), "Delete",
-			      this, SLOT(slotEditDelete()));
+	/* Edit menu */
+	m_editMenu = new QMenu(menuBar);
+	m_editMenu->setTitle(tr("Edit"));
+	menuBar->addMenu(m_editMenu);
+	m_editMenu->addAction(m_editCutAction);
+	m_editMenu->addAction(m_editCopyAction);
+	m_editMenu->addAction(m_editPasteAction);
+	m_editMenu->addAction(m_editDeleteAction);
 	m_editMenu->addSeparator();
-	m_editMenu->addAction(QIcon(PIXMAPS "/configure.png"), "Properties",
-			      this, SLOT(slotEditProperties()));
-	m_editMenu->addAction(QIcon(PIXMAPS "/editclear.png"), "Rename",
-			      this, SLOT(slotEditRename()));
+	m_editMenu->addAction(m_editPropertiesAction);
+	m_editMenu->addAction(m_editRenameAction);
 	m_editMenu->addSeparator();
 
-	// Foreground menu
+	/* Foreground menu */
 	QMenu* fgMenu = new QMenu(m_editMenu);
-	fgMenu->setTitle("Foreground");
+	fgMenu->setTitle(tr("Foreground"));
 	m_editMenu->addMenu(fgMenu);
-	fgMenu->addAction(QIcon(PIXMAPS "/color.png"), "Color",
-			  this, SLOT(slotForegroundColor()));
-	fgMenu->addAction(QIcon(PIXMAPS "/fonts.png"), "Font",
-			  this, SLOT(slotForegroundFont()));
-	fgMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
-			  this, SLOT(slotForegroundNone()));
+	fgMenu->addAction(m_fgColorAction);
+	fgMenu->addAction(m_fgFontAction);
+	fgMenu->addAction(m_fgDefaultAction);
 
-	// Background Menu
+	/* Background Menu */
 	QMenu* bgMenu = new QMenu(m_editMenu);
-	bgMenu->setTitle("Background");
+	bgMenu->setTitle(tr("Background"));
 	m_editMenu->addMenu(bgMenu);
-	bgMenu->addAction(QIcon(PIXMAPS "/color.png"), "Color",
-			  this, SLOT(slotBackgroundColor()));
-	bgMenu->addAction(QIcon(PIXMAPS "/undo.png"), "Default",
-			  this, SLOT(slotBackgroundNone()));
+	bgMenu->addAction(m_bgColorAction);
+	bgMenu->addAction(m_bgDefaultAction);
 
-	// Stacking order menu
+	/* Stacking order menu */
 	QMenu* stackMenu = new QMenu(m_editMenu);
-	stackMenu->setTitle("Stacking");
+	stackMenu->setTitle(tr("Stacking order"));
 	m_editMenu->addMenu(stackMenu);
-	stackMenu->addAction(QIcon(PIXMAPS "/up.png"), "Raise",
-			     this, SLOT(slotStackingRaise()));
-	stackMenu->addAction(QIcon(PIXMAPS "/down.png"), "Lower",
-			     this, SLOT(slotStackingLower()));
+	stackMenu->addAction(m_stackingRaiseAction);
+	stackMenu->addAction(m_stackingLowerAction);
 }
 
 void VirtualConsole::initDockArea()
@@ -218,6 +321,19 @@ bool VirtualConsole::loadXML(QDomDocument* doc, QDomElement* root)
 	{
 		cout << "Virtual Console node not found!" << endl;
 		return false;
+	}
+
+	/* Timer type */
+	if (root->attribute(KXMLQLCVirtualConsoleTimerType) ==
+	    KXMLQLCVirtualConsoleTimerHardware)
+	{
+		_app->functionConsumer()->setTimerType(
+			FunctionConsumer::RTCTimer);
+	}
+	else
+	{
+		_app->functionConsumer()->setTimerType(
+			FunctionConsumer::NanoSleepTimer);
 	}
 
 	node = root->firstChild();
@@ -288,6 +404,17 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	/* Virtual Console entry */
 	root = doc->createElement(KXMLQLCVirtualConsole);
 	wksp_root->appendChild(root);
+	if (_app->functionConsumer()->timerType() ==
+	    FunctionConsumer::NanoSleepTimer)
+	{
+		root.setAttribute(KXMLQLCVirtualConsoleTimerType,
+				  KXMLQLCVirtualConsoleTimerSoftware);
+	}
+	else
+	{
+		root.setAttribute(KXMLQLCVirtualConsoleTimerType,
+				  KXMLQLCVirtualConsoleTimerHardware);
+	}
 
 	/* Save window state */
 	QLCFile::saveXMLWindowState(doc, &root, parentWidget());
@@ -528,6 +655,8 @@ void VirtualConsole::slotToolsSettings()
 	m_dockArea->defaultHoldSlider()->busRange(lo, hi);
 	prop.setHoldLimits(lo, hi);
 
+	prop.setTimerType(_app->functionConsumer()->timerType());
+
 	if (prop.exec() == QDialog::Accepted)
 	{
 		setGridEnabled(prop.isGridEnabled());
@@ -544,6 +673,8 @@ void VirtualConsole::slotToolsSettings()
 		lo = prop.holdLowLimit();
 		hi = prop.holdHighLimit();
 		m_dockArea->defaultHoldSlider()->setBusRange(lo, hi);
+
+		_app->functionConsumer()->setTimerType(prop.timerType());
 
 		_app->doc()->setModified();
 	}
@@ -696,15 +827,17 @@ void VirtualConsole::slotModeChanged(App::Mode mode)
 
 	if (mode == App::Operate)
 	{
-		// Don't allow editing in operate mode
+		// Don't allow edits in operate mode
 		m_editMenu->setEnabled(false);
 		m_addMenu->setEnabled(false);
+		m_toolsSettingsAction->setEnabled(false);
 	}
 	else
 	{
-		// Allow editing in design mode
+		// Allow edits in design mode
 		m_editMenu->setEnabled(true);
 		m_addMenu->setEnabled(true);
+		m_toolsSettingsAction->setEnabled(true);
 	}
 
 	/* Patch the event thru to all children */

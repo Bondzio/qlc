@@ -28,7 +28,6 @@
 
 #include "fixtureconsole.h"
 #include "consolechannel.h"
-#include "sceneeditor.h"
 #include "app.h"
 #include "doc.h"
 
@@ -39,23 +38,18 @@ using namespace std;
 FixtureConsole::FixtureConsole(QWidget* parent, t_fixture_id fxi_id)
 	: QWidget(parent)
 {
-	m_sceneEditor = NULL;
+	new QHBoxLayout(this);
+
 	setFixture(fxi_id);
 }
 
 FixtureConsole::~FixtureConsole()
 {
-	while (m_unitList.isEmpty() == false)
-		delete m_unitList.takeFirst();
-	
-	if (m_sceneEditor != NULL)
-		delete m_sceneEditor;
-	m_sceneEditor = NULL;
 }
 
 void FixtureConsole::setFixture(t_fixture_id id)
 {
-	ConsoleChannel* unit = NULL;
+	ConsoleChannel* cc = NULL;
 	Fixture* fxi = NULL;
 	
 	m_fixture = id;
@@ -63,59 +57,25 @@ void FixtureConsole::setFixture(t_fixture_id id)
 	fxi = _app->doc()->fixture(m_fixture);
 	Q_ASSERT(fxi != NULL);
 
-	// Set the main horizontal layout
-	new QHBoxLayout(this);
-
-	// Create scene editor widget
-	if (m_sceneEditor != NULL)
-		delete m_sceneEditor;
-	m_sceneEditor = new SceneEditor(this);
-	layout()->addWidget(m_sceneEditor);
-	m_sceneEditor->setFixture(m_fixture);
-	m_sceneEditor->show();
-
-	// Catch function add signals
-	connect(_app->doc(), SIGNAL(functionAdded(t_function_id)),
-		m_sceneEditor, SLOT(slotFunctionAdded(t_function_id)));
-
-	// Catch function remove signals
-	connect(_app->doc(), SIGNAL(functionRemoved(t_function_id)),
-		m_sceneEditor, SLOT(slotFunctionRemoved(t_function_id)));
-
-	// Catch function change signals
-	connect(_app->doc(), SIGNAL(functionChanged(t_function_id)),
-		m_sceneEditor, SLOT(slotFunctionChanged(t_function_id)));
-
-	// Create channel units
+	/* Create channel units */
 	for (unsigned int i = 0; i < fxi->channels(); i++)
 	{
-		unit = new ConsoleChannel(this, m_fixture, i);
-		layout()->addWidget(unit);
-		unit->update();
+		cc = new ConsoleChannel(this, m_fixture, i);
+		layout()->addWidget(cc);
 
-		// Channel updates to scene editor
-		connect(unit, 
-			SIGNAL(changed(t_channel, t_value, Scene::ValueType)),
-			m_sceneEditor,
-			SLOT(slotChannelChanged(t_channel, t_value, Scene::ValueType)));
-
-		// Scene editor updates to channels
-		connect(m_sceneEditor,
-			SIGNAL(sceneActivated(SceneValue*, t_channel)),
-			unit, 
-			SLOT(slotSceneActivated(SceneValue*, t_channel)));
-
-		m_unitList.append(unit);
+		connect(cc, SIGNAL(valueChanged(t_channel,t_value)),
+			this, SLOT(slotValueChanged(t_channel,t_value)));
 	}
 
 	/* Resize the console to some sensible proportions if at least
 	   one channel unit was inserted */
-	if (unit != NULL)
-		resize(m_sceneEditor->width() + 
-		       (fxi->channels() * unit->width()), 250);
+	if (cc != NULL)
+		resize((fxi->channels() * cc->width()), 250);
+}
 
-	// Update scene editor (also causes an update to channelunits)
-	m_sceneEditor->update();
+void FixtureConsole::slotValueChanged(t_channel channel, t_value value)
+{
+	emit valueChanged(m_fixture, channel, value);
 }
 
 bool FixtureConsole::loadXML(QDomDocument* doc, QDomElement* root)

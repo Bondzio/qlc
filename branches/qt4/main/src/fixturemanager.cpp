@@ -503,6 +503,7 @@ void FixtureManager::slotConsole()
 
 void FixtureManager::slotAutoFunction()
 {
+#if 0
 	QTreeWidgetItem* item;
 	t_fixture_id fxi_id;
 	Fixture* fxi;
@@ -546,6 +547,7 @@ void FixtureManager::slotAutoFunction()
 	}
 
 	fxi->viewConsole();
+#endif
 }
 
 void FixtureManager::slotContextMenuRequested(const QPoint& point)

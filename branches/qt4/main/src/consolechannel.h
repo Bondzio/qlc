@@ -22,19 +22,22 @@
 #ifndef CONSOLECHANNEL_H
 #define CONSOLECHANNEL_H
 
-#include <QWidget>
-#include "ui_consolechannel.cpp"
+#include <QGroupBox>
 
 #include "common/qlctypes.h"
 #include "scene.h"
 
 class QContextMenuEvent;
+class QVBoxLayout;
+class QToolButton;
+class QSlider;
+class QLabel;
 class QMenu;
 
 class QLCChannel;
 class Fixture;
 
-class ConsoleChannel : public QWidget, public Ui_ConsoleChannel
+class ConsoleChannel : public QGroupBox
 {
 	Q_OBJECT
 
@@ -53,12 +56,6 @@ protected:
 public slots:
 	/** Set channel's focus */
 	void slotSetFocus();
-
-	/**
-	 * Fixture console's scene editor has activated a scene, which is
-	 * reflected here. Set the value and status to this channel's widgets.
-	 */
-	void slotSceneActivated(SceneValue* values, t_channel channels);
 
 	/*********************************************************************
 	 * Menu
@@ -99,28 +96,12 @@ public slots:
 	/** Emulate the user dragging the value slider */
 	void slotAnimateValueChange(t_value);
 
+signals:
+	/** Slider value has changed */
+	void valueChanged(t_channel channel, t_value value);
+
 protected:
 	t_value m_value;
-
-	/*********************************************************************
-	 * Status
-	 *********************************************************************/
-public:
-	/** Set status button's status */
-	void setStatusButton(Scene::ValueType);
-
-	Scene::ValueType status() const { return m_status; }
-
-protected slots:
-	/** Status button was clicked by the user */
-	void slotStatusButtonClicked();
-
-protected:
-	/** Update the button's color, label and tip to show channel status */
-	void updateStatusButton();
-
-protected:
-	Scene::ValueType m_status;
 
 	/*********************************************************************
 	 * Fixture channel
@@ -129,8 +110,15 @@ protected:
 	t_channel m_channel;
 	t_fixture_id m_fixtureID;
 
-signals:
-	void changed(t_channel channel, t_value value, Scene::ValueType status);
+	/*********************************************************************
+	 * Widgets
+	 *********************************************************************/
+protected:
+	QVBoxLayout* verticalLayout;
+	QToolButton* m_presetButton;
+	QLabel* m_valueLabel;
+	QSlider* m_valueSlider;
+	QLabel* m_numberLabel;
 };
 
 #endif

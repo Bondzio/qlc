@@ -23,15 +23,12 @@
 #define FIXTURECONSOLE_H
 
 #include <QWidget>
-#include <QList>
 
 #include "common/qlctypes.h"
 #include "consolechannel.h"
 
 class QDomDocument;
 class QDomElement;
-
-class SceneEditor;
 
 #define KXMLQLCFixtureConsole "Console"
 
@@ -46,21 +43,18 @@ public:
 protected:
 	void setFixture(t_fixture_id id);
 
-public:
-	QList <ConsoleChannel*> unitList() { return m_unitList; }
-	SceneEditor* sceneEditor() { return m_sceneEditor; }
+protected slots:
+	void slotValueChanged(t_channel channel, t_value value);
 
+public:
 	bool loadXML(QDomDocument* doc, QDomElement* root);
 	bool saveXML(QDomDocument* doc, QDomElement* fxi_root);
 
 signals:
-	void closed();
+	void valueChanged(t_fixture_id fxi, t_channel channel, t_value value);
 
 protected:
-	SceneEditor* m_sceneEditor;
 	t_fixture_id m_fixture;
-	
-	QList <ConsoleChannel*> m_unitList;
 };
 
 #endif

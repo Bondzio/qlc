@@ -20,11 +20,9 @@
 */
 
 #include <QContextMenuEvent>
+#include <QVBoxLayout>
 #include <QToolButton>
-#include <QPalette>
 #include <iostream>
-#include <QLayout>
-#include <QPixmap>
 #include <QSlider>
 #include <QLabel>
 #include <QMenu>
@@ -45,21 +43,12 @@ extern App* _app;
 
 using namespace std;
 
-/** Status button's color for Fade status */
-#define KStatusButtonColorFade QColor(80, 151, 222)
-
-/** Status button's color for Set status */
-#define KStatusButtonColorSet QColor(222, 80, 82)
-
-/** Status button's color for Off status */
-#define KStatusButtonColorOff QColor(28, 52, 77)
-
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
 ConsoleChannel::ConsoleChannel(QWidget* parent, t_fixture_id fixtureID,
-			       t_channel channel) : QWidget(parent)
+			       t_channel channel) : QGroupBox(parent)
 {
 	Q_ASSERT(fixtureID != KNoID);
 	m_fixtureID = fixtureID;
@@ -68,18 +57,14 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, t_fixture_id fixtureID,
 	m_channel = channel;
 
 	m_value = 0;
-	m_status = Scene::Fade;
 	m_menu = NULL;
 
-	setupUi(this);
-	layout()->setContentsMargins(1, 1, 1, 1);
 	init();
+	update();
 }
 
 ConsoleChannel::~ConsoleChannel()
 {
-	if (m_menu != NULL)
-		delete m_menu;
 }
 
 void ConsoleChannel::init()
@@ -87,6 +72,31 @@ void ConsoleChannel::init()
 	Fixture* fixture;
 	QLCChannel* ch;
 	QString num;
+
+	this->setCheckable(true);
+
+	new QVBoxLayout(this);
+	layout()->setContentsMargins(1, 15, 1, 1);
+
+	m_presetButton = new QToolButton(this);
+	layout()->addWidget(m_presetButton);
+	m_presetButton->setSizePolicy(QSizePolicy::Preferred,
+				      QSizePolicy::Preferred);
+
+	m_valueLabel = new QLabel(this);
+	layout()->addWidget(m_valueLabel);
+	m_valueLabel->setAlignment(Qt::AlignCenter);
+
+	m_valueSlider = new QSlider(this);
+	layout()->addWidget(m_valueSlider);
+	m_valueSlider->setInvertedAppearance(true);
+	m_valueSlider->setRange(0, 255);
+	m_valueSlider->setSizePolicy(QSizePolicy::Preferred,
+				     QSizePolicy::Expanding);
+
+	m_numberLabel = new QLabel(this);
+	layout()->addWidget(m_numberLabel);
+	m_numberLabel->setAlignment(Qt::AlignCenter);
 
 	// Check that we have an actual fixture
 	fixture = _app->doc()->fixture(m_fixtureID);
@@ -103,7 +113,7 @@ void ConsoleChannel::init()
 		this->setToolTip(tr("Level"));
 
 	// Set channel label
-	num.sprintf("%.3d", m_channel + 1);
+	num.sprintf("%d", m_channel + 1);
 	m_numberLabel->setText(num);
 	
 	connect(m_valueSlider, SIGNAL(valueChanged(int)),
@@ -112,10 +122,6 @@ void ConsoleChannel::init()
 	connect(m_valueSlider, SIGNAL(sliderPressed()),
 		this, SLOT(slotSetFocus()));
 
-	connect(m_statusButton, SIGNAL(clicked()),
-		this, SLOT(slotStatusButtonClicked()));
-
-	updateStatusButton();
 	initMenu();
 }
 
@@ -135,23 +141,6 @@ void ConsoleChannel::slotSetFocus()
 
 	// Set focus to this slider
 	m_valueSlider->setFocus();
-}
-
-void ConsoleChannel::slotSceneActivated(SceneValue* values, t_channel channels)
-{
-	Q_ASSERT(values != NULL);
-	
-	if (m_channel <= channels)
-	{
-		setStatusButton(values[m_channel].type);
-		
-		if (values[m_channel].type == Scene::Set ||
-		    values[m_channel].type == Scene::Fade)
-		{
-			slotAnimateValueChange(values[m_channel].value);
-			emit changed(m_channel, m_value, m_status);
-		}
-	}
 }
 
 /*****************************************************************************
@@ -324,7 +313,8 @@ void ConsoleChannel::slotValueChange(int value)
 	m_valueLabel->setNum(value);
 	
 	m_value = value;
-	emit changed(m_channel, m_value, m_status);
+
+	emit valueChanged(m_channel, value);
 }
 
 int ConsoleChannel::sliderValue() const
@@ -335,53 +325,4 @@ int ConsoleChannel::sliderValue() const
 void ConsoleChannel::slotAnimateValueChange(t_value value)
 {
 	m_valueSlider->setValue(static_cast<int> (KChannelValueMax - value));
-}
-
-/*****************************************************************************
- * Status
- *****************************************************************************/
-
-void ConsoleChannel::setStatusButton(Scene::ValueType status)
-{
-	m_status = status;
-	updateStatusButton();
-}
-
-void ConsoleChannel::slotStatusButtonClicked()
-{
-	m_status = (Scene::ValueType) ((m_status + 1) % 3);
-	updateStatusButton();
-	emit changed(m_channel, m_value, m_status);
-}
-
-void ConsoleChannel::updateStatusButton()
-{
-	QPalette p;
-	if (m_status == Scene::Fade)
-	{
-		p = m_statusButton->palette();
-		p.setColor(QPalette::Window, KStatusButtonColorFade);
-		m_statusButton->setPalette(p);
-
-		m_statusButton->setText("F");
-		m_statusButton->setToolTip("Fade");
-	}
-	else if (m_status == Scene::Set)
-	{
-		p = m_statusButton->palette();
-		p.setColor(QPalette::Window, KStatusButtonColorSet);
-		m_statusButton->setPalette(p);
-
-		m_statusButton->setText("S");
-		m_statusButton->setToolTip("Set");
-	}
-	else
-	{
-		p = m_statusButton->palette();
-		p.setColor(QPalette::Window, KStatusButtonColorOff);
-		m_statusButton->setPalette(p);
-
-		m_statusButton->setText("X");
-		m_statusButton->setToolTip("Off");
-	}
 }

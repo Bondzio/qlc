@@ -22,17 +22,64 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <QList>
+
 #include "function.h"
 #include "common/qlctypes.h"
 
 class EventBuffer;
 class RunTimeData;
-class SceneValue;
 class Fixture;
 class Scene;
 
 class QDomDocument;
 class QDomElement;
+
+#define KXMLQLCSceneValue "Value"
+#define KXMLQLCSceneValueFixture "Fixture"
+#define KXMLQLCSceneValueChannel "Channel"
+
+/*****************************************************************************
+ * SceneValue
+ *****************************************************************************/
+
+class SceneValue;
+class SceneValue
+{
+public:
+	/** Normal constructor */
+	SceneValue(t_fixture_id fxi_id, t_channel channel, t_value value);
+
+	/** Copy constructor */
+	SceneValue(const SceneValue& scv);
+
+	/** Load constructor */
+	SceneValue(QDomElement* tag);
+
+	/** Destructor */
+	~SceneValue();
+
+	/** A SceneValue is not valid if .fxi == KNoID */
+	bool isValid();
+
+	/** Comparator function for qSort() */
+	bool operator< (const SceneValue& scv) const;
+
+	/** Comparator function for matching SceneValues */
+	bool operator== (const SceneValue& scv) const;
+
+	/** Save this SceneValue to XML file */
+	bool saveXML(QDomDocument* doc, QDomElement* scene_root) const;
+
+public:
+	t_fixture_id fxi;
+	t_channel channel;
+	t_value value;
+};
+
+/*****************************************************************************
+ * Scene
+ *****************************************************************************/
 
 class Scene : public Function
 {
@@ -44,36 +91,18 @@ class Scene : public Function
 public:
 	Scene(QObject* parent);
 	~Scene();
+
+	void copyFrom(Scene* ch);
 	
-	/** Copy scene contents and assign it to a fixture */
-	void copyFrom(Scene* sc, t_fixture_id to);
-
-	/*********************************************************************
-	 * Fixture
-	 *********************************************************************/
-public:
-	/** Set the fixture that this scene is assigned to */
-	void setFixture(t_fixture_id id);
-
 	/*********************************************************************
 	 * Values
 	 *********************************************************************/
 public:
-	enum ValueType
-	{
-		Set   = 0, // Normal value
-		Fade  = 1, // Fade value
-		NoSet = 2  // Ignored value
-	};
+	void setValue(SceneValue scv);
+	void setValue(t_fixture_id fxi, t_channel ch, t_value value);
+	SceneValue value(t_fixture_id fxi, t_channel ch);
 
-	SceneValue* values() { return m_values; }
-	
-	bool set(t_channel ch, t_value value, ValueType type);
-	SceneValue channelValue(t_channel ch);
-	
-	ValueType valueType(t_channel ch);
-	QString valueTypeString(t_channel ch);
-	static ValueType stringToValueType(QString type);
+	QList <SceneValue> *values() { return &m_values; }
 
 	/*********************************************************************
 	 * Load & Save
@@ -103,7 +132,7 @@ protected:
 	void run();
 	
 protected:
-	SceneValue* m_values;
+	QList <SceneValue> m_values;
 	
 	t_bus_value m_timeSpan;
 	t_bus_value m_elapsedTime;
@@ -117,18 +146,13 @@ protected:
 class RunTimeData
 {
 public:
+	t_channel address;
+
 	float start;
 	float current;
 	float target;
-	
-	bool ready;
-};
 
-class SceneValue
-{
-public:
-	Scene::ValueType type;
-	t_value value;
+	bool ready;
 };
 
 #endif

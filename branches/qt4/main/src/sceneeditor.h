@@ -28,100 +28,45 @@
 #include "common/qlctypes.h"
 #include "scene.h"
 
-class QAction;
-class QMenu;
-
-class SceneEditor : public QWidget, public Ui_SceneEditor
+class SceneEditor : public QDialog, public Ui_SceneEditor
 {
 	Q_OBJECT
 
 public:
-	SceneEditor(QWidget* parent);
+	SceneEditor(QWidget* parent, Scene* scene);
 	~SceneEditor();
 
-	/*********************************************************************
-	 * Fixture
-	 *********************************************************************/
-public:
-	void setFixture(t_fixture_id id);
-
 protected:
-	t_fixture_id m_fixture;
-
-public slots:
-	void slotChannelChanged(t_channel, t_value, Scene::ValueType);
-
-	/** Signal handler for Doc::functionAdded signal */
-	void slotFunctionAdded(t_function_id fid);
-
-	/** Signal handler for Doc::functionRemoved signal */
-	void slotFunctionRemoved(t_function_id fid);
-
-	/** Signal handler for Doc::functionChanged signal */
-	void slotFunctionChanged(t_function_id fid);
-
-	/*********************************************************************
-	 * Menu & Actions
-	 *********************************************************************/
-protected:
-	void initActions();
-	void initMenu();
+	void init();
 
 protected slots:
-	void slotActivate();
-	bool slotNew();
-	void slotStore();
-	void slotRename();
-	void slotRemove();
-
-protected:
-	QAction* m_activateAction;
-	QAction* m_newAction;
-	QAction* m_storeAction;
-	QAction* m_renameAction;
-	QAction* m_removeAction;
-
-	QMenu* m_menu;
+	void accept();
 
 	/*********************************************************************
-	 * Scene list
+	 * General tab
 	 *********************************************************************/
 protected:
-	/** Fill the function list */
-	void fillFunctions();
-
-	/** Get the list item that has the given function ID */
-	QTreeWidgetItem* getItem(t_function_id id);
-
-	/** Select the item that has the given function ID */
-	void selectFunction(t_function_id fid);
+	QTreeWidgetItem* fixtureItem(t_fixture_id fxi_id);
+	void addFixtureItem(Fixture* fixture);
+	void removeFixtureItem(Fixture* fixture);
 
 protected slots:
-	/** Item selection changed */
-	void slotItemSelectionChanged();
-
-	/** Context menu has been requested for the scene list */
-	void slotSceneListContextMenu(const QPoint& pos);
+	void slotAddFixtureClicked();
+	void slotRemoveFixtureClicked();
 
 	/*********************************************************************
-	 * Current scene
+	 * Fixture tabs
 	 *********************************************************************/
 protected:
-	/** Get the current scene */
-	Scene* currentScene();
-
-signals:
-	void sceneActivated(SceneValue* values, t_channel channels);
-
-protected:
-	Scene* m_tempScene;
+	void addFixtureTab(Fixture* fixture);
+	void removeFixtureTab(Fixture* fixture);
 
 	/*********************************************************************
-	 * Status
+	 * Scene
 	 *********************************************************************/
 protected:
-	/** Set status label's text and color */
-	void setStatusText(QString text, QColor color);
+	Scene* m_scene;
+
 };
 
 #endif

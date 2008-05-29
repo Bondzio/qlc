@@ -40,6 +40,7 @@
 #include "collectioneditor.h"
 #include "functionmanager.h"
 #include "chasereditor.h"
+#include "sceneeditor.h"
 #include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
@@ -448,9 +449,8 @@ int FunctionManager::slotEdit()
 	{
 	case Function::Scene:
 	{
-		QMessageBox::information(this, "TODO", "TODO");
-		//AdvancedSceneEditor ase(this, static_cast<Scene*> (function));
-		//result = ase.exec();
+		SceneEditor se(this, static_cast<Scene*> (function));
+		result = se.exec();
 	}
 	break;
 
@@ -649,7 +649,7 @@ void FunctionManager::updateActionStatus()
 		{
 			// Global fixture has been selected
 			// Disable fixture-only functions
-			m_addSceneAction->setEnabled(false);
+			m_addSceneAction->setEnabled(true);
 			m_addChaserAction->setEnabled(true);
 			m_addCollectionAction->setEnabled(true);
 			m_addEFXAction->setEnabled(false);
@@ -658,7 +658,7 @@ void FunctionManager::updateActionStatus()
 		{
 			// A regular fixture has been selected
 			// Disable global-only functions
-			m_addSceneAction->setEnabled(true);
+			m_addSceneAction->setEnabled(false);
 			m_addChaserAction->setEnabled(false);
 			m_addCollectionAction->setEnabled(false);
 			m_addEFXAction->setEnabled(true);
@@ -952,12 +952,7 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 	// or vice versa
 	if (fxi_id == KNoID)
 	{
-		if (function->type() == Function::Scene)
-		{
-			msg = "Scenes cannot be created to global space.\n";
-			msg += "Paste aborted.\n";
-		}
-		else if (function->type() == Function::EFX)
+		if (function->type() == Function::EFX)
 		{
 			msg = "EFX's cannot be created to global space.\n";
 			msg += "Paste aborted.\n";
@@ -996,22 +991,16 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 	{
 	case Function::Scene:
 	{
-		newFunction =
-			_app->doc()->newFunction(Function::Scene, fxi_id);
-
+		newFunction = _app->doc()->newFunction(Function::Scene, KNoID);
 		Scene* scene = static_cast<Scene*> (newFunction);
-
-		scene->copyFrom(static_cast<Scene*> (function), fxi_id);
+		scene->copyFrom(static_cast<Scene*> (function));
 	}
 	break;
 
 	case Function::Chaser:
 	{
-		newFunction =
-			_app->doc()->newFunction(Function::Chaser, KNoID);
-
+		newFunction = _app->doc()->newFunction(Function::Chaser, KNoID);
 		Chaser* chaser = static_cast<Chaser*> (newFunction);
-
 		chaser->copyFrom(static_cast<Chaser*> (function));
 	}
 	break;
@@ -1028,11 +1017,8 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 
 	case Function::EFX:
 	{
-		newFunction = 
-			_app->doc()->newFunction(Function::EFX, fxi_id);
-
+		newFunction = _app->doc()->newFunction(Function::EFX, fxi_id);
 		EFX* efx = static_cast<EFX*> (newFunction);
-
 		efx->copyFrom(static_cast<EFX*> (function), fxi_id);
 	}
 	break;
@@ -1067,7 +1053,7 @@ void FunctionManager::addFunction(Function::Type type)
 	{
 	case Function::Scene:
 	{
-		function = _app->doc()->newFunction(Function::Scene, fxi_id);
+		function = _app->doc()->newFunction(Function::Scene, KNoID);
 		if (function == NULL)
 			return;
 		function->setName("New Scene");

@@ -1,3 +1,24 @@
+2008-05-29  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/Makefile.am:
+	* main/src/consolechannel.cpp:
+	* main/src/consolechannel.h:
+	* main/src/consolechannel.ui:
+	* main/src/fixtureconsole.cpp:
+	* main/src/fixtureconsole.h:
+	* main/src/fixturemanager.cpp:
+	* main/src/fixtureselection.cpp:
+	* main/src/fixtureselection.h:
+	* main/src/fixtureselection.ui:
+	* main/src/functionmanager.cpp:
+	* main/src/scene.cpp:
+	* main/src/scene.h:
+	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.h:
+	* main/src/sceneeditor.ui:
+
+	Made the first move towards global scenes.
+	
 2008-05-26  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* TODO:

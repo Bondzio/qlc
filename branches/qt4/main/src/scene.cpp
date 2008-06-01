@@ -449,15 +449,19 @@ void Scene::run()
 			else
 			{
 				/* Calculate the current value based on what
-				   it should be after m_elapsedTime to be
-				   ready at m_timeSpan */
+				   it should be after m_elapsedTime, so that it
+				   will be ready when elapsedTime == timeSpan */
 				m_runTimeData[i].current = 
 					m_runTimeData[i].start
 					+ (m_runTimeData[i].target 
 					   - m_runTimeData[i].start)
 					* ((float)m_elapsedTime / m_timeSpan);
 				
-				m_channelData[i] |= static_cast<t_buffer_data>
+				/* The address is in the first 8 bits, so
+				   preserve that part with AND. Then add the
+				   value to the lowest 8 bits with OR. */
+				m_channelData[i] = (m_channelData[i] & 0xff00) 
+					| static_cast<t_buffer_data>
 					(m_runTimeData[i].current);
 			}
 		}

@@ -1,5 +1,11 @@
 2008-06-01  Heikki Junnila  <heikki.junnila@users.sf.net>
 
+	* main/src/scene.cpp:
+
+	Fixed scene running logic.
+
+2008-06-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
 	* main/src/consolechannel.cpp:
 	* main/src/consolechannel.h:
 	* main/src/consolechannel.ui:

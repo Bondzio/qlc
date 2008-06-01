@@ -82,6 +82,8 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
 		if (disabled.contains(fxi_id) == true)
 			item->setFlags(0); // Disables the item
 	}
+
+	m_tree->sortItems(KColumnName, Qt::AscendingOrder);
 }
 
 FixtureSelection::~FixtureSelection()

@@ -159,11 +159,14 @@ Scene::~Scene()
 
 void Scene::copyFrom(Scene* scene)
 {
+	Q_ASSERT(scene != NULL);
+
+	setName(scene->name());
+	setBus(scene->busID());
+
 	QListIterator <SceneValue> it(scene->m_values);
 	while (it.hasNext() == true)
 		m_values.append(it.next());
-
-	setBus(scene->busID());
 }
 
 /*****************************************************************************
@@ -192,6 +195,11 @@ void Scene::setValue(t_fixture_id fxi, t_channel ch, t_value value)
 	setValue(SceneValue(fxi, ch, value));
 }
 
+void Scene::unsetValue(t_fixture_id fxi, t_channel ch)
+{
+	m_values.removeAll(SceneValue(fxi, ch, 0));
+}
+
 SceneValue Scene::value(t_fixture_id fxi, t_channel ch)
 {
 	SceneValue scv(fxi, ch, 0);
@@ -216,9 +224,6 @@ bool Scene::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(wksp_root != NULL);
-
-	fxi = _app->doc()->fixture(m_fixture);
-	Q_ASSERT(fxi != NULL);
 
 	/* Function tag */
 	root = doc->createElement(KXMLQLCFunction);

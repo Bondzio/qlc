@@ -1,3 +1,19 @@
+2008-06-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/consolechannel.cpp:
+	* main/src/consolechannel.h:
+	* main/src/consolechannel.ui:
+	* main/src/fixtureconsole.cpp:
+	* main/src/fixtureconsole.h:
+	* main/src/fixtureselection.cpp:
+	* main/src/scene.cpp:
+	* main/src/scene.h:
+	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.h:
+	* main/src/sceneeditor.ui:
+
+	Updated and fixed scene editor to work with global scenes.
+
 2008-05-29  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/Makefile.am:

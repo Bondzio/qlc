@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>554</width>
-    <height>331</height>
+    <height>365</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -28,6 +28,9 @@
      <property name="text" >
       <string>Send slider data to fixtures</string>
      </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item row="0" column="0" colspan="2" >
@@ -41,7 +44,7 @@
         <x>0</x>
         <y>0</y>
         <width>532</width>
-        <height>249</height>
+        <height>283</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -137,6 +140,43 @@
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+         <item>
+          <widget class="QPushButton" name="m_enableChannelsButton" >
+           <property name="toolTip" >
+            <string>Enable all channels in currently selected fixtures</string>
+           </property>
+           <property name="text" >
+            <string>Enable channels</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_disableChannelsButton" >
+           <property name="toolTip" >
+            <string>Disable all channels in currently selected fixtures</string>
+           </property>
+           <property name="text" >
+            <string>Disable channels</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>268</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="All" >
@@ -145,7 +185,7 @@
         <x>0</x>
         <y>0</y>
         <width>532</width>
-        <height>249</height>
+        <height>283</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -165,8 +205,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>258</x>
-     <y>276</y>
+     <x>442</x>
+     <y>355</y>
     </hint>
     <hint type="destinationlabel" >
      <x>158</x>
@@ -181,8 +221,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>361</x>
-     <y>281</y>
+     <x>544</x>
+     <y>355</y>
     </hint>
     <hint type="destinationlabel" >
      <x>308</x>
@@ -190,5 +230,58 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_enableChannelsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SceneEditor</receiver>
+   <slot>slotEnableChannelsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>65</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>3</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_disableChannelsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SceneEditor</receiver>
+   <slot>slotDisableChannelsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>184</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>76</x>
+     <y>325</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_updateValuesCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>SceneEditor</receiver>
+   <slot>slotUpdateValuesChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>40</x>
+     <y>338</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>131</x>
+     <y>360</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>slotEnableChannelsClicked()</slot>
+  <slot>slotDisableChannelsClicked()</slot>
+  <slot>slotUpdateValuesChecked(bool)</slot>
+ </slots>
 </ui>

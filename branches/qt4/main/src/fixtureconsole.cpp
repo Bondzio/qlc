@@ -35,6 +35,10 @@ extern App* _app;
 
 using namespace std;
 
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
 FixtureConsole::FixtureConsole(QWidget* parent, t_fixture_id fxi_id)
 	: QWidget(parent)
 {
@@ -46,6 +50,10 @@ FixtureConsole::FixtureConsole(QWidget* parent, t_fixture_id fxi_id)
 FixtureConsole::~FixtureConsole()
 {
 }
+
+/*****************************************************************************
+ * Fixture
+ *****************************************************************************/
 
 void FixtureConsole::setFixture(t_fixture_id id)
 {
@@ -63,8 +71,8 @@ void FixtureConsole::setFixture(t_fixture_id id)
 		cc = new ConsoleChannel(this, m_fixture, i);
 		layout()->addWidget(cc);
 
-		connect(cc, SIGNAL(valueChanged(t_channel,t_value)),
-			this, SLOT(slotValueChanged(t_channel,t_value)));
+		connect(cc, SIGNAL(valueChanged(t_channel,t_value,bool)),
+			this, SLOT(slotValueChanged(t_channel,t_value,bool)));
 	}
 
 	/* Resize the console to some sensible proportions if at least
@@ -73,10 +81,59 @@ void FixtureConsole::setFixture(t_fixture_id id)
 		resize((fxi->channels() * cc->width()), 250);
 }
 
-void FixtureConsole::slotValueChanged(t_channel channel, t_value value)
+/*****************************************************************************
+ * Channels
+ *****************************************************************************/
+
+void FixtureConsole::enableAllChannels(bool enable)
 {
-	emit valueChanged(m_fixture, channel, value);
+	/* All of this' children are ConsoleChannel objects, except layout */
+	QListIterator <QObject*> it(children());
+	while (it.hasNext() == true)
+	{
+		ConsoleChannel* cc = qobject_cast<ConsoleChannel*> (it.next());
+		if (cc != NULL)
+			cc->enable(enable);
+	}
 }
+
+void FixtureConsole::setOutputDMX(bool state)
+{
+	/* All of this' children are ConsoleChannel objects, except layout */
+	QListIterator <QObject*> it(children());
+	while (it.hasNext() == true)
+	{
+		ConsoleChannel* cc = qobject_cast<ConsoleChannel*> (it.next());
+		if (cc != NULL)
+			cc->setOutputDMX(state);
+	}
+}
+
+void FixtureConsole::setSceneValue(const SceneValue& scv)
+{
+	Q_ASSERT(scv.fxi == m_fixture);
+
+	QListIterator <QObject*> it(children());
+	while (it.hasNext() == true)
+	{
+		ConsoleChannel* cc = qobject_cast<ConsoleChannel*> (it.next());
+		if (cc != NULL && cc->channel() == scv.channel)
+		{
+			cc->enable(true);
+			cc->setValue(scv.value);
+		}
+	}
+}
+
+void FixtureConsole::slotValueChanged(t_channel channel, t_value value,
+				      bool enabled)
+{
+	emit valueChanged(m_fixture, channel, value, enabled);
+}
+
+/*****************************************************************************
+ * Save / Load
+ *****************************************************************************/
 
 bool FixtureConsole::loadXML(QDomDocument* doc, QDomElement* root)
 {

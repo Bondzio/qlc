@@ -36,25 +36,48 @@ class FixtureConsole : public QWidget
 {
 	Q_OBJECT
 
+	/*********************************************************************
+	 * Initialization
+	 *********************************************************************/
 public:
 	FixtureConsole(QWidget* parent, t_fixture_id fxi_id);
 	~FixtureConsole();
 
+	/*********************************************************************
+	 * Fixture
+	 *********************************************************************/
 protected:
 	void setFixture(t_fixture_id id);
 
-protected slots:
-	void slotValueChanged(t_channel channel, t_value value);
+protected:
+	t_fixture_id m_fixture;
 
+	/*********************************************************************
+	 * Channels
+	 *********************************************************************/
+public:
+	/** Set all channels enabled/disabled */
+	void enableAllChannels(bool enable);
+
+	/** Enable/disable DMX output when sliders are dragged */
+	void setOutputDMX(bool state);
+
+	/** Set the value of one scene channel */
+	void setSceneValue(const SceneValue& scv);
+
+protected slots:
+	void slotValueChanged(t_channel channel, t_value value, bool enabled);
+
+signals:
+	void valueChanged(t_fixture_id fxi, t_channel channel, t_value value,
+			  bool enabled);
+
+	/*********************************************************************
+	 * Save / Load
+	 *********************************************************************/
 public:
 	bool loadXML(QDomDocument* doc, QDomElement* root);
 	bool saveXML(QDomDocument* doc, QDomElement* fxi_root);
-
-signals:
-	void valueChanged(t_fixture_id fxi, t_channel channel, t_value value);
-
-protected:
-	t_fixture_id m_fixture;
 };
 
 #endif

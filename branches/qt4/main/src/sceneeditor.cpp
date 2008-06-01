@@ -49,10 +49,21 @@ extern App* _app;
 #define KColumnModel        2
 #define KColumnID           3
 
+#define KTabGeneral         0
+#define KTabAll             1
+#define KTabFirstFixture    2
+
 SceneEditor::SceneEditor(QWidget* parent, Scene* scene) : QDialog(parent)
 {
 	Q_ASSERT(scene != NULL);
-	m_scene = scene;
+	m_original = scene;
+
+	/* Create a copy of the original scene so that we can freely modify it.
+	   Keep also a pointer to the original so that we can move the
+	   contents from the copied chaser to the original when OK is clicked */
+	m_scene = new Scene(this);
+	m_scene->copyFrom(scene);
+	Q_ASSERT(m_scene != NULL);
 
 	setupUi(this);
 	init();
@@ -60,6 +71,7 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene) : QDialog(parent)
 
 SceneEditor::~SceneEditor()
 {
+	delete m_scene;
 }
 
 void SceneEditor::init()
@@ -74,6 +86,8 @@ void SceneEditor::init()
 
 	m_nameEdit->setText(m_scene->name());
 
+	m_initializing = true;
+
 	QListIterator <SceneValue> it(*m_scene->values());
 	while (it.hasNext() == true)
 	{
@@ -83,18 +97,56 @@ void SceneEditor::init()
 		if (fixtureItem(scv.fxi) == NULL)
 		{
 			Fixture* fixture = _app->doc()->fixture(scv.fxi);
-			Q_ASSERT(fixture != NULL);
+			if (fixture == NULL)
+				continue;
 
 			addFixtureItem(fixture);
 			addFixtureTab(fixture);
 		}
+
+		setSceneValue(scv);
 	}
+
+	m_initializing = false;
+
+	m_tree->sortItems(KColumnName, Qt::AscendingOrder);
+}
+
+void SceneEditor::setSceneValue(const SceneValue& scv)
+{
+	FixtureConsole* fc;
+	Fixture* fixture;
+
+	fixture = _app->doc()->fixture(scv.fxi);
+	Q_ASSERT(fixture != NULL);
+
+	fc = fixtureConsole(fixture);
+	Q_ASSERT(fc != NULL);
+
+	fc->setSceneValue(scv);
 }
 
 void SceneEditor::accept()
 {
 	m_scene->setName(m_nameEdit->text());
+
+	/* Copy the contents of the modified scene over the original scene */
+	m_original->copyFrom(m_scene);
+
 	QDialog::accept();
+}
+
+void SceneEditor::slotUpdateValuesChecked(bool state)
+{
+	/* Start from the first fixture tab */
+	for (int i = KTabFirstFixture; i < m_tab->count(); i++)
+	{
+		FixtureConsole* fc;
+		fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
+		Q_ASSERT(fc != NULL);
+
+		fc->setOutputDMX(state);
+	}
 }
 
 /*****************************************************************************
@@ -103,13 +155,38 @@ void SceneEditor::accept()
 
 QTreeWidgetItem* SceneEditor::fixtureItem(t_fixture_id fxi_id)
 {
-	QList <QTreeWidgetItem*> list(
-		m_tree->findItems(QString("%d").arg(fxi_id),
-					 Qt::MatchExactly, KColumnID));
-	if (list.count() > 0)
-		return list.first();
-	else
-		return NULL;
+	QTreeWidgetItemIterator it(m_tree);
+	while (*it != NULL)
+	{
+		QTreeWidgetItem* item = *it;
+		if (item->text(KColumnID).toInt() == fxi_id)
+			return item;
+		++it;
+	}
+
+	return NULL;
+}
+
+QList <Fixture*> SceneEditor::selectedFixtures()
+{
+	QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
+	QList <Fixture*> list;
+	
+	while (it.hasNext() == true)
+	{
+		QTreeWidgetItem* item;
+		t_fixture_id fxi_id;
+		Fixture* fixture;
+
+		item = it.next();
+		fxi_id = item->text(KColumnID).toInt();
+		fixture = _app->doc()->fixture(fxi_id);
+		Q_ASSERT(fixture != NULL);
+
+		list.append(fixture);
+	}
+
+	return list;
 }
 
 void SceneEditor::addFixtureItem(Fixture* fixture)
@@ -133,6 +210,10 @@ void SceneEditor::addFixtureItem(Fixture* fixture)
 			      fixture->fixtureDef()->manufacturer());
 		item->setText(KColumnModel, fixture->fixtureDef()->model());
 	}
+
+	/* Select newly-added fixtures so that their channels can be
+	   quickly disabled/enabled */
+	item->setSelected(true);
 }
 
 void SceneEditor::removeFixtureItem(Fixture* fixture)
@@ -185,23 +266,65 @@ void SceneEditor::slotRemoveFixtureClicked()
 
 	if (r == QMessageBox::Yes)
 	{
-		QTreeWidgetItem* item;
-		t_fixture_id fxi_id;
-		Fixture* fixture;
-
-		QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
-
+		QListIterator <Fixture*> it(selectedFixtures());
 		while (it.hasNext() == true)
 		{
-			item = it.next();
-			fxi_id = item->text(KColumnID).toInt();
-			fixture = _app->doc()->fixture(fxi_id);
-			Q_ASSERT(fixture != NULL);
-
+			Fixture* fixture = it.next();
 			removeFixtureTab(fixture);
-			delete item;
+			removeFixtureItem(fixture);
 		}
 	}
+}
+
+void SceneEditor::slotEnableChannelsClicked()
+{
+	QListIterator <Fixture*> it(selectedFixtures());
+	while (it.hasNext() == true)
+	{
+		Fixture* fixture;
+		FixtureConsole* fc;
+
+		fixture = it.next();
+		Q_ASSERT(fixture != NULL);
+
+		fc = fixtureConsole(fixture);
+		Q_ASSERT(fc != NULL);
+		
+		fc->enableAllChannels(true);
+	}
+}
+
+void SceneEditor::slotDisableChannelsClicked()
+{
+	QListIterator <Fixture*> it(selectedFixtures());
+	while (it.hasNext() == true)
+	{
+		Fixture* fixture;
+		FixtureConsole* fc;
+
+		fixture = it.next();
+		Q_ASSERT(fixture != NULL);
+
+		fc = fixtureConsole(fixture);
+		Q_ASSERT(fc != NULL);
+
+		fc->enableAllChannels(false);
+	}
+}
+
+/*****************************************************************************
+ * Fixture tabs
+ *****************************************************************************/
+
+FixtureConsole* SceneEditor::fixtureConsole(Fixture* fixture)
+{
+	Q_ASSERT(fixture != NULL);
+
+	/* Start from the first fixture tab */
+	for (int i = KTabFirstFixture; i < m_tab->count(); i++)
+		if (m_tab->tabText(i) == fixture->name())
+			return qobject_cast<FixtureConsole*> (m_tab->widget(i));
+	return NULL;
 }
 
 void SceneEditor::addFixtureTab(Fixture* fixture)
@@ -212,14 +335,22 @@ void SceneEditor::addFixtureTab(Fixture* fixture)
 
 	console = new FixtureConsole(this, fixture->id());
 	m_tab->addTab(console, fixture->name());
+
+	/* Start off with all channels disabled */
+	console->enableAllChannels(false);
+
+	connect(console,
+		SIGNAL(valueChanged(t_fixture_id,t_channel,t_value,bool)),
+		this,
+		SLOT(slotValueChanged(t_fixture_id,t_channel,t_value,bool)));
 }
 
 void SceneEditor::removeFixtureTab(Fixture* fixture)
 {
 	Q_ASSERT(fixture != NULL);
 
-	/* Start from the first fixture tab (0 = General, 1 = All) */
-	for (int i = 2; i < m_tab->count(); i++)
+	/* Start from the first fixture tab */
+	for (int i = KTabFirstFixture; i < m_tab->count(); i++)
 	{
 		if (m_tab->tabText(i) == fixture->name())
 		{
@@ -227,4 +358,17 @@ void SceneEditor::removeFixtureTab(Fixture* fixture)
 			break;
 		}
 	}
+}
+
+void SceneEditor::slotValueChanged(t_fixture_id fxi_id, t_channel channel,
+				   t_value value, bool enabled)
+{
+	/* Don't accept any changes during initialization */
+	if (m_initializing == true)
+		return;
+
+	if (enabled == true)
+		m_scene->setValue(fxi_id, channel, value);
+	else
+		m_scene->unsetValue(fxi_id, channel);
 }

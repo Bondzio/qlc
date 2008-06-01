@@ -50,14 +50,24 @@ using namespace std;
 ConsoleChannel::ConsoleChannel(QWidget* parent, t_fixture_id fixtureID,
 			       t_channel channel) : QGroupBox(parent)
 {
+	/* Set the class name as the object name */
+	setObjectName(ConsoleChannel::staticMetaObject.className());
+
 	Q_ASSERT(fixtureID != KNoID);
 	m_fixtureID = fixtureID;
 
+	// Check that we have an actual fixture
+	m_fixture = _app->doc()->fixture(m_fixtureID);
+	Q_ASSERT(m_fixture != NULL);
+
+	// Check that the given channel is valid
 	Q_ASSERT(channel != KChannelInvalid);
+	Q_ASSERT(channel < m_fixture->channels());
 	m_channel = channel;
 
 	m_value = 0;
 	m_menu = NULL;
+	m_outputDMX = true;
 
 	init();
 	update();
@@ -69,11 +79,11 @@ ConsoleChannel::~ConsoleChannel()
 
 void ConsoleChannel::init()
 {
-	Fixture* fixture;
 	QLCChannel* ch;
 	QString num;
 
 	this->setCheckable(true);
+	connect(this, SIGNAL(toggled(bool)), this, SLOT(slotToggled(bool)));
 
 	new QVBoxLayout(this);
 	layout()->setContentsMargins(1, 15, 1, 1);
@@ -98,15 +108,8 @@ void ConsoleChannel::init()
 	layout()->addWidget(m_numberLabel);
 	m_numberLabel->setAlignment(Qt::AlignCenter);
 
-	// Check that we have an actual fixture
-	fixture = _app->doc()->fixture(m_fixtureID);
-	Q_ASSERT(fixture != NULL);
-	
-	// Check that the given channel is valid
-	Q_ASSERT(m_channel < fixture->channels());
-	
 	// Generic fixtures don't have channel objects
-	ch = fixture->channel(m_channel);
+	ch = m_fixture->channel(m_channel);
 	if (ch != NULL)
 		this->setToolTip(ch->name());
 	else
@@ -119,28 +122,7 @@ void ConsoleChannel::init()
 	connect(m_valueSlider, SIGNAL(valueChanged(int)),
 		this, SLOT(slotValueChange(int)));
 
-	connect(m_valueSlider, SIGNAL(sliderPressed()),
-		this, SLOT(slotSetFocus()));
-
 	initMenu();
-}
-
-void ConsoleChannel::slotSetFocus()
-{
-	t_value value = 0;
-
-	Fixture* fixture = _app->doc()->fixture(m_fixtureID);
-	Q_ASSERT(fixture != NULL);
-
-	// In case someone else has set the value for this channel, animate
-	// the slider to the correct position
-	value = _app->dmxMap()->getValue(fixture->universeAddress() +
-					 m_channel);
-
-	slotAnimateValueChange(value);
-
-	// Set focus to this slider
-	m_valueSlider->setFocus();
 }
 
 /*****************************************************************************
@@ -149,13 +131,11 @@ void ConsoleChannel::slotSetFocus()
 
 void ConsoleChannel::initMenu()
 {
-	Fixture* fixture;
 	QLCChannel* ch;
 	
-	fixture = _app->doc()->fixture(m_fixtureID);
-	Q_ASSERT(fixture != NULL);
+	Q_ASSERT(m_fixture != NULL);
 
-	ch = fixture->channel(m_channel);
+	ch = m_fixture->channel(m_channel);
 	Q_ASSERT(ch != NULL);
 	
 	// Get rid of a possible previous menu
@@ -194,7 +174,7 @@ void ConsoleChannel::initMenu()
 
 	// Initialize the preset menu only for normal fixtures,
 	// i.e. not for Generic dimmer fixtures
-	if (fixture->fixtureDef() != NULL && fixture->fixtureMode() != NULL)
+	if (m_fixture->fixtureDef() != NULL && m_fixture->fixtureMode() != NULL)
 		initCapabilityMenu(ch);
 	else
 		initPlainMenu();
@@ -279,50 +259,76 @@ void ConsoleChannel::slotContextMenuTriggered(QAction* action)
 	Q_ASSERT(action != NULL);
 
 	// The menuitem's data contains a valid DMX value
-	slotAnimateValueChange(action->data().toInt());
+	setValue(action->data().toInt());
 }
 
 /*****************************************************************************
  * Value
  *****************************************************************************/
 
-void ConsoleChannel::update()
-{
-	t_value value = 0;
-	
-	Fixture* fixture = _app->doc()->fixture(m_fixtureID);
-	Q_ASSERT(fixture != NULL);
-	
-	value = _app->dmxMap()->getValue(fixture->universeAddress() +
-					 m_channel);
-	
-	m_valueLabel->setNum(value);
-	slotAnimateValueChange(value);
-}
-
-void ConsoleChannel::slotValueChange(int value)
-{
-	Fixture* fixture = _app->doc()->fixture(m_fixtureID);
-	Q_ASSERT(fixture != NULL);
-	
-	value = KChannelValueMax - value;
-	
-	_app->dmxMap()->setValue(fixture->universeAddress() + m_channel,
-				 (t_value) value);
-	
-	m_valueLabel->setNum(value);
-	
-	m_value = value;
-
-	emit valueChanged(m_channel, value);
-}
-
 int ConsoleChannel::sliderValue() const
 {
 	return KChannelValueMax - m_valueSlider->value();
 }
 
-void ConsoleChannel::slotAnimateValueChange(t_value value)
+void ConsoleChannel::update()
+{
+	t_value value = 0;
+
+	Q_ASSERT(m_fixture != NULL);
+	
+	value = _app->dmxMap()->getValue(m_fixture->universeAddress() +
+					 m_channel);
+	
+	m_valueLabel->setNum(value);
+	setValue(value);
+}
+
+void ConsoleChannel::setOutputDMX(bool state)
+{
+	m_outputDMX = state;
+
+	/* When output is enabled again, update the current value to DMX */
+	if (state == true)
+		_app->dmxMap()->setValue(m_fixture->universeAddress() +
+					 m_channel, (t_value) m_value);
+	else
+		_app->dmxMap()->setValue(m_fixture->universeAddress() +
+					 m_channel, 0); /* TODO: is this ok?? */
+}
+
+void ConsoleChannel::setValue(t_value value)
 {
 	m_valueSlider->setValue(static_cast<int> (KChannelValueMax - value));
 }
+
+void ConsoleChannel::slotValueChange(int value)
+{
+	value = KChannelValueMax - value;
+	
+	if (m_outputDMX == true)
+		_app->dmxMap()->setValue(m_fixture->universeAddress() +
+					 m_channel, (t_value) value);
+	
+	m_valueLabel->setNum(value);
+	
+	m_value = value;
+
+	emit valueChanged(m_channel, m_value, isEnabled());
+}
+
+/*****************************************************************************
+ * Enable/disable
+ *****************************************************************************/
+
+void ConsoleChannel::enable(bool state)
+{
+	setChecked(state);
+	emit valueChanged(m_channel, m_value, isEnabled());
+}
+
+void ConsoleChannel::slotToggled(bool state)
+{
+	emit valueChanged(m_channel, m_value, state);
+}
+

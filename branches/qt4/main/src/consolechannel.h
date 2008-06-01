@@ -53,10 +53,6 @@ protected:
 	/** Initialize the UI */
 	void init();
  
-public slots:
-	/** Set channel's focus */
-	void slotSetFocus();
-
 	/*********************************************************************
 	 * Menu
 	 *********************************************************************/
@@ -89,26 +85,48 @@ public:
 	/** Update the UI to match the channel's real status & value */
 	void update();
 
-public slots:
-	/** Slider value was changed */
-	void slotValueChange(int);
+	/** Enable/disable DMX value output */
+	void setOutputDMX(bool state);
 
 	/** Emulate the user dragging the value slider */
-	void slotAnimateValueChange(t_value);
+	void setValue(t_value value);
+
+public slots:
+	/** Slider value was changed */
+	void slotValueChange(int value);
 
 signals:
 	/** Slider value has changed */
-	void valueChanged(t_channel channel, t_value value);
+	void valueChanged(t_channel channel, t_value value, bool enabled);
 
 protected:
 	t_value m_value;
+	bool m_outputDMX;
+
+	/*********************************************************************
+	 * Enable/disable
+	 *********************************************************************/
+public:
+	/** Enable/disable the channel */
+	void enable(bool state);
+
+	/** Check, whether this channel has been enabled */
+	bool isEnabled() const { return isChecked(); }
+
+protected slots:
+	/** This channel was checked/unchecked */
+	void slotToggled(bool state);
 
 	/*********************************************************************
 	 * Fixture channel
 	 *********************************************************************/
+public:
+	t_channel channel() const { return m_channel; }
+
 protected:
 	t_channel m_channel;
 	t_fixture_id m_fixtureID;
+	Fixture* m_fixture;
 
 	/*********************************************************************
 	 * Widgets

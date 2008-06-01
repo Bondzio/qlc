@@ -100,6 +100,7 @@ public:
 public:
 	void setValue(SceneValue scv);
 	void setValue(t_fixture_id fxi, t_channel ch, t_value value);
+	void unsetValue(t_fixture_id fxi, t_channel ch);
 	SceneValue value(t_fixture_id fxi, t_channel ch);
 
 	QList <SceneValue> *values() { return &m_values; }

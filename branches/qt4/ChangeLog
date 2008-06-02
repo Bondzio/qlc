@@ -1,5 +1,11 @@
 2008-06-02  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/src/sceneeditor.ui:
+
+	Changed scene editor layouts to one master QBoxLayout.
+
+2008-06-02  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/src/functionconsumer.cpp:
 	* main/src/functionconsumer.h:
 	* main/src/virtualconsoleproperties.cpp:

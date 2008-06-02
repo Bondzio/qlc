@@ -273,8 +273,8 @@ void FixtureManager::slotSelectionChanged()
 		QString info;
 		info = QString("<HTML><BODY>");
 		info += QString("<H1>No fixtures</H1>");
-		info += QString("Click \"Add\" on the ");
-		info += QString("toolbar to add a new fixture.");
+		info += QString("Click <IMG SRC=\"" PIXMAPS "/edit_add.png\">");
+		info += QString(" from the toolbar to start adding fixtures.");
 		info += QString("</BODY></HTML>");
 		m_info->setText(info);
 	}

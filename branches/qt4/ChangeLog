@@ -1,3 +1,9 @@
+2008-06-02  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* main/src/fixturemanager.cpp:
+
+	Changed fixture manager's "no fixtures" text to display the add icon.
+
 2008-06-02  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/sceneeditor.ui:

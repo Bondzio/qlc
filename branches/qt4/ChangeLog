@@ -1,10 +1,18 @@
-2008-06-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-02  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/functionconsumer.cpp:
+	* main/src/functionconsumer.h:
+	* main/src/virtualconsoleproperties.cpp:
+
+	Disabled hardware timer from APPLE target completely.
+
+2008-06-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/scene.cpp:
 
 	Fixed scene running logic.
 
-2008-06-01  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/consolechannel.cpp:
 	* main/src/consolechannel.h:
@@ -20,7 +28,7 @@
 
 	Updated and fixed scene editor to work with global scenes.
 
-2008-05-29  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-29  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/Makefile.am:
 	* main/src/consolechannel.cpp:
@@ -41,7 +49,7 @@
 
 	Made the first move towards global scenes.
 	
-2008-05-26  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-26  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/src/virtualconsole.cpp:
@@ -54,7 +62,7 @@
 	settings dialog. Changed all VC menu items to actions and disabled
 	tools during operate mode.
 	
-2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-24  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/doc.cpp:
 	* main/src/virtualconsole.cpp:
@@ -63,7 +71,7 @@
 	Moved bus loading as the last thing in Doc::saveXML() to fix
 	vcslider's initial position.
 
-2008-05-24  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-24  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/chaser.cpp:
 	* main/src/chaser.h:
@@ -83,7 +91,7 @@
 	work. Removed FunctionNS and all event stuff from functions since
 	they are now QObjects with normal signal-slot-connections.
 
-2008-05-19  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-05-19  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/app.cpp:
 	* main/src/vcdockslider.cpp:

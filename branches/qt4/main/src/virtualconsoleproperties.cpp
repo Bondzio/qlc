@@ -32,6 +32,12 @@ VirtualConsoleProperties::VirtualConsoleProperties(QWidget* parent)
 	: QDialog(parent)
 {
 	setupUi(this);
+
+#ifdef __APPLE__
+	m_hardwareTimerRadio->setEnabled(false);
+	m_softwareTimerRadio->setChecked(true);
+	m_hardwareTimerRadio->setToolTip(tr("Not available in Apple"));
+#endif
 }
 
 VirtualConsoleProperties::~VirtualConsoleProperties()

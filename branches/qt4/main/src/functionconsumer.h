@@ -61,12 +61,18 @@ public:
 	 * Timer type
 	 *********************************************************************/
 public:
-	enum TimerType { RTCTimer, NanoSleepTimer };
+	enum TimerType
+	{
+#ifndef __APPLE__
+		RTCTimer,
+#endif
+		NanoSleepTimer
+	};
 
 	/**
 	 * Set the timer type for function consumer. Best results are achieved
 	 * with RTCTimer, which taps directly into your PC's Real Time Clock
-	 * chip.
+	 * chip. RTCTimer is not available in Apple target.
 	 *
 	 * @param type The timer type to set. See enum @ref TimerType.
 	 * @return true if successful, otherwise false
@@ -86,6 +92,7 @@ protected:
 	/*********************************************************************
 	 * RTC timer
 	 *********************************************************************/
+#ifndef __APPLE__
 protected:
 	/**
 	 * Open the RTC timer device and set its frequency
@@ -123,7 +130,9 @@ protected:
 protected:
 	/** File descriptor for RTC timer device */
 	int m_fdRTC;
-	
+
+#endif /* __APPLE__ */
+
 	/*********************************************************************
 	 * NanoSleep timer
 	 *********************************************************************/

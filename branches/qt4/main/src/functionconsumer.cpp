@@ -48,17 +48,21 @@ FunctionConsumer::FunctionConsumer(DMXMap* dmxMap) : QThread()
 	Q_ASSERT(dmxMap != NULL);
 	m_dmxMap = dmxMap;
 
+#ifndef __APPLE__
 	m_timerType = RTCTimer;
-	m_running = false;
 	m_fdRTC = -1;
+#else
+	m_timerType = NanoSleepTimer;
+#endif
+
 	m_timeCode = 0;
+	m_running = false;
 
 	/* Each fixture should fit inside one universe -> 512 values */
 	m_event = new t_buffer_data[512];
 	m_function = NULL;
 	m_channel = 0;
 }
-
 
 FunctionConsumer::~FunctionConsumer()
 {
@@ -76,6 +80,7 @@ bool FunctionConsumer::setTimerType(TimerType type)
 
 	switch (type)
 	{
+#ifndef __APPLE__
 	case RTCTimer:
 		/* Test that we can use RTC */
 		result = openRTC();
@@ -83,7 +88,7 @@ bool FunctionConsumer::setTimerType(TimerType type)
 			closeRTC();
 		m_timerType = type;
 		break;
-
+#endif
 	default:
 	case NanoSleepTimer:
 		/* Test that we can use NanoSleep */
@@ -101,6 +106,7 @@ bool FunctionConsumer::setTimerType(TimerType type)
  * RTC timer
  *****************************************************************************/
 
+#ifndef __APPLE__
 bool FunctionConsumer::openRTC()
 {
 	int retval = -1;
@@ -258,6 +264,7 @@ void FunctionConsumer::runRTC()
 	stopRTC();
 	closeRTC();
 }
+#endif /* __APPLE__ */
 
 /*****************************************************************************
  * NanoSleep timer
@@ -439,10 +446,11 @@ void FunctionConsumer::run()
 
 	switch (m_timerType)
 	{
+#ifndef __APPLE__
 	case RTCTimer:
 		runRTC();
 		break;
-		
+#endif
 	default:
 	case NanoSleepTimer:
 		runNanoSleepTimer();

@@ -1,3 +1,10 @@
+2008-06-06  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* main/src/functionmanager.cpp:
+	* main/src/functionmanager.h:
+
+	Flattened function manager, since all functions are about to get global.
+	
 2008-06-02  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* main/src/fixturemanager.cpp:

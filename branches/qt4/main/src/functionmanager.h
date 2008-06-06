@@ -49,22 +49,10 @@ public:
 	FunctionManager(QWidget* parent);
 	~FunctionManager();
 
-protected:
-	QSplitter* m_splitter;
-
 	/*********************************************************************
 	 * Doc signal handlers
 	 *********************************************************************/
 public slots:
-	/** Fixture was added to Doc */
-	void slotFixtureAdded(t_fixture_id fxi_id);
-
-	/** Fixture was removed from Doc */
-	void slotFixtureRemoved(t_fixture_id fxi_id);
-
-	/** Fixture properties were changed */
-	void slotFixtureChanged(t_fixture_id fxi_id);
-
 	/** Function was added to Doc */
 	void slotFunctionAdded(t_function_id fid);
 
@@ -75,31 +63,14 @@ public slots:
 	void slotFunctionChanged(t_function_id fid);
 
 	/*********************************************************************
-	 * Fixture tree
-	 *********************************************************************/
-protected:
-	/** Init fixture tree view */
-	void initFixtureTree();
-
-	/** Get available fixtures */
-	void updateFixtureTree();
-
-protected slots:
-	/** Fixture selection was changed */
-	void slotFixtureTreeSelectionChanged();
-
-	/** Right mouse button was clicked on fixture tree */
-	void slotFixtureTreeContextMenuRequested(const QPoint& pos);
-
-protected:
-	QTreeWidget* m_fixtureTree;
-
-	/*********************************************************************
 	 * Function tree
 	 *********************************************************************/
 protected:
 	/** Init function tree view */
 	void initFunctionTree();
+
+	/** Update all functions to function tree */
+	void updateFunctionTree();
 
 	/** Update the item's contents from the given function */
 	void updateFunctionItem(QTreeWidgetItem* item, Function* function);
@@ -159,7 +130,6 @@ protected slots:
 	void slotAddEFX();
 
 	int slotEdit();
-	void slotCut();
 	void slotCopy();
 	void slotPaste();
 	void slotDelete();
@@ -183,7 +153,6 @@ protected:
 	QAction* m_addEFXAction;
 	QAction* m_closeAction;
 
-	QAction* m_cutAction;
 	QAction* m_copyAction;
 	QAction* m_pasteAction;
 	QAction* m_editAction;
@@ -197,8 +166,8 @@ protected:
 	 * Helpers
 	 *********************************************************************/
 protected:
-	/** Copy the given function to the given fixture */
-	Function* copyFunction(t_function_id, t_fixture_id);
+	/** Create a copy of the given function */
+	Function* copyFunction(t_function_id fid);
 
 	/** Add a new function of the given type */
 	void addFunction(Function::Type type);

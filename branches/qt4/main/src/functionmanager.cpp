@@ -35,8 +35,6 @@
 #include <QMenu>
 #include <QList>
 
-#include "common/qlcfixturedef.h"
-
 #include "collectioneditor.h"
 #include "functionmanager.h"
 #include "chasereditor.h"
@@ -44,7 +42,6 @@
 #include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
-#include "fixture.h"
 #include "chaser.h"
 #include "scene.h"
 #include "app.h"
@@ -76,23 +73,14 @@ FunctionManager::FunctionManager(QWidget* parent) : QWidget(parent)
 	initMenu();
 	initToolbar();
 
-	// Create the splitter which contains the fixture & function trees
-	m_splitter = new QSplitter(this);
-	layout()->addWidget(m_splitter);
-	m_splitter->setSizePolicy(QSizePolicy::Expanding,
-				  QSizePolicy::Expanding);
-
-	// Create fixture tree
-	initFixtureTree();
-
 	// Create function tree
 	initFunctionTree();
 
 	// Clear clipboard contents
 	m_clipboard.clear();
 
-	// Select the first fixture
-	m_fixtureTree->setCurrentItem(m_fixtureTree->topLevelItem(0));
+	// Get all functions
+	updateFunctionTree();
 }
 
 FunctionManager::~FunctionManager()
@@ -103,64 +91,8 @@ FunctionManager::~FunctionManager()
  * Doc signal handlers
  *****************************************************************************/
 
-void FunctionManager::slotFixtureAdded(t_fixture_id id)
-{
-	QTreeWidgetItem* item;
-	Fixture* fxi;
-	QString s;
-
-	fxi = _app->doc()->fixture(id);
-	if (fxi != NULL)
-	{
-		item = new QTreeWidgetItem(m_fixtureTree);
-		item->setIcon(KColumnName, QIcon(PIXMAPS "/fixture.png"));
-		item->setText(KColumnName, fxi->name());
-		item->setText(KColumnID, s.setNum(id));
-	}
-}
-
-void FunctionManager::slotFixtureRemoved(t_fixture_id id)
-{
-	QTreeWidgetItem* item;
-
-	item = getItem(id, m_fixtureTree);
-	if (item != NULL)
-	{
-		if (item->isSelected() == true)
-		{
-			QTreeWidgetItem* nextItem;
-
-			// Try to select the closest neighbour
-			if (m_fixtureTree->itemAbove(item) != NULL)
-				nextItem = m_fixtureTree->itemAbove(item);
-			else
-				nextItem = m_fixtureTree->itemBelow(item);
-
-			if (nextItem != NULL)
-				nextItem->setSelected(true);
-		}
-
-		delete item;
-	}
-}
-
-void FunctionManager::slotFixtureChanged(t_fixture_id id)
-{
-	QTreeWidgetItem* item;
-
-	item = getItem(id, m_fixtureTree);
-	if (item != NULL)
-	{
-		Fixture* fxi = _app->doc()->fixture(id);
-		Q_ASSERT(fxi != NULL);
-
-		item->setText(KColumnName, fxi->name());
-	}
-}
-
 void FunctionManager::slotFunctionAdded(t_function_id id)
 {
-	QTreeWidgetItem* fixtureItem;
 	QTreeWidgetItem* item;
 	Function* function;
 
@@ -169,22 +101,9 @@ void FunctionManager::slotFunctionAdded(t_function_id id)
 	if (m_blockAddFunctionSignal == true)
 		return;
 	
-	fixtureItem = m_fixtureTree->currentItem();
-	if (fixtureItem == NULL)
-		return; // No fixture, so function tree is empty, nothing to do
-
-	function = _app->doc()->function(id);
-	if (function != NULL)
-	{
-		// Check if the selected fixture is the one that the newly
-		// added function belongs to.
-		if (fixtureItem->text(KColumnID).toInt() == function->fixture())
-		{
-			// Create a new item for the function
-			item = new QTreeWidgetItem(m_functionTree);
-			updateFunctionItem(item, function);
-		}
-	}
+	// Create a new item for the function
+	item = new QTreeWidgetItem(m_functionTree);
+	updateFunctionItem(item, function);
 }
 
 void FunctionManager::slotFunctionRemoved(t_function_id id)
@@ -204,15 +123,15 @@ void FunctionManager::slotFunctionRemoved(t_function_id id)
 			QTreeWidgetItem* nextItem;
 
 			// Try to select the closest neighbour
-			if (m_fixtureTree->itemAbove(item) != NULL)
-				nextItem = m_fixtureTree->itemAbove(item);
+			if (m_functionTree->itemAbove(item) != NULL)
+				nextItem = m_functionTree->itemAbove(item);
 			else
-				nextItem = m_fixtureTree->itemBelow(item);
+				nextItem = m_functionTree->itemBelow(item);
 	  
 			if (nextItem != NULL)
 				nextItem->setSelected(true);
 		}
-      
+
 		delete item;
 	}
 }
@@ -269,11 +188,6 @@ void FunctionManager::initActions()
 	connect(m_editAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotEdit()));
 
-	m_cutAction = new QAction(QIcon(PIXMAPS "/editcut.png"),
-				  tr("Cut"), this);
-	connect(m_cutAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotCut()));
-
 	m_copyAction = new QAction(QIcon(PIXMAPS "/editcopy.png"),
 				   tr("Copy"), this);
 	connect(m_copyAction, SIGNAL(triggered(bool)),
@@ -316,7 +230,6 @@ void FunctionManager::initMenu()
 	m_editMenu->setTitle("Edit");
 	m_editMenu->addAction(m_editAction);
 	m_editMenu->addSeparator();
-	m_editMenu->addAction(m_cutAction);
 	m_editMenu->addAction(m_copyAction);
 	m_editMenu->addAction(m_pasteAction);
 	m_editMenu->addSeparator();
@@ -368,7 +281,6 @@ void FunctionManager::initToolbar()
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_editAction);
 	m_toolbar->addSeparator();
-	m_toolbar->addAction(m_cutAction);
 	m_toolbar->addAction(m_copyAction);
 	m_toolbar->addAction(m_pasteAction);
 	m_toolbar->addSeparator();
@@ -485,27 +397,6 @@ int FunctionManager::slotEdit()
 	return result;
 }
 
-void FunctionManager::slotCut()
-{
-	// Clear existing stuff from clipboard
-	m_clipboard.clear();
-	
-	QListIterator <QTreeWidgetItem*> it(m_functionTree->selectedItems());
-	while (it.hasNext() == true)
-	{
-		QTreeWidgetItem* item = it.next();
-
-		// Add function ID to clipboard
-		m_clipboard.append(item->text(KColumnID).toInt());
-
-		// Set the action to Cut so that we know what to do with paste
-		m_clipboardAction = ClipboardCut;
-
-		// Set the item disabled to indicate it is about to get cut
-		item->setDisabled(true);
-	}
-}
-
 void FunctionManager::slotCopy()
 {
 	// Clear existing stuff from the clipboard
@@ -519,7 +410,7 @@ void FunctionManager::slotCopy()
 		// Add selected function ID's to clipboard
 		m_clipboard.append(item->text(KColumnID).toInt());
 
-		// Set the action to Cut so that we know what to
+		// Set the action to Copy so that we know what to
 		// do with paste
 		m_clipboardAction = ClipboardCopy;
 
@@ -531,65 +422,9 @@ void FunctionManager::slotCopy()
 
 void FunctionManager::slotPaste()
 {
-	t_fixture_id fxi_id;
-
-	QTreeWidgetItem* fixtureitem = m_fixtureTree->currentItem();
-	if (fixtureitem == NULL)
-		return;
-
-	if (m_clipboardAction == ClipboardCut)
-	{
-		// Get the currently selected fixture item
-		fxi_id = fixtureitem->text(KColumnID).toInt();
-
-		QListIterator <t_function_id> it(m_clipboard);
-		while (it.hasNext() == true)
-		{
-			t_function_id fid = it.next();
-
-			// Copy the function
-			if (copyFunction(fid, fxi_id) == NULL)
-			{
-				// Stop pasting so we don't get the user
-				// too annoyed with a message box for each
-				// function. They all will fail, because
-				// the user can't select functions from more
-				// than one fixture (or global) at a time
-				break;
-			}
-			else
-			{
-				// Delete the original function because we are
-				// doing cut-paste
-				_app->doc()->deleteFunction(fid);
-			}
-		}
-
-		// Since the functions that were cut previously, are now
-		// deleted, their function id's in the clipboard are also
-		// invalid.
-		m_clipboard.clear();
-	}
-	else if (m_clipboardAction == ClipboardCopy)
-	{
-		// Get the currently selected fixture item
-		fxi_id = fixtureitem->text(KColumnID).toInt();
-
-		QListIterator <t_function_id> it(m_clipboard);
-		while (it.hasNext() == true)
-		{
-			// Copy the function
-			if (copyFunction(it.next(), fxi_id) == NULL)
-			{
-				// Stop pasting so we don't get the user
-				// too annoyed with a message box for each
-				// function. They all will fail, because
-				// the user can't select functions from more
-				// than one fixture (or global) at a time
-				break;
-			}
-		}
-	}
+	QListIterator <t_function_id> it(m_clipboard);
+	while (it.hasNext() == true)
+		copyFunction(it.next());
 }
 
 void FunctionManager::slotDelete()
@@ -624,78 +459,35 @@ void FunctionManager::slotSelectAll()
 
 void FunctionManager::updateActionStatus()
 {
-	QTreeWidgetItem* fixtureItem = m_fixtureTree->currentItem();
-	if (fixtureItem == NULL)
+	if (m_functionTree->selectedItems().count() > 0)
 	{
-		// There are no fixtures (at least none is selected)
-		// so nothing can be done in function manager
-		m_addSceneAction->setEnabled(false);
-		m_addChaserAction->setEnabled(false);
-		m_addCollectionAction->setEnabled(false);
-		m_addEFXAction->setEnabled(false);
-
-		m_editAction->setEnabled(false);
-		m_cutAction->setEnabled(false);
-		m_copyAction->setEnabled(false);
-		m_pasteAction->setEnabled(false);
-		m_deleteAction->setEnabled(false);
-		m_selectAllAction->setEnabled(false);
+		/* At least one function has been selected, so
+		   editing is possible. */
+		m_editAction->setEnabled(true);
+		m_copyAction->setEnabled(true);
+		
+		m_deleteAction->setEnabled(true);
+		m_selectAllAction->setEnabled(true);
 	}
 	else
 	{
-		// Get the selected fixture
-		t_fixture_id fxi_id = fixtureItem->text(KColumnID).toInt();
-		if (fxi_id == KNoID)
-		{
-			// Global fixture has been selected
-			// Disable fixture-only functions
-			m_addSceneAction->setEnabled(true);
-			m_addChaserAction->setEnabled(true);
-			m_addCollectionAction->setEnabled(true);
-			m_addEFXAction->setEnabled(false);
-		}
-		else
-		{
-			// A regular fixture has been selected
-			// Disable global-only functions
-			m_addSceneAction->setEnabled(false);
-			m_addChaserAction->setEnabled(false);
-			m_addCollectionAction->setEnabled(false);
-			m_addEFXAction->setEnabled(true);
-		}
-
-		if (m_functionTree->selectedItems().count() > 0)
-		{
-			/* At least one function has been selected, so
-			   editing is possible. */
-			m_editAction->setEnabled(true);
-			m_cutAction->setEnabled(true);
-			m_copyAction->setEnabled(true);
-
-			m_deleteAction->setEnabled(true);
-			m_selectAllAction->setEnabled(true);
-		}
-		else
-		{
-			/* No functions selected */
-			m_editAction->setEnabled(false);
-			m_cutAction->setEnabled(false);
-			m_copyAction->setEnabled(false);
-
-			m_deleteAction->setEnabled(false);
-			m_selectAllAction->setEnabled(false);
-		}
-
-		/* Check, whether clipboard contains something to paste */
-		if (m_clipboard.count() > 0)
-		{
-			m_pasteAction->setEnabled(true);
-		}
-		else
-		{
-			m_pasteAction->setEnabled(false);
-			m_clipboardAction = ClipboardNone;
-		}
+		/* No functions selected */
+		m_editAction->setEnabled(false);
+		m_copyAction->setEnabled(false);
+		
+		m_deleteAction->setEnabled(false);
+		m_selectAllAction->setEnabled(false);
+	}
+	
+	/* Check, whether clipboard contains something to paste */
+	if (m_clipboard.count() > 0)
+	{
+		m_pasteAction->setEnabled(true);
+	}
+	else
+	{
+		m_pasteAction->setEnabled(false);
+		m_clipboardAction = ClipboardNone;
 	}
 
 	/* Update bus menu actions in both cases */
@@ -741,126 +533,13 @@ void FunctionManager::updateBusActions()
 }
 
 /****************************************************************************
- * Fixture tree
- ****************************************************************************/
-
-void FunctionManager::initFixtureTree()
-{
-	// Create the tree view as the first child of the splitter
-	m_fixtureTree = new QTreeWidget(m_splitter);
-	m_splitter->addWidget(m_fixtureTree);
-
-	// Add the one and only column
-	m_fixtureTree->setHeaderLabel(tr("Fixture"));
-	m_fixtureTree->header()->setResizeMode(QHeaderView::ResizeToContents);
-	m_fixtureTree->setRootIsDecorated(false);
-	m_fixtureTree->setAllColumnsShowFocus(true);
-	m_fixtureTree->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_fixtureTree->setContextMenuPolicy(Qt::CustomContextMenu);
-
-	// Catch selection changes
-	connect(m_fixtureTree, SIGNAL(itemSelectionChanged()),
-		this, SLOT(slotFixtureTreeSelectionChanged()));
-
-	// Catch right-mouse clicks
-	connect(m_fixtureTree,
-		SIGNAL(customContextMenuRequested(const QPoint&)),
-		this,
-		SLOT(slotFixtureTreeContextMenuRequested(const QPoint&)));
-
-	updateFixtureTree();
-}
-
-void FunctionManager::updateFixtureTree()
-{
-	QString devid;
-
-	m_fixtureTree->clear();
-
-	//
-	// Global root node
-	//
-	QTreeWidgetItem* item = new QTreeWidgetItem(m_fixtureTree);
-	item->setText(KColumnName, "Global");
-	item->setText(KColumnID, devid.setNum(KNoID));
-	item->setIcon(KColumnName, QIcon(PIXMAPS "/global.png"));
-
-	//
-	// Fixture root nodes
-	//
-	for (t_fixture_id id = 0; id < KFixtureArraySize; id++)
-	{
-		Fixture* fxi = _app->doc()->fixture(id);
-		if (fxi == NULL)
-			continue;
-
-		item = new QTreeWidgetItem(m_fixtureTree);
-		item->setText(KColumnName, fxi->name());
-		item->setText(KColumnID, devid.setNum(id));
-		item->setIcon(KColumnName, QIcon(PIXMAPS "/fixture.png"));
-	}
-}
-
-void FunctionManager::slotFixtureTreeSelectionChanged()
-{
-	QTreeWidgetItem* item;
-	t_fixture_id fxi_id;
-
-	item = m_fixtureTree->currentItem();
-	if (item == NULL)
-		return;
-
-	// Get the selected fixture's ID
-	fxi_id = item->text(KColumnID).toInt();
-
-	// Clear the contents of the function tree
-	m_functionTree->clear();
-
-	// Get all functions belonging to the selected fixture
-	for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
-	{
-		Function* function = _app->doc()->function(fid);
-		if (function != NULL && function->fixture() == fxi_id)
-		{
-			item = new QTreeWidgetItem(m_functionTree);
-			updateFunctionItem(item, function);
-		}
-	}
-
-	updateActionStatus();
-}
-
-void FunctionManager::slotFixtureTreeContextMenuRequested(const QPoint& pos)
-{
-	QMenu contextMenu(this);
-	contextMenu.setTitle("Fixture");
-	contextMenu.addMenu(m_manageMenu);
-	contextMenu.addMenu(m_editMenu);
-
-	updateActionStatus();
-
-	// No need to have cut/copy/delete/edit/select in fixture menu
-	m_cutAction->setEnabled(false);
-	m_copyAction->setEnabled(false);
-	m_deleteAction->setEnabled(false);
-	m_editAction->setEnabled(false);
-	m_selectAllAction->setEnabled(false);
-
-	contextMenu.exec(QCursor::pos());
-
-	// Enable the menu items again
-	updateActionStatus();
-}
-
-/****************************************************************************
  * Function tree
  ****************************************************************************/
 
 void FunctionManager::initFunctionTree()
 {
-	// Create the tree view as the second child of the splitter
-	m_functionTree = new QTreeWidget(m_splitter);
-	m_splitter->addWidget(m_functionTree);
+	m_functionTree = new QTreeWidget(this);
+	layout()->addWidget(m_functionTree);
 
 	// Add two columns for function and bus
 	QStringList labels;
@@ -885,6 +564,20 @@ void FunctionManager::initFunctionTree()
 		SIGNAL(customContextMenuRequested(const QPoint&)),
 		this,
 		SLOT(slotFunctionTreeContextMenuRequested(const QPoint&)));
+}
+
+void FunctionManager::updateFunctionTree()
+{
+	for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
+	{
+		Function* function = _app->doc()->function(fid);
+		if (function != NULL)
+		{
+			QTreeWidgetItem* item;
+			item = new QTreeWidgetItem(m_functionTree);
+			updateFunctionItem(item, function);
+		}
+	}
 }
 
 void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
@@ -940,52 +633,13 @@ void FunctionManager::slotFunctionTreeContextMenuRequested(const QPoint& pos)
  * Helpers
  *****************************************************************************/
 
-Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
+Function* FunctionManager::copyFunction(t_function_id fid)
 {
 	Function* newFunction = NULL;
 	QString msg;
 
 	Function* function = _app->doc()->function(fid);
 	Q_ASSERT(function != NULL);
-
-	// Check that we are not trying to copy global functions to a fixture
-	// or vice versa
-	if (fxi_id == KNoID)
-	{
-		if (function->type() == Function::EFX)
-		{
-			msg = "EFX's cannot be created to global space.\n";
-			msg += "Paste aborted.\n";
-		}
-		else
-		{
-			msg = QString::null;
-		}
-	}
-	else if (fxi_id != KNoID)
-	{
-		if (function->type() == Function::Chaser)
-		{
-			msg = "Chasers cannot be created for fixtures.\n";
-			msg += "Paste aborted.\n";
-		}
-		else if (function->type() == Function::Collection)
-		{
-			msg = "Collections cannot be created for fixtures.\n";
-			msg += "Paste aborted.\n";
-		}
-		else
-		{
-			msg = QString::null;
-		}
-	}
-
-	if (msg != QString::null)
-	{
-		// Display error message and exit without creating functions
-		QMessageBox::warning(this, "Unable to paste functions", msg);
-		return NULL;
-	}
 
 	switch(function->type())
 	{
@@ -1017,9 +671,9 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 
 	case Function::EFX:
 	{
-		newFunction = _app->doc()->newFunction(Function::EFX, fxi_id);
+		newFunction = _app->doc()->newFunction(Function::EFX, KNoID);
 		EFX* efx = static_cast<EFX*> (newFunction);
-		efx->copyFrom(static_cast<EFX*> (function), fxi_id);
+		efx->copyFrom(static_cast<EFX*> (function), KNoID);
 	}
 	break;
 
@@ -1033,18 +687,11 @@ Function* FunctionManager::copyFunction(t_function_id fid, t_fixture_id fxi_id)
 
 void FunctionManager::addFunction(Function::Type type)
 {
-	QTreeWidgetItem* fixtureItem = m_fixtureTree->currentItem();
-	QTreeWidgetItem* newItem = NULL;
-	t_fixture_id fxi_id = KNoID;
-	Function* function = NULL;
-
-	if (fixtureItem == NULL)
-		return;
+	QTreeWidgetItem* newItem;
+	Function* function;
 
 	// We don't want the signal handler to add the function twice
 	m_blockAddFunctionSignal = true;
-
-	fxi_id = fixtureItem->text(KColumnID).toInt();
 
 	//
 	// Create the function
@@ -1056,7 +703,7 @@ void FunctionManager::addFunction(Function::Type type)
 		function = _app->doc()->newFunction(Function::Scene, KNoID);
 		if (function == NULL)
 			return;
-		function->setName("New Scene");
+		function->setName(tr("New Scene"));
 	}
 	break;
 
@@ -1065,7 +712,7 @@ void FunctionManager::addFunction(Function::Type type)
 		function = _app->doc()->newFunction(Function::Chaser, KNoID);
 		if (function == NULL)
 			return;
-		function->setName("New Chaser");
+		function->setName(tr("New Chaser"));
 	}
 	break;
 
@@ -1074,16 +721,16 @@ void FunctionManager::addFunction(Function::Type type)
 		function = _app->doc()->newFunction(Function::Collection, KNoID);
 		if (function == NULL)
 			return;
-		function->setName("New Collection");
+		function->setName(tr("New Collection"));
 	}
 	break;
 
 	case Function::EFX:
 	{
-		function = _app->doc()->newFunction(Function::EFX, fxi_id);
+		function = _app->doc()->newFunction(Function::EFX, KNoID);
 		if (function == NULL)
 			return;
-		function->setName("New EFX");
+		function->setName(tr("New EFX"));
 	}
 	break;
 

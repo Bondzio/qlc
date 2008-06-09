@@ -146,3 +146,8 @@
 * Move the contents of Function::setBus() to subclasses and leave only the
   common parts.
 
+* Connect functions to doc::fixtureRemoved so that fixture
+   associations can be removed.
+
+* Connect chaser & collection functions to doc::functionRemoved so that 
+   function associations can be removed.

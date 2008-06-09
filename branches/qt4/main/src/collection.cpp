@@ -89,7 +89,6 @@ bool Collection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 	root.setAttribute(KXMLQLCFunctionID, id());
 	root.setAttribute(KXMLQLCFunctionType, Function::typeToString(m_type));
-	root.setAttribute(KXMLQLCFunctionFixture, fixture());
 	root.setAttribute(KXMLQLCFunctionName, name());
 
 	/* Steps */

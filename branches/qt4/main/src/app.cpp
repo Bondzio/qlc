@@ -374,22 +374,6 @@ void App::initDoc()
 			m_fixtureManager,
 			SLOT(slotFixtureRemoved(t_fixture_id)));
 	}
-	
-	/* Connect fixture list change signals from the new document object */
-	if (m_functionManager != NULL)
-	{
-		connect(m_doc, SIGNAL(fixtureAdded(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureAdded(t_fixture_id)));
-		
-		connect(m_doc, SIGNAL(fixtureRemoved(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureRemoved(t_fixture_id)));
-		
-		connect(m_doc, SIGNAL(fixtureChanged(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureChanged(t_fixture_id)));
-	}
 }
 
 void App::slotDocModified(bool state)
@@ -1073,18 +1057,6 @@ void App::slotFunctionManager()
 
 		connect(m_functionManager, SIGNAL(destroyed(QObject*)),
 			this, SLOT(slotFunctionManagerDestroyed(QObject*)));
-
-		connect(m_doc, SIGNAL(fixtureAdded(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureAdded(t_fixture_id)));
-		
-		connect(m_doc, SIGNAL(fixtureRemoved(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureRemoved(t_fixture_id)));
-
-		connect(m_doc, SIGNAL(fixtureChanged(t_fixture_id)),
-			m_functionManager,
-			SLOT(slotFixtureChanged(t_fixture_id)));
 
 		connect(m_doc, SIGNAL(functionAdded(t_function_id)),
 			m_functionManager,

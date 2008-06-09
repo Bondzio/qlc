@@ -36,33 +36,50 @@ class EFXEditor : public QDialog, public Ui_EFXEditor
 {
 	Q_OBJECT
 
+	/*********************************************************************
+	 * Initialization
+	 *********************************************************************/
 public:
 	EFXEditor(QWidget* parent, EFX* efx);
 	~EFXEditor();
 
 protected:
-	/**
-	 * Set the EFX function to edit
-	 *
-	 * @param efx The EFX function to edit
-	 */
-	void setEFX(EFX* efx);
+	void initGeneralPage();
+	void fillBusCombo();
+	void initMovementPage();
+	void initInitializationPage();
 
-	/**
-	 * Get channels from the EFX function's fixture
-	 * and fill the combos with them.
-	 */
-	void fillChannelCombos();
+protected slots:
+	void accept();
 
-	/**
-	 * Get sceness from the EFX function's fixture
-	 * and fill the list views with them.
-	 */
-	void fillSceneLists();
+protected:
+	EFXPreviewArea* m_previewArea;
+	QPolygon* m_points;
+
+	EFX* m_efx;
+	EFX* m_original;
+
+	/*********************************************************************
+	 * General page
+	 *********************************************************************/
+protected:
+	QTreeWidgetItem* fixtureItem(t_fixture_id fxi_id);
+	QList <Fixture*> selectedFixtures();
+	void updateIndices(int from, int to);
+	void addFixtureItem(Fixture* fixture);
+	void removeFixtureItem(Fixture* fixture);
 
 protected slots:
 	void slotNameEdited(const QString &text);
+	void slotAddFixtureClicked();
+	void slotRemoveFixtureClicked();
+	void slotRaiseFixtureClicked();
+	void slotLowerFixtureClicked();
 
+	/*********************************************************************
+	 * Movement page
+	 *********************************************************************/
+protected slots:
 	void slotAlgorithmSelected(const QString &text);
 	void slotWidthSpinChanged(int value);
 	void slotHeightSpinChanged(int value);
@@ -82,20 +99,18 @@ protected slots:
 	void slotForwardClicked();
 	void slotBackwardClicked();
 
-	void slotXAxisActivated(int index);
-	void slotYAxisActivated(int index);
-  
+	/*********************************************************************
+	 * Initialization page
+	 *********************************************************************/
+protected:
+	void fillSceneLists();
+	
+protected slots:
 	void slotStartSceneGroupToggled(bool);
 	void slotStopSceneGroupToggled(bool);
 
 	void slotStartSceneListSelectionChanged();
 	void slotStopSceneListSelectionChanged();
-
-protected:
-	EFXPreviewArea* m_previewArea;
-	QPolygon* m_points;
-
-	EFX* m_efx;
 };
 
 /**

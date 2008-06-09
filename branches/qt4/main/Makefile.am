@@ -53,6 +53,7 @@ MOCS = \
 	src/moc_dummyoutplugin.cpp \
 	src/moc_efx.cpp \
 	src/moc_efxeditor.cpp \
+	src/moc_efxfixture.cpp \
 	src/moc_eventbuffer.cpp \
 	src/moc_fixture.cpp \
 	src/moc_fixtureconsole.cpp \
@@ -110,6 +111,7 @@ qlc_SOURCES = \
 	src/dummyoutplugin.cpp \
 	src/efx.cpp \
 	src/efxeditor.cpp \
+	src/efxfixture.cpp \
 	src/eventbuffer.cpp \
 	src/fixture.cpp \
 	src/fixtureconsole.cpp \

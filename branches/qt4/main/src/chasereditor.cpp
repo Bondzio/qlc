@@ -46,10 +46,8 @@ using namespace std;
 extern App* _app;
 
 #define KColumnNumber     0
-#define KColumnFixture    1
-#define KColumnFunction   2
-#define KColumnType       3
-#define KColumnFunctionID 4
+#define KColumnFunction   1
+#define KColumnFunctionID 2
 
 ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser) : QDialog(parent)
 {
@@ -125,52 +123,23 @@ ChaserEditor::~ChaserEditor()
 
 void ChaserEditor::updateStepList(int selectIndex)
 {
-	QTreeWidgetItem* item;
-	QString fxi_name;
-	QString func_name;
-	QString func_type;
-	Fixture* fxi = NULL;
-
 	m_tree->clear();
 
 	QListIterator <t_function_id> it(*m_chaser->steps());
 	while (it.hasNext() == true)
 	{
-		t_function_id fid;
+		QTreeWidgetItem* item;
 		Function* function;
+		t_function_id fid;
 		QString str;
 
 		fid = it.next();
 		function = _app->doc()->function(fid);
-		if (function == NULL)
-		{
-			fxi_name = QString("Invalid");
-			func_name = QString("Invalid");
-			func_type = QString("Invalid");
-		}
-		else if (function->fixture() != KNoID)
-		{
-			func_name = function->name();
-			func_type = Function::typeToString(function->type());
-			
-			fxi = _app->doc()->fixture(function->fixture());
-			if (fxi == NULL)
-				fxi_name = QString("Invalid");
-			else
-				fxi_name = fxi->name();
-		}
-		else
-		{
-			fxi_name = QString("Global");
-			func_name = function->name();
-			func_type = Function::typeToString(function->type());
-		}
+		Q_ASSERT(function != NULL);
 		
 		item = new QTreeWidgetItem(m_tree);
 		item->setText(KColumnNumber, "###");
-		item->setText(KColumnFixture, fxi_name);
-		item->setText(KColumnFunction, func_name);
-		item->setText(KColumnType, func_type);
+		item->setText(KColumnFunction, function->name());
 		item->setText(KColumnFunctionID, str.setNum(fid));
 	}
 
@@ -197,7 +166,7 @@ void ChaserEditor::updateOrderNumbers()
 
 void ChaserEditor::slotNameEdited(const QString& text)
 {
-	setWindowTitle(tr("Chaser editor - ") + text);
+	setWindowTitle(QString(tr("Chaser editor - %1")).arg(text));
 }
 
 void ChaserEditor::slotAddClicked()

@@ -51,17 +51,7 @@
        </column>
        <column>
         <property name="text" >
-         <string>Fixture</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
          <string>Function</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Function Type</string>
         </property>
        </column>
       </widget>

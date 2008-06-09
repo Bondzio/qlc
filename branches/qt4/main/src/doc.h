@@ -162,22 +162,21 @@ public:
 	 * @param type The type of the new function
 	 * @param fxi_id The ID of the fixture instance that owns the function
 	 */
-	Function* newFunction(Function::Type type, t_fixture_id fxi_id);
+	Function* newFunction(Function::Type type);
 
 	/**
 	 * Insert a new function instance into Doc's function array. Use this
 	 * ONLY when loading a workspace from a file.
 	 *
-	 * @param func_type The type of the new function
-	 * @param func_id The ID of the function (as loaded from a file)
-	 * @param func_name The name of the function
-	 * @param fxi_id The ID of the fixture instance that owns the function
+	 * @param type The type of the new function
+	 * @param fid The ID of the function (as loaded from a file)
+	 * @param name The name of the function
 	 * @param doc An XML document to load the function from
 	 * @param root An XML "Function" tag to load the function contents from
 	 */
-	Function* newFunction(Function::Type func_type, t_function_id func_id,
-			      QString func_name, t_fixture_id fxi_id,
-			      QDomDocument* doc, QDomElement* root);
+	Function* newFunction(Function::Type type, t_function_id fid,
+			      QString name, QDomDocument* doc,
+			      QDomElement* root);
 
 protected:
 	/**
@@ -185,7 +184,7 @@ protected:
 	 *
 	 * @param type Type of function to create
 	 */
-	Function* newFunction(Function::Type type);
+	Function* createFunction(Function::Type type);
 
 public:
 	/**

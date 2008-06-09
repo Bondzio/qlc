@@ -449,16 +449,6 @@ bool Doc::deleteFixture(t_fixture_id id)
 		delete m_fixtureArray[id];
 		m_fixtureArray[id] = NULL;
 
-		// Delete all functions associated with the removed fixture
-		for (int i = 0; i < KFunctionArraySize; i++)
-		{
-			if (m_functionArray[i] != NULL && 
-			    m_functionArray[i]->fixture() == id)
-			{
-				deleteFunction(i);
-			}
-		}
-
 		emit fixtureRemoved(id);
 		setModified();
 		return true;
@@ -483,7 +473,7 @@ Fixture* Doc::fixture(t_fixture_id id)
  * Functions
  *****************************************************************************/
 
-Function* Doc::newFunction(Function::Type type, t_fixture_id fixture)
+Function* Doc::newFunction(Function::Type type)
 {
 	Function* function = NULL;
 
@@ -492,12 +482,11 @@ Function* Doc::newFunction(Function::Type type, t_fixture_id fixture)
 	{
 		if (m_functionArray[id] == NULL)
 		{
-			function = newFunction(type);
+			function = createFunction(type);
 			Q_ASSERT(function != NULL);
 			m_functionArray[id] = function;
 
 			function->setID(id);
-			function->setFixture(fixture);
 
 			emit functionAdded(id);
 
@@ -516,50 +505,45 @@ Function* Doc::newFunction(Function::Type type, t_fixture_id fixture)
 	return function;
 }
 
-Function* Doc::newFunction(Function::Type func_type, 
-			   t_function_id func_id,
-			   QString func_name,
-			   t_fixture_id fxi_id, 
-			   QDomDocument* doc,
-			   QDomElement* root)
+Function* Doc::newFunction(Function::Type type, t_function_id fid, QString name,
+			   QDomDocument* doc, QDomElement* root)
 {
 	Function* function = NULL;
 
-	Q_ASSERT(func_id >= 0 && func_id < KFunctionArraySize);
+	Q_ASSERT(fid >= 0 && fid < KFunctionArraySize);
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(root != NULL);
 	
 	/* Put the function to its place (==ID) in the function array */
-	if (m_functionArray[func_id] == NULL)
+	if (m_functionArray[fid] == NULL)
 	{
-		function = newFunction(func_type);
+		function = createFunction(type);
 		Q_ASSERT(function != NULL);
-		m_functionArray[func_id] = function;
-		
-		function->setID(func_id);
-		function->setFixture(fxi_id);
-		function->setName(func_name);
-		
+		m_functionArray[fid] = function;
+
+		function->setID(fid);
+		function->setName(name);
+
 		/* Continue loading the function contents */
 		if (function->loadXML(doc, root) == false)
 		{
 			delete function;
 			function = NULL;
-			m_functionArray[func_id] = NULL;
+			m_functionArray[fid] = NULL;
 		}
-		
-		emit functionAdded(func_id);
+
+		emit functionAdded(fid);
 	}
 	else
 	{
 		cout << QString("Function ID %1 already taken.")
-			.arg(func_id).toStdString() << endl;
+			.arg(fid).toStdString() << endl;
 	}
 
 	return function;
 }
 
-Function* Doc::newFunction(Function::Type type)
+Function* Doc::createFunction(Function::Type type)
 {
 	switch (type)
 	{

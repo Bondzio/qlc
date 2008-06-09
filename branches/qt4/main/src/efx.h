@@ -22,27 +22,33 @@
 #ifndef EFX_H
 #define EFX_H
 
+#include <QList>
+
 #include "common/qlctypes.h"
+
+#include "efxfixture.h"
 #include "function.h"
 
 class QDomDocument;
 class QDomElement;
 class QPolygon;
 class QString;
+class Fixture;
 
-#define KXMLQLCFunctionEFXAlgorithm "Algorithm"
-#define KXMLQLCFunctionEFXWidth "Width"
-#define KXMLQLCFunctionEFXHeight "Height"
-#define KXMLQLCFunctionEFXRotation "Rotation"
-#define KXMLQLCFunctionEFXAxis "Axis"
-#define KXMLQLCFunctionEFXOffset "Offset"
-#define KXMLQLCFunctionEFXFrequency "Frequency"
-#define KXMLQLCFunctionEFXPhase "Phase"
-#define KXMLQLCFunctionEFXChannel "Channel"
-#define KXMLQLCFunctionEFXX "X"
-#define KXMLQLCFunctionEFXY "Y"
-#define KXMLQLCFunctionEFXStartScene "StartScene"
-#define KXMLQLCFunctionEFXStopScene "StopScene"
+#define KXMLQLCEFXFixture "Fixture"
+#define KXMLQLCEFXAlgorithm "Algorithm"
+#define KXMLQLCEFXWidth "Width"
+#define KXMLQLCEFXHeight "Height"
+#define KXMLQLCEFXRotation "Rotation"
+#define KXMLQLCEFXAxis "Axis"
+#define KXMLQLCEFXOffset "Offset"
+#define KXMLQLCEFXFrequency "Frequency"
+#define KXMLQLCEFXPhase "Phase"
+#define KXMLQLCEFXChannel "Channel"
+#define KXMLQLCEFXX "X"
+#define KXMLQLCEFXY "Y"
+#define KXMLQLCEFXStartScene "StartScene"
+#define KXMLQLCEFXStopScene "StopScene"
 
 /**
  * An EFX (effects) function that is used to create
@@ -51,6 +57,8 @@ class QString;
 class EFX : public Function
 {
 	Q_OBJECT
+
+	friend class EFXFixture;
 
 	/*********************************************************************
 	 * Initialization
@@ -65,7 +73,7 @@ public:
 	 * @param efx EFX function from which to copy contents to this function
 	 * @param to The new parent fixture for this function
 	 */
-	bool copyFrom(EFX* efx, t_fixture_id to);
+	bool copyFrom(EFX* efx);
 
 	/*********************************************************************
 	 * Preview
@@ -338,45 +346,18 @@ protected:
 	float m_yPhase;
 
 	/*********************************************************************
-	 * Channels
+	 * Fixtures
 	 *********************************************************************/
 public:
-	/**
-	 * Set a channel from a fixture to be used as the X axis.
-	 *
-	 * @param channel Relative number of the channel used as the X axis
-	 */
-	void setXChannel(t_channel channel);
+	void addFixture(t_fixture_id fxi_id);
+	void removeFixture(t_fixture_id fxi_id);
+	void raiseFixture(t_fixture_id fxi_id);
+	void lowerFixture(t_fixture_id fxi_id);
 
-	/**
-	 * Get the channel used as the X axis.
-	 *
-	 */
-	t_channel xChannel();
-
-	/**
-	 * Set a channel from a fixture to be used as the Y axis.
-	 *
-	 * @param channel Relative number of the channel used as the Y axis
-	 */
-	void setYChannel(t_channel channel);
-
-	/**
-	 * Get the channel used as the Y axis.
-	 *
-	 */
-	t_channel yChannel();
+	QList <t_fixture_id>* fixtures() { return &m_fixtures; }
 
 protected:
-	/**
-	 * Channel used for X coordinate data
-	 */
-	t_channel m_xChannel;
-
-	/**
-	 * Channel used for Y coordinate data
-	 */
-	t_channel m_yChannel;
+	QList <t_fixture_id> m_fixtures;
 
 	/*********************************************************************
 	 * Start & Stop Scenes
@@ -493,6 +474,11 @@ protected:
 	 * Function pointer for the point calculation function.
 	 * This pointer is replaced by the appropriate function pointer
 	 * depending on the chosen algorithm.
+	 *
+	 * @param efx The EFX function using this
+	 * @param iterator Step number
+	 * @param x Holds the calculated X coordinate
+	 * @param y Holds the calculated Y coordinate
 	 */
 	void (*pointFunc) (EFX* efx, float iterator, float* x, float* y);
 
@@ -575,16 +561,19 @@ protected:
 	static void lissajousPoint(EFX* efx, float iterator, float* x, float* y);
 
 	/**
-	 * Write the actual calculated coordinate data to
-	 * event buffer.
+	 * Rotate a point of the pattern by rot degrees and scale the point
+	 * within w/h and xOff/yOff.
+	 *
+	 * @param x Holds the calculated X coordinate
+	 * @param y Holds the calculated Y coordinate
+	 * @param w The width to scale to
+	 * @param h The height to scale to
+	 * @param xOff X offset of the pattern
+	 * @param yOff Y offset of the pattern
+	 * @param rotation Degrees to rotate
 	 */
-	void setPoint(t_value x, t_value y);
-
-	/**
-	 *Rotate a point of the pattern by rot degrees
-	 *Do scaling of height and width
-	 */
-	void rotateAndScale(EFX* efx, float *x, float *y, int rot);
+	static void rotateAndScale(float *x, float *y, float w, float h,
+				   float xOff, float yOff, float rotation);
 
 	/*********************************************************************
 	 * Running
@@ -642,9 +631,14 @@ protected:
 	t_buffer_data* m_channelData;
 
 	/**
-	 * RUNTIME ONLY fixture address. Don't use for anything else!
+	 * Actual number of channels inside m_channelData
 	 */
-	t_channel m_address;
+	int m_channels;
+
+	/**
+	 * Run-time pan & tilt channels and their values
+	 */
+	QList <EFXFixture> m_runTimeData;
 };
 
 #endif

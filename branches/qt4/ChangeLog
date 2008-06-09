@@ -1,11 +1,41 @@
-2008-06-06  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-06-09  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* TODO:
+	* main/Makefile.am:
+	* main/src/app.cpp:
+	* main/src/chaser.cpp:
+	* main/src/chaser.h:
+	* main/src/chasereditor.cpp:
+	* main/src/chasereditor.ui:
+	* main/src/collection.cpp:
+	* main/src/collectioneditor.cpp:
+	* main/src/doc.cpp:
+	* main/src/doc.h:
+	* main/src/efx.cpp:
+	* main/src/efx.h:
+	* main/src/efxeditor.cpp:
+	* main/src/efxeditor.h:
+	* main/src/efxeditor.ui:
+	* main/src/efxfixture.cpp:
+	* main/src/efxfixture.h:
+	* main/src/function.cpp:
+	* main/src/function.h:
+	* main/src/functionmanager.cpp:
+	* main/src/functionselection.cpp:
+	* main/src/vcbuttonproperties.cpp:
+	* main/src/vcsliderproperties.ui:
+
+	Removed fixture property from Function class.
+	Made EFX a global function (doesn't work yet).
+	
+2008-06-06  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/functionmanager.cpp:
 	* main/src/functionmanager.h:
 
 	Flattened function manager, since all functions are about to get global.
 	
-2008-06-02  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+2008-06-02  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/fixturemanager.cpp:
 

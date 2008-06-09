@@ -39,10 +39,8 @@
 
 extern App* _app;
 
-#define KColumnFixture  0
-#define KColumnFunction 1
-#define KColumnType     2
-#define KColumnID       3
+#define KColumnFunction 0
+#define KColumnFunctionID 1
 
 CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
 	: QDialog(parent)
@@ -65,7 +63,7 @@ CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
 	Q_ASSERT(m_fc != NULL);
 
 	m_nameEdit->setText(m_fc->name());
-	setWindowTitle("Chaser editor - " + m_fc->name());
+	slotNameEdited(m_fc->name());
 
 	updateFunctionList();
 }
@@ -106,7 +104,7 @@ void CollectionEditor::slotRemove()
 	QTreeWidgetItem* item = m_tree->currentItem();
 	if (item != NULL)
 	{
-		t_function_id id = item->text(KColumnID).toInt();
+		t_function_id id = item->text(KColumnFunctionID).toInt();
 		m_fc->removeItem(id);
 		delete item;
 	}
@@ -128,45 +126,18 @@ void CollectionEditor::updateFunctionList()
 	QListIterator <t_function_id> it(*m_fc->steps());
 	while (it.hasNext() == true)
 	{
-		QString fxi_name;
-		QString func_name;
-		QString func_type;
-
-		t_function_id fid = it.next();
-		Function* function = _app->doc()->function(fid);
-
-		if (function == NULL)
-		{
-			func_name = "Invalid";
-			fxi_name = "Invalid";
-			func_type = "Invalid";
-		}
-		else if (function->fixture() != KNoID)
-		{
-			Fixture* fxi = NULL;
-
-			func_name = function->name();
-			func_type = Function::typeToString(function->type());
-
-			fxi = _app->doc()->fixture(function->fixture());
-			if (fxi == NULL)
-				fxi_name = "Invalid";
-			else
-				fxi_name = fxi->name();
-		}
-		else
-		{
-			fxi_name = QString("Global");
-			func_name = function->name();
-			func_type = Function::typeToString(function->type());
-		}
-
+		QTreeWidgetItem* item;
+		Function* function;
+		t_function_id fid;
 		QString s;
-		QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
-		item->setText(KColumnFixture, fxi_name);
-		item->setText(KColumnFunction, func_name);
-		item->setText(KColumnType, func_type);
-		item->setText(KColumnID, s.setNum(fid));
+
+		fid = it.next();
+		function = _app->doc()->function(fid);
+		Q_ASSERT(function != NULL);
+
+		item = new QTreeWidgetItem(m_tree);
+		item->setText(KColumnFunction, function->name());
+		item->setText(KColumnFunctionID, s.setNum(fid));
 	}
 }
 

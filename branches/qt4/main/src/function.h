@@ -25,25 +25,23 @@
 #include <QObject>
 #include <QThread>
 #include <QString>
+#include <QList>
 
 #include "common/qlctypes.h"
 
 class QDomDocument;
 class QDomElement;
-class QPixmap;
+class QIcon;
 
 class EventBuffer;
 class Function;
-class Fixture;
 class Bus;
 
 #define KXMLQLCFunction "Function"
-#define KXMLQLCFunctionFixture "Fixture"
 #define KXMLQLCFunctionName "Name"
 #define KXMLQLCFunctionID "ID"
 #define KXMLQLCFunctionType "Type"
 #define KXMLQLCFunctionData "Data"
-#define KXMLQLCFunctionChannels "Channels"
 
 #define KXMLQLCFunctionValue "Value"
 #define KXMLQLCFunctionValueType "Type"
@@ -148,9 +146,9 @@ public:
 	static Type stringToType(QString str);
 	
 	/**
-	 * Get a pixmap representing the function's type to be used in lists
+	 * Get an icon (representing the function's type) to be used in lists
 	 */
-	virtual QPixmap pixmap() const;
+	virtual QIcon icon() const;
 
 protected:
 	Type m_type;
@@ -228,25 +226,6 @@ protected:
 	Direction m_direction;
 
 	/*********************************************************************
-	 * Fixture
-	 *********************************************************************/
-public:
-	/**
-	 * Return the fixture instance that this function is associated to
-	 */
-	virtual t_fixture_id fixture() const { return m_fixture; }
-	
-	/**
-	 * Set the fixture instance that this function is associated to
-	 *
-	 * @param id The associated fixture ID
-	 */
-	virtual void setFixture(t_fixture_id id);
-
-protected:
-	t_fixture_id m_fixture;
-	
-	/*********************************************************************
 	 * Bus
 	 *********************************************************************/
 public:
@@ -266,7 +245,7 @@ public:
 	 * Get a textual representation of the function's bus (ID: Name)
 	 */
 	virtual QString busName() const;
-	
+
 public slots:
 	/**
 	 * Callback for bus value changes
@@ -280,20 +259,6 @@ public slots:
 protected:
 	t_bus_id m_busID;
 	
-	/*********************************************************************
-	 * Channels
-	 *********************************************************************/
-public:
-	/**
-	 * Number of channels that this function uses.
-	 * The actual function classes inherited from this base class should
-	 * define means for setting the channel count.
-	 */
-	virtual t_channel channels() const { return m_channels; }
-
-protected:
-	t_channel m_channels;
-
 	/*********************************************************************
 	 * Load & Save
 	 *********************************************************************/

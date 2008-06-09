@@ -51,6 +51,7 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
 	/* Fill the tree */
 	for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
 	{
+		QTreeWidgetItem* item;
 		Function* function;
 		QString str;
 		
@@ -58,12 +59,7 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
 		if (function == NULL)
 			continue;
 
-		QTreeWidgetItem* item;
-		QTreeWidgetItem* parent;
-		
-		parent = fixtureItem(function->fixture(), doc);
-		item = new QTreeWidgetItem(parent);
-
+		item = new QTreeWidgetItem(m_tree);
 		item->setText(KColumnName, function->name());
 		item->setText(KColumnType, function->typeString());
 		item->setText(KColumnID, str.setNum(fid));
@@ -77,53 +73,9 @@ FunctionSelection::~FunctionSelection()
 {
 }
 
-QTreeWidgetItem* FunctionSelection::fixtureItem(t_fixture_id fxi_id, Doc* doc)
-{
-	QTreeWidgetItem* parent;
-	Fixture* fxi;
-	QString str;
-
-	Q_ASSERT(doc != NULL);
-
-	/* Search for an existing fixture item to use as a parent */
-	for (int i = 0; i < m_tree->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* item = m_tree->topLevelItem(i);
-		if (item->text(KColumnID).toInt() == fxi_id)
-			return item; // Fixture item found, return immediately
-	}
-
-	/* Fixture item was not found, so create one. */
-	fxi = doc->fixture(fxi_id);
-	if (fxi != NULL)
-	{
-		/* The function is a fixture function (Scene/EFX) */
-		parent = new QTreeWidgetItem(m_tree);
-		parent->setText(KColumnName, fxi->name());
-		parent->setText(KColumnID, str.setNum(fxi->id()));
-	}
-	else
-	{
-		/* The function is a global function (Chaser/Collection) */
-		parent = new QTreeWidgetItem(m_tree);
-		parent->setText(KColumnName, tr("Global"));
-		parent->setText(KColumnID, str.setNum(KNoID));
-	}
-
-	/* Removes all other flags (including Qt::ItemIsSelectable)
-	   which should prevent us from having to check, whether the user
-	   has selected fixtures instead of functions. */
-	parent->setFlags(Qt::ItemIsEnabled);
-
-	return parent;
-}
-
 void FunctionSelection::slotItemDoubleClicked(QTreeWidgetItem* item, int col)
 {
 	if (item == NULL)
-		return;
-
-	if (item->parent() == NULL)
 		return;
 
 	accept();

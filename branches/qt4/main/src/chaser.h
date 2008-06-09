@@ -54,9 +54,6 @@ public:
 	/** Destructor */
 	virtual ~Chaser();
 
-	/** Chasers are not attached to fixtures */
-	void setFixture(t_fixture_id fxi_id) { /* NOP */ }
-
 	/*********************************************************************
 	 * Chaser contents
 	 *********************************************************************/

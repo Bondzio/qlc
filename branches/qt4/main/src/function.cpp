@@ -23,7 +23,7 @@
 #include <QMessageBox>
 #include <iostream>
 #include <QString>
-#include <QPixmap>
+#include <QIcon>
 #include <QtXml>
 
 #include "common/qlcfile.h"
@@ -61,9 +61,7 @@ Function::Function(QObject* parent, Type type) : QThread(parent)
 	m_type = type;
 	m_runOrder = Loop;
 	m_direction = Forward;
-	m_fixture = KNoID;
 	m_busID = KBusIDInvalid;
-	m_channels = 0;
 	m_eventBuffer = NULL;
 
 	// Receive bus value change signals
@@ -81,6 +79,8 @@ Function::~Function()
 
 void Function::setID(t_function_id id)
 {
+	/* Don't set doc modified status or emit changed signal, because this
+	   function is called only once during function creation. */
 	m_id = id;
 }
 
@@ -136,25 +136,20 @@ Function::Type Function::stringToType(QString string)
 		return Undefined;
 }
 
-QPixmap Function::pixmap() const
+QIcon Function::icon() const
 {
 	switch (m_type)
 	{
 		case Scene:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/scene.png"));
+			return QIcon(PIXMAPS "/scene.png");
 		case Chaser:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/chaser.png"));
+			return QIcon(PIXMAPS "/chaser.png");
 		case EFX:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/efx.png"));
+			return QIcon(PIXMAPS "/efx.png");
 		case Collection:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/collection.png"));
+			return QIcon(PIXMAPS "/collection.png");
 		default:
-			return QPixmap(QString(PIXMAPS) +
-					QString("/function.png"));
+			return QIcon(PIXMAPS "/function.png");
 	}
 }
 
@@ -243,17 +238,6 @@ Function::Direction Function::stringToDirection(QString str)
 }
 
 /*****************************************************************************
- * Fixture
- *****************************************************************************/
-
-void Function::setFixture(t_fixture_id id)
-{
-	m_fixture = id;
-	_app->doc()->setModified();
-	_app->doc()->emitFunctionChanged(m_id);
-}
-
-/*****************************************************************************
  * Bus
  *****************************************************************************/
 
@@ -301,7 +285,6 @@ QString Function::busName() const
 Function* Function::loader(QDomDocument* doc, QDomElement* root)
 {
 	Function* function = NULL;
-	t_fixture_id fxi_id = 0;
 	t_function_id func_id = 0;
 	Type func_type;
 	QString func_name;
@@ -315,23 +298,20 @@ Function* Function::loader(QDomDocument* doc, QDomElement* root)
 		return NULL;
 	}
 
-	/* Extract function ID */
+	/* ID */
 	func_id = root->attribute(KXMLQLCFunctionID).toInt();
 	Q_ASSERT(func_id >= 0 && func_id < KFunctionArraySize);
 
-	/* Extract fixture ID (might be also invalid) */
-	fxi_id = root->attribute(KXMLQLCFunctionFixture).toInt();
-
-	/* Extract function name */
+	/* Name */
 	func_name = root->attribute(KXMLQLCFunctionName);
 
-	/* Extract function type */
+	/* Type */
 	func_type = Function::stringToType(root->attribute(KXMLQLCFunctionType));
 
 	/* Create a new function into Doc using the loaded information 
 	   and continue loading the specific function contents from Doc */
-	return _app->doc()->newFunction(func_type, func_id, func_name, 
-					fxi_id, doc, root);
+	return _app->doc()->newFunction(func_type, func_id, func_name,
+					doc, root);
 }
 
 /*****************************************************************************

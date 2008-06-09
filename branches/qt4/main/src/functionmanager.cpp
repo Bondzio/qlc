@@ -550,6 +550,8 @@ void FunctionManager::initFunctionTree()
 	m_functionTree->setAllColumnsShowFocus(true);
 	m_functionTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_functionTree->setContextMenuPolicy(Qt::CustomContextMenu);
+	m_functionTree->setSortingEnabled(true);
+	m_functionTree->sortByColumn(KColumnName, Qt::AscendingOrder);
 
 	// Catch selection changes
 	connect(m_functionTree, SIGNAL(itemSelectionChanged()),
@@ -587,7 +589,7 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
 		return;
 
 	item->setText(KColumnName, function->name());
-	item->setIcon(KColumnName, function->pixmap());
+	item->setIcon(KColumnName, function->icon());
 	item->setText(KColumnBus, function->busName());
 	item->setText(KColumnID, QString::number(function->id()));
 }
@@ -645,7 +647,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 	{
 	case Function::Scene:
 	{
-		newFunction = _app->doc()->newFunction(Function::Scene, KNoID);
+		newFunction = _app->doc()->newFunction(Function::Scene);
 		Scene* scene = static_cast<Scene*> (newFunction);
 		scene->copyFrom(static_cast<Scene*> (function));
 	}
@@ -653,7 +655,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 
 	case Function::Chaser:
 	{
-		newFunction = _app->doc()->newFunction(Function::Chaser, KNoID);
+		newFunction = _app->doc()->newFunction(Function::Chaser);
 		Chaser* chaser = static_cast<Chaser*> (newFunction);
 		chaser->copyFrom(static_cast<Chaser*> (function));
 	}
@@ -662,7 +664,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 	case Function::Collection:
 	{
 		newFunction =
-			_app->doc()->newFunction(Function::Collection, KNoID);
+			_app->doc()->newFunction(Function::Collection);
 
 		Collection* fc = static_cast<Collection*> (newFunction);
 		fc->copyFrom(static_cast<Collection*> (function));
@@ -671,9 +673,9 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 
 	case Function::EFX:
 	{
-		newFunction = _app->doc()->newFunction(Function::EFX, KNoID);
+		newFunction = _app->doc()->newFunction(Function::EFX);
 		EFX* efx = static_cast<EFX*> (newFunction);
-		efx->copyFrom(static_cast<EFX*> (function), KNoID);
+		efx->copyFrom(static_cast<EFX*> (function));
 	}
 	break;
 
@@ -700,7 +702,7 @@ void FunctionManager::addFunction(Function::Type type)
 	{
 	case Function::Scene:
 	{
-		function = _app->doc()->newFunction(Function::Scene, KNoID);
+		function = _app->doc()->newFunction(Function::Scene);
 		if (function == NULL)
 			return;
 		function->setName(tr("New Scene"));
@@ -709,7 +711,7 @@ void FunctionManager::addFunction(Function::Type type)
 
 	case Function::Chaser:
 	{
-		function = _app->doc()->newFunction(Function::Chaser, KNoID);
+		function = _app->doc()->newFunction(Function::Chaser);
 		if (function == NULL)
 			return;
 		function->setName(tr("New Chaser"));
@@ -718,7 +720,7 @@ void FunctionManager::addFunction(Function::Type type)
 
 	case Function::Collection:
 	{
-		function = _app->doc()->newFunction(Function::Collection, KNoID);
+		function = _app->doc()->newFunction(Function::Collection);
 		if (function == NULL)
 			return;
 		function->setName(tr("New Collection"));
@@ -727,7 +729,7 @@ void FunctionManager::addFunction(Function::Type type)
 
 	case Function::EFX:
 	{
-		function = _app->doc()->newFunction(Function::EFX, KNoID);
+		function = _app->doc()->newFunction(Function::EFX);
 		if (function == NULL)
 			return;
 		function->setName(tr("New EFX"));

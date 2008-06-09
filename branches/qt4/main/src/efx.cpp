@@ -27,8 +27,10 @@
 
 #include <math.h>
 
-#include "common/qlcfile.h"
+#include "common/qlcfixturemode.h"
 #include "common/qlcfixturedef.h"
+#include "common/qlcchannel.h"
+#include "common/qlcfile.h"
 
 #include "functionconsumer.h"
 #include "eventbuffer.h"
@@ -69,9 +71,6 @@ EFX::EFX(QObject* parent) : Function(parent, Function::EFX)
 	m_xPhase = 1.5707963267;
 	m_yPhase = 0;
 
-	m_xChannel = KChannelInvalid;
-	m_yChannel = KChannelInvalid;
-
 	m_runOrder = EFX::Loop;
 	m_direction = EFX::Forward;
 
@@ -90,8 +89,6 @@ EFX::EFX(QObject* parent) : Function(parent, Function::EFX)
 
 	m_channelData = NULL;
 
-	m_address = KChannelInvalid;
-
 	/* Set Default Fade as the speed bus */
 	setBus(KBusIDDefaultFade);
 }
@@ -109,13 +106,15 @@ EFX::~EFX()
  * @param efx EFX function from which to copy contents to this function
  * @param to The new parent fixture instance for this function
  */
-bool EFX::copyFrom(EFX* efx, t_fixture_id to)
+bool EFX::copyFrom(EFX* efx)
 {
 	Q_ASSERT(efx != NULL);
 
-	Function::setFixture(to);
 	Function::setName(efx->name());
 	Function::setBus(efx->busID());
+
+	m_fixtures.clear();
+	m_fixtures = efx->m_fixtures;
 
 	m_width = efx->width();
 	m_height = efx->height();
@@ -127,9 +126,6 @@ bool EFX::copyFrom(EFX* efx, t_fixture_id to)
 	m_yFrequency = efx->yFrequency();
 	m_xPhase = efx->xPhase();
 	m_yPhase = efx->yPhase();
-
-	m_xChannel = efx->xChannel();
-	m_yChannel = efx->yChannel();
 
 	m_runOrder = efx->runOrder();
 	m_direction = efx->direction();
@@ -148,8 +144,6 @@ bool EFX::copyFrom(EFX* efx, t_fixture_id to)
 	m_cycleDuration = KFrequency;
 
 	m_channelData = NULL;
-
-	m_address = KChannelInvalid;
 
 	return true;
 }
@@ -559,71 +553,46 @@ bool EFX::isPhaseEnabled()
 }
 
 /*****************************************************************************
- * Channels
+ * Fixtures
  *****************************************************************************/
 
-/**
- * Set a channel from a fixture instance to be used as the X axis.
- *
- * @param channel Relative number of the channel used as the X axis
- */
-void EFX::setXChannel(t_channel channel)
+void EFX::addFixture(t_fixture_id fxi_id)
 {
-	Fixture* fxi = NULL;
-
-	fxi = _app->doc()->fixture(fixture());
-	Q_ASSERT(fxi != NULL);
-
-	if (channel < (t_channel) fxi->channels())
+	if (m_fixtures.contains(fxi_id) == false)
 	{
-		m_xChannel = channel;
-		updatePreview();
-	}
-	else
-	{
-		qDebug("EFX: Invalid channel number %d", channel);
+		m_fixtures.append(fxi_id);
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
 	}
 }
 
-/**
- * Set a channel from a fixture instance to be used as the Y axis.
- *
- * @param channel Relative number of the channel used as the Y axis
- */
-void EFX::setYChannel(t_channel channel)
+void EFX::removeFixture(t_fixture_id fxi_id)
 {
-	Fixture* fxi = NULL;
+	m_fixtures.removeAll(fxi_id);
+	_app->doc()->setModified();
+	_app->doc()->emitFunctionChanged(m_id);
+}
 
-	fxi = _app->doc()->fixture(fixture());
-	Q_ASSERT(fxi != NULL);
-
-	if (channel < (t_channel) fxi->channels())
+void EFX::raiseFixture(t_fixture_id fxi_id)
+{
+	int index = m_fixtures.indexOf(fxi_id);
+	if (index > 0)
 	{
-		m_yChannel = channel;
-		updatePreview();
-	}
-	else
-	{
-		qDebug("EFX: Invalid channel number %d", channel);
+		m_fixtures.move(index, index - 1);
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
 	}
 }
 
-/**
- * Get the channel used as the X axis.
- *
- */
-t_channel EFX::xChannel()
+void EFX::lowerFixture(t_fixture_id fxi_id)
 {
-	return m_xChannel;
-}
-
-/**
- * Get the channel used as the Y axis.
- *
- */
-t_channel EFX::yChannel()
-{
-	return m_yChannel;
+	int index = m_fixtures.indexOf(fxi_id);
+	if (index < m_fixtures.count())
+	{
+		_app->doc()->setModified();
+		_app->doc()->emitFunctionChanged(m_id);
+		m_fixtures.move(index, index + 1);
+	}
 }
 
 /*****************************************************************************
@@ -728,7 +697,16 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	root.setAttribute(KXMLQLCFunctionID, id());
 	root.setAttribute(KXMLQLCFunctionType, Function::typeToString(m_type));
 	root.setAttribute(KXMLQLCFunctionName, name());
-	root.setAttribute(KXMLQLCFunctionFixture, fixture());
+
+	/* Fixtures */
+	QListIterator <t_fixture_id> it(m_fixtures);
+	while (it.hasNext() == true)
+	{
+		tag = doc->createElement(KXMLQLCEFXFixture);
+		root.appendChild(tag);
+		text = doc->createTextNode(str.setNum(it.next()));
+		tag.appendChild(text);
+	}
 
 	/* Speed bus */
 	tag = doc->createElement(KXMLQLCBus);
@@ -751,34 +729,34 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	tag.appendChild(text);
 
 	/* Algorithm */
-	tag = doc->createElement(KXMLQLCFunctionEFXAlgorithm);
+	tag = doc->createElement(KXMLQLCEFXAlgorithm);
 	root.appendChild(tag);
 	text = doc->createTextNode(algorithm());
 	tag.appendChild(text);
 
 	/* Width */
-	tag = doc->createElement(KXMLQLCFunctionEFXWidth);
+	tag = doc->createElement(KXMLQLCEFXWidth);
 	root.appendChild(tag);
 	str.setNum(width());
 	text = doc->createTextNode(str);
 	tag.appendChild(text);
 
 	/* Height */
-	tag = doc->createElement(KXMLQLCFunctionEFXHeight);
+	tag = doc->createElement(KXMLQLCEFXHeight);
 	root.appendChild(tag);
 	str.setNum(height());
 	text = doc->createTextNode(str);
 	tag.appendChild(text);
 
 	/* Rotation */
-	tag = doc->createElement(KXMLQLCFunctionEFXRotation);
+	tag = doc->createElement(KXMLQLCEFXRotation);
 	root.appendChild(tag);
 	str.setNum(rotation());
 	text = doc->createTextNode(str);
 	tag.appendChild(text);
 
 	/* Start function */
-	tag = doc->createElement(KXMLQLCFunctionEFXStartScene);
+	tag = doc->createElement(KXMLQLCEFXStartScene);
 	root.appendChild(tag);
 	str.setNum(startScene());
 	text = doc->createTextNode(str);
@@ -789,7 +767,7 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 		tag.setAttribute(KXMLQLCFunctionEnabled, KXMLQLCFalse);
 
 	/* Stop function */
-	tag = doc->createElement(KXMLQLCFunctionEFXStopScene);
+	tag = doc->createElement(KXMLQLCEFXStopScene);
 	root.appendChild(tag);
 	str.setNum(stopScene());
 	text = doc->createTextNode(str);
@@ -802,70 +780,56 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	/********************************************
 	 * X-Axis 
 	 ********************************************/
-	tag = doc->createElement(KXMLQLCFunctionEFXAxis);
+	tag = doc->createElement(KXMLQLCEFXAxis);
 	root.appendChild(tag);
-	tag.setAttribute(KXMLQLCFunctionName, KXMLQLCFunctionEFXX);
+	tag.setAttribute(KXMLQLCFunctionName, KXMLQLCEFXX);
 
 	/* Offset */
-	subtag = doc->createElement(KXMLQLCFunctionEFXOffset);
+	subtag = doc->createElement(KXMLQLCEFXOffset);
 	tag.appendChild(subtag);
 	str.setNum(xOffset());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
         /* Frequency */
-	subtag = doc->createElement(KXMLQLCFunctionEFXFrequency);
+	subtag = doc->createElement(KXMLQLCEFXFrequency);
 	tag.appendChild(subtag);
 	str.setNum(xFrequency());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
         /* Phase */
-	subtag = doc->createElement(KXMLQLCFunctionEFXPhase);
+	subtag = doc->createElement(KXMLQLCEFXPhase);
 	tag.appendChild(subtag);
 	str.setNum(xPhase());
-	text = doc->createTextNode(str);
-	subtag.appendChild(text);
-
-        /* Channel */
-	subtag = doc->createElement(KXMLQLCFunctionEFXChannel);
-	tag.appendChild(subtag);
-	str.setNum(xChannel());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
 	/********************************************
 	 * Y-Axis 
 	 ********************************************/
-	tag = doc->createElement(KXMLQLCFunctionEFXAxis);
+	tag = doc->createElement(KXMLQLCEFXAxis);
 	root.appendChild(tag);
-	tag.setAttribute(KXMLQLCFunctionName, KXMLQLCFunctionEFXY);
+	tag.setAttribute(KXMLQLCFunctionName, KXMLQLCEFXY);
 
 	/* Offset */
-	subtag = doc->createElement(KXMLQLCFunctionEFXOffset);
+	subtag = doc->createElement(KXMLQLCEFXOffset);
 	tag.appendChild(subtag);
 	str.setNum(yOffset());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
 	/* Frequency */
-	subtag = doc->createElement(KXMLQLCFunctionEFXFrequency);
+	subtag = doc->createElement(KXMLQLCEFXFrequency);
 	tag.appendChild(subtag);
 	str.setNum(yFrequency());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
         /* Phase */
-	subtag = doc->createElement(KXMLQLCFunctionEFXPhase);
+	subtag = doc->createElement(KXMLQLCEFXPhase);
 	tag.appendChild(subtag);
 	str.setNum(yPhase());
-	text = doc->createTextNode(str);
-	subtag.appendChild(text);
-
-        /* Channel */
-	subtag = doc->createElement(KXMLQLCFunctionEFXChannel);
-	tag.appendChild(subtag);
-	str.setNum(yChannel());
 	text = doc->createTextNode(str);
 	subtag.appendChild(text);
 
@@ -899,7 +863,12 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 			str = tag.attribute(KXMLQLCBusRole);
 			setBus(tag.text().toInt());
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXAlgorithm)
+		else if (tag.tagName() == KXMLQLCEFXFixture)
+		{
+			/* Fixture */
+			addFixture(tag.text().toInt());
+		}
+		else if (tag.tagName() == KXMLQLCEFXAlgorithm)
 		{
 			/* Algorithm */
 			setAlgorithm(tag.text());
@@ -914,22 +883,22 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 			/* Run Order */
 			setRunOrder(Function::stringToRunOrder(tag.text()));
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXWidth)
+		else if (tag.tagName() == KXMLQLCEFXWidth)
 		{
 			/* Width */
 			setWidth(tag.text().toInt());
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXHeight)
+		else if (tag.tagName() == KXMLQLCEFXHeight)
 		{
 			/* Height */
 			setHeight(tag.text().toInt());
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXRotation)
+		else if (tag.tagName() == KXMLQLCEFXRotation)
 		{
 			/* Rotation */
 			setRotation(tag.text().toInt());
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXStartScene)
+		else if (tag.tagName() == KXMLQLCEFXStartScene)
 		{
 			/* Start scene */
 			setStartScene(tag.text().toInt());
@@ -940,7 +909,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 			else
 				setStartSceneEnabled(false);
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXStopScene)
+		else if (tag.tagName() == KXMLQLCEFXStopScene)
 		{
 			/* Stop scene */
 			setStopScene(tag.text().toInt());
@@ -951,7 +920,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 			else
 				setStopSceneEnabled(false);
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXAxis)
+		else if (tag.tagName() == KXMLQLCEFXAxis)
 		{
 			/* Axes */
 			loadXMLAxis(doc, &tag);
@@ -971,11 +940,10 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 
 bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 {
-	QString axis;
-	int offset = 0;
 	int frequency = 0;
+	int offset = 0;
 	int phase = 0;
-	t_channel channel = 0;
+	QString axis;
 
 	QDomNode node;
 	QDomElement tag;
@@ -983,7 +951,7 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 	Q_ASSERT(doc != NULL);
 	Q_ASSERT(root != NULL);
 
-	if (root->tagName() != KXMLQLCFunctionEFXAxis)
+	if (root->tagName() != KXMLQLCEFXAxis)
 	{
 		cout << "EFX axis node not found!" << endl;
 		return false;
@@ -998,21 +966,17 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 	{
 		tag = node.toElement();
 		
-		if (tag.tagName() == KXMLQLCFunctionEFXOffset)
+		if (tag.tagName() == KXMLQLCEFXOffset)
 		{
 			offset = tag.text().toInt();
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXFrequency)
+		else if (tag.tagName() == KXMLQLCEFXFrequency)
 		{
 			frequency = tag.text().toInt();
 		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXPhase)
+		else if (tag.tagName() == KXMLQLCEFXPhase)
 		{
 			phase = tag.text().toInt();
-		}
-		else if (tag.tagName() == KXMLQLCFunctionEFXChannel)
-		{
-			channel = tag.text().toInt();
 		}
 		else
 		{
@@ -1024,19 +988,17 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 		node = node.nextSibling();
 	}
 
-	if (axis == KXMLQLCFunctionEFXY)
+	if (axis == KXMLQLCEFXY)
 	{
 		setYOffset(offset);
 		setYFrequency(frequency);
 		setYPhase(phase);
-		setYChannel(channel);
 	}
-	else if (axis == KXMLQLCFunctionEFXX)
+	else if (axis == KXMLQLCEFXX)
 	{
 		setXOffset(offset);
 		setXFrequency(frequency);
 		setXPhase(phase);
-		setXChannel(channel);
 	}
 	else
 	{
@@ -1066,7 +1028,7 @@ void EFX::slotBusValueChanged(t_bus_id id, t_bus_value value)
 	m_cycleDuration = static_cast<double> (value);
 
 	/* Size of one step */
-	m_stepSize = (double)(1) / ((double)(m_cycleDuration) / (M_PI * 2));
+	m_stepSize = 1.0 / (static_cast<double> (m_cycleDuration) / (M_PI * 2));
 }
 
 /*****************************************************************************
@@ -1088,7 +1050,9 @@ void EFX::circlePoint(EFX* efx, float iterator, float* x, float* y)
 {
 	*x = cos(iterator + M_PI_2);
 	*y = cos(iterator);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
+
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1106,7 +1070,9 @@ void EFX::eightPoint(EFX* efx, float iterator, float* x, float* y)
 {
 	*x = cos((iterator * 2) + M_PI_2);
 	*y = cos(iterator);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
+
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1125,7 +1091,9 @@ void EFX::linePoint(EFX* efx, float iterator, float* x, float* y)
 	/* TODO: It's a simple line, I don't think we need cos() :) */
 	*x = cos(iterator);
 	*y = cos(iterator);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
+
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1144,7 +1112,9 @@ void EFX::trianglePoint(EFX* efx, float iterator, float* x, float* y)
 	/* TODO !!! */
 	*x = cos(iterator);
 	*y = sin(iterator);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
+
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1162,7 +1132,9 @@ void EFX::diamondPoint(EFX* efx, float iterator, float* x, float* y)
 {
 	*x = pow(cos(iterator - M_PI_2), 3);
 	*y = pow(cos(iterator), 3);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
+
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1180,22 +1152,9 @@ void EFX::lissajousPoint(EFX* efx, float iterator, float* x, float* y)
 {
 	*x = cos((efx->m_xFrequency * iterator) - efx->m_xPhase);
 	*y = cos((efx->m_yFrequency * iterator) - efx->m_yPhase);
-	efx->rotateAndScale(efx, x, y, efx->m_rotation);
-}
 
-/**
- * Write the actual calculated coordinate data to
- * event buffer.
- */
-void EFX::setPoint(t_value x, t_value y)
-{
-	m_channelData[0] = (m_address + m_xChannel) << 8;
-	m_channelData[0] |= x;
-
-	m_channelData[1] = (m_address + m_yChannel) << 8;
-	m_channelData[1] |= y;
-
-	m_eventBuffer->put(m_channelData);
+	rotateAndScale(x, y, efx->m_width, efx->m_height,
+		       efx->m_xOffset, efx->m_yOffset, efx->m_rotation);
 }
 
 /**
@@ -1207,14 +1166,19 @@ void EFX::setPoint(t_value x, t_value y)
  * @param y Holds the calculated Y coordinate
  * @param rot Amount of rotation in degrees
  */
-void EFX::rotateAndScale(EFX* efx, float* x, float* y, int rot)
+void EFX::rotateAndScale(float* x, float* y, float w, float h,
+			 float xOff, float yOff, float rotation)
 {
-	float xx, yy;
+	float xx;
+	float yy;
+	float r;
+
 	xx = *x;
 	yy = *y;
-	float r = M_PI/180 * float (rot);
-	*x = efx->m_xOffset + (xx * cos(r) + yy  * sin(r)) * efx->m_width ;
-	*y = efx->m_yOffset + (-xx * sin(r) + yy * cos(r))  * efx->m_height;
+
+	r = M_PI/180 * rotation;
+	*x = xOff + (xx * cos(r) + yy  * sin(r)) * w;
+	*y = yOff + (-xx * sin(r) + yy * cos(r))  * h;
 }
 
 /*****************************************************************************
@@ -1228,34 +1192,79 @@ void EFX::rotateAndScale(EFX* efx, float* x, float* y, int rot)
  */
 void EFX::arm()
 {
-	Fixture* fxi = NULL;
+	QLCFixtureMode* mode;
+	QLCChannel* ch;
+	Fixture* fxi;
+	int channels;
 
-	/* Allocate space for channel data set to eventbuffer.
-	 * There are only two channels to set (X & Y).
-	 */
+	m_channels = 0;
+
+	QListIterator <t_function_id> it(m_fixtures);
+	while (it.hasNext() == true)
+	{
+		EFXFixture ef(this, m_channels, m_direction);
+
+		fxi = _app->doc()->fixture(it.next());
+		Q_ASSERT(fxi != NULL);
+
+		mode = fxi->fixtureMode();
+		Q_ASSERT(mode != NULL);
+
+		channels = 0;
+
+		for (t_channel i = 0; i < mode->channels(); i++)
+		{
+			ch = mode->channel(i);
+			Q_ASSERT(ch != NULL);
+
+			if (ch->group() == KQLCChannelGroupPan)
+			{
+				if (ch->controlByte() == 0)
+				{
+					ef.setLsbPanChannel(
+						fxi->universeAddress() + i);
+					channels++;
+				}
+				else if (ch->controlByte() == 1)
+				{
+					ef.setMsbPanChannel(
+						fxi->universeAddress() + i);
+					channels++;
+				}
+			}
+			else if (ch->group() == KQLCChannelGroupTilt)
+			{
+				if (ch->controlByte() == 0)
+				{
+					ef.setLsbTiltChannel(
+						fxi->universeAddress() + i);
+					channels++;
+				}
+				else if (ch->controlByte() == 1)
+				{
+					ef.setMsbTiltChannel(
+						fxi->universeAddress() + i);
+					channels++;
+				}
+			}
+		}
+
+		/* The fixture must have at least an LSB channel for 8bit
+		   precision to get accepted into the EFX */
+		if (ef.isValid() == true)
+		{
+			m_runTimeData.append(ef);
+			m_channels += channels;
+		}
+	}
+
+	/* Allocate space for channel data that is set to the eventbuffer */
 	if (m_channelData == NULL)
-		m_channelData = new unsigned int[2];
+		m_channelData = new unsigned int[m_channels];
 
-	/* Allocate space for the event buffer.
-	 * There are only two channels to set (X & Y).
-	 */
+	/* Allocate space for the event buffer, 1/2 seconds worth of events */
 	if (m_eventBuffer == NULL)
-		m_eventBuffer = new EventBuffer(2, KFrequency >> 1);
-
-	/* Set the run time address for channel data */
-	fxi = _app->doc()->fixture(fixture());
-	if (fxi != NULL)
-	{
-		m_address = fxi->universeAddress();
-		m_stopped = false;
-	}
-	else
-	{
-		m_stopped = true;
-		cout << "No fixture instance for EFX: "
-		     << Function::name().toStdString()
-		     << endl;
-	}
+		m_eventBuffer = new EventBuffer(m_channels, KFrequency >> 1);
 
 	/* Choose a point calculation function depending on the algorithm */
 	if (m_algorithm == KCircleAlgorithmName)
@@ -1271,15 +1280,7 @@ void EFX::arm()
 	else if (m_algorithm == KLissajousAlgorithmName)
 		pointFunc = lissajousPoint;
 	else
-	{
-		/* There's something wrong, don't run this function */
 		pointFunc = NULL;
-		m_stopped = true;
-
-		cout << "Unknown algorithm used in EFX: "
-		     << m_name.toStdString()
-		     << endl;
-	}
 }
 
 /**
@@ -1288,6 +1289,8 @@ void EFX::arm()
  */
 void EFX::disarm()
 {
+	m_runTimeData.clear();
+
 	if (m_channelData != NULL)
 		delete [] m_channelData;
 	m_channelData = NULL;
@@ -1295,8 +1298,6 @@ void EFX::disarm()
 	if (m_eventBuffer != NULL)
 		delete m_eventBuffer;
 	m_eventBuffer = NULL;
-
-	m_address = KChannelInvalid;
 
 	pointFunc = NULL;
 }
@@ -1315,65 +1316,33 @@ void EFX::stop()
  */
 void EFX::run()
 {
-	float i = 0;
-	float x = 0;
-	float y = 0;
-	Direction dir = direction();
+	m_stopped = true;
+
+	if (pointFunc == NULL)
+		return;
 
 	emit running(m_id);
 
 	m_stopped = false;
 
-	// Set initial speed
+	/* Set initial speed */
 	slotBusValueChanged(m_busID, Bus::value(m_busID));
 
-	// Append this function to running functions' list
+	/* Append this function to running functions' list */
 	_app->functionConsumer()->cue(this);
 
-	// Initialize with start scene
+	/* Initialize with start scene */
 	if (startScene() != KNoID && startSceneEnabled() == true)
 		_app->doc()->function(startScene())->start();
 
 	while (m_stopped == false)
 	{
-		if (dir == Forward)
-		{
-			for (i = 0; i < (M_PI * 2.0) && !m_stopped;
-			     i += m_stepSize)
-			{
-				/* Calculate the next point */
-				pointFunc(this, i, &x, &y);
-	      
-				/* Write the point to event buffer */
-				setPoint(static_cast<t_value> (x),
-					 static_cast<t_value> (y));
-			}
-		}
-		else
-		{
-			for (i = (M_PI * 2.0); i > 0 && !m_stopped;
-			     i -= m_stepSize)
-			{
-				/* Calculate the next point */
-				pointFunc(this, i, &x, &y);
-	      
-				/* Write the point to event buffer */
-				setPoint(static_cast<t_value> (x),
-					 static_cast<t_value> (y));
-			}
-		}
+		/* Go thru all fixtures and calculate their next step */
+		QMutableListIterator <EFXFixture> it(m_runTimeData);
+		while (it.hasNext() == true && m_stopped == false)
+			it.next().nextStep(m_channelData);
 
-		if (runOrder() == PingPong)
-		{
-			if (dir == Forward)
-				dir = Backward;
-			else
-				dir = Forward;
-		}
-		else if (runOrder() == SingleShot)
-		{
-			m_stopped = true;
-		}
+		m_eventBuffer->put(m_channelData);
 	}
 
 	// De-initialize with stop scene

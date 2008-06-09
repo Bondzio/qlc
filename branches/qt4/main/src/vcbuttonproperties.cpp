@@ -111,26 +111,12 @@ void VCButtonProperties::slotSetFunction(t_function_id fid)
 	Fixture* fxi;
 
 	m_function = fid;
+
 	func = _app->doc()->function(m_function);
 	if (func == NULL)
-	{
 		m_functionEdit->setText("No function");
-	}
 	else
-	{
-		fxi = _app->doc()->fixture(func->fixture());
-		if (fxi != NULL)
-		{
-			m_functionEdit->setText(QString("%1 / %2")
-						.arg(fxi->name())
-						.arg(func->name()));
-		}
-		else
-		{
-			m_functionEdit->setText(QString("Global / %2")
-						.arg(func->name()));
-		}
-	}
+		m_functionEdit->setText(func->name());
 }
 
 void VCButtonProperties::slotAttachKey()

@@ -21,6 +21,7 @@
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QMessageBox>
 #include <QPaintEvent>
 #include <QComboBox>
 #include <QCheckBox>
@@ -33,6 +34,7 @@
 #include "common/qlcfixturedef.h"
 #include "common/qlcchannel.h"
 
+#include "fixtureselection.h"
 #include "efxeditor.h"
 #include "fixture.h"
 #include "app.h"
@@ -40,22 +42,107 @@
 
 extern App* _app;
 
+#define KColumnNumber       0
+#define KColumnName         1
+#define KColumnManufacturer 2
+#define KColumnModel        3
+#define KColumnID           4
+
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
 EFXEditor::EFXEditor(QWidget* parent, EFX* efx) : QDialog(parent)
 {
-	Q_ASSERT(efx != NULL);
-
 	setupUi(this);
 
-	m_previewArea = new EFXPreviewArea(m_previewFrame);
+	Q_ASSERT(efx != NULL);
+	m_original = efx;
 
-	/* General page UI connections */
+	/* Create a copy of the original scene so that we can freely modify it.
+	   Keep also a pointer to the original so that we can move the
+	   contents from the copied chaser to the original when OK is clicked */
+	m_efx = new EFX(this);
+	m_efx->copyFrom(efx);
+	Q_ASSERT(m_efx != NULL);
+
+	initGeneralPage();
+	initMovementPage();
+	initInitializationPage();
+}
+
+EFXEditor::~EFXEditor()
+{
+	m_efx->setPreviewPointArray(NULL);
+}
+
+void EFXEditor::initGeneralPage()
+{
+	m_addFixtureButton->setIcon(QIcon(PIXMAPS "/edit_add.png"));
+	m_removeFixtureButton->setIcon(QIcon(PIXMAPS "/edit_remove.png"));
+	m_raiseFixtureButton->setIcon(QIcon(PIXMAPS "/up.png"));
+	m_lowerFixtureButton->setIcon(QIcon(PIXMAPS "/down.png"));
+
 	connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
 		this, SLOT(slotNameEdited(const QString&)));
 
-	connect(m_xCombo, SIGNAL(activated(int)),
-		this, SLOT(slotXAxisActivated(int)));
-	connect(m_yCombo, SIGNAL(activated(int)),
-		this, SLOT(slotYAxisActivated(int)));
+	connect(m_addFixtureButton, SIGNAL(clicked()),
+		this, SLOT(slotAddFixtureClicked()));
+	connect(m_removeFixtureButton, SIGNAL(clicked()),
+		this, SLOT(slotRemoveFixtureClicked()));
+
+	connect(m_raiseFixtureButton, SIGNAL(clicked()),
+		this, SLOT(slotRaiseFixtureClicked()));
+	connect(m_lowerFixtureButton, SIGNAL(clicked()),
+		this, SLOT(slotLowerFixtureClicked()));
+
+	/* Set the EFX's name to the name field */
+	m_nameEdit->setText(m_efx->name());
+	slotNameEdited(m_efx->name());
+
+	/* Put all of the EFX's fixtures to the tree view */
+	QListIterator <t_fixture_id> it(*m_efx->fixtures());
+	while (it.hasNext() == true)
+		addFixtureItem(_app->doc()->fixture(it.next()));
+
+	/* Init bus combo and select the EFX's bus */
+	fillBusCombo();
+}
+
+void EFXEditor::fillBusCombo()
+{
+	m_busCombo->clear();
+
+	for (t_bus_id i = 0; i < KBusCount; i++)
+		m_busCombo->addItem(
+			QString("%1: %2").arg(i + 1).arg(Bus::name(i)));
+
+	m_busCombo->setCurrentIndex(m_efx->busID());
+}
+
+void EFXEditor::initMovementPage()
+{
+	m_previewArea = new EFXPreviewArea(m_previewFrame);
+	m_previewArea->resize(m_previewFrame->width(),
+			      m_previewFrame->height());
+	m_efx->setPreviewPointArray(m_previewArea->points());
+
+	/* Get supported algorithms and fill the algorithm combo with them */
+	QStringList list;
+	EFX::algorithmList(list);
+	m_algorithmCombo->addItems(list);
+
+	connect(m_loop, SIGNAL(clicked()),
+		this, SLOT(slotLoopClicked()));
+	connect(m_singleShot, SIGNAL(clicked()),
+		this, SLOT(slotSingleShotClicked()));
+	connect(m_pingPong, SIGNAL(clicked()),
+		this, SLOT(slotPingPongClicked()));
+
+	connect(m_forward, SIGNAL(clicked()),
+		this, SLOT(slotForwardClicked()));
+	connect(m_backward, SIGNAL(clicked()),
+		this, SLOT(slotBackwardClicked()));
 
 	connect(m_algorithmCombo, SIGNAL(activated(const QString&)),
 		this, SLOT(slotAlgorithmSelected(const QString&)));
@@ -79,64 +166,6 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx) : QDialog(parent)
 	connect(m_yPhaseSpin, SIGNAL(valueChanged(int)),
 		this, SLOT(slotYPhaseSpinChanged(int)));
 
-	/* Advanced page UI connections */
-	connect(m_loop, SIGNAL(clicked()),
-		this, SLOT(slotLoopClicked()));
-	connect(m_singleShot, SIGNAL(clicked()),
-		this, SLOT(slotSingleShotClicked()));
-	connect(m_pingPong, SIGNAL(clicked()),
-		this, SLOT(slotPingPongClicked()));
-
-	connect(m_forward, SIGNAL(clicked()),
-		this, SLOT(slotForwardClicked()));
-	connect(m_backward, SIGNAL(clicked()),
-		this, SLOT(slotBackwardClicked()));
-
-	connect(m_startSceneGroup, SIGNAL(toggled(bool)),
-		this, SLOT(slotStartSceneGroupToggled(bool)));
-	connect(m_stopSceneGroup, SIGNAL(toggled(bool)),
-		this, SLOT(slotStopSceneGroupToggled(bool)));	
-	connect(m_startSceneList, SIGNAL(itemSelectionChanged()),
-		this, SLOT(slotStartSceneListSelectionChanged()));
-	connect(m_stopSceneList, SIGNAL(itemSelectionChanged()),
-		this, SLOT(slotStopSceneListSelectionChanged()));
-
-	/* Get supported algorithms and fill the algorithm combo with them */
-	QStringList list;
-	EFX::algorithmList(list);
-	m_algorithmCombo->addItems(list);
-
-	/* Resize the preview area to fill its frame */
-	m_previewArea->resize(m_previewFrame->width(),
-			      m_previewFrame->height());
-
-	/* Set the currently edited EFX function */
-	setEFX(efx);
-
-	/* Draw the points */
-	m_previewArea->repaint();
-}
-
-EFXEditor::~EFXEditor()
-{
-	m_efx->setPreviewPointArray(NULL);
-}
-
-void EFXEditor::setEFX(EFX* efx)
-{
-	/* Take the new EFX function for editing */
-	m_efx = efx;
-
-	/* Set the algorithm's name to the name field */
-	m_nameEdit->setText(m_efx->name());
-	slotNameEdited(m_efx->name());
-
-	/* Causes the EFX function to update the preview point array */
-	slotAlgorithmSelected(m_efx->algorithm());
-
-	/* Set the preview point array for the new EFX */
-	m_efx->setPreviewPointArray(m_previewArea->points());
-
 	/* Select the EFX's algorithm from the algorithm combo */
 	for (int i = 0; i < m_algorithmCombo->count(); i++)
 	{
@@ -146,6 +175,9 @@ void EFXEditor::setEFX(EFX* efx)
 			break;
 		}
 	}
+
+	/* Causes the EFX function to update the preview point array */
+	slotAlgorithmSelected(m_efx->algorithm());
 
 	/* Get the algorithm parameters */
 	m_widthSpin->setValue(m_efx->width());
@@ -159,7 +191,7 @@ void EFXEditor::setEFX(EFX* efx)
 	m_xPhaseSpin->setValue(m_efx->xPhase());
 	m_yPhaseSpin->setValue(m_efx->yPhase());
 
-	/* Get advanced parameters */
+	/* Running order */
 	switch (m_efx->runOrder())
 	{
 	default:
@@ -174,6 +206,7 @@ void EFXEditor::setEFX(EFX* efx)
 		break;
 	}
 
+	/* Direction */
 	switch (m_efx->direction())
 	{
 	default:
@@ -185,174 +218,245 @@ void EFXEditor::setEFX(EFX* efx)
 		break;
 	}
 
-	fillChannelCombos();
+	/* Draw the points */
+	m_previewArea->repaint();
+}
+
+void EFXEditor::initInitializationPage()
+{
+	connect(m_startSceneGroup, SIGNAL(toggled(bool)),
+		this, SLOT(slotStartSceneGroupToggled(bool)));
+	connect(m_stopSceneGroup, SIGNAL(toggled(bool)),
+		this, SLOT(slotStopSceneGroupToggled(bool)));	
+	connect(m_startSceneList, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotStartSceneListSelectionChanged()));
+	connect(m_stopSceneList, SIGNAL(itemSelectionChanged()),
+		this, SLOT(slotStopSceneListSelectionChanged()));
+
 	fillSceneLists();
 }
 
-void EFXEditor::fillChannelCombos()
+void EFXEditor::accept()
 {
-	QLCChannel* ch = NULL;
-	Fixture* fxi = NULL;
-	QString s;
+	/* Copy the contents of the modified EFX over the original EFX */
+	m_original->copyFrom(m_efx);
 
-	fxi = _app->doc()->fixture(m_efx->fixture());
-	Q_ASSERT(fxi != NULL);
+	QDialog::accept();
+}
 
-	for (t_channel i = 0; i < fxi->channels(); i++)
+/*****************************************************************************
+ * General page
+ *****************************************************************************/
+
+QTreeWidgetItem* EFXEditor::fixtureItem(t_fixture_id fxi_id)
+{
+	QTreeWidgetItemIterator it(m_tree);
+	while (*it != NULL)
 	{
-		ch = fxi->channel(i);
-		if (ch != NULL)
-		{
-			// Insert ch:name strings to combos for
-			// normal fixtures
-			s = QString("%1: %2").arg(i + 1).arg(ch->name());
-			m_xCombo->addItem(s);
-			m_yCombo->addItem(s);
-		}
-		else
-		{
-			// Insert ch:Level strings to combos
-			// for generic dimmer fixtures
-			s = QString("%1: Level").arg(i + 1);
-			m_xCombo->addItem(s);
-			m_yCombo->addItem(s);
-		}
+		QTreeWidgetItem* item = *it;
+		if (item->text(KColumnID).toInt() == fxi_id)
+			return item;
+		++it;
 	}
 
-	/* Select a channel as the X axis */
-	if (m_efx->xChannel() != KChannelInvalid)
+	return NULL;
+}
+
+QList <Fixture*> EFXEditor::selectedFixtures()
+{
+	QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
+	QList <Fixture*> list;
+	
+	while (it.hasNext() == true)
 	{
-		/* If the EFX already has a valid x channel, select it instead */
-		m_xCombo->setCurrentIndex(m_efx->xChannel());
-	}
-	else if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)
-	{
-		/* Try to select a "pan" channel as the Y axis for
-		   normal fixtures */
-		for (t_channel i = 0; i < fxi->channels(); i++)
-		{
-			ch = fxi->channel(i);
-      
-			// Select the first channel that contains "pan"
-			if (ch->name().contains("pan", Qt::CaseInsensitive))
-			{
-				m_xCombo->setCurrentIndex(i);
-				m_efx->setXChannel(i);
-				break;
-			}
-		}
-	}
-	else
-	{
-		m_xCombo->setCurrentIndex(0);
-		m_efx->setXChannel(0);
+		QTreeWidgetItem* item;
+		t_fixture_id fxi_id;
+		Fixture* fixture;
+
+		item = it.next();
+		fxi_id = item->text(KColumnID).toInt();
+		fixture = _app->doc()->fixture(fxi_id);
+		Q_ASSERT(fixture != NULL);
+
+		list.append(fixture);
 	}
 
-	/* Select a channel as the X axis */
-	if (m_efx->yChannel() != KChannelInvalid)
+	return list;
+}
+
+void EFXEditor::updateIndices(int from, int to)
+{
+	QTreeWidgetItem* item;
+	int i;
+
+	for (i = from; i <= to; i++)
 	{
-		/* If the EFX already has valid y channel, select it instead */
-		m_yCombo->setCurrentIndex(m_efx->yChannel());
-	}
-	else if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)
-	{
-		/* Try to select a "tilt" channel as the Y axis for
-		   normal fixtures */
-		for (t_channel i = 0; i < fxi->channels(); i++)
-		{
-			QLCChannel* ch = fxi->channel(i);
-			Q_ASSERT(ch != NULL);
-      
-			// Select the first channel that contains "tilt"
-			if (ch->name().contains("tilt", Qt::CaseInsensitive))
-			{
-				m_yCombo->setCurrentIndex(i);
-				m_efx->setYChannel(i);
-				break;
-			}
-		}
-	}
-	else
-	{
-		m_yCombo->setCurrentIndex(0);
-		m_efx->setXChannel(0);
+		item = m_tree->topLevelItem(i);
+		Q_ASSERT(item != NULL);
+
+		item->setText(KColumnNumber,
+			      QString("%1").arg(i + 1, 3, 10, QChar('0')));
 	}
 }
 
-void EFXEditor::fillSceneLists()
+void EFXEditor::addFixtureItem(Fixture* fixture)
 {
-	Function* function;
 	QTreeWidgetItem* item;
-	QTreeWidgetItem* startItem = NULL;
-	QTreeWidgetItem* stopItem = NULL;
-	QString s;
 
-	Q_ASSERT(m_efx != NULL);
-  
-	for (t_function_id id = 0; id < KFunctionArraySize; id++)
+	Q_ASSERT(fixture != NULL);
+
+	item = new QTreeWidgetItem(m_tree);
+	item->setText(KColumnName, fixture->name());
+	item->setText(KColumnID, QString("%1").arg(fixture->id()));
+
+	if (fixture->fixtureDef() == NULL)
 	{
-		function = _app->doc()->function(id);
-		if (function == NULL)
-			continue;
-	
-		if (function->type() == Function::Scene && 
-		    function->fixture() == m_efx->fixture())
-		{
-			/* Insert the function to start scene list */
-			item = new QTreeWidgetItem(m_startSceneList);
-			item->setText(0, function->name());
-			item->setText(1, s.setNum(function->id()));
-
-			/* Select the scene from the start scene list */
-			if (m_efx->startScene() == function->id())
-			{
-				m_startSceneList->setCurrentItem(item);
-				startItem = item;
-			}
-
-			/* Insert the function to stop scene list */
-			item = new QTreeWidgetItem(m_stopSceneList);
-			item->setText(0, function->name());
-			item->setText(1, s.setNum(function->id()));
-
-			/* Select the scene from the stop scene list */
-			if (m_efx->stopScene() == function->id())
-			{
-				m_stopSceneList->setCurrentItem(item);
-				stopItem = item;
-			}
-		}
+		item->setText(KColumnManufacturer, tr("Generic"));
+		item->setText(KColumnModel, tr("Generic"));
 	}
-  
-	/* Make sure that the selected start scene item is visible */
-	if (startItem != NULL)
-		m_startSceneList->scrollToItem(startItem);
-
-	/* Make sure that the selected stop scene item is visible */
-	if (stopItem != NULL)
-		m_stopSceneList->scrollToItem(stopItem);
-
-	/* Start scene enabled status */
-	if (m_efx->startSceneEnabled() == true)
-		m_startSceneGroup->setChecked(true);
 	else
-		m_startSceneGroup->setChecked(false);
+	{
+		item->setText(KColumnManufacturer,
+			      fixture->fixtureDef()->manufacturer());
+		item->setText(KColumnModel, fixture->fixtureDef()->model());
+	}
 
-	/* Stop scene enabled status */
-	if (m_efx->stopSceneEnabled() == true)
-		m_stopSceneGroup->setChecked(true);
-	else
-		m_stopSceneGroup->setChecked(false);
+	updateIndices(m_tree->indexOfTopLevelItem(item),
+		      m_tree->topLevelItemCount() - 1);
+
+	/* Select newly-added fixtures so that they can be moved quickly */
+	m_tree->setCurrentItem(item);
+}
+
+void EFXEditor::removeFixtureItem(Fixture* fixture)
+{
+	QTreeWidgetItem* item;
+	int from;
+
+	Q_ASSERT(fixture != NULL);
+
+	item = fixtureItem(fixture->id());
+	Q_ASSERT(item != NULL);
+
+	from = m_tree->indexOfTopLevelItem(item);
+	delete item;
+
+	updateIndices(from, m_tree->topLevelItemCount() - 1);
 }
 
 void EFXEditor::slotNameEdited(const QString &text)
 {
 	Q_ASSERT(m_efx != NULL);
 
-	setWindowTitle(QString("EFX Editor - ") + text);
+	setWindowTitle(tr("EFX Editor - %1").arg(text));
 
 	m_efx->setName(text);
 }
+
+void EFXEditor::slotAddFixtureClicked()
+{
+	/* Put all fixtures already present into a list of fixtures that
+	   will be disabled in the fixture selection dialog */
+	QList <t_fixture_id> disabled;
+	QTreeWidgetItemIterator twit(m_tree);
+	while (*twit != NULL)
+	{
+		disabled.append((*twit)->text(KColumnID).toInt());
+		twit++;
+	}
+
+	/* Get a list of new fixtures to add to the scene */
+	FixtureSelection fs(this, _app->doc(), true, disabled);
+	if (fs.exec() == QDialog::Accepted)
+	{
+		QTreeWidgetItem* item;
+		t_fixture_id fxi_id;
+		Fixture* fixture;
+
+		QListIterator <t_fixture_id> it(fs.selection);
+		while (it.hasNext() == true)
+		{
+			fxi_id = it.next();
+
+			fixture = _app->doc()->fixture(fxi_id);
+			Q_ASSERT(fixture != NULL);
+
+			addFixtureItem(fixture);
+			m_efx->addFixture(fxi_id);
+		}
+	}
+}
+
+void EFXEditor::slotRemoveFixtureClicked()
+{
+	int r = QMessageBox::question(
+		this, tr("Remove fixtures"),
+		tr("Do you want to remove the selected fixture(s)?"),
+		QMessageBox::Yes, QMessageBox::No);
+
+	if (r == QMessageBox::Yes)
+	{
+		Fixture* fixture;
+
+		QListIterator <Fixture*> it(selectedFixtures());
+		while (it.hasNext() == true)
+		{
+			fixture = it.next();
+			Q_ASSERT(fixture != NULL);
+
+			removeFixtureItem(fixture);
+			m_efx->removeFixture(fixture->id());
+		}
+	}
+}
+
+void EFXEditor::slotRaiseFixtureClicked()
+{
+	QTreeWidgetItem* item;
+	int index;
+
+	item = m_tree->currentItem();
+	if (item != NULL)
+	{
+		index = m_tree->indexOfTopLevelItem(item);
+		if (index == 0)
+			return;
+
+		m_efx->raiseFixture(item->text(KColumnID).toInt());
+
+		item = m_tree->takeTopLevelItem(index);
+		m_tree->insertTopLevelItem(index - 1, item);
+		m_tree->setCurrentItem(item);
+
+		updateIndices(index - 1, index);
+	}
+}
+
+void EFXEditor::slotLowerFixtureClicked()
+{
+	QTreeWidgetItem* item;
+	int index;
+
+	item = m_tree->currentItem();
+	if (item != NULL)
+	{
+		index = m_tree->indexOfTopLevelItem(item);
+		if (index == (m_tree->topLevelItemCount() - 1))
+			return;
+
+		m_efx->lowerFixture(item->text(KColumnID).toInt());
+
+		item = m_tree->takeTopLevelItem(index);
+		m_tree->insertTopLevelItem(index + 1, item);
+		m_tree->setCurrentItem(item);
+
+		updateIndices(index, index + 1);
+	}
+}
+
+/*****************************************************************************
+ * Movement page
+ *****************************************************************************/
 
 void EFXEditor::slotAlgorithmSelected(const QString &text)
 {
@@ -479,24 +583,6 @@ void EFXEditor::slotYPhaseSpinChanged(int value)
 	m_previewArea->repaint();
 }
 
-void EFXEditor::slotXAxisActivated(int channel)
-{
-	Q_ASSERT(m_efx != NULL);
-
-	m_efx->setXChannel(static_cast<t_channel> (channel));
-
-	m_previewArea->repaint();
-}
-
-void EFXEditor::slotYAxisActivated(int channel)
-{
-	Q_ASSERT(m_efx != NULL);
-
-	m_efx->setYChannel(static_cast<t_channel> (channel));
-
-	m_previewArea->repaint();
-}
-
 /*****************************************************************************
  * Run order
  *****************************************************************************/
@@ -536,14 +622,78 @@ void EFXEditor::slotBackwardClicked()
 }
 
 /*****************************************************************************
- * Start scene
+ * Initialization page
  *****************************************************************************/
+
+void EFXEditor::fillSceneLists()
+{
+	Function* function;
+	QTreeWidgetItem* item;
+	QTreeWidgetItem* startItem = NULL;
+	QTreeWidgetItem* stopItem = NULL;
+	QString s;
+
+	Q_ASSERT(m_efx != NULL);
+  
+	for (t_function_id id = 0; id < KFunctionArraySize; id++)
+	{
+		function = _app->doc()->function(id);
+		if (function == NULL)
+			continue;
+	
+		if (function->type() == Function::Scene)
+		{
+			/* Insert the function to start scene list */
+			item = new QTreeWidgetItem(m_startSceneList);
+			item->setText(0, function->name());
+			item->setText(1, s.setNum(function->id()));
+
+			/* Select the scene from the start scene list */
+			if (m_efx->startScene() == function->id())
+			{
+				m_startSceneList->setCurrentItem(item);
+				startItem = item;
+			}
+
+			/* Insert the function to stop scene list */
+			item = new QTreeWidgetItem(m_stopSceneList);
+			item->setText(0, function->name());
+			item->setText(1, s.setNum(function->id()));
+
+			/* Select the scene from the stop scene list */
+			if (m_efx->stopScene() == function->id())
+			{
+				m_stopSceneList->setCurrentItem(item);
+				stopItem = item;
+			}
+		}
+	}
+  
+	/* Make sure that the selected start scene item is visible */
+	if (startItem != NULL)
+		m_startSceneList->scrollToItem(startItem);
+
+	/* Make sure that the selected stop scene item is visible */
+	if (stopItem != NULL)
+		m_stopSceneList->scrollToItem(stopItem);
+
+	/* Start scene enabled status */
+	if (m_efx->startSceneEnabled() == true)
+		m_startSceneGroup->setChecked(true);
+	else
+		m_startSceneGroup->setChecked(false);
+
+	/* Stop scene enabled status */
+	if (m_efx->stopSceneEnabled() == true)
+		m_stopSceneGroup->setChecked(true);
+	else
+		m_stopSceneGroup->setChecked(false);
+}
 
 void EFXEditor::slotStartSceneGroupToggled(bool state)
 {
 	Q_ASSERT(m_efx != NULL);
 
-	//m_startSceneList->setEnabled(state);
 	m_efx->setStartSceneEnabled(state);
 
 	slotStartSceneListSelectionChanged();
@@ -558,15 +708,10 @@ void EFXEditor::slotStartSceneListSelectionChanged()
 		m_efx->setStartScene(item->text(1).toInt());
 }
 
-/*****************************************************************************
- * Stop scene
- *****************************************************************************/
-
 void EFXEditor::slotStopSceneGroupToggled(bool state)
 {
 	Q_ASSERT(m_efx != NULL);
 
-	//m_stopSceneList->setEnabled(state);
 	m_efx->setStopSceneEnabled(state);
 
 	slotStopSceneListSelectionChanged();

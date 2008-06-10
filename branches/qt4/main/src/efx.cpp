@@ -1221,13 +1221,13 @@ void EFX::arm()
 			{
 				if (ch->controlByte() == 0)
 				{
-					ef.setLsbPanChannel(
+					ef.setMsbPanChannel(
 						fxi->universeAddress() + i);
 					channels++;
 				}
 				else if (ch->controlByte() == 1)
 				{
-					ef.setMsbPanChannel(
+					ef.setLsbPanChannel(
 						fxi->universeAddress() + i);
 					channels++;
 				}
@@ -1236,13 +1236,13 @@ void EFX::arm()
 			{
 				if (ch->controlByte() == 0)
 				{
-					ef.setLsbTiltChannel(
+					ef.setMsbTiltChannel(
 						fxi->universeAddress() + i);
 					channels++;
 				}
 				else if (ch->controlByte() == 1)
 				{
-					ef.setMsbTiltChannel(
+					ef.setLsbTiltChannel(
 						fxi->universeAddress() + i);
 					channels++;
 				}
@@ -1341,7 +1341,7 @@ void EFX::run()
 		QMutableListIterator <EFXFixture> it(m_runTimeData);
 		while (it.hasNext() == true && m_stopped == false)
 			it.next().nextStep(m_channelData);
-
+		
 		m_eventBuffer->put(m_channelData);
 	}
 

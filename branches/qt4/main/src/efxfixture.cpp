@@ -19,12 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <iostream>
 #include <math.h>
 
 #include "eventbuffer.h"
 #include "efxfixture.h"
 #include "function.h"
 #include "efx.h"
+
+using namespace std;
 
 /*****************************************************************************
  * Initialization
@@ -58,12 +61,12 @@ EFXFixture::~EFXFixture()
 
 void EFXFixture::setLsbPanChannel(t_channel ch)
 {
-	m_msbPanChannel = ch;
+	m_lsbPanChannel = ch;
 }
 
 void EFXFixture::setMsbPanChannel(t_channel ch)
 {
-	m_lsbPanChannel = ch;
+	m_msbPanChannel = ch;
 }
 
 void EFXFixture::setLsbTiltChannel(t_channel ch)
@@ -78,8 +81,8 @@ void EFXFixture::setMsbTiltChannel(t_channel ch)
 
 bool EFXFixture::isValid()
 {
-	if (m_lsbPanChannel != KChannelInvalid &&
-	    m_lsbTiltChannel != KChannelInvalid)
+	if (m_msbPanChannel != KChannelInvalid &&
+	    m_msbTiltChannel != KChannelInvalid)
 	{
 		return true;
 	}
@@ -148,14 +151,14 @@ void EFXFixture::setPoint(t_buffer_data* data)
 	if (m_lsbPanChannel != KChannelInvalid)
 	{
 		data[m_index + 2]  = m_lsbPanChannel << 8;
-		data[m_index + 2] |=  static_cast <t_value> 
+		data[m_index + 2] |= static_cast <t_value> 
 			((m_panValue - floor(m_panValue)) * 255.0);
 	}
 
 	if (m_lsbTiltChannel != KChannelInvalid)
 	{
 		data[m_index + 3]  = m_lsbTiltChannel << 8;
-		data[m_index + 3] |=  static_cast <t_value> 
+		data[m_index + 3] |= static_cast <t_value> 
 			((m_tiltValue - floor(m_tiltValue)) * 255.0);
 	}
 }

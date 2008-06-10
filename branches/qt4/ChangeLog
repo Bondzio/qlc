@@ -1,4 +1,11 @@
-2008-06-09  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-10  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/efx.cpp:
+	* main/src/efxfixture.cpp:
+
+	Fixed EFX to work in parallel mode.
+
+2008-06-09  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* TODO:
 	* main/Makefile.am:

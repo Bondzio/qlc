@@ -96,6 +96,9 @@ void EFXEditor::initGeneralPage()
 	connect(m_lowerFixtureButton, SIGNAL(clicked()),
 		this, SLOT(slotLowerFixtureClicked()));
 
+	connect(m_parallelRadio, SIGNAL(toggled(bool)),
+		this, SLOT(slotParallelRadioToggled(bool)));
+
 	/* Set the EFX's name to the name field */
 	m_nameEdit->setText(m_efx->name());
 	slotNameEdited(m_efx->name());
@@ -452,6 +455,14 @@ void EFXEditor::slotLowerFixtureClicked()
 
 		updateIndices(index, index + 1);
 	}
+}
+
+void EFXEditor::slotParallelRadioToggled(bool state)
+{
+	if (state == true)
+		m_efx->setPropagationMode(EFX::Parallel);
+	else
+		m_efx->setPropagationMode(EFX::Serial);
 }
 
 /*****************************************************************************

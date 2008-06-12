@@ -36,6 +36,9 @@ class QString;
 class Fixture;
 
 #define KXMLQLCEFXFixture "Fixture"
+#define KXMLQLCEFXPropagationMode "PropagationMode"
+#define KXMLQLCEFXPropagationModeParallel "Parallel"
+#define KXMLQLCEFXPropagationModeSerial "Serial"
 #define KXMLQLCEFXAlgorithm "Algorithm"
 #define KXMLQLCEFXWidth "Width"
 #define KXMLQLCEFXHeight "Height"
@@ -349,15 +352,24 @@ protected:
 	 * Fixtures
 	 *********************************************************************/
 public:
+	enum PropagationMode { Parallel, Serial };
+
+public:
 	void addFixture(t_fixture_id fxi_id);
 	void removeFixture(t_fixture_id fxi_id);
 	void raiseFixture(t_fixture_id fxi_id);
 	void lowerFixture(t_fixture_id fxi_id);
 
+	void setPropagationMode(PropagationMode mode);
+	PropagationMode propagationMode() const { return m_propagationMode; }
+	static QString propagationModeToString(PropagationMode mode);
+	static PropagationMode stringToPropagationMode(QString str);
+
 	QList <t_fixture_id>* fixtures() { return &m_fixtures; }
 
 protected:
 	QList <t_fixture_id> m_fixtures;
+	PropagationMode m_propagationMode;
 
 	/*********************************************************************
 	 * Start & Stop Scenes

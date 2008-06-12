@@ -71,6 +71,8 @@ EFX::EFX(QObject* parent) : Function(parent, Function::EFX)
 	m_xPhase = 1.5707963267;
 	m_yPhase = 0;
 
+	m_propagationMode = Parallel;
+
 	m_runOrder = EFX::Loop;
 	m_direction = EFX::Forward;
 
@@ -115,6 +117,7 @@ bool EFX::copyFrom(EFX* efx)
 
 	m_fixtures.clear();
 	m_fixtures = efx->m_fixtures;
+	m_propagationMode = efx->m_propagationMode;
 
 	m_width = efx->width();
 	m_height = efx->height();
@@ -595,6 +598,27 @@ void EFX::lowerFixture(t_fixture_id fxi_id)
 	}
 }
 
+void EFX::setPropagationMode(PropagationMode mode)
+{
+	m_propagationMode = mode;
+}
+
+QString EFX::propagationModeToString(PropagationMode mode)
+{
+	if (mode == Serial)
+		return QString(KXMLQLCEFXPropagationModeSerial);
+	else
+		return QString(KXMLQLCEFXPropagationModeParallel);
+}
+
+EFX::PropagationMode EFX::stringToPropagationMode(QString str)
+{
+	if (str == QString(KXMLQLCEFXPropagationModeSerial))
+		return Serial;
+	else
+		return Parallel;
+}
+
 /*****************************************************************************
  * Start & Stop scenes
  *****************************************************************************/
@@ -697,6 +721,8 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	root.setAttribute(KXMLQLCFunctionID, id());
 	root.setAttribute(KXMLQLCFunctionType, Function::typeToString(m_type));
 	root.setAttribute(KXMLQLCFunctionName, name());
+	root.setAttribute(KXMLQLCEFXPropagationMode,
+			  propagationModeToString(m_propagationMode));
 
 	/* Fixtures */
 	QListIterator <t_fixture_id> it(m_fixtures);
@@ -850,6 +876,10 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 		cout << "Function node not found!" << endl;
 		return false;
 	}
+
+	/* Propagation mode */
+	str = root->attribute(KXMLQLCEFXPropagationMode);
+	setPropagationMode(stringToPropagationMode(str));
 
 	/* Load EFX contents */
 	node = root->firstChild();

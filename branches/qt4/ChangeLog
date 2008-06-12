@@ -1,4 +1,4 @@
-2008-06-12  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-12  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:
 	* main/src/efxeditor.cpp:
@@ -9,7 +9,7 @@
 	Added propagation mode stuff to EFX::save&load functions.
 	Added propagation mode updating to EFXEditor.
 
-2008-06-12  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-12  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:
 	* main/src/efx.h:

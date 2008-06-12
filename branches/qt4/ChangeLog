@@ -1,6 +1,17 @@
 2008-06-12  Heikki Junnila  <heikki.junnila@users.sf.net>
 
 	* main/src/efx.cpp:
+	* main/src/efxeditor.cpp:
+	* main/src/efxeditor.h:
+	* main/src/functionmanager.cpp:
+
+	Fixed crash bug in functionmanager slotFunctionAdded().
+	Added propagation mode stuff to EFX::save&load functions.
+	Added propagation mode updating to EFXEditor.
+
+2008-06-12  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/efx.cpp:
 	* main/src/efx.h:
 	* main/src/efxeditor.cpp:
 	* main/src/efxeditor.h:

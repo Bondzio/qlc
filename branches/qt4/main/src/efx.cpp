@@ -721,8 +721,6 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 	root.setAttribute(KXMLQLCFunctionID, id());
 	root.setAttribute(KXMLQLCFunctionType, Function::typeToString(m_type));
 	root.setAttribute(KXMLQLCFunctionName, name());
-	root.setAttribute(KXMLQLCEFXPropagationMode,
-			  propagationModeToString(m_propagationMode));
 
 	/* Fixtures */
 	QListIterator <t_fixture_id> it(m_fixtures);
@@ -733,6 +731,12 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 		text = doc->createTextNode(str.setNum(it.next()));
 		tag.appendChild(text);
 	}
+
+	/* Propagation mode */
+	tag = doc->createElement(KXMLQLCEFXPropagationMode);
+	root.appendChild(tag);
+	text = doc->createTextNode(propagationModeToString(m_propagationMode));
+	tag.appendChild(text);
 
 	/* Speed bus */
 	tag = doc->createElement(KXMLQLCBus);
@@ -877,10 +881,6 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 		return false;
 	}
 
-	/* Propagation mode */
-	str = root->attribute(KXMLQLCEFXPropagationMode);
-	setPropagationMode(stringToPropagationMode(str));
-
 	/* Load EFX contents */
 	node = root->firstChild();
 	while (node.isNull() == false)
@@ -897,6 +897,11 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 		{
 			/* Fixture */
 			addFixture(tag.text().toInt());
+		}
+		else if (tag.tagName() == KXMLQLCEFXPropagationMode)
+		{
+			/* Propagation mode */
+			setPropagationMode(stringToPropagationMode(tag.text()));
 		}
 		else if (tag.tagName() == KXMLQLCEFXAlgorithm)
 		{

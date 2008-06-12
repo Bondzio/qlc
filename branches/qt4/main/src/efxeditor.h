@@ -77,6 +77,7 @@ protected slots:
 	void slotLowerFixtureClicked();
 
 	void slotParallelRadioToggled(bool state);
+	void slotBusComboActivated(int index);
 
 	/*********************************************************************
 	 * Movement page

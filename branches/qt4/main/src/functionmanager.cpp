@@ -91,7 +91,7 @@ FunctionManager::~FunctionManager()
  * Doc signal handlers
  *****************************************************************************/
 
-void FunctionManager::slotFunctionAdded(t_function_id id)
+void FunctionManager::slotFunctionAdded(t_function_id fid)
 {
 	QTreeWidgetItem* item;
 	Function* function;
@@ -103,6 +103,7 @@ void FunctionManager::slotFunctionAdded(t_function_id id)
 	
 	// Create a new item for the function
 	item = new QTreeWidgetItem(m_functionTree);
+	function = _app->doc()->function(fid);
 	updateFunctionItem(item, function);
 }
 
@@ -585,8 +586,8 @@ void FunctionManager::updateFunctionTree()
 void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
 					 Function* function)
 {
-	if (item == NULL || function == NULL)
-		return;
+	Q_ASSERT(item != NULL);
+	Q_ASSERT(function != NULL);
 
 	item->setText(KColumnName, function->name());
 	item->setIcon(KColumnName, function->icon());

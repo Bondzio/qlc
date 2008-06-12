@@ -99,6 +99,9 @@ void EFXEditor::initGeneralPage()
 	connect(m_parallelRadio, SIGNAL(toggled(bool)),
 		this, SLOT(slotParallelRadioToggled(bool)));
 
+	connect(m_busCombo, SIGNAL(activated(int)),
+		this, SLOT(slotBusComboActivated(int)));
+
 	/* Set the EFX's name to the name field */
 	m_nameEdit->setText(m_efx->name());
 	slotNameEdited(m_efx->name());
@@ -107,6 +110,12 @@ void EFXEditor::initGeneralPage()
 	QListIterator <t_fixture_id> it(*m_efx->fixtures());
 	while (it.hasNext() == true)
 		addFixtureItem(_app->doc()->fixture(it.next()));
+
+	/* Set propagation mode */
+	if (m_efx->propagationMode() == EFX::Serial)
+		m_serialRadio->setChecked(true);
+	else
+		m_parallelRadio->setChecked(true);
 
 	/* Init bus combo and select the EFX's bus */
 	fillBusCombo();
@@ -459,10 +468,18 @@ void EFXEditor::slotLowerFixtureClicked()
 
 void EFXEditor::slotParallelRadioToggled(bool state)
 {
+	Q_ASSERT(m_efx != NULL);
+
 	if (state == true)
 		m_efx->setPropagationMode(EFX::Parallel);
 	else
 		m_efx->setPropagationMode(EFX::Serial);
+}
+
+void EFXEditor::slotBusComboActivated(int index)
+{
+	Q_ASSERT(m_efx != NULL);
+	m_efx->setBus(index);
 }
 
 /*****************************************************************************

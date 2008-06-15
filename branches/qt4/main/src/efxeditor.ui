@@ -611,6 +611,24 @@
          <layout class="QVBoxLayout" >
           <item>
            <widget class="QTreeWidget" name="m_startSceneList" >
+            <property name="alternatingRowColors" >
+             <bool>true</bool>
+            </property>
+            <property name="rootIsDecorated" >
+             <bool>false</bool>
+            </property>
+            <property name="itemsExpandable" >
+             <bool>false</bool>
+            </property>
+            <property name="sortingEnabled" >
+             <bool>true</bool>
+            </property>
+            <property name="allColumnsShowFocus" >
+             <bool>true</bool>
+            </property>
+            <property name="expandsOnDoubleClick" >
+             <bool>false</bool>
+            </property>
             <column>
              <property name="text" >
               <string>Scene</string>
@@ -635,6 +653,24 @@
          <layout class="QVBoxLayout" >
           <item>
            <widget class="QTreeWidget" name="m_stopSceneList" >
+            <property name="alternatingRowColors" >
+             <bool>true</bool>
+            </property>
+            <property name="rootIsDecorated" >
+             <bool>false</bool>
+            </property>
+            <property name="itemsExpandable" >
+             <bool>false</bool>
+            </property>
+            <property name="sortingEnabled" >
+             <bool>true</bool>
+            </property>
+            <property name="allColumnsShowFocus" >
+             <bool>true</bool>
+            </property>
+            <property name="expandsOnDoubleClick" >
+             <bool>false</bool>
+            </property>
             <column>
              <property name="text" >
               <string>Scene</string>

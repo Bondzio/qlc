@@ -1,3 +1,21 @@
+2008-06-15  Heikki Junnila  <heikki.junnila@users.sf.net>
+
+	* main/src/dmxmap.cpp:
+	* main/src/efx.cpp:
+	* main/src/efx.h:
+	* main/src/efxeditor.ui:
+	* main/src/efxfixture.cpp:
+	* main/src/efxfixture.h:
+	* main/src/functionselection.ui:
+	* main/src/scene.cpp:
+	* main/src/scene.h:
+
+	First real attempt at EFX serial propagation mode. Not too good.
+	Renamed RunTimeData to SceneChannel.
+	Added Scene::writeValues() that is supposed to write the scene
+	contents to DMXMap during EFX init/deinit, but EFX doesn't seem to
+	like using any Scene* objects within... Dammit.
+	
 2008-06-12  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:

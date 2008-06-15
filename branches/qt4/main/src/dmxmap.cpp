@@ -305,6 +305,9 @@ bool DMXMap::getValueRange(t_channel address, t_value* values, t_channel num)
 
 void DMXMap::setValue(t_channel channel, t_value value)
 {
+	if (channel == KChannelInvalid)
+		return;
+
 	Q_ASSERT(channel < (m_universes * 512));
 
 	if (m_blackout == true)

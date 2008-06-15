@@ -35,6 +35,7 @@
 #include "functionconsumer.h"
 #include "eventbuffer.h"
 #include "fixture.h"
+#include "scene.h"
 #include "app.h"
 #include "doc.h"
 #include "efx.h"
@@ -87,7 +88,6 @@ EFX::EFX(QObject* parent) : Function(parent, Function::EFX)
 	m_algorithm = KCircleAlgorithmName;
 
 	m_stepSize = 0;
-	m_cycleDuration = KFrequency;
 
 	m_channelData = NULL;
 
@@ -144,7 +144,6 @@ bool EFX::copyFrom(EFX* efx)
 	m_algorithm = QString(efx->algorithm());
 
 	m_stepSize = 0;
-	m_cycleDuration = KFrequency;
 
 	m_channelData = NULL;
 
@@ -1059,11 +1058,8 @@ void EFX::slotBusValueChanged(t_bus_id id, t_bus_value value)
 	if (id != m_busID)
 		return;
 
-	/* Basically number of steps required to complete a full cycle */
-	m_cycleDuration = static_cast<double> (value);
-
 	/* Size of one step */
-	m_stepSize = 1.0 / (static_cast<double> (m_cycleDuration) / (M_PI * 2));
+	m_stepSize = 1.0 / (float(value) / float(M_PI * 2.0));
 }
 
 /*****************************************************************************
@@ -1288,6 +1284,7 @@ void EFX::arm()
 		   precision to get accepted into the EFX */
 		if (ef.isValid() == true)
 		{
+			ef.updateSkipThreshold();
 			m_runTimeData.append(ef);
 			m_channels += channels;
 		}
@@ -1367,12 +1364,12 @@ void EFX::run()
 	_app->functionConsumer()->cue(this);
 
 	/* Initialize with start scene */
-	if (startScene() != KNoID && startSceneEnabled() == true)
-		_app->doc()->function(startScene())->start();
+	if (m_startSceneID != KNoID && m_startSceneEnabled == true)
+		;
 
+	/* Go thru all fixtures and calculate their next step */
 	while (m_stopped == false)
 	{
-		/* Go thru all fixtures and calculate their next step */
 		QMutableListIterator <EFXFixture> it(m_runTimeData);
 		while (it.hasNext() == true && m_stopped == false)
 			it.next().nextStep(m_channelData);
@@ -1380,7 +1377,13 @@ void EFX::run()
 		m_eventBuffer->put(m_channelData);
 	}
 
-	// De-initialize with stop scene
-	if (stopScene() != KNoID && stopSceneEnabled())
-		_app->doc()->function(stopScene())->start();
+	/* De-initialize with stop scene */
+	if (m_stopSceneID != KNoID && m_stopSceneEnabled == true)
+		;
+
+	/* Reset all fixtures */
+	QMutableListIterator <EFXFixture> it(m_runTimeData);
+	while (it.hasNext() == true)
+		it.next().reset();
+
 }

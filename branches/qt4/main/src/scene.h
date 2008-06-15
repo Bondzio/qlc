@@ -28,9 +28,7 @@
 #include "common/qlctypes.h"
 
 class EventBuffer;
-class RunTimeData;
 class Fixture;
-class Scene;
 
 class QDomDocument;
 class QDomElement;
@@ -40,10 +38,32 @@ class QDomElement;
 #define KXMLQLCSceneValueChannel "Channel"
 
 /*****************************************************************************
+ * SceneChannel
+ *****************************************************************************/
+
+class SceneChannel
+{
+public:
+	/** The universe and channel that this object refers to */
+	t_channel address;
+
+	/** The value of the channel where a scene started fading from */
+	float start;
+
+	/** The current value set by a scene */
+	float current;
+
+	/** The target value to eventually fade to */
+	float target;
+
+	/** If true, this value is ready, don't set it anymore to DMX */
+	bool ready;
+};
+
+/*****************************************************************************
  * SceneValue
  *****************************************************************************/
 
-class SceneValue;
 class SceneValue
 {
 public:
@@ -89,20 +109,53 @@ class Scene : public Function
 	 * Initialization
 	 *********************************************************************/
 public:
+	/**
+	 * Construct a new scene function, with parent object (Doc)
+	 */
 	Scene(QObject* parent);
+	
+	/**
+	 * Destroy the scene
+	 */
 	~Scene();
 
-	void copyFrom(Scene* ch);
+	/**
+	 * Copy all contents (except ID) from another scene function
+	 */
+	void copyFrom(Scene* scene);
 	
 	/*********************************************************************
 	 * Values
 	 *********************************************************************/
 public:
+	/**
+	 * Set the value of one fixture channel, using a predefined SceneValue
+	 */
 	void setValue(SceneValue scv);
-	void setValue(t_fixture_id fxi, t_channel ch, t_value value);
-	void unsetValue(t_fixture_id fxi, t_channel ch);
-	SceneValue value(t_fixture_id fxi, t_channel ch);
 
+	/**
+	 * Set the value of one fixture channel, specify parameters separately
+	 */
+	void setValue(t_fixture_id fxi, t_channel ch, t_value value);
+
+	/**
+	 * Clear the value of one fixture channel
+	 */
+	void unsetValue(t_fixture_id fxi, t_channel ch);
+
+	/**
+	 * Get the value of one fixture channel
+	 */
+	t_value value(t_fixture_id fxi, t_channel ch);
+
+	/**
+	 * Write the scene values to DMX Map
+	 */
+	void writeValues();
+
+	/**
+	 * Get a list of values in this scene
+	 */
 	QList <SceneValue> *values() { return &m_values; }
 
 	/*********************************************************************
@@ -116,9 +169,15 @@ public:
 	 * Bus
 	 *********************************************************************/
 public slots:
+	/**
+	 * Listener for bus value changes
+	 */
 	void slotBusValueChanged(t_bus_id id, t_bus_value value);
 
 public:
+	/**
+	 * Initiate speed change with the given bus value
+	 */
 	void speedChange(t_bus_value value);
 	
 	/*********************************************************************
@@ -137,23 +196,11 @@ protected:
 	
 	t_bus_value m_timeSpan;
 	t_bus_value m_elapsedTime;
-	
-	RunTimeData* m_runTimeData;
+
+	SceneChannel* m_channels;
 	t_buffer_data* m_channelData;
 
 	bool m_stopped;
-};
-
-class RunTimeData
-{
-public:
-	t_channel address;
-
-	float start;
-	float current;
-	float target;
-
-	bool ready;
 };
 
 #endif

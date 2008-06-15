@@ -359,6 +359,7 @@ public:
 	void removeFixture(t_fixture_id fxi_id);
 	void raiseFixture(t_fixture_id fxi_id);
 	void lowerFixture(t_fixture_id fxi_id);
+	int fixtureCount() const { return m_fixtures.count(); }
 
 	void setPropagationMode(PropagationMode mode);
 	PropagationMode propagationMode() const { return m_propagationMode; }
@@ -627,15 +628,6 @@ protected:
 	 * is 64, then this is 1/64.
 	 */
 	float m_stepSize;
-
-	/**
-	 * How long (how many timer ticks) the function should take to complete
-	 * one cycle. One timer tick is 1/KFrequency (== 1/64th of a second). So
-	 * setting KFrequency as the cycle duration means that this function
-	 * takes one second to complete a full cycle (for example a complete
-	 * circle).
-	 */
-	float m_cycleDuration;
 
 	/**
 	 * Channel data that is written to the event buffer

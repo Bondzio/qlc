@@ -36,6 +36,9 @@ public:
 	EFXFixture(EFX* parent, int index, Function::Direction direction);
 	~EFXFixture();
 
+	/** Reset the fixture when the EFX is stopped */
+	void reset();
+
 protected:
 	/** The EFX function that this fixture belongs to */
 	EFX* m_parent;
@@ -56,6 +59,8 @@ public:
 	void setLsbTiltChannel(t_channel ch);
 	void setMsbTiltChannel(t_channel ch);
 
+	void updateSkipThreshold();
+
 	bool isValid();
 
 protected:
@@ -64,6 +69,19 @@ protected:
 	 * circle's circumference)
 	 */
 	float m_iterator;
+
+	/**
+	 * This iterator is incremented until it is >= m_skipThreshold.
+	 * After that, m_iterator is incremented. Used for serial propagation.
+	 */
+	float m_skipIterator;
+
+	/**
+	 * This is basically the index of a point in the EFX's pattern,
+	 * where this fixture will start doing its stuff. Used for serial
+	 * propagation.
+	 */
+	float m_skipThreshold;
 
 	/**
 	 * The current pan value

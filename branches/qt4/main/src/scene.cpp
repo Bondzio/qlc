@@ -147,7 +147,7 @@ Scene::Scene(QObject* parent) : Function(parent, Function::Scene)
 {
 	m_timeSpan = 255;
 	m_elapsedTime = 0;
-	m_runTimeData = NULL;
+	m_channels = NULL;
 	m_channelData = NULL;
 	
 	setBus(KBusIDDefaultFade);
@@ -200,14 +200,23 @@ void Scene::unsetValue(t_fixture_id fxi, t_channel ch)
 	m_values.removeAll(SceneValue(fxi, ch, 0));
 }
 
-SceneValue Scene::value(t_fixture_id fxi, t_channel ch)
+t_value Scene::value(t_fixture_id fxi, t_channel ch)
 {
 	SceneValue scv(fxi, ch, 0);
 	int index = m_values.indexOf(scv);
 	if (index == -1)
-		return SceneValue(KNoID, 0, 0);
+		return 0;
 	else
-		return m_values.at(index);
+		return m_values.at(index).value;
+}
+
+void Scene::writeValues()
+{
+	for (int i = 0; i < m_values.count(); i++)
+	{
+		_app->dmxMap()->setValue(m_channels[i].address,
+					 m_values[i].value);
+	}
 }
 
 /*****************************************************************************
@@ -332,8 +341,8 @@ void Scene::arm()
 {
 	int i = 0;
 
-	if (m_runTimeData == NULL)
-		m_runTimeData = new RunTimeData[m_values.count()];
+	if (m_channels == NULL)
+		m_channels = new SceneChannel[m_values.count()];
 
 	if (m_channelData == NULL)
 		m_channelData = new t_buffer_data[m_values.count()];
@@ -352,7 +361,7 @@ void Scene::arm()
 		Fixture* fxi = _app->doc()->fixture(scv.fxi);
 		Q_ASSERT(fxi != NULL);
 
-		m_runTimeData[i].address = fxi->universeAddress() + scv.channel;
+		m_channels[i].address = fxi->universeAddress() + scv.channel;
 		m_channelData[i] = (fxi->universeAddress() + scv.channel) << 8;
 		i++;
 	}
@@ -360,9 +369,9 @@ void Scene::arm()
 
 void Scene::disarm()
 {
-	if (m_runTimeData != NULL)
-		delete [] m_runTimeData;
-	m_runTimeData = NULL;
+	if (m_channels != NULL)
+		delete [] m_channels;
+	m_channels = NULL;
 	
 	if (m_channelData != NULL)
 		delete [] m_channelData;
@@ -404,22 +413,22 @@ void Scene::run()
 	/* Fill run-time buffers with the data for the first step */
 	for (i = 0; i < channels; i++)
 	{
-		m_runTimeData[i].current = m_runTimeData[i].start =
+		m_channels[i].current = m_channels[i].start =
 			static_cast<float> 
-			(_app->dmxMap()->getValue(m_runTimeData[i].address));
+			(_app->dmxMap()->getValue(m_channels[i].address));
 		
-		m_runTimeData[i].target = 
+		m_channels[i].target = 
 			static_cast<float> (m_values.at(i).value);
 		
 		/* Check, whether this scene needs to play at all */
-		if (m_runTimeData[i].current == m_values.at(i).value)
+		if (m_channels[i].current == m_values.at(i).value)
 		{
-			m_runTimeData[i].ready = true;
+			m_channels[i].ready = true;
 			ready--;
 		}
 		else
 		{
-			m_runTimeData[i].ready = false;
+			m_channels[i].ready = false;
 		}
 	}
 
@@ -436,7 +445,7 @@ void Scene::run()
 	{
 		for (i = 0; i < channels; i++)
 		{
-			if (m_runTimeData[i].ready == true)
+			if (m_channels[i].ready == true)
 			{
 				/* This channel contains a value that is not
 				   supposed to be written anymore, since as far
@@ -451,10 +460,10 @@ void Scene::run()
 				/* Calculate the current value based on what
 				   it should be after m_elapsedTime, so that it
 				   will be ready when elapsedTime == timeSpan */
-				m_runTimeData[i].current = 
-					m_runTimeData[i].start
-					+ (m_runTimeData[i].target 
-					   - m_runTimeData[i].start)
+				m_channels[i].current = 
+					m_channels[i].start
+					+ (m_channels[i].target 
+					   - m_channels[i].start)
 					* ((float)m_elapsedTime / m_timeSpan);
 				
 				/* The address is in the first 8 bits, so
@@ -462,7 +471,7 @@ void Scene::run()
 				   value to the lowest 8 bits with OR. */
 				m_channelData[i] = (m_channelData[i] & 0xff00) 
 					| static_cast<t_buffer_data>
-					(m_runTimeData[i].current);
+					(m_channels[i].current);
 			}
 		}
 		
@@ -476,7 +485,7 @@ void Scene::run()
 	   add up because of rounding errors and inaccuracy of floats). */
 	for (i = 0; i < channels && m_stopped == false; i++)
 	{
-		if (m_runTimeData[i].ready == true)
+		if (m_channels[i].ready == true)
 		{
 			m_channelData[i] = KChannelInvalid << 8;
 			m_channelData[i] |= 0;
@@ -485,10 +494,10 @@ void Scene::run()
 		{
 			/* Just set the target value */
 			m_channelData[i] |= static_cast<t_buffer_data>
-				(m_runTimeData[i].target);
+				(m_channels[i].target);
 			
 			/* ...and don't touch this channel anymore */
-			m_runTimeData[i].ready = true;
+			m_channels[i].ready = true;
 		}
 	}
 	

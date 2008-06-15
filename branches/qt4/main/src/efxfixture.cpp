@@ -41,6 +41,8 @@ EFXFixture::EFXFixture(EFX* parent, int index, Function::Direction direction)
 	m_index = index;
 	m_direction = direction;
 
+	m_skipIterator = 0;
+	m_skipThreshold = 0;
 	m_iterator = 0;
 	m_panValue = 0;
 	m_tiltValue = 0;
@@ -53,6 +55,12 @@ EFXFixture::EFXFixture(EFX* parent, int index, Function::Direction direction)
 
 EFXFixture::~EFXFixture()
 {
+}
+
+void EFXFixture::reset()
+{
+	m_skipIterator = 0;
+	m_iterator = 0;
 }
 
 /*****************************************************************************
@@ -79,6 +87,12 @@ void EFXFixture::setMsbTiltChannel(t_channel ch)
 	m_msbTiltChannel = ch;
 }
 
+void EFXFixture::updateSkipThreshold()
+{
+	m_skipThreshold = float(m_index) *
+		(float(M_PI * 2.0) / float(m_parent->fixtureCount()));
+}
+
 bool EFXFixture::isValid()
 {
 	if (m_msbPanChannel != KChannelInvalid &&
@@ -98,7 +112,15 @@ bool EFXFixture::isValid()
 
 void EFXFixture::nextStep(t_buffer_data* data)
 {
-	m_iterator += m_parent->m_stepSize;
+	if (m_parent->propagationMode() == EFX::Serial &&
+	    m_skipIterator < m_skipThreshold)
+	{
+		m_skipIterator += m_parent->m_stepSize;
+	}
+	else
+	{
+		m_iterator += m_parent->m_stepSize;
+	}
 
 	if (m_iterator < (M_PI * 2.0))
 	{

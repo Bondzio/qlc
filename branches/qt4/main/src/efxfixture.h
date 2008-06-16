@@ -33,7 +33,8 @@ class EFXFixture
 	 * Initialization
 	 *********************************************************************/
 public:
-	EFXFixture(EFX* parent, int index, Function::Direction direction);
+	EFXFixture(EFX* parent, int index, int order,
+		   Function::Direction direction);
 	~EFXFixture();
 
 	/** Reset the fixture when the EFX is stopped */
@@ -45,6 +46,9 @@ protected:
 
 	/** This fixture's starting index in m_channelData */
 	int m_index;
+
+	/** This fixture's order in serial propagation mode */
+	int m_order;
 
 	/** This fixture's current direction */
 	Function::Direction m_direction;

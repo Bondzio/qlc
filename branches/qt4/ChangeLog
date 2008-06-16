@@ -1,4 +1,12 @@
-2008-06-15  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-16  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/efx.cpp:
+	* main/src/efxfixture.cpp:
+	* main/src/efxfixture.h:
+
+	Fixed EFX serial propagation mode.
+	
+2008-06-15  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/dmxmap.cpp:
 	* main/src/efx.cpp:

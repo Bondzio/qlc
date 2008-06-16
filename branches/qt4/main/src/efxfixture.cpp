@@ -33,12 +33,14 @@ using namespace std;
  * Initialization
  *****************************************************************************/
 
-EFXFixture::EFXFixture(EFX* parent, int index, Function::Direction direction)
+EFXFixture::EFXFixture(EFX* parent, int index, int order,
+		       Function::Direction direction)
 {
 	Q_ASSERT(parent != NULL);
 
 	m_parent = parent;
 	m_index = index;
+	m_order = order;
 	m_direction = direction;
 
 	m_skipIterator = 0;
@@ -89,7 +91,11 @@ void EFXFixture::setMsbTiltChannel(t_channel ch)
 
 void EFXFixture::updateSkipThreshold()
 {
-	m_skipThreshold = float(m_index) *
+	/* One EFX "round" is always (pi * 2) long. Divide this "circumference"
+	   into as many steps as there are fixtures in this EFX. If there are
+	   four fixtures, these steps end up in 12 o'clock, 3 o'clock,
+	   6 o'clock and 9 o'clock etc.. */
+	m_skipThreshold = float(m_order) *
 		(float(M_PI * 2.0) / float(m_parent->fixtureCount()));
 }
 

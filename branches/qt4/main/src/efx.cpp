@@ -1226,14 +1226,15 @@ void EFX::arm()
 	QLCFixtureMode* mode;
 	QLCChannel* ch;
 	Fixture* fxi;
-	int channels;
+	int channels = 0;
+	int order = 0;
 
 	m_channels = 0;
 
 	QListIterator <t_function_id> it(m_fixtures);
 	while (it.hasNext() == true)
 	{
-		EFXFixture ef(this, m_channels, m_direction);
+		EFXFixture ef(this, m_channels, order, m_direction);
 
 		fxi = _app->doc()->fixture(it.next());
 		Q_ASSERT(fxi != NULL);
@@ -1287,6 +1288,7 @@ void EFX::arm()
 			ef.updateSkipThreshold();
 			m_runTimeData.append(ef);
 			m_channels += channels;
+			order++;
 		}
 	}
 

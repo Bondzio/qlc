@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <iostream>
 #include <QPolygon>
+#include <QtDebug>
 #include <QList>
 #include <QtXml>
 
@@ -876,7 +877,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCFunction)
 	{
-		cout << "Function node not found!" << endl;
+		qWarning() << "Function node not found!";
 		return false;
 	}
 
@@ -961,9 +962,7 @@ bool EFX::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			cout << "Unknown EFX tag: "
-			     << tag.tagName().toStdString()
-			     << endl;
+			qWarning() << "Unknown EFX tag:" << tag.tagName();
 		}
 		
 		node = node.nextSibling();
@@ -987,7 +986,7 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCEFXAxis)
 	{
-		cout << "EFX axis node not found!" << endl;
+		qWarning() << "EFX axis node not found!";
 		return false;
 	}
 
@@ -1014,9 +1013,8 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			cout << "Unknown EFX axis tag: "
-			     << tag.tagName().toStdString()
-			     << endl;
+			qWarning() << "Unknown EFX axis tag: "
+				   << tag.tagName();
 		}
 		
 		node = node.nextSibling();
@@ -1036,7 +1034,7 @@ bool EFX::loadXMLAxis(QDomDocument* doc, QDomElement* root)
 	}
 	else
 	{
-		cout << "Unknown EFX axis: " << axis.toStdString() << endl;
+		qWarning() << "Unknown EFX axis:" << axis;
 	}
 	
 	return true;
@@ -1059,7 +1057,7 @@ void EFX::slotBusValueChanged(t_bus_id id, t_bus_value value)
 		return;
 
 	/* Size of one step */
-	m_stepSize = 1.0 / (float(value) / float(M_PI * 2.0));
+	m_stepSize = float(1) / (float(value) / float(M_PI * 2));
 }
 
 /*****************************************************************************
@@ -1350,6 +1348,8 @@ void EFX::stop()
  */
 void EFX::run()
 {
+	class Scene* scene;
+
 	m_stopped = true;
 
 	if (pointFunc == NULL)
@@ -1367,7 +1367,12 @@ void EFX::run()
 
 	/* Initialize with start scene */
 	if (m_startSceneID != KNoID && m_startSceneEnabled == true)
-		;
+	{
+		scene = static_cast <class Scene*>
+			(_app->doc()->function(m_startSceneID));
+		Q_ASSERT(scene != NULL);
+		scene->writeValues();
+	}
 
 	/* Go thru all fixtures and calculate their next step */
 	while (m_stopped == false)
@@ -1379,9 +1384,18 @@ void EFX::run()
 		m_eventBuffer->put(m_channelData);
 	}
 
+	/* Clear the event buffer's contents so that this function will
+	   stop immediately. */
+	m_eventBuffer->purge();
+
 	/* De-initialize with stop scene */
 	if (m_stopSceneID != KNoID && m_stopSceneEnabled == true)
-		;
+	{
+		scene = static_cast <class Scene*>
+			(_app->doc()->function(m_stopSceneID));
+		Q_ASSERT(scene != NULL);
+		scene->writeValues();
+	}
 
 	/* Reset all fixtures */
 	QMutableListIterator <EFXFixture> it(m_runTimeData);

@@ -23,15 +23,13 @@
 #define SCENE_H
 
 #include <QList>
+#include <QtXml>
 
-#include "function.h"
 #include "common/qlctypes.h"
 
-class EventBuffer;
-class Fixture;
-
-class QDomDocument;
-class QDomElement;
+#include "eventbuffer.h"
+#include "function.h"
+#include "fixture.h"
 
 #define KXMLQLCSceneValue "Value"
 #define KXMLQLCSceneValueFixture "Fixture"
@@ -158,6 +156,9 @@ public:
 	 */
 	QList <SceneValue> *values() { return &m_values; }
 
+protected:
+	QList <SceneValue> m_values;	
+
 	/*********************************************************************
 	 * Load & Save
 	 *********************************************************************/
@@ -192,8 +193,6 @@ protected:
 	void run();
 	
 protected:
-	QList <SceneValue> m_values;
-	
 	t_bus_value m_timeSpan;
 	t_bus_value m_elapsedTime;
 

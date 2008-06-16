@@ -1,5 +1,11 @@
 2008-06-16  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/src/scene.cpp:
+
+	Fixed value duplication bug in Scene::copyFrom().
+	
+2008-06-16  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/src/efx.cpp:
 	* main/src/efxfixture.cpp:
 	* main/src/efxfixture.h:

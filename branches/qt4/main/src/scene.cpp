@@ -21,6 +21,7 @@
 
 #include <QApplication>
 #include <iostream>
+#include <QtDebug>
 #include <QList>
 #include <QFile>
 #include <QtXml>
@@ -70,8 +71,8 @@ SceneValue::SceneValue(QDomElement* tag)
 		channel = 0;
 		value = 0;
 
-		cout << QString("Node is not a scene value tag: %1")
-			.arg(tag->tagName()).toStdString() << endl;
+		qWarning() << "Node is not a scene value tag:"
+			   << tag->tagName();
 	}
 	else
 	{
@@ -164,9 +165,8 @@ void Scene::copyFrom(Scene* scene)
 	setName(scene->name());
 	setBus(scene->busID());
 
-	QListIterator <SceneValue> it(scene->m_values);
-	while (it.hasNext() == true)
-		m_values.append(it.next());
+	m_values.clear();
+	m_values = scene->m_values;
 }
 
 /*****************************************************************************
@@ -297,9 +297,7 @@ bool Scene::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else
 		{
-			cout << "Unknown scene tag: "
-			     << tag.tagName().toStdString()
-			     << endl;
+			qWarning() << "Unknown scene tag:" << tag.tagName();
 		}
 		
 		node = node.nextSibling();

@@ -15,11 +15,6 @@
 * AssignHotKey, AssignSliderHotkey, KeyBind, SliderKeyBind
 	-> Change them to something faster and rational
 
-* AdvancedSceneEditor
-	-> REMOVE COMPLETELY and change to something slider-like, for
-	   example SceneEditor.
-	-> REMOVE COMPLETELY EditSceneValue
-
 * Put back old shortcut keys (application menus)
 
 * Rename BusProperties to BusManager
@@ -27,13 +22,6 @@
 * Change Bus concept so that everybody can just connect() to buses.
 
 * Rename DMXMapEditor to OutputManager
-
-* Rename FunctionCollection to Collection (same for its editor)
-
-* All functions' editing capabilities don't need to be inside mutexes and
-  running locks, since all functions are stopped before switching to
-  design mode. And no editing is possible in operate mode. So remove the
-  locks.
 
 * FunctionCollection::stop() stops all of its member functions, regardless of
   whether they have been started by the collection or some other (user,chaser,
@@ -44,12 +32,7 @@
 * REMOVE COMPLETELY dummyinplugin; it's completely useless now that
   there is no "default" input plugin.
 
-* EFX's and EFXEditor to support 16bit values
 * Preview point array away from EFX and into EFXEditor
-* EFXEditor to support Cancel (now it just edits the EFX directly)
-  -> Do it with EFX's copy constructor: edit the copied version and
-   copy the duplicate's properties back to the actual one in accept() slot?
-* EFXEditor to support channel groups (now it searches for "pan" or "tilt")
 * Phase parameter to EFX's so that multiple fixtures can do cooler effects.
   -> Elie Roux:
    Let's say for example you have 4 MAC in the back of the scene in a
@@ -75,15 +58,6 @@
 
 * Put all gfx into a .qrc file and compile that into the binary with qmake
 
-* Put FixtureConsole inside QMdiSubWindow (in Fixture class)
-* FixtureConsole's window title (plus when fixture renamed) thru QMdiSubWindow
-* FixtureConsole scene editor multiple selection for bulk removal, storing
-  a scene will only overwrite the last selected scene (is there any reason
-  for storing the same contents to multiple scenes?)
-* FixtureConsole reloads the whole scene list after every operation. Make it
-  smarter.
-
-* FixtureManager's window title thru QMdiSubWindow
 * FixtureManager::loader()
 * Removal of multiple fixtures from FixtureManager should be easier. Maybe
   multiple selection?
@@ -91,32 +65,19 @@
   incorporated into FunctionManager. So that user can select, which groups
   of functions to generate etc.. NEEDS MORE SPECS.
 
-* FunctionConsumer's timer type should be configurable with a settings dialog.
-
-* FunctionManager thru QMdiSubWindow and its window title & icon the same
 * FunctionManager shortcut keys
 * Check that FunctionManager tracks bus name changes correctly
-* Bus setting doesn't work since action signals don't send the action 
-  itself, and 32 individual slot connections seems like dumb.
 * FunctionManager::addFunction() -> check function creation failure when
   maximum number of functions is reached.
-* Some sophisticated way for editing scenes now that AdvancedSceneEditor
-  has been removed.
 
-* Monitor title & icon thru QMdiSubWindow
 * Monitor loading doesn't work. Put its settings into a separate class 
   inside Monitor and deal with them. The monitor itself can then be 
   created and destroyed at will.
 * Multiple monitors for different universes?
 * Monitor scrolling - so that the display doesn't always start from channel 1
-* QApplication locks were removed from Monitor since they shouldn't be
-  necessary with a QTimer (if it were a thread, then locks would be needed).
 * Monitor drawing should be optimized so that slotTimeout() updates only
   values and not labels at all, since they dont change unless something
   passes over them (like another window).
-
-* m_startMutex in Scene, again, wtf is it for??
-* m_startMutex comes from Function, is it really necessary ANYWHERE?
 
 * Tooltips to ALL widgets.
 
@@ -125,7 +86,6 @@
 * HTP channels to DMXMap. Maybe limit the number, since they are needed
   only for dimmer fixtures. Or bind somehow to the generic fixture def.
 
-* VCWidgets should have object names
 * Change VCWidget's moving threshold checks to use QPoint::manhattanLength()
 
 * Add message boxes to all editor windows to indicate if there are no

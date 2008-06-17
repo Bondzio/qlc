@@ -161,10 +161,10 @@ QString HIDInput::infoText()
 	info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\" COLSPAN=\"3\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += name();
 	info += QString("</FONT>");
@@ -177,10 +177,10 @@ QString HIDInput::infoText()
 
 	/* Device title */
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += QString("Device");
 	info += QString("</FONT>");
@@ -188,10 +188,10 @@ QString HIDInput::infoText()
 
 	/* Name title */
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += QString("Name");
 	info += QString("</FONT>");
@@ -199,10 +199,10 @@ QString HIDInput::infoText()
 
 	/* Mode title */
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += QString("Mode");
 	info += QString("</FONT>");

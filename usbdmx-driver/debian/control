@@ -1,0 +1,14 @@
+Source: usbdmx-driver
+Section: admin
+Priority: extra
+Maintainer: Heikki Junnila <hjunnila@users.sf.net>
+Build-Depends: debhelper, fakeroot, build-essential, make
+Standards-Version: 3.7.3
+Homepage: http://www.peperoni-light.de
+
+Package: usbdmx-driver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Kernel driver module for Peperoni Rodin USB to DMX cables.
+  Driver that makes it possible to use Peperoni Rodin1, Rodin2 and RodinT
+  USB to DMX cables with lighting control software.

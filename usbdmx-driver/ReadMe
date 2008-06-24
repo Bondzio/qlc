@@ -1,0 +1,42 @@
+This driver and source code for test applications is provided as is.
+In case of trouble with compiling, contact driver@lighting-solutions.de.
+In case of trouble with packaging, contact hjunnila@users.sf.net.
+
+The makefile contains stuff to build the module only for 2.6.x kernels.
+There are two ways to install this driver:
+
+1: DEBIAN PACKAGE
+   If you want to create a debian package, type:
+	dpkg-buildpackage -rfakeroot
+
+   And to install the package, go to the parent directory and type:
+	dpkg -i usbdmx-driver_2.1-1_i386.deb
+
+2: MANUAL INSTALLATION
+   If you want to install the driver manually, type:
+	make
+	su -c "make install"
+
+   You might need to run "depmod -a" as root after installation to 
+   update your module information. Otherwise you need to reboot your 
+   machine.
+
+Both methods attempt to install a .rules file into /etc/udev/rules.d/,
+which should enable any user to read/write to all (found) /dev/usbdmx* files.
+
+The driver uses major 180, minor 192+. To create the devices used to access
+the interfaces manually, type as root:
+
+	mknod /dev/usbdmx0 c 180 192
+	mknod /dev/usbdmx1 c 180 193
+	mknod /dev/usbdmx2 c 180 194
+	...and so forth
+
+The driver supports up to 16 devices in the moment.
+To load the driver manually (without installing it), type:
+
+	insmod usbdmx.ko
+
+USAGE:
+For advanced usage information (in your own code) consult the demo 
+source code demo.c and the include file "usbdmx.h".

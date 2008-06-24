@@ -96,8 +96,9 @@ void VCDockSlider::setBusID(t_bus_id id)
 
 	// Set slider name to the tap button
 	name = Bus::name(m_busID);
-	if (name == QString::null)
-		name.sprintf("%.2d", m_busID + 1);
+	if (name.simplified().isEmpty() == true)
+		name.sprintf("Bus %.2d", m_busID + 1);
+
 	m_tapButton->setText(name);
 }
 
@@ -119,7 +120,7 @@ void VCDockSlider::busRange(t_bus_value &lo, t_bus_value &hi)
 void VCDockSlider::slotBusNameChanged(t_bus_id id, const QString &name)
 {
 	if (id == m_busID)
-		m_tapButton->setText(name);
+		setBusID(id);
 }
 
 void VCDockSlider::slotBusValueChanged(t_bus_id id, t_bus_value value)

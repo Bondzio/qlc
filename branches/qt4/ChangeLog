@@ -1,3 +1,13 @@
+2008-06-24  Heikki Junnila  <set EMAIL_ADDRESS environment variable>
+
+	* main/src/vcdockslider.cpp:
+	* main/src/vcslider.cpp:
+	* main/src/vcsliderproperties.cpp:
+	* main/src/vcsliderproperties.ui:
+
+	Fixed crash problems in vcsliderproperties.
+	Fixed slider name issues with vcslider & dockslider.
+	
 2008-06-24  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/usbdmxout/configureusbdmxout.ui:

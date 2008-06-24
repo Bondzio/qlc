@@ -365,8 +365,8 @@ void VCSlider::setBus(t_bus_id bus)
 	m_bus = bus;
 
 	name = Bus::name(bus);
-	if (name == QString::null)
-		name.sprintf("%.2d", bus + 1);
+	if (name.simplified().isEmpty() == true)
+		name.sprintf("Bus %.2d", bus + 1);
 
 	setCaption(name);
 }
@@ -413,7 +413,7 @@ void VCSlider::slotBusValueChanged(t_bus_id bus, t_bus_value value)
 void VCSlider::slotBusNameChanged(t_bus_id bus, const QString& name)
 {
 	if (m_bus == bus)
-		setTapButtonText(name);
+		setBus(bus);
 }
 
 /*****************************************************************************

@@ -27,7 +27,7 @@
         <x>0</x>
         <y>0</y>
         <width>436</width>
-        <height>455</height>
+        <height>456</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -147,7 +147,7 @@
         <x>0</x>
         <y>0</y>
         <width>436</width>
-        <height>455</height>
+        <height>456</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -248,7 +248,7 @@
         <x>0</x>
         <y>0</y>
         <width>436</width>
-        <height>455</height>
+        <height>456</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -313,6 +313,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="m_levelCapabilityButton" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
             <property name="toolTip" >
              <string>Set value range from the selected capability</string>
             </property>
@@ -326,11 +329,15 @@
        </item>
        <item>
         <widget class="QTreeWidget" name="m_levelList" >
-         <column>
-          <property name="text" >
-           <string>1</string>
-          </property>
-         </column>
+         <property name="alternatingRowColors" >
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode" >
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="allColumnsShowFocus" >
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -398,7 +405,7 @@
         <x>0</x>
         <y>0</y>
         <width>436</width>
-        <height>455</height>
+        <height>456</height>
        </rect>
       </property>
       <attribute name="title" >

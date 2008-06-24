@@ -23,6 +23,7 @@
 #include <QInputDialog>
 #include <QRadioButton>
 #include <QTreeWidget>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QComboBox>
@@ -144,6 +145,7 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
 	QStringList labels;
 	labels << "Name" << "Type" << "Range";
 	m_levelList->setHeaderLabels(labels);
+	m_levelList->header()->setResizeMode(QHeaderView::ResizeToContents);
 
 	/* Tree widget contents */
 	levelUpdateFixtures();
@@ -160,9 +162,9 @@ VCSliderProperties::~VCSliderProperties()
 
 void VCSliderProperties::slotModeBusClicked()
 {
-	m_nameEdit->setText(Bus::name(m_slider->bus()));
 	m_nameEdit->setEnabled(false);
-	
+	slotBusComboActivated(m_busCombo->currentIndex());
+
 	m_busValueRangeGroup->setEnabled(true);
 	m_busGroup->setEnabled(true);
 	
@@ -273,7 +275,8 @@ void VCSliderProperties::levelUpdateFixtureNode(t_fixture_id id)
 	{
 		item = new QTreeWidgetItem(m_levelList);
 		item->setText(KColumnID, str.setNum(id));
-		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable
+			       | Qt::ItemIsTristate);
 	}
 
 	item->setText(KColumnName, fxi->name());
@@ -380,6 +383,7 @@ void VCSliderProperties::levelUpdateCapabilityNode(QTreeWidgetItem* parent,
 	item->setText(KColumnName, cap->name());
 	item->setText(KColumnRange, str.sprintf("%.3d - %.3d",
 						cap->min(), cap->max()));
+	item->setFlags(item->flags() & (~Qt::ItemIsUserCheckable));
 }
 
 void VCSliderProperties::levelUpdateChannelSelections()
@@ -411,27 +415,26 @@ void VCSliderProperties::levelUpdateChannelSelections()
 
 void VCSliderProperties::levelSelectChannelsByGroup(QString group)
 {
-	QTreeWidgetItem* fxiNode = NULL;
-	QTreeWidgetItem* chNode = NULL;
+	QTreeWidgetItem* fxi_item;
+	QTreeWidgetItem* ch_item;
+	int i;
+	int j;
 
-	QTreeWidgetItemIterator fxit(m_levelList);
-	while (*fxit != NULL)
+	/* Go thru only channel items. Fixture items get (partially) selected 
+	   according to their children's state */
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		fxiNode = *fxit;
-		++fxit;
+		fxi_item = m_levelList->topLevelItem(i);
+		Q_ASSERT(fxi_item != NULL);
 
-		QTreeWidgetItemIterator chit(fxiNode);
-		while (*chit != NULL)
+		for (j = 0; j < fxi_item->childCount(); j++)
 		{
-			chNode = *chit;
-			++chit;
+			ch_item = fxi_item->child(j);
+			Q_ASSERT(ch_item != NULL);
 
-			if (chNode->text(KColumnType) == group)
-				chNode->setCheckState(KColumnName,
-						      Qt::Checked);
-			else
-				chNode->setCheckState(KColumnName,
-						      Qt::Unchecked);
+			if (ch_item->text(KColumnType) == group)
+				ch_item->setCheckState(KColumnName,
+						       Qt::Checked);
 		}
 	}
 }
@@ -454,7 +457,8 @@ void VCSliderProperties::slotLevelCapabilityButtonClicked()
 	QStringList list;
 
 	item = m_levelList->currentItem();
-	if (item == NULL || item->parent() == NULL)
+	if (item == NULL || item->parent() == NULL ||
+	    item->parent()->parent() == NULL)
 		return;
 
 	list = item->text(KColumnRange).split("-");
@@ -466,61 +470,76 @@ void VCSliderProperties::slotLevelCapabilityButtonClicked()
 
 void VCSliderProperties::slotLevelListClicked(QTreeWidgetItem* item)
 {
-	if (item == NULL)
-		return;
-
 	/* Enable the capability button if a capability has been selected */
-	if (item->parent() != NULL)
+	if (item != NULL && item->parent() != NULL &&
+	    item->parent()->parent() != NULL)
+	{
 		m_levelCapabilityButton->setEnabled(true);
+	}
 	else
+	{
 		m_levelCapabilityButton->setEnabled(false);
+	}
 }
 
 void VCSliderProperties::slotLevelAllClicked()
 {
+	QTreeWidgetItem* fxi_item;
+	int i;
+
 	/* Set all fixture items selected, their children should get selected
 	   as well because the fixture items are Controller items. */
-	QTreeWidgetItemIterator it(m_levelList);
-	while (*it != NULL)
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		(*it)->setCheckState(KColumnName, Qt::Checked);
-		++it;
+		fxi_item = m_levelList->topLevelItem(i);
+		Q_ASSERT(fxi_item != NULL);
+
+		fxi_item->setCheckState(KColumnName, Qt::Checked);
 	}
 }
 
 void VCSliderProperties::slotLevelNoneClicked()
 {
+	QTreeWidgetItem* fxi_item;
+	int i;
+
 	/* Set all fixture items unselected, their children should get unselected
 	   as well because the fixture items are Controller items. */
-	QTreeWidgetItemIterator it(m_levelList);
-	while (*it != NULL)
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		(*it)->setCheckState(KColumnName, Qt::Unchecked);
-		++it;
+		fxi_item = m_levelList->topLevelItem(i);
+		Q_ASSERT(fxi_item != NULL);
+
+		fxi_item->setCheckState(KColumnName, Qt::Unchecked);
 	}
 }
 
 void VCSliderProperties::slotLevelInvertClicked()
 {
+	QTreeWidgetItem* fxi_item;
+	QTreeWidgetItem* ch_item;
+	int i;
+	int j;
+
 	/* Go thru only channel items. Fixture items get (partially) selected 
 	   according to their children's state */
-	QTreeWidgetItemIterator fxit(m_levelList);
-	while (*fxit != NULL)
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		QTreeWidgetItemIterator chit(*fxit);
-		while (*chit != NULL)
+		fxi_item = m_levelList->topLevelItem(i);
+		Q_ASSERT(fxi_item != NULL);
+
+		for (j = 0; j < fxi_item->childCount(); j++)
 		{
-			if ((*chit)->checkState(KColumnName) == Qt::Checked)
-				(*chit)->setCheckState(KColumnName,
+			ch_item = fxi_item->child(j);
+			Q_ASSERT(ch_item != NULL);
+
+			if (ch_item->checkState(KColumnName) == Qt::Checked)
+				ch_item->setCheckState(KColumnName,
 						       Qt::Unchecked);
 			else
-				(*chit)->setCheckState(KColumnName,
+				ch_item->setCheckState(KColumnName,
 						       Qt::Checked);
-
-			++chit;
 		}
-
-		++fxit;
 	}
 }
 
@@ -545,29 +564,35 @@ void VCSliderProperties::slotLevelByGroupClicked()
 
 void VCSliderProperties::storeLevelChannels()
 {
-	t_fixture_id fxi_id = KNoID;
-	t_channel ch_num = 0;
+	QTreeWidgetItem* fxi_item;
+	QTreeWidgetItem* ch_item;
+	t_fixture_id fxi_id;
+	t_channel ch_num;
+	int i;
+	int j;
 	
+	/* Clear all channels from the slider first */
 	m_slider->clearLevelChannels();
 
-	QTreeWidgetItemIterator fxit(m_levelList);
-	while (*fxit != NULL)
+	/* Go thru all fixtures and their channels, add checked channels */
+	for (i = 0; i < m_levelList->topLevelItemCount(); i++)
 	{
-		fxi_id = (*fxit)->text(KColumnID).toInt();
+		fxi_item = m_levelList->topLevelItem(i);
+		Q_ASSERT(fxi_item != NULL);
 
-		QTreeWidgetItemIterator chit(*fxit);
-		while (*chit != NULL)
+		fxi_id = fxi_item->text(KColumnID).toInt();
+
+		for (j = 0; j < fxi_item->childCount(); j++)
 		{
-			if ((*fxit)->checkState(KColumnName) == Qt::Checked)
+			ch_item = fxi_item->child(j);
+			Q_ASSERT(ch_item != NULL);
+
+			if (ch_item->checkState(KColumnName) == Qt::Checked)
 			{
-				ch_num = (*chit)->text(KColumnID).toInt();
+				ch_num = ch_item->text(KColumnID).toInt();
 				m_slider->addLevelChannel(fxi_id, ch_num);
 			}
-			
-			++chit;
 		}
-
-		++fxit;
 	}
 }
 
@@ -583,17 +608,20 @@ void VCSliderProperties::accept()
 	m_slider->setLevelHighLimit(m_levelHighLimitSpin->value());
 	storeLevelChannels();
 
-	/* Set general page stuff last so that name & mode don't get
-	   overridden by bus/value/submaster setters */
-	m_slider->setCaption(m_nameEdit->text());
-
 	/* Slider mode */
 	if (m_modeBusRadio->isChecked() == true)
+	{
 		m_slider->setSliderMode(VCSlider::Bus);
+	}
 	else if (m_modeLevelRadio->isChecked() == true)
+	{
 		m_slider->setSliderMode(VCSlider::Level);
+		m_slider->setCaption(m_nameEdit->text());
+	}
 	else
+	{
 		m_slider->setSliderMode(VCSlider::Submaster);
+	}
 
 	/* Value style */
 	if (m_valueExactRadio->isChecked() == true)

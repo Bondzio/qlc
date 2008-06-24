@@ -34,6 +34,9 @@
        <property name="text" >
         <string>Test output</string>
        </property>
+       <property name="checkable" >
+         <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

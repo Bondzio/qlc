@@ -1,10 +1,16 @@
+2008-06-24  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* libs/usbdmxout/configureusbdmxout.ui:
+
+	Fixed test button.
+	
 2008-06-17  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/hidinput/hidinput.cpp:
 
 	Fixed info view colors.
 
-2008-06-17  Heikki Junnila  <heikki.junnila@users.sf.net>
+2008-06-17  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:
 	* main/src/scene.h:

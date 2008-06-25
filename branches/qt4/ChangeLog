@@ -1,3 +1,10 @@
+2008-06-25  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/efxeditor.cpp:
+	* main/src/efxfixture.cpp:
+
+	Added starting point indicator to EFX preview.
+	
 2008-06-24  Heikki Junnila  <set EMAIL_ADDRESS environment variable>
 
 	* main/src/vcdockslider.cpp:

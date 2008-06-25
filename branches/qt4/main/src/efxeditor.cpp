@@ -766,7 +766,8 @@ EFXPreviewArea::EFXPreviewArea(QWidget* parent) : QFrame (parent)
 	QPalette p = palette();
 	m_points = new QPolygon();
 
-	p.setColor(QPalette::Window, Qt::white);
+	setAutoFillBackground(true);
+	p.setColor(QPalette::Window, p.color(QPalette::Base));
 	setPalette(p);
 
 	setFrameStyle(StyledPanel | Sunken);
@@ -804,25 +805,35 @@ void EFXPreviewArea::paintEvent(QPaintEvent* e)
 	QPainter painter(this);
 	QPen pen;
 	QPoint point;
+	QColor color;
 	unsigned int i;
 
-	// Draw crosshairs
-	painter.setPen(Qt::lightGray);
+	/* Crosshairs */
+	color = palette().color(QPalette::Mid);
+	painter.setPen(color);
 	painter.drawLine(127, 0, 127, 255);
 	painter.drawLine(0, 127, 255, 127);
 
-	// Set pen color to black
-	pen.setColor(Qt::black);
-
-	// Use the black pen as the painter
+	/* Plain points with highlight color */
+	color = palette().color(QPalette::Highlight);
+	pen.setColor(color);
 	painter.setPen(pen);
-
 	painter.drawPolygon(*m_points);
 
 	// Draw the points from the point array
 	for (i = 0; updatesEnabled() && i < m_points->size(); i++)
 	{
+		color = color.lighter(100 + (m_points->size()/100));
+		pen.setColor(color);
+		painter.setPen(pen);
 		point = m_points->point(i);
-		painter.drawEllipse(point.x() - 2, point.y() - 2, 4, 4);
+		painter.drawEllipse(point.x() - 1, point.y() - 1, 2, 2);
 	}
+
+	/* Starting point */
+	pen.setColor(color);
+	painter.setPen(pen);
+	point = m_points->point(0);
+	painter.fillRect(point.x() - 3, point.y() - 3, 6, 6,
+			 QBrush(palette().color(QPalette::Dark)));
 }

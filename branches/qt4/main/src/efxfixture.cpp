@@ -63,6 +63,8 @@ void EFXFixture::reset()
 {
 	m_skipIterator = 0;
 	m_iterator = 0;
+
+	updateSkipThreshold();
 }
 
 /*****************************************************************************

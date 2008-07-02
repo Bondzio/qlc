@@ -210,12 +210,30 @@ t_value Scene::value(t_fixture_id fxi, t_channel ch)
 		return m_values.at(index).value;
 }
 
-void Scene::writeValues()
+void Scene::writeValues(t_fixture_id fxi_id)
 {
 	for (int i = 0; i < m_values.count(); i++)
 	{
-		_app->dmxMap()->setValue(m_channels[i].address,
-					 m_values[i].value);
+		if (fxi_id == KNoID || m_values[i].fxi == fxi_id)
+		{
+			_app->dmxMap()->setValue(m_channels[i].address,
+						 m_values[i].value);
+		}
+	}
+}
+
+/*****************************************************************************
+ * Fixtures
+ *****************************************************************************/
+
+void Scene::slotFixtureRemoved(t_fixture_id fxi_id)
+{
+	QMutableListIterator <SceneValue> it(m_values);
+	while (it.hasNext() == true)
+	{
+		SceneValue scv = it.next();
+		if (scv.fxi == fxi_id)
+			it.remove();
 	}
 }
 

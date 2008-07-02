@@ -485,7 +485,6 @@ Function* Doc::newFunction(Function::Type type)
 			function = createFunction(type);
 			Q_ASSERT(function != NULL);
 			m_functionArray[id] = function;
-
 			function->setID(id);
 
 			emit functionAdded(id);
@@ -545,23 +544,40 @@ Function* Doc::newFunction(Function::Type type, t_function_id fid, QString name,
 
 Function* Doc::createFunction(Function::Type type)
 {
+	Function* function;
+
 	switch (type)
 	{
 	case Function::Scene:
-		return new Scene(this);
+	        function = new Scene(this);
+		break;
 
 	case Function::Chaser:
-		return new Chaser(this);
+	        function = new Chaser(this);
+		break;
 
 	case Function::Collection:
-		return new Collection(this);
+		function = new Collection(this);
+		break;
 
 	case Function::EFX:
-		return new EFX(this);
+		function = new EFX(this);
+		break;
 
 	default:
-		return NULL;
+		function = NULL;
+		break;
 	}
+
+	if (function != NULL)
+	{
+		/* Listen to fixture removals so that functions can
+		   get rid of nonexisting members. */
+		connect(this, SIGNAL(fixtureRemoved(t_fixture_id)),
+			function, SLOT(slotFixtureRemoved(t_fixture_id)));
+	}
+
+	return function;
 }
 
 void Doc::deleteFunction(t_function_id id)

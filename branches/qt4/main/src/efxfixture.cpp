@@ -25,6 +25,7 @@
 #include "eventbuffer.h"
 #include "efxfixture.h"
 #include "function.h"
+#include "scene.h"
 #include "efx.h"
 
 using namespace std;
@@ -33,15 +34,22 @@ using namespace std;
  * Initialization
  *****************************************************************************/
 
-EFXFixture::EFXFixture(EFX* parent, int index, int order,
-		       Function::Direction direction)
+EFXFixture::EFXFixture(EFX* parent, t_fixture_id fxi_id, int index, int order,
+		       Function::Direction direction, Scene* startScene,
+		       Scene* stopScene)
 {
 	Q_ASSERT(parent != NULL);
+	Q_ASSERT(fxi_id != KNoID);
 
 	m_parent = parent;
+	m_fixture = fxi_id;
 	m_index = index;
 	m_order = order;
 	m_direction = direction;
+	m_startScene = startScene;
+	m_stopScene = stopScene;
+	m_initialized = false;
+	m_ready = false;
 
 	m_skipIterator = 0;
 	m_skipThreshold = 0;
@@ -61,8 +69,12 @@ EFXFixture::~EFXFixture()
 
 void EFXFixture::reset()
 {
+	m_panValue = 0;
+	m_tiltValue = 0;
 	m_skipIterator = 0;
 	m_iterator = 0;
+	m_initialized = false;
+	m_ready = false;
 
 	updateSkipThreshold();
 }
@@ -120,6 +132,9 @@ bool EFXFixture::isValid()
 
 void EFXFixture::nextStep(t_buffer_data* data)
 {
+	if (m_ready == true)
+		return;
+
 	if (m_parent->propagationMode() == EFX::Serial &&
 	    m_skipIterator < m_skipThreshold)
 	{
@@ -128,6 +143,15 @@ void EFXFixture::nextStep(t_buffer_data* data)
 	else
 	{
 		m_iterator += m_parent->m_stepSize;
+
+		/* This fixture is now running. Initialize it */
+		if (m_initialized == false)
+		{
+			m_initialized = true;
+
+			if (m_startScene != NULL)
+				m_startScene->writeValues(m_fixture);
+		}
 	}
 
 	if (m_iterator < (M_PI * 2.0))
@@ -152,6 +176,7 @@ void EFXFixture::nextStep(t_buffer_data* data)
 		
 		if (m_parent->m_runOrder == Function::PingPong)
 		{
+			/* Reverse direction */
 			if (m_direction == Function::Forward)
 				m_direction = Function::Backward;
 			else
@@ -159,11 +184,11 @@ void EFXFixture::nextStep(t_buffer_data* data)
 		}
 		else if (m_parent->m_runOrder == Function::SingleShot)
 		{
-			/* TODO: SingleShot */
-		}
-		else
-		{
-			/* TODO: Loop */
+			/* De-initialize the fixture and mark this as ready */
+			if (m_stopScene != NULL)
+				m_stopScene->writeValues(m_fixture);
+
+			m_ready = true;
 		}
 	}
 }

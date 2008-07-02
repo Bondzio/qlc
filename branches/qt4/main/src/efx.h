@@ -368,6 +368,10 @@ public:
 
 	QList <t_fixture_id>* fixtures() { return &m_fixtures; }
 
+public slots:
+	/** Slot that captures Doc::fixtureRemoved signals */
+	void slotFixtureRemoved(t_fixture_id fxi_id);
+
 protected:
 	QList <t_fixture_id> m_fixtures;
 	PropagationMode m_propagationMode;

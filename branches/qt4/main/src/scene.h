@@ -147,9 +147,10 @@ public:
 	t_value value(t_fixture_id fxi, t_channel ch);
 
 	/**
-	 * Write the scene values to DMX Map
+	 * Write the scene values to DMX Map. If fxi_id is given, writes
+	 * values only for the specified fixture. 
 	 */
-	void writeValues();
+	void writeValues(t_fixture_id fxi_id = KNoID);
 
 	/**
 	 * Get a list of values in this scene
@@ -158,6 +159,12 @@ public:
 
 protected:
 	QList <SceneValue> m_values;	
+
+	/*********************************************************************
+	 * Fixtures
+	 *********************************************************************/
+public slots:
+	void slotFixtureRemoved(t_fixture_id fxi_id);
 
 	/*********************************************************************
 	 * Load & Save

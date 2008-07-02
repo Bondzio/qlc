@@ -1,3 +1,18 @@
+2008-07-02  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/doc.cpp:
+	* main/src/efx.cpp:
+	* main/src/efx.h:
+	* main/src/efxfixture.cpp:
+	* main/src/efxfixture.h:
+	* main/src/function.cpp:
+	* main/src/function.h:
+	* main/src/scene.cpp:
+	* main/src/scene.h:
+
+	Added slotFixtureRemoved() for Scene & EFX functions.
+	Changed serial mode EFX initialization to happen similarly in serial.	
+
 2008-06-25  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efxeditor.cpp:

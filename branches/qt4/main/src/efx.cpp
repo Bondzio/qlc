@@ -619,6 +619,11 @@ EFX::PropagationMode EFX::stringToPropagationMode(QString str)
 		return Parallel;
 }
 
+void EFX::slotFixtureRemoved(t_fixture_id fxi_id)
+{
+	m_fixtures.removeAll(fxi_id);
+}
+
 /*****************************************************************************
  * Start & Stop scenes
  *****************************************************************************/
@@ -1221,20 +1226,43 @@ void EFX::rotateAndScale(float* x, float* y, float w, float h,
  */
 void EFX::arm()
 {
-	QLCFixtureMode* mode;
-	QLCChannel* ch;
-	Fixture* fxi;
+	class Scene* startScene = NULL;
+	class Scene* stopScene = NULL;
+	QLCFixtureMode* mode = NULL;
+	QLCChannel* ch = NULL;
+	t_fixture_id fxi_id = KNoID;
+	Fixture* fxi = NULL;
 	int channels = 0;
 	int order = 0;
 
 	m_channels = 0;
 
+	/* Initialization scene */
+	if (m_startSceneID != KNoID && m_startSceneEnabled == true)
+	{
+		startScene = static_cast <class Scene*>
+			(_app->doc()->function(m_startSceneID));
+		Q_ASSERT(startScene != NULL);
+	}
+
+	/* De-initialization scene */
+	if (m_stopSceneID != KNoID && m_stopSceneEnabled == true)
+	{
+		stopScene = static_cast <class Scene*>
+			(_app->doc()->function(m_stopSceneID));
+		Q_ASSERT(stopScene != NULL);
+	}
+
 	QListIterator <t_function_id> it(m_fixtures);
 	while (it.hasNext() == true)
 	{
-		EFXFixture ef(this, m_channels, order, m_direction);
+		fxi_id = it.next();
+		Q_ASSERT(fxi_id != KNoID);
 
-		fxi = _app->doc()->fixture(it.next());
+		EFXFixture ef(this, fxi_id, m_channels, order, m_direction,
+			      startScene, stopScene);
+
+		fxi = _app->doc()->fixture(fxi_id);
 		Q_ASSERT(fxi != NULL);
 
 		mode = fxi->fixtureMode();
@@ -1348,7 +1376,8 @@ void EFX::stop()
  */
 void EFX::run()
 {
-	class Scene* scene;
+	EFXFixture* ef;
+	int ready;
 
 	m_stopped = true;
 
@@ -1365,41 +1394,53 @@ void EFX::run()
 	/* Append this function to running functions' list */
 	_app->functionConsumer()->cue(this);
 
-	/* Initialize with start scene */
-	if (m_startSceneID != KNoID && m_startSceneEnabled == true)
-	{
-		scene = static_cast <class Scene*>
-			(_app->doc()->function(m_startSceneID));
-		Q_ASSERT(scene != NULL);
-		scene->writeValues();
-	}
-
 	/* Go thru all fixtures and calculate their next step */
 	while (m_stopped == false)
 	{
+		ready = 0;
+
 		QMutableListIterator <EFXFixture> it(m_runTimeData);
 		while (it.hasNext() == true && m_stopped == false)
-			it.next().nextStep(m_channelData);
-		
+		{
+			it.next();
+			if (it.value().isReady() == false)
+			{
+				it.value().nextStep(m_channelData);
+			}
+			else
+			{
+				ready++;
+			}
+		}
+
 		m_eventBuffer->put(m_channelData);
+
+		if (ready == m_runTimeData.count())
+			m_stopped = true;
 	}
 
 	/* Clear the event buffer's contents so that this function will
 	   stop immediately. */
 	m_eventBuffer->purge();
 
-	/* De-initialize with stop scene */
+	/* De-initialize in the end (SingleShot will have de-initialized
+	   all "ready" fixtures already) */
 	if (m_stopSceneID != KNoID && m_stopSceneEnabled == true)
 	{
-		scene = static_cast <class Scene*>
+		class Scene* stopScene = static_cast <class Scene*>
 			(_app->doc()->function(m_stopSceneID));
-		Q_ASSERT(scene != NULL);
-		scene->writeValues();
+		Q_ASSERT(stopScene != NULL);
+		
+		stopScene->writeValues();
 	}
 
 	/* Reset all fixtures */
 	QMutableListIterator <EFXFixture> it(m_runTimeData);
 	while (it.hasNext() == true)
 		it.next().reset();
+
+	/* Reset channel data */
+	for (int i = 0; i < m_channels; i++)
+		m_channelData[i] = 0;
 
 }

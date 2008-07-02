@@ -26,6 +26,7 @@
 #include "function.h"
 
 class EFX;
+class Scene;
 
 class EFXFixture
 {
@@ -33,17 +34,24 @@ class EFXFixture
 	 * Initialization
 	 *********************************************************************/
 public:
-	EFXFixture(EFX* parent, int index, int order,
-		   Function::Direction direction);
+	EFXFixture(EFX* parent, t_fixture_id fxi_id, int index, int order,
+		   Function::Direction direction, Scene* startScene,
+		   Scene* stopScene);
 	~EFXFixture();
 
 	/** Reset the fixture when the EFX is stopped */
 	void reset();
 
+	/** Check, whether this EFXFixture is ready (no more events) */
+	bool isReady() const { return m_ready; }
+
 protected:
 	/** The EFX function that this fixture belongs to */
 	EFX* m_parent;
 
+	/** The ID of the fixture that is EFXFixture represents */
+	t_fixture_id m_fixture;
+	
 	/** This fixture's starting index in m_channelData */
 	int m_index;
 
@@ -52,6 +60,19 @@ protected:
 
 	/** This fixture's current direction */
 	Function::Direction m_direction;
+
+	/** The scene that is used to initialize the fixtures involved */
+	Scene* m_startScene;
+
+	/** The scene that is used to de-initialize the fixtures involved */
+	Scene* m_stopScene;
+
+	/** When the start scene is run, the EFXFixture has been initialized */
+	bool m_initialized;
+
+	/** When running in single shot mode, the fixture is marked ready
+	    after it has completed a full cycle. */
+	bool m_ready;
 
 	/*********************************************************************
 	 * Channels

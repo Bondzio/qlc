@@ -1,3 +1,11 @@
+2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/consolechannel.cpp:
+	* main/src/sceneeditor.cpp:
+
+	Fixed fixture removal in scene editor.
+	Fixed initial value of a channel in scene editor.
+	
 2008-07-06  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:
@@ -31,7 +39,7 @@
 
 	Added starting point indicator to EFX preview.
 	
-2008-06-24  Heikki Junnila  <set EMAIL_ADDRESS environment variable>
+2008-06-24  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/vcdockslider.cpp:
 	* main/src/vcslider.cpp:

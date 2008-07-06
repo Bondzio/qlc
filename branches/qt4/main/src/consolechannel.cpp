@@ -324,6 +324,10 @@ void ConsoleChannel::slotValueChange(int value)
 void ConsoleChannel::enable(bool state)
 {
 	setChecked(state);
+
+	m_value = _app->dmxMap()->getValue(m_fixture->universeAddress() +
+					   m_channel);
+
 	emit valueChanged(m_channel, m_value, isEnabled());
 }
 

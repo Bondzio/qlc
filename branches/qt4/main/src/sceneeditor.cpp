@@ -270,8 +270,14 @@ void SceneEditor::slotRemoveFixtureClicked()
 		while (it.hasNext() == true)
 		{
 			Fixture* fixture = it.next();
+			Q_ASSERT(fixture != NULL);
+
 			removeFixtureTab(fixture);
 			removeFixtureItem(fixture);
+
+			/* Remove all values associated to the fixture */
+			for (int i = 0; i < fixture->channels(); i++)
+				m_scene->unsetValue(fixture->id(), i);
 		}
 	}
 }
@@ -354,6 +360,9 @@ void SceneEditor::removeFixtureTab(Fixture* fixture)
 	{
 		if (m_tab->tabText(i) == fixture->name())
 		{
+			QWidget* console = m_tab->widget(i);
+			Q_ASSERT(console != NULL);
+			delete console;
 			m_tab->removeTab(i);
 			break;
 		}

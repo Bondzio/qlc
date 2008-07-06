@@ -1,3 +1,14 @@
+2008-07-06  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/efx.cpp:
+	* main/src/functionconsumer.cpp:
+	* main/src/functionconsumer.h:
+	* main/src/scene.cpp:
+
+	Fixed some weirdness in scene behaviour.
+	Changed QMutableListIterator to int in functionconsumer, since
+	it could be somewhat lighter.
+
 2008-07-02  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/doc.cpp:

@@ -19,6 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDebug>
+
 #ifndef __APPLE__
 #include <linux/rtc.h>
 #endif
@@ -134,11 +136,12 @@ bool FunctionConsumer::openRTC()
 	retval = ioctl(m_fdRTC, RTC_IRQP_SET, KFrequency);
 	if (retval == -1)
 	{
-		qWarning("Unable to set %ldHz to RTC: %s", strerror(errno));
+		qWarning("Unable to set %ldHz to RTC: %s",
+			 KFrequency, strerror(errno));
 		closeRTC();
 		return false;
 	}
-	
+
 	/* Attempt to read RTC frequency (should now be 64Hz) */
 	retval = ioctl(m_fdRTC, RTC_IRQP_READ, &tmp);
 	if (retval == -1)
@@ -238,7 +241,7 @@ void FunctionConsumer::runRTC()
 {
 	int retval = -1;
 	unsigned long data = 0;
-	
+
 	if (openRTC() == false)
 		return;
 
@@ -257,7 +260,7 @@ void FunctionConsumer::runRTC()
 		else
 		{
 			m_timeCode++;
-			event(data);
+			event();
 		}
 	}
 	
@@ -363,7 +366,7 @@ void FunctionConsumer::runNanoSleepTimer()
 
 		m_timeCode++;
 
-		event(current->tv_sec);
+		event();
 	}
 
 	free(finish);
@@ -458,20 +461,18 @@ void FunctionConsumer::run()
 	}
 }
 
-
 /**
  * Actual consumer function. Nothing^H^H^H^H^H As little as possible should
  * be allocated here to keep this as fast as possible.
  */
-void FunctionConsumer::event(time_t)
+void FunctionConsumer::event()
 {
 	/* Lock before accessing the running functions list */
 	m_functionListMutex.lock();
 	
-	QMutableListIterator <Function*> it(m_functionList);
-	while (it.hasNext() == true)
+	for (int i = 0; i < m_functionList.count(); i++)
 	{
-		m_function = it.next();
+		m_function = m_functionList.at(i);
 
 		/* Unlock after accessing the running functions list */
 		m_functionListMutex.unlock(); 
@@ -484,7 +485,7 @@ void FunctionConsumer::event(time_t)
 				m_functionListMutex.lock();
 
 				/* Remove the current function */
-				it.remove();
+				m_functionList.removeAt(i);
 
 				/* Tell the function that it has been removed */
 				m_function->finale();

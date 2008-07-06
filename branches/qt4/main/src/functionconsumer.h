@@ -199,7 +199,7 @@ protected:
 	 * The main thread function calls this function to handle all running
 	 * functions on each periodic pass.
 	 */
-	void event(time_t);
+	void event();
 	
 protected:
 	/** A DMXMap instance that routes all values to correct plugins */

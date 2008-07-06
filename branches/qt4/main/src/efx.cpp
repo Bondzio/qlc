@@ -1381,18 +1381,18 @@ void EFX::run()
 
 	m_stopped = true;
 
-	if (pointFunc == NULL)
-		return;
-
 	emit running(m_id);
-
-	m_stopped = false;
 
 	/* Set initial speed */
 	slotBusValueChanged(m_busID, Bus::value(m_busID));
 
 	/* Append this function to running functions' list */
 	_app->functionConsumer()->cue(this);
+
+	if (pointFunc == NULL || m_fixtures.isEmpty() == true)
+		return;
+
+	m_stopped = false;
 
 	/* Go thru all fixtures and calculate their next step */
 	while (m_stopped == false)

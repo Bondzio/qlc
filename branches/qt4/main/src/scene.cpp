@@ -432,10 +432,10 @@ void Scene::run()
 		m_channels[i].current = m_channels[i].start =
 			static_cast<float> 
 			(_app->dmxMap()->getValue(m_channels[i].address));
-		
+
 		m_channels[i].target = 
 			static_cast<float> (m_values.at(i).value);
-		
+
 		/* Check, whether this scene needs to play at all */
 		if (m_channels[i].current == m_values.at(i).value)
 		{
@@ -466,9 +466,9 @@ void Scene::run()
 				/* This channel contains a value that is not
 				   supposed to be written anymore, since as far
 				   as this scene is concerned, it is (or has
-				   been) where it is supposed to be. */
+				   been) where it is supposed to be. Invalid
+				   channels are ignored by dmxmap. */
 				m_channelData[i] = KChannelInvalid << 8;
-				m_channelData[i] |= 0;
 				continue;
 			}
 			else
@@ -478,14 +478,14 @@ void Scene::run()
 				   will be ready when elapsedTime == timeSpan */
 				m_channels[i].current = 
 					m_channels[i].start
-					+ (m_channels[i].target 
-					   - m_channels[i].start)
-					* ((float)m_elapsedTime / m_timeSpan);
-				
+					+ (m_channels[i].target -
+					   m_channels[i].start)
+					* (float(m_elapsedTime) / m_timeSpan);
+
 				/* The address is in the first 8 bits, so
 				   preserve that part with AND. Then add the
 				   value to the lowest 8 bits with OR. */
-				m_channelData[i] = (m_channelData[i] & 0xff00) 
+				m_channelData[i] = (m_channelData[i] & 0xff00)
 					| static_cast<t_buffer_data>
 					(m_channels[i].current);
 			}
@@ -503,13 +503,18 @@ void Scene::run()
 	{
 		if (m_channels[i].ready == true)
 		{
+			/* This channel contains a value that is not
+			   supposed to be written anymore, since as far
+			   as this scene is concerned, it is (or has
+			   been) where it is supposed to be. Invalid
+			   channels are ignored by dmxmap. */
 			m_channelData[i] = KChannelInvalid << 8;
-			m_channelData[i] |= 0;
 		}
 		else
 		{
 			/* Just set the target value */
-			m_channelData[i] |= static_cast<t_buffer_data>
+			m_channelData[i] = (m_channelData[i] & 0xff00) |
+				static_cast<t_buffer_data>
 				(m_channels[i].target);
 			
 			/* ...and don't touch this channel anymore */

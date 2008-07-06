@@ -24,7 +24,7 @@
         <x>0</x>
         <y>0</y>
         <width>532</width>
-        <height>282</height>
+        <height>283</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -146,19 +146,6 @@
         </spacer>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="All" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>532</width>
-        <height>283</height>
-       </rect>
-      </property>
-      <attribute name="title" >
-       <string>All</string>
-      </attribute>
      </widget>
     </widget>
    </item>

@@ -99,7 +99,7 @@ void ConsoleChannel::init()
 
 	m_valueSlider = new QSlider(this);
 	layout()->addWidget(m_valueSlider);
-	m_valueSlider->setInvertedAppearance(true);
+	m_valueSlider->setInvertedAppearance(false);
 	m_valueSlider->setRange(0, 255);
 	m_valueSlider->setSizePolicy(QSizePolicy::Preferred,
 				     QSizePolicy::Expanding);
@@ -268,7 +268,7 @@ void ConsoleChannel::slotContextMenuTriggered(QAction* action)
 
 int ConsoleChannel::sliderValue() const
 {
-	return KChannelValueMax - m_valueSlider->value();
+	return m_valueSlider->value();
 }
 
 void ConsoleChannel::update()
@@ -299,13 +299,11 @@ void ConsoleChannel::setOutputDMX(bool state)
 
 void ConsoleChannel::setValue(t_value value)
 {
-	m_valueSlider->setValue(static_cast<int> (KChannelValueMax - value));
+	m_valueSlider->setValue(static_cast<int> (value));
 }
 
 void ConsoleChannel::slotValueChange(int value)
 {
-	value = KChannelValueMax - value;
-	
 	if (m_outputDMX == true)
 		_app->dmxMap()->setValue(m_fixture->universeAddress() +
 					 m_channel, (t_value) value);

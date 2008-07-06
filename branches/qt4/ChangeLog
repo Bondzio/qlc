@@ -2,6 +2,15 @@
 
 	* main/src/consolechannel.cpp:
 	* main/src/sceneeditor.cpp:
+	* main/src/sceneeditor.ui:
+
+	Changed console channel's inverted appearance to normal.
+	Removed the "All" tab from scene editor.
+
+2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/consolechannel.cpp:
+	* main/src/sceneeditor.cpp:
 
 	Fixed fixture removal in scene editor.
 	Fixed initial value of a channel in scene editor.

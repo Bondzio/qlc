@@ -50,8 +50,7 @@ extern App* _app;
 #define KColumnID           3
 
 #define KTabGeneral         0
-#define KTabAll             1
-#define KTabFirstFixture    2
+#define KTabFirstFixture    1
 
 SceneEditor::SceneEditor(QWidget* parent, Scene* scene) : QDialog(parent)
 {

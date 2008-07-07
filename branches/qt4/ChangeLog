@@ -1,5 +1,14 @@
 2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/usbdmxout/configureusbdmxout.ui:
+	* libs/usbdmxout/usbdmxout.cpp:
+
+	An error was displayed for a successfully initialized usbdmx device,
+	fixed. Changed alternating row colors, root is decorated, all cols
+	show focus etc.. for usbdmx configuration window.
+	
+2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/src/consolechannel.cpp:
 	* main/src/sceneeditor.cpp:
 	* main/src/sceneeditor.ui:

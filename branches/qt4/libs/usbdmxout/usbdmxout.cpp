@@ -182,11 +182,17 @@ int USBDMXOut::open()
 	{
 		path.sprintf("/dev/usbdmx%d", i);
 		m_devices[i] = ::open(path.toUtf8(), O_RDWR);
-		m_errors[i] = errno;
 		if (m_devices[i] >= 0)
+		{
+			m_errors[i] = 0;
 			std::cout << "Found USB2DMX device from "
 				  << path.toStdString()
 				  << std::endl;
+		}
+		else
+		{
+			m_errors[i] = errno;
+		}
 	}
 
 	return 0;

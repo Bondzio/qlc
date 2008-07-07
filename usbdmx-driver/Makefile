@@ -4,12 +4,13 @@
 # in case of trouble, please contact driver@lighting-solutions.de
 #
 
-# path to kernel sources
+# Paths
 KERNEL_PATH = /lib/modules/`uname -r`/build
-
-# path to udev rules
+INSTALL_PATH = /lib/modules/`uname -r`/kernel
 UDEV_PATH = /etc/udev/rules.d
 
+#############################################################################
+# Compiler flags
 CC	= gcc
 KCFLAGS	= -I$(KERNEL_PATH)/include \
 		-O2 -Wall -Wstrict-prototypes -Wno-trigraphs \
@@ -18,7 +19,7 @@ KCFLAGS	= -I$(KERNEL_PATH)/include \
 obj-m	+= usbdmx.o
 
 #############################################################################
-# targets
+# Targets
 
 all: demo
 
@@ -33,6 +34,6 @@ modules:
 	make -C $(KERNEL_PATH) M=$(PWD) modules
 
 install:
-	install -o root -g root -D usbdmx.ko $(DESTDIR)$(KERNEL_PATH)/kernel/driver/misc/usbdmx.ko
+	install -o root -g root -D usbdmx.ko $(DESTDIR)$(INSTALL_PATH)/driver/misc/usbdmx.ko
 	install -o root -g root -D z65_usbdmx.rules $(DESTDIR)$(UDEV_PATH)/z65_usbdmx.rules
 

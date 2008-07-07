@@ -1,5 +1,19 @@
 2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* gfx/chaser.png:
+	* gfx/collection.png:
+	* gfx/function.png:
+	* gfx/scene.png:
+	* main/src/collectioneditor.cpp:
+	* main/src/functionmanager.cpp:
+	* main/src/functionmanager.h:
+
+	Changed function icons to slightly better ones.
+	Set the collection being edited to be disabled in selection dialog.
+	Changed copy-paste in function manager to clone.
+
+2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/usbdmxout/configureusbdmxout.ui:
 	* libs/usbdmxout/usbdmxout.cpp:
 

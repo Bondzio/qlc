@@ -96,23 +96,6 @@ protected slots:
 	void slotBusTriggered(QAction* action);
 
 	/*********************************************************************
-	 * Clipboard
-	 *********************************************************************/
-protected:
-	typedef enum _ClipboardAction
-	{
-		ClipboardNone,
-		ClipboardCut,
-		ClipboardCopy
-	} ClipboardAction;
-
-	/** The current clipboard action (see above) */
-	ClipboardAction m_clipboardAction;
-
-	/** List of cut/copied function IDs */
-	QList <t_function_id> m_clipboard;
-
-	/*********************************************************************
 	 * Menus, toolbar & actions
 	 *********************************************************************/
 protected:
@@ -130,8 +113,7 @@ protected slots:
 	void slotAddEFX();
 
 	int slotEdit();
-	void slotCopy();
-	void slotPaste();
+	void slotClone();
 	void slotDelete();
 	void slotSelectAll();
 
@@ -153,8 +135,7 @@ protected:
 	QAction* m_addEFXAction;
 	QAction* m_closeAction;
 
-	QAction* m_copyAction;
-	QAction* m_pasteAction;
+	QAction* m_cloneAction;
 	QAction* m_editAction;
 	QAction* m_deleteAction;
 	QAction* m_selectAllAction;

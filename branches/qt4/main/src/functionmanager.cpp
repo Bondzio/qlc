@@ -62,8 +62,6 @@ extern App* _app;
 
 FunctionManager::FunctionManager(QWidget* parent) : QWidget(parent)
 {
-	m_clipboardAction = ClipboardNone;
-	
 	m_blockAddFunctionSignal = false;
 	m_blockRemoveFunctionSignal = false;
 
@@ -75,9 +73,6 @@ FunctionManager::FunctionManager(QWidget* parent) : QWidget(parent)
 
 	// Create function tree
 	initFunctionTree();
-
-	// Clear clipboard contents
-	m_clipboard.clear();
 
 	// Get all functions
 	updateFunctionTree();
@@ -189,15 +184,10 @@ void FunctionManager::initActions()
 	connect(m_editAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotEdit()));
 
-	m_copyAction = new QAction(QIcon(PIXMAPS "/editcopy.png"),
-				   tr("Copy"), this);
-	connect(m_copyAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotCopy()));
-
-	m_pasteAction = new QAction(QIcon(PIXMAPS "/editpaste.png"),
-				    tr("Paste"), this);
-	connect(m_pasteAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotPaste()));
+	m_cloneAction = new QAction(QIcon(PIXMAPS "/editcopy.png"),
+				    tr("Clone"), this);
+	connect(m_cloneAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotClone()));
 
 	m_deleteAction = new QAction(QIcon(PIXMAPS "/editdelete.png"),
 				     tr("Delete"), this);
@@ -221,8 +211,8 @@ void FunctionManager::initMenu()
 	m_manageMenu->setTitle(tr("Manage"));
 	m_manageMenu->addAction(m_addSceneAction);
 	m_manageMenu->addAction(m_addChaserAction);
-	m_manageMenu->addAction(m_addCollectionAction);
 	m_manageMenu->addAction(m_addEFXAction);
+	m_manageMenu->addAction(m_addCollectionAction);
 	m_manageMenu->addSeparator();
 	m_manageMenu->addAction(m_closeAction);
 
@@ -231,11 +221,10 @@ void FunctionManager::initMenu()
 	m_editMenu->setTitle("Edit");
 	m_editMenu->addAction(m_editAction);
 	m_editMenu->addSeparator();
-	m_editMenu->addAction(m_copyAction);
-	m_editMenu->addAction(m_pasteAction);
+	m_editMenu->addAction(m_cloneAction);
+	m_editMenu->addAction(m_selectAllAction);
 	m_editMenu->addSeparator();
 	m_editMenu->addAction(m_deleteAction);
-	m_editMenu->addAction(m_selectAllAction);
 	m_editMenu->addSeparator();
 
 	/* Bus menu */
@@ -277,13 +266,11 @@ void FunctionManager::initToolbar()
 	layout()->addWidget(m_toolbar);
 	m_toolbar->addAction(m_addSceneAction);
 	m_toolbar->addAction(m_addChaserAction);
-	m_toolbar->addAction(m_addCollectionAction);
 	m_toolbar->addAction(m_addEFXAction);
+	m_toolbar->addAction(m_addCollectionAction);
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_editAction);
-	m_toolbar->addSeparator();
-	m_toolbar->addAction(m_copyAction);
-	m_toolbar->addAction(m_pasteAction);
+	m_toolbar->addAction(m_cloneAction);
 	m_toolbar->addSeparator();
 	m_toolbar->addAction(m_deleteAction);
 }
@@ -398,34 +385,11 @@ int FunctionManager::slotEdit()
 	return result;
 }
 
-void FunctionManager::slotCopy()
+void FunctionManager::slotClone()
 {
-	// Clear existing stuff from the clipboard
-	m_clipboard.clear();
-
 	QListIterator <QTreeWidgetItem*> it(m_functionTree->selectedItems());
 	while (it.hasNext() == true)
-	{
-		QTreeWidgetItem* item = it.next();
-
-		// Add selected function ID's to clipboard
-		m_clipboard.append(item->text(KColumnID).toInt());
-
-		// Set the action to Copy so that we know what to
-		// do with paste
-		m_clipboardAction = ClipboardCopy;
-
-		// In case the user does a cut & then copy, enable the
-		// selected items because cut disables them.
-		item->setDisabled(false);
-	}
-}
-
-void FunctionManager::slotPaste()
-{
-	QListIterator <t_function_id> it(m_clipboard);
-	while (it.hasNext() == true)
-		copyFunction(it.next());
+		copyFunction(it.next()->text(KColumnID).toInt());
 }
 
 void FunctionManager::slotDelete()
@@ -465,7 +429,7 @@ void FunctionManager::updateActionStatus()
 		/* At least one function has been selected, so
 		   editing is possible. */
 		m_editAction->setEnabled(true);
-		m_copyAction->setEnabled(true);
+		m_cloneAction->setEnabled(true);
 		
 		m_deleteAction->setEnabled(true);
 		m_selectAllAction->setEnabled(true);
@@ -474,23 +438,12 @@ void FunctionManager::updateActionStatus()
 	{
 		/* No functions selected */
 		m_editAction->setEnabled(false);
-		m_copyAction->setEnabled(false);
+		m_cloneAction->setEnabled(false);
 		
 		m_deleteAction->setEnabled(false);
 		m_selectAllAction->setEnabled(false);
 	}
 	
-	/* Check, whether clipboard contains something to paste */
-	if (m_clipboard.count() > 0)
-	{
-		m_pasteAction->setEnabled(true);
-	}
-	else
-	{
-		m_pasteAction->setEnabled(false);
-		m_clipboardAction = ClipboardNone;
-	}
-
 	/* Update bus menu actions in both cases */
 	updateBusActions();
 }
@@ -651,6 +604,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 		newFunction = _app->doc()->newFunction(Function::Scene);
 		Scene* scene = static_cast<Scene*> (newFunction);
 		scene->copyFrom(static_cast<Scene*> (function));
+		scene->setName("Copy of " + function->name());
 	}
 	break;
 
@@ -659,6 +613,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 		newFunction = _app->doc()->newFunction(Function::Chaser);
 		Chaser* chaser = static_cast<Chaser*> (newFunction);
 		chaser->copyFrom(static_cast<Chaser*> (function));
+		chaser->setName("Copy of " + function->name());
 	}
 	break;
 
@@ -669,6 +624,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 
 		Collection* fc = static_cast<Collection*> (newFunction);
 		fc->copyFrom(static_cast<Collection*> (function));
+		fc->setName("Copy of " + function->name());
 	}
 	break;
 
@@ -677,6 +633,7 @@ Function* FunctionManager::copyFunction(t_function_id fid)
 		newFunction = _app->doc()->newFunction(Function::EFX);
 		EFX* efx = static_cast<EFX*> (newFunction);
 		efx->copyFrom(static_cast<EFX*> (function));
+		efx->setName("Copy of " + function->name());
 	}
 	break;
 

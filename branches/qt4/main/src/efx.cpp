@@ -135,10 +135,10 @@ bool EFX::copyFrom(EFX* efx)
 	m_direction = efx->direction();
 
 	m_startSceneID = efx->startScene();
-	m_startSceneEnabled = efx-startSceneEnabled();
+	m_startSceneEnabled = efx->startSceneEnabled();
 
 	m_stopSceneID = efx->stopScene();
-	m_stopSceneEnabled = efx-stopSceneEnabled();
+	m_stopSceneEnabled = efx->stopSceneEnabled();
 
 	m_previewPointArray = NULL;
 

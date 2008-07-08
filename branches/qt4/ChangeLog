@@ -1,3 +1,10 @@
+2008-07-08  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/src/efx.cpp:
+	* main/src/efxeditor.cpp:
+
+	Fixed start/stop scene enable/disable.
+	
 2008-07-07  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* gfx/chaser.png:

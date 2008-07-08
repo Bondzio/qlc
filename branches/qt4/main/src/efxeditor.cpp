@@ -48,6 +48,9 @@ extern App* _app;
 #define KColumnModel        3
 #define KColumnID           4
 
+#define KInitColumnName     0
+#define KInitColumnID       1
+
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
@@ -673,8 +676,8 @@ void EFXEditor::fillSceneLists()
 		{
 			/* Insert the function to start scene list */
 			item = new QTreeWidgetItem(m_startSceneList);
-			item->setText(0, function->name());
-			item->setText(1, s.setNum(function->id()));
+			item->setText(KInitColumnName, function->name());
+			item->setText(KInitColumnID, s.setNum(function->id()));
 
 			/* Select the scene from the start scene list */
 			if (m_efx->startScene() == function->id())
@@ -685,8 +688,8 @@ void EFXEditor::fillSceneLists()
 
 			/* Insert the function to stop scene list */
 			item = new QTreeWidgetItem(m_stopSceneList);
-			item->setText(0, function->name());
-			item->setText(1, s.setNum(function->id()));
+			item->setText(KInitColumnName, function->name());
+			item->setText(KInitColumnID, s.setNum(function->id()));
 
 			/* Select the scene from the stop scene list */
 			if (m_efx->stopScene() == function->id())
@@ -716,6 +719,9 @@ void EFXEditor::fillSceneLists()
 		m_stopSceneGroup->setChecked(true);
 	else
 		m_stopSceneGroup->setChecked(false);
+
+	m_stopSceneList->sortItems(KInitColumnName, Qt::AscendingOrder);
+	m_startSceneList->sortItems(KInitColumnName, Qt::AscendingOrder);
 }
 
 void EFXEditor::slotStartSceneGroupToggled(bool state)
@@ -733,7 +739,7 @@ void EFXEditor::slotStartSceneListSelectionChanged()
 
 	QTreeWidgetItem* item = m_startSceneList->currentItem();
 	if (item != NULL)
-		m_efx->setStartScene(item->text(1).toInt());
+		m_efx->setStartScene(item->text(KInitColumnID).toInt());
 }
 
 void EFXEditor::slotStopSceneGroupToggled(bool state)
@@ -751,7 +757,7 @@ void EFXEditor::slotStopSceneListSelectionChanged()
    
 	QTreeWidgetItem* item = m_stopSceneList->currentItem();
 	if (item != NULL)
-		m_efx->setStopScene(item->text(1).toInt());
+		m_efx->setStopScene(item->text(KInitColumnID).toInt());
 }
 
 /*****************************************************************************

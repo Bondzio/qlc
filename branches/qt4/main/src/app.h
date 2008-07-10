@@ -292,6 +292,8 @@ public slots:
 	void slotHelpAbout();
 	void slotHelpAboutQt();
 
+	void slotCustomContextMenuRequested(const QPoint&);
+
 protected:
 	QAction* m_fileNewAction;
 	QAction* m_fileOpenAction;
@@ -325,6 +327,19 @@ protected:
 	QMenu* m_helpMenu;
 	
 	QToolBar* m_toolbar;
+
+	/*********************************************************************
+	 * Workspace background
+	 *********************************************************************/	
+public:
+	void setBackgroundImage(QString path);
+
+public slots:
+	void slotSetBackgroundImage();
+	void slotClearBackgroundImage();
+
+protected:
+	QString m_backgroundImage;
 };
 
 #endif

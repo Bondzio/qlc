@@ -26,6 +26,7 @@
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QStatusBar>
+#include <QSettings>
 #include <QMdiArea>
 #include <QMenuBar>
 #include <QToolBar>
@@ -176,11 +177,23 @@ App::~App()
  */
 void App::init()
 {
+	QSettings settings("qlc.sf.net", "qlc");
+
 	setWindowTitle(KApplicationNameLong);
 	setWindowIcon(QIcon(PIXMAPS "/qlc.png"));
 
 	/* MDI Area */
 	setCentralWidget(new QMdiArea(this));
+	centralWidget()->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(centralWidget(),
+		SIGNAL(customContextMenuRequested(const QPoint&)),
+		this,
+		SLOT(slotCustomContextMenuRequested(const QPoint&)));
+
+	/* Workspace background */
+	setBackgroundImage(
+		settings.value(QString("%1/workspace/background")
+			       .arg(KApplicationNameLong)).toString());
 
 	/* Resize the whole application to default size */
 	resize(KApplicationDefaultWidth, KApplicationDefaultHeight);
@@ -921,12 +934,21 @@ void App::slotFileSaveDefaults()
 
 	r = QMessageBox::question(this, "Save Defaults?",
 				  QString("Do you wish to save defaults for:\n")
-				  + QString("* Workspace background & theme\n")
+				  + QString("* Workspace background\n")
 				  + QString("* Universe mapping"),
 				  QMessageBox::Yes, QMessageBox::No);
 	if (r == QMessageBox::Yes)
 	{
+		QSettings settings("qlc.sf.net", "qlc");
+
+		/* Workspace background */
+		settings.setValue(QString("%1/workspace/background/")
+				  .arg(KApplicationNameLong), 
+				  m_backgroundImage);
+
+		/* Universe mapping */
 		m_dmxMap->saveDefaults(KApplicationNameLong);
+
 	}
 }
 
@@ -1180,3 +1202,50 @@ void App::slotHelpAboutQt()
 	QMessageBox::aboutQt(this, QString("Q Light Controller"));
 }
 
+void App::slotCustomContextMenuRequested(const QPoint& pos)
+{
+	QMenu menu;
+	menu.addAction(QIcon(PIXMAPS "/image.png"), tr("Set background image..."),
+		       this, SLOT(slotSetBackgroundImage()));
+	menu.addAction(QIcon(PIXMAPS "/editdelete.png"),
+		       tr("Clear background image"),
+		       this, SLOT(slotClearBackgroundImage()));
+	menu.exec(QCursor::pos());
+}
+
+/*****************************************************************************
+ * Workspace background
+ *****************************************************************************/
+
+void App::setBackgroundImage(QString path)
+{
+	if (path.isEmpty() == true)
+	{
+		slotClearBackgroundImage();
+	}
+	else
+	{
+		qobject_cast<QMdiArea*>
+			(centralWidget())->setBackground(QPixmap(path));
+		m_backgroundImage = path;
+	}
+}
+
+void App::slotSetBackgroundImage()
+{
+	QString path = QFileDialog::getOpenFileName(
+		this, tr("Open an image file"), getenv("HOME"),
+		tr("Images (*.png *.xpm *.jpg *.gif)"));
+	
+	if (path.isEmpty() == true)
+		return;
+
+	setBackgroundImage(path);
+}
+
+void App::slotClearBackgroundImage()
+{
+	qobject_cast<QMdiArea*> (centralWidget())->setBackground(
+		QBrush(QApplication::palette().color(QPalette::Dark)));
+	m_backgroundImage = QString::null;
+}

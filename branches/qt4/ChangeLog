@@ -1,5 +1,12 @@
 2008-07-10  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/src/app.cpp:
+	* main/src/app.h:
+
+	Implemented workspace background setting.
+	
+2008-07-10  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/src/vcslider.cpp:
 
 	Fixed bus ID loading.

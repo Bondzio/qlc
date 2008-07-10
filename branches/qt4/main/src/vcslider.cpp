@@ -762,6 +762,8 @@ bool VCSlider::loadXML(QDomDocument* doc, QDomElement* root)
 
 			str = tag.attribute(KXMLQLCVCSliderBusHighLimit);
 			setBusHighLimit(str.toInt());
+
+			setBus(tag.text().toInt());
 		}
 		else if (tag.tagName() == KXMLQLCVCSliderLevel)
 		{

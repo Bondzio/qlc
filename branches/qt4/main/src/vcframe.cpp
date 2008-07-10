@@ -33,6 +33,7 @@
 
 #include "vcframeproperties.h"
 #include "virtualconsole.h"
+#include "vccuelist.h"
 #include "vcbutton.h"
 #include "vcslider.h"
 #include "vcframe.h"
@@ -223,6 +224,10 @@ bool VCFrame::loadXML(QDomDocument* doc, QDomElement* root)
 		{
 			VCSlider::loader(doc, &tag, this);
 		}
+		else if (tag.tagName() == KXMLQLCVCCueList)
+		{
+			VCCueList::loader(doc, &tag, this);
+		}
 		else
 		{
 			cout << "Unknown frame tag: "
@@ -299,13 +304,17 @@ void VCFrame::invokeMenu(QPoint point)
 	addMenu = new QMenu(menu);
 	addMenu->setTitle("Add widget");
 	addMenu->addAction(QIcon(PIXMAPS "/button.png"), tr("Button"), 
-			   this, SLOT(slotAddButton()));	
+			   this, SLOT(slotAddButton()));
 	addMenu->addAction(QIcon(PIXMAPS "/slider.png"), tr("Slider"),
 			   this, SLOT(slotAddSlider()));
-	addMenu->addAction(QIcon(PIXMAPS "/frame.png"), tr("Frame"),
-			   this, SLOT(slotAddFrame()));
 	addMenu->addAction(QIcon(PIXMAPS "/xypad.png"), tr("XY pad"),
 			   this, SLOT(slotAddXYPad()));
+	addMenu->addSeparator();
+	addMenu->addAction(QIcon(PIXMAPS "/cuelist.png"), tr("Cue list"),
+			   this, SLOT(slotAddCueList()));
+	addMenu->addSeparator();
+	addMenu->addAction(QIcon(PIXMAPS "/frame.png"), tr("Frame"),
+			   this, SLOT(slotAddFrame()));
 	addMenu->addAction(QIcon(PIXMAPS "/label.png"), tr("Label"),
 			   this, SLOT(slotAddLabel()));
 
@@ -363,25 +372,6 @@ void VCFrame::slotAddSlider()
 	_app->doc()->setModified();
 }
 
-void VCFrame::slotAddFrame()
-{
-	VCFrame* frame;
-	QPoint at;
-
-	frame = new VCFrame(this);
-	Q_ASSERT(frame != NULL);
-	frame->show();
-
-	if (at.isNull() == false)
-		frame->move(at);
-	else
-		frame->move(m_mousePressPoint);
-
-	_app->virtualConsole()->setSelectedWidget(frame);
-
-	_app->doc()->setModified();
-}
-
 void VCFrame::slotAddXYPad()
 {
 	VCXYPad* xypad;
@@ -397,6 +387,44 @@ void VCFrame::slotAddXYPad()
 		xypad->move(m_mousePressPoint);
 
 	_app->virtualConsole()->setSelectedWidget(xypad);
+
+	_app->doc()->setModified();
+}
+
+void VCFrame::slotAddCueList()
+{
+	VCCueList* cuelist;
+	QPoint at;
+
+	cuelist = new VCCueList(this);
+	Q_ASSERT(cuelist != NULL);
+	cuelist->show();
+
+	if (at.isNull() == false)
+		cuelist->move(at);
+	else
+		cuelist->move(m_mousePressPoint);
+
+	_app->virtualConsole()->setSelectedWidget(cuelist);
+
+	_app->doc()->setModified();
+}
+
+void VCFrame::slotAddFrame()
+{
+	VCFrame* frame;
+	QPoint at;
+
+	frame = new VCFrame(this);
+	Q_ASSERT(frame != NULL);
+	frame->show();
+
+	if (at.isNull() == false)
+		frame->move(at);
+	else
+		frame->move(m_mousePressPoint);
+
+	_app->virtualConsole()->setSelectedWidget(frame);
 
 	_app->doc()->setModified();
 }

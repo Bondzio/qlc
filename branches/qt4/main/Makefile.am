@@ -26,6 +26,7 @@ UICS = \
 	src/ui_functionselection.cpp \
 	src/ui_sceneeditor.cpp \
 	src/ui_vcbuttonproperties.cpp \
+	src/ui_vccuelistproperties.cpp \
 	src/ui_vcdockslider.cpp \
 	src/ui_vcframeproperties.cpp \
 	src/ui_vcsliderproperties.cpp \
@@ -74,6 +75,8 @@ MOCS = \
 	src/moc_sceneeditor.cpp \
 	src/moc_vcbutton.cpp \
 	src/moc_vcbuttonproperties.cpp \
+	src/moc_vccuelist.cpp \
+	src/moc_vccuelistproperties.cpp \
 	src/moc_vcdockarea.cpp \
 	src/moc_vcdockslider.cpp \
 	src/moc_vcframe.cpp \
@@ -134,6 +137,8 @@ qlc_SOURCES = \
 	src/sceneeditor.cpp \
 	src/vcbutton.cpp \
 	src/vcbuttonproperties.cpp \
+	src/vccuelist.cpp \
+	src/vccuelistproperties.cpp \
 	src/vcdockarea.cpp \
 	src/vcdockslider.cpp \
 	src/vcframe.cpp \

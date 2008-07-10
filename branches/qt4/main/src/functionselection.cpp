@@ -31,8 +31,13 @@
 #define KColumnType 1
 #define KColumnID   2
 
+/*****************************************************************************
+ * Initialization
+ *****************************************************************************/
+
 FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
-				     t_function_id disableFunction)
+				     t_function_id disableFunction,
+				     Function::Type filter)
 	: QDialog(parent)
 {
 	Q_ASSERT(doc != NULL);
@@ -59,19 +64,26 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
 		if (function == NULL)
 			continue;
 
-		item = new QTreeWidgetItem(m_tree);
-		item->setText(KColumnName, function->name());
-		item->setText(KColumnType, function->typeString());
-		item->setText(KColumnID, str.setNum(fid));
+		if (filter == Function::Undefined || filter == function->type())
+		{
+			item = new QTreeWidgetItem(m_tree);
+			item->setText(KColumnName, function->name());
+			item->setText(KColumnType, function->typeString());
+			item->setText(KColumnID, str.setNum(fid));
 
-		if (disableFunction == fid)
-			item->setFlags(0); // Disables the item
+			if (disableFunction == fid)
+				item->setFlags(0); // Disables the item
+		}
 	}
 }
 
 FunctionSelection::~FunctionSelection()
 {
 }
+
+/*****************************************************************************
+ * Internal
+ *****************************************************************************/
 
 void FunctionSelection::slotItemDoubleClicked(QTreeWidgetItem* item, int col)
 {

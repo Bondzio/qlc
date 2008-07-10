@@ -1,7 +1,7 @@
 /*
   Q Light Controller
-  vcframe.h
-  
+  vccuelist.h
+
   Copyright (c) Heikki Junnila
   
   This program is free software; you can redistribute it and/or
@@ -19,97 +19,108 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef VCFRAME_H
-#define VCFRAME_H
+#ifndef VCCUELIST_H
+#define VCCUELIST_H
 
 #include "vcwidget.h"
-#include "common/qlctypes.h"
 
+class QTreeWidgetItem;
 class QDomDocument;
 class QDomElement;
-class QMouseEvent;
-class QString;
+class QTreeWidget;
 
-#define KXMLQLCVCFrame "Frame"
-#define KXMLQLCVCFrameButtonBehaviour "ButtonBehaviour"
+class VCCueListProperties;
+class Function;
+class KeyBind;
 
-class VCFrame : public VCWidget
+#define KXMLQLCVCCueList "CueList"
+#define KXMLQLCVCCueListFunction "Function"
+
+#define KVCCueListColumnNumber 0
+#define KVCCueListColumnName   1
+#define KVCCueListColumnID     2
+
+class VCCueList : public VCWidget
 {
 	Q_OBJECT
+
+	friend class VCCueListProperties;
 
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
 public:
-	VCFrame(QWidget* parent);
-	virtual ~VCFrame();
+	/** Normal constructor */
+	VCCueList(QWidget* parent);
 
-	void init(bool bottomFrame = false);
+	/** Destructor */
+	~VCCueList();
 
-	/* Check if this is the virtual console's draw area */
-	bool isBottomFrame();
+	/*********************************************************************
+	 * Cue list
+	 *********************************************************************/
+public:
+	/** Clear the tree widget's list of cues */
+	void clear();
 
-public slots:
-	/* Delete this widget */
-	void slotDelete();
+	/** Append the given function to the widget's list of cues */
+	void append(t_function_id fid);
+
+protected slots:
+	/** Skip to the next cue */
+	void slotNextCue();
+
+	/** Slot to catch function stopped signals */
+	void slotFunctionStopped(t_function_id fid);
+
+	/** Slot that is called whenever the current item changes (either by
+	    pressing the key binding or clicking an item with mouse) */
+	void slotItemActivated(QTreeWidgetItem* item);
+
+protected:
+	QTreeWidget* m_list;
+	Function* m_current;
+
+	/*********************************************************************
+	 * Key Bind
+	 *********************************************************************/
+public:
+	void setKeyBind(KeyBind* kb);
+	KeyBind* keyBind() const { return m_keyBind; }
+
+protected:
+	KeyBind* m_keyBind;
+
+	/*********************************************************************
+	 * Caption
+	 *********************************************************************/
+public:
+	/** See VCWidget::setCaption() */
+	void setCaption(const QString& text);
+
+	/*********************************************************************
+	 * QLC Mode
+	 *********************************************************************/
+public:
+	/** See VCWidget::setCaption() */
+	void slotModeChanged(App::Mode mode);
 
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-public slots:
-	/** Edit this widget's properties */
-	void slotProperties();
-
-	/*********************************************************************
-	 * Button behaviour
-	 *********************************************************************/
 public:
-	enum ButtonBehaviour
-	{
-		Normal = 0,
-		Exclusive = 1
-	};
-
-	/** Set the way buttons behave inside this frame */
-	void setButtonBehaviour(ButtonBehaviour);
-
-	/** Get the way buttons behave inside this frame */
-	ButtonBehaviour buttonBehaviour() { return m_buttonBehaviour; }
-
-protected:
-	ButtonBehaviour m_buttonBehaviour;
+	/** See VCWidget::slotProperties() */
+	void slotProperties();
 
 	/*********************************************************************
 	 * Load & Save
 	 *********************************************************************/
 public:
-	static bool loader(QDomDocument* doc, QDomElement* root, QWidget* parent);
-	bool loadXML(QDomDocument* doc, QDomElement* vc_root);
+	static bool loader(QDomDocument* doc, QDomElement* root,
+			   QWidget* parent);
+	bool loadXML(QDomDocument* doc, QDomElement* root);
 	bool saveXML(QDomDocument* doc, QDomElement* vc_root);
-
-	/*********************************************************************
-	 * Widget menu & actions
-	 *********************************************************************/
-protected:
-	void invokeMenu(QPoint point);
-
-	/*********************************************************************
-	 * Widget adding
-	 *********************************************************************/
-public slots:
-	void slotAddButton();
-	void slotAddSlider();
-	void slotAddXYPad();
-	void slotAddCueList();
-	void slotAddFrame();
-	void slotAddLabel();
-
-	/*********************************************************************
-	 * Event handlers
-	 *********************************************************************/
-protected:
-	void paintEvent(QPaintEvent* e);
-	void mouseMoveEvent(QMouseEvent* e);
 };
 
 #endif
+

@@ -41,9 +41,9 @@ AssignHotKey::AssignHotKey(QWidget* parent) : QDialog(parent)
 	str += QString("</BODY></HTML>");
 	m_infoText->setText(str);
 	m_infoText->setFocusPolicy(Qt::NoFocus);
+	m_buttonBox->setFocusPolicy(Qt::NoFocus);
 
 	m_previewEdit->setReadOnly(true);
-	m_previewEdit->setFocusPolicy(Qt::NoFocus);
 	m_previewEdit->setAlignment(Qt::AlignCenter);
 }
 
@@ -53,13 +53,8 @@ AssignHotKey::~AssignHotKey()
 
 void AssignHotKey::keyPressEvent(QKeyEvent* e)
 {
-	QString keyString;
-
 	Q_ASSERT (m_keyBind != NULL);
-
 	m_keyBind->setKey(e->key());
 	m_keyBind->setMod(e->modifiers());
-
-	keyString = m_keyBind->keyString();
-	m_previewEdit->setText(keyString);
+	m_previewEdit->setText(m_keyBind->keyString());
 }

@@ -1,3 +1,23 @@
+2008-07-10  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* gfx/Makefile.am:
+	* gfx/cuelist.png:
+	* main/Makefile.am:
+	* main/src/assignhotkey.cpp:
+	* main/src/functionselection.cpp:
+	* main/src/functionselection.h:
+	* main/src/vccuelist.cpp:
+	* main/src/vccuelist.h:
+	* main/src/vccuelistproperties.cpp:
+	* main/src/vccuelistproperties.h:
+	* main/src/vccuelistproperties.ui:
+	* main/src/vcframe.cpp:
+	* main/src/vcframe.h:
+	* main/src/virtualconsole.cpp:
+	* main/src/virtualconsole.h:
+
+	Added a cue list widget to virtual console for theatrical applications.
+	
 2008-07-08  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/src/efx.cpp:

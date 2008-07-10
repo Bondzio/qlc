@@ -289,8 +289,9 @@ public:
 protected:
 	QAction* m_addButtonAction;
 	QAction* m_addSliderAction;
-	QAction* m_addFrameAction;
 	QAction* m_addXYPadAction;
+	QAction* m_addCueListAction;
+	QAction* m_addFrameAction;
 	QAction* m_addLabelAction;
 
 	QAction* m_toolsSettingsAction;
@@ -334,9 +335,10 @@ signals:
 public slots:
 	void slotAddButton();
 	void slotAddSlider();
+	void slotAddXYPad();
+	void slotAddCueList();
 	void slotAddFrame();
 	void slotAddLabel();
-	void slotAddXYPad();
 
 	/*********************************************************************
 	 * Tools menu callbacks

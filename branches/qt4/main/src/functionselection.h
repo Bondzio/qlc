@@ -27,6 +27,7 @@
 
 #include "common/qlctypes.h"
 #include "ui_functionselection.cpp"
+#include "function.h"
 
 class QTreeWidgetItem;
 class QWidget;
@@ -37,6 +38,10 @@ class Doc;
 class FunctionSelection : public QDialog, public Ui_FunctionSelection
 {
 	Q_OBJECT
+
+	/*********************************************************************
+	 * Initialization
+	 *********************************************************************/
 public:
 	/**
 	 * Constructor
@@ -46,9 +51,12 @@ public:
 	 * @param multiple Set true to enable multiple selection
 	 * @param disableID A function ID to disable (when adding steps to
 	 *                  a chaser, disable the chaser itself)
+	 * @param filter Show only functions of the given type (use
+	 *               Function::Undefined to show all)
 	 */
 	FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
-			  t_function_id disableFunction = KNoID);
+			  t_function_id disableFunction = KNoID,
+			  Function::Type filter = Function::Undefined);
 
 	/**
 	 * Destructor
@@ -60,6 +68,9 @@ public:
 	 */
 	QList <t_function_id> selection;
 
+	/*********************************************************************
+	 * Internal
+	 *********************************************************************/
 protected:
 	/**
 	 * Find a top-level item that matches the given fixture instance or

@@ -20,6 +20,7 @@ dist_appicons_DATA = \
 	color.png \
 	configure.png \
 	console.png \
+	cuelist.png \
 	detach.png \
 	design.png \
 	down.png \

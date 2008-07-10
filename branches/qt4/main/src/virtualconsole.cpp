@@ -108,15 +108,20 @@ void VirtualConsole::initActions()
 	connect(m_addSliderAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddSlider()));
 
+	m_addXYPadAction = new QAction(QIcon(PIXMAPS "/xypad.png"),
+				       tr("XY pad"), this);
+	connect(m_addXYPadAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddXYPad()));
+
+	m_addCueListAction = new QAction(QIcon(PIXMAPS "/cuelist.png"),
+					 tr("Cue list"), this);
+	connect(m_addCueListAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddCueList()));
+
 	m_addFrameAction = new QAction(QIcon(PIXMAPS "/frame.png"),
 				       tr("Frame"), this);
 	connect(m_addFrameAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddFrame()));
-
-	m_addXYPadAction = new QAction(QIcon(PIXMAPS "/xypad.png"),
-				       tr("XY Pad"), this);
-	connect(m_addXYPadAction, SIGNAL(triggered(bool)),
-		this, SLOT(slotAddXYPad()));
 
 	m_addLabelAction = new QAction(QIcon(PIXMAPS "/label.png"),
 				       tr("Label"), this);
@@ -228,6 +233,8 @@ void VirtualConsole::initMenuBar()
 	m_addMenu->addAction(m_addButtonAction);
 	m_addMenu->addAction(m_addSliderAction);
 	m_addMenu->addAction(m_addXYPadAction);
+	m_addMenu->addSeparator();
+	m_addMenu->addAction(m_addCueListAction);
 	m_addMenu->addSeparator();
 	m_addMenu->addAction(m_addFrameAction);
 	m_addMenu->addAction(m_addLabelAction);
@@ -594,19 +601,6 @@ void VirtualConsole::slotAddSlider()
 	frame->slotAddSlider();
 }
 
-void VirtualConsole::slotAddFrame()
-{
-	VCFrame* frame;
-	if (m_selectedWidget != NULL &&
-	    m_selectedWidget->objectName() == "VCFrame")
-		frame = qobject_cast<VCFrame*>(m_selectedWidget);
-	else
-		frame = m_drawArea;
-
-	Q_ASSERT(frame != NULL);
-	frame->slotAddFrame();
-}
-
 void VirtualConsole::slotAddXYPad()
 {
 	VCFrame* frame;
@@ -618,6 +612,31 @@ void VirtualConsole::slotAddXYPad()
 
 	Q_ASSERT(frame != NULL);
 	frame->slotAddXYPad();
+}
+
+void VirtualConsole::slotAddCueList()
+{
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddCueList();
+}
+void VirtualConsole::slotAddFrame()
+{
+	VCFrame* frame;
+	if (m_selectedWidget != NULL &&
+	    m_selectedWidget->objectName() == "VCFrame")
+		frame = qobject_cast<VCFrame*>(m_selectedWidget);
+	else
+		frame = m_drawArea;
+
+	Q_ASSERT(frame != NULL);
+	frame->slotAddFrame();
 }
 
 void VirtualConsole::slotAddLabel()

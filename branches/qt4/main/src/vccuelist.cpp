@@ -201,7 +201,7 @@ void VCCueList::slotModeChanged(App::Mode mode)
 	}
 
 	/* Always start from the beginning */
-	m_list->setCurrentItem(m_list->topLevelItem(0));
+	m_list->setCurrentItem(NULL);
 	m_current = NULL;
 
 	VCWidget::slotModeChanged(mode);
@@ -285,10 +285,9 @@ bool VCCueList::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else if (tag.tagName() == KXMLQLCKeyBind)
 		{
-			if (m_keyBind != NULL)
-				delete m_keyBind;
-			m_keyBind = new KeyBind();
-			m_keyBind->loadXML(doc, &tag);
+			KeyBind* kb = new KeyBind();
+			kb->loadXML(doc, &tag);
+			setKeyBind(kb);
 		}
 		else if (tag.tagName() == KXMLQLCVCCueListFunction)
 		{

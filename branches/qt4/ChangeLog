@@ -1,5 +1,11 @@
 2008-07-10  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/src/vccuelist.cpp:
+
+	Fixed keybind loading and initial key press to start from the beginning.
+	
+2008-07-10  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* gfx/Makefile.am:
 	* gfx/cuelist.png:
 	* main/Makefile.am:

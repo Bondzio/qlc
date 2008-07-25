@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "common/qlcplugin.h"
-#include "common/qlcinplugin.h"
+#include "qlcplugin.h"
+#include "qlcinplugin.h"
 
 QLCInPlugin::QLCInPlugin() : QLCPlugin()
 {
@@ -36,12 +36,11 @@ t_input QLCInPlugin::inputs()
 	return 1;
 }
 
-t_input_channel QLCInPlugin::channels(t_input input)
+t_input_channel QLCInPlugin::channels(t_input)
 {
 	return 1;
 }
 
-void QLCInPlugin::feedBack(t_input input, t_input_channel channel,
-			   t_input_value value)
+void QLCInPlugin::feedBack(t_input, t_input_channel, t_input_value)
 {
 }

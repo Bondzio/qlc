@@ -22,14 +22,14 @@
 #ifndef QLCINPLUGIN_H
 #define QLCINPLUGIN_H
 
-#include "common/qlcplugin.h"
-#include "common/qlctypes.h"
+#include "qlcplugin.h"
+#include "qlctypes.h"
 
 /*****************************************************************************
  * InputPlugin
  *****************************************************************************/
 
-class QLCInPlugin : public QLCPlugin
+class QLC_DECLSPEC QLCInPlugin : public QLCPlugin
 {
 	Q_OBJECT
 

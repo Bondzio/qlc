@@ -23,11 +23,12 @@
 #define QLCDOCBROWSER_H
 
 #include <QMainWindow>
+#include "qlctypes.h"
 
 class QTextBrowser;
 class QAction;
 
-class QLCDocBrowser : public QMainWindow
+class QLC_DECLSPEC QLCDocBrowser : public QMainWindow
 {
 	Q_OBJECT
 

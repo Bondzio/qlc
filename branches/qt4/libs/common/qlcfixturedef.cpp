@@ -24,11 +24,11 @@
 #include <QFile>
 #include <QtXml>
 
-#include "common/qlcfixturemode.h"
-#include "common/qlcfixturedef.h"
-#include "common/qlccapability.h"
-#include "common/qlcchannel.h"
-#include "common/qlcfile.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
+#include "qlccapability.h"
+#include "qlcchannel.h"
+#include "qlcfile.h"
 
 QLCFixtureDef::QLCFixtureDef()
 {
@@ -65,23 +65,19 @@ QLCFixtureDef::QLCFixtureDef(const QString &fileName)
 		{
 			if (loadXML(doc) == false)
 			{
-				std::cout << fileName.toStdString()
-					  << " is not a fixture definition file"
-					  << endl;
+				qDebug() << fileName 
+				 << " is not a fixture definition file";
 			}
 		}
 		else
 		{
-			std::cout << fileName.toStdString()
-				  << " is not a fixture definition file"
-				  << endl;
+			qDebug() << fileName
+				 << " is not a fixture definition file";
 		}
 	}
 	else
 	{
-		std::cout << fileName.toStdString()
-			  << ": File parsing failed"
-			  << endl;
+		qDebug() << fileName << ": File parsing failed";
 	}
 }
 
@@ -327,9 +323,8 @@ bool QLCFixtureDef::loadXML(QDomDocument* doc)
 			else if (tag.tagName() == KXMLQLCFixtureMode)
 				addMode(new QLCFixtureMode(this, &tag));
 			else
-				std::cout << "Unknown Fixture tag: "
-					  << tag.tagName().toStdString()
-					  << endl;
+				qDebug() << "Unknown Fixture tag: "
+					 << tag.tagName();
 
 			node = node.nextSibling();
 		}
@@ -338,7 +333,7 @@ bool QLCFixtureDef::loadXML(QDomDocument* doc)
 	}
 	else
 	{
-		std::cout << "Fixture node not found in file!" << endl;
+		qDebug() << "Fixture node not found in file!";
 		retval = false;
 	}
 	

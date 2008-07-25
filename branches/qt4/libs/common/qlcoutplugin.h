@@ -22,10 +22,10 @@
 #ifndef QLCOUTPLUGIN_H
 #define QLCOUTPLUGIN_H
 
-#include "common/qlcplugin.h"
-#include "common/qlctypes.h"
+#include "qlcplugin.h"
+#include "qlctypes.h"
 
-class QLCOutPlugin : public QLCPlugin
+class QLC_DECLSPEC QLCOutPlugin : public QLCPlugin
 {
 	Q_OBJECT
 		

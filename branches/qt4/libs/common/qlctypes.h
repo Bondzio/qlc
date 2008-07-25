@@ -25,6 +25,21 @@
 #include <limits.h>
 
 /*****************************************************************************
+ * Common defines
+ *****************************************************************************/
+#define VERSION "3.0.0"
+
+#ifdef WIN32
+#	ifdef QLC_EXPORT
+#		define QLC_DECLSPEC __declspec(dllexport)
+#	else
+#		define QLC_DECLSPEC __declspec(dllimport)
+#	endif
+#else
+#	define QLC_DECLSPEC
+#endif
+ 
+/*****************************************************************************
  * Utils
  *****************************************************************************/
 

@@ -23,7 +23,7 @@
 #include <QString>
 #include <QtXml>
 
-#include "common/qlcphysical.h"
+#include "qlcphysical.h"
 
 QLCPhysical& QLCPhysical::operator=(const QLCPhysical& physical)
 {
@@ -93,9 +93,7 @@ bool QLCPhysical::loadXML(QDomElement* root)
 		}
 		else
 		{
-			std::cout << "Unknown Physical tag: "
-				  << tag.tagName().toStdString()
-				  << endl;
+			qDebug() << "Unknown Physical tag:" << tag.tagName();
 		}
 
 		node = node.nextSibling();

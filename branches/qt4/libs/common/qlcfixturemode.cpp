@@ -21,13 +21,14 @@
 
 #include <iostream>
 #include <QString>
+#include <QDebug>
 #include <QList>
 #include <QtXml>
 
-#include "common/qlcfixturemode.h"
-#include "common/qlcfixturedef.h"
-#include "common/qlcchannel.h"
-#include "common/qlcphysical.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
+#include "qlcchannel.h"
+#include "qlcphysical.h"
 
 QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef)
 {
@@ -200,9 +201,7 @@ bool QLCFixtureMode::loadXML(QDomElement* root)
 		}
 		else
 		{
-			std::cout << "Unknown Mode tag: "
-				  << tag.tagName().toStdString()
-				  << endl;
+			qDebug() << "Unknown Mode tag: " << tag.tagName();
 		}
 
 		node = node.nextSibling();

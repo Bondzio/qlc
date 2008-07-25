@@ -24,6 +24,7 @@
 #include <QFile>
 #include <QtXml>
 
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 bool QLCFile::readXML(const QString path, QDomDocument** document)
@@ -46,17 +47,13 @@ bool QLCFile::readXML(const QString path, QDomDocument** document)
 
 		if (result == false)
 		{
-			QString str;
-
-			str.sprintf("%s: %s, line %d, col %d", qPrintable(path),
-				    qPrintable(error), line, col);
-			std::cout << str.toStdString();
+			qDebug() << path << ":" << error << ", line:" << line
+				 << ", col:" << col;
 		}
 	}
 	else
 	{
-		std::cout << "Unable to open file: " << path.toStdString()
-			  << endl;
+		qDebug() << "Unable to open file:" << path;
 		result = false;
 	}
 
@@ -174,7 +171,7 @@ bool QLCFile::loadXMLWindowState(QDomElement* tag,
 	}
 	else
 	{
-		std::cout << "Window state not found!" << endl;
+		qDebug() << "Window state not found!";
 		return false;
 	}
 }

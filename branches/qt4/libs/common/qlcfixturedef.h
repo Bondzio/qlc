@@ -25,7 +25,7 @@
 #include <QString>
 #include <QList>
 
-#include "common/qlctypes.h"
+#include "qlctypes.h"
 
 // Fixture document type
 #define KXMLQLCFixtureDefDocument "FixtureDefinition"
@@ -48,7 +48,7 @@ class QLCChannel;
 class QLCFixtureMode;
 class QLCFixtureDef;
 
-class QLCFixtureDef
+class QLC_DECLSPEC QLCFixtureDef
 {
 public:
 	/** Default constructor */

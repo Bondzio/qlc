@@ -22,6 +22,8 @@
 #ifndef QLCFILE_H
 #define QLCFILE_H
 
+#include "qlctypes.h"
+
 class QDomDocument;
 class QDomElement;
 class QString;
@@ -48,7 +50,7 @@ class QString;
 #define KXMLQLCWindowStateWidth "Width"
 #define KXMLQLCWindowStateHeight "Height"
 
-class QLCFile
+class QLC_DECLSPEC QLCFile
 {
 public:
 	/**

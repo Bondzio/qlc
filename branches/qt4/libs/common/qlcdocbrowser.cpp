@@ -21,28 +21,31 @@
 
 #include <QTextBrowser>
 #include <QVBoxLayout>
+#include <QSettings>
 #include <QToolBar>
 #include <QAction>
+#include <QIcon>
 #include <QUrl>
 
 #include "qlcdocbrowser.h"
+#include "qlctypes.h"
 
 QLCDocBrowser::QLCDocBrowser(QWidget* parent) : QMainWindow(parent)
-{
+{	
 	setWindowTitle("Q Light Controller - Document Browser");
 	resize(600, 600);
 
 	/* Actions */
-	m_backwardAction = new QAction(QIcon(PIXMAPS "/back.png"),
+	m_backwardAction = new QAction(QIcon(":/back.png"), 
 				       tr("Backward"), this);
 	m_backwardAction->setEnabled(false);
 
-	m_forwardAction = new QAction(QIcon(PIXMAPS "/forward.png"),
-				   tr("Forward"), this);
+	m_forwardAction = new QAction(QIcon(":/forward.png"),
+				      tr("Forward"), this);
 	m_forwardAction->setEnabled(false);
 
-	m_homeAction = new QAction(QIcon(PIXMAPS "/help.png"),
-				   tr("Index"), this);
+	m_homeAction = new QAction(QIcon(":/help.png"), tr("Index"), this);
+
 	/* Toolbar */
 	QToolBar* toolbar = new QToolBar("Document Browser", this);
 	this->addToolBar(toolbar);
@@ -59,14 +62,17 @@ QLCDocBrowser::QLCDocBrowser(QWidget* parent) : QMainWindow(parent)
 	connect(m_browser, SIGNAL(forwardAvailable(bool)),
 		this, SLOT(slotForwardAvailable(bool)));
 
-	m_browser->setSource(QUrl(DOCUMENTS "/index.html"));
-
 	connect(m_backwardAction, SIGNAL(triggered(bool)),
 		m_browser, SLOT(backward()));
 	connect(m_forwardAction, SIGNAL(triggered(bool)),
 		m_browser, SLOT(forward()));
 	connect(m_homeAction, SIGNAL(triggered(bool)), 
 		m_browser, SLOT(home()));
+	
+	/* Set the documentation source */
+	QSettings s;
+	QString docs = s.value("directories/documentation").toString();
+	m_browser->setSource(QUrl(docs + QString("/index.html")));
 }
 
 QLCDocBrowser::~QLCDocBrowser()

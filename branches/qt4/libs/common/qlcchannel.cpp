@@ -25,8 +25,8 @@
 #include <QFile>
 #include <QtXml>
 
-#include "common/qlcchannel.h"
-#include "common/qlccapability.h"
+#include "qlcchannel.h"
+#include "qlccapability.h"
 
 QLCChannel::QLCChannel()
 {
@@ -297,9 +297,7 @@ bool QLCChannel::loadXML(QDomElement* root)
 		}
 		else
 		{
-			std::cout << "Unknown Channel tag: "
-				  << tag.tagName().toStdString()
-				  << endl;
+			qDebug() << "Unknown Channel tag: " << tag.tagName();
 		}
 
 		node = node.nextSibling();

@@ -23,6 +23,7 @@
 #define QLCPHYSICAL_H
 
 #include <QString>
+#include "qlctypes.h"
 
 class QDomElement;
 class QDomDocument;
@@ -50,7 +51,7 @@ class QDomDocument;
 #define KXMLQLCPhysicalFocusPanMax "PanMax"
 #define KXMLQLCPhysicalFocusTiltMax "TiltMax"
 
-class QLCPhysical
+class QLC_DECLSPEC QLCPhysical
 {
 public:
 	/** Assignment operator */

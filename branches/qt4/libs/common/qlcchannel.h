@@ -24,7 +24,7 @@
 
 #include <QList>
 
-#include "common/qlctypes.h"
+#include "qlctypes.h"
 
 #define KXMLQLCChannel          QString("Channel")
 #define KXMLQLCChannelNumber    QString("Number")
@@ -53,7 +53,7 @@ class QStringList;
 class QLCCapability;
 class QLCChannel;
 
-class QLCChannel
+class QLC_DECLSPEC QLCChannel
 {
  public:
 	/** Standard constructor */

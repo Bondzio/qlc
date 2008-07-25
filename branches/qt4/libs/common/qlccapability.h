@@ -24,7 +24,7 @@
 
 #include <QList>
 
-#include "common/qlctypes.h"
+#include "qlctypes.h"
 
 #define KXMLQLCCapability    "Capability"
 #define KXMLQLCCapabilityMin "Min"
@@ -36,7 +36,7 @@ class QDomDocument;
 class QDomElement;
 class QLCCapability;
 
-class QLCCapability
+class QLC_DECLSPEC QLCCapability
 {
  public:
 	/** Default constructor */

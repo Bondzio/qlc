@@ -23,6 +23,7 @@
 #define QLCPLUGIN_H
 
 #include <QObject>
+#include "qlctypes.h"
 
 class QLCPlugin;
 
@@ -39,7 +40,7 @@ class QLCPlugin;
  */
 typedef QLCPlugin* (*QLCPluginCreateFunction)();
 
-class QLCPlugin : public QObject
+class QLC_DECLSPEC QLCPlugin : public QObject
 {
 	Q_OBJECT
 

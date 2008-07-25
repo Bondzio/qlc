@@ -24,8 +24,8 @@
 #include <QFile>
 #include <QtXml>
 
-#include "common/qlccapability.h"
-#include "common/qlctypes.h"
+#include "qlccapability.h"
+#include "qlctypes.h"
 
 QLCCapability::QLCCapability(t_value min, t_value max, QString name)
 {
@@ -109,7 +109,7 @@ bool QLCCapability::loadXML(QDomElement* root)
 	str = root->attribute(KXMLQLCCapabilityMin);
 	if (str == QString::null)
 	{
-		std::cout << "QLCCapability has no min limit" << endl;
+		qDebug() << "QLCCapability has no min limit.";
 		return false;
 	}
 	else
@@ -121,7 +121,7 @@ bool QLCCapability::loadXML(QDomElement* root)
 	str = root->attribute(KXMLQLCCapabilityMax);
 	if (str == QString::null)
 	{
-		std::cout << "QLCCapability has no max limit" << endl;
+		qDebug() << "QLCCapability has no max limit.";
 		return false;
 	}
 	else

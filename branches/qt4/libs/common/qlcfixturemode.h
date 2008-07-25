@@ -25,10 +25,10 @@
 #include <QString>
 #include <QList>
 
-#include "common/qlcfixturedef.h"
-#include "common/qlcphysical.h"
-#include "common/qlcchannel.h"
-#include "common/qlctypes.h"
+#include "qlcfixturedef.h"
+#include "qlcphysical.h"
+#include "qlcchannel.h"
+#include "qlctypes.h"
 
 #define KXMLQLCFixtureMode              "Mode"
 #define KXMLQLCFixtureModeName          "Name"
@@ -42,7 +42,7 @@ class QLCFixtureDef;
 class QLCPhysical;
 class QLCChannel;
 
-class QLCFixtureMode
+class QLC_DECLSPEC QLCFixtureMode
 {
 public:
 	/** Default constructor */

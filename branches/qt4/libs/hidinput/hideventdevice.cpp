@@ -39,7 +39,7 @@
 #define test_bit(bit, array)    (array[bit / 8] & (1 << (bit % 8)))
 
 HIDEventDevice::HIDEventDevice(HIDInput* parent, const QString& path) 
-	: HIDDevice(parent, "HIDEventDevice", path)
+	: HIDDevice(parent, path)
 {
 }
 
@@ -55,6 +55,9 @@ HIDEventDevice::~HIDEventDevice()
 bool HIDEventDevice::open()
 {
 	bool result = false;
+
+	if (m_file.isOpen() == true)
+		return true;
 
 	std::cout << "**********************************************"
 		  << std::endl;
@@ -164,6 +167,25 @@ QString HIDEventDevice::path() const
 }
 
 /*****************************************************************************
+ * Enabled status
+ *****************************************************************************/
+
+bool HIDEventDevice::isEnabled()
+{
+	return m_enabled;
+}
+
+void HIDEventDevice::setEnabled(bool state)
+{
+	Q_ASSERT(parent() != NULL);
+
+	if (state == true)
+		qobject_cast <HIDInput*> (parent())->addPollDevice(this);
+	else
+		qobject_cast <HIDInput*> (parent())->removePollDevice(this);
+}
+
+/*****************************************************************************
  * Device info
  *****************************************************************************/
 
@@ -171,7 +193,6 @@ QString HIDEventDevice::infoText()
 {
 	QString info;
 	QString str;
-	int version;
 
 	info += QString("<TR>");
 
@@ -222,7 +243,8 @@ t_input_channel HIDEventDevice::channels()
  * Input data
  *****************************************************************************/
 
-void HIDEventDevice::feedBack(t_input_channel channel, t_input_value value)
+void HIDEventDevice::feedBack(t_input_channel /*channel*/,
+			      t_input_value /*value*/)
 {
 }
 

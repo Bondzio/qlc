@@ -27,8 +27,7 @@
 #include "hiddevice.h"
 #include "hidinput.h"
 
-HIDDevice::HIDDevice(HIDInput* parent, const char* name, const QString& path)
-	: QObject(parent)
+HIDDevice::HIDDevice(HIDInput* parent, const QString& path) : QObject(parent)
 {
 	Q_ASSERT(path.length() > 0);
 	m_file.setFileName(path);
@@ -57,6 +56,24 @@ QString HIDDevice::path() const
 	return QString::null;
 }
 
+int HIDDevice::handle() const
+{
+	return m_file.handle();
+}
+
+/*****************************************************************************
+ * Enabled status
+ *****************************************************************************/
+
+bool HIDDevice::isEnabled()
+{
+	return false;
+}
+
+void HIDDevice::setEnabled(bool /*state*/)
+{
+}
+
 /*****************************************************************************
  * Device info
  *****************************************************************************/
@@ -80,6 +97,6 @@ t_input_channel HIDDevice::channels()
  * Input data
  *****************************************************************************/
 
-void HIDDevice::feedBack(t_input_channel channel, t_input_value value)
+void HIDDevice::feedBack(t_input_channel /*channel*/, t_input_value /*value*/)
 {
 }

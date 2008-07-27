@@ -21,12 +21,17 @@
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QHeaderView>
 #include <QPushButton>
 #include <QString>
 #include <QTimer>
 
 #include "configurehidinput.h"
 #include "hidinput.h"
+
+#define KColumnNumber  0
+#define KColumnEnabled 1
+#define KColumnName    2
 
 /*****************************************************************************
  * Initialization
@@ -39,6 +44,7 @@ ConfigureHIDInput::ConfigureHIDInput(QWidget* parent, HIDInput* plugin)
 	m_plugin = plugin;
 
 	setupUi(this);
+	m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
 
 	connect(m_refreshButton, SIGNAL(clicked()),
 		this, SLOT(slotRefreshClicked()));
@@ -68,7 +74,7 @@ void ConfigureHIDInput::refreshList()
 
 	m_list->clear();
 
-	for (unsigned int i = 0; i < m_plugin->m_devices.count(); i++)
+	for (int i = 0; i < m_plugin->m_devices.count(); i++)
 	{
 		HIDDevice* dev;
 		QTreeWidgetItem* item;
@@ -77,8 +83,10 @@ void ConfigureHIDInput::refreshList()
 		Q_ASSERT(dev != NULL);
 
 		item = new QTreeWidgetItem(m_list);
-		item->setText(0, s.setNum(i + 1));
-		item->setText(1, dev->name());
+		item->setText(KColumnNumber, s.setNum(i + 1));
+		item->setText(KColumnName, dev->name());
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(KColumnEnabled, Qt::Unchecked);
 	}
 }
 

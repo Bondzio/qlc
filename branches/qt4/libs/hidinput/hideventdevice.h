@@ -83,6 +83,23 @@ protected:
 	uint8_t m_eventTypes[(EV_MAX/8) + 1];
 
 	/*********************************************************************
+	 * Enabled status
+	 *********************************************************************/
+public:
+	/**
+	 * Get the device's enabled state (whether it sends events to QLC)
+	 */
+	bool isEnabled();
+
+	/**
+	 * Set the device's enabled state (whether it sends events to QLC)
+	 */
+	void setEnabled(bool state);
+
+protected:
+	bool m_enabled;
+
+	/*********************************************************************
 	 * Device info
 	 *********************************************************************/
 public:

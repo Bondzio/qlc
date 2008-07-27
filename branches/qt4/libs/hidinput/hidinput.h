@@ -28,6 +28,7 @@
 #include "common/qlctypes.h"
 
 #include "hiddevice.h"
+#include "hidpoller.h"
 
 /**
  * This lib's only exported function that is used to create instances of
@@ -44,6 +45,7 @@ class HIDInput : public QLCInPlugin
 	Q_OBJECT
 
 	friend class ConfigureHIDInput;
+	friend class HIDPoller;
 
 	/*********************************************************************
 	 * Initialization
@@ -84,6 +86,23 @@ public:
 	 *********************************************************************/
 public:
 	virtual QString infoText();
+
+	/*********************************************************************
+	 * Polled devices
+	 *********************************************************************/
+public:
+	/**
+	 * Add a HID device to be polled for input events
+	 */
+	bool addPollDevice(HIDDevice* device);
+
+	/**
+	 * Remove a HID device from the list of polled devices
+	 */
+	bool removePollDevice(HIDDevice* device);
+
+protected:
+	HIDPoller* m_poller;
 
 	/*********************************************************************
 	 * Input data

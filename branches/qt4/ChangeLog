@@ -1,3 +1,30 @@
+2008-07-27  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* fixtureeditor/fixtureeditor.pro:
+	* libs/Makefile.am:
+	* libs/common/common.pro:
+	* libs/hidinput/Makefile.am:
+	* libs/hidinput/configurehidinput.cpp:
+	* libs/hidinput/configurehidinput.h:
+	* libs/hidinput/configurehidinput.ui:
+	* libs/hidinput/hiddevice.cpp:
+	* libs/hidinput/hiddevice.h:
+	* libs/hidinput/hideventdevice.cpp:
+	* libs/hidinput/hideventdevice.h:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* libs/hidinput/hidinput.pro:
+	* libs/hidinput/hidpoller.cpp:
+	* libs/hidinput/hidpoller.h:
+	* libs/libs.pro:
+	* main/main.pro:
+	* main/qlc.pro:
+	* main/qlc.qrc:
+	* qlc.pro:
+
+	Added some .pro files to enable compiling from topdir level.
+	Continued a bit on HID input plugin.
+	
 2008-07-25  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* Makefile.am:

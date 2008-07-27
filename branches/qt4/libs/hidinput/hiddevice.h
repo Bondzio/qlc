@@ -41,7 +41,7 @@ class HIDDevice : public QObject
 	Q_OBJECT
 		
 public:
-	HIDDevice(HIDInput* parent, const char* name, const QString& path);
+	HIDDevice(HIDInput* parent, const QString& path);
 	virtual ~HIDDevice();
 
 	/*********************************************************************
@@ -66,8 +66,27 @@ public:
 	 */
 	virtual QString path() const;
 
+	/**
+	 * Get the device's file descriptor
+	 */
+	virtual int handle() const;
+
 protected:
 	QFile m_file;
+
+	/*********************************************************************
+	 * Enabled status
+	 *********************************************************************/
+public:
+	/**
+	 * Get the device's enabled state (whether it sends events to QLC)
+	 */
+	virtual bool isEnabled();
+
+	/**
+	 * Set the device's enabled state (whether it sends events to QLC)
+	 */
+	virtual void setEnabled(bool state);
 
 	/*********************************************************************
 	 * Device info

@@ -25,9 +25,10 @@
 #include <iostream>
 #include <QDir>
 
-#include "hidinput.h"
-#include "hideventdevice.h"
 #include "configurehidinput.h"
+#include "hideventdevice.h"
+#include "hidpoller.h"
+#include "hidinput.h"
 
 extern "C" QLCInPlugin* create()
 {
@@ -43,6 +44,7 @@ HIDInput::HIDInput() : QLCInPlugin()
 	m_version = 0x00010000;
 	m_name = QString("HID Input");
 	m_type = Input;
+	m_poller = NULL;
 
 	open();
 }
@@ -79,6 +81,8 @@ int HIDInput::open()
 			m_devices.append(hidDevice);
 		}
 	}
+
+	return 0;
 }
 
 int HIDInput::close()
@@ -93,6 +97,8 @@ int HIDInput::close()
 		hidDevice->close();
 		delete hidDevice;
 	}
+
+	return 0;
 }
 
 HIDDevice* HIDInput::device(const QString& path)
@@ -111,7 +117,7 @@ HIDDevice* HIDInput::device(const QString& path)
 
 HIDDevice* HIDInput::device(const unsigned int index)
 {
-	if (index > m_devices.count())
+	if (index > static_cast<unsigned int> (m_devices.count()))
 		return NULL;
 	else
 		return m_devices.at(index);
@@ -137,7 +143,7 @@ t_input_channel HIDInput::channels(t_input input)
 int HIDInput::configure(QWidget* parentWidget)
 {
 	ConfigureHIDInput conf(parentWidget, this);
-	conf.exec();
+	return conf.exec();
 }
 
 /*****************************************************************************
@@ -146,8 +152,7 @@ int HIDInput::configure(QWidget* parentWidget)
 
 QString HIDInput::infoText()
 {
-	HIDDevice* device = NULL;
-	QString info = QString::null;
+	QString info;
 	QString t;
 
 	/* HTML Title */
@@ -230,7 +235,42 @@ QString HIDInput::infoText()
 	return info;
 }
 
-void HIDInput::feedBack(t_input input, t_input_channel channel,
-			t_input_value value)
+/*****************************************************************************
+ * Polled devices
+ *****************************************************************************/
+
+bool HIDInput::addPollDevice(HIDDevice* device)
+{
+	Q_ASSERT(device != NULL);
+
+	if (m_poller == NULL)
+		m_poller = new HIDPoller(this);
+
+	m_poller->addDevice(device);
+	return true;
+}
+
+bool HIDInput::removePollDevice(HIDDevice* device)
+{
+	if (m_poller == NULL)
+		return false;
+
+	m_poller->removeDevice(device);
+
+	if (m_poller->deviceCount() == 0)
+	{
+		delete m_poller;
+		m_poller = NULL;
+	}
+
+	return true;
+}
+
+/*****************************************************************************
+ * Input data
+ *****************************************************************************/
+
+void HIDInput::feedBack(t_input /*input*/, t_input_channel /*channel*/,
+			t_input_value /*value*/)
 {
 }

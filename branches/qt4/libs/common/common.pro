@@ -1,13 +1,15 @@
-TEMPLATE = lib
-LANGUAGE = C++
-CONFIG += qt
-TARGET = qlccommon
-DEPENDPATH += .
-INCLUDEPATH += .
-QT += xml
-DEFINES += QLC_EXPORT
+TEMPLATE 	= lib
+LANGUAGE 	= C++
+TARGET 		= qlccommon
 
-# Input
+CONFIG 		+= qt warn_on release build_all
+QT 		+= xml
+win32:DEFINES 	+= QLC_EXPORT
+
+target.path 	= /usr/lib
+INSTALLS 	+= target
+
+# Sources
 HEADERS += qlccapability.h \
            qlcchannel.h \
            qlcdocbrowser.h \

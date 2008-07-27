@@ -1,5 +1,11 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/app.cpp:
+
+	Added more sophisticated fixture path resolving.
+	
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* fixtures/fixtures.pro:
 	* qlc.pro:
 

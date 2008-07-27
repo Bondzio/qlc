@@ -422,6 +422,16 @@ bool App::initFixtureDefinitions()
 	QSettings s;
 	QString fixturePath = s.value("directories/fixtures").toString();
 
+	if (fixturePath.isEmpty() == true)
+	{
+#ifdef WIN32
+		fixturePath = "C:\\QLC\\Fixtures";
+#else
+		fixturePath = "/usr/share/fixtures";
+		s.setValue("directories/fixtures", fixturePath);
+#endif
+	}
+
 	QDir dir(fixturePath, "*.qxf", QDir::Name, QDir::Files);
 	if (dir.exists() == false)
 	{
@@ -446,22 +456,35 @@ bool App::initFixtureDefinitions()
 	for (it = dirlist.begin(); it != dirlist.end(); ++it)
 	{
 		QString path = QString(fixturePath) + QDir::separator() + *it;
-		QLCFixtureDef* fixtureDef = new QLCFixtureDef(path);
+		QLCFixtureDef* fxi = new QLCFixtureDef(path);
 
-		cout << QString("Loaded fixture definition for %1 %2")
-		        .arg(fixtureDef->manufacturer())
-		        .arg(fixtureDef->model())
-			.toStdString()
-		     << endl;
-
-		if (fixtureDef != NULL)
+		if (fxi != NULL)
 		{
-			m_fixtureDefList.append(fixtureDef);
+			if (fixtureDef(fxi->manufacturer(), fxi->model())
+			    == NULL)
+			{
+				m_fixtureDefList.append(fxi);
+
+				qDebug() << "Loaded fixture definition for"
+					 << fxi->manufacturer()
+					 << "-"
+					 << fxi->model();
+			}
+			else
+			{
+				qWarning() << "Fixture"
+					   << fxi->manufacturer()
+					   << "-"
+					   << fxi->model()
+					   << "already exists. Skipping.";
+				delete fxi;
+			}
 		}
 		else
 		{
-			cout << "Fixture definition loading failed: "
-			     << path.toStdString() << endl;
+			qWarning() << "Fixture definition loading from"
+				   << path
+				   << "failed. Skipping.";
 		}
 	}
 
@@ -948,6 +971,8 @@ void App::slotFileDirectories()
 	{
 		QSettings s;
 		setBackgroundImage(s.value("/workspace/background").toString());
+
+		initFixtureDefinitions();
 	}
 }
 

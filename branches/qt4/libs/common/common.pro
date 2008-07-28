@@ -2,7 +2,7 @@ TEMPLATE 	= lib
 LANGUAGE 	= C++
 TARGET 		= qlccommon
 
-CONFIG 		+= qt warn_on release build_all
+CONFIG 		+= qt warn_on
 QT 		+= xml
 win32:DEFINES 	+= QLC_EXPORT
 

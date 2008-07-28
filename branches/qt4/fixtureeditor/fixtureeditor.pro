@@ -2,14 +2,14 @@ TEMPLATE 	= app
 LANGUAGE 	= C++
 TARGET 		= qlc-fixtureeditor
 
-CONFIG 		+= qt warn_on release build_all
-win32:CONFIG	+= windows
+CONFIG 		+= qt warn_on
 QT 		+= xml
 
 INCLUDEPATH 	+= . ../libs/
-LIBS 		+= -L../libs/common/release -lqlccommon
+win32:LIBS	+= -L../libs/common/release -lqlccommon
+unix:LIBS	+= -L../libs/common -lqlccommon
 
-target.path 	= /usr/bin
+unix:target.path = /usr/bin
 INSTALLS 	+= target
 
 # Sources

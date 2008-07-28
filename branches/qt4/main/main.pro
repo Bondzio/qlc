@@ -2,15 +2,14 @@ TEMPLATE 	= app
 LANGUAGE 	= C++
 TARGET 		= qlc
 
-CONFIG 		+= qt warn_on release build_all
-win32:CONFIG 	+= windows
+CONFIG 		+= qt warn_on
 QT 		+= xml
 
 INCLUDEPATH 	+= . ../libs/
 unix:LIBS 	+= -L../libs/common/ -lqlccommon
 win32:LIBS 	+= -L../libs/common/release/ -lqlccommon
 
-target.path	= /usr/bin
+unix:target.path = /usr/bin
 INSTALLS	+= target
 
 RESOURCES 	+= main.qrc

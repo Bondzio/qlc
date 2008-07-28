@@ -1,5 +1,14 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* debian/control:
+	* debian/files:
+	* debian/qlc.install:
+	* debian/rules:
+
+	Updated debian rules to pass but package creation doesn't work yet.
+
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* INSTALL:
 	* README:
 

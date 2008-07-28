@@ -24,7 +24,7 @@
 
 #include <QDialog>
 
-#include "ui_configureusbdmxout.cpp"
+#include "ui_configureusbdmxout.h"
 
 class USBDMXOut;
 class QTimer;

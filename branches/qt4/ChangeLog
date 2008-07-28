@@ -1,5 +1,14 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/libs.pro:
+	* libs/usbdmxout/Makefile.am:
+	* libs/usbdmxout/configureusbdmxout.h:
+	* libs/usbdmxout/usbdmxout.pro:
+
+	Changed usbdmx to use qmake.
+
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/app.cpp:
 
 	Added more sophisticated fixture path resolving.

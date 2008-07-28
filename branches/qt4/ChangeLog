@@ -1,5 +1,12 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* INSTALL:
+	* README:
+
+	Removed INSTALL and updated instructions in README.
+	
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* docs/Makefile.am:
 	* etc/Makefile.am:
 	* etc/etc.pro:

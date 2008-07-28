@@ -2,7 +2,8 @@
   Q Light Controller
   configurellaout.cpp
   
-  Copyright (C) Simon Newton, Heikki Junnila
+  Copyright (C) Simon Newton,
+                Heikki Junnila
   
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,23 +20,27 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QTreeWidgetItem>
+#include <QTreeWidget>
+#include <QPushButton>
+#include <QDialog>
+#include <QString>
+#include <QTimer>
+
 #include "configurellaout.h"
 #include "llaout.h"
-
-#include <qstring.h>
-#include <qpushbutton.h>
-#include <qlistview.h>
-#include <qtimer.h>
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
 ConfigureLlaOut::ConfigureLlaOut(QWidget* parent, LlaOut* plugin) 
-	: UI_ConfigureLlaOut(parent, "Configure LLA Out", true)
+	: QDialog(parent)
 {
 	Q_ASSERT(plugin != NULL);
 	m_plugin = plugin;
+
+	setupUi(this);
 
 	m_timer = NULL;
 	m_testUniverse = -1;
@@ -53,7 +58,7 @@ ConfigureLlaOut::~ConfigureLlaOut()
 
 void ConfigureLlaOut::slotTestToggled(bool state)
 {
-	QListViewItem* item = NULL;
+	QTreeWidgetItem* item;
 
 	if (state == true)
 	{
@@ -61,7 +66,7 @@ void ConfigureLlaOut::slotTestToggled(bool state)
 		if (item == NULL)
 		{
 			/* If there is no selection, don't toggle the button */
-			m_testButton->setOn(false);
+			m_testButton->setChecked(false);
 		}
 		else
 		{
@@ -77,7 +82,7 @@ void ConfigureLlaOut::slotTestToggled(bool state)
 			m_timer = new QTimer(this);
 			connect(m_timer, SIGNAL(timeout()),
 				this, SLOT(slotTestTimeout()));
-			m_timer->start(1000, false);
+			m_timer->start(1000);
 
 			/* Do the first cycle already here, since the first
 			   timeout occurs after one second */

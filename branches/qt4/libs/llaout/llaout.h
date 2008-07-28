@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  configurellaout.h
+  llaout.h
   
   Copyright (c) Simon Newton
                 Heikki Junnila
@@ -20,65 +20,68 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef CONFIGURELLAOUT_H
-#define CONFIGURELLAOUT_H
+#ifndef LLAOUT_H
+#define LLAOUT_H
 
-#include "uic_configurellaout.h"
+#include "common/qlcoutplugin.h"
+#include "common/qlctypes.h"
 
-class LlaOut;
+class ConfigureLlaOut;
+class LlaClient;
 
-class ConfigureLlaOut : public UI_ConfigureLlaOut
+extern "C" QLCOutPlugin* create();
+
+class LlaOut : public QLCOutPlugin
 {
 	Q_OBJECT
-
+		
+	friend class ConfigureLlaOut;
+	
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
+ public:
+	LlaOut();
+	~LlaOut();
+	
+	/*********************************************************************
+	 * Open/close
+	 *********************************************************************/
 public:
-	ConfigureLlaOut(QWidget* parent, LlaOut* plugin);
-	virtual ~ConfigureLlaOut();
+	int open();
+	int close();
+	int outputs();
 
 protected:
-	LlaOut* m_plugin;
+	LlaClient *m_lla;
+	
+	/*********************************************************************
+	 * Configuration
+	 *********************************************************************/
+public:
+	int configure(QWidget* parentWidget);
+
+protected:
+	QString m_configDir;
 
 	/*********************************************************************
-	 * Universe testing
+	 * Status
 	 *********************************************************************/
-protected slots:
-	/**
-	 * Start/stop flashing all channel values of one universe
-	 *
-	 * @param state true to start flashing, false to stop flashing
-	 */
-	void slotTestToggled(bool state);
-
-	/**
-	 * Flash all channels of one universe between 0 and 255
-	 */
-	void slotTestTimeout();
-
-protected:
-	/** Timer that drives universe testing */
-	QTimer* m_timer;
-
-	/** Modulo var that changes state between [0|1] on each timer pass */
-	int m_testMod;
-
-	/** The universe to test output on */
-	int m_testUniverse;
-
+public:
+	QString infoText();
+	
 	/*********************************************************************
-	 * Refresh
+	 * Value read/write
 	 *********************************************************************/
-protected slots:
-	/**
-	 * Invoke refresh for the interface list
-	 */
-	void slotRefreshClicked();
-
+public:
+	int writeChannel(t_channel channel, t_value value);
+	int writeRange(t_channel address, t_value* values, t_channel num);
+	
+	int readChannel(t_channel channel, t_value &value);
+	int readRange(t_channel address, t_value* values, t_channel num);
+	
 protected:
-	/** Refresh the interface list */
-	void refreshList();
+	t_value m_values[KChannelMax];
 };
 
 #endif

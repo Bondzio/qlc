@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  llaout.h
+  configurellaout.h
   
   Copyright (c) Simon Newton
                 Heikki Junnila
@@ -20,68 +20,65 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef LLAOUT_H
-#define LLAOUT_H
+#ifndef CONFIGURELLAOUT_H
+#define CONFIGURELLAOUT_H
 
-#include "common/outputplugin.h"
-#include "common/types.h"
+#include "ui_configurellaout.h"
 
-class ConfigureLlaOut;
-class LlaClient;
+class LlaOut;
 
-extern "C" OutputPlugin* create();
-
-class LlaOut : public OutputPlugin
+class ConfigureLlaOut : public QDialog, public Ui_ConfigureLlaOut
 {
 	Q_OBJECT
-		
-	friend class ConfigureLlaOut;
-	
+
 	/*********************************************************************
 	 * Initialization
 	 *********************************************************************/
- public:
-	LlaOut();
-	~LlaOut();
-	
-	/*********************************************************************
-	 * Open/close
-	 *********************************************************************/
 public:
-	int open();
-	int close();
-	int outputs();
+	ConfigureLlaOut(QWidget* parent, LlaOut* plugin);
+	virtual ~ConfigureLlaOut();
 
 protected:
-	LlaClient *m_lla;
-	
-	/*********************************************************************
-	 * Configuration
-	 *********************************************************************/
-public:
-	int configure(QWidget* parentWidget);
-
-protected:
-	QString m_configDir;
+	LlaOut* m_plugin;
 
 	/*********************************************************************
-	 * Status
+	 * Universe testing
 	 *********************************************************************/
-public:
-	QString infoText();
-	
-	/*********************************************************************
-	 * Value read/write
-	 *********************************************************************/
-public:
-	int writeChannel(t_channel channel, t_value value);
-	int writeRange(t_channel address, t_value* values, t_channel num);
-	
-	int readChannel(t_channel channel, t_value &value);
-	int readRange(t_channel address, t_value* values, t_channel num);
-	
+protected slots:
+	/**
+	 * Start/stop flashing all channel values of one universe
+	 *
+	 * @param state true to start flashing, false to stop flashing
+	 */
+	void slotTestToggled(bool state);
+
+	/**
+	 * Flash all channels of one universe between 0 and 255
+	 */
+	void slotTestTimeout();
+
 protected:
-	t_value m_values[KChannelMax];
+	/** Timer that drives universe testing */
+	QTimer* m_timer;
+
+	/** Modulo var that changes state between [0|1] on each timer pass */
+	int m_testMod;
+
+	/** The universe to test output on */
+	int m_testUniverse;
+
+	/*********************************************************************
+	 * Refresh
+	 *********************************************************************/
+protected slots:
+	/**
+	 * Invoke refresh for the interface list
+	 */
+	void slotRefreshClicked();
+
+protected:
+	/** Refresh the interface list */
+	void refreshList();
 };
 
 #endif

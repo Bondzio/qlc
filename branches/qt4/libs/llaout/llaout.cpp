@@ -29,20 +29,20 @@
 #include <errno.h>
 #include <linux/errno.h>
 
-#include <qapplication.h>
-#include <qthread.h>
-#include <qstring.h>
-#include <qfile.h>
+#include <QApplication>
+#include <QString>
+#include <QMutex>
+#include <QFile>
 
 #include <lla/LlaClient.h>
 
-#include "common/filehandler.h"
-#include "llaout.h"
+#include "common/qlcfile.h"
 #include "configurellaout.h"
+#include "llaout.h"
 
 static QMutex _mutex;
 
-extern "C" OutputPlugin* create()
+extern "C" QLCOutPlugin* create()
 {
 	return new LlaOut();
 }
@@ -51,11 +51,11 @@ extern "C" OutputPlugin* create()
  * Initialization
  *****************************************************************************/
 
-LlaOut::LlaOut() : OutputPlugin()
+LlaOut::LlaOut() : QLCOutPlugin()
 {
 	m_lla = NULL;
 	m_name = QString("LLA Output");
-	m_type = OutputType;
+	m_type = Output;
 	m_version = 0x00010100;
 	m_configDir = QString("~/.qlc/");
 	
@@ -139,10 +139,10 @@ QString LlaOut::infoText()
 	str += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	str += QString("<TR>");
 	str += QString("<TD BGCOLOR=\"");
-	str += QApplication::palette().active().highlight().name();
+	str += QApplication::palette().color(QPalette::Highlight).name();
 	str += QString("\">");
 	str += QString("<FONT COLOR=\"");
-	str += QApplication::palette().active().highlightedText().name();
+	str += QApplication::palette().color(QPalette::HighlightedText).name();
 	str += QString("\" SIZE=\"5\">");
 	str += name();
 	str += QString("</FONT>");
@@ -154,7 +154,7 @@ QString LlaOut::infoText()
 	str += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
 	str += QString("<TR>");
 	str += QString("<TD><B>Version</B></TD>");
-	t.sprintf("%d.%d.%d", (version() >> 16) & 0xff,
+	t.sprintf("%lu.%lu.%lu", (version() >> 16) & 0xff,
 		  (version() >> 8) & 0xff, version() & 0xff);
 	str += QString("<TD>" + t + "</TD>");
 	str += QString("</TR>");

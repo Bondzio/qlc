@@ -1,5 +1,13 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/dmx4linuxout/Makefile.am:
+	* libs/dmx4linuxout/configuredmx4linuxout.h:
+	* libs/dmx4linuxout/dmx4linuxout.pro:
+
+	Changed DMX4Linux to use qmake.
+	
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/libs.pro:
 	* libs/usbdmxout/Makefile.am:
 	* libs/usbdmxout/configureusbdmxout.h:

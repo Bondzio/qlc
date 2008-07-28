@@ -24,7 +24,7 @@
 
 #include <QDialog>
 
-#include "ui_configuredmx4linuxout.cpp"
+#include "ui_configuredmx4linuxout.h"
 
 class QWidget;
 class DMX4LinuxOut;

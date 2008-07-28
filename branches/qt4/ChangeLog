@@ -1,5 +1,18 @@
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* docs/Makefile.am:
+	* etc/Makefile.am:
+	* etc/etc.pro:
+	* etc/qlc-fixtureeditor.desktop:
+	* fixtureeditor/fixtureeditor.pro:
+	* fixtures/fixtures.pro:
+	* qlc.pro:
+
+	Changed etc t use qmake. Fixed fixtures.pro to use subdirs template
+	instead of lib.
+
+2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/dmx4linuxout/Makefile.am:
 	* libs/dmx4linuxout/configuredmx4linuxout.h:
 	* libs/dmx4linuxout/dmx4linuxout.pro:

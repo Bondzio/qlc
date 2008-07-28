@@ -1,6 +1,6 @@
 TEMPLATE 	= app
 LANGUAGE 	= C++
-TARGET 		= fixtureeditor
+TARGET 		= qlc-fixtureeditor
 
 CONFIG 		+= qt warn_on release build_all
 win32:CONFIG	+= windows

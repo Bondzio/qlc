@@ -51,7 +51,6 @@ HEADERS += aboutbox.h \
            inputmap.h \
            keybind.h \
            monitor.h \
-           pluginloader.h \
            pluginmanager.h \
            scene.h \
            sceneeditor.h \
@@ -131,7 +130,6 @@ SOURCES += aboutbox.cpp \
            keybind.cpp \
            main.cpp \
            monitor.cpp \
-           pluginloader.cpp \
            pluginmanager.cpp \
            scene.cpp \
            sceneeditor.cpp \

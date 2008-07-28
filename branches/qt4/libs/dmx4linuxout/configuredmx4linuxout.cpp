@@ -138,13 +138,10 @@ void ConfigureDMX4LinuxOut::refreshList()
 
 	m_list->clear();
 
-	for (int i = 0; i < m_plugin->m_dmxInfo.used_out_universes; i++)
+	for (int i = 0; i < MAX_DMX4LINUX_DEVICES; i++)
 	{
 		QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
 		item->setText(0, t.sprintf("%.2d", i + 1));
-		item->setText(1, t.sprintf("%s",
-					   m_plugin->m_dmxCaps[i].driver));
-		item->setText(3, t.sprintf("%.3d",
-					   m_plugin->m_dmxCaps[i].maxSlots));
+		item->setText(1, "Unknown");
 	}
 }

@@ -19,10 +19,13 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QPluginLoader>
 #include <QMessageBox>
 #include <QStringList>
-#include <iostream>
+#include <QSettings>
+#include <QDebug>
 #include <QList>
+#include <QDir>
 
 #include "common/qlcinplugin.h"
 #include "common/qlctypes.h"
@@ -40,12 +43,69 @@ extern App* _app;
 
 InputMap::InputMap()
 {
+	load();
 }
 
 InputMap::~InputMap()
 {
 	while (m_plugins.isEmpty() == false)
 		delete m_plugins.takeFirst();
+}
+
+void InputMap::load()
+{
+	QSettings s;
+	
+	QString pluginPath = s.value("directories/plugins").toString();
+	if (pluginPath.isEmpty() == true)
+	{
+#ifdef WIN32
+		pluginPath = "%%SystemRoot%%\\QLC\\Plugins";
+#else
+		pluginPath = "/usr/lib/qlc";
+#endif
+		s.setValue("directories/plugins", pluginPath);
+	}
+
+#ifdef WIN32
+	QDir dir(pluginPath + "\\Input", "*.dll", QDir::Name, QDir::Files);
+#else
+	QDir dir(pluginPath + "/input", "*.so", QDir::Name, QDir::Files);
+#endif
+
+	/* Check that we can access the directory */
+	if (dir.exists() == false)
+	{
+		qWarning() << "Input plugin path" << dir.absolutePath()
+			   << "doesn't exist.";
+		return;
+	}
+	else if (dir.isReadable() == false)
+	{
+		qWarning() << "Input plugin path" << dir.absolutePath()
+			   << "is not accessible";
+		return;
+	}
+
+	/* Loop thru all files in the directory */
+	QStringList dirlist(dir.entryList());
+	QStringList::Iterator it;
+	for (it = dirlist.begin(); it != dirlist.end(); ++it)
+	{
+		QPluginLoader loader(dir.absoluteFilePath(*it), this);
+		QLCInPlugin* plugin;
+
+		plugin = qobject_cast<QLCInPlugin*> (loader.instance());
+		if (plugin == NULL)
+		{
+			qWarning() << "Unable to find an input plugin in"
+				   << dir.absoluteFilePath(*it);
+		}
+		else
+		{
+			appendPlugin(plugin);
+		}
+	}
 }
 
 /*****************************************************************************
@@ -77,7 +137,7 @@ void InputMap::configurePlugin(const QString& pluginName)
 				     "Unable to configure plugin",
 				     pluginName + QString(" not found!"));
 	else
-		inputPlugin->configure(_app);
+		inputPlugin->configure();
 }
 
 QString InputMap::pluginStatus(const QString& pluginName)
@@ -133,17 +193,14 @@ bool InputMap::appendPlugin(QLCInPlugin* inputPlugin)
 
 	if (plugin(inputPlugin->name()) == NULL)
 	{
-		cout << "Found input plugin: "
-		     << inputPlugin->name().toStdString()
-		     << endl;
+		qDebug() << "Found an input plugin:" << inputPlugin->name();
 		m_plugins.append(inputPlugin);
 		return true;
 	}
 	else
 	{
-		cout << "Input plugin: "
-		     << inputPlugin->name().toStdString()
-		     << " is already loaded." << endl;
+		qWarning() << "Input plugin" << inputPlugin->name()
+			   << "is already loaded. Skipping.";
 		return false;
 	}
 }

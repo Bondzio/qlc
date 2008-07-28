@@ -22,24 +22,60 @@
 #ifndef QLCOUTPLUGIN_H
 #define QLCOUTPLUGIN_H
 
-#include "qlcplugin.h"
+#include <QtPlugin>
+
 #include "qlctypes.h"
 
-class QLC_DECLSPEC QLCOutPlugin : public QLCPlugin
+class QLCOutPlugin
 {
-	Q_OBJECT
-		
 public:
 	/**
-	 * Create a new output plugin
+	 * Destroy the plugin
 	 */
-	QLCOutPlugin();
+	virtual ~QLCOutPlugin() {}
+	
+	/**
+	 * Open (initialize for operation) the plugin.
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 *
+	 */
+	virtual int open() = 0;
 
 	/**
-	 * Destroy an output plugin
+	 * Close (de-initialize) the plugin
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
 	 */
-	virtual ~QLCOutPlugin();
-	
+	virtual int close() = 0;
+
+	/**
+	 * Invoke a configuration dialog for the plugin
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual int configure() = 0;
+
+	/**
+	 * Provide an information text to be displayed in the plugin manager
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual QString infoText() = 0;
+
+	/**
+	 * Get the plugin's name
+	 */
+	virtual QString name() = 0;
+
+	/*********************************************************************
+	 * Outputs
+	 *********************************************************************/
+public:	
 	/**
 	 * Get the number of outputs provided by the plugin.
 	 * Default implementation provides one output line.
@@ -48,7 +84,7 @@ public:
 	 * is already used quite widely in QLC, "output" was chosen here
 	 * instead to prevent confusion.
 	 */
-	virtual int outputs() { return 1; }
+	virtual int outputs() = 0;
 	
 	/**
 	 * Write the value of one channel. Channel numbers 0-511 are
@@ -101,5 +137,7 @@ public:
 	virtual int readRange(t_channel address, t_value* values,
 			      t_channel num) = 0;
 };
+
+Q_DECLARE_INTERFACE(QLCOutPlugin, "QLCOutPlugin")
 
 #endif

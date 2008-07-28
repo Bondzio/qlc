@@ -29,20 +29,18 @@
 class ConfigureLlaOut;
 class LlaClient;
 
-extern "C" QLCOutPlugin* create();
-
-class LlaOut : public QLCOutPlugin
+class LlaOut : public QObject, public QLCOutPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QLCOutPlugin)
 		
 	friend class ConfigureLlaOut;
 	
 	/*********************************************************************
-	 * Initialization
+	 * Name
 	 *********************************************************************/
- public:
-	LlaOut();
-	~LlaOut();
+public:
+	QString name();
 	
 	/*********************************************************************
 	 * Open/close
@@ -59,7 +57,7 @@ protected:
 	 * Configuration
 	 *********************************************************************/
 public:
-	int configure(QWidget* parentWidget);
+	int configure();
 
 protected:
 	QString m_configDir;

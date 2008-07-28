@@ -20,14 +20,14 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <linux/errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
-#include <linux/errno.h>
 
 #include <QApplication>
 #include <QString>
@@ -42,31 +42,13 @@
 
 static QMutex _mutex;
 
-extern "C" QLCOutPlugin* create()
-{
-	return new LlaOut();
-}
-
 /*****************************************************************************
- * Initialization
+ * Name
  *****************************************************************************/
 
-LlaOut::LlaOut() : QLCOutPlugin()
+QString LlaOut::name()
 {
-	m_lla = NULL;
-	m_name = QString("LLA Output");
-	m_type = Output;
-	m_version = 0x00010100;
-	m_configDir = QString("~/.qlc/");
-	
-	for (t_channel i = 0; i < KChannelMax; i++)
-		m_values[i] = 0;
-
-	open();
-}
-
-LlaOut::~LlaOut()
-{
+	return QString("LLA Output");
 }
 
 /*****************************************************************************
@@ -75,7 +57,8 @@ LlaOut::~LlaOut()
 
 int LlaOut::open()
 {
-	close();
+	for (t_channel i = 0; i < KChannelMax; i++)
+		m_values[i] = 0;
 
 	m_lla = new LlaClient();
 	
@@ -113,11 +96,10 @@ int LlaOut::outputs()
  * Configuration
  *****************************************************************************/
 
-int LlaOut::configure(QWidget* parentWidget)
+int LlaOut::configure()
 {
-	ConfigureLlaOut conf(parentWidget, this);
-	conf.exec();
-	return 0;
+	ConfigureLlaOut conf(NULL, this);
+	return conf.exec();
 }
 
 /*****************************************************************************
@@ -150,16 +132,6 @@ QString LlaOut::infoText()
 	str += QString("</TR>");
 	str += QString("</TABLE>");
 
-	/* Version */
-	str += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
-	str += QString("<TR>");
-	str += QString("<TD><B>Version</B></TD>");
-	t.sprintf("%lu.%lu.%lu", (version() >> 16) & 0xff,
-		  (version() >> 8) & 0xff, version() & 0xff);
-	str += QString("<TD>" + t + "</TD>");
-	str += QString("</TR>");
-	
-	str += QString("</TABLE>");
 	str += QString("</BODY>");
 	str += QString("</HTML>");
 	
@@ -240,3 +212,9 @@ int LlaOut::readRange(t_channel address, t_value* values, t_channel num)
 	
 	return 0;
 }
+
+/*****************************************************************************
+ * Plugin export
+ ****************************************************************************/
+
+Q_EXPORT_PLUGIN2(llaout, LlaOut)

@@ -24,6 +24,7 @@
 #ifndef USBDMXOUT_H
 #define USBDMXOUT_H
 
+#include <QtPlugin>
 #include <QMutex>
 
 #include "common/qlcoutplugin.h"
@@ -32,8 +33,6 @@
 class ConfigureUsbDmxOut;
 class QString;
 
-extern "C" QLCOutPlugin* create();
-
 /* Maximum number of supported device entries (/dev/usbdmx*) */
 #define MAX_USBDMX_DEVICES 8
 
@@ -41,18 +40,18 @@ extern "C" QLCOutPlugin* create();
  * USBDMXOut
  *****************************************************************************/
 
-class USBDMXOut : public QLCOutPlugin
+class USBDMXOut : public QObject, public QLCOutPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QLCOutPlugin)
 
 	friend class ConfigureUSBDMXOut;
 
 	/*********************************************************************
-	 * Initialization
+	 * Name
 	 *********************************************************************/
 public:
-	USBDMXOut();
-	virtual ~USBDMXOut();
+	QString name();
 
 	/*********************************************************************
 	 * Plugin open/close
@@ -70,7 +69,7 @@ protected:
 	 * Configuration
 	 *********************************************************************/
 public:
-	int configure(QWidget* parentWidget);
+	int configure();
 
 	/*********************************************************************
 	 * Plugin status

@@ -25,28 +25,25 @@
 #include <QString>
 #include <QWidget>
 
-#include <dmx/dmx.h>
-#include <dmx/dmxioctl.h>
-
 #include "common/qlcoutplugin.h"
 #include "common/qlctypes.h"
 
 class ConfigureDMX4LinuxOut;
 
-extern "C" QLCOutPlugin* create();
+#define MAX_DMX4LINUX_DEVICES 4
 
-class DMX4LinuxOut : public QLCOutPlugin
+class DMX4LinuxOut : public QObject, public QLCOutPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QLCOutPlugin)
 
 	friend class ConfigureDMX4LinuxOut;
 
 	/*********************************************************************
-	 * Initialization
+	 * Name
 	 *********************************************************************/
 public:
-	DMX4LinuxOut();
-	~DMX4LinuxOut();
+	QString name();
 
 	/*********************************************************************
 	 * Open/close
@@ -68,21 +65,12 @@ protected:
 	/** Error code for /dev/dmx open() */
 	int m_openError;
 
-	/** Generic information on DMX4Linux */
-	struct dmx_info m_dmxInfo;
-
-	/** Error code for DMX information ioctl() */
-	int m_dmxInfoError;
-
-	/** Capabilities for each output line (universe) */
-	struct dmx_capabilities* m_dmxCaps;
-
 	/*********************************************************************
 	 * Configuration
 	 *********************************************************************/
 public:
 	/** Invoke a configuration dialog */
-	int configure(QWidget* parentWidget);
+	int configure();
 
 	/*********************************************************************
 	 * Status
@@ -102,7 +90,7 @@ public:
 	int readRange(t_channel address, t_value* values, t_channel num);
 
 protected:
-	t_value m_values[KChannelMax];
+	t_value m_values[MAX_DMX4LINUX_DEVICES * 512];
 };
 
 #endif

@@ -30,36 +30,30 @@
 #include "hiddevice.h"
 #include "hidpoller.h"
 
-/**
- * This lib's only exported function that is used to create instances of
- * class HIDInput
- */
-extern "C" QLCInPlugin* create();
-
 /*****************************************************************************
  * HIDInput
  *****************************************************************************/
 
-class HIDInput : public QLCInPlugin
+class HIDInput : public QObject, public QLCInPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QLCInPlugin)
 
 	friend class ConfigureHIDInput;
 	friend class HIDPoller;
 
 	/*********************************************************************
-	 * Initialization
+	 * Name
 	 *********************************************************************/
 public:
-	HIDInput();
-	virtual ~HIDInput();
+	QString name();
 
 	/*********************************************************************
 	 * Open/close
 	 *********************************************************************/
 public:
-	virtual int open();
-	virtual int close();
+	int open();
+	int close();
 
 protected:
 	HIDDevice* device(const QString& path);
@@ -72,20 +66,20 @@ protected:
 	 * Inputs & channels
 	 *********************************************************************/
 public:
-	virtual t_input inputs();
-	virtual t_input_channel channels(t_input input);
+	t_input inputs();
+	t_input_channel channels(t_input input);
 
 	/*********************************************************************
 	 * Configuration
 	 *********************************************************************/
 public:
-	virtual int configure(QWidget* parentWidget);
+	int configure();
 
 	/*********************************************************************
 	 * Status
 	 *********************************************************************/
 public:
-	virtual QString infoText();
+	QString infoText();
 
 	/*********************************************************************
 	 * Polled devices
@@ -108,8 +102,8 @@ protected:
 	 * Input data
 	 *********************************************************************/
 public:
-	virtual void feedBack(t_input input, t_input_channel channel,
-			      t_input_value value);
+	void feedBack(t_input input, t_input_channel channel,
+		      t_input_value value);
 };
 
 #endif

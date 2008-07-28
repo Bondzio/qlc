@@ -22,21 +22,64 @@
 #ifndef QLCINPLUGIN_H
 #define QLCINPLUGIN_H
 
-#include "qlcplugin.h"
+#include <QtPlugin>
+
 #include "qlctypes.h"
 
 /*****************************************************************************
  * InputPlugin
  *****************************************************************************/
 
-class QLC_DECLSPEC QLCInPlugin : public QLCPlugin
+class QLCInPlugin
 {
-	Q_OBJECT
-
 public:
-	QLCInPlugin();
-	virtual ~QLCInPlugin();
+	/**
+	 * Destroy the plugin
+	 */
+	virtual ~QLCInPlugin() {}
+	
+	/**
+	 * Open (initialize for operation) the plugin.
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 *
+	 */
+	virtual int open() = 0;
 
+	/**
+	 * Close (de-initialize) the plugin
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual int close() = 0;
+
+	/**
+	 * Invoke a configuration dialog for the plugin
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual int configure() = 0;
+
+	/**
+	 * Provide an information text to be displayed in the plugin manager
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual QString infoText() = 0;
+
+	/**
+	 * Get the plugin's name
+	 */
+	virtual QString name() = 0;
+
+	/*********************************************************************
+	 * Inputs
+	 *********************************************************************/
+public:
 	/**
 	 * Get the number of inputs provided by the plugin
 	 *
@@ -44,7 +87,7 @@ public:
 	 *
 	 * @return Number of inputs provided by the plugin
 	 */
-	virtual t_input inputs();
+	virtual t_input inputs() = 0;
 
 	/**
 	 * Get the number of channels provided by a plugin input
@@ -54,8 +97,12 @@ public:
 	 * @param input An input line whose number of channels to get
 	 * @return Number of input channels in the given input
 	 */
-	virtual t_input_channel channels(t_input input);
+	virtual t_input_channel channels(t_input input) = 0;
 
+	/*********************************************************************
+	 * Feedback
+	 *********************************************************************/
+public:
 	/**
 	 * Send a value back to an input line's channel. This method can be
 	 * used for example to move motorized sliders with QLC sliders.
@@ -65,8 +112,8 @@ public:
 	 * @param value An input value to send back to the input channel
 	 */
 	virtual void feedBack(t_input input, t_input_channel channel,
-			      t_input_value value);
-	
+			      t_input_value value) = 0;
+#if 0
 signals:
 	/**
 	 * Signal a value change in an input's channel. This is THE signal that
@@ -79,6 +126,9 @@ signals:
 	void valueChanged(t_input input,
 			  t_input_channel channel,
 			  t_input_value value);
+#endif
 };
+
+Q_DECLARE_INTERFACE(QLCInPlugin, "QLCInPlugin")
 
 #endif

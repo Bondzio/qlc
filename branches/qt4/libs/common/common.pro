@@ -16,10 +16,7 @@ HEADERS += qlccapability.h \
            qlcfile.h \
            qlcfixturedef.h \
            qlcfixturemode.h \
-           qlcinplugin.h \
-           qlcoutplugin.h \
            qlcphysical.h \
-           qlcplugin.h \
            qlctypes.h
 	   
 SOURCES += qlccapability.cpp \
@@ -28,7 +25,4 @@ SOURCES += qlccapability.cpp \
            qlcfile.cpp \
            qlcfixturedef.cpp \
            qlcfixturemode.cpp \
-           qlcinplugin.cpp \
-           qlcoutplugin.cpp \
-           qlcphysical.cpp \
-           qlcplugin.cpp
+           qlcphysical.cpp

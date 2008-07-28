@@ -27,7 +27,6 @@
 
 #include "common/qlctypes.h"
 
-class PluginLoader;
 class QLCInPlugin;
 
 class InputMap : public QObject
@@ -38,8 +37,20 @@ class InputMap : public QObject
 	 * Initialization
 	 *********************************************************************/
 public:
+	/**
+	 * Create a new InputMap object
+	 */
 	InputMap();
+
+	/**
+	 * Destroy an InputMap object
+	 */
 	virtual ~InputMap();
+
+	/**
+	 * Load all input plugins from the input plugin directory
+	 */
+	void load();
 
 	/*********************************************************************
 	 * Plugins

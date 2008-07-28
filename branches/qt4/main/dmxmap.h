@@ -55,7 +55,6 @@ class DMXPatch
 	friend class DMXMap;
 	friend class DMXMapEditor;
 	friend class DMXPatchEditor;
-	friend class PluginLoader;
 
 public:
 	DMXPatch(QLCOutPlugin* p, int o) { plugin = p; output = o; }
@@ -108,7 +107,6 @@ public:
 	 * Create a new DMXMap object
 	 *
 	 * @param universes Number of universes
-	 * @param channels Number of channels per universe
 	 */
 	DMXMap(int universes = KUniverseCount);
 
@@ -116,6 +114,11 @@ public:
 	 * Destroy a DMXMap object
 	 */
 	~DMXMap();
+
+	/**
+	 * Load all output plugins from the plugin directory.
+	 */
+	void load();
 
 protected:
 	/** Total number of supported universes */

@@ -27,9 +27,10 @@
 #include "common/qlcoutplugin.h"
 #include "common/qlctypes.h"
 
-class DummyOutPlugin : public QLCOutPlugin
+class DummyOutPlugin : public QObject, public QLCOutPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QLCOutPlugin)
 		
 	/*********************************************************************
 	 * Initialization
@@ -37,6 +38,15 @@ class DummyOutPlugin : public QLCOutPlugin
 public:
 	DummyOutPlugin();
 	virtual ~DummyOutPlugin();
+
+	/*********************************************************************
+	 * Name
+	 *********************************************************************/
+public:
+	QString name() { return m_name; }
+
+protected:
+	QString m_name;
 
 	/*********************************************************************
 	 * Open/close
@@ -50,7 +60,7 @@ public:
 	 * Configuration
 	 *********************************************************************/
 public:
-	int configure(QWidget* parentWidget);
+	int configure();
 
 	/*********************************************************************
 	 * Status

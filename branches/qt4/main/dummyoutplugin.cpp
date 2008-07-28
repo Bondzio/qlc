@@ -31,7 +31,6 @@
 
 DummyOutPlugin::DummyOutPlugin() : QLCOutPlugin()
 {
-	m_version = 0x00010100;
 	m_name = QString("Dummy Output");
 
 	for (t_channel i = 0; i < KChannelMax; i++)
@@ -65,9 +64,9 @@ int DummyOutPlugin::outputs()
  * Configuration
  *****************************************************************************/
 
-int DummyOutPlugin::configure(QWidget* parentWidget)
+int DummyOutPlugin::configure()
 {
-	QMessageBox::information(parentWidget,
+	QMessageBox::information(NULL,
 				 tr("Dummy output configuration"),
 				 tr("This plugin has no configurable options"));
 	return 0;
@@ -103,15 +102,8 @@ QString DummyOutPlugin::infoText()
 	str += QString("</TR>");
 	str += QString("</TABLE>");
 
-	/* Version */
+	/* Outputs */
 	str += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
-	str += QString("<TR>");
-	str += QString("<TD><B>Version</B></TD>");
-	t.sprintf("%ld.%ld.%ld", (version() >> 16) & 0xff,
-		  (version() >> 8) & 0xff, version() & 0xff);
-	str += QString("<TD>" + t +"</TD>");
-	str += QString("</TR>");
-
 	str += QString("<TR>");
 	str += QString("<TD><B>Outputs</B></TD>");
 	t.sprintf("%d", outputs());

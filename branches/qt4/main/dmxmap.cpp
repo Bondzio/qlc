@@ -19,22 +19,16 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <stdlib.h>
-
-#ifndef WIN32
-#include <dlfcn.h>
-#endif
-
+#include <QPluginLoader>
 #include <QMessageBox>
 #include <QSettings>
-#include <iostream>
 #include <QString>
+#include <QDebug>
 #include <QList>
 #include <QtXml>
 #include <QDir>
 
 #include "common/qlcoutplugin.h"
-#include "common/qlcplugin.h"
 #include "common/qlctypes.h"
 
 #include "dummyoutplugin.h"
@@ -98,7 +92,7 @@ bool DMXPatch::loader(QDomDocument*, QDomElement* root, DMXMap* dmxMap)
 
 	if (root->tagName() != KXMLQLCDMXPatch)
 	{
-		cout << "Patch node not found!" << endl;
+		qWarning() << "Patch node not found!";
 		return false;
 	}
 
@@ -122,9 +116,9 @@ bool DMXPatch::loader(QDomDocument*, QDomElement* root, DMXMap* dmxMap)
 			output = tag.text().toInt();
 		}
 		else
-			cout << "Unknown Patch tag: "
-			     << tag.tagName().toStdString()
-			     << endl;
+		{
+			qWarning() << "Unknown Patch tag: " << tag.tagName();
+		}
 		
 		node = node.nextSibling();
 	}
@@ -145,6 +139,8 @@ DMXMap::DMXMap(int universes) : QObject()
 	m_blackoutStore = NULL;
 
 	initPatch();
+
+	load();
 }
 
 DMXMap::~DMXMap()
@@ -153,6 +149,62 @@ DMXMap::~DMXMap()
 		delete m_plugins.takeFirst();
 
 	m_dummyOut = NULL;
+}
+
+void DMXMap::load()
+{
+	QSettings s;
+	
+	QString pluginPath = s.value("directories/plugins").toString();
+	if (pluginPath.isEmpty() == true)
+	{
+#ifdef WIN32
+		pluginPath = "%%SystemRoot%%\\QLC\\Plugins";
+#else
+		pluginPath = "/usr/lib/qlc";
+#endif
+		s.setValue("directories/plugins", pluginPath);
+	}
+
+#ifdef WIN32
+	QDir dir(pluginPath + "\\Output", "*.dll", QDir::Name, QDir::Files);
+#else
+	QDir dir(pluginPath + "/output", "*.so", QDir::Name, QDir::Files);
+#endif
+
+	/* Check that we can access the directory */
+	if (dir.exists() == false)
+	{
+		qWarning() << "Output plugin path" << dir.absolutePath()
+			   << "doesn't exist.";
+		return;
+	}
+	else if (dir.isReadable() == false)
+	{
+		qWarning() << "Output plugin path" << dir.absolutePath()
+			   << "is not accessible";
+		return;
+	}
+
+	/* Loop thru all files in the directory */
+	QStringList dirlist(dir.entryList());
+	QStringList::Iterator it;
+	for (it = dirlist.begin(); it != dirlist.end(); ++it)
+	{
+		QPluginLoader loader(dir.absoluteFilePath(*it), this);
+		QLCOutPlugin* plugin;
+
+		plugin = qobject_cast<QLCOutPlugin*> (loader.instance());
+		if (plugin == NULL)
+		{
+			qWarning() << "Unable to find an output plugin in"
+				   << dir.absoluteFilePath(*it);
+		}
+		else
+		{
+			appendPlugin(plugin);
+		}
+	}
 }
 
 /*****************************************************************************
@@ -249,9 +301,8 @@ t_value DMXMap::getValue(t_channel channel)
 
 	if (universe >= m_universes)
 	{
-		cout << QString("Unable to set values. Invalid universe %1.")
-			.arg(universe).toStdString() 
-		     << endl;
+		qWarning() << "Unable to set values. Invalid universe number:"
+			   << universe;
 		return 0;
 	}
 
@@ -286,9 +337,8 @@ bool DMXMap::getValueRange(t_channel address, t_value* values, t_channel num)
 
 	if (universe >= m_universes)
 	{
-		cout << QString("Unable to set values. Invalid universe %1.")
-			.arg(universe).toStdString() 
-		     << endl;
+		qWarning() << "Unable to set values. Invalid universe number:"
+			   << universe;
 		return 0;
 	}
 
@@ -324,9 +374,8 @@ void DMXMap::setValue(t_channel channel, t_value value)
 
 	if (universe >= m_universes)
 	{
-		cout << QString("Unable to set values. Invalid universe %1.")
-			.arg(universe).toStdString() 
-		     << endl;
+		qWarning() << "Unable to set values. Invalid universe number:"
+			   << universe;
 		return;
 	}
 
@@ -358,9 +407,8 @@ void DMXMap::setValueRange(t_channel address, t_value* values, t_channel num)
 
 	if (universe >= m_universes)
 	{
-		cout << QString("Unable to set values. Invalid universe %1.")
-			.arg(universe).toStdString() 
-		     << endl;
+		qWarning() << "Unable to set values. Invalid universe number:"
+			   << universe;
 		return;
 	}
 
@@ -402,19 +450,16 @@ bool DMXMap::setPatch(unsigned int universe, const QString& pluginName,
 {
 	if (int(universe) >= m_patch.size())
 	{
-		cout << QString("Unable to patch universe %1. Number is out of "
-				"bounds.").arg(universe).toStdString()
-		     << endl;
+		qWarning() << "Universe number out of bounds:" << universe
+			   << "Unable to set patch.";
 		return false;
 	}
 
 	QLCOutPlugin* outputPlugin = plugin(pluginName);
 	if (outputPlugin == NULL)
 	{
-		cout << QString("Unable to patch universe %1. Plugin %2 not "
-				"found.")
-			.arg(universe).arg(pluginName).toStdString()
-		     << endl;
+		qWarning() << "Plugin" << pluginName << "for universe number"
+			   << universe << "not found.";
 		return false;
 	}
 	else
@@ -465,7 +510,7 @@ void DMXMap::configurePlugin(const QString& pluginName)
 		QMessageBox::warning(_app, tr("Unable to configure plugin"),
 				     tr("%1 not found").arg(pluginName));
 	else
-		outputPlugin->configure(_app);
+		outputPlugin->configure();
 }
 
 QString DMXMap::pluginStatus(const QString& pluginName)
@@ -557,17 +602,14 @@ bool DMXMap::appendPlugin(QLCOutPlugin* outputPlugin)
 
 	if (plugin(outputPlugin->name()) == NULL)
 	{
-		cout << "Found output plugin: "
-		     << outputPlugin->name().toStdString()
-		     << endl;
+		qDebug() << "Found an output plugin:" << outputPlugin->name();
 		m_plugins.append(outputPlugin);
 		return true;
 	}
 	else
 	{
-		cout << outputPlugin->name().toStdString()
-		     << " is already loaded."
-		     << endl;
+		qWarning() << "Output plugin" << outputPlugin->name()
+			   << "is already loaded. Skipping";
 		return false;
 	}
 }
@@ -619,7 +661,7 @@ bool DMXMap::loadXML(QDomDocument* doc, QDomElement* root)
 
 	if (root->tagName() != KXMLQLCDMXMap)
 	{
-		cout << "DMXMap node not found!" << endl;
+		qWarning() << "DMXMap node not found!";
 		return false;
 	}
 
@@ -634,9 +676,9 @@ bool DMXMap::loadXML(QDomDocument* doc, QDomElement* root)
 			DMXPatch::loader(doc, &tag, this);
 		}
 		else
-			cout << "Unknown DMXMap tag: "
-			     << tag.tagName().toStdString()
-			     << endl;
+		{
+			qWarning() << "Unknown DMXMap tag:" << tag.tagName();
+		}
 		
 		node = node.nextSibling();
 	}

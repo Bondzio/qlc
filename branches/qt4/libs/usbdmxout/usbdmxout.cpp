@@ -31,7 +31,7 @@
 
 #include <QApplication>
 #include <QPalette>
-#include <iostream>
+#include <QDebug>
 #include <QString>
 #include <QColor>
 
@@ -132,39 +132,12 @@
 #define USBDMX21     (0x04)
 
 /*****************************************************************************
- * UsbDmxOut plugin implementation
+ * Name
  *****************************************************************************/
 
-extern "C" QLCOutPlugin* create()
+QString USBDMXOut::name()
 {
-	return new USBDMXOut();
-}
-
-/*****************************************************************************
- * Initialization
- *****************************************************************************/
-
-USBDMXOut::USBDMXOut() : QLCOutPlugin()
-{
-	m_name = QString("USB DMX Output");
-	m_type = Output;
-	m_version = 0x00010100;
-
-	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
-	{
-		m_devices[i] = -1;
-		m_errors[i] = 0;
-	}
-
-	for (t_channel ch = 0; ch < MAX_USBDMX_DEVICES * 512; ch++)
-		m_values[ch] = 0;
-
-	open();
-}
-
-USBDMXOut::~USBDMXOut()
-{
-	close();
+	return QString("USB DMX Output");
 }
 
 /*****************************************************************************
@@ -173,25 +146,25 @@ USBDMXOut::~USBDMXOut()
 
 int USBDMXOut::open()
 {
-	QString path;
+	/* Initialize value buffer */
+	for (t_channel ch = 0; ch < MAX_USBDMX_DEVICES * 512; ch++)
+		m_values[ch] = 0;
 
-	/* Close all connections first */
-	close();
-
+	/* Attempt to find USBDMX devices */
 	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
 	{
-		path.sprintf("/dev/usbdmx%d", i);
-		m_devices[i] = ::open(path.toUtf8(), O_RDWR);
+		QString path("/dev/usbdmx%1");
+		m_devices[i] = ::open(path.arg(i).toUtf8(), O_RDWR);
 		if (m_devices[i] >= 0)
 		{
+			qDebug() << "Found a USB2DMX device in" << path;
 			m_errors[i] = 0;
-			std::cout << "Found USB2DMX device from "
-				  << path.toStdString()
-				  << std::endl;
 		}
 		else
 		{
+			qDebug() << "No USB2DMX device in" << path;
 			m_errors[i] = errno;
+			m_devices[i] = -1;
 		}
 	}
 
@@ -219,11 +192,10 @@ int USBDMXOut::outputs()
  * Configuration
  *****************************************************************************/
 
-int USBDMXOut::configure(QWidget* parentWidget)
+int USBDMXOut::configure()
 {
-	ConfigureUSBDMXOut conf(parentWidget, this);
-	conf.exec();
-	return 0;
+	ConfigureUSBDMXOut conf(NULL, this);
+	return conf.exec();
 }
 
 /*****************************************************************************
@@ -254,20 +226,6 @@ QString USBDMXOut::infoText()
 	info += name();
 	info += QString("</FONT>");
 	info += QString("</TD>");
-	info += QString("</TR>");
-	info += QString("</TABLE>");
-
-	/* Version information */
-	info += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
-	info += QString("<TR>");
-	info += QString("<TD><B>Version</B></TD>");
-	info += QString("<TD>");
-	s.setNum((version() >> 16) & 0xff);
-	info += s + QString(".");
-	s.setNum((version() >> 8) & 0xff);
-	info += s + QString(".");
-	s.setNum(version() & 0xff);
-	info += s + QString("</TD>");
 	info += QString("</TR>");
 	info += QString("</TABLE>");
 
@@ -404,3 +362,9 @@ int USBDMXOut::readRange(t_channel address, t_value* values, t_channel num)
 
 	return 0;
 }
+
+/*****************************************************************************
+ * Plugin export
+ ****************************************************************************/
+
+Q_EXPORT_PLUGIN2(usbdmxout, USBDMXOut)

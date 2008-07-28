@@ -50,7 +50,6 @@
 #include "fixturemanager.h"
 #include "pluginmanager.h"
 #include "busproperties.h"
-#include "pluginloader.h"
 #include "inputmap.h"
 #include "aboutbox.h"
 #include "monitor.h"
@@ -212,7 +211,6 @@ void App::init()
 	initDMXMap();
 	initInputMap();
 	
-	PluginLoader::load(m_dmxMap, m_inputMap);
 	m_dmxMap->loadDefaults();
 	m_inputMap->loadDefaults();
 

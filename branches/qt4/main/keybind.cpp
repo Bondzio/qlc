@@ -345,7 +345,7 @@ void KeyBind::slotKeyReleased(QKeyEvent* e)
  * Load & Save
  *****************************************************************************/
 
-bool KeyBind::loadXML(QDomDocument* doc, QDomElement* root)
+bool KeyBind::loadXML(QDomDocument*/* doc*/, QDomElement* root)
 {
 	QString action;
 	QString mod;
@@ -354,7 +354,6 @@ bool KeyBind::loadXML(QDomDocument* doc, QDomElement* root)
 	QDomNode node;
 	QDomElement tag;
 
-	Q_ASSERT(doc != NULL);
 	Q_ASSERT(root != NULL);
 
 	if (root->tagName() != KXMLQLCKeyBind)

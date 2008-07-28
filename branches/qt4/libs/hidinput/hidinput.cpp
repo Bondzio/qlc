@@ -30,27 +30,13 @@
 #include "hidpoller.h"
 #include "hidinput.h"
 
-extern "C" QLCInPlugin* create()
-{
-	return new HIDInput;
-}
-
 /*****************************************************************************
- * Initialization
+ * Name
  *****************************************************************************/
 
-HIDInput::HIDInput() : QLCInPlugin()
+QString HIDInput::name()
 {
-	m_version = 0x00010000;
-	m_name = QString("HID Input");
-	m_type = Input;
-	m_poller = NULL;
-
-	open();
-}
-
-HIDInput::~HIDInput()
-{
+	return QString("HID Input");
 }
 
 /*****************************************************************************
@@ -140,9 +126,9 @@ t_input_channel HIDInput::channels(t_input input)
  * Configuration
  *****************************************************************************/
 
-int HIDInput::configure(QWidget* parentWidget)
+int HIDInput::configure()
 {
-	ConfigureHIDInput conf(parentWidget, this);
+	ConfigureHIDInput conf(NULL, this);
 	return conf.exec();
 }
 
@@ -274,3 +260,9 @@ void HIDInput::feedBack(t_input /*input*/, t_input_channel /*channel*/,
 			t_input_value /*value*/)
 {
 }
+
+/*****************************************************************************
+ * Plugin export
+ ****************************************************************************/
+
+Q_EXPORT_PLUGIN2(hidinput, HIDInput)

@@ -1,9 +1,11 @@
 TEMPLATE	= lib
 LANGUAGE	= C++
-TARGET		= usbdmx
-INCLUDEPATH	+= . ../
+TARGET		= usbdmxout
 
-target.path	= /usr/lib/qlc
+INCLUDEPATH	+= . ../../libs/
+CONFIG		+= plugin warn_on release build_all
+
+target.path	= /usr/lib/qlc/output
 INSTALLS	+= target
 
 # Sources

@@ -19,55 +19,34 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <linux/errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
-#include <linux/errno.h>
 
 #include <QApplication>
-#include <iostream>
 #include <QString>
+#include <QDebug>
 #include <QMutex>
 #include <QFile>
 
-#include "dmx4linuxout.h"
-#include "configuredmx4linuxout.h"
 #include "common/qlcfile.h"
 
-#define CONF_FILE "dmx4linuxout.conf"
+#include "configuredmx4linuxout.h"
+#include "dmx4linuxout.h"
 
 static QMutex _mutex;
 
-extern "C" QLCOutPlugin* create()
-{
-	return new DMX4LinuxOut();
-}
-
 /*****************************************************************************
- * Initialization
+ * Name
  *****************************************************************************/
 
-DMX4LinuxOut::DMX4LinuxOut() : QLCOutPlugin()
+QString DMX4LinuxOut::name()
 {
-	m_name = QString("DMX4Linux Output");
-	m_type = Output;
-	m_version = 0x00010100;
-
-	m_fd = -1;
-	m_openError = 0;
-	m_dmxInfoError = 0;
-
-	for (t_channel i = 0; i < KChannelMax; i++)
-		m_values[i] = 0;
-
-	open();
-}
-
-DMX4LinuxOut::~DMX4LinuxOut()
-{
+	return QString("DMX4Linux Output");
 }
 
 /*****************************************************************************
@@ -76,44 +55,19 @@ DMX4LinuxOut::~DMX4LinuxOut()
 
 int DMX4LinuxOut::open()
 {
-	if (m_fd != -1)
-		::close(m_fd);
-	m_fd = -1;
-	
+	for (t_channel i = 0; i < MAX_DMX4LINUX_DEVICES * 512; i++)
+		m_values[i] = 0;
+
 	m_fd = ::open("/dev/dmx", O_WRONLY | O_NONBLOCK);
-	m_openError = errno;
-	if (m_openError < 0)
+	if (m_fd < 0)
 	{
-		std::cout << "DMX4Linux output is not available: "
-			  << strerror(m_openError)
-			  << std::endl;
+		m_openError = errno;
+		qWarning() << "DMX4Linux output is not available:"
+			   << strerror(m_openError);
 	}
 	else
 	{
-		/* Try to read DMX information */
-		::ioctl(m_fd, DMX_IOCTL_GET_INFO, &m_dmxInfo);
-		m_dmxInfoError = errno;
-		if (m_dmxInfoError < 0)
-		{
-			std::cout << "Unable to get DMX4Linux information: "
-				  << strerror(m_dmxInfoError)
-				  << std::endl;
-		}
-		else
-		{
-			int i = 0;
-
-			m_dmxCaps = new struct 
-				dmx_capabilities[m_dmxInfo.max_out_universes];
-
-			/* Try to read DMX capabilities for universes */
-			for (i = 0; i < m_dmxInfo.max_out_universes; i++)
-			{
-				m_dmxCaps[i].direction = 0;
-				m_dmxCaps[i].universe = i;
-				::ioctl(m_fd, DMX_IOCTL_GET_CAP, &m_dmxCaps[i]);
-			}
-		}
+		m_openError = 0;
 	}
 
 	return errno;
@@ -121,8 +75,7 @@ int DMX4LinuxOut::open()
 
 int DMX4LinuxOut::close()
 {
-	int r = 0;
-	r = ::close(m_fd);
+	int r = ::close(m_fd);
 	if (r == -1)
 		perror("close");
 	else
@@ -133,18 +86,17 @@ int DMX4LinuxOut::close()
 
 int DMX4LinuxOut::outputs()
 {
-	return m_dmxInfo.used_out_universes;
+	return MAX_DMX4LINUX_DEVICES;
 }
 
 /*****************************************************************************
  * Configuration
  *****************************************************************************/
 
-int DMX4LinuxOut::configure(QWidget* parentWidget)
+int DMX4LinuxOut::configure()
 {
-	ConfigureDMX4LinuxOut conf(parentWidget, this);
-	conf.exec();
-	return 0;
+	ConfigureDMX4LinuxOut conf(NULL, this);
+	return conf.exec();
 }
 
 /*****************************************************************************
@@ -178,18 +130,8 @@ QString DMX4LinuxOut::infoText()
 	info += QString("</TR>");
 	info += QString("</TABLE>");
 
-	/* Plugin version */
+	/* Plugin information */
 	info += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
-	info += QString("<TR>");
-	info += QString("<TD><B>Version</B></TD>");
-	info += QString("<TD>");
-	t.setNum((version() >> 16) & 0xff);
-	info += t + QString(".");
-	t.setNum((version() >> 8) & 0xff);
-	info += t + QString(".");
-	t.setNum(version() & 0xff);
-	info += t + QString("</TD>");
-	info += QString("</TR>");
 	
 	/* Print error if /dev/dmx cannot be opened */
 	if (m_openError != 0)
@@ -205,23 +147,11 @@ QString DMX4LinuxOut::infoText()
 	/*********************************************************************
 	 * DMX4Linux information
 	 *********************************************************************/
-	if (m_openError == 0 && m_dmxInfoError == 0)
+	if (m_openError == 0)
 	{
 		info += QString("<TR>");
-		info += QString("<TD><B>DMX4Linux version</B></TD>");
-		t.sprintf("%d.%d", m_dmxInfo.version_major, m_dmxInfo.version_minor);
-		info += QString("<TD>" + t + "</TD>");
-		info += QString("</TR>");
-
-		info += QString("<TR>");
 		info += QString("<TD><B>Available outputs</B></TD>");
-		t.sprintf("%d", m_dmxInfo.max_out_universes);
-		info += QString("<TD>" + t + "</TD>");
-		info += QString("</TR>");
-
-		info += QString("<TR>");
-		info += QString("<TD><B>Used outputs</B></TD>");
-		t.sprintf("%d", m_dmxInfo.used_out_universes);
+		t.sprintf("%d", MAX_DMX4LINUX_DEVICES);
 		info += QString("<TD>" + t + "</TD>");
 		info += QString("</TR>");
 	}
@@ -230,7 +160,7 @@ QString DMX4LinuxOut::infoText()
 		info += QString("<TR>");
 		info += QString("<TD><B>Unable to read info:</B></TD>");
 		info += QString("<TD>");
-		info += QString(strerror(m_dmxInfoError));
+		info += QString(strerror(m_openError));
 		info += QString("</TD>");
 		info += QString("</TR>");
 	}
@@ -243,47 +173,35 @@ QString DMX4LinuxOut::infoText()
 
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\">");
 	info += QString("Output");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\">");
 	info += QString("Driver");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\">");
 	info += QString("Channels");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 	info += QString("</TR>");
-
-	for (int i = 0; i < m_dmxInfo.used_out_universes; i++)
-	{
-		info += QString("<TR>");
-		t.sprintf("%d", i + 1);
-		info += QString("<TD>" + t + "</TD>");
-		t.sprintf("%s", m_dmxCaps[i].driver);
-		info += QString("<TD>" + t + "</TD>");
-		t.sprintf("%d", m_dmxCaps[i].maxSlots);
-		info += QString("<TD>" + t + "</TD>");
-		info += QString("</TR>");
-	}
 
 	info += QString("</TABLE>");
 
@@ -354,3 +272,9 @@ int DMX4LinuxOut::readRange(t_channel address, t_value* values, t_channel num)
 
 	return 0;
 }
+
+/*****************************************************************************
+ * Plugin export
+ ****************************************************************************/
+
+Q_EXPORT_PLUGIN2(dmx4linuxout, DMX4LinuxOut)

@@ -3,10 +3,9 @@ LANGUAGE	= C++
 TARGET		= dmx4linuxout
 
 INCLUDEPATH	+= . ../../libs/
-CONFIG		+= qt warn_on release build_all
-LIBS		+= -ldmx4l
+CONFIG		+= plugin warn_on release build_all
 
-target.path	= /usr/lib/qlc
+target.path	= /usr/lib/qlc/output
 INSTALLS	+= target
 
 # Sources

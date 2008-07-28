@@ -1,3 +1,43 @@
+2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* TODO:
+	* libs/common/common.pro:
+	* libs/common/qlcinplugin.cpp:
+	* libs/common/qlcinplugin.h:
+	* libs/common/qlcoutplugin.cpp:
+	* libs/common/qlcoutplugin.h:
+	* libs/common/qlcplugin.cpp:
+	* libs/common/qlcplugin.h:
+	* libs/dmx4linuxout/configuredmx4linuxout.cpp:
+	* libs/dmx4linuxout/configuredmx4linuxout.ui:
+	* libs/dmx4linuxout/dmx4linuxout.cpp:
+	* libs/dmx4linuxout/dmx4linuxout.h:
+	* libs/dmx4linuxout/dmx4linuxout.pro:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* libs/hidinput/hidinput.pro:
+	* libs/libs.pro:
+	* libs/llaout/llaout.cpp:
+	* libs/llaout/llaout.h:
+	* libs/llaout/llaout.pro:
+	* libs/usbdmxout/usbdmxout.cpp:
+	* libs/usbdmxout/usbdmxout.h:
+	* libs/usbdmxout/usbdmxout.pro:
+	* main/app.cpp:
+	* main/dmxmap.cpp:
+	* main/dmxmap.h:
+	* main/dummyoutplugin.cpp:
+	* main/dummyoutplugin.h:
+	* main/inputmap.cpp:
+	* main/inputmap.h:
+	* main/keybind.cpp:
+	* main/main.pro:
+	* main/pluginloader.cpp:
+	* main/pluginloader.h:
+
+	Changed plugin system to use QtPlugin stuff, which should make it
+	possible to load plugins in win32 & unix with almost the same code.
+	
 2008-07-28  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* debian/control:

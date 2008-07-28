@@ -1,3 +1,5 @@
+* Remove "QDomDocument* doc" param from all *::loadXML functions not using it.
+
 * Automatic fixture address assignment to fixture manager, to find the
   next adequate address space for selected fixture(s).
 * Multiple selection to fixture manager.

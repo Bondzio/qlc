@@ -1,6 +1,4 @@
 TEMPLATE = subdirs
-CONFIG =
-QT =
 TARGET = fixtures
 
 fixtures.files += Elation-Color-Spot-150.qxf
@@ -56,5 +54,6 @@ fixtures.files += SGM-Victory-250.qxf
 fixtures.files += SGM-Victory-II-250.qxf
 fixtures.files += SGM-Victory-II-Pro150.qxf
 
-fixtures.path = /usr/share/fixtures/
+unix:fixtures.path = /usr/share/fixtures
+win32:fixtures.path = C:\QLC\Fixtures
 INSTALLS += fixtures

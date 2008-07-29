@@ -15,6 +15,7 @@ INSTALLS 	+= target
 
 # Sources
 RESOURCES += fixtureeditor.qrc
+win32:RC_FILE = fixtureeditor.rc
 
 HEADERS += aboutbox.h \
            app.h \

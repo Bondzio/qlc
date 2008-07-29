@@ -1,5 +1,17 @@
 2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* ChangeLog
+	* fixtureeditor/fixtureeditor.pro
+	* fixtureeditor/fixtureeditor.rc
+	* gfx/qlc-fixtureeditor.ico
+	* gfx/qlc.ico
+	* main/main.pro
+	* main/main.rc
+
+	Added windows application icons to qlc and fixture editor binaries.
+	
+2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* fixtureeditor/fixtureeditor.pro
 	* libs/common/common.pro
 	* libs/libs.pro

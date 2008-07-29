@@ -14,6 +14,7 @@ win32:target.path = C:\QLC
 INSTALLS	+= target
 
 RESOURCES 	+= main.qrc
+win32:RC_FILE	= main.rc
 
 # Sources
 HEADERS += aboutbox.h \

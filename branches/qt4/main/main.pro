@@ -10,6 +10,7 @@ unix:LIBS 	+= -L../libs/common/ -lqlccommon
 win32:LIBS 	+= -L../libs/common/release/ -lqlccommon
 
 unix:target.path = /usr/bin
+win32:target.path = C:\QLC
 INSTALLS	+= target
 
 RESOURCES 	+= main.qrc

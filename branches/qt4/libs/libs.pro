@@ -1,7 +1,8 @@
 TEMPLATE	= subdirs
 
 SUBDIRS		+= common
-unix:SUBDIRS	+= hidinput
-unix:SUBDIRS	+= usbdmxout
+SUBDIRS         += usbdmxout
+
+unix:SUBDIRS    += hidinput
 unix:SUBDIRS	+= llaout
 unix:SUBDIRS	+= dmx4linuxout

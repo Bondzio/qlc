@@ -1,5 +1,22 @@
 2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* fixtureeditor/fixtureeditor.pro
+	* libs/common/common.pro
+	* libs/libs.pro
+	* libs/usbdmxout/usbdmx-dynamic.cpp
+	* libs/usbdmxout/usbdmx-dynamic.h
+	* libs/usbdmxout/usbdmx.h
+	* libs/usbdmxout/usbdmxout-win32.cpp
+	* libs/usbdmxout/usbdmxout-win32.h
+	* libs/usbdmxout/usbdmxout.pro
+	* main/main.pro
+	* ChangeLog
+	
+	Made a windows port for usbdmx plugin (not tested yet).
+	Fixated windows installation directories to c:\qlc\.
+
+2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* TODO:
 	* libs/common/common.pro:
 	* libs/common/qlcinplugin.cpp:

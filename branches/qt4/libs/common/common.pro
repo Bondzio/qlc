@@ -6,7 +6,8 @@ CONFIG 		+= qt warn_on
 QT 		+= xml
 win32:DEFINES 	+= QLC_EXPORT
 
-target.path 	= /usr/lib
+unix:target.path = /usr/lib
+win32:target.path = C:\QLC
 INSTALLS 	+= target
 
 # Sources

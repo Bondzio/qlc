@@ -10,6 +10,7 @@ win32:LIBS	+= -L../libs/common/release -lqlccommon
 unix:LIBS	+= -L../libs/common -lqlccommon
 
 unix:target.path = /usr/bin
+win32:target.path = C:\QLC
 INSTALLS 	+= target
 
 # Sources

@@ -501,25 +501,12 @@ void Scene::run()
 	   add up because of rounding errors and inaccuracy of floats). */
 	for (i = 0; i < channels && m_stopped == false; i++)
 	{
-		if (m_channels[i].ready == true)
-		{
-			/* This channel contains a value that is not
-			   supposed to be written anymore, since as far
-			   as this scene is concerned, it is (or has
-			   been) where it is supposed to be. Invalid
-			   channels are ignored by dmxmap. */
-			m_channelData[i] = KChannelInvalid << 8;
-		}
-		else
-		{
-			/* Just set the target value */
-			m_channelData[i] = (m_channelData[i] & 0xff00) |
-				static_cast<t_buffer_data>
-				(m_channels[i].target);
-			
-			/* ...and don't touch this channel anymore */
-			m_channels[i].ready = true;
-		}
+		/* Just set the target value */
+		m_channelData[i] = (m_channelData[i] & 0xff00) |
+			static_cast<t_buffer_data> (m_channels[i].target);
+		
+		/* ...and don't touch this channel anymore */
+		m_channels[i].ready = true;
 	}
 	
 	if (m_stopped == false)

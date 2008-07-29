@@ -1,3 +1,13 @@
+2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* fixtureeditor/editmode.cpp:
+	* main/dmxmap.cpp:
+	* main/scene.cpp:
+
+	Fixed a bug in scene that left some channel values untouched.
+	Added QDialog construction to fixtureeditor's editmode dialog.
+	Changed win32 plugin dir to C:\... instead of SystemRoot/...
+
 2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* editcapability.ui

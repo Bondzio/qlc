@@ -50,7 +50,7 @@ EditMode::EditMode(QWidget* parent, QLCFixtureMode* mode) : QDialog(parent)
 	init();
 }
 
-EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef)
+EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef) : QDialog(parent)
 {
 	Q_ASSERT(fixtureDef != NULL);
 	

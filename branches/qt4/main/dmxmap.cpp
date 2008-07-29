@@ -159,7 +159,7 @@ void DMXMap::load()
 	if (pluginPath.isEmpty() == true)
 	{
 #ifdef WIN32
-		pluginPath = "%%SystemRoot%%\\QLC\\Plugins";
+		pluginPath = "C:\\QLC\\Plugins";
 #else
 		pluginPath = "/usr/lib/qlc";
 #endif
@@ -464,8 +464,10 @@ bool DMXMap::setPatch(unsigned int universe, const QString& pluginName,
 	}
 	else
 	{
+		m_patch[universe]->plugin->close();
 		m_patch[universe]->plugin = outputPlugin;
 		m_patch[universe]->output = output;
+		m_patch[universe]->plugin->open();
 
 		return true;
 	}

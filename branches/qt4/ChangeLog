@@ -1,5 +1,17 @@
 2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* editcapability.ui
+	* editchannel.cpp
+	* editchannel.ui
+	* editmode.ui
+	* fixtureeditor.cpp
+	* fixtureeditor.ui
+	* ChangeLog
+	
+	Fixed forgotten spin box max limits from 99 to 360, 255, etc...
+	
+2008-07-29  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* ChangeLog
 	* fixtureeditor/fixtureeditor.pro
 	* fixtureeditor/fixtureeditor.rc

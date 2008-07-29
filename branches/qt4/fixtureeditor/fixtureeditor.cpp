@@ -121,7 +121,11 @@ void QLCFixtureEditor::init()
 		SIGNAL(customContextMenuRequested(const QPoint&)),
 		this,
 		SLOT(slotChannelListContextMenuRequested(const QPoint&)));
-
+	connect(m_channelList,
+		SIGNAL(itemActivated(QTreeWidgetItem*,int)),
+		this,
+		SLOT(slotEditChannel()));
+		
 	refreshChannelList();
 
 	/* Mode page */
@@ -144,6 +148,10 @@ void QLCFixtureEditor::init()
 		SIGNAL(customContextMenuRequested(const QPoint&)),
 		this,
 		SLOT(slotModeListContextMenuRequested(const QPoint&)));
+	connect(m_modeList,
+		SIGNAL(itemActivated(QTreeWidgetItem*,int)),
+		this,
+		SLOT(slotEditMode()));
 
 	refreshModeList();
 }

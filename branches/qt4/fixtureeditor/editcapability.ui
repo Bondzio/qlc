@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>134</height>
+    <height>135</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -41,10 +41,24 @@
        </widget>
       </item>
       <item row="1" column="0" >
-       <widget class="QSpinBox" name="m_minSpin" />
+       <widget class="QSpinBox" name="m_minSpin" >
+        <property name="accelerated" >
+         <bool>true</bool>
+        </property>
+        <property name="maximum" >
+         <number>255</number>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1" >
-       <widget class="QSpinBox" name="m_maxSpin" />
+       <widget class="QSpinBox" name="m_maxSpin" >
+        <property name="accelerated" >
+         <bool>true</bool>
+        </property>
+        <property name="maximum" >
+         <number>255</number>
+        </property>
+       </widget>
       </item>
       <item row="1" column="2" >
        <widget class="QLineEdit" name="m_descriptionEdit" />
@@ -58,7 +72,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

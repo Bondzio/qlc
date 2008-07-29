@@ -96,6 +96,16 @@ void EditChannel::init()
 	connect(m_editCapabilityButton, SIGNAL(clicked()),
 		this, SLOT(slotEditCapabilityClicked()));
 	
+	/* Capability list connections */
+	connect(m_capabilityList,
+		SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+		this,
+		SLOT(slotCapabilityListSelectionChanged(QTreeWidgetItem*)));
+	connect(m_capabilityList,
+		SIGNAL(itemActivated(QTreeWidgetItem*,int)),
+		this,
+		SLOT(slotEditCapabilityClicked()));
+	
 	refreshCapabilities();
 }
 

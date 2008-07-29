@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>595</width>
-    <height>411</height>
+    <height>416</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -33,16 +33,33 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>571</width>
+        <height>304</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Channels</string>
       </attribute>
       <layout class="QHBoxLayout" >
        <item>
         <widget class="QTreeWidget" name="m_channelList" >
+         <property name="alternatingRowColors" >
+          <bool>true</bool>
+         </property>
          <property name="rootIsDecorated" >
           <bool>false</bool>
          </property>
          <property name="itemsExpandable" >
+          <bool>false</bool>
+         </property>
+         <property name="allColumnsShowFocus" >
+          <bool>true</bool>
+         </property>
+         <property name="expandsOnDoubleClick" >
           <bool>false</bool>
          </property>
          <column>
@@ -64,12 +81,24 @@
            <property name="text" >
             <string>...</string>
            </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="m_removeChannelButton" >
            <property name="text" >
             <string>...</string>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -78,12 +107,24 @@
            <property name="text" >
             <string>...</string>
            </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="m_lowerChannelButton" >
            <property name="text" >
             <string>...</string>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -92,7 +133,7 @@
            <property name="orientation" >
             <enum>Qt::Vertical</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>20</width>
              <height>40</height>
@@ -105,6 +146,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tab" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>571</width>
+        <height>304</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Physical</string>
       </attribute>
@@ -299,8 +348,11 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_bulbLumensSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
               <property name="maximum" >
-               <number>100000</number>
+               <number>99999</number>
               </property>
              </widget>
             </item>
@@ -394,8 +446,14 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_weightSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
               <property name="suffix" >
                <string>kg</string>
+              </property>
+              <property name="maximum" >
+               <number>999</number>
               </property>
              </widget>
             </item>
@@ -412,8 +470,14 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_widthSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
               <property name="suffix" >
                <string>mm</string>
+              </property>
+              <property name="maximum" >
+               <number>9999</number>
               </property>
              </widget>
             </item>
@@ -430,8 +494,14 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_heightSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
               <property name="suffix" >
                <string>mm</string>
+              </property>
+              <property name="maximum" >
+               <number>9999</number>
               </property>
              </widget>
             </item>
@@ -448,8 +518,14 @@
             </item>
             <item>
              <widget class="QSpinBox" name="m_depthSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
               <property name="suffix" >
                <string>mm</string>
+              </property>
+              <property name="maximum" >
+               <number>9999</number>
               </property>
              </widget>
             </item>
@@ -507,7 +583,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="m_lensDegreesMinSpin" />
+             <widget class="QSpinBox" name="m_lensDegreesMinSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="maximum" >
+               <number>360</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -521,7 +604,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="m_lensDegreesMaxSpin" />
+             <widget class="QSpinBox" name="m_lensDegreesMaxSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="maximum" >
+               <number>360</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -582,7 +672,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="m_panMaxSpin" />
+             <widget class="QSpinBox" name="m_panMaxSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="maximum" >
+               <number>360</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -596,7 +693,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="m_tiltMaxSpin" />
+             <widget class="QSpinBox" name="m_tiltMaxSpin" >
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="maximum" >
+               <number>360</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -613,7 +717,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

@@ -92,7 +92,27 @@ int USBDMXOut::open()
 		/* Open the device */
 		if (usbdmx->open(i, &handle) == TRUE)
 		{
+			USHORT version;
+			
 			m_devices[i] = handle;
+			
+			usbdmx->device_version(m_devices[i], &version);
+			if (usbdmx->is_xswitch(m_devices[i]))
+				m_names[i] = QString("X-Switch V%1")
+						.arg(version);
+			else if (usbdmx->is_rodin1(m_devices[i]))
+				m_names[i] = QString("Rodin1 V%1")
+						.arg(version);
+			else if (usbdmx->is_rodin2(m_devices[i]))
+				m_names[i] = QString("Rodin2 V%1")
+						.arg(version);
+			else if (usbdmx->is_rodint(m_devices[i]))
+				m_names[i] = QString("RodinT V%1")
+						.arg(version);
+			else if (usbdmx->is_usbdmx21(m_devices[i]))
+				m_names[i] = QString("USBDMX21 V%1")
+						.arg(version);
+
 		}
 		else
 		{
@@ -228,28 +248,10 @@ QString USBDMXOut::infoText()
 		if (m_devices[i] != NULL)
 		{
 			atLeastOne = true;
-			USHORT version;
 
 			info += QString("<TR>");
 			info += QString("<TD>%1</TD>").arg(i + 1);
-
-			usbdmx->device_version(m_devices[i], &version);
-			if (usbdmx->is_xswitch(m_devices[i]))
-				info += QString("<TD>X-Switch V%1</TD>")
-					.arg(version);
-			else if (usbdmx->is_rodin1(m_devices[i]))
-				info += QString("<TD>Rodin1 V%1</TD>")
-					.arg(version);
-			else if (usbdmx->is_rodin2(m_devices[i]))
-				info += QString("<TD>Rodin2 V%1</TD>")
-					.arg(version);
-			else if (usbdmx->is_rodint(m_devices[i]))
-				info += QString("<TD>RodinT V%1</TD>")
-					.arg(version);
-			else if (usbdmx->is_usbdmx21(m_devices[i]))
-				info += QString("<TD>USBDMX21 V%1</TD>")
-					.arg(version);
-
+			info += QString("<TD>%1</TD>").arg(m_names[i]);
 			info += QString("</TR>");
 		}
 	}

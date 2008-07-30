@@ -26,7 +26,12 @@
 #include <QTimer>
 
 #include "configureusbdmxout.h"
+
+#ifdef WIN32
+#include "usbdmxout-win32.h"
+#else
 #include "usbdmxout.h"
+#endif
 
 /*****************************************************************************
  * Initialization
@@ -139,7 +144,6 @@ void ConfigureUSBDMXOut::slotTestTimeout()
 
 void ConfigureUSBDMXOut::slotRefreshClicked()
 {
-	m_plugin->open();
 	refreshList();
 }
 
@@ -151,11 +155,15 @@ void ConfigureUSBDMXOut::refreshList()
 
 	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
 	{
-		if (m_plugin->m_devices[i] >= 0)
+		if (m_plugin->m_devices[i] > 0)
 		{
 			QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-			item->setText(0, s.sprintf("%.2d", i + 1));
-			item->setText(1, s.sprintf("/dev/usbdmx%d", i));
+			item->setText(0, QString("%1").arg(i + 1));
+#ifdef WIN32
+			item->setText(1, m_plugin->m_names[i]);
+#else
+			item->setText(1, QString("/dev/usbdmx%1").arg(i));
+#endif
 		}
 	}
 }

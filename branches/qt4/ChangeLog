@@ -1,5 +1,11 @@
 2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/scene.cpp:
+
+	Fixed (again) the bug in scene that left some channel values untouched.
+
+2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/usbdmxout/usbdmxout-win32.h
 	* ChangeLog
 

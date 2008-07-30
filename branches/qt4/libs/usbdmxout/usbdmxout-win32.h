@@ -65,7 +65,8 @@ public:
 protected:
 	HANDLE m_devices[MAX_USBDMX_DEVICES];
 	struct usbdmx_functions *usbdmx;
-
+	int m_refCount;
+	
 	/*********************************************************************
 	 * Name
 	 *********************************************************************/

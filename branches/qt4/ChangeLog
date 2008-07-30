@@ -1,5 +1,12 @@
 2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/usbdmxout/usbdmxout-win32.h
+	* ChangeLog
+
+	Added missing m_refCount param to usbdmx win32 class.
+
+2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/common/qlcinplugin.h:
 	* libs/common/qlcoutplugin.h:
 	* libs/dmx4linuxout/dmx4linuxout.cpp:

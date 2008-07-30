@@ -39,14 +39,13 @@ public:
 	DummyOutPlugin();
 	virtual ~DummyOutPlugin();
 
+	void init();
+
 	/*********************************************************************
 	 * Name
 	 *********************************************************************/
 public:
-	QString name() { return m_name; }
-
-protected:
-	QString m_name;
+	QString name();
 
 	/*********************************************************************
 	 * Open/close

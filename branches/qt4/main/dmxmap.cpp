@@ -202,6 +202,7 @@ void DMXMap::load()
 		}
 		else
 		{
+			plugin->init();
 			appendPlugin(plugin);
 		}
 	}
@@ -433,6 +434,7 @@ void DMXMap::initPatch()
 
 	/* Create a dummy output plugin and put it to the plugins list */
 	m_dummyOut = new DummyOutPlugin();
+	m_dummyOut->init();
 	appendPlugin(m_dummyOut);
 
 	for (i = 0; i < m_universes; i++)

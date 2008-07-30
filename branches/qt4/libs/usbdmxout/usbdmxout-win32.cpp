@@ -34,12 +34,22 @@
 extern "C" struct usbdmx_functions *usbdmx;
 
 /*****************************************************************************
- * Name
+ * Initialization
  *****************************************************************************/
 
-QString USBDMXOut::name()
+void USBDMXOut::init()
 {
-	return QString("USB DMX Output");
+	/* Initialize value buffer */
+	for (t_channel ch = 0; ch < MAX_USBDMX_DEVICES * 512; ch++)
+		m_values[ch] = 0;
+
+	/* Initialize device handles */
+	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
+	{
+		m_devices[i] = 0;
+	}
+
+	m_refCount = 0;
 }
 
 /*****************************************************************************
@@ -48,9 +58,11 @@ QString USBDMXOut::name()
 
 int USBDMXOut::open()
 {
-	/* Initialize value buffer */
-	for (t_channel ch = 0; ch < MAX_USBDMX_DEVICES * 512; ch++)
-		m_values[ch] = 0;
+	/* Count the number of times open() has been called so that the devices
+	   are opened only once. This is basically reference counting. */
+	m_refCount++;
+	if (m_refCount > 1)
+		return 0;
 
 	/* Load usbdmx.dll */
 	usbdmx = usbdmx_init();
@@ -108,6 +120,14 @@ int USBDMXOut::open()
 
 int USBDMXOut::close()
 {
+	/* Count the number of times close() has been called so that the devices
+	   are closed only after the last user closes this plugin. This is
+	   basically reference counting. */
+	m_refCount--;
+	if (m_refCount > 0)
+		return 0;
+	Q_ASSERT(m_refCount == 0);
+
 	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
 	{
 		/* Close the interface if it exists */
@@ -125,13 +145,30 @@ int USBDMXOut::outputs()
 }
 
 /*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString USBDMXOut::name()
+{
+	return QString("USB DMX Output");
+}
+
+/*****************************************************************************
  * Configuration
  *****************************************************************************/
 
 int USBDMXOut::configure()
 {
+	int r;
+
+	open();
+
 	ConfigureUSBDMXOut conf(NULL, this);
-	return conf.exec();
+	r = conf.exec();
+
+	close();
+
+	return r;
 }
 
 /*****************************************************************************
@@ -193,6 +230,8 @@ QString USBDMXOut::infoText()
 	info += QString("</TD>");
 	info += QString("</TR>");
 
+	open();
+
 	/* Output lines */
 	for (int i = 0; i < MAX_USBDMX_DEVICES; i++)
 	{
@@ -229,6 +268,8 @@ QString USBDMXOut::infoText()
 		
 		info += QString("</TR>");
 	}
+
+	close();
 
 	info += QString("</TABLE>");
 

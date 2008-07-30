@@ -48,10 +48,10 @@ class USBDMXOut : public QObject, public QLCOutPlugin
 	friend class ConfigureUSBDMXOut;
 
 	/*********************************************************************
-	 * Name
+	 * Initialization
 	 *********************************************************************/
 public:
-	QString name();
+	void init();
 
 	/*********************************************************************
 	 * Plugin open/close
@@ -62,8 +62,20 @@ public:
 	int outputs();
 
 protected:
+	/** /dev/usbdmx* devices */
 	int m_devices[MAX_USBDMX_DEVICES];
+
+	/** Errors for each of the above devices */
 	int m_errors[MAX_USBDMX_DEVICES];
+
+	/** Reference count for open() & close() */
+	int m_refCount;
+
+	/*********************************************************************
+	 * Name
+	 *********************************************************************/
+public:
+	QString name();
 
 	/*********************************************************************
 	 * Configuration

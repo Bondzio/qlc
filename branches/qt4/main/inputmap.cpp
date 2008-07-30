@@ -103,6 +103,7 @@ void InputMap::load()
 		}
 		else
 		{
+			plugin->init();
 			appendPlugin(plugin);
 		}
 	}

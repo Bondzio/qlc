@@ -43,12 +43,17 @@
 static QMutex _mutex;
 
 /*****************************************************************************
- * Name
+ * Initialization
  *****************************************************************************/
 
-QString LlaOut::name()
+void LlaOut::init()
 {
-	return QString("LLA Output");
+	m_lla = NULL;
+
+	for (t_channel i = 0; i < KChannelMax; i++)
+		m_values[i] = 0;
+
+	m_refCount = 0;
 }
 
 /*****************************************************************************
@@ -57,8 +62,11 @@ QString LlaOut::name()
 
 int LlaOut::open()
 {
-	for (t_channel i = 0; i < KChannelMax; i++)
-		m_values[i] = 0;
+	/* Count the number of times open() has been called so that the devices
+	   are opened only once. This is basically reference counting. */
+	m_refCount++;
+	if (m_refCount > 1)
+		return 0;
 
 	m_lla = new LlaClient();
 	
@@ -77,6 +85,14 @@ int LlaOut::open()
 
 int LlaOut::close()
 {
+	/* Count the number of times close() has been called so that the devices
+	   are closed only after the last user closes this plugin. This is
+	   basically reference counting. */
+	m_refCount--;
+	if (m_refCount > 0)
+		return 0;
+	Q_ASSERT(m_refCount == 0);
+
 	if (m_lla != NULL)
 	{
 		m_lla->stop();
@@ -93,13 +109,30 @@ int LlaOut::outputs()
 }
 
 /*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString LlaOut::name()
+{
+	return QString("LLA Output");
+}
+
+/*****************************************************************************
  * Configuration
  *****************************************************************************/
 
 int LlaOut::configure()
 {
+	int r;
+
+	open();
+
 	ConfigureLlaOut conf(NULL, this);
-	return conf.exec();
+	r = conf.exec();
+
+	close();
+
+	return r;
 }
 
 /*****************************************************************************
@@ -109,33 +142,61 @@ int LlaOut::configure()
 QString LlaOut::infoText()
 {
 	QString t;
-	QString str;
+	QString info;
 
-	str += QString("<HTML>");
-	str += QString("<HEAD>");
-	str += QString("<TITLE>Plugin Info</TITLE>");
-	str += QString("</HEAD>");
-	str += QString("<BODY>");
+	info += QString("<HTML>");
+	info += QString("<HEAD>");
+	info += QString("<TITLE>Plugin Info</TITLE>");
+	info += QString("</HEAD>");
+	info += QString("<BODY>");
 
 	/* Title */
-	str += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
-	str += QString("<TR>");
-	str += QString("<TD BGCOLOR=\"");
-	str += QApplication::palette().color(QPalette::Highlight).name();
-	str += QString("\">");
-	str += QString("<FONT COLOR=\"");
-	str += QApplication::palette().color(QPalette::HighlightedText).name();
-	str += QString("\" SIZE=\"5\">");
-	str += name();
-	str += QString("</FONT>");
-	str += QString("</TD>");
-	str += QString("</TR>");
-	str += QString("</TABLE>");
+	info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
+	info += QString("<TR>");
+	info += QString("<TD BGCOLOR=\"");
+	info += QApplication::palette().color(QPalette::Highlight).name();
+	info += QString("\">");
+	info += QString("<FONT COLOR=\"");
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
+	info += QString("\" SIZE=\"5\">");
+	info += name();
+	info += QString("</FONT>");
+	info += QString("</TD>");
+	info += QString("</TR>");
+	info += QString("</TABLE>");
 
-	str += QString("</BODY>");
-	str += QString("</HTML>");
+	/*********************************************************************
+	 * DMX4Linux information
+	 *********************************************************************/
+
+	info += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
+
+	if (open() != 0)
+	{
+		info += QString("<TR>");
+		info += QString("<TD><B>Unable to open LLAOut</B></TD>");
+		info += QString("<TD>");
+		info += QString("No DMX output");
+		info += QString("</TD>");
+		info += QString("</TR>");
+	}
+	else
+	{
+		info += QString("<TR>");
+		info += QString("<TD><B>Available outputs</B></TD>");
+		t.sprintf("%d", KChannelMax / 512);
+		info += QString("<TD>" + t + "</TD>");
+		info += QString("</TR>");
+	}
+
+	info += QString("</TABLE>");
+
+	close();
+
+	info += QString("</BODY>");
+	info += QString("</HTML>");
 	
-	return str;
+	return info;
 }
 
 /*****************************************************************************

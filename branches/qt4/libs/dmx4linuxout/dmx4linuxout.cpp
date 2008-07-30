@@ -41,12 +41,18 @@
 static QMutex _mutex;
 
 /*****************************************************************************
- * Name
+ * Initialization
  *****************************************************************************/
 
-QString DMX4LinuxOut::name()
+void DMX4LinuxOut::init()
 {
-	return QString("DMX4Linux Output");
+	m_fd = 0;
+	m_openError = 0;
+	m_refCount = 0;
+
+	for (t_channel i = 0; i < MAX_DMX4LINUX_DEVICES * 512; i++)
+		m_values[i] = 0;
+
 }
 
 /*****************************************************************************
@@ -55,8 +61,11 @@ QString DMX4LinuxOut::name()
 
 int DMX4LinuxOut::open()
 {
-	for (t_channel i = 0; i < MAX_DMX4LINUX_DEVICES * 512; i++)
-		m_values[i] = 0;
+	/* Count the number of times open() has been called so that the devices
+	   are opened only once. This is basically reference counting. */
+	m_refCount++;
+	if (m_refCount > 1)
+		return 0;
 
 	m_fd = ::open("/dev/dmx", O_WRONLY | O_NONBLOCK);
 	if (m_fd < 0)
@@ -75,11 +84,20 @@ int DMX4LinuxOut::open()
 
 int DMX4LinuxOut::close()
 {
+	/* Count the number of times close() has been called so that the devices
+	   are closed only after the last user closes this plugin. This is
+	   basically reference counting. */
+	m_refCount--;
+	if (m_refCount > 0)
+		return 0;
+	Q_ASSERT(m_refCount == 0);
+
 	int r = ::close(m_fd);
 	if (r == -1)
 		perror("close");
 	else
 		m_fd = -1;
+	m_openError = 0;
 
 	return r;
 }
@@ -90,13 +108,30 @@ int DMX4LinuxOut::outputs()
 }
 
 /*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString DMX4LinuxOut::name()
+{
+	return QString("DMX4Linux Output");
+}
+
+/*****************************************************************************
  * Configuration
  *****************************************************************************/
 
 int DMX4LinuxOut::configure()
 {
+	int r;
+
+	open();
+
 	ConfigureDMX4LinuxOut conf(NULL, this);
-	return conf.exec();
+	r = conf.exec();
+
+	close();
+
+	return r;
 }
 
 /*****************************************************************************
@@ -119,10 +154,10 @@ QString DMX4LinuxOut::infoText()
 	info += QString("<TABLE COLS=\"1\" WIDTH=\"100%\">");
 	info += QString("<TR>");
 	info += QString("<TD BGCOLOR=\"");
-	//info += QApplication::palette().active().highlight().name();
+	info += QApplication::palette().color(QPalette::Highlight).name();
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
-	//info += QApplication::palette().active().highlightedText().name();
+	info += QApplication::palette().color(QPalette::HighlightedText).name();
 	info += QString("\" SIZE=\"5\">");
 	info += name();
 	info += QString("</FONT>");
@@ -130,8 +165,13 @@ QString DMX4LinuxOut::infoText()
 	info += QString("</TR>");
 	info += QString("</TABLE>");
 
-	/* Plugin information */
+	/*********************************************************************
+	 * DMX4Linux information
+	 *********************************************************************/
+
 	info += QString("<TABLE COLS=\"2\" WIDTH=\"100%\">");
+
+	open();
 	
 	/* Print error if /dev/dmx cannot be opened */
 	if (m_openError != 0)
@@ -144,9 +184,6 @@ QString DMX4LinuxOut::infoText()
 		info += QString("</TR>");
 	}
 
-	/*********************************************************************
-	 * DMX4Linux information
-	 *********************************************************************/
 	if (m_openError == 0)
 	{
 		info += QString("<TR>");
@@ -166,44 +203,7 @@ QString DMX4LinuxOut::infoText()
 	}
 	info += QString("</TABLE>");
 
-	/*********************************************************************
-	 * DMX4Linux universe information
-	 *********************************************************************/
-	info += QString("<TABLE COLS=\"3\" WIDTH=\"100%\">");
-
-	info += QString("<TR>");
-	info += QString("<TD BGCOLOR=\"");
-	info += QApplication::palette().color(QPalette::Highlight).name();
-	info += QString("\">");
-	info += QString("<FONT COLOR=\"");
-	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\">");
-	info += QString("Output");
-	info += QString("</FONT>");
-	info += QString("</TD>");
-
-	info += QString("<TD BGCOLOR=\"");
-	info += QApplication::palette().color(QPalette::Highlight).name();
-	info += QString("\">");
-	info += QString("<FONT COLOR=\"");
-	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\">");
-	info += QString("Driver");
-	info += QString("</FONT>");
-	info += QString("</TD>");
-
-	info += QString("<TD BGCOLOR=\"");
-	info += QApplication::palette().color(QPalette::Highlight).name();
-	info += QString("\">");
-	info += QString("<FONT COLOR=\"");
-	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\">");
-	info += QString("Channels");
-	info += QString("</FONT>");
-	info += QString("</TD>");
-	info += QString("</TR>");
-
-	info += QString("</TABLE>");
+	close();
 
 	info += QString("</BODY>");
 	info += QString("</HTML>");

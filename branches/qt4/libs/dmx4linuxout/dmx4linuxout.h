@@ -40,10 +40,10 @@ class DMX4LinuxOut : public QObject, public QLCOutPlugin
 	friend class ConfigureDMX4LinuxOut;
 
 	/*********************************************************************
-	 * Name
+	 * Initialization
 	 *********************************************************************/
 public:
-	QString name();
+	void init();
 
 	/*********************************************************************
 	 * Open/close
@@ -64,6 +64,15 @@ protected:
 
 	/** Error code for /dev/dmx open() */
 	int m_openError;
+
+	/** Reference count for open() & close() */
+	int m_refCount;
+
+	/*********************************************************************
+	 * Name
+	 *********************************************************************/
+public:
+	QString name();
 
 	/*********************************************************************
 	 * Configuration

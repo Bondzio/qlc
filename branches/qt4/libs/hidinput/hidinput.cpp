@@ -31,12 +31,12 @@
 #include "hidinput.h"
 
 /*****************************************************************************
- * Name
+ * Initialization
  *****************************************************************************/
 
-QString HIDInput::name()
+void HIDInput::init()
 {
-	return QString("HID Input");
+	m_refCount = 0;
 }
 
 /*****************************************************************************
@@ -45,23 +45,26 @@ QString HIDInput::name()
 
 int HIDInput::open()
 {
-	HIDDevice* hidDevice = NULL;
+	/* Count the number of times open() has been called so that the devices
+	   are opened only once. This is basically reference counting. */
+	m_refCount++;
+	if (m_refCount > 1)
+		return 0;
+
 	QDir dir("/dev/input/");
 	QStringList nameFilters;
 	QStringList entries;
 	QStringList::iterator it;
-	QString path;
-
-	close();
 
 	nameFilters << "event*";
 	entries = dir.entryList(nameFilters, QDir::Files | QDir::System);
 	for (it = entries.begin(); it != entries.end(); ++it)
 	{
-		path = dir.absolutePath() + QDir::separator() + *it;
-		hidDevice = device(path);
+		QString path = dir.absolutePath() + QDir::separator() + *it;
+		HIDDevice* hidDevice = device(path);
+
 		if (hidDevice == NULL)
-	{
+		{
 			hidDevice = new HIDEventDevice(this, path);
 			hidDevice->open();
 			m_devices.append(hidDevice);
@@ -73,11 +76,17 @@ int HIDInput::open()
 
 int HIDInput::close()
 {
-	HIDDevice* hidDevice = NULL;
+	/* Count the number of times close() has been called so that the devices
+	   are closed only after the last user closes this plugin. This is
+	   basically reference counting. */
+	m_refCount--;
+	if (m_refCount > 0)
+		return 0;
+	Q_ASSERT(m_refCount == 0);
 
 	while (m_devices.isEmpty() == false)
 	{
-		hidDevice = m_devices.takeFirst();
+		HIDDevice* hidDevice = m_devices.takeFirst();
 		Q_ASSERT(hidDevice != NULL);
 		
 		hidDevice->close();
@@ -123,13 +132,30 @@ t_input_channel HIDInput::channels(t_input input)
 }
 
 /*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString HIDInput::name()
+{
+	return QString("HID Input");
+}
+
+/*****************************************************************************
  * Configuration
  *****************************************************************************/
 
 int HIDInput::configure()
 {
+	int r;
+	
+	open();
+
 	ConfigureHIDInput conf(NULL, this);
-	return conf.exec();
+	r = conf.exec();
+
+	close();
+
+	return r;
 }
 
 /*****************************************************************************
@@ -200,6 +226,8 @@ QString HIDInput::infoText()
 	info += QString("</TD>");
 	info += QString("</TR>");
 
+	open();
+
 	/* Devices */
 	if (m_devices.count() == 0)
 	{
@@ -215,6 +243,8 @@ QString HIDInput::infoText()
 		while (it.hasNext() == true)
 			info += it.next()->infoText();
 	}
+
+	close();
 
 	info += QString("</TABLE>");
 

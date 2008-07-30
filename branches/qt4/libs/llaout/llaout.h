@@ -35,12 +35,12 @@ class LlaOut : public QObject, public QLCOutPlugin
 	Q_INTERFACES(QLCOutPlugin)
 		
 	friend class ConfigureLlaOut;
-	
+
 	/*********************************************************************
-	 * Name
+	 * Initialization
 	 *********************************************************************/
 public:
-	QString name();
+	void init();
 	
 	/*********************************************************************
 	 * Open/close
@@ -52,6 +52,15 @@ public:
 
 protected:
 	LlaClient *m_lla;
+
+	/** Reference count for open() & close() */
+	int m_refCount;
+	
+	/*********************************************************************
+	 * Name
+	 *********************************************************************/
+public:
+	QString name();
 	
 	/*********************************************************************
 	 * Configuration

@@ -35,7 +35,24 @@ public:
 	virtual ~QLCOutPlugin() {}
 	
 	/**
-	 * Open (initialize for operation) the plugin.
+	 * Initialize the plugin. Since plugins cannot have a user-defined
+	 * constructor, any initialization prior to opening any HW must be
+	 * done thru this second-stage initialization method. DMXMap calls
+	 * this function for all plugins exactly once after loading, before
+	 * calling any other method from the plugin.
+	 *
+	 * This is a pure virtual function that must be implemented
+	 * in all plugins.
+	 */
+	virtual void init() = 0;
+
+	/**
+	 * Open the plugin. DMXMap calls open() whenever the plugin is used by
+	 * QLC to send DMX data and when the plugin goes dormant, DMXMap calls
+	 * close(). If you need to open() the plugin for configuration or some
+	 * other activity, you should implement reference counting to ensure
+	 * that used plugins won't get closed after the configuration dialog
+	 * is closed.
 	 *
 	 * This is a pure virtual function that must be implemented
 	 * in all plugins.
@@ -44,7 +61,12 @@ public:
 	virtual int open() = 0;
 
 	/**
-	 * Close (de-initialize) the plugin
+	 * Close the plugin. DMXMap calls open() whenever the plugin is used by
+	 * QLC to send DMX data and when the plugin goes dormant, DMXMap calls
+	 * close(). If you need to open() the plugin for configuration or some
+	 * other activity, you should implement reference counting to ensure
+	 * that used plugins won't get closed after the configuration dialog
+	 * is closed.
 	 *
 	 * This is a pure virtual function that must be implemented
 	 * in all plugins.

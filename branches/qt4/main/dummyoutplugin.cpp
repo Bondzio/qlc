@@ -31,14 +31,25 @@
 
 DummyOutPlugin::DummyOutPlugin() : QLCOutPlugin()
 {
-	m_name = QString("Dummy Output");
-
-	for (t_channel i = 0; i < KChannelMax; i++)
-		m_values[i] = 0;
 }
 
 DummyOutPlugin::~DummyOutPlugin()
 {
+}
+
+void DummyOutPlugin::init()
+{
+	for (t_channel i = 0; i < KChannelMax; i++)
+		m_values[i] = 0;
+}
+
+/*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString DummyOutPlugin::name()
+{
+	return QString("Dummy Output");
 }
 
 /*****************************************************************************

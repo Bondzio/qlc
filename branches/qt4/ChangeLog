@@ -1,5 +1,27 @@
 2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/common/qlcinplugin.h:
+	* libs/common/qlcoutplugin.h:
+	* libs/dmx4linuxout/dmx4linuxout.cpp:
+	* libs/dmx4linuxout/dmx4linuxout.h:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* libs/llaout/llaout.cpp:
+	* libs/llaout/llaout.h:
+	* libs/usbdmxout/usbdmxout-win32.cpp:
+	* libs/usbdmxout/usbdmxout-win32.h:
+	* libs/usbdmxout/usbdmxout.cpp:
+	* libs/usbdmxout/usbdmxout.h:
+	* main/dmxmap.cpp:
+	* main/dummyoutplugin.cpp:
+	* main/dummyoutplugin.h:
+	* main/inputmap.cpp:
+
+	Implemented a one-time init and reference counted open/close scheme
+	for plugins.
+	
+2008-07-30  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* fixtureeditor/editmode.cpp:
 	* main/dmxmap.cpp:
 	* main/scene.cpp:

@@ -180,3 +180,5 @@ int DummyOutPlugin::readRange(t_channel address, t_value* values,
 
 	return 0;
 }
+
+Q_EXPORT_PLUGIN2(dummyout, DummyOutPlugin)

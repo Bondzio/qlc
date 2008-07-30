@@ -66,7 +66,7 @@ protected:
 	HANDLE m_devices[MAX_USBDMX_DEVICES];
 	struct usbdmx_functions *usbdmx;
 	int m_refCount;
-	
+
 	/*********************************************************************
 	 * Name
 	 *********************************************************************/
@@ -96,7 +96,10 @@ public:
 	int readRange(t_channel address, t_value* values, t_channel num);
 
 protected:
-	t_value m_values[MAX_USBDMX_DEVICES * 512];
+	int bulkWrite(int iFaceNo);
+
+protected:
+	t_value m_values[MAX_USBDMX_DEVICES][512];
 	QMutex m_mutex;
 };
 

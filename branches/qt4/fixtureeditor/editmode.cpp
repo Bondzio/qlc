@@ -53,9 +53,12 @@ EditMode::EditMode(QWidget* parent, QLCFixtureMode* mode) : QDialog(parent)
 EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef) : QDialog(parent)
 {
 	Q_ASSERT(fixtureDef != NULL);
-	
+
 	/* Create a new mode for the given fixture */
 	m_mode = new QLCFixtureMode(fixtureDef);
+
+	setupUi(this);
+	init();
 }
 
 EditMode::~EditMode()

@@ -1,3 +1,10 @@
+2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* fixtureeditor/editmode.cpp
+	* ChangeLog
+	
+	Dialog controls were not initialized when a new mode was being edited.
+
 2008-07-31  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/usbdmxout/configureusbdmxout.cpp

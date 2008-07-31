@@ -21,6 +21,7 @@
 
 #include <QTreeWidgetItem>
 #include <QRadioButton>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QTreeWidget>
 #include <QToolButton>
@@ -97,6 +98,8 @@ void EditChannel::init()
 		this, SLOT(slotEditCapabilityClicked()));
 	
 	/* Capability list connections */
+	m_capabilityList->header()
+		->setResizeMode(QHeaderView::ResizeToContents);
 	connect(m_capabilityList,
 		SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
 		this,
@@ -284,6 +287,8 @@ void EditChannel::refreshCapabilities()
 		str.sprintf("%lu", (unsigned long) cap);
 		item->setText(KColumnPointer, str);
 	}
+	
+	m_capabilityList->sortItems(KColumnMin, Qt::AscendingOrder);
 	
 	slotCapabilityListSelectionChanged(m_capabilityList->currentItem());
 }

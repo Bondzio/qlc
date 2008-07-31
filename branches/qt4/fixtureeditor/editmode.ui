@@ -677,7 +677,7 @@
                <bool>true</bool>
               </property>
               <property name="maximum" >
-               <number>360</number>
+               <number>999</number>
               </property>
              </widget>
             </item>
@@ -698,7 +698,7 @@
                <bool>true</bool>
               </property>
               <property name="maximum" >
-               <number>360</number>
+               <number>999</number>
               </property>
              </widget>
             </item>

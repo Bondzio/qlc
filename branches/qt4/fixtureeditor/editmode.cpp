@@ -21,6 +21,7 @@
 
 #include <QTreeWidgetItem>
 #include <QInputDialog>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QTreeWidget>
 #include <QPushButton>
@@ -87,9 +88,9 @@ void EditMode::init()
 	m_lowerChannelButton->setIcon(QIcon(":/down.png"));
 	connect(m_lowerChannelButton, SIGNAL(clicked()),
 		this, SLOT(slotLowerChannelClicked()));
-	
+
 	m_modeNameEdit->setText(m_mode->name());
-	
+	m_channelList->header()->setResizeMode(QHeaderView::ResizeToContents);
 	refreshChannelList();
 
 	/* Physical page */
@@ -138,25 +139,14 @@ void EditMode::slotAddChannelClicked()
 	
 	if (ok == true && name.isEmpty() == false)
 	{
-		QTreeWidgetItem* item;
-		int index;
-
 		ch = m_mode->fixtureDef()->channel(name);
 
-		// Find out the current channel number
-		item = m_channelList->currentItem();
-		if (item != NULL)
-			index = item->text(KChannelsColumnNumber).toInt() - 1;
-		else
-			index = 0;
-		
-		// Insert the item at current selection
-		m_mode->insertChannel(ch, index);
-		
-		// Easier to refresh the whole list than to increment all
-		// channel numbers after the inserted item
+		// Append the channel
+		m_mode->insertChannel(ch, m_mode->channels());
+
+		// Easier to refresh the whole list
 		refreshChannelList();
-		
+
 		// Select the new channel
 		selectChannel(ch->name());
 	}

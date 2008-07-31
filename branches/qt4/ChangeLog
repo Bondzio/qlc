@@ -1,5 +1,18 @@
 2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* fixtureeditor/editchannel.cpp
+	* fixtureeditor/editmode.cpp
+	* fixtureeditor/editmode.ui
+	* fixtureeditor/fixtureeditor.cpp
+	* fixtures/Movitec-SL-250.qxf
+	* ChangeLog
+
+	Set all fixtureeditor's tree widgets to resize to contents.
+	Changed mode channel adding to append instead of insert.
+	Added Movitec SL-250 definition.
+
+2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* fixtureeditor/editmode.cpp
 	* ChangeLog
 	

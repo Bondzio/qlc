@@ -21,6 +21,7 @@
 
 #include <QTreeWidgetItem>
 #include <QInputDialog>
+#include <QHeaderView>
 #include <QTreeWidget>
 #include <QMessageBox>
 #include <QToolButton>
@@ -125,7 +126,8 @@ void QLCFixtureEditor::init()
 		SIGNAL(itemActivated(QTreeWidgetItem*,int)),
 		this,
 		SLOT(slotEditChannel()));
-		
+	
+	m_channelList->header()->setResizeMode(QHeaderView::ResizeToContents);
 	refreshChannelList();
 
 	/* Mode page */
@@ -153,6 +155,7 @@ void QLCFixtureEditor::init()
 		this,
 		SLOT(slotEditMode()));
 
+	m_modeList->header()->setResizeMode(QHeaderView::ResizeToContents);
 	refreshModeList();
 }
 

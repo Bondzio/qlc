@@ -1,5 +1,19 @@
 2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* fixtureeditor/fixtureeditor.pro
+	* fixtures/fixtures.pro
+	* libs/common/common.pro
+	* libs/dmx4linuxout/dmx4linuxout.pro
+	* libs/hidinput/hidinput.pro
+	* libs/llaout/llaout.pro
+	* libs/usbdmxout/usbdmxout.pro
+	* main/main.pro
+
+	Added "release" to all .pro files' CONFIG tag.
+	Added Movitec SL250 to fixtures install files.
+
+2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* main/keybind.h:
 	* main/vcframeproperties.cpp:
 

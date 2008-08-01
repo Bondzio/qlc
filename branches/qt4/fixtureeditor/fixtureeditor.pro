@@ -2,7 +2,7 @@ TEMPLATE 	= app
 LANGUAGE 	= C++
 TARGET 		= qlc-fixtureeditor
 
-CONFIG 		+= qt warn_on
+CONFIG          += qt warn_on release
 QT 		+= xml
 
 INCLUDEPATH 	+= . ../libs/

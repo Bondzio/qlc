@@ -2,8 +2,8 @@ TEMPLATE	= lib
 LANGUAGE	= C++
 TARGET		= llaout
 
-INCLUDEPATH 	+= . ../../libs/
-CONFIG		+= plugin link_pkgconfig warn_on release build_all
+INCLUDEPATH     += . ../../libs/
+CONFIG          += plugin link_pkgconfig warn_on release
 PKGCONFIG	+= liblla
 
 target.path	= /usr/lib/qlc/output

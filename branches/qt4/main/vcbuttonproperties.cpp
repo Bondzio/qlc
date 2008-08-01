@@ -55,19 +55,19 @@ VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent)
 	m_keyEdit->setText(m_keyBind->keyString());
 
 	/* press action */
-	switch(m_keyBind->pressAction())
+	switch(m_keyBind->action())
 	{
 	default:
-	case KeyBind::PressToggle:
+	case KeyBind::Toggle:
 		m_toggle->setChecked(true);
 		break;
-	case KeyBind::PressFlash:
+	case KeyBind::Flash:
 		m_flash->setChecked(true);
 		break;
-	case KeyBind::PressStepForward:
+	case KeyBind::StepForward:
 		m_forward->setChecked(true);
 		break;
-	case KeyBind::PressStepBackward:
+	case KeyBind::StepBackward:
 		m_backward->setChecked(true);
 		break;
 	}
@@ -149,25 +149,13 @@ void VCButtonProperties::accept()
 	Q_ASSERT(m_keyBind != NULL);
 
 	if (m_toggle->isChecked() == true)
-	{
-		m_keyBind->setPressAction(KeyBind::PressToggle);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-	}
+		m_keyBind->setAction(KeyBind::Toggle);
 	else if (m_flash->isChecked() == true)
-	{
-		m_keyBind->setPressAction(KeyBind::PressFlash);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseStop);
-	}
+		m_keyBind->setAction(KeyBind::Flash);
 	else if (m_forward->isChecked() == true)
-	{
-		m_keyBind->setPressAction(KeyBind::PressStepForward);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-	}
+		m_keyBind->setAction(KeyBind::StepForward);
 	else if (m_backward->isChecked() == true)
-	{
-		m_keyBind->setPressAction(KeyBind::PressStepBackward);
-		m_keyBind->setReleaseAction(KeyBind::ReleaseNothing);
-	}
+		m_keyBind->setAction(KeyBind::StepBackward);
 
 	m_button->setKeyBind(m_keyBind);
         m_button->setStopFunctions(m_stopFunctionsCheck->isChecked());  

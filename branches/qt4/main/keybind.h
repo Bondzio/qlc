@@ -31,6 +31,7 @@ class QDomElement;
 #define KXMLQLCKeyBind "KeyBind"
 #define KXMLQLCKeyBindKey "Key"
 #define KXMLQLCKeyBindModifier "Modifier"
+#define KXMLQLCKeyBindAction "Action"
 
 class KeyBind : public QObject
 {
@@ -40,19 +41,11 @@ class KeyBind : public QObject
 	 * Enums
 	 *********************************************************************/
 public:
-	enum PressAction {
-		PressStart = 0,
-		PressToggle = 1,
-		PressStepForward = 6,
-		PressStepBackward = 3,
-		PressStop = 4,
-		PressNothing = 5,
-		PressFlash = 2
-	};
-
-	enum ReleaseAction {
-		ReleaseStop = 0,
-		ReleaseNothing = 1
+	enum Action {
+		Toggle,
+		Flash,
+		StepForward,
+		StepBackward
 	};
 
 	/*********************************************************************
@@ -126,16 +119,10 @@ protected:
 	 *********************************************************************/
 public:
 	/** Set the action to take when the assigned key combo is pressed */
-	void setPressAction(PressAction action) { m_pressAction = action; }
+	void setAction(Action action) { m_action = action; }
 
 	/** Get the action to take when the assigned key combo is pressed */
-	PressAction pressAction() const { return m_pressAction; }
-
-	/** Set the action to take when the assigned key combo is released */
-	void setReleaseAction(ReleaseAction action) { m_releaseAction = action; }
-
-	/** Get the action to take when the assigned key combo is released */
-	ReleaseAction releaseAction() const { return m_releaseAction; }
+	KeyBind::Action action() const { return m_action; }
 
 signals:
 	/** Signal that is emitted when the key combo is pressed */
@@ -149,14 +136,18 @@ public slots:
 	void slotKeyPressed(QKeyEvent* e);
 
 	/** Key release receiver slot */
-	void slotKeyReleased(QKeyEvent* e);
+	void KeyBind::slotKeyReleased(QKeyEvent* e);
 
 protected:
 	/** The action to take when the assigned key combo is pressed */
-	PressAction m_pressAction;
+	Action m_action;
 
-	/** The action to take when the assigned key combo is released */
-	ReleaseAction m_releaseAction;
+	/*********************************************************************
+	 * Action to string
+	 *********************************************************************/
+public:
+	static QString actionToString(KeyBind::Action action);
+	static KeyBind::Action stringToAction(QString action);
 
 	/*********************************************************************
 	 * Load & Save

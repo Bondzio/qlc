@@ -37,13 +37,11 @@ extern App* _app;
 
 KeyBind::KeyBind() : QObject()
 {
-	m_pressAction = PressToggle;
-	m_releaseAction = ReleaseNothing;
+	m_action = Toggle;
 	m_key = Qt::Key_unknown;
 	m_mod = Qt::NoModifier;
 
 	Q_ASSERT(_app->virtualConsole() != NULL);
-
 	connect(_app->virtualConsole(), SIGNAL(keyPressed(QKeyEvent*)),
 		this, SLOT(slotKeyPressed(QKeyEvent*)));
 
@@ -53,14 +51,11 @@ KeyBind::KeyBind() : QObject()
 
 KeyBind::KeyBind(const int key, const Qt::KeyboardModifiers mod) : QObject()
 {
+	m_action = Toggle;
 	m_key = key;
 	m_mod = mod;
 
-	m_pressAction = PressStart;
-	m_releaseAction = ReleaseNothing;
-
 	Q_ASSERT(_app->virtualConsole() != NULL);
-
 	connect(_app->virtualConsole(), SIGNAL(keyPressed(QKeyEvent*)),
 		this, SLOT(slotKeyPressed(QKeyEvent*)));
 
@@ -71,14 +66,11 @@ KeyBind::KeyBind(const int key, const Qt::KeyboardModifiers mod) : QObject()
 KeyBind::KeyBind(const KeyBind* kb) : QObject()
 {
 	Q_ASSERT(kb != NULL);
+	m_action = kb->action();
 	m_key = kb->key();
 	m_mod = kb->mod();
 
-	m_pressAction = kb->pressAction();
-	m_releaseAction = kb->releaseAction();
-
 	Q_ASSERT(_app->virtualConsole() != NULL);
-
 	connect(_app->virtualConsole(), SIGNAL(keyPressed(QKeyEvent*)),
 		this, SLOT(slotKeyPressed(QKeyEvent*)));
 
@@ -94,8 +86,7 @@ bool KeyBind::operator==(KeyBind* kb)
 {
 	if (m_key != kb->key() || m_mod != kb->mod())
 		return false;
-	else if (pressAction() != kb->pressAction() ||
-		 releaseAction() != kb->releaseAction())
+	else if (action() != kb->action())
 		return false;
 	else
 		return true;
@@ -342,6 +333,38 @@ void KeyBind::slotKeyReleased(QKeyEvent* e)
 }
 
 /*****************************************************************************
+ * Action to string
+ *****************************************************************************/
+
+QString KeyBind::actionToString(KeyBind::Action action)
+{
+	switch (action)
+	{
+		default:
+		case Toggle:
+			return QString("Toggle");
+		case Flash:
+			return QString("Flash");
+		case StepForward:
+			return QString("StepForward");
+		case StepBackward:
+			return QString("StepBackward");
+	}
+}
+
+KeyBind::Action KeyBind::stringToAction(QString action)
+{
+	if (action == "Flash")
+		return KeyBind::Flash;
+	else if (action == "StepForward")
+		return KeyBind::StepForward;
+	else if (action == "StepBackward")
+		return KeyBind::StepBackward;
+	else
+		return KeyBind::Toggle;
+}
+
+/*****************************************************************************
  * Load & Save
  *****************************************************************************/
 
@@ -374,6 +397,10 @@ bool KeyBind::loadXML(QDomDocument*/* doc*/, QDomElement* root)
 
 			setKey(key.toInt());
 			setMod((Qt::KeyboardModifiers)mod.toInt());
+		}
+		else if (tag.tagName() == KXMLQLCKeyBindAction)
+		{
+			setAction(stringToAction(tag.text()));
 		}
 		else
 		{
@@ -415,5 +442,11 @@ bool KeyBind::saveXML(QDomDocument* doc, QDomElement* vc_root)
 	text = doc->createTextNode(str);
 	tag.appendChild(text);
 
+	/* Action */
+	tag = doc->createElement(KXMLQLCKeyBindAction);
+	root.appendChild(tag);
+	text = doc->createTextNode(actionToString(m_action));
+	tag.appendChild(text);
+	
 	return true;
 }

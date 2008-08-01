@@ -188,10 +188,10 @@ bool VCButton::loadXML(QDomDocument* doc, QDomElement* root)
 		}
 		else if (tag.tagName() == KXMLQLCKeyBind)
 		{
-			if (m_keyBind != NULL)
-				delete m_keyBind;
-			m_keyBind = new KeyBind();
-			m_keyBind->loadXML(doc, &tag);
+			KeyBind* kb = new KeyBind();
+			kb->loadXML(doc, &tag);
+			setKeyBind(kb);
+			delete kb;
 		}
 		else
 		{
@@ -362,7 +362,7 @@ void VCButton::pressFunction()
 	{
 		return;
 	}
-	else if (m_keyBind->pressAction() == KeyBind::PressToggle &&
+	else if (m_keyBind->action() == KeyBind::Toggle &&
 		 m_isExclusive == false)
 	{
 		f = _app->doc()->function(m_function);
@@ -379,7 +379,7 @@ void VCButton::pressFunction()
 			setFunction(KNoID);
 		}
 	}
-	else if (m_keyBind->pressAction() == KeyBind::PressToggle &&
+	else if (m_keyBind->action() == KeyBind::Toggle &&
 		 m_isExclusive == true)
 	{
 		/* Get a list of this button's siblings from this' parent */
@@ -409,7 +409,7 @@ void VCButton::pressFunction()
 			setFunction(KNoID);
 		}
 	}
-	else if (m_keyBind->pressAction() == KeyBind::PressFlash)
+	else if (m_keyBind->action() == KeyBind::Flash)
 	{
 		f = _app->doc()->function(m_function);
 		if (f != NULL)
@@ -432,11 +432,7 @@ void VCButton::releaseFunction()
 	{
 		return;
 	}
-	else if (m_keyBind->releaseAction() == KeyBind::ReleaseNothing)
-	{
-		return;
-	}
-	else if (m_keyBind->releaseAction() == KeyBind::ReleaseStop)
+	else if (m_keyBind->action() == KeyBind::Flash)
 	{
 		Function* function = _app->doc()->function(m_function);
 		if (function != NULL && isOn() == true)
@@ -492,7 +488,7 @@ void VCButton::paintEvent(QPaintEvent* e)
 {
 	VCWidget::paintEvent(e);
 
-	if (m_keyBind->pressAction() == KeyBind::PressFlash)
+	if (m_keyBind->action() == KeyBind::Flash)
 	{
 		/* TODO: Something better for marking a flash button */
 		QPainter p(this);

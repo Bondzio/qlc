@@ -1,5 +1,16 @@
 2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* ChangeLog
+	* main/keybind.cpp
+	* main/keybind.h
+	* main/vcbutton.cpp
+	* main/vcbuttonproperties.cpp
+
+	Fixed a bug that caused KeyBind to forget its action and signal
+	connections between workspace loads.
+
+2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* fixtureeditor/editchannel.cpp
 	* fixtureeditor/editmode.cpp
 	* fixtureeditor/editmode.ui

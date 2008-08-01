@@ -30,6 +30,8 @@ VCFrameProperties::VCFrameProperties(QWidget* parent, VCFrame* frame)
 	Q_ASSERT(frame != NULL);
 	m_frame = frame;
 
+	setupUi(this);
+
 	if (m_frame->buttonBehaviour() == VCFrame::Exclusive)
 		m_exclusive->setChecked(true);
 	else

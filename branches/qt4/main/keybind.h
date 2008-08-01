@@ -136,7 +136,7 @@ public slots:
 	void slotKeyPressed(QKeyEvent* e);
 
 	/** Key release receiver slot */
-	void KeyBind::slotKeyReleased(QKeyEvent* e);
+	void slotKeyReleased(QKeyEvent* e);
 
 protected:
 	/** The action to take when the assigned key combo is pressed */

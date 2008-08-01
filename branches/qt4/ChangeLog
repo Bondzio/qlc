@@ -1,5 +1,13 @@
 2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* main/keybind.h:
+	* main/vcframeproperties.cpp:
+
+	Fixed crash bug with VCFrame properties.
+	Fixed compile error in KeyBind.
+	
+2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* ChangeLog
 	* main/keybind.cpp
 	* main/keybind.h

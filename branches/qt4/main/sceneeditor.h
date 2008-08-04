@@ -52,7 +52,6 @@ protected:
 	 *********************************************************************/
 protected slots:
 	void accept();
-	void slotUpdateValuesChecked(bool state);
 
 	/*********************************************************************
 	 * General tab

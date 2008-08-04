@@ -134,19 +134,6 @@ void SceneEditor::accept()
 	QDialog::accept();
 }
 
-void SceneEditor::slotUpdateValuesChecked(bool state)
-{
-	/* Start from the first fixture tab */
-	for (int i = KTabFirstFixture; i < m_tab->count(); i++)
-	{
-		FixtureConsole* fc;
-		fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
-		Q_ASSERT(fc != NULL);
-
-		fc->setOutputDMX(state);
-	}
-}
-
 /*****************************************************************************
  * General page
  *****************************************************************************/

@@ -22,14 +22,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="General" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>538</width>
-        <height>462</height>
-       </rect>
-      </property>
       <attribute name="title" >
        <string>General</string>
       </attribute>
@@ -39,7 +31,7 @@
          <item>
           <widget class="QLabel" name="m_nameLabel" >
            <property name="text" >
-            <string>EFX name:</string>
+            <string>EFX name</string>
            </property>
           </widget>
          </item>
@@ -95,12 +87,24 @@
            <property name="text" >
             <string>...</string>
            </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="m_removeFixtureButton" >
            <property name="text" >
             <string>...</string>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -109,12 +113,24 @@
            <property name="text" >
             <string>...</string>
            </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="m_lowerFixtureButton" >
            <property name="text" >
             <string>...</string>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -170,7 +186,7 @@
          <item>
           <widget class="QGroupBox" name="m_busGroup" >
            <property name="title" >
-            <string>Bus</string>
+            <string>Speed bus</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6" >
             <item>
@@ -188,14 +204,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Movement" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>538</width>
-        <height>462</height>
-       </rect>
-      </property>
       <attribute name="title" >
        <string>Movement</string>
       </attribute>
@@ -582,14 +590,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Initialization" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>538</width>
-        <height>462</height>
-       </rect>
-      </property>
       <attribute name="title" >
        <string>Initialization</string>
       </attribute>

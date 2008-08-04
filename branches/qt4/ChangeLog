@@ -1,3 +1,19 @@
+2008-08-04  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/chasereditor.ui
+	* main/collectioneditor.ui
+	* main/efxeditor.ui
+	* main/sceneeditor.cpp
+	* main/sceneeditor.h
+	* main/sceneeditor.ui
+	* main/vcbuttonproperties.ui
+	* main/vccuelistproperties.ui
+	* main/vcsliderproperties.ui
+	* main/vcxypadproperties.ui
+
+	Modified all tool buttons in dialogs to 26x26px since 16x16px is
+	too small in windows.
+	
 2008-08-01  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* fixtureeditor/fixtureeditor.pro

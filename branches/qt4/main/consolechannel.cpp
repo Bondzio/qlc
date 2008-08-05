@@ -156,7 +156,46 @@ void ConsoleChannel::initMenu()
 	else if (ch->group() == KQLCChannelGroupTilt)
 		m_presetButton->setIcon(QIcon(":/tilt.png"));
 	else if (ch->group() == KQLCChannelGroupColour)
+	{
+		if (ch->name().contains("red", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("red"));
+			m_presetButton->setPalette(pal);
+		}
+		else if (ch->name().contains("green", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("green"));
+			m_presetButton->setPalette(pal);
+		}
+		else if (ch->name().contains("blue", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("blue"));
+			m_presetButton->setPalette(pal);
+		}
+		else if (ch->name().contains("cyan", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("cyan"));
+			m_presetButton->setPalette(pal);
+		}
+		else if (ch->name().contains("magenta", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("magenta"));
+			m_presetButton->setPalette(pal);
+		}
+		else if (ch->name().contains("yellow", Qt::CaseInsensitive) == true)
+		{
+			QPalette pal = m_presetButton->palette();
+			pal.setColor(QPalette::Button, QColor("yellow"));
+			m_presetButton->setPalette(pal);
+		}
+
 		m_presetButton->setIcon(QIcon(":/color.png"));
+	}
 	else if (ch->group() == KQLCChannelGroupGobo)
 		m_presetButton->setIcon(QIcon(":/gobo.png"));
 	else if (ch->group() == KQLCChannelGroupShutter)

@@ -1,3 +1,10 @@
+2008-08-05  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/consolechannel.cpp:
+
+	Added red/green/blue/cyan/magenta/yellow background color to
+	console channel button where appropriate.
+	
 2008-08-05  Heikki Junnila  <hjunnila@users.sf.net
 
 	* fixtureeditor/editcapability.cpp

@@ -48,6 +48,7 @@ fixtures.files += Martin-MX-4.qxf
 fixtures.files += Martin-Roboscan-518.qxf
 fixtures.files += Martin-Roboscan-812.qxf
 fixtures.files += Movitec-SL-250.qxf
+fixtures.files += Movitec-WL-250.qxf
 fixtures.files += SGM-Colorlab-250.qxf
 fixtures.files += SGM-Giotto-Spot-250.qxf
 fixtures.files += SGM-Giotto-Wash-400.qxf

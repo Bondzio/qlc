@@ -35,6 +35,9 @@ EditCapability::EditCapability(QWidget* parent, QLCCapability* cap)
 	m_minSpin->setValue(m_capability->min());
 	m_maxSpin->setValue(m_capability->max());
 	m_descriptionEdit->setText(m_capability->name());
+	m_minSpin->setFocus();
+	m_minSpin->selectAll();
+
 	connect(m_minSpin, SIGNAL(valueChanged(int)),
 		this, SLOT(slotMinSpinChanged(int)));
 	connect(m_maxSpin, SIGNAL(valueChanged(int)),

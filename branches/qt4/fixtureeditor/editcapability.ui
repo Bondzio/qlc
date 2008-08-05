@@ -6,11 +6,11 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>135</height>
+    <height>142</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Edit Capability</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>

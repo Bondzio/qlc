@@ -205,11 +205,24 @@ void EditChannel::slotAddCapabilityClicked()
 
 void EditChannel::slotRemoveCapabilityClicked()
 {
+	QTreeWidgetItem* item;
+	QTreeWidgetItem* next;
+
+	item = m_capabilityList->currentItem();
+	if (item == NULL)
+		return;
+
+	if (m_capabilityList->itemBelow(item) != NULL)
+		next = m_capabilityList->itemBelow(item);
+	else if (m_capabilityList->itemAbove(item) != NULL)
+		next = m_capabilityList->itemAbove(item);
+	else
+		next = NULL;
+
 	// This also deletes the capability
 	m_channel->removeCapability(currentCapability());
-	
-	refreshCapabilities();
-	slotCapabilityListSelectionChanged(m_capabilityList->currentItem());
+	delete item;
+	m_capabilityList->setCurrentItem(next);
 }
 
 void EditChannel::slotEditCapabilityClicked()

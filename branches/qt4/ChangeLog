@@ -1,3 +1,16 @@
+2008-08-05  Heikki Junnila  <hjunnila@users.sf.net
+
+	* fixtureeditor/editcapability.cpp
+	* fixtureeditor/editcapability.ui
+	* fixtureeditor/editchannel.cpp
+	* fixtureeditor/editmode.ui
+	* fixtureeditor/fixtureeditor.cpp
+	* libs/common/qlcfixturedef.cpp
+
+	Fixed a crash in qlcchannel removal
+	Added next item selection during channel, mode and capabilit
+	removal in fixture editor.
+
 2008-08-04  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/chasereditor.ui

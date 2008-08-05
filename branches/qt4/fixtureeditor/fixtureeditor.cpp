@@ -98,7 +98,8 @@ void QLCFixtureEditor::init()
 	connect(m_modelEdit, SIGNAL(textEdited(const QString&)),
 		this, SLOT(slotModelTextEdited(const QString&)));
 
-	m_typeCombo->setEditText(m_fixtureDef->type());
+	m_typeCombo->setCurrentIndex(
+		m_typeCombo->findText(m_fixtureDef->type()));
 	connect(m_typeCombo, SIGNAL(activated(const QString&)),
 		this, SLOT(slotTypeActivated(const QString&)));
 
@@ -401,14 +402,27 @@ void QLCFixtureEditor::slotAddChannel()
 void QLCFixtureEditor::slotRemoveChannel()
 {
 	QLCChannel* channel = currentChannel();
-	
+	Q_ASSERT(channel != NULL);
+
 	if (QMessageBox::question(this, "Remove Channel",
 		QString("Are you sure you wish to remove channel: ") + channel->name(),
 			QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 	{
+		QTreeWidgetItem* item;
+		QTreeWidgetItem* next;
+		
+		item = m_channelList->currentItem();
+		if (m_channelList->itemBelow(item) != NULL)
+			next = m_channelList->itemBelow(item);
+		else if (m_channelList->itemAbove(item) != NULL)
+			next = m_channelList->itemAbove(item);
+		else
+			next = NULL;
+		
 		// Remove the selected channel from the fixture (also deleted)
 		m_fixtureDef->removeChannel(currentChannel());
-		refreshChannelList();
+		delete item;
+		m_channelList->setCurrentItem(next);
 		setModified();
 	}
 }
@@ -625,8 +639,19 @@ void QLCFixtureEditor::slotRemoveMode()
 		QString("Are you sure you wish to remove mode: ") + mode->name(),
 			QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 	{
+		QTreeWidgetItem* item;
+		QTreeWidgetItem* next;
+		
+		item = m_modeList->currentItem();
+		if (m_modeList->itemBelow(item) != NULL)
+			next = m_modeList->itemBelow(item);
+		else if (m_modeList->itemAbove(item) != NULL)
+			next = m_modeList->itemAbove(item);
+		else
+			next = NULL;
+
 		m_fixtureDef->removeMode(mode);
-		refreshModeList();
+		delete item;
 		setModified();
 	}
 }

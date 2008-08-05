@@ -151,12 +151,18 @@ void QLCFixtureDef::addChannel(QLCChannel* channel)
 
 bool QLCFixtureDef::removeChannel(QLCChannel* channel)
 {
-	QMutableListIterator <QLCChannel*> it(m_channels);
-	while (it.hasNext() == true)
+	/* First remove the channel from all modes */
+	QListIterator <QLCFixtureMode*> modeit(m_modes);
+	while (modeit.hasNext() == true)
+		modeit.next()->removeChannel(channel);
+
+	/* Then remove the actual channel from this fixture definition */
+	QMutableListIterator <QLCChannel*> chit(m_channels);
+	while (chit.hasNext() == true)
 	{
-		if (it.next() == channel)
+		if (chit.next() == channel)
 		{
-			it.remove();
+			chit.remove();
 			delete channel;
 			return true;
 		}

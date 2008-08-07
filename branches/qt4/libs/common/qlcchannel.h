@@ -55,7 +55,7 @@ class QLCChannel;
 
 class QLC_DECLSPEC QLCChannel
 {
- public:
+public:
 	/** Standard constructor */
 	QLCChannel();
 	
@@ -66,7 +66,7 @@ class QLC_DECLSPEC QLCChannel
 	QLCChannel(QDomElement* tag);
 
 	/** Destructor */
-	~QLCChannel();
+	virtual ~QLCChannel();
 
 	/** Assignment operator */
 	QLCChannel& operator=(QLCChannel& lc);
@@ -74,6 +74,7 @@ class QLC_DECLSPEC QLCChannel
 	/*********************************************************************
 	 * Channel groups
 	 *********************************************************************/
+public:
 	/** Get a list of possible channel groups */
 	static QStringList groupList();
 
@@ -86,7 +87,7 @@ class QLC_DECLSPEC QLCChannel
 	/*********************************************************************
 	 * Properties
 	 *********************************************************************/
-
+public:
 	/** Get the channel's name */
 	QString name() const { return m_name; }
 
@@ -108,7 +109,7 @@ class QLC_DECLSPEC QLCChannel
 	/*********************************************************************
 	 * Capabilities
 	 *********************************************************************/
-
+public:
 	/** Get a list of channel's capabilities */
 	QList <QLCCapability*> *capabilities() { return &m_capabilities; }
 
@@ -124,21 +125,20 @@ class QLC_DECLSPEC QLCChannel
 	/** Remove a capability from the channel */
 	bool removeCapability(QLCCapability* cap);
 
- protected:
+protected:
 	void sortCapabilities();
 
- public:
 	/*********************************************************************
 	 * File operations
 	 *********************************************************************/
-
+public:
 	/** Save the channel to a QDomDocument, under the given element */
 	void saveXML(QDomDocument* doc, QDomElement* root);
 
 	/** Load channel contents from an XML element */
-	bool loadXML(QDomElement* tag);
+	virtual bool loadXML(QDomElement* tag);
 
- private:
+protected:
 	/** Name */
 	QString m_name;
 

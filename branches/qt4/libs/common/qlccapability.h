@@ -68,7 +68,7 @@ class QLC_DECLSPEC QLCCapability
 	int saveXML(QDomDocument* doc, QDomElement* root);
 
 	/** Load capability contents from an XML element */
-	bool loadXML(QDomElement* root);
+	virtual bool loadXML(QDomElement* root);
  
  private:
 	t_value m_min;

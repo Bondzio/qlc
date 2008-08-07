@@ -55,7 +55,7 @@ public:
 	QLCFixtureMode(QLCFixtureDef* fixtureDef, QDomElement* tag);
 
 	/** Destructor */
-	~QLCFixtureMode();
+	virtual ~QLCFixtureMode();
 
 	/** Assignment operator */
 	QLCFixtureMode& operator=(QLCFixtureMode& mode);
@@ -116,7 +116,7 @@ public:
 	const QLCPhysical physical();
 
 	/** Load from an XML tag */
-	bool loadXML(QDomElement* root);
+	virtual bool loadXML(QDomElement* root);
 
 	/** Save to an XML document */
 	bool saveXML(QDomDocument* doc, QDomElement* root);

@@ -264,7 +264,6 @@ void QLCChannel::saveXML(QDomDocument* doc, QDomElement* root)
 
 bool QLCChannel::loadXML(QDomElement* root)
 {
-	QLCCapability* cap = NULL;
 	QDomNode node;
 	QDomElement tag;
 	QString str;
@@ -286,8 +285,7 @@ bool QLCChannel::loadXML(QDomElement* root)
 		
 		if (tag.tagName() == KXMLQLCCapability)
 		{
-			cap = new QLCCapability(&tag);
-			addCapability(cap);
+			addCapability(new QLCCapability(&tag));
 		}
 		else if (tag.tagName() == KXMLQLCChannelGroup)
 		{

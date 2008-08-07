@@ -61,7 +61,7 @@ public:
 	QLCFixtureDef(const QString &fileName);
 
 	/** Destructor */
-	~QLCFixtureDef();
+	virtual ~QLCFixtureDef();
 
 	/** Assignment operator */
 	QLCFixtureDef& operator=(QLCFixtureDef& fixture);
@@ -136,7 +136,7 @@ public:
 	bool saveXML(const QString &fileName);
 	
 	/** Load fixture contents from an XML document */
-	bool loadXML(QDomDocument* doc); 
+	virtual bool loadXML(QDomDocument* doc); 
 
 protected:
 	/** Modes (i.e. particular collections of channels) */

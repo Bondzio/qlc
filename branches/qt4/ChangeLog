@@ -1,3 +1,9 @@
+2008-08-08  Heikki Junnila  <ext-heikki.junnila@nokia.com>
+
+	* libs/common/qlcphysical.h:
+
+	Changed private members to protected and set loadXML virtual.
+
 2008-08-07  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/common/common.pro:

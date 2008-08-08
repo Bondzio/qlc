@@ -47,16 +47,18 @@ public:
 	 * Constructor
 	 *
 	 * @param parent The parent widget
-	 * @param doc The Doc* object holding all fixtures and functions
 	 * @param multiple Set true to enable multiple selection
 	 * @param disableID A function ID to disable (when adding steps to
 	 *                  a chaser, disable the chaser itself)
-	 * @param filter Show only functions of the given type (use
-	 *               Function::Undefined to show all)
+	 * @param filter Show only functions of the given types OR'd. Use
+	 *               Function::Undefined to show all.
+	 * @param constFilter If true, don't allow user filter selection
 	 */
-	FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
+	FunctionSelection(QWidget* parent,
+			  bool multiple,
 			  t_function_id disableFunction = KNoID,
-			  Function::Type filter = Function::Undefined);
+			  int filter = Function::Undefined,
+			  bool constFilter = false);
 
 	/**
 	 * Destructor
@@ -73,6 +75,11 @@ public:
 	 *********************************************************************/
 protected:
 	/**
+	 * Clear & (re)fill the tree
+	 */
+	void refillTree();
+
+	/**
 	 * Find a top-level item that matches the given fixture instance or
 	 * create one if it doesn't exist.
 	 *
@@ -87,10 +94,19 @@ protected slots:
 	 */
 	void slotItemDoubleClicked(QTreeWidgetItem* item);
 
+	void slotCollectionChecked(bool state);
+	void slotEFXChecked(bool state);
+	void slotChaserChecked(bool state);
+	void slotSceneChecked(bool state);
+
 	/**
 	 * OK button click
 	 */
 	void accept();
+
+protected:
+	int m_filter;
+	t_function_id m_disable;
 };
 
 #endif

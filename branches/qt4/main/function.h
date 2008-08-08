@@ -60,7 +60,14 @@ class Function : public QThread
 	Q_OBJECT
 
 public:
-	enum Type { Undefined, Scene, Chaser, EFX, Collection };
+	enum Type
+	{
+		Undefined  = 0,
+		Scene      = 1 << 0,
+		Chaser     = 1 << 1,
+		EFX        = 1 << 2,
+		Collection = 1 << 3
+	};
 
 	/*********************************************************************
 	 * Initialization

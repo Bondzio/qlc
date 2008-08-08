@@ -475,7 +475,7 @@ void VCButton::invokeMenu(QPoint point)
 
 void VCButton::slotAttachFunction()
 {
-	FunctionSelection sel(this, _app->doc(), false);
+	FunctionSelection sel(this, false, KNoID, Function::Undefined, false);
 	if (sel.exec() == QDialog::Accepted)
 		setFunction(sel.selection.at(0));
 }

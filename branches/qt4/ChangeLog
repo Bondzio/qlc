@@ -1,3 +1,18 @@
+2008-08-08  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* main/chasereditor.cpp:
+	* main/collectioneditor.cpp:
+	* main/fixtureselection.ui:
+	* main/function.h:
+	* main/functionselection.cpp:
+	* main/functionselection.h:
+	* main/functionselection.ui:
+	* main/vcbutton.cpp:
+	* main/vcbuttonproperties.cpp:
+	* main/vccuelistproperties.cpp:
+
+	Added user-editable function type filtering to function selection.
+
 2008-08-08  Heikki Junnila  <ext-heikki.junnila@nokia.com>
 
 	* libs/common/qlcphysical.h:

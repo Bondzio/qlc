@@ -107,7 +107,7 @@ void VCCueListProperties::slotAddClicked()
 	Function* function;
 
 	/* Select only scenes */
-	FunctionSelection fs(this, _app->doc(), true, KNoID, Function::Scene);
+	FunctionSelection fs(this, true, KNoID, Function::Scene, true);
 	if (fs.exec() == QDialog::Accepted)
 	{
 		/* Append selected scenes. TODO: Insert after current item. */

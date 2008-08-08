@@ -97,7 +97,7 @@ VCButtonProperties::~VCButtonProperties()
 
 void VCButtonProperties::slotAttachFunction()
 {
-	FunctionSelection sel(this, _app->doc(), false);
+	FunctionSelection sel(this, false, KNoID, Function::Undefined, false);
 	if (sel.exec() == QDialog::Accepted)
 	{
 		/* Get the first selected function */

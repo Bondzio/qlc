@@ -82,7 +82,8 @@ void CollectionEditor::slotNameEdited(const QString& text)
 
 void CollectionEditor::slotAdd()
 {
-	FunctionSelection sel(this, _app->doc(), true, m_original->id());
+	FunctionSelection sel(this, true, m_original->id(),
+			      Function::Undefined, false);
 	if (sel.exec() == QDialog::Accepted)
 	{
 		t_function_id fid;

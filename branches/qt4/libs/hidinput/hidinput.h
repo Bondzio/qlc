@@ -48,6 +48,8 @@ class HIDInput : public QObject, public QLCInPlugin
 public:
 	void init();
 
+	virtual ~HIDInput();
+
 	/*********************************************************************
 	 * Open/close
 	 *********************************************************************/
@@ -61,7 +63,6 @@ protected:
 
 protected:
 	QList <HIDDevice*> m_devices;
-	int m_refCount;
 
 	/*********************************************************************
 	 * Name
@@ -91,12 +92,20 @@ public:
 	/*********************************************************************
 	 * Device poller
 	 *********************************************************************/
+public:
+	void addPollDevice(HIDDevice* device);
+	void removePollDevice(HIDDevice* device);
+
 protected:
 	HIDPoller* m_poller;
 
 	/*********************************************************************
 	 * Input data
 	 *********************************************************************/
+public slots:
+	void slotValueChanged(HIDDevice* device, t_input_channel channel,
+			      t_input_value value);
+
 public:
 	void feedBack(t_input input, t_input_channel channel,
 		      t_input_value value);

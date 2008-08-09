@@ -1,5 +1,17 @@
 2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/hidinput/configurehidinput.cpp:
+	* libs/hidinput/configurehidinput.h:
+	* libs/hidinput/hiddevice.h:
+	* libs/hidinput/hideventdevice.cpp:
+	* libs/hidinput/hideventdevice.h:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+
+	Changed HID plugin to open/close devices on demand.
+
+2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/hidinput/hiddevice.h:
 	* libs/hidinput/hideventdevice.cpp:
 	* libs/hidinput/hideventdevice.h:

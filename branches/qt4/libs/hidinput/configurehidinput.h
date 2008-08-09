@@ -50,6 +50,11 @@ protected slots:
 	 */
 	void slotRefreshClicked();
 
+	/**
+	 *
+	 */
+	void slotItemChanged(QTreeWidgetItem* item, int column);
+
 protected:
 	/** Refresh the interface list */
 	void refreshList();

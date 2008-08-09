@@ -121,8 +121,13 @@ protected:
 signals:
 	/**
 	 * Signal that is emitted when an input channel's value is changed
+	 *
+	 * @param device The eventing HIDDevice
+	 * @param channel The channel whose value has changed
+	 * @param value The changed value
 	 */
-	virtual void valueChanged(t_input_channel channel, t_input_value value);
+	void valueChanged(HIDDevice* device, t_input_channel channel,
+			  t_input_value value);
 
 public:
 	/**

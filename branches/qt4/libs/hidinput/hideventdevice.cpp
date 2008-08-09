@@ -31,8 +31,8 @@
 #include "hidinput.h"
 
 /**
- * This macro is used to tell if "bit" is set in "array"
- * it selects a byte from the array, and does a boolean AND 
+ * This macro is used to tell if "bit" is set in "array".
+ * It selects a byte from the array, and does a boolean AND 
  * operation with a byte that only has the relevant bit set. 
  * eg. to check for the 12th bit, we do (array[1] & 1<<4)
  */
@@ -41,108 +41,61 @@
 HIDEventDevice::HIDEventDevice(HIDInput* parent, const QString& path) 
 	: HIDDevice(parent, path)
 {
-	m_refCount = 0;
+	init();
 }
 
 HIDEventDevice::~HIDEventDevice()
 {
-	close();
-}
-
-/*****************************************************************************
- * File operations
- *****************************************************************************/
-
-bool HIDEventDevice::open()
-{
-	bool result = false;
-
-	/* Count the number of times open() has been called so that the devices
-	   are opened only once. This is basically reference counting. */
-	m_refCount++;
-	if (m_refCount > 1)
-		return true;
-
-	qWarning() << "*******************************************************";
-	qWarning() << "Device file: " << m_file.fileName();
-
-	result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadWrite);
-	if (result == false)
-	{
-		qWarning() << "Unable to open" << m_file.fileName()
-			   << "in Read/Write mode:" << m_file.errorString();
-		
-		result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadOnly);
-		if (result == false)
-		{
-			qWarning() << "Unable to open" << m_file.fileName()
-				   << "in Read Only mode:"
-				   << m_file.errorString();
-		}
-	}
-
-	if (result == true)
-	{
-		/* An event device has been opened in RW or RO mode now.
-		   Either way, these should be available. */
-
-		/* Device name */
-		char name[128] = "Unknown";
-		if (ioctl(m_file.handle(), EVIOCGNAME(sizeof(name)), name) <= 0)
-		{
-			m_name = QString(strerror(errno));
-			perror("ioctl EVIOCGNAME");
-		}
-		else
-		{
-			m_name = QString(name);
-			qDebug() << "Device name:" << m_name;
-		}
-
-		/* Device info */
-		if (ioctl(m_file.handle(), EVIOCGID, &m_deviceInfo))
-			perror("ioctl EVIOCGID");
-		
-		/* Supported event types */
-		if (ioctl(m_file.handle(), EVIOCGBIT(0, sizeof(m_eventTypes)),
-			  m_eventTypes) <= 0)
-			perror("ioctl EVIOCGBIT");
-		else
-			getCapabilities();
-	}
-
-	return result;
-}
-
-void HIDEventDevice::close()
-{
-	/* Count the number of times close() has been called so that the devices
-	   are closed only after the last user closes this plugin. This is
-	   basically reference counting. */
-	m_refCount--;
-	if (m_refCount > 0)
-		return;
-	Q_ASSERT(m_refCount == 0);
-
+	setEnabled(false);
+	
 	while (m_channels.isEmpty() == false)
 		delete m_channels.takeFirst();
-
-	m_file.close();
 }
 
-QString HIDEventDevice::path() const
+void HIDEventDevice::init()
 {
-	return m_file.fileName();
-}
+	if (open() == false)
+		return;
+	
+	qDebug() << "*******************************************************";
+	qDebug() << "Device file: " << m_file.fileName();
 
-t_input_channel HIDEventDevice::channels()
-{
-	return m_channels.count();
+	/* Device name */
+	char name[128] = "Unknown";
+	if (ioctl(m_file.handle(), EVIOCGNAME(sizeof(name)), name) <= 0)
+	{
+		m_name = QString(strerror(errno));
+		perror("ioctl EVIOCGNAME");
+	}
+	else
+	{
+		m_name = QString(name);
+		qDebug() << "Device name:" << m_name;
+	}
+	
+	/* Device info */
+	if (ioctl(m_file.handle(), EVIOCGID, &m_deviceInfo))
+	{
+		perror("ioctl EVIOCGID");
+	}
+	
+	/* Supported event types */
+	if (ioctl(m_file.handle(), EVIOCGBIT(0, sizeof(m_eventTypes)),
+		  m_eventTypes) <= 0)
+	{
+		perror("ioctl EVIOCGBIT");
+	}
+	else
+	{
+		getCapabilities();
+	}
+
+	close();
 }
 
 void HIDEventDevice::getCapabilities()
 {
-	QString s;
+	Q_ASSERT(m_file.isOpen() == true);
 
 	qDebug() << "Supported event types:";
 
@@ -181,6 +134,8 @@ void HIDEventDevice::getAbsoluteAxesCapabilities()
 	uint8_t mask[ABS_MAX/8 + 1];
 	struct input_absinfo feats;
 	int r;
+
+	Q_ASSERT(m_file.isOpen() == true);
 	
 	memset(mask, 0, sizeof(mask));
 	r = ioctl(m_file.handle(), EVIOCGBIT(EV_ABS, sizeof(mask)), mask);
@@ -217,6 +172,47 @@ void HIDEventDevice::getAbsoluteAxesCapabilities()
 	}
 }
 
+/*****************************************************************************
+ * File operations
+ *****************************************************************************/
+
+bool HIDEventDevice::open()
+{
+	bool result = false;
+
+	result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadWrite);
+	if (result == false)
+	{
+		qWarning() << "Unable to open" << m_file.fileName()
+			   << "in Read/Write mode:" << m_file.errorString();
+		
+		result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadOnly);
+		if (result == false)
+		{
+			qWarning() << "Unable to open" << m_file.fileName()
+				   << "in Read Only mode:"
+				   << m_file.errorString();
+		}
+	}
+
+	return result;
+}
+
+void HIDEventDevice::close()
+{
+	m_file.close();
+}
+
+QString HIDEventDevice::path() const
+{
+	return m_file.fileName();
+}
+
+t_input_channel HIDEventDevice::channels()
+{
+	return m_channels.count();
+}
+
 void HIDEventDevice::readEvent()
 {
 	struct input_event ev;
@@ -237,18 +233,20 @@ void HIDEventDevice::readEvent()
 
 bool HIDEventDevice::isEnabled()
 {
-	return m_enabled;
+	return m_file.isOpen();
 }
 
 void HIDEventDevice::setEnabled(bool state)
 {
 	Q_ASSERT(parent() != NULL);
-/*
+
+	if (m_file.isOpen() == state)
+		return;
+
 	if (state == true)
 		qobject_cast <HIDInput*> (parent())->addPollDevice(this);
 	else
 		qobject_cast <HIDInput*> (parent())->removePollDevice(this);
-*/
 }
 
 /*****************************************************************************
@@ -267,33 +265,15 @@ QString HIDEventDevice::infoText()
 	info += m_file.fileName();
 	info += QString("</TD>");
 
-	if (m_file.isOpen() == true)
-	{
-		/* Name */
-		info += QString("<TD>");
-		info += m_name;
-		info += QString("</TD>");
-
-		/* Mode */
-		info += QString("<TD>");
-		if (m_file.isReadable() == true)
-			info += QString("Read");
-		if (m_file.isWritable() == true)
-			info += QString("/Write");
-		else
-			info += QString(" Only");
-		info += QString("</TD>");
-	}
-	else
-	{
-		/* File is not open, put an error here. */
-		info += QString("<TD>");
-		info += m_file.errorString();
-		info += QString("</TD>");
-		info += QString("<TD>");
-		info += m_file.errorString();
-		info += QString("</TD>");
-	}
+	/* Name */
+	info += QString("<TD>");
+	info += m_name;
+	info += QString("</TD>");
+	
+	/* Mode */
+	info += QString("<TD ALIGN=\"CENTER\">");
+	info += QString("%1").arg(channels());
+	info += QString("</TD>");
 
 	info += QString("</TR>");
 

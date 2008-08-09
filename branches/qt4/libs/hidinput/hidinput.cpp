@@ -36,8 +36,29 @@
 
 void HIDInput::init()
 {
+	QDir dir("/dev/input/");
+	QStringList nameFilters;
+	QStringList entries;
+	QStringList::iterator it;
+	HIDDevice* hidDevice;
+	QString path;
+
+	nameFilters << "event*";
+	entries = dir.entryList(nameFilters, QDir::Files | QDir::System);
+	for (it = entries.begin(); it != entries.end(); ++it)
+	{
+		path = dir.absolutePath() + QDir::separator() + *it;
+		hidDevice = new HIDEventDevice(this, path);
+		m_devices.append(hidDevice);
+	}
+
 	m_poller = new HIDPoller(this);
-	m_refCount = 0;
+}
+
+HIDInput::~HIDInput()
+{
+	while (m_devices.isEmpty() == false)
+		delete m_devices.takeFirst();
 }
 
 /*****************************************************************************
@@ -46,54 +67,11 @@ void HIDInput::init()
 
 int HIDInput::open()
 {
-	/* Count the number of times open() has been called so that the devices
-	   are opened only once. This is basically reference counting. */
-	m_refCount++;
-	if (m_refCount > 1)
-		return 0;
-
-	QDir dir("/dev/input/");
-	QStringList nameFilters;
-	QStringList entries;
-	QStringList::iterator it;
-
-	nameFilters << "event*";
-	entries = dir.entryList(nameFilters, QDir::Files | QDir::System);
-	for (it = entries.begin(); it != entries.end(); ++it)
-	{
-		QString path;
-		HIDDevice* hidDevice;
-
-		path = dir.absolutePath() + QDir::separator() + *it;
-		hidDevice = new HIDEventDevice(this, path);
-		hidDevice->open();
-		m_devices.append(hidDevice);
-		m_poller->addDevice(hidDevice);
-	}
-
 	return 0;
 }
 
 int HIDInput::close()
 {
-	/* Count the number of times close() has been called so that the devices
-	   are closed only after the last user closes this plugin. This is
-	   basically reference counting. */
-	m_refCount--;
-	if (m_refCount > 0)
-		return 0;
-	Q_ASSERT(m_refCount == 0);
-
-	while (m_devices.isEmpty() == false)
-	{
-		HIDDevice* hidDevice = m_devices.takeFirst();
-		Q_ASSERT(hidDevice != NULL);
-
-		m_poller->removeDevice(hidDevice);
-		hidDevice->close();
-		delete hidDevice;
-	}
-
 	return 0;
 }
 
@@ -149,12 +127,8 @@ int HIDInput::configure()
 {
 	int r;
 	
-	open();
-
 	ConfigureHIDInput conf(NULL, this);
 	r = conf.exec();
-
-	close();
 
 	return r;
 }
@@ -199,7 +173,7 @@ QString HIDInput::infoText()
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
 	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\" SIZE=\"5\">");
+	info += QString("\" SIZE=\"4\">");
 	info += QString("Device");
 	info += QString("</FONT>");
 	info += QString("</TD>");
@@ -210,7 +184,7 @@ QString HIDInput::infoText()
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
 	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\" SIZE=\"5\">");
+	info += QString("\" SIZE=\"4\">");
 	info += QString("Name");
 	info += QString("</FONT>");
 	info += QString("</TD>");
@@ -221,13 +195,11 @@ QString HIDInput::infoText()
 	info += QString("\">");
 	info += QString("<FONT COLOR=\"");
 	info += QApplication::palette().color(QPalette::HighlightedText).name();
-	info += QString("\" SIZE=\"5\">");
-	info += QString("Mode");
+	info += QString("\" SIZE=\"4\">");
+	info += QString("Channels");
 	info += QString("</FONT>");
 	info += QString("</TD>");
 	info += QString("</TR>");
-
-	open();
 
 	/* Devices */
 	if (m_devices.count() == 0)
@@ -245,16 +217,45 @@ QString HIDInput::infoText()
 			info += it.next()->infoText();
 	}
 
-	close();
-
 	info += QString("</TABLE>");
 
 	return info;
 }
 
 /*****************************************************************************
+ * Device poller
+ *****************************************************************************/
+
+void HIDInput::addPollDevice(HIDDevice* device)
+{
+	Q_ASSERT(device != NULL);
+
+	m_poller->addDevice(device);
+	connect(device,
+	   SIGNAL(valueChanged(HIDDevice*,t_input_channel,t_input_value)),
+	   this,
+	   SLOT(slotValueChanged(HIDDevice*,t_input_channel,t_input_value)));
+}
+
+void HIDInput::removePollDevice(HIDDevice* device)
+{
+	Q_ASSERT(device != NULL);
+
+	m_poller->removeDevice(device);
+	disconnect(device,
+	   SIGNAL(valueChanged(HIDDevice*,t_input_channel,t_input_value)),
+	   this,
+	   SLOT(slotValueChanged(HIDDevice*,t_input_channel,t_input_value)));
+}
+
+/*****************************************************************************
  * Input data
  *****************************************************************************/
+
+void HIDInput::slotValueChanged(HIDDevice* device, t_input_channel channel,
+				t_input_value value)
+{
+}
 
 void HIDInput::feedBack(t_input /*input*/, t_input_channel /*channel*/,
 			t_input_value /*value*/)

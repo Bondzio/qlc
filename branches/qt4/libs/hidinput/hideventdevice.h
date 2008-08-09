@@ -78,7 +78,20 @@ public:
 	virtual ~HIDEventDevice();
 
 protected:
-	int m_refCount;
+	/**
+	 * Initialize the device, find out its capabilities etc.
+	 */
+	void init();
+
+	/**
+	 * Find out the HID device's capabilities
+	 */
+	void getCapabilities();
+
+	/**
+	 * Find out the capabilities of absolute axes
+	 */
+	void getAbsoluteAxesCapabilities();
 
 	/*********************************************************************
 	 * File operations
@@ -113,17 +126,6 @@ public:
 	void readEvent();
 
 protected:
-	/**
-	 * Find out the HID device's capabilities
-	 */
-	void getCapabilities();
-
-	/**
-	 * Find out the capabilities of absolute axes
-	 */
-	void getAbsoluteAxesCapabilities();
-
-protected:
 	struct input_id m_deviceInfo;
 	uint8_t m_eventTypes[(EV_MAX/8) + 1];
 	QList <HIDEventDeviceChannel*> m_channels;
@@ -141,9 +143,6 @@ public:
 	 * Set the device's enabled state (whether it sends events to QLC)
 	 */
 	void setEnabled(bool state);
-
-protected:
-	bool m_enabled;
 
 	/*********************************************************************
 	 * Device info

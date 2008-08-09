@@ -56,8 +56,10 @@ protected:
 	/*********************************************************************
 	 * Poller thread
 	 *********************************************************************/
-protected:
+public:
 	virtual void stop();
+
+protected:
 	virtual void run();
 
 protected:

@@ -1,5 +1,22 @@
 2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
 
+	* libs/common/qlcinplugin.h:
+	* libs/hidinput/configurehidinput.cpp:
+	* libs/hidinput/hiddevice.cpp:
+	* libs/hidinput/hiddevice.h:
+	* libs/hidinput/hideventdevice.cpp:
+	* libs/hidinput/hideventdevice.h:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* libs/hidinput/hidpoller.cpp:
+	* libs/hidinput/hidpoller.h:
+	* main/inputmap.cpp:
+
+	Fixed a crash with HID plugin during app shutdown.
+	Refactored input plugin construct/destruct scheme.
+	
+2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
+
 	* libs/hidinput/configurehidinput.cpp:
 	* libs/hidinput/configurehidinput.h:
 	* libs/hidinput/hiddevice.h:

@@ -31,7 +31,26 @@
 #include "hidinput.h"
 
 /*****************************************************************************
- * Initialization
+ * HIDInputEvent
+ *****************************************************************************/
+
+static const QEvent::Type _HIDInputEventType = static_cast<QEvent::Type>
+	(QEvent::registerEventType());
+
+HIDInputEvent::HIDInputEvent(t_input input, t_input_channel channel,
+			     t_input_value value) : QEvent(_HIDInputEventType)
+{
+	m_input = input;
+	m_channel = channel;
+	m_value = value;
+}
+
+HIDInputEvent::~HIDInputEvent()
+{
+}
+
+/*****************************************************************************
+ * HIDInput Initialization
  *****************************************************************************/
 
 void HIDInput::init()
@@ -40,16 +59,17 @@ void HIDInput::init()
 	QStringList nameFilters;
 	QStringList entries;
 	QStringList::iterator it;
-	HIDDevice* hidDevice;
+	HIDDevice* device;
 	QString path;
+	t_input line = 0;
 
 	nameFilters << "event*";
 	entries = dir.entryList(nameFilters, QDir::Files | QDir::System);
 	for (it = entries.begin(); it != entries.end(); ++it)
 	{
 		path = dir.absolutePath() + QDir::separator() + *it;
-		hidDevice = new HIDEventDevice(this, path);
-		m_devices.append(hidDevice);
+		device = new HIDEventDevice(this, line++, path);
+		m_devices.append(device);
 	}
 
 	m_poller = new HIDPoller(this);
@@ -59,21 +79,14 @@ HIDInput::~HIDInput()
 {
 	while (m_devices.isEmpty() == false)
 		delete m_devices.takeFirst();
+
+	m_poller->stop();
+	delete m_poller;
 }
 
 /*****************************************************************************
- * Open/close
+ * Devices
  *****************************************************************************/
-
-int HIDInput::open()
-{
-	return 0;
-}
-
-int HIDInput::close()
-{
-	return 0;
-}
 
 HIDDevice* HIDInput::device(const QString& path)
 {
@@ -97,6 +110,19 @@ HIDDevice* HIDInput::device(const unsigned int index)
 		return m_devices.at(index);
 }
 
+/*****************************************************************************
+ * Name
+ *****************************************************************************/
+
+QString HIDInput::name()
+{
+	return QString("HID Input");
+}
+
+/*****************************************************************************
+ * Inputs
+ *****************************************************************************/
+
 t_input HIDInput::inputs()
 {
 	return m_devices.count();
@@ -111,26 +137,13 @@ t_input_channel HIDInput::channels(t_input input)
 }
 
 /*****************************************************************************
- * Name
- *****************************************************************************/
-
-QString HIDInput::name()
-{
-	return QString("HID Input");
-}
-
-/*****************************************************************************
  * Configuration
  *****************************************************************************/
 
-int HIDInput::configure()
+void HIDInput::configure()
 {
-	int r;
-	
 	ConfigureHIDInput conf(NULL, this);
-	r = conf.exec();
-
-	return r;
+	conf.exec();
 }
 
 /*****************************************************************************
@@ -229,32 +242,27 @@ QString HIDInput::infoText()
 void HIDInput::addPollDevice(HIDDevice* device)
 {
 	Q_ASSERT(device != NULL);
-
 	m_poller->addDevice(device);
-	connect(device,
-	   SIGNAL(valueChanged(HIDDevice*,t_input_channel,t_input_value)),
-	   this,
-	   SLOT(slotValueChanged(HIDDevice*,t_input_channel,t_input_value)));
 }
 
 void HIDInput::removePollDevice(HIDDevice* device)
 {
 	Q_ASSERT(device != NULL);
-
 	m_poller->removeDevice(device);
-	disconnect(device,
-	   SIGNAL(valueChanged(HIDDevice*,t_input_channel,t_input_value)),
-	   this,
-	   SLOT(slotValueChanged(HIDDevice*,t_input_channel,t_input_value)));
 }
 
 /*****************************************************************************
  * Input data
  *****************************************************************************/
 
-void HIDInput::slotValueChanged(HIDDevice* device, t_input_channel channel,
-				t_input_value value)
+void HIDInput::customEvent(QEvent* event)
 {
+	if (event->type() == _HIDInputEventType)
+	{
+		HIDInputEvent* e = static_cast<HIDInputEvent*> (event);
+		qDebug() << e->m_input << e->m_channel << e->m_value;
+		event->accept();
+	}
 }
 
 void HIDInput::feedBack(t_input /*input*/, t_input_channel /*channel*/,

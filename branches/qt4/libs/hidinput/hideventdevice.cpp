@@ -22,6 +22,7 @@
 #include <linux/input.h>
 #include <errno.h>
 
+#include <QCoreApplication>
 #include <QObject>
 #include <QString>
 #include <QDebug>
@@ -38,8 +39,9 @@
  */
 #define test_bit(bit, array)    (array[bit / 8] & (1 << (bit % 8)))
 
-HIDEventDevice::HIDEventDevice(HIDInput* parent, const QString& path) 
-	: HIDDevice(parent, path)
+HIDEventDevice::HIDEventDevice(HIDInput* parent, t_input line, 
+			       const QString& path)
+	: HIDDevice(parent, line, path)
 {
 	init();
 }
@@ -156,6 +158,9 @@ void HIDEventDevice::getAbsoluteAxesCapabilities()
 			}
 			else
 			{
+				if (feats.maximum <= 0)
+					continue;
+
 				HIDEventDeviceChannel* channel;
 				channel = new HIDEventDeviceChannel(i, EV_ABS,
 								 feats.minimum,
@@ -216,14 +221,33 @@ t_input_channel HIDEventDevice::channels()
 void HIDEventDevice::readEvent()
 {
 	struct input_event ev;
-
+	
 	Q_ASSERT(m_file.isOpen() == true);
 
 	if (read(m_file.handle(), &ev, sizeof(struct input_event)) > 0)
 	{
-		printf("Event: time %ld.%06ld, type %d, code %d, value %d\n",
-		       ev.time.tv_sec, ev.time.tv_usec, ev.type,
-		       ev.code, ev.value);
+		if (ev.type != 0 && ev.code < m_channels.count())
+		{
+			HIDEventDeviceChannel* ch;
+			t_input_value val;
+
+			ch = m_channels.at(ev.code);
+			Q_ASSERT(ch != NULL);
+
+			/* Scale the device's native value range to
+			   0 - KInputValueMax:
+			   y = (x - from_min) * (to_max / from_range) */
+			val = (ev.value - ch->m_min) * 
+				(KInputValueMax / (ch->m_max - ch->m_min));
+			
+			/* Post the event to the global event loop so that
+			   we can switch context away from the poller thread
+			   and into the main application thread. This is
+			   caught in HIDInput::customEvent(). */
+			QCoreApplication::postEvent(
+				parent(),
+				new HIDInputEvent(m_line, ch->m_channel, val));
+		}
 	}
 }
 
@@ -240,7 +264,7 @@ void HIDEventDevice::setEnabled(bool state)
 {
 	Q_ASSERT(parent() != NULL);
 
-	if (m_file.isOpen() == state)
+	if (isEnabled() == state)
 		return;
 
 	if (state == true)

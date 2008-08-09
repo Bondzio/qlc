@@ -22,6 +22,7 @@
 #ifndef HIDINPUT_H
 #define HIDINPUT_H
 
+#include <QEvent>
 #include <QList>
 
 #include "common/qlcinplugin.h"
@@ -29,6 +30,22 @@
 
 #include "hiddevice.h"
 #include "hidpoller.h"
+
+/*****************************************************************************
+ * HIDInputEvent
+ *****************************************************************************/
+
+class HIDInputEvent : public QEvent
+{
+public:
+	HIDInputEvent(t_input input, t_input_channel channel,
+		      t_input_value value);
+	~HIDInputEvent();
+
+	t_input m_input;
+	t_input_channel m_channel;
+	t_input_value m_value;
+};
 
 /*****************************************************************************
  * HIDInput
@@ -47,16 +64,11 @@ class HIDInput : public QObject, public QLCInPlugin
 	 *********************************************************************/
 public:
 	void init();
-
-	virtual ~HIDInput();
+	~HIDInput();
 
 	/*********************************************************************
-	 * Open/close
+	 * Devices
 	 *********************************************************************/
-public:
-	int open();
-	int close();
-
 protected:
 	HIDDevice* device(const QString& path);
 	HIDDevice* device(const unsigned int index);
@@ -81,7 +93,7 @@ public:
 	 * Configuration
 	 *********************************************************************/
 public:
-	int configure();
+	void configure();
 
 	/*********************************************************************
 	 * Status
@@ -102,9 +114,8 @@ protected:
 	/*********************************************************************
 	 * Input data
 	 *********************************************************************/
-public slots:
-	void slotValueChanged(HIDDevice* device, t_input_channel channel,
-			      t_input_value value);
+protected:
+	void customEvent(QEvent* event);
 
 public:
 	void feedBack(t_input input, t_input_channel channel,

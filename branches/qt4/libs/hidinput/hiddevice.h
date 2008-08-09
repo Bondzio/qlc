@@ -41,7 +41,7 @@ class HIDDevice : public QObject
 	Q_OBJECT
 		
 public:
-	HIDDevice(HIDInput* parent, const QString& path);
+	HIDDevice(HIDInput* parent, t_input line, const QString& path);
 	virtual ~HIDDevice();
 
 	/*********************************************************************
@@ -78,6 +78,15 @@ public:
 
 protected:
 	QFile m_file;
+
+	/*********************************************************************
+	 * Line
+	 *********************************************************************/
+public:
+	t_input line() const { return m_line; }
+
+protected:
+	t_input m_line;
 
 	/*********************************************************************
 	 * Enabled status

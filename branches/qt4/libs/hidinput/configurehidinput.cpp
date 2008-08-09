@@ -66,7 +66,6 @@ ConfigureHIDInput::~ConfigureHIDInput()
 
 void ConfigureHIDInput::slotRefreshClicked()
 {
-	m_plugin->open();
 	refreshList();
 }
 

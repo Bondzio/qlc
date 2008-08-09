@@ -81,26 +81,26 @@ bool HIDPoller::addDevice(HIDDevice* device)
 
 bool HIDPoller::removeDevice(HIDDevice* device)
 {
+	bool r = false;
+
 	Q_ASSERT(device != NULL);
 
 	m_mutex.lock();
 
-	if (m_devices.contains(device->handle()) == false)
+	if (m_devices.remove(device->handle()) > 0)
 	{
-		m_mutex.unlock();
-		return false;
+		device->close();
+		m_changed = true;
+
+		if (m_devices.isEmpty() == true)
+			m_running = false;
+
+		r = true;
 	}
-
-	device->close();
-	m_devices.remove(device->handle());
-	m_changed = true;
-
-	if (m_devices.count() == 0)
-		m_running = false;
 
 	m_mutex.unlock();
 
-	return true;
+	return r;
 }
 
 /*****************************************************************************
@@ -123,8 +123,6 @@ void HIDPoller::run()
 
 	while (m_running == true)
 	{
-		m_mutex.lock();
-
 		/* If the list of polled devices has changed, reload all
 		   devices into the array of pollfd's */
 		if (m_changed == true)

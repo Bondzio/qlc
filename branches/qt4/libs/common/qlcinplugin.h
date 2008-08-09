@@ -34,7 +34,9 @@ class QLCInPlugin
 {
 public:
 	/**
-	 * Destroy the plugin
+	 * De-initialize the plugin. This is the last thing that is called
+	 * for the plugin so make sure nothing is lingering in the twilight
+	 * after this call.
 	 */
 	virtual ~QLCInPlugin() {}
 	
@@ -45,36 +47,10 @@ public:
 	 * this function for all plugins exactly once after loading, before
 	 * calling any other method from the plugin.
 	 *
-	 * This is a pure virtual function that must be implemented
-	 * in all plugins.
+	 * This is a pure virtual function that must be implemented in all
+	 * plugins.
 	 */
 	virtual void init() = 0;
-
-	/**
-	 * Open the plugin. InputMap calls open() whenever the plugin is used
-	 * by QLC to send/receive input data and when the plugin goes dormant,
-	 * InputMap calls close(). If you need to open() the plugin for
-	 * configuration or some other activity, you should implement reference
-	 * counting to ensure that used plugins won't get closed after the
-	 * configuration dialog is closed.
-	 *
-	 * This is a pure virtual function that must be implemented
-	 * in all plugins.
-	 */
-	virtual int open() = 0;
-
-	/**
-	 * Close the plugin. InputMap calls open() whenever the plugin is used
-	 * by QLC to send/receive input data and when the plugin goes dormant,
-	 * InputMap calls close(). If you need to open() the plugin for
-	 * configuration or some other activity, you should implement reference
-	 * counting to ensure that used plugins won't get closed after the
-	 * configuration dialog is closed.
-	 *
-	 * This is a pure virtual function that must be implemented
-	 * in all plugins.
-	 */
-	virtual int close() = 0;
 
 	/**
 	 * Invoke a configuration dialog for the plugin
@@ -82,7 +58,7 @@ public:
 	 * This is a pure virtual function that must be implemented
 	 * in all plugins.
 	 */
-	virtual int configure() = 0;
+	virtual void configure() = 0;
 
 	/**
 	 * Provide an information text to be displayed in the plugin manager

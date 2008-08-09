@@ -27,10 +27,12 @@
 #include "hiddevice.h"
 #include "hidinput.h"
 
-HIDDevice::HIDDevice(HIDInput* parent, const QString& path) : QObject(parent)
+HIDDevice::HIDDevice(HIDInput* parent, t_input line, const QString& path) 
+	: QObject(parent)
 {
 	Q_ASSERT(path.length() > 0);
 	m_file.setFileName(path);
+	m_line = line;
 }
 
 HIDDevice::~HIDDevice()

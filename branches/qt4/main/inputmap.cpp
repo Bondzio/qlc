@@ -49,7 +49,10 @@ InputMap::InputMap()
 InputMap::~InputMap()
 {
 	while (m_plugins.isEmpty() == false)
-		delete m_plugins.takeFirst();
+	{
+		QLCInPlugin* plugin = m_plugins.takeFirst();
+		delete plugin;
+	}
 }
 
 void InputMap::load()

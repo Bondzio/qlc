@@ -68,13 +68,14 @@ public:
 /*****************************************************************************
  * HIDEventDevice
  *****************************************************************************/
+class HIDEventDevice;
 
 class HIDEventDevice : public HIDDevice
 {
 	Q_OBJECT
 		
 public:
-	HIDEventDevice(HIDInput* parent, const QString& path);
+	HIDEventDevice(HIDInput* parent, t_input line, const QString& path);
 	virtual ~HIDEventDevice();
 
 protected:
@@ -156,12 +157,6 @@ public:
 	/*********************************************************************
 	 * Input data
 	 *********************************************************************/
-signals:
-	/**
-	 * Signal that is emitted when an input channel's value is changed
-	 */
-	void valueChanged(t_input_channel channel, t_input_value value);
-
 public:
 	/**
 	 * Send an input value back the HID device to move motorized sliders

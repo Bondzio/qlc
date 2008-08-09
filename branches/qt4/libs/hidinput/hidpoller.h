@@ -23,6 +23,8 @@
 #define HIDPOLLER_H
 
 #include <QThread>
+#include <QMutex>
+#include <QMap>
 
 class HIDDevice;
 class HIDInput;
@@ -47,9 +49,10 @@ public:
 	int deviceCount() const { return m_devices.count(); }
 
 protected:
+	QMap <int, HIDDevice*> m_devices;
 	bool m_changed;
-	QList <HIDDevice*> m_devices;
-
+	QMutex m_mutex;
+	
 	/*********************************************************************
 	 * Poller thread
 	 *********************************************************************/

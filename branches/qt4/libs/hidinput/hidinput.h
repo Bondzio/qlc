@@ -89,19 +89,8 @@ public:
 	QString infoText();
 
 	/*********************************************************************
-	 * Polled devices
+	 * Device poller
 	 *********************************************************************/
-public:
-	/**
-	 * Add a HID device to be polled for input events
-	 */
-	bool addPollDevice(HIDDevice* device);
-
-	/**
-	 * Remove a HID device from the list of polled devices
-	 */
-	bool removePollDevice(HIDDevice* device);
-
 protected:
 	HIDPoller* m_poller;
 

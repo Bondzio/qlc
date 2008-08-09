@@ -34,6 +34,37 @@
 
 class HIDInput;
 
+class HIDEventDeviceChannel
+{
+public:
+	HIDEventDeviceChannel(int channel, int type, int min, int max)
+	{
+		m_channel = channel;
+		m_type = type;
+		m_min = min;
+		m_max = max;
+	}
+
+	virtual ~HIDEventDeviceChannel() { }
+	
+	HIDEventDeviceChannel& operator=(const HIDEventDeviceChannel& channel)
+	{
+		if (this != &channel)
+		{
+			m_type = channel.m_type;
+			m_channel = channel.m_channel;
+			m_min = channel.m_min;
+			m_max = channel.m_max;
+		}
+		return *this;
+	}
+
+	int m_channel;
+	int m_type;
+	int m_min;
+	int m_max;
+};
+
 /*****************************************************************************
  * HIDEventDevice
  *****************************************************************************/
@@ -46,6 +77,9 @@ public:
 	HIDEventDevice(HIDInput* parent, const QString& path);
 	virtual ~HIDEventDevice();
 
+protected:
+	int m_refCount;
+
 	/*********************************************************************
 	 * File operations
 	 *********************************************************************/
@@ -57,11 +91,6 @@ public:
 	 * @return true if the file was opened RW/RO
 	 */
 	bool open();
-
-	/**
-	 * Find out the HID device's capabilities
-	 */
-	void getCapabilities();
 
 	/**
 	 * Close the HID device
@@ -78,9 +107,26 @@ public:
 	 */
 	t_input_channel channels();
 
+	/**
+	 * Read one event and emit it
+	 */
+	void readEvent();
+
+protected:
+	/**
+	 * Find out the HID device's capabilities
+	 */
+	void getCapabilities();
+
+	/**
+	 * Find out the capabilities of absolute axes
+	 */
+	void getAbsoluteAxesCapabilities();
+
 protected:
 	struct input_id m_deviceInfo;
 	uint8_t m_eventTypes[(EV_MAX/8) + 1];
+	QList <HIDEventDeviceChannel*> m_channels;
 
 	/*********************************************************************
 	 * Enabled status

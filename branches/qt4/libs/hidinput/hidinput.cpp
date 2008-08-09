@@ -22,7 +22,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QStringList>
-#include <iostream>
+#include <QDebug>
 #include <QDir>
 
 #include "configurehidinput.h"
@@ -36,6 +36,7 @@
 
 void HIDInput::init()
 {
+	m_poller = new HIDPoller(this);
 	m_refCount = 0;
 }
 
@@ -60,15 +61,14 @@ int HIDInput::open()
 	entries = dir.entryList(nameFilters, QDir::Files | QDir::System);
 	for (it = entries.begin(); it != entries.end(); ++it)
 	{
-		QString path = dir.absolutePath() + QDir::separator() + *it;
-		HIDDevice* hidDevice = device(path);
+		QString path;
+		HIDDevice* hidDevice;
 
-		if (hidDevice == NULL)
-		{
-			hidDevice = new HIDEventDevice(this, path);
-			hidDevice->open();
-			m_devices.append(hidDevice);
-		}
+		path = dir.absolutePath() + QDir::separator() + *it;
+		hidDevice = new HIDEventDevice(this, path);
+		hidDevice->open();
+		m_devices.append(hidDevice);
+		m_poller->addDevice(hidDevice);
 	}
 
 	return 0;
@@ -88,7 +88,8 @@ int HIDInput::close()
 	{
 		HIDDevice* hidDevice = m_devices.takeFirst();
 		Q_ASSERT(hidDevice != NULL);
-		
+
+		m_poller->removeDevice(hidDevice);
 		hidDevice->close();
 		delete hidDevice;
 	}
@@ -249,37 +250,6 @@ QString HIDInput::infoText()
 	info += QString("</TABLE>");
 
 	return info;
-}
-
-/*****************************************************************************
- * Polled devices
- *****************************************************************************/
-
-bool HIDInput::addPollDevice(HIDDevice* device)
-{
-	Q_ASSERT(device != NULL);
-
-	if (m_poller == NULL)
-		m_poller = new HIDPoller(this);
-
-	m_poller->addDevice(device);
-	return true;
-}
-
-bool HIDInput::removePollDevice(HIDDevice* device)
-{
-	if (m_poller == NULL)
-		return false;
-
-	m_poller->removeDevice(device);
-
-	if (m_poller->deviceCount() == 0)
-	{
-		delete m_poller;
-		m_poller = NULL;
-	}
-
-	return true;
 }
 
 /*****************************************************************************

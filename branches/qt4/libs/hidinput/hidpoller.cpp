@@ -19,11 +19,16 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMapIterator>
+#include <linux/input.h>
+#include <QDebug>
+#include <QMap>
+
 #include "hidpoller.h"
 #include "hidinput.h"
 #include "poll.h"
 
-#define KPollTimeout 5000
+#define KPollTimeout 1000
 
 /*****************************************************************************
  * Initialization
@@ -32,9 +37,7 @@
 HIDPoller::HIDPoller(HIDInput* parent) : QThread(parent)
 {
 	Q_ASSERT(parent != NULL);
-
-	m_running = true;
-	start();
+	m_running = false;
 }
 
 HIDPoller::~HIDPoller()
@@ -51,14 +54,27 @@ bool HIDPoller::addDevice(HIDDevice* device)
 {
 	Q_ASSERT(device != NULL);
 
-	if (m_devices.contains(device) == true)
+	m_mutex.lock();
+
+	if (m_devices.contains(device->handle()) == true)
+	{
+		m_mutex.unlock();
 		return false;
+	}
 
 	if (device->open() == true)
 	{
-		m_devices.append(device);
+		m_devices[device->handle()] = device;
 		m_changed = true;
 	}
+
+	if (m_running == false)
+	{
+		m_running = true;
+		start();
+	}
+
+	m_mutex.unlock();
 
 	return true;
 }
@@ -67,12 +83,22 @@ bool HIDPoller::removeDevice(HIDDevice* device)
 {
 	Q_ASSERT(device != NULL);
 
-	if (m_devices.contains(device) == false)
+	m_mutex.lock();
+
+	if (m_devices.contains(device->handle()) == false)
+	{
+		m_mutex.unlock();
 		return false;
+	}
 
 	device->close();
-	m_devices.removeAll(device);
+	m_devices.remove(device->handle());
 	m_changed = true;
+
+	if (m_devices.count() == 0)
+		m_running = false;
+
+	m_mutex.unlock();
 
 	return true;
 }
@@ -91,46 +117,67 @@ void HIDPoller::run()
 {
 	struct pollfd* fds = NULL;
 	HIDDevice* device;
+	int num = 0;
 	int r;
+	int i;
 
 	while (m_running == true)
 	{
+		m_mutex.lock();
+
 		/* If the list of polled devices has changed, reload all
 		   devices into the array of pollfd's */
 		if (m_changed == true)
 		{
-			delete [] fds;
-			fds = new struct pollfd[m_devices.count()];
-			memset(fds, 0, sizeof(struct pollfd) * m_devices.count());
-			
-			for (int i = 0; i < m_devices.count(); i++)
-			{
-				device = m_devices.at(i);
-				Q_ASSERT(device != NULL);
-				device->open();
+			if (fds != NULL)
+				delete [] fds;
 
-				fds[i].fd = device->handle();
+			num = m_devices.count();
+			fds = new struct pollfd[num];
+			memset(fds, 0, num);
+			i = 0;
+
+			QMapIterator<int, HIDDevice*> it(m_devices);
+			while (it.hasNext() == true)
+			{
+				it.next();
+				fds[i].fd = it.key();
 				fds[i].events = POLLIN;
+				i++;
 			}
 
 			m_changed = false;
 		}
 
-		r = poll(fds, m_devices.count(), KPollTimeout);
-		if (r == 0)
-		{
-			/* Plain timeout, continue polling */
-			continue;
-		}
-		else if (r < 0)
+		m_mutex.unlock();
+
+		r = poll(fds, num, KPollTimeout);
+		if (r < 0)
 		{
 			/* Error occurred */
-			perror("poll: ");
-			continue;
+			perror("poll");
 		}
-		else
+		else if (r != 0)
 		{
-			/* One or more polled descriptors produced an event */
+			m_mutex.lock();
+
+			/* If the device map has changed, we can't trust
+			   that any of the devices are valid. */
+			if (m_changed == false)
+			{
+				for (i = 0; i < num; i++)
+				{
+					if (fds[i].revents != 0)
+					{
+						device = m_devices[fds[i].fd];
+						Q_ASSERT(device != NULL);
+						
+						device->readEvent();
+					}
+				}
+			}
+
+			m_mutex.unlock();
 		}
 	}
 }

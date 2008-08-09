@@ -1,3 +1,15 @@
+2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* libs/hidinput/hiddevice.h:
+	* libs/hidinput/hideventdevice.cpp:
+	* libs/hidinput/hideventdevice.h:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* libs/hidinput/hidpoller.cpp:
+	* libs/hidinput/hidpoller.h:
+
+	Continued on the HID input plugin.
+	
 2008-08-08  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* main/chasereditor.cpp:

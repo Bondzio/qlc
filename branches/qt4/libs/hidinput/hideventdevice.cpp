@@ -22,9 +22,9 @@
 #include <linux/input.h>
 #include <errno.h>
 
-#include <iostream>
 #include <QObject>
 #include <QString>
+#include <QDebug>
 #include <QFile>
 
 #include "hideventdevice.h"
@@ -41,6 +41,7 @@
 HIDEventDevice::HIDEventDevice(HIDInput* parent, const QString& path) 
 	: HIDDevice(parent, path)
 {
+	m_refCount = 0;
 }
 
 HIDEventDevice::~HIDEventDevice()
@@ -56,31 +57,27 @@ bool HIDEventDevice::open()
 {
 	bool result = false;
 
-	if (m_file.isOpen() == true)
+	/* Count the number of times open() has been called so that the devices
+	   are opened only once. This is basically reference counting. */
+	m_refCount++;
+	if (m_refCount > 1)
 		return true;
 
-	std::cout << "**********************************************"
-		  << std::endl;
-	std::cout << "* Device file: " << m_file.fileName().toStdString()
-		  << std::endl;
+	qWarning() << "*******************************************************";
+	qWarning() << "Device file: " << m_file.fileName();
 
 	result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadWrite);
 	if (result == false)
 	{
-		std::cout << "Unable to open "
-			  << m_file.fileName().toStdString()
-			  << " in Read/Write mode: "
-			  << m_file.errorString().toStdString()
-			  << std::endl;
+		qWarning() << "Unable to open" << m_file.fileName()
+			   << "in Read/Write mode:" << m_file.errorString();
 		
 		result = m_file.open(QIODevice::Unbuffered | QIODevice::ReadOnly);
 		if (result == false)
 		{
-			std::cout << "Unable to open "
-				  << m_file.fileName().toStdString()
-				  << " in Read Only mode: "
-				  << m_file.errorString().toStdString()
-				  << std::endl;
+			qWarning() << "Unable to open" << m_file.fileName()
+				   << "in Read Only mode:"
+				   << m_file.errorString();
 		}
 	}
 
@@ -90,7 +87,7 @@ bool HIDEventDevice::open()
 		   Either way, these should be available. */
 
 		/* Device name */
-		char name[256] = "Unknown";
+		char name[128] = "Unknown";
 		if (ioctl(m_file.handle(), EVIOCGNAME(sizeof(name)), name) <= 0)
 		{
 			m_name = QString(strerror(errno));
@@ -99,8 +96,7 @@ bool HIDEventDevice::open()
 		else
 		{
 			m_name = QString(name);
-			std::cout << "* Device name:" << m_name.toStdString()
-				  << std::endl;
+			qDebug() << "Device name:" << m_name;
 		}
 
 		/* Device info */
@@ -118,52 +114,121 @@ bool HIDEventDevice::open()
 	return result;
 }
 
-void HIDEventDevice::getCapabilities()
-{
-	int i = 0;
-
-	std::cout << "* Supported event types:" << std::endl;
-
-	for (i = 0; i < EV_MAX; i++)
-	{
-		if (test_bit(i, m_eventTypes))
-		{
-			/* this means that the bit is set in the
-			   event types list */
-			QString s;
-			s.sprintf("0x%02x", i);
-			std::cout << "\tEvent type 0x%02x " << s.toStdString();
-			switch (i)
-			{
-			case EV_KEY:
-				std::cout << "\t (Keys or Buttons)" << std::endl;
-				break;
-			case EV_ABS:
-				std::cout << "\t (Absolute Axes)" << std::endl;
-				break;
-			case EV_LED:
-				std::cout << "\t (LEDs)" << std::endl;
-				break;
-			case EV_REP:
-				std::cout << "\t (Repeat)" << std::endl;
-				break;
-			default:
-				s.sprintf("0x%04hx", i);
-				std::cout << "\t (Unknown event type: "
-					  << s.toStdString() << std::endl;
-			}
-		}
-	}
-}
-
 void HIDEventDevice::close()
 {
+	/* Count the number of times close() has been called so that the devices
+	   are closed only after the last user closes this plugin. This is
+	   basically reference counting. */
+	m_refCount--;
+	if (m_refCount > 0)
+		return;
+	Q_ASSERT(m_refCount == 0);
+
+	while (m_channels.isEmpty() == false)
+		delete m_channels.takeFirst();
+
 	m_file.close();
 }
 
 QString HIDEventDevice::path() const
 {
 	return m_file.fileName();
+}
+
+t_input_channel HIDEventDevice::channels()
+{
+	return m_channels.count();
+}
+
+void HIDEventDevice::getCapabilities()
+{
+	QString s;
+
+	qDebug() << "Supported event types:";
+
+	for (int i = 0; i < EV_MAX; i++)
+	{
+		if (test_bit(i, m_eventTypes))
+		{
+			switch (i)
+			{
+			case EV_KEY:
+				qDebug() << "\tKeys or Buttons";
+				break;
+
+			case EV_ABS:
+				qDebug() << "\tAbsolute Axes";
+				getAbsoluteAxesCapabilities();
+				break;
+
+			case EV_LED:
+				qDebug() << "\tLEDs";
+				break;
+
+			case EV_REP:
+				qDebug() << "\tRepeat";
+				break;
+
+			default:
+				qDebug() << "\tUnknown event type: " << i;
+			}
+		}
+	}
+}
+
+void HIDEventDevice::getAbsoluteAxesCapabilities()
+{
+	uint8_t mask[ABS_MAX/8 + 1];
+	struct input_absinfo feats;
+	int r;
+	
+	memset(mask, 0, sizeof(mask));
+	r = ioctl(m_file.handle(), EVIOCGBIT(EV_ABS, sizeof(mask)), mask);
+	if (r < 0)
+	{
+		perror("evdev ioctl");
+		return;
+	}
+
+	for (int i = 0; i < ABS_MAX; i++)
+	{
+		if (test_bit(i, mask) != 0)
+		{
+			r = ioctl(m_file.handle(), EVIOCGABS(i), &feats);
+			if (r != 0)
+			{
+				perror("evdev EVIOCGABS ioctl");
+			}
+			else
+			{
+				HIDEventDeviceChannel* channel;
+				channel = new HIDEventDeviceChannel(i, EV_ABS,
+								 feats.minimum,
+								 feats.maximum);
+				m_channels.append(channel);
+
+				qDebug() << "\t\tChannel:" << i
+					 << "min:" << feats.minimum
+					 << "max:" << feats.maximum
+					 << "flatness:" << feats.flat
+					 << "fuzz:" << feats.fuzz;
+			}
+		}
+	}
+}
+
+void HIDEventDevice::readEvent()
+{
+	struct input_event ev;
+
+	Q_ASSERT(m_file.isOpen() == true);
+
+	if (read(m_file.handle(), &ev, sizeof(struct input_event)) > 0)
+	{
+		printf("Event: time %ld.%06ld, type %d, code %d, value %d\n",
+		       ev.time.tv_sec, ev.time.tv_usec, ev.type,
+		       ev.code, ev.value);
+	}
 }
 
 /*****************************************************************************
@@ -178,11 +243,12 @@ bool HIDEventDevice::isEnabled()
 void HIDEventDevice::setEnabled(bool state)
 {
 	Q_ASSERT(parent() != NULL);
-
+/*
 	if (state == true)
 		qobject_cast <HIDInput*> (parent())->addPollDevice(this);
 	else
 		qobject_cast <HIDInput*> (parent())->removePollDevice(this);
+*/
 }
 
 /*****************************************************************************
@@ -232,11 +298,6 @@ QString HIDEventDevice::infoText()
 	info += QString("</TR>");
 
 	return info;
-}
-
-t_input_channel HIDEventDevice::channels()
-{
-	return 0;
 }
 
 /*****************************************************************************

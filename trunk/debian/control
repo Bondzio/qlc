@@ -1,0 +1,20 @@
+Source: qlc
+Section: Other
+Priority: optional
+Maintainer: Heikki Junnila <hjunnila@users.sf.net>
+Build-Depends: debhelper (>= 4.0.0), libqt4-dev (>= 4.3.0)
+Standards-Version: 3.6.0
+
+Package: qlc
+Section: Other
+Architecture: i386
+Depends: ${shlib:Depends}
+Description: Software DMX lighting desk
+  Software DMX lighting desk
+
+Package: qlc-fixtures
+Section: Other
+Architecture: any
+Depends: qlc
+Description: Fixture definitions for Q Light Controller
+  Fixture definitions for Q Light Controller

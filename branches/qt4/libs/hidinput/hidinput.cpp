@@ -260,9 +260,22 @@ void HIDInput::customEvent(QEvent* event)
 	if (event->type() == _HIDInputEventType)
 	{
 		HIDInputEvent* e = static_cast<HIDInputEvent*> (event);
-		qDebug() << e->m_input << e->m_channel << e->m_value;
+		emit valueChanged(this, e->m_input, e->m_channel, e->m_value);
 		event->accept();
 	}
+}
+
+void HIDInput::connectInputData(QObject* listener)
+{
+	Q_ASSERT(listener != NULL);
+
+	qDebug() << "Connect" << listener;
+
+	connect(this, SIGNAL(valueChanged(QLCInPlugin*,t_input,t_input_channel,
+					  t_input_value)),
+		listener,
+		SLOT(slotValueChanged(QLCInPlugin*,t_input,t_input_channel,
+				      t_input_value)));
 }
 
 void HIDInput::feedBack(t_input /*input*/, t_input_channel /*channel*/,

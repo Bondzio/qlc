@@ -108,6 +108,7 @@ void InputMap::load()
 		{
 			plugin->init();
 			appendPlugin(plugin);
+			plugin->connectInputData(this);
 		}
 	}
 }
@@ -221,6 +222,16 @@ QLCInPlugin* InputMap::plugin(const QString& name)
 	}
 	
 	return NULL;
+}
+
+/*****************************************************************************
+ * Input data
+ *****************************************************************************/
+
+void InputMap::slotValueChanged(QLCInPlugin* plugin, t_input input,
+				t_input_channel channel, t_input_value value)
+{
+	qDebug() << plugin->name() << input << channel << value;
 }
 
 /*****************************************************************************

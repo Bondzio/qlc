@@ -117,7 +117,13 @@ protected:
 protected:
 	void customEvent(QEvent* event);
 
+signals:
+	void valueChanged(QLCInPlugin* plugin, t_input line,
+			  t_input_channel channel, t_input_value value);
+
 public:
+	void connectInputData(QObject* listener);
+
 	void feedBack(t_input input, t_input_channel channel,
 		      t_input_value value);
 };

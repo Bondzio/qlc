@@ -22,7 +22,7 @@
 #include <linux/input.h>
 #include <errno.h>
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QObject>
 #include <QString>
 #include <QDebug>
@@ -239,12 +239,12 @@ void HIDEventDevice::readEvent()
 			   y = (x - from_min) * (to_max / from_range) */
 			val = (ev.value - ch->m_min) * 
 				(KInputValueMax / (ch->m_max - ch->m_min));
-			
+
 			/* Post the event to the global event loop so that
 			   we can switch context away from the poller thread
 			   and into the main application thread. This is
 			   caught in HIDInput::customEvent(). */
-			QCoreApplication::postEvent(
+			QApplication::postEvent(
 				parent(),
 				new HIDInputEvent(m_line, ch->m_channel, val));
 		}

@@ -97,6 +97,33 @@ public:
 	virtual t_input_channel channels(t_input input) = 0;
 
 	/*********************************************************************
+	 * Input data listener
+	 *********************************************************************/
+public:
+	/**
+	 * Normally, if QLCInPlugin were a QObject, one would just define a
+	 * signal to QLCInPlugin that is emitted when input data is available.
+	 * It seems, however, that plugins' base interface classes cannot be
+	 * QObjects, so the basic signal-slot approach cannot be used.
+	 *
+	 * Each input plugin implementation must:
+	 *    1. Inherit QObject and QLCInPlugin
+	 *    2. Re-implement this method and connect their plugin's signal:
+	 *
+	 *         valueChanged(QLCInPlugin* plugin, t_input line,
+	 *                      t_input_channel ch, t_input_value val);
+	 *
+	 * to the listener object's slot:
+	 *
+	 *         slotValueChanged(QLCInPlugin* plugin, t_input line,
+	 *                          t_input_channel ch, t_input_value val);
+	 *
+	 * With this approach, input plugins can use the signal-slot mechanism
+	 * just as if QLCInPlugin inherited QObject directly.
+	 */
+	virtual void connectInputData(QObject* listener) = 0;
+
+	/*********************************************************************
 	 * Feedback
 	 *********************************************************************/
 public:
@@ -110,20 +137,6 @@ public:
 	 */
 	virtual void feedBack(t_input input, t_input_channel channel,
 			      t_input_value value) = 0;
-#if 0
-signals:
-	/**
-	 * Signal a value change in an input's channel. This is THE signal that
-	 * sends input values to QLC components.
-	 *
-	 * @param input An input line whose channel's value has changed
-	 * @param channel A channel whose value has changed
-	 * @param value The changed value
-	 */
-	void valueChanged(t_input input,
-			  t_input_channel channel,
-			  t_input_value value);
-#endif
 };
 
 Q_DECLARE_INTERFACE(QLCInPlugin, "QLCInPlugin")

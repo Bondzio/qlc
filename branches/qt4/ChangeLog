@@ -1,3 +1,14 @@
+2008-08-10  Heikki Junnila  <hjunnila@users.sf.net>
+
+	* libs/common/qlcinplugin.h:
+	* libs/hidinput/hideventdevice.cpp:
+	* libs/hidinput/hidinput.cpp:
+	* libs/hidinput/hidinput.h:
+	* main/inputmap.cpp:
+	* main/inputmap.h:
+
+	Created route for data from input plugins to input map.
+
 2008-08-09  Heikki Junnila  <hjunnila@users.sf.net>
 
 	* libs/common/qlcinplugin.h:

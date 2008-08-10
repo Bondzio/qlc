@@ -109,6 +109,14 @@ protected:
 	/** List containing all available input plugins */
 	QList <QLCInPlugin*> m_plugins;
 
+
+	/*********************************************************************
+	 * Input data
+	 *********************************************************************/
+public slots:
+	void slotValueChanged(QLCInPlugin* plugin, t_input input,
+			      t_input_channel channel, t_input_value value);
+
 	/*********************************************************************
 	 * Defaults
 	 *********************************************************************/

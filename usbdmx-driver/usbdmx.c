@@ -401,6 +401,7 @@ static ssize_t usbdmx_write(struct file *file, const char *buffer,
 			   dmx->memory,
 			   USB_DIR_OUT | USB_TYPE_VENDOR, dmx->blocking, 
 			   dmx->offset, buf, count, TIMEOUT);
+  kfree(buf);
   if(result != count && result != -ETIMEDOUT)
     err("usbdmx_write: finished with result: %i", result);
   

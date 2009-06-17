@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=QLC Fixture Editor
+GenericName=Edit fixtures
+GenericName[de]=Lichtgeräte bearbeiten
+GenericName[fi]=Muokkaa valaisimia
+Exec=qlc-fixtureeditor
+Icon=qlc-fixtureeditor
+Categories=Lighting;Art;Qt

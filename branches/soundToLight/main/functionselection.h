@@ -59,7 +59,7 @@ public:
 	FunctionSelection(QWidget* parent,
 			  bool multiple,
 			  t_function_id disableFunction = KNoID,
-			  int filter = Function::Scene | Function::Chaser |
+			  int filter = Function::Scene | Function::Chaser |Function::Shuffle |
 				       Function::EFX | Function::Collection,
 			  bool constFilter = false);
 
@@ -87,6 +87,7 @@ protected:
 	 *********************************************************************/
 protected slots:
 	void slotNewScene();
+	void slotNewShuffle();
 	void slotNewChaser();
 	void slotNewEFX();
 	void slotNewCollection();
@@ -99,6 +100,7 @@ protected:
 	QToolBar* m_toolbar;
 	QAction* m_addSceneAction;
 	QAction* m_addChaserAction;
+	QAction* m_addShuffleAction;
 	QAction* m_addEFXAction;
 	QAction* m_addCollectionAction;
 
@@ -138,6 +140,7 @@ protected slots:
 
 	void slotCollectionChecked(bool state);
 	void slotEFXChecked(bool state);
+	void slotShuffleChecked(bool state);
 	void slotChaserChecked(bool state);
 	void slotSceneChecked(bool state);
 

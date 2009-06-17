@@ -40,11 +40,13 @@
 #include "collectioneditor.h"
 #include "functionmanager.h"
 #include "chasereditor.h"
+#include "shuffleeditor.h"
 #include "sceneeditor.h"
 #include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
 #include "chaser.h"
+#include "shuffle.h"
 #include "scene.h"
 #include "app.h"
 #include "doc.h"
@@ -168,6 +170,12 @@ void FunctionManager::initActions()
 	connect(m_addChaserAction, SIGNAL(triggered(bool)),
 		this, SLOT(slotAddChaser()));
 
+	m_addShuffleAction = new QAction(QIcon(":/chaser.png"),
+					tr("New shuff&le"), this);
+	m_addShuffleAction->setShortcut(QKeySequence("CTRL+L"));
+	connect(m_addShuffleAction, SIGNAL(triggered(bool)),
+		this, SLOT(slotAddShuffle()));
+
 	m_addCollectionAction = new QAction(QIcon(":/collection.png"),
 					    tr("New c&ollection"), this);
 	m_addCollectionAction->setShortcut(QKeySequence("CTRL+O"));
@@ -217,6 +225,7 @@ void FunctionManager::initMenu()
 	m_addMenu->setTitle(tr("&Add"));
 	m_addMenu->addAction(m_addSceneAction);
 	m_addMenu->addAction(m_addChaserAction);
+	m_addMenu->addAction(m_addShuffleAction);
 	m_addMenu->addAction(m_addEFXAction);
 	m_addMenu->addAction(m_addCollectionAction);
 
@@ -269,6 +278,7 @@ void FunctionManager::initToolbar()
 	layout()->addWidget(m_toolbar);
 	m_toolbar->addAction(m_addSceneAction);
 	m_toolbar->addAction(m_addChaserAction);
+	m_toolbar->addAction(m_addShuffleAction);
 	m_toolbar->addAction(m_addEFXAction);
 	m_toolbar->addAction(m_addCollectionAction);
 	m_toolbar->addSeparator();
@@ -354,6 +364,26 @@ void FunctionManager::slotAddScene()
 void FunctionManager::slotAddChaser()
 {
 	Function* f = new Chaser(_app->doc());
+	if (_app->doc()->addFunction(f) == true)
+	{
+		addFunction(f);
+	}
+	else if (_app->doc()->functions() >= KFunctionArraySize)
+	{
+		QMessageBox::critical(this, tr("Too many functions"),
+			tr("You can't create more than %1 functions.")
+			.arg(KFunctionArraySize));
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("Function creation failed"),
+			tr("Unable to create new function."));
+	}
+}
+
+void FunctionManager::slotAddShuffle()
+{
+	Function* f = new Shuffle(_app->doc());
 	if (_app->doc()->addFunction(f) == true)
 	{
 		addFunction(f);
@@ -672,6 +702,11 @@ int FunctionManager::editFunction(Function* function)
 	else if (function->type() == Function::Chaser)
 	{
 		ChaserEditor editor(this, qobject_cast<Chaser*> (function));
+		result = editor.exec();
+	}
+	else if (function->type() == Function::Shuffle)
+	{
+		ShuffleEditor editor(this, qobject_cast<Shuffle*> (function));
 		result = editor.exec();
 	}
 	else if (function->type() == Function::Collection)

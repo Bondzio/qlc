@@ -28,12 +28,14 @@
 #include "functionselection.h"
 #include "collectioneditor.h"
 #include "chasereditor.h"
+#include "shuffleeditor.h"
 #include "sceneeditor.h"
 #include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
+#include "shuffle.h"
 #include "scene.h"
 #include "efx.h"
 #include "app.h"
@@ -59,6 +61,7 @@ FunctionSelection::FunctionSelection(QWidget* parent,
 	m_toolbar = NULL;
 	m_addSceneAction = NULL;
 	m_addChaserAction = NULL;
+	m_addShuffleAction = NULL;
 	m_addEFXAction = NULL;
 	m_addCollectionAction = NULL;
 
@@ -83,6 +86,11 @@ FunctionSelection::FunctionSelection(QWidget* parent,
 	connect(m_chaserCheck, SIGNAL(toggled(bool)),
 		this, SLOT(slotChaserChecked(bool)));
 
+	m_shuffleCheck->setChecked(m_filter & Function::Shuffle);
+	m_addShuffleAction->setEnabled(m_filter & Function::Shuffle);
+	connect(m_shuffleCheck, SIGNAL(toggled(bool)),
+		this, SLOT(slotShuffleChecked(bool)));
+
 	m_efxCheck->setChecked(m_filter & Function::EFX);
 	m_addEFXAction->setEnabled(m_filter & Function::EFX);
 	connect(m_efxCheck, SIGNAL(toggled(bool)),
@@ -96,6 +104,7 @@ FunctionSelection::FunctionSelection(QWidget* parent,
 	if (constFilter == true)
 	{
 		m_sceneCheck->setEnabled(false);
+		m_shuffleCheck->setEnabled(false);
 		m_chaserCheck->setEnabled(false);
 		m_efxCheck->setEnabled(false);
 		m_collectionCheck->setEnabled(false);
@@ -132,6 +141,8 @@ void FunctionSelection::initToolBar()
 			tr("New Scene"), this, SLOT(slotNewScene()));
 	m_addChaserAction = m_toolbar->addAction(QIcon(":/chaser.png"),
 			tr("New Chaser"), this, SLOT(slotNewChaser()));
+	m_addShuffleAction = m_toolbar->addAction(QIcon(":/chaser.png"),
+			tr("New Shuffle"), this, SLOT(slotNewShuffle()));
 	m_addEFXAction = m_toolbar->addAction(QIcon(":/efx.png"),
 			tr("New EFX"), this, SLOT(slotNewEFX()));
 	m_addCollectionAction = m_toolbar->addAction(QIcon(":/collection.png"),
@@ -153,6 +164,17 @@ void FunctionSelection::slotNewChaser()
 {
 	Function* function = new Chaser(_app->doc());
 	function->setName(tr("New Chaser"));
+
+	if (_app->doc()->addFunction(function) == true)
+		addFunction(function);
+	else
+		addFunctionErrorMessage();
+}
+
+void FunctionSelection::slotNewShuffle()
+{
+	Function* function = new Shuffle(_app->doc());
+	function->setName(tr("New Shuffle"));
 
 	if (_app->doc()->addFunction(function) == true)
 		addFunction(function);
@@ -310,6 +332,16 @@ void FunctionSelection::slotChaserChecked(bool state)
 	refillTree();
 }
 
+void FunctionSelection::slotShuffleChecked(bool state)
+{
+	if (state == true)
+		m_filter = (m_filter | Function::Shuffle);
+	else
+		m_filter = (m_filter & ~Function::Shuffle);
+	m_addShuffleAction->setEnabled(state);
+	refillTree();
+}
+
 void FunctionSelection::slotEFXChecked(bool state)
 {
 	if (state == true)
@@ -353,6 +385,11 @@ int FunctionSelection::editFunction(Function* function)
 	else if (function->type() == Function::Chaser)
 	{
 		ChaserEditor editor(this, qobject_cast<Chaser*> (function));
+		result = editor.exec();
+	}
+	else if (function->type() == Function::Shuffle)
+	{
+		ShuffleEditor editor(this, qobject_cast<Shuffle*> (function));
 		result = editor.exec();
 	}
 	else if (function->type() == Function::Collection)

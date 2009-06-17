@@ -114,6 +114,7 @@ protected slots:
 
 	void slotAddScene();
 	void slotAddChaser();
+	void slotAddShuffle();
 	void slotAddCollection();
 	void slotAddEFX();
 
@@ -134,6 +135,7 @@ protected:
 
 	QAction* m_addSceneAction;
 	QAction* m_addChaserAction;
+	QAction* m_addShuffleAction;
 	QAction* m_addCollectionAction;
 	QAction* m_addEFXAction;
 

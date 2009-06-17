@@ -32,6 +32,7 @@
 #include "collection.h"
 #include "function.h"
 #include "chaser.h"
+#include "shuffle.h"
 #include "scene.h"
 #include "efx.h"
 #include "bus.h"
@@ -39,6 +40,7 @@
 
 const QString KSceneString      (      "Scene" );
 const QString KChaserString     (     "Chaser" );
+const QString KShuffleString     (    "Shuffle" );
 const QString KEFXString        (        "EFX" );
 const QString KCollectionString ( "Collection" );
 const QString KUndefinedString  (  "Undefined" );
@@ -125,6 +127,8 @@ QString Function::typeToString(const Type type)
 		return KSceneString;
 	case Chaser:
 		return KChaserString;
+	case Shuffle:
+		return KShuffleString;
 	case EFX:
 		return KEFXString;
 	case Collection:
@@ -141,6 +145,8 @@ Function::Type Function::stringToType(QString string)
 		return Scene;
 	else if (string == KChaserString)
 		return Chaser;
+	else if (string == KShuffleString)
+		return Shuffle;
 	else if (string == KEFXString)
 		return EFX;
 	else if (string == KCollectionString)
@@ -156,6 +162,8 @@ QIcon Function::icon() const
 		case Scene:
 			return QIcon(":/scene.png");
 		case Chaser:
+			return QIcon(":/chaser.png");
+		case Shuffle:
 			return QIcon(":/chaser.png");
 		case EFX:
 			return QIcon(":/efx.png");
@@ -298,6 +306,8 @@ void Function::loader(const QDomElement* root, Doc* doc)
 	        function = new class Scene(doc);
 	else if (type == Function::Chaser)
 	        function = new class Chaser(doc);
+	else if (type == Function::Shuffle)
+	        function = new class Shuffle(doc);
 	else if (type == Function::Collection)
 		function = new class Collection(doc);
 	else if (type == Function::EFX)

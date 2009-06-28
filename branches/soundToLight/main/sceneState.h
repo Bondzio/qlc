@@ -21,6 +21,8 @@ public:
 	virtual void start();
 	virtual void stop();
 
+	virtual int baseWeight();
+
 	t_function_id m_sceneId;
 };
 

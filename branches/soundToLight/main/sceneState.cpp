@@ -34,3 +34,6 @@ void SceneState::stop() {
 	function->stop(_app->masterTimer());
 }
 
+int SceneState::baseWeight() {
+	return 1;
+}

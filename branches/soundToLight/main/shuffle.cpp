@@ -1,4 +1,4 @@
-/*
+	/*
   Q Light Controller
   shuffle.cpp
 
@@ -32,6 +32,7 @@
 #include "doc.h"
 #include "bus.h"
 
+#include "blackoutState.h"
 #include "sceneState.h"
 
 /*****************************************************************************
@@ -61,7 +62,8 @@ Shuffle::Shuffle(QObject* parent) : Function(parent)
 	}
 
 	//always add a blackout state to the start!
-	m_steps.append(new BlackoutState());
+	BlackoutState *b = new BlackoutState();
+	m_steps.append(b);
 }
 
 Shuffle::~Shuffle()
@@ -232,6 +234,8 @@ bool Shuffle::loadXML(const QDomElement* root)
 	QDomNode node;
 	QDomElement tag;
 
+	m_steps.clear();
+
 	Q_ASSERT(root != NULL);
 
 	if (root->tagName() != KXMLQLCFunction)
@@ -283,7 +287,8 @@ bool Shuffle::loadXML(const QDomElement* root)
 
 
 	//always add a blackout state to the end!
-	m_steps.append(new BlackoutState());
+	BlackoutState *b = new BlackoutState();
+	m_steps.append(b);
 
 	return true;
 }
@@ -374,7 +379,24 @@ bool Shuffle::write(QByteArray* universes)
 
 void Shuffle::nextStep()
 {
-	m_runTimePosition = rand() % m_steps.size();
+	int totalWeight = 0;
+
+	QListIterator <State *> it(m_steps);
+	while (it.hasNext() == true) {
+		State *state = it.next();
+		totalWeight += state->baseWeight();
+	}
+
+	int randNo = rand() % totalWeight;
+
+	for (int i = 0; i < m_steps.size(); i++) {
+		State *state = m_steps[i];
+		randNo -= state->baseWeight();
+		if (randNo < 0) {
+			m_runTimePosition = i;
+			break;
+		}
+	}
 }
 
 void Shuffle::startMemberAt(int index)
@@ -382,7 +404,7 @@ void Shuffle::startMemberAt(int index)
 	State* state;
 
 	state = m_steps.at(index);
-	Q_ASSERT(fid != KNoID);
+	Q_ASSERT(index != KNoID);
 
 	state->start();
 }
@@ -392,7 +414,7 @@ void Shuffle::stopMemberAt(int index)
 	State* state;
 
 	state = m_steps.at(index);
-	Q_ASSERT(fid != KNoID);
+	Q_ASSERT(index != KNoID);
 
 	//TODO
 	state->stop();

@@ -34,6 +34,8 @@
 
 #include "blackoutState.h"
 #include "sceneState.h"
+#include "stateFilter.h"
+#include "goboFilter.h"
 
 /*****************************************************************************
  * Initialization
@@ -64,6 +66,12 @@ Shuffle::Shuffle(QObject* parent) : Function(parent)
 	//always add a blackout state to the start!
 	BlackoutState *b = new BlackoutState();
 	m_steps.append(b);
+
+	//setup m_filter
+	QList<StateFilter *> *foo;
+	foo = new QList<StateFilter *>();
+	m_filters = *foo;
+	m_filters.append(new GoboFilter());
 }
 
 Shuffle::~Shuffle()
@@ -381,17 +389,27 @@ void Shuffle::nextStep()
 {
 	int totalWeight = 0;
 
+	QList<float> weights;
+
 	QListIterator <State *> it(m_steps);
 	while (it.hasNext() == true) {
 		State *state = it.next();
-		totalWeight += state->baseWeight();
+		float weight = state->baseWeight();
+		totalWeight += weight;
+
+		QListIterator <StateFilter *> filterIt(m_filters);
+		while (filterIt.hasNext() == true) {
+			StateFilter* filter = filterIt.next();
+			weight *= filter->weightModifier(state);
+		}
+		weights.append(weight);
 	}
 
 	int randNo = rand() % totalWeight;
 
-	for (int i = 0; i < m_steps.size(); i++) {
-		State *state = m_steps[i];
-		randNo -= state->baseWeight();
+	for (int i = 0; i < weights.size(); i++) {
+		float weight = weights[i];
+		randNo -= weight;
 		if (randNo < 0) {
 			m_runTimePosition = i;
 			break;

@@ -16,7 +16,7 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 
-	virtual int baseWeight() = 0;
+	virtual float baseWeight() = 0;
 };
 
 #endif /* STATE_H_ */

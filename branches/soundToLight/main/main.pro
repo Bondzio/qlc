@@ -40,6 +40,8 @@ HEADERS += blackoutState.h \
     shuffle.h \
     sceneState.h \
     state.h \
+    stateFilter.h \
+    goboFilter.h \
     aboutbox.h \
     addfixture.h \
     app.h \
@@ -127,6 +129,8 @@ SOURCES += blackoutState.cpp \
     shuffle.cpp \
     sceneState.cpp \
     state.cpp \
+    stateFilter.cpp \
+    goboFilter.cpp \
     aboutbox.cpp \
     addfixture.cpp \
     app.cpp \

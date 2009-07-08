@@ -29,6 +29,7 @@
 
 #include "function.h"
 #include "state.h"
+#include "stateFilter.h"
 
 class QFile;
 class QString;
@@ -85,6 +86,7 @@ public:
 
 protected:
 	QList <State *> m_steps;
+	QList <StateFilter *> m_filters;
 
 	/*********************************************************************
 	 * Edit

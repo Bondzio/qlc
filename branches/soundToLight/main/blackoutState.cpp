@@ -30,6 +30,6 @@ void BlackoutState::stop() {
 	_app->outputMap()->setBlackout(false);
 }
 
-int BlackoutState::baseWeight() {
-	return 10;
+float BlackoutState::baseWeight() {
+	return 10.0;
 }

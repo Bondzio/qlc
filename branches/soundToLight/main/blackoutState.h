@@ -18,7 +18,7 @@ public:
 	virtual void start();
 	virtual void stop();
 
-	virtual int baseWeight();
+	virtual float baseWeight();
 };
 
 #endif /* BLACKOUTSTATE_H_ */

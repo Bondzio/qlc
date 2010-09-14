@@ -1,0 +1,209 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>UI_DeviceProperties</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>UI_DeviceProperties</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>265</width>
+            <height>127</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Device Properties</string>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout1</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>m_deviceNameLabel</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>70</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>70</width>
+                            <height>32767</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Name</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>m_deviceNameEdit</cstring>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Device's name</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout5</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>m_addressLabel</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>70</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>70</width>
+                            <height>32767</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Address</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>m_addressSpin</cstring>
+                    </property>
+                    <property name="maxValue">
+                        <number>512</number>
+                    </property>
+                    <property name="minValue">
+                        <number>1</number>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Device's DMX address</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_dipButton</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>DIP</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Select the address with DIP switches</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout7</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer1</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>40</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_ok</cstring>
+                    </property>
+                    <property name="text">
+                        <string>OK</string>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Accept changes and close</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>m_cancel</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Cancel</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Reject changes and close</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<connections>
+    <connection>
+        <sender>m_cancel</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_DeviceProperties</receiver>
+        <slot>reject()</slot>
+    </connection>
+    <connection>
+        <sender>m_dipButton</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_DeviceProperties</receiver>
+        <slot>slotDIPClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_DeviceProperties</receiver>
+        <slot>slotOKClicked()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>m_deviceNameEdit</tabstop>
+    <tabstop>m_addressSpin</tabstop>
+    <tabstop>m_dipButton</tabstop>
+    <tabstop>m_ok</tabstop>
+    <tabstop>m_cancel</tabstop>
+</tabstops>
+<slots>
+    <slot>slotDIPClicked()</slot>
+    <slot>slotOKClicked()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

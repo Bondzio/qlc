@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+  <HEAD>
+    <LINK REL="stylesheet" TYPE="text/css" HREF="qlc.css">
+      <TITLE>Compiling QLC</TITLE>
+  </HEAD>
+  
+  <BODY>
+    <TABLE CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+      <TR>
+	<TD ALIGN="left">
+	  <IMG SRC="pics/qlc-logo.jpg" ALIGN="absmiddle" ALT="Q Light Controller">
+	</TD>
+	<TD ALIGN="right">
+	  <A HREF="index.html" CLASS="link">QLC Documentation</A>
+	  <BR>
+	    <A HREF="http://qlc.sourceforge.net" CLASS="link">QLC Homepage</A>
+	    <BR>
+	      <A HREF="http://www.sourceforge.net/projects/qlc" CLASS="link">QLC at SourceForge</A>
+	      <BR>
+	</TD>
+      </TR>
+    </TABLE>
+    
+    <TABLE CELLSPACING="1" CELLPADDING="0" WIDTH="100%">
+      <TR>
+	<TD CLASS="headertd" WIDTH="100%">Compiling QLC</TD>
+      </TR>
+    </TABLE>
+    
+    <P CLASS="normal">
+      This document discusses issues related to compiling Q Light Controller 2
+      from source files. It is assumed that the user is installing QLC with the default
+      settings.
+    </P>
+    
+    <H3>Directory structure</H3>
+    <P CLASS="normal">
+      QLC2 source distribution is divided in directories in order to keep
+      different file types in their own directory. <B>qlc2</B> is the topmost
+      directory that houses all the directories that are
+      included in QLC source distribution.
+    </P>
+    
+    <P CLASS="normal">
+      <PRE>
+	qlc2/
+	    dce/
+	        src/            <-- device class editor sources
+	    libs/
+	        common/         <-- common helper classes
+                dmx4linuxout/   <-- DMX4Linux output plugin
+                joystick/       <-- Joystick input plugin (not supported yet)
+                midiout/        <-- MIDI-based output plugin
+	    main/
+		src/		<-- main application sources
+  	    xpm/                <-- user interface icons, background images etc.
+	    devices/            <-- device class definitions
+	    docs/               <-- these documentation files
+	</PRE>
+    </P>
+
+    <H3>Configuration</H3>
+    <P CLASS="normal">
+      In most cases, qlc doesn't require any configuration if you have
+      all the necessary libraries installed on your Linux system. The most
+      common cases of unsuccessful compile operations are missing or
+      incorrect library or header directories. Basically, running
+      <B>./configure</B> from the <B>qlc2/</B> main directory, sets all
+      library paths correctly -- provided that you have installed them to
+      your system.
+    </P>
+    
+    <H3>Compiling</H3>
+    <P CLASS="normal">
+      Now, that everything should be in order, go to qlc2/ and compile QLC with:
+
+      <PRE>
+	make
+      </PRE>
+
+      To install QLC (to <B>/usr/local/qlc</B>), type:
+
+      <PRE>
+	make install
+      </PRE>
+
+      To install icons to KDE & GNOME application menus, type:
+
+      <PRE>
+        make menuitems
+      </PRE>
+
+    </P>
+    
+    <HR>
+      <A HREF="mailto:hjunnila@users.sourceforge.net" CLASS="link">Heikki Junnila</A>
+  </BODY>
+</HTML>

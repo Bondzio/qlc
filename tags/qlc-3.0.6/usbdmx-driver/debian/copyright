@@ -1,0 +1,24 @@
+This package was debianized by Heikki Junnila <hjunnila@users.sf.net> on
+Tue, 24 Jun 2008 13:31:36 +0300.
+
+It was downloaded from http://www.peperoni-light.de/
+
+Upstream Author(s): 
+
+    Jan Menzel <menzel@peperoni-light.de>
+    Dirk Bertelmann <bertelmann@peperoni-light.de>
+
+Copyright: 
+
+    Jan Menzel <menzel@peperoni-light.de>
+    Dirk Bertelmann <bertelmann@peperoni-light.de>
+
+License:
+
+    <Put the license of the package here indented by 4 spaces>
+
+The Debian packaging is (C) 2008, Heikki Junnila <hjunnila@users.sf.net> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

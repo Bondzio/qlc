@@ -1,0 +1,3 @@
+# Peperoni Rodin products
+KERNEL=="usbdmx[0-16]*", MODE="0666"
+

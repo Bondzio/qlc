@@ -1,0 +1,272 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>UI_ConfigureMidiOut</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>UI_ConfigureMidiOut</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>269</width>
+            <height>305</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Configure Midi Output Plugin</string>
+    </property>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>m_deviceGroup</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>250</width>
+                <height>60</height>
+            </rect>
+        </property>
+        <property name="frameShape">
+            <enum>Box</enum>
+        </property>
+        <property name="frameShadow">
+            <enum>Sunken</enum>
+        </property>
+        <property name="title">
+            <string>Device</string>
+        </property>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>m_deviceEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>230</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>The device file that is the interface for DMX4Linux. For example /dev/dmx.</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>m_statusGroup</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>80</y>
+                <width>250</width>
+                <height>60</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Status</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>m_statusLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>140</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="frameShape">
+                <enum>StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="text">
+                <string>Not Active</string>
+            </property>
+            <property name="alignment">
+                <set>AlignCenter</set>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>m_activate</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>160</x>
+                    <y>20</y>
+                    <width>80</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Activate</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Activate the interface. Pressing this button also saves settings.</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>GroupBox5</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>150</y>
+                <width>250</width>
+                <height>100</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Midi Settings</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>m_midiOutputLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>30</y>
+                    <width>160</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Midi Output Channel</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>m_firstNoteNumber</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>60</y>
+                    <width>160</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>First Note Number</string>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>m_midiChannelSpin</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>190</x>
+                    <y>30</y>
+                    <width>50</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <property name="maxValue">
+                <number>16</number>
+            </property>
+            <property name="minValue">
+                <number>1</number>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>m_firstNoteSpin</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>190</x>
+                    <y>60</y>
+                    <width>50</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <property name="maxValue">
+                <number>127</number>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>m_ok</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>80</x>
+                <y>270</y>
+                <width>80</width>
+                <height>22</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;OK</string>
+        </property>
+        <property name="default">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>m_cancel</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>170</x>
+                <y>270</y>
+                <width>80</width>
+                <height>22</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;Cancel</string>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>m_activate</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_ConfigureMidiOut</receiver>
+        <slot>slotActivateClicked()</slot>
+    </connection>
+    <connection>
+        <sender>m_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_ConfigureMidiOut</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>m_cancel</sender>
+        <signal>clicked()</signal>
+        <receiver>UI_ConfigureMidiOut</receiver>
+        <slot>reject()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>m_deviceEdit</tabstop>
+    <tabstop>m_activate</tabstop>
+    <tabstop>m_midiChannelSpin</tabstop>
+    <tabstop>m_firstNoteSpin</tabstop>
+    <tabstop>m_ok</tabstop>
+    <tabstop>m_cancel</tabstop>
+</tabstops>
+<slots>
+    <slot>slotActivateClicked()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

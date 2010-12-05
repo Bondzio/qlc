@@ -29,9 +29,13 @@
 #include "doc.h"
 #include "bus.h"
 
-ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps)
+ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps,
+                           Function::Direction direction,
+                           Function::RunOrder runOrder)
     : m_doc(doc)
     , m_steps(steps)
+    , m_direction(direction)
+    , m_runOrder(runOrder)
     , m_elapsed(0)
     , m_tap(false)
     , m_currentStep(0)
@@ -54,26 +58,34 @@ void ChaserRunner::reset()
     m_channelMap.clear();
 }
 
-void ChaserRunner::write(UniverseArray* universes, quint32 hold)
+bool ChaserRunner::write(UniverseArray* universes, quint32 hold)
 {
     // Nothing to do
     if (m_steps.size() == 0)
-        return;
+        return false;
 
     if (m_elapsed == 0)
     {
         // First step
-        m_currentStep = 0;
-        m_elapsed = 1;
+        if (m_direction == Function::Forward)
+            m_currentStep = 0;
+        else
+            m_currentStep = m_steps.size() - 1;
 
+        m_elapsed = 1;
         createFadeChannels(universes);
     }
     else if (m_elapsed >= hold || m_tap == true)
     {
         // Next step
-        m_currentStep++;
-        if (m_currentStep >= m_steps.size())
-            m_currentStep = 0;
+        if (m_direction == Function::Forward)
+            m_currentStep++;
+        else
+            m_currentStep--;
+
+        if (roundCheck() == false)
+            return false;
+
         m_elapsed = 1;
         m_tap = false;
 
@@ -104,6 +116,46 @@ void ChaserRunner::write(UniverseArray* universes, quint32 hold)
                              channel.group());
         }
     }
+
+    return true;
+}
+
+bool ChaserRunner::roundCheck()
+{
+    if (m_currentStep >= m_steps.size() || m_currentStep < 0)
+    {
+        // Either end has been reached
+        if (m_runOrder == Function::SingleShot)
+        {
+            // SingleShot has been completed -> stop.
+            return false;
+        }
+        else if (m_runOrder == Function::Loop)
+        {
+            if (m_direction == Function::Forward)
+                m_currentStep = 0;
+            else
+                m_currentStep = m_steps.size() - 1;
+        }
+        else // Ping Pong
+        {
+            // Change running direction, don't run the step at each end twice;
+            // thus -1/+1
+            if (m_direction == Function::Forward)
+            {
+                m_currentStep = m_steps.size() - 2;
+                m_direction = Function::Backward;
+            }
+            else
+            {
+                m_currentStep = 1;
+                m_direction = Function::Forward;
+            }
+        }
+    }
+
+    // Let's continue
+    return true;
 }
 
 void ChaserRunner::createFadeChannels(UniverseArray* universes, bool handover)

@@ -25,6 +25,8 @@
 #include <QList>
 #include <QMap>
 
+#include "function.h"
+
 class UniverseArray;
 class FadeChannel;
 class Scene;
@@ -33,12 +35,26 @@ class Doc;
 class ChaserRunner
 {
 public:
-    ChaserRunner(Doc* doc, QList <Scene*> steps);
+    ChaserRunner(Doc* doc, QList <Scene*> steps,
+                 Function::Direction direction, Function::RunOrder runOrder);
     ~ChaserRunner();
 
     void tap();
     void reset();
-    void write(UniverseArray* universes, quint32 holdValue);
+
+    /**
+     * Write the current step to $universes. This method returns false only
+     * if there are no steps at all or SingleShot has been completed.
+     *
+     * @param universes UniverseArray to write values to
+     * @param holdValue Current hold bus value
+     * @return true if the chaser should continue, otherwise false
+     */
+    bool write(UniverseArray* universes, quint32 holdValue);
+
+    /** Ran at each end of m_steps. Returns false only when SingleShot has been
+        completed. */
+    bool roundCheck();
 
     /**
      * Create FadeChannel map for the currently active scene. If $handover
@@ -59,10 +75,12 @@ public:
 protected:
     Doc* m_doc;
     QList <Scene*> m_steps; //! List of steps to go thru
+    Function::Direction m_direction;
+    Function::RunOrder m_runOrder;
     QMap <quint32,FadeChannel> m_channelMap; //! Current step channels
     quint32 m_elapsed; //! Elapsed timer ticks (==write() calls)
     bool m_tap; //! Tracks bus button taps
-    int m_currentStep;
+    int m_currentStep; //! Current step from m_steps
 };
 
 #endif

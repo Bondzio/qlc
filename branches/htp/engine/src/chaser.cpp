@@ -352,7 +352,7 @@ void Chaser::arm()
         sceneList << scene;
     }
 
-    m_runner = new ChaserRunner(doc, sceneList);
+    m_runner = new ChaserRunner(doc, sceneList, direction(), runOrder());
 
     resetElapsed();
 }
@@ -376,7 +376,10 @@ void Chaser::write(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
     Q_ASSERT(m_runner != NULL);
-    m_runner->write(universes, Bus::instance()->value(busID()));
+
+    if (m_runner->write(universes, Bus::instance()->value(busID())) == false)
+        stop();
+
     incrementElapsed();
 }
 

@@ -406,15 +406,9 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
     Q_ASSERT(universes != NULL);
 
     if (flashing() == true)
-    {
         writeValues(universes);
-    }
     else
-    {
-        if (universes->isHTPEnabled() == false)
-            writeZeros(universes);
         timer->unregisterDMXSource(this);
-    }
 }
 
 /****************************************************************************

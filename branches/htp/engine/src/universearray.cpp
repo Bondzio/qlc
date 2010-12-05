@@ -34,7 +34,6 @@
 
 UniverseArray::UniverseArray(int size)
     : m_size(size)
-    , m_htpEnabled(true)
     , m_preGMValues(new QByteArray(size, char(0)))
     , m_postGMValues(new QByteArray(size, char(0)))
 {
@@ -90,9 +89,7 @@ void UniverseArray::zeroIntensityChannels()
 
 bool UniverseArray::checkHTP(int channel, uchar value, QLCChannel::Group group) const
 {
-    if (isHTPEnabled() == true &&
-        group == QLCChannel::Intensity &&
-        value < uchar(preGMValues()[channel]))
+    if (group == QLCChannel::Intensity && value < uchar(preGMValues()[channel]))
     {
         /* Current value is higher than new value and HTP applies: reject. */
         return false;
@@ -102,16 +99,6 @@ bool UniverseArray::checkHTP(int channel, uchar value, QLCChannel::Group group) 
         /* Current value is below new value or HTP does not apply: accept. */
         return true;
     }
-}
-
-void UniverseArray::setHTPEnabled(bool enable)
-{
-    m_htpEnabled = enable;
-}
-
-bool UniverseArray::isHTPEnabled() const
-{
-    return m_htpEnabled;
 }
 
 /****************************************************************************

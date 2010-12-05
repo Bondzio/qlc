@@ -65,15 +65,6 @@ public:
     /** Check if new $value for $channel & $group pass HTP criteria. */
     bool checkHTP(int channel, uchar value, QLCChannel::Group group) const;
 
-    /** Set HTP for intensity channels enabled/disabled */
-    void setHTPEnabled(bool enable);
-
-    /** Check if HTP is enabled for intensity channels */
-    bool isHTPEnabled() const;
-
-protected:
-    bool m_htpEnabled;
-
     /************************************************************************
      * Grand Master
      ************************************************************************/

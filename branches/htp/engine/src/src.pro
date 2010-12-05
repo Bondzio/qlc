@@ -44,10 +44,12 @@ HEADERS += qlccapability.h \
 # Engine
 HEADERS += bus.h \
            chaser.h \
+           chaserrunner.h \
            collection.h \
            doc.h \
            efx.h \
            efxfixture.h \
+           fadechannel.h \
            fixture.h \
            function.h \
            inputmap.h \
@@ -75,10 +77,12 @@ SOURCES += qlccapability.cpp \
 # Engine
 SOURCES += bus.cpp \
            chaser.cpp \
+           chaserrunner.cpp \
            collection.cpp \
            doc.cpp \
            efx.cpp \
            efxfixture.cpp \
+           fadechannel.cpp \
            fixture.cpp \
            function.cpp \
            inputmap.cpp \

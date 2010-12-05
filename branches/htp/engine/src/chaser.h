@@ -29,6 +29,7 @@ class QFile;
 class QString;
 class QDomDocument;
 class MasterTimer;
+class ChaserRunner;
 
 /**
  * Chaser is a meta-function; it consists of other functions that are run in a
@@ -154,11 +155,11 @@ public:
     void preRun(MasterTimer* timer);
 
     /** @reimpl */
-    void postRun(MasterTimer* timer, UniverseArray* universes);
+    //void postRun(MasterTimer* timer, UniverseArray* universes);
 
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
-
+#if 0
 protected:
     /** Check, whether the chaser has gone a full round. Returns false
         if singleshot == true and a full round has been completed. */
@@ -172,10 +173,10 @@ protected:
 
     /** Stop the current function */
     void stopCurrent();
-
+#endif
 protected:
     bool m_tapped;
-
+    ChaserRunner* m_runner;
     Direction m_runTimeDirection;
     int m_runTimePosition;
 };

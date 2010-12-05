@@ -27,10 +27,12 @@
 #include "qlcfile.h"
 
 #include "universearray.h"
+#include "chaserrunner.h"
 #include "mastertimer.h"
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
+#include "scene.h"
 #include "doc.h"
 #include "bus.h"
 
@@ -42,6 +44,7 @@ Chaser::Chaser(Doc* doc) : Function(doc)
 {
     m_runTimeDirection = Forward;
     m_runTimePosition = 0;
+    m_runner = NULL;
 
     setName(tr("New Chaser"));
     setBus(Bus::defaultHold());
@@ -322,10 +325,66 @@ bool Chaser::loadXML(const QDomElement* root)
 
 void Chaser::slotBusTapped(quint32 id)
 {
-    if (id == m_busID)
-        m_tapped = true;
+    if (id == m_busID && m_runner != NULL)
+        m_runner->tap();
 }
 
+void Chaser::arm()
+{
+    Doc* doc = qobject_cast <Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    /* Check that all member functions exist (nonexistent functions can
+       be present only when a corrupted file has been loaded) */
+    QList <class Scene*> sceneList;
+    QMutableListIterator<t_function_id> it(m_steps);
+    while (it.hasNext() == true)
+    {
+        Function* function = doc->function(it.next());
+
+        /* Remove any nonexistent member functions */
+        if (function == NULL || function->type() != Function::Scene)
+            it.remove();
+
+        class Scene* scene = qobject_cast<class Scene*> (function);
+        Q_ASSERT(scene != NULL);
+
+        sceneList << scene;
+    }
+
+    m_runner = new ChaserRunner(doc, sceneList);
+
+    resetElapsed();
+}
+
+void Chaser::disarm()
+{
+    delete m_runner;
+    m_runner = NULL;
+}
+
+void Chaser::preRun(MasterTimer* timer)
+{
+    Q_UNUSED(timer);
+    Q_ASSERT(m_runner != NULL);
+    m_runner->reset();
+
+    Function::preRun(timer);
+}
+
+void Chaser::write(MasterTimer* timer, UniverseArray* universes)
+{
+    Q_UNUSED(timer);
+    Q_ASSERT(m_runner != NULL);
+    m_runner->write(universes, Bus::instance()->value(busID()));
+    incrementElapsed();
+}
+
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
+
+#if 0
 void Chaser::arm()
 {
     Doc* doc = qobject_cast <Doc*> (parent());
@@ -436,7 +495,7 @@ bool Chaser::roundCheck()
 {
     /* Check if one complete chase round has been completed. */
     if ((m_runTimeDirection == Backward && m_runTimePosition == -1) ||
-            (m_runTimeDirection == Forward && m_runTimePosition == m_steps.size()))
+        (m_runTimeDirection == Forward && m_runTimePosition == m_steps.size()))
     {
         if (m_runOrder == SingleShot)
         {
@@ -501,3 +560,4 @@ void Chaser::stopCurrent()
     if (function != NULL)
         function->stop();
 }
+#endif

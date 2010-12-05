@@ -411,7 +411,8 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
     }
     else
     {
-        writeZeros(universes);
+        if (universes->isHTPEnabled() == false)
+            writeZeros(universes);
         timer->unregisterDMXSource(this);
     }
 }
@@ -516,6 +517,10 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
         if (sch.current == sch.target)
         {
             ready--;
+
+            /* Write the target value to the universe */
+            universes->write(sch.address, sch.target, sch.group);
+
             continue;
         }
         if (elapsed() >= Bus::instance()->value(m_busID))

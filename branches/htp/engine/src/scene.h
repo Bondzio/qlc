@@ -161,7 +161,7 @@ public:
 class Scene : public Function, public DMXSource
 {
     Q_OBJECT
-    Q_DISABLE_COPY(Scene)
+    //Q_DISABLE_COPY(Scene)
 
     /*********************************************************************
      * Initialization

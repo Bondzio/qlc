@@ -505,14 +505,22 @@ void ConsoleChannel::writeDMX(MasterTimer* timer, UniverseArray* universes)
         return;
 
     m_valueChangedMutex.lock();
-    if (m_valueChanged == true)
+
+    const QLCChannel* qlcch = m_fixture->channel(m_channel);
+    Q_ASSERT(qlcch != NULL);
+
+    if (qlcch->group() != QLCChannel::Intensity && m_valueChanged == false)
     {
-        const QLCChannel* qlcch = m_fixture->channel(m_channel);
-        Q_ASSERT(qlcch != NULL);
+        /* Value has not changed and this is not an intensity channel.
+           LTP in effect. */
+    }
+    else
+    {
         quint32 ch = m_fixture->universeAddress() + m_channel;
         universes->write(ch, m_value, qlcch->group());
-        m_valueChanged = false;
     }
+
+    m_valueChanged = false;
     m_valueChangedMutex.unlock();
 }
 

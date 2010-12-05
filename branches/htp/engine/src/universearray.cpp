@@ -34,6 +34,7 @@
 
 UniverseArray::UniverseArray(int size)
     : m_size(size)
+    , m_htpEnabled(true)
     , m_preGMValues(new QByteArray(size, char(0)))
     , m_postGMValues(new QByteArray(size, char(0)))
 {
@@ -71,6 +72,46 @@ void UniverseArray::reset(int address, int range)
         m_gMIntensityChannels.remove(i);
         m_gMNonIntensityChannels.remove(i);
     }
+}
+
+/****************************************************************************
+ * Highest Takes Precedence
+ ****************************************************************************/
+
+void UniverseArray::zeroIntensityChannels()
+{
+    QSetIterator <int> it(m_gMIntensityChannels);
+    while (it.hasNext() == true)
+    {
+        int channel(it.next());
+        m_preGMValues->data()[channel] = 0;
+    }
+}
+
+bool UniverseArray::checkHTP(int channel, uchar value, QLCChannel::Group group) const
+{
+    if (isHTPEnabled() == true &&
+        group == QLCChannel::Intensity &&
+        value < uchar(preGMValues()[channel]))
+    {
+        /* Current value is higher than new value and HTP applies: reject. */
+        return false;
+    }
+    else
+    {
+        /* Current value is below new value or HTP does not apply: accept. */
+        return true;
+    }
+}
+
+void UniverseArray::setHTPEnabled(bool enable)
+{
+    m_htpEnabled = enable;
+}
+
+bool UniverseArray::isHTPEnabled() const
+{
+    return m_htpEnabled;
 }
 
 /****************************************************************************
@@ -238,8 +279,10 @@ bool UniverseArray::write(int channel, uchar value, QLCChannel::Group group)
     if (channel >= size())
         return false;
 
-    m_preGMValues->data()[channel] = char(value);
+    if (checkHTP(channel, value, group) == false)
+        return false;
 
+    m_preGMValues->data()[channel] = char(value);
     value = applyGM(channel, value, group);
     m_postGMValues->data()[channel] = char(value);
 

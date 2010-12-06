@@ -521,6 +521,8 @@ void Scene_Test::flashUnflash()
     QVERIFY(s1->stopped() == true);
     QVERIFY(s1->flashing() == true);
 
+    uni.zeroIntensityChannels();
+
     s1->writeDMX(mts, &uni);
     QVERIFY(uni.preGMValues()[0] == char(123));
     QVERIFY(uni.preGMValues()[1] == char(45));
@@ -531,6 +533,8 @@ void Scene_Test::flashUnflash()
     QVERIFY(s1->stopped() == true);
     QVERIFY(s1->flashing() == true);
 
+    uni.zeroIntensityChannels();
+
     s1->writeDMX(mts, &uni);
     QVERIFY(uni.preGMValues()[0] == char(123));
     QVERIFY(uni.preGMValues()[1] == char(45));
@@ -540,6 +544,8 @@ void Scene_Test::flashUnflash()
     QVERIFY(mts->m_dmxSourceList.size() == 1);
     QVERIFY(s1->stopped() == true);
     QVERIFY(s1->flashing() == false);
+
+    uni.zeroIntensityChannels();
 
     s1->writeDMX(mts, &uni);
     QVERIFY(mts->m_dmxSourceList.size() == 0);
@@ -821,9 +827,11 @@ void Scene_Test::writeNonZeroStartingValues()
     s1->write(mts, &uni);
     QVERIFY(s1->stopped() == false);
     QVERIFY(uni.preGMValues()[0] == (char) 151);
-    QVERIFY(uni.preGMValues()[1] == (char) 213);
+    QVERIFY(uni.preGMValues()[1] == (char) 255); // HTP
     // Result is 3 on AMD64, 2 on IA32
     QVERIFY(uni.preGMValues()[2] == (char) 3 || uni.preGMValues()[2] == (char) 2);
+
+    uni.zeroIntensityChannels();
 
     s1->write(mts, &uni);
     QVERIFY(s1->stopped() == false);
@@ -831,6 +839,8 @@ void Scene_Test::writeNonZeroStartingValues()
     QVERIFY(uni.preGMValues()[1] == (char) 170);
     // Result is 2 on AMD64, 1 in IA32
     QVERIFY(uni.preGMValues()[2] == (char) 2 || uni.preGMValues()[2] == (char) 1);
+
+    uni.zeroIntensityChannels();
 
     s1->write(mts, &uni);
     QVERIFY(s1->stopped() == true);

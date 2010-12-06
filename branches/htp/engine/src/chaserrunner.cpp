@@ -30,10 +30,12 @@
 #include "bus.h"
 
 ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps,
+                           quint32 holdBusId,
                            Function::Direction direction,
                            Function::RunOrder runOrder)
     : m_doc(doc)
     , m_steps(steps)
+    , m_holdBusId(holdBusId)
     , m_direction(direction)
     , m_runOrder(runOrder)
     , m_elapsed(0)
@@ -55,10 +57,11 @@ void ChaserRunner::reset()
 {
     m_currentStep = 0;
     m_elapsed = 0;
+    m_tap = false;
     m_channelMap.clear();
 }
 
-bool ChaserRunner::write(UniverseArray* universes, quint32 hold)
+bool ChaserRunner::write(UniverseArray* universes)
 {
     // Nothing to do
     if (m_steps.size() == 0)
@@ -75,7 +78,7 @@ bool ChaserRunner::write(UniverseArray* universes, quint32 hold)
         m_elapsed = 1;
         createFadeChannels(universes);
     }
-    else if (m_elapsed >= hold || m_tap == true)
+    else if (m_elapsed >= Bus::instance()->value(m_holdBusId) || m_tap == true)
     {
         // Next step
         if (m_direction == Function::Forward)

@@ -35,7 +35,7 @@ class Doc;
 class ChaserRunner
 {
 public:
-    ChaserRunner(Doc* doc, QList <Scene*> steps,
+    ChaserRunner(Doc* doc, QList <Scene*> steps, quint32 holdBusId,
                  Function::Direction direction, Function::RunOrder runOrder);
     ~ChaserRunner();
 
@@ -47,10 +47,9 @@ public:
      * if there are no steps at all or SingleShot has been completed.
      *
      * @param universes UniverseArray to write values to
-     * @param holdValue Current hold bus value
      * @return true if the chaser should continue, otherwise false
      */
-    bool write(UniverseArray* universes, quint32 holdValue);
+    bool write(UniverseArray* universes);
 
     /** Ran at each end of m_steps. Returns false only when SingleShot has been
         completed. */
@@ -72,9 +71,10 @@ public:
      */
     void createFadeChannels(UniverseArray* universes, bool handover = false);
 
-protected:
+private:
     Doc* m_doc;
     QList <Scene*> m_steps; //! List of steps to go thru
+    quint32 m_holdBusId;
     Function::Direction m_direction;
     Function::RunOrder m_runOrder;
     QMap <quint32,FadeChannel> m_channelMap; //! Current step channels

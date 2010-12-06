@@ -39,6 +39,7 @@
 #include "palettegenerator_test.h"
 #include "universearray_test.h"
 #include "scenechannel_test.h"
+#include "chaserrunner_test.h"
 #include "mastertimer_test.h"
 #include "outputpatch_test.h"
 #include "fadechannel_test.h"
@@ -185,6 +186,12 @@ int main(int argc, char** argv)
     r = QTest::qExec(&scene, argc, argv);
     if (r != 0)
         return r;
+
+    ChaserRunner_Test chaserrunner;
+    r = QTest::qExec(&chaserrunner, argc, argv);
+    if (r != 0)
+        return r;
+
     Chaser_Test chaser;
     r = QTest::qExec(&chaser, argc, argv);
     if (r != 0)

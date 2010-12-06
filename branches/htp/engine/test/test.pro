@@ -30,6 +30,7 @@ HEADERS += qlcphysical_test.h \
 
 # Engine
 HEADERS += bus_test.h \
+           chaserrunner_test.h \
            fadechannel_test.h \
            fixture_test.h \
            function_test.h \
@@ -74,6 +75,7 @@ SOURCES += qlcphysical_test.cpp \
 
 # Engine
 SOURCES += bus_test.cpp \
+           chaserrunner_test.cpp \
            fadechannel_test.cpp \
            fixture_test.cpp \
            function_test.cpp \

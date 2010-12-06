@@ -144,7 +144,7 @@ void FadeChannel_Test::calculateCurrent()
     QCOMPARE(fch.calculateCurrent(200, 101), uchar(173));
     QCOMPARE(fch.calculateCurrent(200, 102), uchar(172));
     // Skip...
-    QCOMPARE(fch.calculateCurrent(200, 198), uchar(99));
-    QCOMPARE(fch.calculateCurrent(200, 199), uchar(100));
+    QCOMPARE(fch.calculateCurrent(200, 198), uchar(103));
+    QCOMPARE(fch.calculateCurrent(200, 199), uchar(102));
     QCOMPARE(fch.calculateCurrent(200, 200), uchar(101));
 }

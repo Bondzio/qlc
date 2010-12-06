@@ -41,6 +41,7 @@
 #include "scenechannel_test.h"
 #include "mastertimer_test.h"
 #include "outputpatch_test.h"
+#include "fadechannel_test.h"
 #include "inputpatch_test.h"
 #include "scenevalue_test.h"
 #include "collection_test.h"
@@ -162,6 +163,11 @@ int main(int argc, char** argv)
 
     Function_Test function;
     r = QTest::qExec(&function, argc, argv);
+    if (r != 0)
+        return r;
+
+    FadeChannel_Test fadechannel;
+    r = QTest::qExec(&fadechannel, argc, argv);
     if (r != 0)
         return r;
 

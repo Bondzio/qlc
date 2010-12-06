@@ -30,6 +30,7 @@ HEADERS += qlcphysical_test.h \
 
 # Engine
 HEADERS += bus_test.h \
+           fadechannel_test.h \
            fixture_test.h \
            function_test.h \
            scene_test.h \
@@ -73,30 +74,31 @@ SOURCES += qlcphysical_test.cpp \
 
 # Engine
 SOURCES += bus_test.cpp \
-      fixture_test.cpp \
-      function_test.cpp \
-      scene_test.cpp \
-      scenevalue_test.cpp \
-      scenechannel_test.cpp \
-      chaser_test.cpp \
-      collection_test.cpp \
-      efx_test.cpp \
-      efxfixture_test.cpp \
-      universearray_test.cpp \
-      outputpatch_test.cpp \
-      inputpatch_test.cpp \
-      outputmap_test.cpp \
-      inputmap_test.cpp \
-      mastertimer_test.cpp \
-      doc_test.cpp \
-      palettegenerator_test.cpp
-
+           fadechannel_test.cpp \
+           fixture_test.cpp \
+           function_test.cpp \
+           scene_test.cpp \
+           scenevalue_test.cpp \
+           scenechannel_test.cpp \
+           chaser_test.cpp \
+           collection_test.cpp \
+           efx_test.cpp \
+           efxfixture_test.cpp \
+           universearray_test.cpp \
+           outputpatch_test.cpp \
+           inputpatch_test.cpp \
+           outputmap_test.cpp \
+           inputmap_test.cpp \
+           mastertimer_test.cpp \
+           doc_test.cpp \
+           palettegenerator_test.cpp
+    
 # Stubs
 SOURCES += mastertimer_stub.cpp \
-       dmxsource_stub.cpp \
-       scene_stub.cpp \
-       outputmap_stub.cpp \
-       function_stub.cpp
+           dmxsource_stub.cpp \
+           scene_stub.cpp \
+           outputmap_stub.cpp \
+           function_stub.cpp
 
 # Test main
 SOURCES += main.cpp

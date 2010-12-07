@@ -354,6 +354,7 @@ void ChaserRunner_Test::createFadeChannels()
     QMap <quint32,FadeChannel> map;
     FadeChannel ch;
 
+    // No handover
     QCOMPARE(cr.m_currentStep, 0);
     map = cr.createFadeChannels(&ua, false);
 
@@ -399,95 +400,111 @@ void ChaserRunner_Test::createFadeChannels()
     QCOMPARE(ch.target(), uchar(250));
     QCOMPARE(ch.current(), uchar(0));
 
+    // Handover with previous values
+    map[0].setCurrent(map[0].target());
+    map[1].setCurrent(map[1].target());
+    map[2].setCurrent(map[2].target());
+    map[3].setCurrent(map[3].target());
+    map[4].setCurrent(map[4].target());
+    map[5].setCurrent(map[5].target());
+    cr.m_channelMap = map;
     cr.m_currentStep = 1;
-    map = cr.createFadeChannels(&ua, false);
+    map = cr.createFadeChannels(&ua, true);
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
     QCOMPARE(ch.address(), quint32(0));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(255));
     QCOMPARE(ch.target(), uchar(127));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(255));
 
     QVERIFY(map.contains(1) == true);
     ch = map[1];
     QCOMPARE(ch.address(), quint32(1));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(254));
     QCOMPARE(ch.target(), uchar(126));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(254));
 
     QVERIFY(map.contains(2) == true);
     ch = map[2];
     QCOMPARE(ch.address(), quint32(2));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(253));
     QCOMPARE(ch.target(), uchar(125));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(253));
 
     QVERIFY(map.contains(3) == true);
     ch = map[3];
     QCOMPARE(ch.address(), quint32(3));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(252));
     QCOMPARE(ch.target(), uchar(124));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(252));
 
     QVERIFY(map.contains(4) == true);
     ch = map[4];
     QCOMPARE(ch.address(), quint32(4));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(251));
     QCOMPARE(ch.target(), uchar(123));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(251));
 
     QVERIFY(map.contains(5) == true);
     ch = map[5];
     QCOMPARE(ch.address(), quint32(5));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(250));
     QCOMPARE(ch.target(), uchar(122));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(250));
 
+    // Handover attempt without previous values -> runner takes them from UA
+    ua.write(0, 1, QLCChannel::Intensity);
+    ua.write(1, 2, QLCChannel::Intensity);
+    ua.write(2, 3, QLCChannel::Intensity);
+    ua.write(3, 4, QLCChannel::Intensity);
+    ua.write(4, 5, QLCChannel::Intensity);
+    ua.write(5, 6, QLCChannel::Intensity);
+    cr.m_channelMap.clear();
     cr.m_currentStep = 2;
-    map = cr.createFadeChannels(&ua, false);
+    map = cr.createFadeChannels(&ua, true);
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
     QCOMPARE(ch.address(), quint32(0));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(1));
     QCOMPARE(ch.target(), uchar(0));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(1));
 
     QVERIFY(map.contains(1) == true);
     ch = map[1];
     QCOMPARE(ch.address(), quint32(1));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(2));
     QCOMPARE(ch.target(), uchar(1));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(2));
 
     QVERIFY(map.contains(2) == true);
     ch = map[2];
     QCOMPARE(ch.address(), quint32(2));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(3));
     QCOMPARE(ch.target(), uchar(2));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(3));
 
     QVERIFY(map.contains(3) == true);
     ch = map[3];
     QCOMPARE(ch.address(), quint32(3));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(4));
     QCOMPARE(ch.target(), uchar(3));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(4));
 
     QVERIFY(map.contains(4) == true);
     ch = map[4];
     QCOMPARE(ch.address(), quint32(4));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(5));
     QCOMPARE(ch.target(), uchar(4));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(5));
 
     QVERIFY(map.contains(5) == true);
     ch = map[5];
     QCOMPARE(ch.address(), quint32(5));
-    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.start(), uchar(6));
     QCOMPARE(ch.target(), uchar(5));
-    QCOMPARE(ch.current(), uchar(0));
+    QCOMPARE(ch.current(), uchar(6));
 
     cr.m_currentStep = 3;
     map = cr.createFadeChannels(&ua, false);

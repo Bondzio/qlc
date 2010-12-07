@@ -36,12 +36,15 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps,
     : m_doc(doc)
     , m_steps(steps)
     , m_holdBusId(holdBusId)
-    , m_direction(direction)
+    , m_originalDirection(direction)
     , m_runOrder(runOrder)
+
+    , m_direction(direction)
     , m_elapsed(0)
     , m_tap(false)
     , m_currentStep(0)
 {
+    reset();
 }
 
 ChaserRunner::~ChaserRunner()
@@ -55,7 +58,13 @@ void ChaserRunner::tap()
 
 void ChaserRunner::reset()
 {
-    m_currentStep = 0;
+    // Restore original direction since Ping-Pong switches m_direction
+    m_direction = m_originalDirection;
+
+    if (m_direction == Function::Backward)
+        m_currentStep = m_steps.size() - 1;
+    else
+        m_currentStep = 0;
     m_elapsed = 0;
     m_tap = false;
     m_channelMap.clear();
@@ -70,13 +79,8 @@ bool ChaserRunner::write(UniverseArray* universes)
     if (m_elapsed == 0)
     {
         // First step
-        if (m_direction == Function::Forward)
-            m_currentStep = 0;
-        else
-            m_currentStep = m_steps.size() - 1;
-
         m_elapsed = 1;
-        createFadeChannels(universes);
+        m_channelMap = createFadeChannels(universes);
     }
     else if (m_elapsed >= Bus::instance()->value(m_holdBusId) || m_tap == true)
     {
@@ -91,8 +95,7 @@ bool ChaserRunner::write(UniverseArray* universes)
 
         m_elapsed = 1;
         m_tap = false;
-
-        createFadeChannels(universes, true);
+        m_channelMap = createFadeChannels(universes, true);
     }
     else
     {
@@ -142,8 +145,7 @@ bool ChaserRunner::roundCheck()
         }
         else // Ping Pong
         {
-            // Change running direction, don't run the step at each end twice;
-            // thus -1/+1
+            // Change direction, but don't run the 1st/last step twice
             if (m_direction == Function::Forward)
             {
                 m_currentStep = m_steps.size() - 2;
@@ -161,12 +163,15 @@ bool ChaserRunner::roundCheck()
     return true;
 }
 
-void ChaserRunner::createFadeChannels(UniverseArray* universes, bool handover)
+QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(const UniverseArray* universes,
+                                                            bool handover) const
 {
+    QMap <quint32,FadeChannel> map;
+    if (m_currentStep >= m_steps.size() || m_currentStep < 0)
+        return map;
+
     Scene* scene = m_steps.at(m_currentStep);
     Q_ASSERT(scene != NULL);
-
-    QMap <quint32,FadeChannel> channelMap;
 
     QListIterator <SceneValue> it(scene->values());
     while (it.hasNext() == true)
@@ -181,11 +186,12 @@ void ChaserRunner::createFadeChannels(UniverseArray* universes, bool handover)
         channel.setTarget(value.value);
 
         channel.setStart(uchar(universes->preGMValues()[channel.address()]));
-        if (handover == true && m_channelMap.contains(channel.address()) == true)
+        if (handover && m_channelMap.contains(channel.address()))
             channel.setStart(m_channelMap[channel.address()].current());
         channel.setCurrent(channel.start());
-        channelMap[channel.address()] = channel;
+
+        map[channel.address()] = channel;
     }
 
-    m_channelMap = channelMap;
+    return map;
 }

@@ -54,36 +54,36 @@ void FadeChannel_Test::group()
 void FadeChannel_Test::start()
 {
     FadeChannel fch;
-    QCOMPARE(fch.start(), qint32(0));
+    QCOMPARE(fch.start(), uchar(0));
 
-    for (qint32 i = 0; i <= 255; i++)
+    for (uchar i = 0; i < 255; i++)
     {
         fch.setStart(i);
-        QCOMPARE(fch.start(), qint32(i));
+        QCOMPARE(fch.start(), i);
     }
 }
 
 void FadeChannel_Test::target()
 {
     FadeChannel fch;
-    QCOMPARE(fch.target(), qint32(0));
+    QCOMPARE(fch.target(), uchar(0));
 
-    for (qint32 i = 0; i <= 255; i++)
+    for (uchar i = 0; i < 255; i++)
     {
         fch.setTarget(i);
-        QCOMPARE(fch.target(), qint32(i));
+        QCOMPARE(fch.target(), i);
     }
 }
 
 void FadeChannel_Test::current()
 {
     FadeChannel fch;
-    QCOMPARE(fch.current(), qint32(0));
+    QCOMPARE(fch.current(), uchar(0));
 
-    for (qint32 i = 0; i <= 255; i++)
+    for (uchar i = 0; i < 255; i++)
     {
         fch.setCurrent(i);
-        QCOMPARE(fch.current(), qint32(i));
+        QCOMPARE(fch.current(), i);
     }
 }
 

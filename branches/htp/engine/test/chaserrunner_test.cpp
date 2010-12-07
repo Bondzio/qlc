@@ -20,10 +20,13 @@
 */
 
 #include <QtTest>
+#include <QMap>
 
 #include "chaserrunner_test.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
+#include "universearray.h"
+#include "fadechannel.h"
 #include "qlcfile.h"
 #include "fixture.h"
 #include "scene.h"
@@ -55,11 +58,30 @@ void ChaserRunner_Test::init()
     QVERIFY(mode != NULL);
 
     Fixture* fxi = new Fixture(m_doc);
+    QVERIFY(fxi != NULL);
     fxi->setFixtureDefinition(def, mode);
     fxi->setName("Test Fixture");
     fxi->setAddress(0);
     fxi->setUniverse(0);
     m_doc->addFixture(fxi);
+
+    m_scene1 = new Scene(m_doc);
+    QVERIFY(m_scene1 != NULL);
+    for (quint32 i = 0; i < fxi->channels(); i++)
+        m_scene1->setValue(fxi->id(), i, 255 - i);
+    m_doc->addFunction(m_scene1);
+
+    m_scene2 = new Scene(m_doc);
+    QVERIFY(m_scene2 != NULL);
+    for (quint32 i = 0; i < fxi->channels(); i++)
+        m_scene2->setValue(fxi->id(), i, 127 - i);
+    m_doc->addFunction(m_scene2);
+
+    m_scene3 = new Scene(m_doc);
+    QVERIFY(m_scene3 != NULL);
+    for (quint32 i = 0; i < fxi->channels(); i++)
+        m_scene3->setValue(fxi->id(), i, 0 + i);
+    m_doc->addFunction(m_scene3);
 }
 
 void ChaserRunner_Test::cleanup()
@@ -71,17 +93,32 @@ void ChaserRunner_Test::cleanup()
 void ChaserRunner_Test::initial()
 {
     QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
     QCOMPARE(cr.m_doc, m_doc);
     QCOMPARE(cr.m_steps, steps);
     QCOMPARE(cr.m_holdBusId, Bus::defaultHold());
     QCOMPARE(cr.m_direction, Function::Forward);
+    QCOMPARE(cr.m_originalDirection, Function::Forward);
     QCOMPARE(cr.m_runOrder, Function::SingleShot);
     QVERIFY(cr.m_channelMap.isEmpty() == true);
     QCOMPARE(cr.m_elapsed, quint32(0));
     QCOMPARE(cr.m_tap, false);
     QCOMPARE(cr.m_currentStep, 0);
+
+    ChaserRunner cr2(m_doc, steps, Bus::defaultFade(), Function::Backward,
+                    Function::Loop);
+    QCOMPARE(cr2.m_doc, m_doc);
+    QCOMPARE(cr2.m_steps, steps);
+    QCOMPARE(cr2.m_holdBusId, Bus::defaultFade());
+    QCOMPARE(cr2.m_direction, Function::Backward);
+    QCOMPARE(cr2.m_originalDirection, Function::Backward);
+    QCOMPARE(cr2.m_runOrder, Function::Loop);
+    QVERIFY(cr2.m_channelMap.isEmpty() == true);
+    QCOMPARE(cr2.m_elapsed, quint32(0));
+    QCOMPARE(cr2.m_tap, false);
+    QCOMPARE(cr2.m_currentStep, 2);
 }
 
 void ChaserRunner_Test::tap()
@@ -92,40 +129,367 @@ void ChaserRunner_Test::tap()
 
     cr.tap();
     QCOMPARE(cr.m_tap, true);
+
+    cr.reset();
+    QCOMPARE(cr.m_tap, false);
 }
 
-void ChaserRunner_Test::roundCheckSingleShot()
+void ChaserRunner_Test::roundCheckSingleShotForward()
 {
-    Fixture* fxi = m_doc->fixture(0);
-    QVERIFY(fxi != NULL);
-
-    Scene* scene1 = new Scene(m_doc);
-    QVERIFY(scene1 != NULL);
-    for (quint32 i = 0; i < fxi->channels(); i++)
-        scene1->setValue(fxi->id(), i, 255);
-    m_doc->addFunction(scene1);
-
-    Scene* scene2 = new Scene(m_doc);
-    QVERIFY(scene2 != NULL);
-    for (quint32 i = 0; i < fxi->channels(); i++)
-        scene2->setValue(fxi->id(), i, 0);
-    m_doc->addFunction(scene2);
-
     QList <Scene*> steps;
-    steps << scene1 << scene2;
+    steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
 
     QCOMPARE(cr.m_currentStep, 0);
     QVERIFY(cr.roundCheck() == true);
+
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 2;
-    QVERIFY(cr.roundCheck() == false);
+    QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == false);
-    cr.m_currentStep = -1;
+    cr.m_currentStep = 4;
     QVERIFY(cr.roundCheck() == false);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 0);
+}
+
+void ChaserRunner_Test::roundCheckSingleShotBackward()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
+                    Function::SingleShot);
+
+    QCOMPARE(cr.m_currentStep, 2);
+    QVERIFY(cr.roundCheck() == true);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == false);
+    cr.m_currentStep = -2;
+    QVERIFY(cr.roundCheck() == false);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 2);
+}
+
+void ChaserRunner_Test::roundCheckLoopForward()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+
+    QCOMPARE(cr.m_currentStep, 0);
+    QVERIFY(cr.roundCheck() == true);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+
+    // Loops around back to index 0
+    cr.m_currentStep = 3;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 0);
+}
+
+void ChaserRunner_Test::roundCheckLoopBackward()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
+                    Function::Loop);
+
+    QCOMPARE(cr.m_currentStep, 2);
+    QVERIFY(cr.roundCheck() == true);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+
+    // Loops around back to index 2
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 2);
+}
+
+void ChaserRunner_Test::roundCheckPingPongForward()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::PingPong);
+
+    QCOMPARE(cr.m_currentStep, 0);
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 3;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 3;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.m_direction, Function::Forward);
+}
+
+void ChaserRunner_Test::roundCheckPingPongBackward()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
+                    Function::PingPong);
+
+    QCOMPARE(cr.m_currentStep, 2);
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 3;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.reset();
+    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.m_direction, Function::Backward);
+}
+
+void ChaserRunner_Test::createFadeChannels()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+    QMap <quint32,FadeChannel> map;
+    FadeChannel ch;
+
+    QCOMPARE(cr.m_currentStep, 0);
+    map = cr.createFadeChannels(&ua, false);
+
+    QVERIFY(map.contains(0) == true);
+    ch = map[0];
+    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(255));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(1) == true);
+    ch = map[1];
+    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(254));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(2) == true);
+    ch = map[2];
+    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(253));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(3) == true);
+    ch = map[3];
+    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(252));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(4) == true);
+    ch = map[4];
+    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(251));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(5) == true);
+    ch = map[5];
+    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(250));
+    QCOMPARE(ch.current(), uchar(0));
+
+    cr.m_currentStep = 1;
+    map = cr.createFadeChannels(&ua, false);
+
+    QVERIFY(map.contains(0) == true);
+    ch = map[0];
+    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(127));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(1) == true);
+    ch = map[1];
+    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(126));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(2) == true);
+    ch = map[2];
+    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(125));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(3) == true);
+    ch = map[3];
+    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(124));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(4) == true);
+    ch = map[4];
+    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(123));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(5) == true);
+    ch = map[5];
+    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(122));
+    QCOMPARE(ch.current(), uchar(0));
+
+    cr.m_currentStep = 2;
+    map = cr.createFadeChannels(&ua, false);
+
+    QVERIFY(map.contains(0) == true);
+    ch = map[0];
+    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(0));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(1) == true);
+    ch = map[1];
+    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(1));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(2) == true);
+    ch = map[2];
+    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(2));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(3) == true);
+    ch = map[3];
+    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(3));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(4) == true);
+    ch = map[4];
+    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(4));
+    QCOMPARE(ch.current(), uchar(0));
+
+    QVERIFY(map.contains(5) == true);
+    ch = map[5];
+    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.start(), uchar(0));
+    QCOMPARE(ch.target(), uchar(5));
+    QCOMPARE(ch.current(), uchar(0));
+
+    cr.m_currentStep = 3;
+    map = cr.createFadeChannels(&ua, false);
+    QVERIFY(map.isEmpty() == true);
 }

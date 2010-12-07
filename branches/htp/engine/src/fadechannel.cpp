@@ -23,12 +23,22 @@
 
 #include "fadechannel.h"
 
-FadeChannel::FadeChannel()
-    : m_address(0)
-    , m_group(QLCChannel::NoGroup)
-    , m_start(0)
-    , m_target(0)
-    , m_current(0)
+FadeChannel::FadeChannel(quint32 address, QLCChannel::Group grp,
+                         uchar start, uchar target, uchar current)
+    : m_address(address)
+    , m_group(grp)
+    , m_start(start)
+    , m_target(target)
+    , m_current(current)
+{
+}
+
+FadeChannel::FadeChannel(const FadeChannel& ch)
+    : m_address(ch.m_address)
+    , m_group(ch.m_group)
+    , m_start(ch.m_start)
+    , m_target(ch.m_target)
+    , m_current(ch.m_current)
 {
 }
 
@@ -56,32 +66,32 @@ QLCChannel::Group FadeChannel::group() const
     return m_group;
 }
 
-void FadeChannel::setStart(qint32 value)
+void FadeChannel::setStart(uchar value)
 {
     m_start = value;
 }
 
-qint32 FadeChannel::start() const
+uchar FadeChannel::start() const
 {
     return m_start;
 }
 
-void FadeChannel::setTarget(qint32 value)
+void FadeChannel::setTarget(uchar value)
 {
     m_target = value;
 }
 
-qint32 FadeChannel::target() const
+uchar FadeChannel::target() const
 {
     return m_target;
 }
 
-void FadeChannel::setCurrent(qint32 value)
+void FadeChannel::setCurrent(uchar value)
 {
     m_current = value;
 }
 
-qint32 FadeChannel::current() const
+uchar FadeChannel::current() const
 {
     return m_current;
 }
@@ -102,5 +112,5 @@ uchar FadeChannel::calculateCurrent(quint32 fadeTime, quint32 elapsedTime)
     m_current = qint32(qreal(m_current) * timeScale);
     m_current += m_start;
 
-    return uchar(m_current);
+    return static_cast<uchar>(m_current);
 }

@@ -39,7 +39,14 @@ public:
                  Function::Direction direction, Function::RunOrder runOrder);
     ~ChaserRunner();
 
+    /**
+     * Set a flag indicating that m_holdBusId has been tapped.
+     */
     void tap();
+
+    /**
+     * Reset the runner to a state where nothing has been run yet.
+     */
     void reset();
 
     /**
@@ -51,6 +58,7 @@ public:
      */
     bool write(UniverseArray* universes);
 
+private:
     /** Ran at each end of m_steps. Returns false only when SingleShot has been
         completed. */
     bool roundCheck();
@@ -69,14 +77,24 @@ public:
      * @param universes Current UniverseArray
      * @param handover See above description.
      */
-    void createFadeChannels(UniverseArray* universes, bool handover = false);
+    QMap <quint32,FadeChannel> createFadeChannels(const UniverseArray* universes,
+                                                  bool handover = false) const;
 
+    /************************************************************************
+     * Constant parameters
+     ************************************************************************/
 private:
-    Doc* m_doc;
-    QList <Scene*> m_steps; //! List of steps to go thru
-    quint32 m_holdBusId;
-    Function::Direction m_direction;
-    Function::RunOrder m_runOrder;
+    const Doc* m_doc;
+    const QList <Scene*> m_steps; //! List of steps to go thru
+    const quint32 m_holdBusId;
+    const Function::Direction m_originalDirection; //! Set during constructor
+    const Function::RunOrder m_runOrder;
+
+    /************************************************************************
+     * Run-time parameters
+     ************************************************************************/
+private:
+    Function::Direction m_direction; //! Run-time direction
     QMap <quint32,FadeChannel> m_channelMap; //! Current step channels
     quint32 m_elapsed; //! Elapsed timer ticks (==write() calls)
     bool m_tap; //! Tracks bus button taps

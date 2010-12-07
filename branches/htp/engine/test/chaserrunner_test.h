@@ -25,6 +25,7 @@
 #include <QObject>
 #include "qlcfixturedefcache.h"
 
+class Scene;
 class Doc;
 
 class ChaserRunner_Test : public QObject
@@ -38,11 +39,20 @@ private slots:
 
     void initial();
     void tap();
-    void roundCheckSingleShot();
+    void roundCheckSingleShotForward();
+    void roundCheckSingleShotBackward();
+    void roundCheckLoopForward();
+    void roundCheckLoopBackward();
+    void roundCheckPingPongForward();
+    void roundCheckPingPongBackward();
+    void createFadeChannels();
 
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;
+    Scene* m_scene1;
+    Scene* m_scene2;
+    Scene* m_scene3;
 };
 
 #endif

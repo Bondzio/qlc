@@ -55,8 +55,12 @@ class FadeChannel
      * Initialization
      ************************************************************************/
 public:
-    /** Create a new FadeChannel with all values set zero */
-    FadeChannel();
+    /** Create a new FadeChannel with the given values */
+    FadeChannel(quint32 address = 0, QLCChannel::Group grp = QLCChannel::NoGroup,
+                uchar start = 0, uchar target = 0, uchar current = 0);
+
+    /** Copy constructor */
+    FadeChannel(const FadeChannel& ch);
 
     /** Destructor */
     virtual ~FadeChannel();
@@ -78,22 +82,22 @@ public:
     QLCChannel::Group group() const;
 
     /** Set starting value */
-    void setStart(qint32 value);
+    void setStart(uchar value);
 
     /** Get starting value */
-    qint32 start() const;
+    uchar start() const;
 
     /** Set target value */
-    void setTarget(qint32 value);
+    void setTarget(uchar value);
 
     /** Get target value */
-    qint32 target() const;
+    uchar target() const;
 
     /** Set the current value */
-    void setCurrent(qint32 value);
+    void setCurrent(uchar value);
 
     /** Get the current value */
-    qint32 current() const;
+    uchar current() const;
 
     /**
      * Calculate current value based on fadeTime and elapsedTime. Basically:

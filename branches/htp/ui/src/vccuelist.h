@@ -32,17 +32,15 @@ class QDomElement;
 class QTreeWidget;
 
 class VCCueListProperties;
-class Function;
+class ChaserRunner;
+class Chaser;
 
 #define KXMLQLCVCCueList "CueList"
-#define KXMLQLCVCCueListFunction "Function"
+#define KXMLQLCVCCueListFunction "Function" // Legacy
+#define KXMLQLCVCCueListChaser "Chaser"
 #define KXMLQLCVCCueListKey "Key"
 #define KXMLQLCVCCueListNext "Next"
 #define KXMLQLCVCCueListPrevious "Previous"
-
-#define KVCCueListColumnNumber 0
-#define KVCCueListColumnName   1
-#define KVCCueListColumnID     2
 
 /**
  * VCCueList provides a \ref VirtualConsole widget to control cue lists.
@@ -79,14 +77,17 @@ protected:
     bool copyFrom(VCWidget* widget);
 
     /*********************************************************************
-     * Cue list
+     * Chaser
      *********************************************************************/
 public:
-    /** Clear the tree widget's list of cues */
-    void clear();
+    /** Update the contents of cue list */
+    void updateList();
 
-    /** Append the given function to the widget's list of cues */
-    void append(t_function_id fid);
+    /** Set the chaser whose steps are used as the cue list */
+    void setChaser(t_function_id fid);
+
+    /** Get the chaser that's used as the cue list */
+    t_function_id chaser() const;
 
 protected slots:
     /** Removes destroyed functions from the list */
@@ -101,8 +102,8 @@ protected slots:
     /** Skip to the previous cue */
     void slotPreviousCue();
 
-    /** Slot to catch function stopped signals */
-    void slotFunctionStopped(t_function_id fid);
+    /** Called when m_runner skips to another step */
+    void slotCurrentStepChanged(int stepNumber);
 
     /** Slot that is called whenever the current item changes (either by
         pressing the key binding or clicking an item with mouse) */
@@ -110,7 +111,8 @@ protected slots:
 
 protected:
     QTreeWidget* m_list;
-    Function* m_current;
+    t_function_id m_chaser;
+    ChaserRunner* m_runner;
 
     /*********************************************************************
      * Key sequences

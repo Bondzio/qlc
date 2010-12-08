@@ -29,14 +29,17 @@
 
 class UniverseArray;
 class FadeChannel;
-class Scene;
+class Function;
 class Doc;
 
-class ChaserRunner
+class ChaserRunner : public QObject
 {
+    Q_OBJECT
+
 public:
-    ChaserRunner(Doc* doc, QList <Scene*> steps, quint32 holdBusId,
-                 Function::Direction direction, Function::RunOrder runOrder);
+    ChaserRunner(Doc* doc, QList <Function*> steps, quint32 holdBusId,
+                 Function::Direction direction, Function::RunOrder runOrder,
+                 QObject* parent = NULL);
     ~ChaserRunner();
 
     /**
@@ -79,6 +82,10 @@ public:
      */
     bool write(UniverseArray* universes);
 
+signals:
+    /** Tells that the current step number has changed. */
+    void currentStepChanged(int stepNumber);
+
 private:
     /** Ran at each end of m_steps. Returns false only when SingleShot has been
         completed. */
@@ -106,7 +113,7 @@ private:
      ************************************************************************/
 private:
     const Doc* m_doc;
-    const QList <Scene*> m_steps; //! List of steps to go thru
+    const QList <Function*> m_steps; //! List of steps to go thru
     const quint32 m_holdBusId;
     const Function::Direction m_originalDirection; //! Set during constructor
     const Function::RunOrder m_runOrder;

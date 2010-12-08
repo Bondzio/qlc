@@ -184,6 +184,23 @@ QList <t_function_id> Chaser::steps() const
     return m_steps;
 }
 
+QList <Function*> Chaser::stepFunctions() const
+{
+    Doc* doc = qobject_cast<Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    QList <Function*> list;
+    QListIterator <t_function_id> it(m_steps);
+    while (it.hasNext() == true)
+    {
+        Function* function = doc->function(it.next());
+        if (function != NULL)
+            list << function;
+    }
+
+    return list;
+}
+
 void Chaser::slotFunctionRemoved(t_function_id fid)
 {
     m_steps.removeAll(fid);
@@ -333,27 +350,7 @@ void Chaser::arm()
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
-
-    /* Check that all member functions exist (nonexistent functions can
-       be present only when a corrupted file has been loaded) */
-    QList <class Scene*> sceneList;
-    QMutableListIterator<t_function_id> it(m_steps);
-    while (it.hasNext() == true)
-    {
-        Function* function = doc->function(it.next());
-
-        /* Remove any nonexistent member functions */
-        if (function == NULL || function->type() != Function::Scene)
-            it.remove();
-
-        class Scene* scene = qobject_cast<class Scene*> (function);
-        Q_ASSERT(scene != NULL);
-
-        sceneList << scene;
-    }
-
-    m_runner = new ChaserRunner(doc, sceneList, busID(), direction(), runOrder());
-
+    m_runner = new ChaserRunner(doc, stepFunctions(), busID(), direction(), runOrder());
     resetElapsed();
 }
 

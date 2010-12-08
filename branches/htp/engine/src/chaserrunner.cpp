@@ -29,11 +29,13 @@
 #include "doc.h"
 #include "bus.h"
 
-ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps,
+ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
                            quint32 holdBusId,
                            Function::Direction direction,
-                           Function::RunOrder runOrder)
-    : m_doc(doc)
+                           Function::RunOrder runOrder,
+                           QObject* parent)
+    : QObject(parent)
+    , m_doc(doc)
     , m_steps(steps)
     , m_holdBusId(holdBusId)
     , m_originalDirection(direction)
@@ -140,8 +142,10 @@ bool ChaserRunner::write(UniverseArray* universes)
     QMutableMapIterator <quint32,FadeChannel> it(m_channelMap);
     while (it.hasNext() == true)
     {
-        Scene* scene = m_steps.at(m_currentStep);
-        Q_ASSERT(scene != NULL);
+        Scene* scene = qobject_cast<Scene*> (m_steps.at(m_currentStep));
+        if (scene == NULL)
+            continue;
+
         quint32 fadeTime = Bus::instance()->value(scene->busID());
 
         FadeChannel& channel(it.next().value());
@@ -220,6 +224,8 @@ bool ChaserRunner::roundCheck()
         }
     }
 
+    emit currentStepChanged(m_currentStep);
+
     // Let's continue
     return true;
 }
@@ -231,8 +237,10 @@ QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(const UniverseArray*
     if (m_currentStep >= m_steps.size() || m_currentStep < 0)
         return map;
 
-    Scene* scene = m_steps.at(m_currentStep);
-    Q_ASSERT(scene != NULL);
+    // If the step is not a scene, don't attempt to create fade channels
+    Scene* scene = qobject_cast<Scene*> (m_steps.at(m_currentStep));
+    if (scene == NULL)
+        return map;
 
     QListIterator <SceneValue> it(scene->values());
     while (it.hasNext() == true)

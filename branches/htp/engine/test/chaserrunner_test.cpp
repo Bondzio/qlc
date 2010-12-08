@@ -92,7 +92,7 @@ void ChaserRunner_Test::cleanup()
 
 void ChaserRunner_Test::initial()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
@@ -123,7 +123,7 @@ void ChaserRunner_Test::initial()
 
 void ChaserRunner_Test::nextPrevious()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
 
@@ -150,7 +150,7 @@ void ChaserRunner_Test::nextPrevious()
 
 void ChaserRunner_Test::autoStep()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
 
@@ -168,7 +168,7 @@ void ChaserRunner_Test::autoStep()
 
 void ChaserRunner_Test::roundCheckSingleShotForward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
@@ -192,7 +192,7 @@ void ChaserRunner_Test::roundCheckSingleShotForward()
 
 void ChaserRunner_Test::roundCheckSingleShotBackward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::SingleShot);
@@ -216,7 +216,7 @@ void ChaserRunner_Test::roundCheckSingleShotBackward()
 
 void ChaserRunner_Test::roundCheckLoopForward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
@@ -252,7 +252,7 @@ void ChaserRunner_Test::roundCheckLoopForward()
 
 void ChaserRunner_Test::roundCheckLoopBackward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::Loop);
@@ -288,7 +288,7 @@ void ChaserRunner_Test::roundCheckLoopBackward()
 
 void ChaserRunner_Test::roundCheckPingPongForward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::PingPong);
@@ -339,7 +339,7 @@ void ChaserRunner_Test::roundCheckPingPongForward()
 
 void ChaserRunner_Test::roundCheckPingPongBackward()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::PingPong);
@@ -390,7 +390,7 @@ void ChaserRunner_Test::roundCheckPingPongBackward()
 
 void ChaserRunner_Test::createFadeChannels()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
@@ -561,7 +561,7 @@ void ChaserRunner_Test::createFadeChannels()
 
 void ChaserRunner_Test::writeNoSteps()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
@@ -571,7 +571,7 @@ void ChaserRunner_Test::writeNoSteps()
 
 void ChaserRunner_Test::writeHoldZero()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
@@ -633,7 +633,7 @@ void ChaserRunner_Test::writeHoldZero()
 
 void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
@@ -753,7 +753,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
 
 void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::Loop);
@@ -873,7 +873,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
 
 void ChaserRunner_Test::writeForwardSingleShotHoldFive()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
@@ -936,7 +936,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
 
 void ChaserRunner_Test::writeNoAutoStepHoldFive()
 {
-    QList <Scene*> steps;
+    QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);

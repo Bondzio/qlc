@@ -111,8 +111,19 @@ public:
      */
     bool lowerStep(int index);
 
-    /** Get this chaser's list of steps */
+    /**
+     * Get the chaser's list of steps as function IDs
+     *
+     * @return List of function IDs
+     */
     QList <t_function_id> steps() const;
+
+    /**
+     * Get the chaser's list of steps as function pointers
+     *
+     * @return List of function pointers
+     */
+    QList <Function*> stepFunctions() const;
 
 public slots:
     /**

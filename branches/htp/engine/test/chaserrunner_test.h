@@ -47,6 +47,13 @@ private slots:
     void roundCheckPingPongBackward();
     void createFadeChannels();
 
+    void writeNoSteps();
+    void writeBusZero();
+    void writeHoldFive();
+    void writeHoldFiveBackwards();
+    void writeHoldFiveSingleShot();
+    void writeHoldFiveTap();
+
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;

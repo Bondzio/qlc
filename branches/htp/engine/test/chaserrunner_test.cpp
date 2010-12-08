@@ -509,4 +509,383 @@ void ChaserRunner_Test::createFadeChannels()
     cr.m_currentStep = 3;
     map = cr.createFadeChannels(&ua, false);
     QVERIFY(map.isEmpty() == true);
+
+    cr.m_currentStep = -1;
+    map = cr.createFadeChannels(&ua, false);
+    QVERIFY(map.isEmpty() == true);
+}
+
+void ChaserRunner_Test::writeNoSteps()
+{
+    QList <Scene*> steps;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    QVERIFY(cr.write(&ua) == false);
+}
+
+void ChaserRunner_Test::writeBusZero()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    QVERIFY(cr.write(&ua) == true);
+    QCOMPARE(cr.m_elapsed, quint32(1));
+    QVERIFY(cr.m_channelMap.isEmpty() == false);
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+    QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+    QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+    QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+    QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+    QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+
+    ua.zeroIntensityChannels();
+
+    QVERIFY(cr.write(&ua) == true);
+    QCOMPARE(cr.m_elapsed, quint32(1));
+    QVERIFY(cr.m_channelMap.isEmpty() == false);
+    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+    QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+    QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+    QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+    QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+    QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+
+    ua.zeroIntensityChannels();
+
+    QVERIFY(cr.write(&ua) == true);
+    QCOMPARE(cr.m_elapsed, quint32(1));
+    QVERIFY(cr.m_channelMap.isEmpty() == false);
+    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+    QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+    QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+    QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+    QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+    QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+
+    ua.zeroIntensityChannels();
+
+    QVERIFY(cr.write(&ua) == true);
+    QCOMPARE(cr.m_elapsed, quint32(1));
+    QVERIFY(cr.m_channelMap.isEmpty() == false);
+    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+    QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+    QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+    QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+    QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+    QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+}
+
+void ChaserRunner_Test::writeHoldFive()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+}
+
+void ChaserRunner_Test::writeHoldFiveBackwards()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+}
+
+void ChaserRunner_Test::writeHoldFiveSingleShot()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::SingleShot);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+
+    // SingleShot is completed
+    QVERIFY(cr.write(&ua) == false);
+}
+
+void ChaserRunner_Test::writeHoldFiveTap()
+{
+    QList <Scene*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        if (i == 3)
+        {
+            cr.tap();
+            break;
+        }
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        if (i == 3)
+        {
+            cr.tap();
+            break;
+        }
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
 }

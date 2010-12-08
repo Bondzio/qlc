@@ -39,9 +39,11 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Scene*> steps,
     , m_originalDirection(direction)
     , m_runOrder(runOrder)
 
+    , m_autoStep(true)
     , m_direction(direction)
     , m_elapsed(0)
-    , m_tap(false)
+    , m_next(false)
+    , m_previous(false)
     , m_currentStep(0)
 {
     reset();
@@ -51,9 +53,26 @@ ChaserRunner::~ChaserRunner()
 {
 }
 
-void ChaserRunner::tap()
+void ChaserRunner::next()
 {
-    m_tap = true;
+    m_next = true;
+    m_previous = false;
+}
+
+void ChaserRunner::previous()
+{
+    m_next = false;
+    m_previous = true;
+}
+
+void ChaserRunner::setAutoStep(bool autoStep)
+{
+    m_autoStep = autoStep;
+}
+
+bool ChaserRunner::isAutoStep() const
+{
+    return m_autoStep;
 }
 
 void ChaserRunner::reset()
@@ -66,7 +85,8 @@ void ChaserRunner::reset()
     else
         m_currentStep = 0;
     m_elapsed = 0;
-    m_tap = false;
+    m_next = false;
+    m_previous = false;
     m_channelMap.clear();
 }
 
@@ -82,19 +102,33 @@ bool ChaserRunner::write(UniverseArray* universes)
         m_elapsed = 1;
         m_channelMap = createFadeChannels(universes);
     }
-    else if (m_elapsed >= Bus::instance()->value(m_holdBusId) || m_tap == true)
+    else if ((isAutoStep() && m_elapsed >= Bus::instance()->value(m_holdBusId))
+             || m_next == true || m_previous == true)
     {
         // Next step
         if (m_direction == Function::Forward)
-            m_currentStep++;
+        {
+            // "Previous" for a forwards chaser is -1
+            if (m_previous == true)
+                m_currentStep--;
+            else
+                m_currentStep++;
+        }
         else
-            m_currentStep--;
+        {
+            // "Previous" for a backwards scene is +1
+            if (m_previous == true)
+                m_currentStep++;
+            else
+                m_currentStep--;
+        }
 
         if (roundCheck() == false)
             return false;
 
         m_elapsed = 1;
-        m_tap = false;
+        m_next = false;
+        m_previous = false;
         m_channelMap = createFadeChannels(universes, true);
     }
     else
@@ -128,34 +162,61 @@ bool ChaserRunner::write(UniverseArray* universes)
 
 bool ChaserRunner::roundCheck()
 {
-    if (m_currentStep >= m_steps.size() || m_currentStep < 0)
+    if (m_currentStep < m_steps.size() && m_currentStep >= 0)
+        return true; // In the middle of steps. No need to go any further.
+
+    if (m_runOrder == Function::SingleShot)
     {
-        // Either end has been reached
-        if (m_runOrder == Function::SingleShot)
+        if (m_direction == Function::Forward)
         {
-            // SingleShot has been completed -> stop.
-            return false;
+            if (m_currentStep >= m_steps.size())
+                return false; // Forwards SingleShot has been completed.
+            else
+                m_currentStep = 0; // No wrapping
         }
-        else if (m_runOrder == Function::Loop)
+        else // Backwards
         {
-            if (m_direction == Function::Forward)
+            if (m_currentStep < 0)
+                return false; // Backwards SingleShot has been completed.
+            else
+                m_currentStep = m_steps.size() - 1; // No wrapping
+        }
+    }
+    else if (m_runOrder == Function::Loop)
+    {
+        if (m_direction == Function::Forward)
+        {
+            if (m_currentStep >= m_steps.size())
                 m_currentStep = 0;
             else
                 m_currentStep = m_steps.size() - 1;
         }
-        else // Ping Pong
+        else // Backwards
         {
-            // Change direction, but don't run the 1st/last step twice
-            if (m_direction == Function::Forward)
-            {
-                m_currentStep = m_steps.size() - 2;
-                m_direction = Function::Backward;
-            }
+            if (m_currentStep < 0)
+                m_currentStep = m_steps.size() - 1;
             else
-            {
+                m_currentStep = 0;
+        }
+    }
+    else // Ping Pong
+    {
+        // Change direction, but don't run the first/last step twice.
+        if (m_direction == Function::Forward)
+        {
+            if (m_currentStep >= m_steps.size())
                 m_currentStep = 1;
-                m_direction = Function::Forward;
-            }
+            else
+                m_currentStep = m_steps.size() - 2;
+            m_direction = Function::Backward;
+        }
+        else // Backwards
+        {
+            if (m_currentStep < 0)
+                m_currentStep = m_steps.size() - 2;
+            else
+                m_currentStep = 1;
+            m_direction = Function::Forward;
         }
     }
 

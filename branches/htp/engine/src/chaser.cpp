@@ -326,7 +326,7 @@ bool Chaser::loadXML(const QDomElement* root)
 void Chaser::slotBusTapped(quint32 id)
 {
     if (id == m_busID && m_runner != NULL)
-        m_runner->tap();
+        m_runner->next();
 }
 
 void Chaser::arm()

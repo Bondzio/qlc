@@ -40,9 +40,30 @@ public:
     ~ChaserRunner();
 
     /**
-     * Set a flag indicating that m_holdBusId has been tapped.
+     * Skip to the next scene, obeying direction and run order settings.
      */
-    void tap();
+    void next();
+
+    /**
+     * Skip to the previous scene, obeying direction and run order settings.
+     */
+    void previous();
+
+    /**
+     * Enables automatic stepping if $auto is true; otherwise automatic
+     * stepping is disabled and the only way to skip to next/previous step is
+     * thru next() and previous() methods.
+     *
+     * @param auto Enable/disable automatic stepping
+     */
+    void setAutoStep(bool autoStep);
+
+    /**
+     * Check, if automatic stepping is enabled (default = true).
+     *
+     * @return true if automatic stepping is enabled, otherwise false.
+     */
+    bool isAutoStep() const;
 
     /**
      * Reset the runner to a state where nothing has been run yet.
@@ -94,10 +115,12 @@ private:
      * Run-time parameters
      ************************************************************************/
 private:
+    bool m_autoStep; //! Automatic stepping
     Function::Direction m_direction; //! Run-time direction
     QMap <quint32,FadeChannel> m_channelMap; //! Current step channels
     quint32 m_elapsed; //! Elapsed timer ticks (==write() calls)
-    bool m_tap; //! Tracks bus button taps
+    bool m_next; //! If true, skips to the next step when write is called
+    bool m_previous; //! If true, skips to the previous step when write is called
     int m_currentStep; //! Current step from m_steps
 };
 

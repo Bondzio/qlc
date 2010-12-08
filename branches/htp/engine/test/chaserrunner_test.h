@@ -38,7 +38,8 @@ private slots:
     void cleanup();
 
     void initial();
-    void tap();
+    void nextPrevious();
+    void autoStep();
     void roundCheckSingleShotForward();
     void roundCheckSingleShotBackward();
     void roundCheckLoopForward();
@@ -48,11 +49,12 @@ private slots:
     void createFadeChannels();
 
     void writeNoSteps();
-    void writeBusZero();
-    void writeHoldFive();
-    void writeHoldFiveBackwards();
-    void writeHoldFiveSingleShot();
-    void writeHoldFiveTap();
+    void writeHoldZero();
+
+    void writeForwardLoopHoldFiveNextPrevious();
+    void writeBackwardLoopHoldFiveNextPrevious();
+    void writeForwardSingleShotHoldFive();
+    void writeNoAutoStepHoldFive();
 
 private:
     Doc* m_doc;

@@ -84,6 +84,7 @@ void UniverseArray::zeroIntensityChannels()
     {
         int channel(it.next());
         m_preGMValues->data()[channel] = 0;
+        m_postGMValues->data()[channel] = 0;
     }
 }
 

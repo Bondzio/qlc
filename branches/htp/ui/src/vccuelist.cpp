@@ -431,6 +431,7 @@ bool VCCueList::loadXML(const QDomElement* root)
     QDomNode node;
     QDomElement tag;
     QString str;
+    Chaser* legacyChaser = NULL;
 
     Q_ASSERT(root != NULL);
 
@@ -519,7 +520,25 @@ bool VCCueList::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCCueListFunction)
         {
-            //append(tag.text().toInt()); // Legacy
+            // Legacy: Create a chaser to incorporate old-style cue list
+            // member functions and assign that chaser to this cue list.
+            if (legacyChaser == NULL)
+            {
+                legacyChaser = new Chaser(_app->doc());
+                if (_app->doc()->addFunction(legacyChaser) == true)
+                {
+                    setChaser(legacyChaser->id());
+                    legacyChaser->setName(caption());
+                }
+                else
+                {
+                    delete legacyChaser;
+                    legacyChaser = NULL;
+                }
+            }
+
+            // Add cue list members to the chaser
+            legacyChaser->addStep(tag.text().toInt());
         }
         else
         {

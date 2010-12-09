@@ -103,6 +103,8 @@ bool ChaserRunner::write(UniverseArray* universes)
         // First step
         m_elapsed = 1;
         m_channelMap = createFadeChannels(universes);
+
+        emit currentStepChanged(m_currentStep);
     }
     else if ((isAutoStep() && m_elapsed >= Bus::instance()->value(m_holdBusId))
              || m_next == true || m_previous == true)
@@ -132,6 +134,8 @@ bool ChaserRunner::write(UniverseArray* universes)
         m_next = false;
         m_previous = false;
         m_channelMap = createFadeChannels(universes, true);
+
+        emit currentStepChanged(m_currentStep);
     }
     else
     {
@@ -223,8 +227,6 @@ bool ChaserRunner::roundCheck()
             m_direction = Function::Forward;
         }
     }
-
-    emit currentStepChanged(m_currentStep);
 
     // Let's continue
     return true;

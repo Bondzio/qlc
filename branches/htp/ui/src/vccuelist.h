@@ -24,6 +24,8 @@
 
 #include <QKeySequence>
 #include <QWidget>
+
+#include "dmxsource.h"
 #include "vcwidget.h"
 
 class QTreeWidgetItem;
@@ -48,16 +50,16 @@ class Chaser;
  * @see VCWidget
  * @see VirtualConsole
  */
-class VCCueList : public VCWidget
+class VCCueList : public VCWidget, public DMXSource
 {
     Q_OBJECT
     Q_DISABLE_COPY(VCCueList)
 
     friend class VCCueListProperties;
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Normal constructor */
     VCCueList(QWidget* parent);
@@ -65,9 +67,9 @@ public:
     /** Destructor */
     ~VCCueList();
 
-    /*********************************************************************
+    /*************************************************************************
      * Clipboard
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Create a copy of this widget into the given parent */
     VCWidget* createCopy(VCWidget* parent);
@@ -76,9 +78,9 @@ protected:
     /** Copy the contents for this widget from another widget */
     bool copyFrom(VCWidget* widget);
 
-    /*********************************************************************
-     * Chaser
-     *********************************************************************/
+    /*************************************************************************
+     * Cue list
+     *************************************************************************/
 public:
     /** Update the contents of cue list */
     void updateList();
@@ -110,13 +112,24 @@ protected slots:
     void slotItemActivated(QTreeWidgetItem* item);
 
 protected:
+    /** Create the runner that writes cue values to universes */
+    void createRunner();
+
+protected:
     QTreeWidget* m_list;
     t_function_id m_chaser;
     ChaserRunner* m_runner;
 
-    /*********************************************************************
+    /*************************************************************************
+     * DMX Source
+     *************************************************************************/
+public:
+    /** @reimp */
+    void writeDMX(MasterTimer* timer, UniverseArray* universes);
+
+    /*************************************************************************
      * Key sequences
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Keyboard key combination for skipping to the next cue */
     void setNextKeySequence(const QKeySequence& keySequence);
@@ -137,9 +150,9 @@ protected:
     QKeySequence m_nextKeySequence;
     QKeySequence m_previousKeySequence;
 
-    /*********************************************************************
+    /*************************************************************************
      * External Input
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Input universe/channel for skipping to the next cue */
     void setNextInputSource(quint32 universe, quint32 channel);
@@ -149,7 +162,6 @@ public:
     quint32 nextInputChannel() const {
         return m_nextInputChannel;
     }
-
 
     /** Input universe/channel for skipping to the previous cue */
     void setPreviousInputSource(quint32 universe, quint32 channel);
@@ -173,30 +185,22 @@ private:
     quint32 m_previousInputChannel;
     quint32 m_previousLatestValue;
 
-    /*********************************************************************
-     * Caption
-     *********************************************************************/
+    /*************************************************************************
+     * VCWidget-inherited
+     *************************************************************************/
 public:
-    /** See VCWidget::setCaption() */
+    /** @reimp */
     void setCaption(const QString& text);
 
-    /*********************************************************************
-     * QLC Mode
-     *********************************************************************/
-public:
-    /** See VCWidget::setCaption() */
+    /** @reimp */
     void slotModeChanged(Doc::Mode mode);
 
-    /*********************************************************************
-     * Properties
-     *********************************************************************/
-public:
-    /** Edit properties for this widget */
+    /** @reimp */
     void editProperties();
 
-    /*********************************************************************
+    /*************************************************************************
      * Load & Save
-     *********************************************************************/
+     *************************************************************************/
 public:
     static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);

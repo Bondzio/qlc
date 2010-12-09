@@ -191,8 +191,11 @@ void VCCueList::slotNextCue()
     if (mode() != Doc::Operate)
         return;
 
-    Q_ASSERT(m_runner != NULL);
-    m_runner->next();
+    /* Create the runner only when the first/last cue is engaged. */
+    if (m_runner == NULL)
+        createRunner();
+    else
+        m_runner->next();
 }
 
 void VCCueList::slotPreviousCue()
@@ -200,8 +203,11 @@ void VCCueList::slotPreviousCue()
     if (mode() != Doc::Operate)
         return;
 
-    Q_ASSERT(m_runner != NULL);
-    m_runner->previous();
+    /* Create the runner only when the first/last cue is engaged. */
+    if (m_runner == NULL)
+        createRunner();
+    else
+        m_runner->previous();
 }
 
 void VCCueList::slotCurrentStepChanged(int stepNumber)
@@ -209,8 +215,8 @@ void VCCueList::slotCurrentStepChanged(int stepNumber)
     Q_ASSERT(stepNumber < m_list->topLevelItemCount() && stepNumber >= 0);
     QTreeWidgetItem* item = m_list->topLevelItem(stepNumber);
     Q_ASSERT(item != NULL);
-    m_list->setCurrentItem(item);
     m_list->scrollToItem(item, QAbstractItemView::PositionAtCenter);
+    m_list->setCurrentItem(item);
 }
 
 void VCCueList::slotItemActivated(QTreeWidgetItem* item)
@@ -220,6 +226,35 @@ void VCCueList::slotItemActivated(QTreeWidgetItem* item)
 
     //! @todo
     Q_UNUSED(item);
+}
+
+void VCCueList::createRunner()
+{
+    Q_ASSERT(m_runner == NULL);
+
+    QList <Function*> cues;
+    Chaser* cha = qobject_cast<Chaser*> (_app->doc()->function(chaser()));
+    if (cha != NULL)
+        cues = cha->stepFunctions();
+    m_runner = new ChaserRunner(_app->doc(), cues, Bus::defaultHold(),
+                                Function::Forward, Function::Loop);
+    m_runner->setAutoStep(false);
+    connect(m_runner, SIGNAL(currentStepChanged(int)),
+            this, SLOT(slotCurrentStepChanged(int)));
+}
+
+/*****************************************************************************
+ * DMX Source
+ *****************************************************************************/
+
+void VCCueList::writeDMX(MasterTimer* timer, UniverseArray* universes)
+{
+    Q_UNUSED(timer);
+
+    if (m_runner == NULL)
+        return;
+    else
+        m_runner->write(universes);
 }
 
 /*****************************************************************************
@@ -317,7 +352,7 @@ void VCCueList::slotPreviousInputValueChanged(quint32 universe, quint32 channel,
 }
 
 /*****************************************************************************
- * Caption
+ * VCWidget-inherited methods
  *****************************************************************************/
 
 void VCCueList::setCaption(const QString& text)
@@ -329,29 +364,21 @@ void VCCueList::setCaption(const QString& text)
     m_list->setHeaderLabels(list);
 }
 
-/*****************************************************************************
- * QLC Mode
- *****************************************************************************/
-
 void VCCueList::slotModeChanged(Doc::Mode mode)
 {
     if (mode == Doc::Operate)
     {
         Q_ASSERT(m_runner == NULL);
+        _app->masterTimer()->registerDMXSource(this);
 
-        QList <Function*> cues;
-        Chaser* cha = qobject_cast<Chaser*> (_app->doc()->function(chaser()));
-        if (cha != NULL)
-            cues = cha->stepFunctions();
-
-        m_runner = new ChaserRunner(_app->doc(), cues, Bus::defaultHold(),
-                                    Function::Forward, Function::Loop);
         updateList();
         m_list->setEnabled(true);
     }
     else
     {
-        delete m_runner;
+        _app->masterTimer()->unregisterDMXSource(this);
+        if (m_runner != NULL)
+            delete m_runner;
         m_runner = NULL;
         m_list->setEnabled(false);
     }
@@ -361,10 +388,6 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
 
     VCWidget::slotModeChanged(mode);
 }
-
-/*****************************************************************************
- * Properties
- *****************************************************************************/
 
 void VCCueList::editProperties()
 {
@@ -382,8 +405,6 @@ void VCCueList::editProperties()
 
 bool VCCueList::loader(const QDomElement* root, QWidget* parent)
 {
-    VCCueList* cuelist = NULL;
-
     Q_ASSERT(root != NULL);
     Q_ASSERT(parent != NULL);
 
@@ -394,11 +415,14 @@ bool VCCueList::loader(const QDomElement* root, QWidget* parent)
     }
 
     /* Create a new cuelist into its parent */
-    cuelist = new VCCueList(parent);
-    cuelist->show();
+    VCCueList* cuelist = new VCCueList(parent);
+    Q_ASSERT(cuelist != NULL);
 
     /* Continue loading */
-    return cuelist->loadXML(root);
+    bool ret = cuelist->loadXML(root);
+    cuelist->updateList();
+    cuelist->show();
+    return ret;
 }
 
 bool VCCueList::loadXML(const QDomElement* root)

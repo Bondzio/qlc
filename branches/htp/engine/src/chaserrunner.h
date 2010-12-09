@@ -53,6 +53,20 @@ public:
     void previous();
 
     /**
+     * Set the current step number.
+     *
+     * @param step Step number to set
+     */
+    void setCurrentStep(int step);
+
+    /**
+     * Get the current step number.
+     *
+     * @return Current step number
+     */
+    int currentStep() const;
+
+    /**
      * Enables automatic stepping if $auto is true; otherwise automatic
      * stepping is disabled and the only way to skip to next/previous step is
      * thru next() and previous() methods.
@@ -129,6 +143,7 @@ private:
     bool m_next; //! If true, skips to the next step when write is called
     bool m_previous; //! If true, skips to the previous step when write is called
     int m_currentStep; //! Current step from m_steps
+    int m_newCurrent; //! Used to manually set the current step
 };
 
 #endif

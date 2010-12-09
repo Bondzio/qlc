@@ -106,6 +106,7 @@ void ChaserRunner_Test::initial()
     QCOMPARE(cr.m_elapsed, quint32(0));
     QCOMPARE(cr.m_next, false);
     QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.m_newCurrent, -1);
 
     ChaserRunner cr2(m_doc, steps, Bus::defaultFade(), Function::Backward,
                     Function::Loop);
@@ -119,6 +120,7 @@ void ChaserRunner_Test::initial()
     QCOMPARE(cr2.m_elapsed, quint32(0));
     QCOMPARE(cr2.m_next, false);
     QCOMPARE(cr2.m_currentStep, 2);
+    QCOMPARE(cr.m_newCurrent, -1);
 }
 
 void ChaserRunner_Test::nextPrevious()
@@ -173,7 +175,7 @@ void ChaserRunner_Test::roundCheckSingleShotForward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
 
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
@@ -187,7 +189,7 @@ void ChaserRunner_Test::roundCheckSingleShotForward()
     QVERIFY(cr.roundCheck() == true);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 }
 
 void ChaserRunner_Test::roundCheckSingleShotBackward()
@@ -197,7 +199,7 @@ void ChaserRunner_Test::roundCheckSingleShotBackward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::SingleShot);
 
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
@@ -211,7 +213,7 @@ void ChaserRunner_Test::roundCheckSingleShotBackward()
     QVERIFY(cr.roundCheck() == true);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 }
 
 void ChaserRunner_Test::roundCheckLoopForward()
@@ -221,33 +223,33 @@ void ChaserRunner_Test::roundCheckLoopForward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
 
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QVERIFY(cr.roundCheck() == true);
 
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 
     // Loops around back to index 0
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 
     // Loops around to index 2
     cr.m_currentStep = -1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 }
 
 void ChaserRunner_Test::roundCheckLoopBackward()
@@ -257,33 +259,33 @@ void ChaserRunner_Test::roundCheckLoopBackward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::Loop);
 
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QVERIFY(cr.roundCheck() == true);
 
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
 
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 
     // Loops around back to index 2
     cr.m_currentStep = -1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 
     // Loops around to index 0
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
 }
 
 void ChaserRunner_Test::roundCheckPingPongForward()
@@ -293,47 +295,47 @@ void ChaserRunner_Test::roundCheckPingPongForward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::PingPong);
 
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QVERIFY(cr.roundCheck() == true);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = -1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(cr.m_direction, Function::Forward);
 }
 
@@ -344,47 +346,47 @@ void ChaserRunner_Test::roundCheckPingPongBackward()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::PingPong);
 
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QVERIFY(cr.roundCheck() == true);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = -1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = -1;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.reset();
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QCOMPARE(cr.m_direction, Function::Backward);
 }
 
@@ -399,7 +401,7 @@ void ChaserRunner_Test::createFadeChannels()
     FadeChannel ch;
 
     // No handover
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     map = cr.createFadeChannels(&ua, false);
 
     QVERIFY(map.contains(0) == true);
@@ -583,7 +585,7 @@ void ChaserRunner_Test::writeHoldZero()
     QVERIFY(cr.write(&ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
     QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
     QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -596,7 +598,7 @@ void ChaserRunner_Test::writeHoldZero()
     QVERIFY(cr.write(&ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
-    QCOMPARE(cr.m_currentStep, 1);
+    QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
     QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
     QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
@@ -609,7 +611,7 @@ void ChaserRunner_Test::writeHoldZero()
     QVERIFY(cr.write(&ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
-    QCOMPARE(cr.m_currentStep, 2);
+    QCOMPARE(cr.currentStep(), 2);
     QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
     QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
     QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -622,7 +624,7 @@ void ChaserRunner_Test::writeHoldZero()
     QVERIFY(cr.write(&ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
-    QCOMPARE(cr.m_currentStep, 0);
+    QCOMPARE(cr.currentStep(), 0);
     QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
     QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
     QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -655,7 +657,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -671,7 +673,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -693,7 +695,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -709,7 +711,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(cr.currentStep(), 1);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
@@ -725,7 +727,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -741,7 +743,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -775,7 +777,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -791,7 +793,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -813,7 +815,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -829,7 +831,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(cr.currentStep(), 1);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
@@ -845,7 +847,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -861,7 +863,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -889,7 +891,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -905,7 +907,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(cr.currentStep(), 1);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
@@ -921,7 +923,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -953,7 +955,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -971,7 +973,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 2);
+        QCOMPARE(cr.currentStep(), 2);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
@@ -989,7 +991,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 0);
+        QCOMPARE(cr.currentStep(), 0);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
@@ -1007,7 +1009,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
-        QCOMPARE(cr.m_currentStep, 1);
+        QCOMPARE(cr.currentStep(), 1);
         QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
         QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
         QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
@@ -1017,3 +1019,109 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     }
 }
 
+void ChaserRunner_Test::writeNoAutoSetCurrentStep()
+{
+    QList <Function*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    cr.setAutoStep(false);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    for (quint32 i = 0; i < 10; i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    cr.next();
+    QCOMPARE(cr.m_next, true);
+    cr.setCurrentStep(15);
+    QCOMPARE(cr.m_newCurrent, -1);
+    QCOMPARE(cr.currentStep(), 0);
+    QCOMPARE(cr.m_next, true);
+    QCOMPARE(cr.m_previous, false);
+
+    cr.previous();
+    QCOMPARE(cr.m_previous, true);
+    cr.setCurrentStep(4);
+    QCOMPARE(cr.m_newCurrent, -1);
+    QCOMPARE(cr.currentStep(), 0);
+    QCOMPARE(cr.m_next, false);
+    QCOMPARE(cr.m_previous, true);
+
+    cr.setCurrentStep(2);
+    QCOMPARE(cr.m_newCurrent, 2);
+    QCOMPARE(cr.m_next, false);
+    QCOMPARE(cr.m_previous, false);
+
+    for (quint32 i = 0; i < 25; i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_newCurrent, -1);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(0));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(1));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(2));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(3));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(4));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(5));
+    }
+
+    cr.setCurrentStep(0);
+    QCOMPARE(cr.m_newCurrent, 0);
+
+    for (quint32 i = 0; i < 35; i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_newCurrent, -1);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 0);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(255));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(254));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(253));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(252));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(251));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(250));
+    }
+
+    cr.setCurrentStep(1);
+    QCOMPARE(cr.m_newCurrent, 1);
+
+    for (quint32 i = 0; i < 15; i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_newCurrent, -1);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]), uchar(127));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]), uchar(126));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]), uchar(125));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]), uchar(124));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]), uchar(123));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
+    }
+}

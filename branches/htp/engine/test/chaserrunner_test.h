@@ -55,6 +55,7 @@ private slots:
     void writeBackwardLoopHoldFiveNextPrevious();
     void writeForwardSingleShotHoldFive();
     void writeNoAutoStepHoldFive();
+    void writeNoAutoSetCurrentStep();
 
 private:
     Doc* m_doc;

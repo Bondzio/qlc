@@ -224,8 +224,9 @@ void VCCueList::slotItemActivated(QTreeWidgetItem* item)
     if (mode() != Doc::Operate)
         return;
 
-    //! @todo
-    Q_UNUSED(item);
+    if (m_runner == NULL)
+        createRunner();
+    m_runner->setCurrentStep(m_list->indexOfTopLevelItem(item));
 }
 
 void VCCueList::createRunner()

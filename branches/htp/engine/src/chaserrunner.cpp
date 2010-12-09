@@ -47,6 +47,7 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
     , m_next(false)
     , m_previous(false)
     , m_currentStep(0)
+    , m_newCurrent(-1)
 {
     reset();
 }
@@ -65,6 +66,21 @@ void ChaserRunner::previous()
 {
     m_next = false;
     m_previous = true;
+}
+
+void ChaserRunner::setCurrentStep(int step)
+{
+    if (step >= 0 && step < m_steps.size())
+    {
+        m_newCurrent = step;
+        m_next = false;
+        m_previous = false;
+    }
+}
+
+int ChaserRunner::currentStep() const
+{
+    return m_currentStep;
 }
 
 void ChaserRunner::setAutoStep(bool autoStep)
@@ -98,7 +114,21 @@ bool ChaserRunner::write(UniverseArray* universes)
     if (m_steps.size() == 0)
         return false;
 
-    if (m_elapsed == 0)
+    if (m_newCurrent != -1)
+    {
+        // Manually-set current step
+        m_currentStep = m_newCurrent;
+        m_newCurrent = -1;
+
+        // No need to do roundcheck here, since manually-set steps are
+        // always within m_steps limits.
+
+        m_elapsed = 1;
+        m_channelMap = createFadeChannels(universes, true);
+
+        emit currentStepChanged(m_currentStep);
+    }
+    else if (m_elapsed == 0)
     {
         // First step
         m_elapsed = 1;

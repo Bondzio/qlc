@@ -33,32 +33,6 @@
 #include "doc.h"
 #include "bus.h"
 
-/****************************************************************************
- * SceneChannel
- ****************************************************************************/
-
-SceneChannel::SceneChannel()
-{
-    address = 0;
-    group = QLCChannel::NoGroup;
-    start = 0;
-    current = 0;
-    target = 0;
-}
-
-SceneChannel::SceneChannel(const SceneChannel& sch)
-{
-    address = sch.address;
-    group = sch.group;
-    start = sch.start;
-    current = sch.current;
-    target = sch.target;
-}
-
-SceneChannel::~SceneChannel()
-{
-}
-
 /*****************************************************************************
  * SceneValue
  *****************************************************************************/
@@ -446,17 +420,16 @@ void Scene::arm()
             const QLCChannel* qlcch = fxi->channel(scv.channel);
             Q_ASSERT(qlcch != NULL);
 
-            SceneChannel channel;
-            channel.address = fxi->universeAddress() + scv.channel;
-            channel.group = qlcch->group();
-            channel.target = scv.value;
-            m_armedChannels.append(channel);
+            FadeChannel fc;
+            fc.setAddress(fxi->universeAddress() + scv.channel);
+            fc.setGroup(qlcch->group());
+            fc.setTarget(scv.value);
+            m_armedChannels << fc;
         }
         else
         {
             qWarning() << Q_FUNC_INFO << "Scene " << name() << "channel"
-                       << scv.channel
-                       << "is out of its fixture" << fxi->name()
+                       << scv.channel << "is out of its fixture" << fxi->name()
                        << "channel count ( <" << fxi->channels()
                        << ") bounds. Removing the channel.";
             it.remove();
@@ -480,62 +453,59 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     quint32 ready = m_armedChannels.count();
 
     /* Iterator for all scene channels */
-    QMutableListIterator <SceneChannel> it(m_armedChannels);
+    QMutableListIterator <FadeChannel> it(m_armedChannels);
 
     /* Get starting values for each channel on the first pass */
     if (elapsed() == 0)
     {
         while (it.hasNext() == true)
         {
-            SceneChannel sch = it.next();
+            FadeChannel& fc(it.next());
 
             /* Get the starting value from universes. Important
                to cast to uchar, since UniverseArray handles signed
                char, whereas uchar is unsigned. Without cast,
                this will result in negative values when x > 127 */
-            sch.start = uchar(universes->preGMValues()[sch.address]);
-            sch.current = sch.start;
-
-            /* Set the changed object back to the list */
-            it.setValue(sch);
+            fc.setStart(uchar(universes->preGMValues()[fc.address()]));
+            fc.setCurrent(fc.start());
         }
 
         /* Reel back to start of list */
         it.toFront();
     }
 
+    // Grab current fade bus value
+    quint32 fadeTime = Bus::instance()->value(m_busID);
+
     while (it.hasNext() == true)
     {
-        SceneChannel sch = it.next();
-
-        if (sch.current == sch.target)
+        FadeChannel& fc(it.next());
+        if (fc.current() == fc.target())
         {
-            ready--;
-
             /* Write the target value to the universe */
-            universes->write(sch.address, sch.target, sch.group);
-
+            universes->write(fc.address(), fc.target(), fc.group());
+            ready--;
             continue;
         }
-        if (elapsed() >= Bus::instance()->value(m_busID))
+
+        if (elapsed() >= fadeTime)
         {
             /* When this scene's time is up, write the absolute
                target values to get rid of rounding errors that
                may happen in nextValue(). */
-            sch.current = sch.target;
+            fc.setCurrent(fc.target());
             ready--;
 
             /* Write the target value to the universe */
-            universes->write(sch.address, sch.target, sch.group);
+            universes->write(fc.address(), fc.target(), fc.group());
         }
         else
         {
             /* Write the next value to the universe buffer */
-            universes->write(sch.address, nextValue(&sch), sch.group);
+            universes->write(fc.address(),
+                             fc.calculateCurrent(fadeTime, elapsed()),
+                             fc.group());
         }
-
-        /* Set the changed object back to the list */
-        it.setValue(sch);
     }
 
     /* Next time unit */
@@ -554,8 +524,8 @@ void Scene::writeValues(UniverseArray* universes, t_fixture_id fxi_id)
     {
         if (fxi_id == Fixture::invalidId() || m_values[i].fxi == fxi_id)
         {
-            SceneChannel sch = m_armedChannels[i];
-            universes->write(sch.address, m_values[i].value, sch.group);
+            const FadeChannel& fc(m_armedChannels[i]);
+            universes->write(fc.address(), fc.target(), fc.group());
         }
     }
 }
@@ -568,30 +538,14 @@ void Scene::writeZeros(UniverseArray* universes, t_fixture_id fxi_id)
     {
         if (fxi_id == Fixture::invalidId() || m_values[i].fxi == fxi_id)
         {
-            SceneChannel sch = m_armedChannels[i];
-            universes->write(sch.address, 0, sch.group);
+            const FadeChannel& fc(m_armedChannels[i]);
+            universes->write(fc.address(), 0, fc.group());
         }
     }
 }
 
-uchar Scene::nextValue(SceneChannel* sch)
+QList <FadeChannel> Scene::armedChannels() const
 {
-    Q_ASSERT(sch != NULL);
-
-    /* Ensure that bus value is never zero */
-    qreal busValue = qreal(Bus::instance()->value(m_busID)) + 1.0;
-
-    /* Time scale is basically a percentage (0.0 - 1.0) of remaining time */
-    qreal timeScale = qreal(elapsed() + 1) / busValue;
-
-    /*
-     * Calculate the current value based on what it should be after
-     * Function::elapsed() cycles, so that it will be ready when
-     * Function::elapsed() == Bus::instance()->value()
-     */
-    sch->current = sch->target - sch->start;
-    sch->current = int(qreal(sch->current) * timeScale);
-    sch->current += sch->start;
-
-    return uchar(sch->current);
+    return m_armedChannels;
 }
+

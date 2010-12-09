@@ -109,39 +109,39 @@ void FadeChannel_Test::calculateCurrent()
     // A bit more complex involving decimals that don't produce round integers
     fch.setStart(3);
     fch.setTarget(147);
-    QCOMPARE(fch.calculateCurrent(13, 0), uchar(3));
-    QCOMPARE(fch.calculateCurrent(13, 1), uchar(14));
-    QCOMPARE(fch.calculateCurrent(13, 2), uchar(25));
-    QCOMPARE(fch.calculateCurrent(13, 3), uchar(36));
-    QCOMPARE(fch.calculateCurrent(13, 4), uchar(47));
-    QCOMPARE(fch.calculateCurrent(13, 5), uchar(58));
-    QCOMPARE(fch.calculateCurrent(13, 6), uchar(69));
-    QCOMPARE(fch.calculateCurrent(13, 7), uchar(80));
-    QCOMPARE(fch.calculateCurrent(13, 8), uchar(91));
-    QCOMPARE(fch.calculateCurrent(13, 9), uchar(102));
-    QCOMPARE(fch.calculateCurrent(13, 10), uchar(113));
-    QCOMPARE(fch.calculateCurrent(13, 11), uchar(124));
-    QCOMPARE(fch.calculateCurrent(13, 12), uchar(135));
+    QCOMPARE(fch.calculateCurrent(13, 0), uchar(13));
+    QCOMPARE(fch.calculateCurrent(13, 1), uchar(23));
+    QCOMPARE(fch.calculateCurrent(13, 2), uchar(33));
+    QCOMPARE(fch.calculateCurrent(13, 3), uchar(44));
+    QCOMPARE(fch.calculateCurrent(13, 4), uchar(54));
+    QCOMPARE(fch.calculateCurrent(13, 5), uchar(64));
+    QCOMPARE(fch.calculateCurrent(13, 6), uchar(75));
+    QCOMPARE(fch.calculateCurrent(13, 7), uchar(85));
+    QCOMPARE(fch.calculateCurrent(13, 8), uchar(95));
+    QCOMPARE(fch.calculateCurrent(13, 9), uchar(105));
+    QCOMPARE(fch.calculateCurrent(13, 10), uchar(116));
+    QCOMPARE(fch.calculateCurrent(13, 11), uchar(126));
+    QCOMPARE(fch.calculateCurrent(13, 12), uchar(136));
     QCOMPARE(fch.calculateCurrent(13, 13), uchar(147));
 
     // One more to check slower operation (200 ticks for 144 steps)
     fch.setStart(245);
     fch.setTarget(101);
     QCOMPARE(fch.calculateCurrent(200, 0), uchar(245));
-    QCOMPARE(fch.calculateCurrent(200, 1), uchar(245));
-    QCOMPARE(fch.calculateCurrent(200, 2), uchar(244));
+    QCOMPARE(fch.calculateCurrent(200, 1), uchar(244));
+    QCOMPARE(fch.calculateCurrent(200, 2), uchar(243));
     QCOMPARE(fch.calculateCurrent(200, 3), uchar(243));
-    QCOMPARE(fch.calculateCurrent(200, 4), uchar(243));
-    QCOMPARE(fch.calculateCurrent(200, 5), uchar(242));
-    QCOMPARE(fch.calculateCurrent(200, 6), uchar(241));
+    QCOMPARE(fch.calculateCurrent(200, 4), uchar(242));
+    QCOMPARE(fch.calculateCurrent(200, 5), uchar(241));
+    QCOMPARE(fch.calculateCurrent(200, 6), uchar(240));
     QCOMPARE(fch.calculateCurrent(200, 7), uchar(240));
-    QCOMPARE(fch.calculateCurrent(200, 8), uchar(240));
-    QCOMPARE(fch.calculateCurrent(200, 9), uchar(239));
+    QCOMPARE(fch.calculateCurrent(200, 8), uchar(239));
+    QCOMPARE(fch.calculateCurrent(200, 9), uchar(238));
     QCOMPARE(fch.calculateCurrent(200, 10), uchar(238));
-    QCOMPARE(fch.calculateCurrent(200, 11), uchar(238));
+    QCOMPARE(fch.calculateCurrent(200, 11), uchar(237));
     // Skip...
     QCOMPARE(fch.calculateCurrent(200, 100), uchar(173));
-    QCOMPARE(fch.calculateCurrent(200, 101), uchar(173));
+    QCOMPARE(fch.calculateCurrent(200, 101), uchar(172));
     QCOMPARE(fch.calculateCurrent(200, 102), uchar(172));
     // Skip...
     QCOMPARE(fch.calculateCurrent(200, 198), uchar(103));

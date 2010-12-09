@@ -36,7 +36,6 @@ HEADERS += bus_test.h \
            function_test.h \
            scene_test.h \
            scenevalue_test.h \
-           scenechannel_test.h \
            chaser_test.h \
            collection_test.h \
            efx_test.h \
@@ -81,7 +80,6 @@ SOURCES += bus_test.cpp \
            function_test.cpp \
            scene_test.cpp \
            scenevalue_test.cpp \
-           scenechannel_test.cpp \
            chaser_test.cpp \
            collection_test.cpp \
            efx_test.cpp \

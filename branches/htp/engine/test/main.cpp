@@ -38,7 +38,6 @@
 // Engine
 #include "palettegenerator_test.h"
 #include "universearray_test.h"
-#include "scenechannel_test.h"
 #include "chaserrunner_test.h"
 #include "mastertimer_test.h"
 #include "outputpatch_test.h"
@@ -174,11 +173,6 @@ int main(int argc, char** argv)
 
     SceneValue_Test scenevalue;
     r = QTest::qExec(&scenevalue, argc, argv);
-    if (r != 0)
-        return r;
-
-    SceneChannel_Test scenechannel;
-    r = QTest::qExec(&scenechannel, argc, argv);
     if (r != 0)
         return r;
 

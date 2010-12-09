@@ -106,7 +106,8 @@ uchar FadeChannel::calculateCurrent(quint32 fadeTime, quint32 elapsedTime)
     }
 
     // Time scale is basically a percentage (0.0 - 1.0) of remaining time.
-    qreal timeScale = qreal(elapsedTime) / qreal(fadeTime);
+    // Add 1.0 to both to get correct scale (fadeTime==1 means two steps)
+    qreal timeScale = qreal(elapsedTime + 1.0) / qreal(fadeTime + 1.0);
 
     m_current = m_target - m_start;
     m_current = qint32(qreal(m_current) * timeScale);

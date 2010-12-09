@@ -25,6 +25,7 @@
 #include <QList>
 #include <QtXml>
 
+#include "fadechannel.h"
 #include "dmxsource.h"
 #include "qlctypes.h"
 #include "function.h"
@@ -33,59 +34,6 @@
 #define KXMLQLCSceneValue "Value"
 #define KXMLQLCSceneValueFixture "Fixture"
 #define KXMLQLCSceneValueChannel "Channel"
-
-/*****************************************************************************
- * SceneChannel
- *****************************************************************************/
-
-/**
- * SceneChannel is a helper class used to store individual RUNTIME values for
- * channels as they are operated by a Scene function during Operate mode.
- *
- * Unlike SceneValue, a SceneChannel consists of an absolute DMX address,
- * starting channel value, target value and channel's current value.
- * SceneChannels are used only during Operate mode, when fixture addresses
- * cannot change anymore, so it is slightly more efficient to store absolute
- * DMX addresses than relative channel numbers as in SceneValue. When a Scene
- * starts, it takes the current values of all of its channels and stores them
- * into their respective SceneChannels' $start variable. The Scene then
- * calculates how much time it still has until the values specified in $target
- * need to be set for each involved channel and adjusts the step size
- * accordingly. The more time there's left, the smoother the fade effect. Each
- * gradual step is written to the channels' DMX addresses and also stored to
- * SceneChannels' $current variable for the next round. When $current == $target
- * the SceneChannel is seen ready and won't be touched any longer (until the
- * rest of the channels are ready as well).
- *
- * Although uchar is an UNSIGNED char (0-255), these variables must be SIGNED
- * because the floating-point calculations that Scene does don't necessarily
- * stop exactly at 0.0 and 255.0, but might go slightly over/under. If these
- * variables were unsigned, an overflow would occur in some cases, resulting in
- * UINT_MAX values and everything would go wacko.
- */
-class SceneChannel
-{
-public:
-    SceneChannel();
-    SceneChannel(const SceneChannel& sch);
-    ~SceneChannel();
-
-public:
-    /** The universe and channel that this object refers to */
-    quint32 address;
-
-    /** The channel group that this channel belongs to */
-    QLCChannel::Group group;
-
-    /** The value of the channel where a scene started fading from */
-    qint32 start;
-
-    /** The current value set by a scene */
-    qint32 current;
-
-    /** The target value to eventually fade to */
-    qint32 target;
-};
 
 /*****************************************************************************
  * SceneValue
@@ -297,16 +245,10 @@ public:
                             t_fixture_id fxi_id = Fixture::invalidId());
 
     /** Get a list of channels that have been armed for running */
-    QList <SceneChannel> armedChannels() const {
-        return m_armedChannels;
-    }
+    QList <FadeChannel> armedChannels() const;
 
 protected:
-    /** Calculate channel values for the next step. */
-    uchar nextValue(SceneChannel* sch);
-
-protected:
-    QList <SceneChannel> m_armedChannels;
+    QList <FadeChannel> m_armedChannels;
 };
 
 #endif

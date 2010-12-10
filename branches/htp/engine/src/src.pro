@@ -60,7 +60,8 @@ HEADERS += bus.h \
            outputmap.h \
            outputpatch.h \
            palettegenerator.h \
-           scene.h
+           scene.h \
+           scenevalue.h
 
 # Fixture metadata
 SOURCES += qlccapability.cpp \
@@ -93,7 +94,8 @@ SOURCES += bus.cpp \
            outputmap.cpp \
            outputpatch.cpp \
            palettegenerator.cpp \
-           scene.cpp
+           scene.cpp \
+           scenevalue.cpp
 
 # Interfaces
 HEADERS += ../../plugins/interfaces/qlcinplugin.h \

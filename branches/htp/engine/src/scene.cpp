@@ -34,104 +34,6 @@
 #include "bus.h"
 
 /*****************************************************************************
- * SceneValue
- *****************************************************************************/
-
-SceneValue::SceneValue(t_fixture_id id, quint32 ch, uchar val) :
-        fxi     ( id ),
-        channel ( ch ),
-        value   ( val )
-{
-}
-
-SceneValue::SceneValue(const SceneValue& scv)
-{
-    fxi = scv.fxi;
-    channel = scv.channel;
-    value = scv.value;
-}
-
-SceneValue::~SceneValue()
-{
-}
-
-bool SceneValue::isValid()
-{
-    if (fxi == Fixture::invalidId())
-        return false;
-    else
-        return true;
-}
-
-bool SceneValue::operator< (const SceneValue& scv) const
-{
-    if (fxi < scv.fxi)
-    {
-        return true;
-    }
-    else if (fxi == scv.fxi)
-    {
-        if (channel < scv.channel)
-            return true;
-        else
-            return false;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool SceneValue::operator== (const SceneValue& scv) const
-{
-    if (fxi == scv.fxi && channel == scv.channel)
-        return true;
-    else
-        return false;
-}
-
-bool SceneValue::loadXML(const QDomElement* tag)
-{
-    Q_ASSERT(tag != NULL);
-
-    if (tag->tagName() != KXMLQLCSceneValue)
-    {
-        qWarning() << Q_FUNC_INFO << "Scene node not found";
-        return false;
-    }
-
-    fxi = t_fixture_id(tag->attribute(KXMLQLCSceneValueFixture).toInt());
-    if (fxi < 0 || fxi >= KFixtureArraySize)
-        return false;
-
-    channel = quint32(tag->attribute(KXMLQLCSceneValueChannel).toInt());
-    value = uchar(tag->text().toUInt());
-
-    return isValid();
-}
-
-bool SceneValue::saveXML(QDomDocument* doc, QDomElement* scene_root) const
-{
-    QDomElement tag;
-    QDomText text;
-
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(scene_root != NULL);
-
-    /* Value tag and its attributes */
-    tag = doc->createElement(KXMLQLCSceneValue);
-    tag.setAttribute(KXMLQLCSceneValueFixture, fxi);
-    tag.setAttribute(KXMLQLCSceneValueChannel, channel);
-    scene_root->appendChild(tag);
-
-    /* The actual value as node text */
-    text = doc->createTextNode(QString("%1").arg(value));
-    tag.appendChild(text);
-
-    return true;
-}
-
-/*****************************************************************************
  * Initialization
  *****************************************************************************/
 
@@ -337,7 +239,7 @@ bool Scene::loadXML(const QDomElement* root)
         {
             /* Channel value */
             SceneValue scv;
-            if (scv.loadXML(&tag) == true)
+            if (scv.loadXML(tag) == true)
                 setValue(scv);
         }
         else

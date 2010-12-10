@@ -26,75 +26,11 @@
 #include <QtXml>
 
 #include "fadechannel.h"
+#include "scenevalue.h"
 #include "dmxsource.h"
 #include "qlctypes.h"
 #include "function.h"
 #include "fixture.h"
-
-#define KXMLQLCSceneValue "Value"
-#define KXMLQLCSceneValueFixture "Fixture"
-#define KXMLQLCSceneValueChannel "Channel"
-
-/*****************************************************************************
- * SceneValue
- *****************************************************************************/
-
-/**
- * SceneValue is a helper class used to store individual channel TARGET values
- * for Scene functions. Each channel that is taking part in a scene is
- * represented with a SceneValue.
- *
- * A SceneValue consists of a fixture, channel and value. Fixture tells, which
- * fixture a particular value corresponds to, channel contains the particular
- * channel number from the fixture and, value tells the exact target value for
- * that channel. Channel numbers are not absolute DMX channels because the
- * fixture address can be changed at any time. Instead, channel number tells
- * the relative channel number, respective to fixture address.
- *
- * For example:
- * Let's say we have a SceneValue with channel = 5, value = 127 and, the
- * fixture assigned to the SceneValue is at DMX address 100. Thus, the
- * SceneValue represents value 127 for absolute DMX channel 105. If the address
- * of the fixture is changed, the SceneValue doesn't need to be touched at all.
- */
-class SceneValue
-{
-public:
-    /** Normal constructor */
-    SceneValue(t_fixture_id fxi_id = Fixture::invalidId(),
-               quint32 channel = QLCChannel::invalid(),
-               uchar value = 0);
-
-    /** Copy constructor */
-    SceneValue(const SceneValue& scv);
-
-    /** Destructor */
-    ~SceneValue();
-
-    /** A SceneValue is not valid if .fxi == Fixture::invalidId() */
-    bool isValid();
-
-    /** Comparator function for qSort() */
-    bool operator< (const SceneValue& scv) const;
-
-    /** Comparator function for matching SceneValues */
-    bool operator== (const SceneValue& scv) const;
-
-    /** Load this SceneValue's contents from an XML tag */
-    bool loadXML(const QDomElement* tag);
-
-    /** Save this SceneValue to an XML document */
-    bool saveXML(QDomDocument* doc, QDomElement* scene_root) const;
-
-public:
-    t_fixture_id fxi;
-    quint32 channel;
-    uchar value;
-};
-
-/*****************************************************************************
- * Scene
- *****************************************************************************/
 
 /**
  * Scene encapsulates the values of selected channels from one or more fixture

@@ -85,7 +85,6 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, t_fixture_id fixtureID,
     setMinimumWidth(50);
 
     init();
-    updateValue();
 
     setStyle(App::saneStyle());
 }
@@ -118,6 +117,7 @@ void ConsoleChannel::init()
     }
 
     m_valueEdit = new QLineEdit(this);
+    m_valueEdit->setText(QString::number(0));
     layout()->addWidget(m_valueEdit);
     m_valueEdit->setAlignment(Qt::AlignCenter);
     m_validator = new QIntValidator(0, UCHAR_MAX, this);
@@ -140,7 +140,7 @@ void ConsoleChannel::init()
     // Generic fixtures don't have channel objects
     const QLCChannel* ch = m_fixture->channel(m_channel);
     if (ch != NULL)
-        setToolTip(QString("%1 / %2").arg(ch->name()));
+        setToolTip(QString("%1").arg(ch->name()));
     else
         setToolTip(tr("Level"));
 
@@ -449,17 +449,6 @@ void ConsoleChannel::slotContextMenuTriggered(QAction* action)
 int ConsoleChannel::sliderValue() const
 {
     return m_valueSlider->value();
-}
-
-void ConsoleChannel::updateValue()
-{
-    Q_ASSERT(m_fixture != NULL);
-
-    const UniverseArray* unis(_app->outputMap()->peekUniverses());
-    uchar value = unis->preGMValues()[m_fixture->universeAddress() + m_channel];
-
-    m_valueEdit->setText(QString("%1").arg(value));
-    setValue(value);
 }
 
 void ConsoleChannel::setOutputDMX(bool state)

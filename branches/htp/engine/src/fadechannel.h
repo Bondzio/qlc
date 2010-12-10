@@ -99,10 +99,19 @@ public:
     /** Get the current value */
     uchar current() const;
 
+    /** Mark this channel as ready (useful for writing LTP values only once) */
+    void setReady(bool rdy);
+
+    /** Check if this channel is ready. Default is false. */
+    bool isReady() const;
+
     /**
      * Calculate current value based on fadeTime and elapsedTime. Basically:
      * "what m_current should be, if you were given $fadeTime ticks to fade
      * from m_start to m_target when $elapsedTime ticks have already passed."
+     *
+     * Also, if a channel has been marked ready (isReady() == true), this method
+     * returns the target value.
      *
      * @param fadeTime Number of ticks to fade from start to target
      * @param elapsedTime Number of ticks already spent
@@ -116,6 +125,7 @@ private:
     qint32 m_start;
     qint32 m_target;
     qint32 m_current;
+    bool m_ready;
 };
 
 #endif

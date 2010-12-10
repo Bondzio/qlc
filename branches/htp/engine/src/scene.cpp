@@ -351,6 +351,18 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
                this will result in negative values when x > 127 */
             fc.setStart(uchar(universes->preGMValues()[fc.address()]));
             fc.setCurrent(fc.start());
+
+            // Don't touch the value at all if it's already on target
+            if (fc.start() == fc.target())
+            {
+                fc.setReady(true);
+                if (fc.group() != QLCChannel::Intensity)
+                    ready--;
+            }
+            else
+            {
+                fc.setReady(false);
+            }
         }
 
         /* Reel back to start of list */
@@ -363,24 +375,29 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     while (it.hasNext() == true)
     {
         FadeChannel& fc(it.next());
-        if (fc.current() == fc.target())
-        {
-            /* Write the target value to the universe */
-            universes->write(fc.address(), fc.target(), fc.group());
-            ready--;
-            continue;
-        }
-
         if (elapsed() >= fadeTime)
         {
-            /* When this scene's time is up, write the absolute
-               target values to get rid of rounding errors that
-               may happen in nextValue(). */
-            fc.setCurrent(fc.target());
-            ready--;
-
-            /* Write the target value to the universe */
-            universes->write(fc.address(), fc.target(), fc.group());
+            if (fc.group() == QLCChannel::Intensity)
+            {
+                // Don't do "ready--" for intensity channels to keep the
+                // scene on as long as its manually stopped.
+                fc.setReady(true);
+                universes->write(fc.address(), fc.target(), fc.group());
+            }
+            else if (fc.isReady() == false)
+            {
+                // If an LTP channel has not been marked ready (i.e. we've just
+                // consumed all time) mark it ready so that its value will not
+                // be written anymore (otherwise it would not be LTP anymore).
+                ready--;
+                fc.setReady(true);
+                universes->write(fc.address(), fc.target(), fc.group());
+            }
+            else
+            {
+                // Once an LTP-channel (non-intensity) has been marked ready,
+                // it's value is no longer touched by scene.
+            }
         }
         else
         {
@@ -394,7 +411,9 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     /* Next time unit */
     incrementElapsed();
 
-    /* When all channels are ready, this function can be stopped. */
+    // When all channels are ready, this function can be stopped. If there is
+    // even one HTP channel in a scene, the function will not stop by itself
+    // because then (ready == HTP_channel_count).
     if (ready == 0)
         stop();
 }

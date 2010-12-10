@@ -30,6 +30,7 @@ FadeChannel::FadeChannel(quint32 address, QLCChannel::Group grp,
     , m_start(start)
     , m_target(target)
     , m_current(current)
+    , m_ready(false)
 {
 }
 
@@ -39,6 +40,7 @@ FadeChannel::FadeChannel(const FadeChannel& ch)
     , m_start(ch.m_start)
     , m_target(ch.m_target)
     , m_current(ch.m_current)
+    , m_ready(ch.m_ready)
 {
 }
 
@@ -96,10 +98,21 @@ uchar FadeChannel::current() const
     return m_current;
 }
 
+void FadeChannel::setReady(bool rdy)
+{
+    m_ready = rdy;
+}
+
+bool FadeChannel::isReady() const
+{
+    return m_ready;
+}
+
 uchar FadeChannel::calculateCurrent(quint32 fadeTime, quint32 elapsedTime)
 {
-    // If all time has been consumed, return the target value
-    if (elapsedTime >= fadeTime)
+    // Return the target value if all time has been consumed or the channel
+    // has been marked ready.
+    if (elapsedTime >= fadeTime || m_ready == true)
     {
         m_current = m_target;
         return m_current;

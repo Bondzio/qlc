@@ -559,7 +559,7 @@ void Scene_Test::flashUnflash()
 }
 
 /** Test scene running with bus value 0 (takes one cycle) */
-void Scene_Test::writeBusZero()
+void Scene_Test::writeHTPBusZero()
 {
     Doc* doc = new Doc(this, m_cache);
 
@@ -585,15 +585,17 @@ void Scene_Test::writeBusZero()
 
     mts->startFunction(s1, false);
     s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == true);
     QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
     QVERIFY(uni.preGMValues()[1] == (char) 127);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
 
     mts->stopFunction(s1);
     QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
     s1->disarm();
@@ -603,7 +605,7 @@ void Scene_Test::writeBusZero()
 }
 
 /** Test scene running with bus value 1 (takes two cycles) */
-void Scene_Test::writeBusOne()
+void Scene_Test::writeHTPBusOne()
 {
     Doc* doc = new Doc(this, m_cache);
 
@@ -635,223 +637,28 @@ void Scene_Test::writeBusOne()
     QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
+    uni.zeroIntensityChannels();
+
     s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
     QVERIFY(uni.preGMValues()[0] == (char) 127);
     QVERIFY(uni.preGMValues()[1] == (char) 63);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    mts->stopFunction(s1);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->disarm();
-
-    delete mts;
-    delete doc;
-}
-
-/** Test scene running with bus value 2 (takes three cycles) */
-void Scene_Test::writeBusTwo()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    Bus::instance()->setValue(Bus::defaultFade(), 2);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setAddress(0);
-    fxi->setUniverse(0);
-    fxi->setChannels(10);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("First");
-    s1->setValue(fxi->id(), 0, UCHAR_MAX);
-    s1->setValue(fxi->id(), 1, 127);
-    s1->setValue(fxi->id(), 2, 0);
-    doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
-
-    QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
     QVERIFY(s1->stopped() == false);
-
-    QVERIFY(uni.preGMValues()[0] == (char) 0);
-    QVERIFY(uni.preGMValues()[1] == (char) 0);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    // Result is 84 on AMD64, 85 on IA32
-    QVERIFY(uni.preGMValues()[0] == (char) 84 || uni.preGMValues()[0] == (char) 85);
-    QVERIFY(uni.preGMValues()[1] == (char) 42);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    // Result is 169 on AMD64, 170 on IA32
-    QVERIFY(uni.preGMValues()[0] == (char) 169 || uni.preGMValues()[0] == (char) 170);
-    QVERIFY(uni.preGMValues()[1] == (char) 84);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    mts->stopFunction(s1);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->disarm();
-
-    delete mts;
-    delete doc;
-}
-
-/** Test scene running with initial bus value 5 (takes 6 cycles) that is
-    changed in the middle to 0 */
-void Scene_Test::writeBusFiveChangeToZeroInTheMiddle()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    Bus::instance()->setValue(Bus::defaultFade(), 5);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setAddress(0);
-    fxi->setUniverse(0);
-    fxi->setChannels(10);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("First");
-    s1->setValue(fxi->id(), 0, UCHAR_MAX);
-    s1->setValue(fxi->id(), 1, 127);
-    s1->setValue(fxi->id(), 2, 0);
-    doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
-
-    QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
-    QVERIFY(s1->stopped() == false);
-
-    QVERIFY(uni.preGMValues()[0] == (char) 0);
-    QVERIFY(uni.preGMValues()[1] == (char) 0);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    QVERIFY(uni.preGMValues()[0] == (char) 42);
-    QVERIFY(uni.preGMValues()[1] == (char) 21);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    // Result is 84 on AMD64, 85 on IA32
-    QVERIFY(uni.preGMValues()[0] == (char) 84 || uni.preGMValues()[0] == (char) 85);
-    QVERIFY(uni.preGMValues()[1] == (char) 42);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    mts->stopFunction(s1);
-    QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
-    QVERIFY(uni.preGMValues()[2] == (char) 0);
-
-    s1->disarm();
-
-    delete mts;
-    delete doc;
-}
-
-/** Test scene running with initial values something else than zero */
-void Scene_Test::writeNonZeroStartingValues()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    Bus::instance()->setValue(Bus::defaultFade(), 2);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setAddress(0);
-    fxi->setUniverse(0);
-    fxi->setChannels(10);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("First");
-    s1->setValue(fxi->id(), 0, UCHAR_MAX);
-    s1->setValue(fxi->id(), 1, 127);
-    s1->setValue(fxi->id(), 2, 0);
-    doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
-
-    QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
-    QVERIFY(s1->stopped() == false);
-
-    uni.write(0, 100, QLCChannel::Intensity);
-    uni.write(1, UCHAR_MAX, QLCChannel::Intensity);
-    uni.write(2, 3, QLCChannel::Intensity);
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    QVERIFY(uni.preGMValues()[0] == (char) 151);
-    QVERIFY(uni.preGMValues()[1] == (char) 255); // HTP
-    // Result is 3 on AMD64, 2 on IA32
-    QVERIFY(uni.preGMValues()[2] == (char) 3 || uni.preGMValues()[2] == (char) 2);
 
     uni.zeroIntensityChannels();
 
     s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == false);
-    QVERIFY(uni.preGMValues()[0] == (char) 203);
-    QVERIFY(uni.preGMValues()[1] == (char) 170);
-    // Result is 2 on AMD64, 1 in IA32
-    QVERIFY(uni.preGMValues()[2] == (char) 2 || uni.preGMValues()[2] == (char) 1);
-
-    uni.zeroIntensityChannels();
-
-    s1->write(mts, &uni);
-    QVERIFY(s1->stopped() == true);
     QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
     QVERIFY(uni.preGMValues()[1] == (char) 127);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
 
     mts->stopFunction(s1);
     QVERIFY(s1->stopped() == true);
-    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
-    QVERIFY(uni.preGMValues()[1] == (char) 127);
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
     s1->disarm();

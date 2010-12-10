@@ -52,11 +52,8 @@ private slots:
 
     void flashUnflash();
 
-    void writeBusZero();
-    void writeBusOne();
-    void writeBusTwo();
-    void writeBusFiveChangeToZeroInTheMiddle();
-    void writeNonZeroStartingValues();
+    void writeHTPBusZero();
+    void writeHTPBusOne();
 
 private:
     Doc* m_doc;

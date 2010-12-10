@@ -49,6 +49,7 @@ private slots:
     void createFadeChannels();
 
     void writeNoSteps();
+    void writeMissingFixture();
     void writeHoldZero();
 
     void writeForwardLoopHoldFiveNextPrevious();

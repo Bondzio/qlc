@@ -279,7 +279,8 @@ QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(const UniverseArray*
     {
         SceneValue value(it.next());
         Fixture* fxi = m_doc->fixture(value.fxi);
-        Q_ASSERT(fxi != NULL);
+        if (fxi == NULL || fxi->channel(value.channel) == NULL)
+            continue;
 
         FadeChannel channel;
         channel.setAddress(fxi->universeAddress() + value.channel);

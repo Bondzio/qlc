@@ -571,6 +571,22 @@ void ChaserRunner_Test::writeNoSteps()
     QVERIFY(cr.write(&ua) == false);
 }
 
+void ChaserRunner_Test::writeMissingFixture()
+{
+    QList <Function*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    m_scene3->setValue(500, 0, 255);
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::Loop);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultFade(), 5);
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+
+    for (int i = 0; i < 120; i++)
+        QVERIFY(cr.write(&ua) == true);
+}
+
 void ChaserRunner_Test::writeHoldZero()
 {
     QList <Function*> steps;

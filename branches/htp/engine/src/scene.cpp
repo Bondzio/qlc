@@ -217,8 +217,7 @@ bool Scene::loadXML(const QDomElement* root)
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) !=
-            typeToString(Function::Scene))
+    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::Scene))
     {
         qWarning() << Q_FUNC_INFO << "Function is not a scene";
         return false;
@@ -293,49 +292,31 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
 
 void Scene::arm()
 {
-    m_armedChannels.clear();
-
     /* Scenes cannot run unless they are children of Doc */
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
 
-    /* Get exact address numbers from fixtures and fixate them to this
-       scene for running. */
+    m_armedChannels.clear();
+
+    /* Fixate exact DMX addresses */
     QMutableListIterator <SceneValue> it(m_values);
     while (it.hasNext() == true)
     {
-        SceneValue scv(it.next());
+        SceneValue value(it.next());
 
-        Fixture* fxi = doc->fixture(scv.fxi);
-        if (fxi == NULL)
+        Fixture* fxi = doc->fixture(value.fxi);
+        if (fxi == NULL || fxi->channel(value.channel) == NULL)
         {
-            qWarning() << Q_FUNC_INFO << "Channel" << scv.channel << "from an"
-                       << "unavailable fixture ID" << scv.fxi
-                       << "taking part in scene" << name()
-                       << ". Removing the channel.";
+            // Remove such fixtures and channels that don't exist
             it.remove();
             continue;
         }
 
-        if (scv.channel < fxi->channels())
-        {
-            const QLCChannel* qlcch = fxi->channel(scv.channel);
-            Q_ASSERT(qlcch != NULL);
-
-            FadeChannel fc;
-            fc.setAddress(fxi->universeAddress() + scv.channel);
-            fc.setGroup(qlcch->group());
-            fc.setTarget(scv.value);
-            m_armedChannels << fc;
-        }
-        else
-        {
-            qWarning() << Q_FUNC_INFO << "Scene " << name() << "channel"
-                       << scv.channel << "is out of its fixture" << fxi->name()
-                       << "channel count ( <" << fxi->channels()
-                       << ") bounds. Removing the channel.";
-            it.remove();
-        }
+        FadeChannel fc;
+        fc.setAddress(fxi->universeAddress() + value.channel);
+        fc.setGroup(fxi->channel(value.channel)->group());
+        fc.setTarget(value.value);
+        m_armedChannels << fc;
     }
 
     resetElapsed();

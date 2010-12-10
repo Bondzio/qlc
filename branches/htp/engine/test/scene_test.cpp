@@ -32,6 +32,8 @@
 #include "scene.h"
 #include "doc.h"
 
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
 #include "qlcchannel.h"
 #include "qlcfile.h"
 
@@ -130,6 +132,15 @@ void Scene_Test::values()
     /* Remove fixture 4's channel 5 from the scene */
     s.unsetValue(4, 5);
     QVERIFY(s.values().size() == 0);
+
+    s.setValue(1, 1, 255);
+    s.setValue(2, 2, 255);
+    s.setValue(4, 3, 255);
+    s.setValue(1, 4, 255);
+    QVERIFY(s.values().size() == 4);
+
+    s.clear();
+    QVERIFY(s.values().size() == 0);
 }
 
 void Scene_Test::fixtureRemoval()
@@ -190,6 +201,13 @@ void Scene_Test::loadSuccess()
     QDomText v2Text = doc.createTextNode("59");
     v2.appendChild(v2Text);
     root.appendChild(v2);
+
+    QDomElement foo = doc.createElement("Foo");
+    foo.setAttribute("Fixture", 133);
+    foo.setAttribute("Channel", 4);
+    QDomText fooText = doc.createTextNode("59");
+    foo.appendChild(fooText);
+    root.appendChild(foo);
 
     Scene s(m_doc);
     QVERIFY(s.loadXML(&root) == true);
@@ -660,6 +678,221 @@ void Scene_Test::writeHTPBusOne()
     QVERIFY(uni.preGMValues()[0] == (char) 0);
     QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
+
+    s1->disarm();
+
+    delete mts;
+    delete doc;
+}
+
+void Scene_Test::writeLTPHTPBusZero()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    Bus::instance()->setValue(Bus::defaultFade(), 1);
+
+    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 1");
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(doc);
+    fxi->setFixtureDefinition(def, mode);
+    QCOMPARE(fxi->channels(), quint32(6));
+    fxi->setAddress(0);
+    fxi->setUniverse(0);
+    doc->addFixture(fxi);
+
+    Scene* s1 = new Scene(doc);
+    s1->setName("First");
+    s1->setValue(fxi->id(), 0, UCHAR_MAX);
+    s1->setValue(fxi->id(), 1, 127);
+    s1->setValue(fxi->id(), 5, 0);
+    doc->addFunction(s1);
+
+    s1->arm();
+
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+
+    QVERIFY(s1->stopped() == true);
+    mts->startFunction(s1, false);
+    QVERIFY(s1->stopped() == false);
+
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) 127);
+    QVERIFY(uni.preGMValues()[1] == (char) 63);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) 127);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
+
+    mts->stopFunction(s1);
+    QVERIFY(s1->stopped() == true);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) 127);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+
+    s1->disarm();
+
+    delete mts;
+    delete doc;
+}
+
+void Scene_Test::writeLTPBusOne()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    Bus::instance()->setValue(Bus::defaultFade(), 1);
+
+    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 1");
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(doc);
+    fxi->setFixtureDefinition(def, mode);
+    QCOMPARE(fxi->channels(), quint32(6));
+    fxi->setAddress(0);
+    fxi->setUniverse(0);
+    doc->addFixture(fxi);
+
+    Scene* s1 = new Scene(doc);
+    s1->setName("First");
+    s1->setValue(fxi->id(), 0, UCHAR_MAX);
+    s1->setValue(fxi->id(), 1, UCHAR_MAX);
+    s1->setValue(fxi->id(), 2, UCHAR_MAX);
+    doc->addFunction(s1);
+
+    s1->arm();
+
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+
+    QVERIFY(s1->stopped() == true);
+    mts->startFunction(s1, false);
+    QVERIFY(s1->stopped() == false);
+
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) 127);
+    QVERIFY(uni.preGMValues()[1] == (char) 127);
+    QVERIFY(uni.preGMValues()[2] == (char) 127);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[2] == (char) UCHAR_MAX);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[2] == (char) UCHAR_MAX);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
+
+    s1->disarm();
+
+    delete mts;
+    delete doc;
+}
+
+void Scene_Test::writeLTPReady()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    Bus::instance()->setValue(Bus::defaultFade(), 1);
+
+    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 1");
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(doc);
+    fxi->setFixtureDefinition(def, mode);
+    QCOMPARE(fxi->channels(), quint32(6));
+    fxi->setAddress(0);
+    fxi->setUniverse(0);
+    doc->addFixture(fxi);
+
+    Scene* s1 = new Scene(doc);
+    s1->setName("First");
+    s1->setValue(fxi->id(), 0, UCHAR_MAX);
+    s1->setValue(fxi->id(), 1, UCHAR_MAX);
+    s1->setValue(fxi->id(), 2, UCHAR_MAX);
+    doc->addFunction(s1);
+
+    s1->arm();
+
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+
+    QVERIFY(s1->stopped() == true);
+    mts->startFunction(s1, false);
+    QVERIFY(s1->stopped() == false);
+
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
+    QVERIFY(uni.preGMValues()[2] == (char) 0);
+
+    uni.write(0, 255, QLCChannel::Pan);
+    uni.write(1, 255, QLCChannel::Tilt);
+    uni.write(2, 255, QLCChannel::Colour);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[2] == (char) UCHAR_MAX);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[2] == (char) UCHAR_MAX);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[1] == (char) UCHAR_MAX);
+    QVERIFY(uni.preGMValues()[2] == (char) UCHAR_MAX);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
 
     s1->disarm();
 

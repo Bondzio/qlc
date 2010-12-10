@@ -54,6 +54,9 @@ private slots:
 
     void writeHTPBusZero();
     void writeHTPBusOne();
+    void writeLTPHTPBusZero();
+    void writeLTPBusOne();
+    void writeLTPReady();
 
 private:
     Doc* m_doc;

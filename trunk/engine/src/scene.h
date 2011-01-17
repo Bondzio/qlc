@@ -170,10 +170,12 @@ public:
      * @param universes The universe array to write values to
      * @param fxi_id if non-invalid, writes values concerning only given fixture
      * @param grp if non-invalid, writes values concerning only given channel group
+     * @param percentage Percentage 0.0 - 1.0 of the actual value to write (default 1.0)
      */
     virtual void writeValues(UniverseArray* universes,
                              quint32 fxi_id = Fixture::invalidId(),
-                             QLCChannel::Group grp = QLCChannel::NoGroup);
+                             QLCChannel::Group grp = QLCChannel::NoGroup,
+                             qreal percentage = 1.0);
 
     /** Get a list of channels that have been armed for running */
     QList <FadeChannel> armedChannels() const;

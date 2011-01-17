@@ -47,7 +47,8 @@ public:
     void setValue(quint32 address, uchar value);
     void writeValues(UniverseArray* universes,
                      quint32 fxi_id = Fixture::invalidId(),
-                     QLCChannel::Group grp = QLCChannel::NoGroup);
+                     QLCChannel::Group grp = QLCChannel::NoGroup,
+                     qreal percentage = 1.0);
 
     QMap <quint32,uchar> m_values;
 };

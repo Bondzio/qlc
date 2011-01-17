@@ -419,17 +419,20 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
 }
 
 void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
-                        QLCChannel::Group grp)
+                        QLCChannel::Group grp, qreal percentage)
 {
     Q_ASSERT(universes != NULL);
-
-    for (int i = 0; i < m_armedChannels.size() && i < m_values.size(); i++)
+    for (int i = 0; i < m_armedChannels.size(); i++)
     {
         if (fxi_id == Fixture::invalidId() || m_values[i].fxi == fxi_id)
         {
             const FadeChannel& fc(m_armedChannels[i]);
             if (grp == QLCChannel::NoGroup || fc.group() == grp)
-                universes->write(fc.address(), fc.target(), fc.group());
+            {
+                qreal value = CLAMP(percentage, 0.0, 1.0) * qreal(fc.target());
+                value = uchar(floor(value + 0.5));
+                universes->write(fc.address(), uchar(value), fc.group());
+            }
         }
     }
 }
@@ -438,4 +441,3 @@ QList <FadeChannel> Scene::armedChannels() const
 {
     return m_armedChannels;
 }
-

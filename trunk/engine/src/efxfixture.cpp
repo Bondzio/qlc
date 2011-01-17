@@ -375,8 +375,7 @@ void EFXFixture::start(UniverseArray* universes)
     {
         // On the next passes, keep writing only HTP/intensity values
         if (m_startScene != NULL)
-            m_startScene->writeValues(universes, m_fixture,
-                                      QLCChannel::Intensity);
+            m_startScene->writeValues(universes, m_fixture, QLCChannel::Intensity);
     }
 }
 

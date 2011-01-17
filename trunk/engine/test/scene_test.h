@@ -58,6 +58,8 @@ private slots:
     void writeLTPBusOne();
     void writeLTPReady();
 
+    void writeValues();
+
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;

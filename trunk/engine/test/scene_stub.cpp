@@ -41,7 +41,7 @@ void SceneStub::setValue(quint32 address, uchar value)
 }
 
 void SceneStub::writeValues(UniverseArray* array, quint32 fxi_id,
-                            QLCChannel::Group grp)
+                            QLCChannel::Group grp, qreal percentage)
 {
     Q_UNUSED(fxi_id);
     Q_UNUSED(grp);
@@ -50,6 +50,8 @@ void SceneStub::writeValues(UniverseArray* array, quint32 fxi_id,
     while (it.hasNext() == true)
     {
         it.next();
-        array->write(it.key(), it.value(), QLCChannel::Intensity);
+        qreal value = CLAMP(percentage, 0.0, 1.0) * qreal(it.value());
+        value = uchar(floor(value + 0.5));
+        array->write(it.key(), uchar(value), QLCChannel::Intensity);
     }
 }

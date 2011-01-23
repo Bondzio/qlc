@@ -156,15 +156,15 @@ App::~App()
     if (m_inputMap != NULL)
         m_inputMap->saveDefaults();
 
-    // Delete doc
-    if (m_doc != NULL)
-        delete m_doc;
-    m_doc = NULL;
-
     // Delete master timer
     if (m_masterTimer != NULL)
         delete m_masterTimer;
     m_masterTimer = NULL;
+
+    // Delete doc
+    if (m_doc != NULL)
+        delete m_doc;
+    m_doc = NULL;
 
     // Delete mode indicator
     if (m_modeIndicator != NULL)

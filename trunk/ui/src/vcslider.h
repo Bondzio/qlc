@@ -60,6 +60,9 @@ class VCSliderProperties;
 #define KXMLQLCVCSliderChannel "Channel"
 #define KXMLQLCVCSliderChannelFixture "Fixture"
 
+#define KXMLQLCVCSliderPlayback "Playback"
+#define KXMLQLCVCSliderPlaybackFunction "Function"
+
 class VCSlider : public VCWidget, public DMXSource
 {
     Q_OBJECT
@@ -118,7 +121,7 @@ public:
     {
         Bus,
         Level,
-        Submaster
+        Playback
     };
 
 public:
@@ -354,11 +357,58 @@ protected:
     uchar m_levelValue;
 
     /*********************************************************************
+     * Playback
+     *********************************************************************/
+public:
+    /**
+     * Set the function used as the slider's playback function (when in
+     * playback mode).
+     *
+     * @param fid The ID of the function
+     */
+    void setPlaybackFunction(t_function_id fid);
+
+    /**
+     * Get the function used as the slider's playback function (when in
+     * playback mode).
+     *
+     * @return The ID of the function
+     */
+    t_function_id playbackFunction() const;
+
+    /**
+     * Set the level of the currently selected playback function.
+     *
+     * @param level The current playback function's level.
+     */
+    void setPlaybackValue(uchar value);
+
+    /**
+     * Get the level of the currently selected playback function.
+     *
+     * @return The current playback function level.
+     */
+    uchar playbackValue() const;
+
+protected:
+    t_function_id m_playbackFunction;
+    uchar m_playbackValue;
+    bool m_playbackValueChanged;
+    QMutex m_playbackValueMutex;
+
+    /*********************************************************************
      * DMXSource
      *********************************************************************/
 public:
     /** @reimpl */
     void writeDMX(MasterTimer* timer, UniverseArray* universes);
+
+protected:
+    /** writeDMX for Level mode */
+    void writeDMXLevel(MasterTimer* timer, UniverseArray* universes);
+
+    /** writeDMX for Playback mode */
+    void writeDMXPlayback(MasterTimer* timer, UniverseArray* universes);
 
     /*********************************************************************
      * Top label
@@ -467,6 +517,7 @@ public:
     static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);
     bool loadXMLLevel(const QDomElement* level_root);
+    bool loadXMLPlayback(const QDomElement* pb_root);
 
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 };

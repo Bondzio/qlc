@@ -51,7 +51,7 @@ private:
 protected slots:
     void slotModeBusClicked();
     void slotModeLevelClicked();
-    void slotModeSubmasterClicked();
+    void slotModePlaybackClicked();
 
     void slotAutoDetectInputToggled(bool checked);
     void slotInputValueChanged(quint32 universe, quint32 channel);
@@ -131,7 +131,7 @@ protected slots:
     void slotLevelHighSpinChanged(int value);
 
     /** Callback for "set limits by capability" button clicks */
-    void slotLevelCapabilityButtonClicked();
+    void slotLevelCapabilityClicked();
 
     /** Callback for level list item clicks */
     void slotLevelListClicked(QTreeWidgetItem* item);
@@ -147,6 +147,20 @@ protected slots:
 
     /** Callback for "channel selection by group" button clicks */
     void slotLevelByGroupClicked();
+
+    /*************************************************************************
+     * Playback page
+     *************************************************************************/
+public slots:
+    /** Callback for playback function attach clicks */
+    void slotAttachPlaybackFunctionClicked();
+
+    /** Callback for playback function detach clicks */
+    void slotDetachPlaybackFunctionClicked();
+
+protected:
+    /** The currently selected playback function */
+    t_function_id m_playbackFunctionId;
 
     /*********************************************************************
      * OK & Cancel

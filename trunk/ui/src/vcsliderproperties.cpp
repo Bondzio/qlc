@@ -38,6 +38,7 @@
 
 #include "vcsliderproperties.h"
 #include "selectinputchannel.h"
+#include "functionselection.h"
 #include "inputpatch.h"
 #include "vcslider.h"
 #include "inputmap.h"
@@ -70,7 +71,7 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
     connect(m_levelHighLimitSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotLevelHighSpinChanged(int)));
     connect(m_levelCapabilityButton, SIGNAL(clicked()),
-            this, SLOT(slotLevelCapabilityButtonClicked()));
+            this, SLOT(slotLevelCapabilityClicked()));
     connect(m_levelList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
             this, SLOT(slotLevelListClicked(QTreeWidgetItem*)));
     connect(m_levelAllButton, SIGNAL(clicked()),
@@ -83,6 +84,14 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
             this, SLOT(slotLevelByGroupClicked()));
     connect(m_switchToLevelModeButton, SIGNAL(clicked()),
             this, SLOT(slotModeLevelClicked()));
+
+    /* Playback page connections */
+    connect(m_switchToPlaybackModeButton, SIGNAL(clicked()),
+            this, SLOT(slotModePlaybackClicked()));
+    connect(m_attachPlaybackFunctionButton, SIGNAL(clicked()),
+            this, SLOT(slotAttachPlaybackFunctionClicked()));
+    connect(m_detachPlaybackFunctionButton, SIGNAL(clicked()),
+            this, SLOT(slotDetachPlaybackFunctionClicked()));
 
     /*********************************************************************
      * General page
@@ -102,8 +111,8 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
     case VCSlider::Level:
         slotModeLevelClicked();
         break;
-    case VCSlider::Submaster:
-        slotModeLevelClicked();
+    case VCSlider::Playback:
+        slotModePlaybackClicked();
         break;
     }
 
@@ -162,6 +171,11 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
     /* Tree widget contents */
     levelUpdateFixtures();
     levelUpdateChannelSelections();
+
+    /*********************************************************************
+     * Playback page
+     *********************************************************************/
+    
 }
 
 VCSliderProperties::~VCSliderProperties()
@@ -190,9 +204,15 @@ void VCSliderProperties::slotModeBusClicked()
     m_levelInvertButton->hide();
     m_levelByGroupButton->hide();
 
+    m_playbackFunctionGroup->hide();
+
     m_switchToBusModeButton->hide();
     m_switchToLevelModeButton->show();
-    m_busSpacer->changeSize(10, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+    m_switchToPlaybackModeButton->show();
+
+    m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
 void VCSliderProperties::slotModeLevelClicked()
@@ -211,14 +231,42 @@ void VCSliderProperties::slotModeLevelClicked()
     m_levelInvertButton->show();
     m_levelByGroupButton->show();
 
-    m_switchToLevelModeButton->hide();
+    m_playbackFunctionGroup->hide();
+
     m_switchToBusModeButton->show();
+    m_switchToLevelModeButton->hide();
+    m_switchToPlaybackModeButton->show();
+
     m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+    m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-void VCSliderProperties::slotModeSubmasterClicked()
+void VCSliderProperties::slotModePlaybackClicked()
 {
-    m_sliderMode = VCSlider::Submaster;
+    m_sliderMode = VCSlider::Playback;
+
+    m_nameEdit->setEnabled(true);
+    m_busValueRangeGroup->hide();
+    m_busGroup->hide();
+    m_sliderMovementNormalRadio->setChecked(true);
+
+    m_levelValueRangeGroup->hide();
+    m_levelList->hide();
+    m_levelAllButton->hide();
+    m_levelNoneButton->hide();
+    m_levelInvertButton->hide();
+    m_levelByGroupButton->hide();
+
+    m_playbackFunctionGroup->show();
+
+    m_switchToLevelModeButton->show();
+    m_switchToBusModeButton->show();
+    m_switchToPlaybackModeButton->hide();
+
+    m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
 void VCSliderProperties::slotAutoDetectInputToggled(bool checked)
@@ -549,7 +597,7 @@ void VCSliderProperties::slotLevelHighSpinChanged(int value)
         m_levelLowLimitSpin->setValue(value - 1);
 }
 
-void VCSliderProperties::slotLevelCapabilityButtonClicked()
+void VCSliderProperties::slotLevelCapabilityClicked()
 {
     QTreeWidgetItem* item;
     QStringList list;
@@ -657,6 +705,45 @@ void VCSliderProperties::slotLevelByGroupClicked()
 }
 
 /*****************************************************************************
+ * Playback page
+ *****************************************************************************/
+
+void VCSliderProperties::slotAttachPlaybackFunctionClicked()
+{
+    FunctionSelection fs(this, false, Function::invalidId(), Function::Scene, true);
+    if (fs.exec() != QDialog::Accepted)
+        return;
+
+    if (fs.selection().size() == 0)
+        return;
+
+    m_playbackFunctionId = fs.selection().first();
+    updatePlaybackFunctionName();
+}
+
+void VCSliderProperties::updatePlaybackFunctionName()
+{
+    Function* function = _app->doc()->function(fs.selection().first());
+    if (function != NULL)
+    {
+        m_playbackFunctionId = function->id();
+        m_playbackFunctionEdit->setText(function->name());
+        if (m_nameEdit->text().simplified().isEmpty() == true)
+            m_nameEdit->setText(function->name());
+    }
+    else
+    {
+        slotDetachPlaybackFunctionClicked();
+    }
+}
+
+void VCSliderProperties::slotDetachPlaybackFunctionClicked()
+{
+    m_playbackFunctionId = Function::invalidId();
+    m_playbackFunctionEdit->setText(tr("No function"));
+}
+
+/*****************************************************************************
  * OK & Cancel
  *****************************************************************************/
 
@@ -699,9 +786,12 @@ void VCSliderProperties::accept()
     m_slider->setLevelHighLimit(m_levelHighLimitSpin->value());
     storeLevelChannels();
 
+    /* Playback page */
+    m_slider->setPlaybackFunction(m_playbackFunctionId);
+
     /* Slider mode */
     m_slider->setSliderMode(VCSlider::SliderMode(m_sliderMode));
-    if (m_sliderMode == VCSlider::Level)
+    if (m_sliderMode == VCSlider::Level || m_sliderMode == VCSlider::Playback)
         m_slider->setCaption(m_nameEdit->text());
 
     /* Value style */

@@ -110,7 +110,7 @@ void VCButtonProperties::slotSetFunction(t_function_id fid)
     func = _app->doc()->function(m_function);
     if (func == NULL)
     {
-        m_functionEdit->setText("No function");
+        m_functionEdit->setText(tr("No function"));
     }
     else
     {

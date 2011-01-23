@@ -40,6 +40,7 @@
 #include "vcslider.h"
 #include "app.h"
 #include "doc.h"
+#include "scene.h"
 #include "inputmap.h"
 #include "inputpatch.h"
 #include "universearray.h"
@@ -81,6 +82,10 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
     m_sliderValue = 0;
     m_levelValue = 0;
     m_levelValueChanged = false;
+
+    m_playbackFunction = Function::invalidId();
+    m_playbackValue = 0;
+    m_playbackValueChanged = false;
 
     m_time = NULL;
 
@@ -325,8 +330,8 @@ QString VCSlider::sliderModeToString(SliderMode mode)
         return QString("Level");
         break;
 
-    case Submaster:
-        return QString("Submaster");
+    case Playback:
+        return QString("Playback");
         break;
 
     default:
@@ -341,8 +346,8 @@ VCSlider::SliderMode VCSlider::stringToSliderMode(const QString& mode)
         return Bus;
     else if (mode == QString("Level"))
         return Level;
-    else if (mode == QString("Submaster"))
-        return Submaster;
+    else if (mode == QString("Playback"))
+        return Playback;
     else
         return Bus;
 }
@@ -354,7 +359,7 @@ VCSlider::SliderMode VCSlider::sliderMode()
 
 void VCSlider::setSliderMode(SliderMode mode)
 {
-    Q_ASSERT(mode >= Bus && mode <= Submaster);
+    Q_ASSERT(mode >= Bus && mode <= Playback);
 
     /* Disconnect these to prevent double callbacks and non-needes signals */
     disconnect(Bus::instance(), SIGNAL(nameChanged(quint32, const QString&)),
@@ -362,9 +367,12 @@ void VCSlider::setSliderMode(SliderMode mode)
     disconnect(Bus::instance(), SIGNAL(valueChanged(quint32, quint32)),
                this, SLOT(slotBusValueChanged(quint32, quint32)));
 
-    /* Unregister this as a DMX source if the new mode is not "Level" */
-    if (m_sliderMode == Level && mode != Level)
+    /* Unregister this as a DMX source if the new mode is not "Level" or "Playback" */
+    if ((m_sliderMode == Level && mode != Level) ||
+        (m_sliderMode == Playback && mode != Playback))
+    {
         _app->masterTimer()->unregisterDMXSource(this);
+    }
 
     m_sliderMode = mode;
 
@@ -400,10 +408,17 @@ void VCSlider::setSliderMode(SliderMode mode)
 
         _app->masterTimer()->registerDMXSource(this);
     }
-    else if (mode == Submaster)
+    else if (mode == Playback)
     {
         m_bottomLabel->show();
         m_tapButton->hide();
+
+        uchar level = playbackValue();
+        m_slider->setRange(0, UCHAR_MAX);
+        setSliderValue(level);
+        slotSliderMoved(level);
+
+        _app->masterTimer()->registerDMXSource(this);
     }
 }
 
@@ -534,11 +549,46 @@ void VCSlider::slotFixtureRemoved(quint32 fxi_id)
     }
 }
 
-/*********************************************************************
+/*****************************************************************************
+ * Playback
+ *****************************************************************************/
+
+void VCSlider::setPlaybackFunction(t_function_id fid)
+{
+    m_playbackFunction = fid;
+}
+
+t_function_id VCSlider::playbackFunction() const
+{
+    return m_playbackFunction;
+}
+
+void VCSlider::setPlaybackValue(uchar value)
+{
+    m_playbackValueMutex.lock();
+    m_playbackValue = value;
+    m_playbackValueChanged = true;
+    m_playbackValueMutex.unlock();
+}
+
+uchar VCSlider::playbackValue() const
+{
+    return m_playbackValue;
+}
+
+/*****************************************************************************
  * DMXSource
- *********************************************************************/
+ *****************************************************************************/
 
 void VCSlider::writeDMX(MasterTimer* timer, UniverseArray* universes)
+{
+    if (sliderMode() == Level)
+        writeDMXLevel(timer, universes);
+    else if (sliderMode() == Playback)
+        writeDMXPlayback(timer, universes);
+}
+
+void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
 
@@ -569,6 +619,53 @@ void VCSlider::writeDMX(MasterTimer* timer, UniverseArray* universes)
     }
     m_levelValueChanged = false;
     m_levelValueMutex.unlock();
+}
+
+void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
+{
+    Q_UNUSED(timer);
+
+    Function* f = _app->doc()->function(m_playbackFunction);
+    if (f == NULL)
+        return;
+
+    m_playbackValueMutex.lock();
+    qreal percentage = qreal(m_playbackValue) / qreal(UCHAR_MAX);
+
+    switch(f->type())
+    {
+    case Function::Scene:
+        {
+        Scene* s = qobject_cast<Scene*> (f);
+        Q_ASSERT(s != NULL);
+
+        /* When the value has changed recently (= slider moved since last writeDMX cycle)
+           write both HTP & LTP channels. Otherwise write only HTP channel values. */
+        if (m_playbackValueChanged == true)
+            s->writeValues(universes, Fixture::invalidId(), QLCChannel::NoGroup, percentage);
+        else
+            s->writeValues(universes, Fixture::invalidId(), QLCChannel::Intensity, percentage);
+        break;
+        }
+
+    case Function::Chaser:
+        /** @todo Chaser playback */
+        break;
+
+    case Function::EFX:
+        /** @todo EFX playback */
+        break;
+
+    case Function::Collection:
+        /** @todo Collection playback */
+        break;
+
+    default:
+        break;
+    }
+
+    m_playbackValueChanged = false;
+    m_playbackValueMutex.unlock();
 }
 
 /*****************************************************************************
@@ -652,8 +749,26 @@ void VCSlider::slotSliderMoved(int value)
     }
     break;
 
-    case Submaster:
-        break;
+    case Playback:
+    {
+        setPlaybackValue(value);
+
+        /* Set text for the top label */
+        if (valueDisplayStyle() == ExactValue)
+        {
+            num.sprintf("%.3d", value);
+        }
+        else
+        {
+            float f = SCALE(float(value),
+                            float(m_slider->minimum()),
+                            float(m_slider->maximum()),
+                            float(0), float(100));
+            num.sprintf("%.3d%%", static_cast<int> (f));
+        }
+        setTopLabelText(num);
+    }
+    break;
 
     default:
         break;
@@ -861,6 +976,10 @@ bool VCSlider::loadXML(const QDomElement* root)
         {
             loadXMLInput(&tag);
         }
+        else if (tag.tagName() == KXMLQLCVCSliderPlayback)
+        {
+            loadXMLPlayback(&tag);
+        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown slider tag:" << tag.tagName();
@@ -927,11 +1046,45 @@ bool VCSlider::loadXMLLevel(const QDomElement* level_root)
     return true;
 }
 
+bool VCSlider::loadXMLPlayback(const QDomElement* pb_root)
+{
+    QDomNode node;
+    QDomElement tag;
+
+    Q_ASSERT(pb_root != NULL);
+
+    if (pb_root->tagName() != KXMLQLCVCSliderPlayback)
+    {
+        qWarning() << Q_FUNC_INFO << "Slider playback node not found";
+        return false;
+    }
+
+    /* Children */
+    node = pb_root->firstChild();
+    while (node.isNull() == false)
+    {
+        tag = node.toElement();
+        if (tag.tagName() == KXMLQLCVCSliderPlaybackFunction)
+        {
+            /* Function */
+            setPlaybackFunction(tag.text().toUInt());
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unknown slider playback tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
+}
+
 bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
 {
     QDomElement root;
     QDomElement tag;
-    QDomElement chtag;
+    QDomElement subtag;
     QDomText text;
     QString str;
 
@@ -1008,6 +1161,16 @@ bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
         LevelChannel lch(it.next());
         lch.saveXML(doc, &tag);
     }
+
+    /* Playback */
+    tag = doc->createElement(KXMLQLCVCSliderPlayback);
+    root.appendChild(tag);
+
+    /* Playback function */
+    subtag = doc->createElement(KXMLQLCVCSliderPlaybackFunction);
+    text = doc->createTextNode(QString::number(playbackFunction()));
+    subtag.appendChild(text);
+    tag.appendChild(subtag);
 
     return true;
 }

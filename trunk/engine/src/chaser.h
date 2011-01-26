@@ -166,30 +166,20 @@ public:
     void preRun(MasterTimer* timer);
 
     /** @reimpl */
-    //void postRun(MasterTimer* timer, UniverseArray* universes);
-
-    /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
-#if 0
-protected:
-    /** Check, whether the chaser has gone a full round. Returns false
-        if singleshot == true and a full round has been completed. */
-    bool roundCheck();
 
-    /** Increment or decrement the next function position */
-    void nextStep();
-
-    /** Start the current function */
-    void startCurrent(MasterTimer* timer);
-
-    /** Stop the current function */
-    void stopCurrent();
-#endif
 protected:
     bool m_tapped;
     ChaserRunner* m_runner;
     Direction m_runTimeDirection;
     int m_runTimePosition;
+
+    /*************************************************************************
+     * Intensity
+     *************************************************************************/
+public:
+    /** @reimpl */
+    void adjustIntensity(qreal fraction);
 };
 
 #endif

@@ -35,18 +35,20 @@
 #include <QPen>
 
 #include "vcsliderproperties.h"
+#include "qlcinputchannel.h"
 #include "virtualconsole.h"
+#include "universearray.h"
 #include "mastertimer.h"
+#include "collection.h"
+#include "inputpatch.h"
+#include "inputmap.h"
 #include "vcslider.h"
+#include "qlcfile.h"
+#include "chaser.h"
+#include "scene.h"
+#include "efx.h"
 #include "app.h"
 #include "doc.h"
-#include "scene.h"
-#include "inputmap.h"
-#include "inputpatch.h"
-#include "universearray.h"
-#include "qlcinputchannel.h"
-
-#include "qlcfile.h"
 
 extern App* _app;
 
@@ -84,6 +86,7 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
     m_levelValueChanged = false;
 
     m_playbackFunction = Function::invalidId();
+    m_playbackFunctionStartedByMe = false;
     m_playbackValue = 0;
     m_playbackValueChanged = false;
 
@@ -248,6 +251,21 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
         m_slider->setEnabled(true);
         m_bottomLabel->setEnabled(true);
         m_tapButton->setEnabled(true);
+
+        if (sliderMode() == Playback)
+        {
+            /* Follow playback function running/stopped status in case the
+               function is started from another control. */
+            Function* function = _app->doc()->function(playbackFunction());
+            if (function != NULL)
+            {
+                connect(function, SIGNAL(running(t_function_id)),
+                        this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
+                connect(function, SIGNAL(stopped(t_function_id)),
+                        this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
+                m_playbackFunctionStartedByMe = false;
+            }
+        }
     }
     else
     {
@@ -255,6 +273,20 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
         m_slider->setEnabled(false);
         m_bottomLabel->setEnabled(false);
         m_tapButton->setEnabled(false);
+
+        if (sliderMode() == Playback)
+        {
+            /* Stop following playback function running/stopped status in case
+               the function is changed in Design mode to another. */
+            Function* function = _app->doc()->function(playbackFunction());
+            if (function != NULL)
+            {
+                disconnect(function, SIGNAL(running(t_function_id)),
+                        this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
+                disconnect(function, SIGNAL(stopped(t_function_id)),
+                        this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
+            }
+        }
     }
 
     VCWidget::slotModeChanged(mode);
@@ -576,6 +608,19 @@ uchar VCSlider::playbackValue() const
     return m_playbackValue;
 }
 
+void VCSlider::slotPlaybackFunctionRunning(t_function_id fid)
+{
+    if (fid == playbackFunction() && m_playbackFunctionStartedByMe == false)
+        setSliderValue(m_slider->maximum());
+}
+
+void VCSlider::slotPlaybackFunctionStopped(t_function_id fid)
+{
+    if (fid == playbackFunction())
+        setSliderValue(0);
+    m_playbackFunctionStartedByMe = false;
+}
+
 /*****************************************************************************
  * DMXSource
  *****************************************************************************/
@@ -623,49 +668,61 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
 
 void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
 {
-    Q_UNUSED(timer);
-
-    Function* f = _app->doc()->function(m_playbackFunction);
-    if (f == NULL)
+    Function* function = _app->doc()->function(m_playbackFunction);
+    if (function == NULL)
         return;
 
+    /* Grab current values inside a locked mutex */
     m_playbackValueMutex.lock();
-    qreal percentage = qreal(m_playbackValue) / qreal(UCHAR_MAX);
+     uchar value = m_playbackValue;
+     bool changed = m_playbackValueChanged;
+     m_playbackValueChanged = false;
+    m_playbackValueMutex.unlock();
 
-    switch(f->type())
+    qreal percentage = qreal(value) / qreal(UCHAR_MAX);
+
+    switch(function->type())
     {
     case Function::Scene:
-        {
-        Scene* s = qobject_cast<Scene*> (f);
-        Q_ASSERT(s != NULL);
+    {
+        Scene* scene = qobject_cast<Scene*> (function);
+        Q_ASSERT(scene != NULL);
 
         /* When the value has changed recently (= slider moved since last writeDMX cycle)
            write both HTP & LTP channels. Otherwise write only HTP channel values. */
-        if (m_playbackValueChanged == true)
-            s->writeValues(universes, Fixture::invalidId(), QLCChannel::NoGroup, percentage);
-        else
-            s->writeValues(universes, Fixture::invalidId(), QLCChannel::Intensity, percentage);
-        break;
+        if (changed == true) {
+            scene->writeValues(universes, Fixture::invalidId(),
+                               QLCChannel::NoGroup, percentage);
+        } else {
+            scene->writeValues(universes, Fixture::invalidId(),
+                               QLCChannel::Intensity, percentage);
         }
-
-    case Function::Chaser:
-        /** @todo Chaser playback */
-        break;
-
-    case Function::EFX:
-        /** @todo EFX playback */
-        break;
-
-    case Function::Collection:
-        /** @todo Collection playback */
-        break;
+    }
+    break;
 
     default:
+        if (changed == true)
+        {
+            if (value == 0)
+            {
+                if (function->stopped() == false)
+                {
+                    m_playbackFunctionStartedByMe = false;
+                    function->stop();
+                }
+            }
+            else
+            {
+                if (function->stopped() == true)
+                {
+                    m_playbackFunctionStartedByMe = true;
+                    timer->startFunction(function, false);
+                }
+                function->adjustIntensity(percentage);
+            }
+        }
         break;
     }
-
-    m_playbackValueChanged = false;
-    m_playbackValueMutex.unlock();
 }
 
 /*****************************************************************************

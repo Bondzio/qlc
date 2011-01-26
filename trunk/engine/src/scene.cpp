@@ -436,8 +436,3 @@ void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
         }
     }
 }
-
-QList <FadeChannel> Scene::armedChannels() const
-{
-    return m_armedChannels;
-}

@@ -59,6 +59,8 @@ private slots:
     void writeNoAutoStepHoldFive();
     void writeNoAutoSetCurrentStep();
 
+    void writeForwardSingleShotHoldFiveAdjustIntensity();
+
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;

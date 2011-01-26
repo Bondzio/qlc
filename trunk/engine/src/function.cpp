@@ -64,6 +64,7 @@ Function::Function(Doc* doc) : QObject(doc)
     m_flashing = false;
     m_elapsed = 0;
     m_stop = true;
+    m_intensity = 1.0;
 }
 
 Function::~Function()
@@ -382,6 +383,7 @@ void Function::postRun(MasterTimer* timer, UniverseArray* universes)
 
     m_stopMutex.lock();
     resetElapsed();
+    resetIntensity();
     m_stop = true;
     m_functionStopped.wakeAll();
     m_stopMutex.unlock();
@@ -456,4 +458,23 @@ bool Function::stopAndWait()
 
     m_stopMutex.unlock();
     return result;
+}
+
+/*****************************************************************************
+ * Intensity
+ *****************************************************************************/
+
+void Function::adjustIntensity(qreal fraction)
+{
+    m_intensity = CLAMP(fraction, 0.0, 1.0);
+}
+
+void Function::resetIntensity()
+{
+    adjustIntensity(1.0);
+}
+
+qreal Function::intensity() const
+{
+    return m_intensity;
 }

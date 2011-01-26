@@ -157,6 +157,27 @@ void Function_Test::stopAndWaitFail()
     QVERIFY(stub->stopAndWait() == false);
 }
 
+void Function_Test::adjustIntensity()
+{
+    QLCFixtureDefCache cache;
+    Doc doc(this, cache);
+
+    Function_Stub* stub = new Function_Stub(&doc);
+    QCOMPARE(stub->intensity(), qreal(1.0));
+
+    stub->adjustIntensity(0.5);
+    QCOMPARE(stub->intensity(), qreal(0.5));
+
+    stub->adjustIntensity(1.5);
+    QCOMPARE(stub->intensity(), qreal(1.0));
+
+    stub->adjustIntensity(-7.0);
+    QCOMPARE(stub->intensity(), qreal(0));
+
+    stub->resetIntensity();
+    QCOMPARE(stub->intensity(), qreal(1.0));
+}
+
 void Function_Test::slotFixtureRemoved()
 {
     QLCFixtureDefCache cache;

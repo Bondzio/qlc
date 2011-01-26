@@ -175,7 +175,10 @@ VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
     /*********************************************************************
      * Playback page
      *********************************************************************/
-    
+
+    /* Function */
+    m_playbackFunctionId = m_slider->playbackFunction();
+    updatePlaybackFunctionName();
 }
 
 VCSliderProperties::~VCSliderProperties()
@@ -710,7 +713,8 @@ void VCSliderProperties::slotLevelByGroupClicked()
 
 void VCSliderProperties::slotAttachPlaybackFunctionClicked()
 {
-    FunctionSelection fs(this, false, Function::invalidId(), Function::Scene, true);
+    FunctionSelection fs(this, false, Function::invalidId(),
+                         Function::Scene | Function::Chaser);
     if (fs.exec() != QDialog::Accepted)
         return;
 
@@ -721,26 +725,26 @@ void VCSliderProperties::slotAttachPlaybackFunctionClicked()
     updatePlaybackFunctionName();
 }
 
+void VCSliderProperties::slotDetachPlaybackFunctionClicked()
+{
+    m_playbackFunctionId = Function::invalidId();
+    updatePlaybackFunctionName();
+}
+
 void VCSliderProperties::updatePlaybackFunctionName()
 {
-    Function* function = _app->doc()->function(fs.selection().first());
+    Function* function = _app->doc()->function(m_playbackFunctionId);
     if (function != NULL)
     {
-        m_playbackFunctionId = function->id();
         m_playbackFunctionEdit->setText(function->name());
         if (m_nameEdit->text().simplified().isEmpty() == true)
             m_nameEdit->setText(function->name());
     }
     else
     {
-        slotDetachPlaybackFunctionClicked();
+        m_playbackFunctionId = Function::invalidId(); // Ensure
+        m_playbackFunctionEdit->setText(tr("No function"));
     }
-}
-
-void VCSliderProperties::slotDetachPlaybackFunctionClicked()
-{
-    m_playbackFunctionId = Function::invalidId();
-    m_playbackFunctionEdit->setText(tr("No function"));
 }
 
 /*****************************************************************************

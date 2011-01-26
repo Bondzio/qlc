@@ -479,6 +479,32 @@ private:
 
     QMutex m_stopMutex;
     QWaitCondition m_functionStopped;
+
+    /*************************************************************************
+     * Intensity
+     *************************************************************************/
+public:
+    /**
+     * Adjust the intensity of the function by a fraction.
+     *
+     * @param fraction Intensity as a fraction (0.0 - 1.0)
+     */
+    virtual void adjustIntensity(qreal fraction);
+
+    /**
+     * Reset intensity to the default value (1.0).
+     */
+    void resetIntensity();
+
+    /**
+     * Get the function's current intensity fraction.
+     *
+     * @return Intensity fraction (0.0 - 1.0)
+     */
+    qreal intensity() const;
+
+private:
+    qreal m_intensity;
 };
 
 #endif

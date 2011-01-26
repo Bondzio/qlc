@@ -159,6 +159,10 @@ public slots:
     void slotDetachPlaybackFunctionClicked();
 
 protected:
+    /** Update the name of the playback function, based on m_playbackFunctionId */
+    void updatePlaybackFunctionName();
+
+protected:
     /** The currently selected playback function */
     t_function_id m_playbackFunctionId;
 

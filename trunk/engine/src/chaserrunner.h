@@ -39,7 +39,7 @@ class ChaserRunner : public QObject
 public:
     ChaserRunner(Doc* doc, QList <Function*> steps, quint32 holdBusId,
                  Function::Direction direction, Function::RunOrder runOrder,
-                 QObject* parent = NULL);
+                 qreal intensity = 1.0, QObject* parent = NULL);
     ~ChaserRunner();
 
     /**
@@ -122,6 +122,15 @@ private:
     QMap <quint32,FadeChannel> createFadeChannels(const UniverseArray* universes) const;
 
     /************************************************************************
+     * Intensity
+     ************************************************************************/
+public:
+    /**
+     * Adjust the intensities of chaser steps.
+     */
+    void adjustIntensity(qreal fraction);
+
+    /************************************************************************
      * Constant parameters
      ************************************************************************/
 private:
@@ -143,6 +152,7 @@ private:
     bool m_previous; //! If true, skips to the previous step when write is called
     int m_currentStep; //! Current step from m_steps
     int m_newCurrent; //! Used to manually set the current step
+    qreal m_intensity; //! Intensity fraction 0.0 - 1.0
 };
 
 #endif

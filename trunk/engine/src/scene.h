@@ -177,9 +177,6 @@ public:
                              QLCChannel::Group grp = QLCChannel::NoGroup,
                              qreal percentage = 1.0);
 
-    /** Get a list of channels that have been armed for running */
-    QList <FadeChannel> armedChannels() const;
-
 protected:
     QList <FadeChannel> m_armedChannels;
 };

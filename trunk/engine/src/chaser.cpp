@@ -350,7 +350,8 @@ void Chaser::arm()
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
-    m_runner = new ChaserRunner(doc, stepFunctions(), busID(), direction(), runOrder());
+    m_runner = new ChaserRunner(doc, stepFunctions(), busID(), direction(),
+                                runOrder(), intensity());
     resetElapsed();
 }
 
@@ -378,4 +379,15 @@ void Chaser::write(MasterTimer* timer, UniverseArray* universes)
         stop();
 
     incrementElapsed();
+}
+
+/*****************************************************************************
+ * Intensity
+ *****************************************************************************/
+
+void Chaser::adjustIntensity(qreal fraction)
+{
+    if (m_runner != NULL)
+        m_runner->adjustIntensity(fraction);
+    Function::adjustIntensity(fraction);
 }

@@ -33,6 +33,7 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
                            quint32 holdBusId,
                            Function::Direction direction,
                            Function::RunOrder runOrder,
+                           qreal intensity,
                            QObject* parent)
     : QObject(parent)
     , m_doc(doc)
@@ -48,6 +49,7 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
     , m_previous(false)
     , m_currentStep(0)
     , m_newCurrent(-1)
+    , m_intensity(intensity)
 {
     reset();
 }
@@ -189,9 +191,8 @@ bool ChaserRunner::write(UniverseArray* universes)
         }
         else
         {
-            universes->write(channel.address(),
-                             channel.calculateCurrent(fadeTime, m_elapsed),
-                             channel.group());
+            uchar value = uchar(floor((qreal(channel.calculateCurrent(fadeTime, m_elapsed)) * m_intensity) + 0.5));
+            universes->write(channel.address(), value, channel.group());
         }
     }
 
@@ -332,4 +333,13 @@ QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(
     map.unite(zeroChannels);
 
     return map;
+}
+
+/****************************************************************************
+ * Intensity
+ ****************************************************************************/
+
+void ChaserRunner::adjustIntensity(qreal fraction)
+{
+    m_intensity = fraction;
 }

@@ -29,8 +29,11 @@
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
-#include "scene.h"
 #include "doc.h"
+
+#define protected public
+#include "scene.h"
+#undef protected
 
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
@@ -393,31 +396,31 @@ void Scene_Test::arm()
     s1->setValue(fxi->id(), 3, 67);
     doc->addFunction(s1);
 
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     s1->arm();
-    QVERIFY(s1->armedChannels().size() == 3);
+    QVERIFY(s1->m_armedChannels.size() == 3);
 
     FadeChannel ch;
-    ch = s1->armedChannels().at(0);
+    ch = s1->m_armedChannels.at(0);
     QVERIFY(ch.address() == fxi->universeAddress());
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 123);
 
-    ch = s1->armedChannels().at(1);
+    ch = s1->m_armedChannels.at(1);
     QVERIFY(ch.address() == fxi->universeAddress() + 7);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 45);
 
-    ch = s1->armedChannels().at(2);
+    ch = s1->m_armedChannels.at(2);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
 
     s1->disarm();
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 3);
 
     delete doc;
@@ -441,27 +444,27 @@ void Scene_Test::armMissingFixture()
     s1->setValue(fxi->id(), 3, 67);
     doc->addFunction(s1);
 
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 3);
     s1->arm();
-    QVERIFY(s1->armedChannels().size() == 2);
+    QVERIFY(s1->m_armedChannels.size() == 2);
     QVERIFY(s1->values().size() == 2); // The channel is removed
 
     FadeChannel ch;
-    ch = s1->armedChannels().at(0);
+    ch = s1->m_armedChannels.at(0);
     QVERIFY(ch.address() == fxi->universeAddress() + 7);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 45);
 
-    ch = s1->armedChannels().at(1);
+    ch = s1->m_armedChannels.at(1);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
 
     s1->disarm();
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 2);
 
     delete doc;
@@ -485,27 +488,27 @@ void Scene_Test::armTooManyChannels()
     s1->setValue(fxi->id(), 3, 67);
     doc->addFunction(s1);
 
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 3);
     s1->arm();
-    QVERIFY(s1->armedChannels().size() == 2);
+    QVERIFY(s1->m_armedChannels.size() == 2);
     QVERIFY(s1->values().size() == 2); // The channel is removed
 
     FadeChannel ch;
-    ch = s1->armedChannels().at(0);
+    ch = s1->m_armedChannels.at(0);
     QVERIFY(ch.address() == fxi->universeAddress() + 7);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 45);
 
-    ch = s1->armedChannels().at(1);
+    ch = s1->m_armedChannels.at(1);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
 
     s1->disarm();
-    QVERIFY(s1->armedChannels().size() == 0);
+    QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 2);
 
     delete doc;

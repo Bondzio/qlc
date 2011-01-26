@@ -107,6 +107,7 @@ void ChaserRunner_Test::initial()
     QCOMPARE(cr.m_next, false);
     QCOMPARE(cr.m_currentStep, 0);
     QCOMPARE(cr.m_newCurrent, -1);
+    QCOMPARE(cr.m_intensity, qreal(1.0));
 
     ChaserRunner cr2(m_doc, steps, Bus::defaultFade(), Function::Backward,
                     Function::Loop);
@@ -120,7 +121,8 @@ void ChaserRunner_Test::initial()
     QCOMPARE(cr2.m_elapsed, quint32(0));
     QCOMPARE(cr2.m_next, false);
     QCOMPARE(cr2.m_currentStep, 2);
-    QCOMPARE(cr.m_newCurrent, -1);
+    QCOMPARE(cr2.m_newCurrent, -1);
+    QCOMPARE(cr2.m_intensity, qreal(1.0));
 }
 
 void ChaserRunner_Test::nextPrevious()
@@ -1195,3 +1197,97 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
         QCOMPARE(uchar(ua.preGMValues().data()[5]), uchar(122));
     }
 }
+
+void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
+{
+    QList <Function*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
+                    Function::SingleShot);
+    UniverseArray ua(512);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    cr.adjustIntensity(0.7);
+    QCOMPARE(cr.m_intensity, 0.7);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+        qDebug() << "kakka" << uchar(ua.preGMValues().data()[0]);
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 0);
+        qDebug() << "paska" << uchar(ua.preGMValues().data()[0])
+                 << uchar(floor((qreal(255) * qreal(cr.m_intensity)) + 0.5));
+        QCOMPARE(uchar(ua.preGMValues().data()[0]),
+                uchar(floor((qreal(255) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]),
+                uchar(floor((qreal(254) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]),
+                uchar(floor((qreal(253) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]),
+                uchar(floor((qreal(252) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]),
+                uchar(floor((qreal(251) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]),
+                uchar(floor((qreal(250) * qreal(cr.m_intensity)) + 0.5)));
+    }
+
+    cr.adjustIntensity(0.2);
+    QCOMPARE(cr.m_intensity, 0.2);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 1);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]),
+                uchar(floor((qreal(127) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]),
+                uchar(floor((qreal(126) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]),
+                uchar(floor((qreal(125) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]),
+                uchar(floor((qreal(124) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]),
+                uchar(floor((qreal(123) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]),
+                uchar(floor((qreal(122) * qreal(cr.m_intensity)) + 0.5)));
+    }
+
+    cr.adjustIntensity(1.0);
+    QCOMPARE(cr.m_intensity, 1.0);
+
+    for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
+    {
+        ua.zeroIntensityChannels();
+
+        QVERIFY(cr.write(&ua) == true);
+        QCOMPARE(cr.m_elapsed, quint32(i + 1));
+        QVERIFY(cr.m_channelMap.isEmpty() == false);
+        QCOMPARE(cr.currentStep(), 2);
+        QCOMPARE(uchar(ua.preGMValues().data()[0]),
+                uchar(floor((qreal(0) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[1]),
+                uchar(floor((qreal(1) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[2]),
+                uchar(floor((qreal(2) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[3]),
+                uchar(floor((qreal(3) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[4]),
+                uchar(floor((qreal(4) * qreal(cr.m_intensity)) + 0.5)));
+        QCOMPARE(uchar(ua.preGMValues().data()[5]),
+                uchar(floor((qreal(5) * qreal(cr.m_intensity)) + 0.5)));
+    }
+
+    // SingleShot is completed
+    QVERIFY(cr.write(&ua) == false);
+}
+

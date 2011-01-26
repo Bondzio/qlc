@@ -390,8 +390,13 @@ public:
      */
     uchar playbackValue() const;
 
+protected slots:
+    void slotPlaybackFunctionRunning(t_function_id fid);
+    void slotPlaybackFunctionStopped(t_function_id fid);
+
 protected:
     t_function_id m_playbackFunction;
+    bool m_playbackFunctionStartedByMe;
     uchar m_playbackValue;
     bool m_playbackValueChanged;
     QMutex m_playbackValueMutex;

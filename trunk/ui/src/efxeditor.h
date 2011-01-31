@@ -109,19 +109,6 @@ protected slots:
 
 protected:
     void redrawPreview();
-
-    /*********************************************************************
-     * Initialization page
-     *********************************************************************/
-protected:
-    void fillSceneLists();
-
-protected slots:
-    void slotStartSceneGroupToggled(bool);
-    void slotStopSceneGroupToggled(bool);
-
-    void slotStartSceneListSelectionChanged();
-    void slotStopSceneListSelectionChanged();
 };
 
 /**

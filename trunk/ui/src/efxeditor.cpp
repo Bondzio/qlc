@@ -74,7 +74,6 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx) : QDialog(parent)
 
     initGeneralPage();
     initMovementPage();
-    initInitializationPage();
 
     QSettings settings;
     QVariant var = settings.value(SETTINGS_GEOMETRY);
@@ -238,20 +237,6 @@ void EFXEditor::initMovementPage()
     }
 
     redrawPreview();
-}
-
-void EFXEditor::initInitializationPage()
-{
-    connect(m_startSceneGroup, SIGNAL(toggled(bool)),
-            this, SLOT(slotStartSceneGroupToggled(bool)));
-    connect(m_stopSceneGroup, SIGNAL(toggled(bool)),
-            this, SLOT(slotStopSceneGroupToggled(bool)));
-    connect(m_startSceneList, SIGNAL(itemSelectionChanged()),
-            this, SLOT(slotStartSceneListSelectionChanged()));
-    connect(m_stopSceneList, SIGNAL(itemSelectionChanged()),
-            this, SLOT(slotStopSceneListSelectionChanged()));
-
-    fillSceneLists();
 }
 
 void EFXEditor::accept()
@@ -686,114 +671,6 @@ void EFXEditor::redrawPreview()
     m_efx->preview(points);
     m_previewArea->setPoints(points);
     m_previewArea->draw();
-}
-
-/*****************************************************************************
- * Initialization page
- *****************************************************************************/
-
-void EFXEditor::fillSceneLists()
-{
-    Function* function;
-    QTreeWidgetItem* item;
-    QTreeWidgetItem* startItem = NULL;
-    QTreeWidgetItem* stopItem = NULL;
-    QString s;
-
-    Q_ASSERT(m_efx != NULL);
-
-    for (t_function_id id = 0; id < KFunctionArraySize; id++)
-    {
-        function = _app->doc()->function(id);
-        if (function == NULL)
-            continue;
-
-        if (function->type() == Function::Scene)
-        {
-            /* Insert the function to start scene list */
-            item = new QTreeWidgetItem(m_startSceneList);
-            item->setText(KInitColumnName, function->name());
-            item->setText(KInitColumnID, s.setNum(function->id()));
-
-            /* Select the scene from the start scene list */
-            if (m_efx->startScene() == function->id())
-            {
-                m_startSceneList->setCurrentItem(item);
-                startItem = item;
-            }
-
-            /* Insert the function to stop scene list */
-            item = new QTreeWidgetItem(m_stopSceneList);
-            item->setText(KInitColumnName, function->name());
-            item->setText(KInitColumnID, s.setNum(function->id()));
-
-            /* Select the scene from the stop scene list */
-            if (m_efx->stopScene() == function->id())
-            {
-                m_stopSceneList->setCurrentItem(item);
-                stopItem = item;
-            }
-        }
-    }
-
-    /* Make sure that the selected start scene item is visible */
-    if (startItem != NULL)
-        m_startSceneList->scrollToItem(startItem);
-
-    /* Make sure that the selected stop scene item is visible */
-    if (stopItem != NULL)
-        m_stopSceneList->scrollToItem(stopItem);
-
-    /* Start scene enabled status */
-    if (m_efx->startSceneEnabled() == true)
-        m_startSceneGroup->setChecked(true);
-    else
-        m_startSceneGroup->setChecked(false);
-
-    /* Stop scene enabled status */
-    if (m_efx->stopSceneEnabled() == true)
-        m_stopSceneGroup->setChecked(true);
-    else
-        m_stopSceneGroup->setChecked(false);
-
-    m_stopSceneList->sortItems(KInitColumnName, Qt::AscendingOrder);
-    m_startSceneList->sortItems(KInitColumnName, Qt::AscendingOrder);
-}
-
-void EFXEditor::slotStartSceneGroupToggled(bool state)
-{
-    Q_ASSERT(m_efx != NULL);
-
-    m_efx->setStartSceneEnabled(state);
-
-    slotStartSceneListSelectionChanged();
-}
-
-void EFXEditor::slotStartSceneListSelectionChanged()
-{
-    Q_ASSERT(m_efx != NULL);
-
-    QTreeWidgetItem* item = m_startSceneList->currentItem();
-    if (item != NULL)
-        m_efx->setStartScene(item->text(KInitColumnID).toInt());
-}
-
-void EFXEditor::slotStopSceneGroupToggled(bool state)
-{
-    Q_ASSERT(m_efx != NULL);
-
-    m_efx->setStopSceneEnabled(state);
-
-    slotStopSceneListSelectionChanged();
-}
-
-void EFXEditor::slotStopSceneListSelectionChanged()
-{
-    Q_ASSERT(m_efx != NULL);
-
-    QTreeWidgetItem* item = m_stopSceneList->currentItem();
-    if (item != NULL)
-        m_efx->setStopScene(item->text(KInitColumnID).toInt());
 }
 
 /*****************************************************************************

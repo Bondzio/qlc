@@ -97,18 +97,6 @@ protected:
     /** Get the order number in serial propagation mode */
     int serialNumber() const;
 
-    /** Set the scene that is used to initialize the fixture */
-    void setStartScene(Scene* scene);
-
-    /** Get the scene that is used to initialize the fixture */
-    Scene* startScene() const;
-
-    /** Set the scene that is used to de-initialize the fixture */
-    void setStopScene(Scene* scene);
-
-    /** Get the scene that is used to de-initialize the fixture */
-    Scene* stopScene() const;
-
     /** Set the low byte channel for pan movement */
     void setLsbPanChannel(quint32 ch);
 
@@ -120,6 +108,9 @@ protected:
 
     /** Set the high byte channel for pan movement */
     void setMsbTiltChannel(quint32 ch);
+
+    /** Set the channels that control intensity */
+    void setIntensityChannels(QList <quint32> channels);
 
     /** Update the waiting threshold value for serial operation */
     void updateSkipThreshold();
@@ -147,15 +138,6 @@ protected:
 
     /** This fixture's current run-time direction */
     Function::Direction m_runTimeDirection;
-
-    /** The scene that is used to initialize the fixtures involved */
-    Scene* m_startScene;
-
-    /** The scene that is used to de-initialize the fixtures involved */
-    Scene* m_stopScene;
-
-    /** When the start scene is run, the EFXFixture has been initialized */
-    bool m_initialized;
 
     /** When running in single shot mode, the fixture is marked ready
         after it has completed a full cycle. */
@@ -210,6 +192,11 @@ protected:
      */
     quint32 m_msbTiltChannel;
 
+    /**
+     * Universe channels for controlling intensity
+     */
+    QList <quint32> m_intensityChannels;
+
     /*********************************************************************
      * Running
      *********************************************************************/
@@ -219,6 +206,20 @@ protected:
 
     /** Write this EFXFixture's channel data to universes */
     void setPoint(UniverseArray* universes);
+
+    /*********************************************************************
+     * Intensity
+     *********************************************************************/
+public:
+    /**
+     * Adjust the intensity of the fixture by a fraction.
+     *
+     * @param fraction Intensity fraction 0.0 - 1.0
+     */
+    void adjustIntensity(qreal fraction);
+
+private:
+    qreal m_intensity;
 };
 
 #endif

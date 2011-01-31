@@ -503,6 +503,10 @@ public:
      */
     qreal intensity() const;
 
+signals:
+    /** Informs that the intensity of a function has changed */
+    void intensityChanged(qreal fraction);
+
 private:
     qreal m_intensity;
 };

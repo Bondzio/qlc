@@ -60,12 +60,6 @@ EFX::EFX(Doc* doc) : Function(doc)
 
     m_propagationMode = Parallel;
 
-    m_startSceneID = Function::invalidId();
-    m_startSceneEnabled = false;
-
-    m_stopSceneID = Function::invalidId();
-    m_stopSceneEnabled = false;
-
     m_algorithm = EFX::Circle;
 
     m_stepSize = 0;
@@ -76,10 +70,6 @@ EFX::EFX(Doc* doc) : Function(doc)
     setBus(Bus::defaultFade());
     connect(Bus::instance(), SIGNAL(valueChanged(quint32,quint32)),
             this, SLOT(slotBusValueChanged(quint32,quint32)));
-
-    // Listen to start/stop scene removals
-    connect(doc, SIGNAL(functionRemoved(t_function_id)),
-            this, SLOT(slotFunctionRemoved(t_function_id)));
 }
 
 EFX::~EFX()
@@ -154,12 +144,6 @@ bool EFX::copyFrom(const Function* function)
     m_yFrequency = efx->m_yFrequency;
     m_xPhase = efx->m_xPhase;
     m_yPhase = efx->m_yPhase;
-
-    m_startSceneID = efx->m_startSceneID;
-    m_startSceneEnabled = efx->m_startSceneEnabled;
-
-    m_stopSceneID = efx->m_stopSceneID;
-    m_stopSceneEnabled = efx->m_stopSceneEnabled;
 
     m_algorithm = efx->m_algorithm;
 
@@ -572,90 +556,6 @@ EFX::PropagationMode EFX::stringToPropagationMode(QString str)
 }
 
 /*****************************************************************************
- * Start & Stop scenes
- *****************************************************************************/
-
-void EFX::setStartScene(t_function_id scene)
-{
-    if (scene > Function::invalidId() && scene < KFunctionArraySize)
-    {
-        m_startSceneID = scene;
-    }
-    else
-    {
-        m_startSceneID = Function::invalidId();
-        m_startSceneEnabled = false;
-    }
-
-    emit changed(m_id);
-}
-
-t_function_id EFX::startScene() const
-{
-    return m_startSceneID;
-}
-
-void EFX::setStartSceneEnabled(bool set)
-{
-    m_startSceneEnabled = set;
-    emit changed(m_id);
-}
-
-bool EFX::startSceneEnabled() const
-{
-    return m_startSceneEnabled;
-}
-
-void EFX::setStopScene(t_function_id scene)
-{
-    if (scene > Function::invalidId() && scene < KFunctionArraySize)
-    {
-        m_stopSceneID = scene;
-    }
-    else
-    {
-        m_stopSceneID = Function::invalidId();
-        m_stopSceneEnabled = false;
-    }
-
-    emit changed(m_id);
-}
-
-t_function_id EFX::stopScene() const
-{
-    return m_stopSceneID;
-}
-
-void EFX::setStopSceneEnabled(bool set)
-{
-    m_stopSceneEnabled = set;
-    emit changed(m_id);
-}
-
-bool EFX::stopSceneEnabled() const
-{
-    return m_stopSceneEnabled;
-}
-
-void EFX::slotFunctionRemoved(t_function_id id)
-{
-    if (id == m_startSceneID)
-    {
-        m_startSceneID = Function::invalidId();
-        m_startSceneEnabled = false;
-        emit changed(m_id);
-    }
-
-    /* No "else" because the same function might be both start & stop */
-    if (id == m_stopSceneID)
-    {
-        m_stopSceneID = Function::invalidId();
-        m_stopSceneEnabled = false;
-        emit changed(m_id);
-    }
-}
-
-/*****************************************************************************
  * Load & Save
  *****************************************************************************/
 
@@ -735,28 +635,6 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     str.setNum(rotation());
     text = doc->createTextNode(str);
     tag.appendChild(text);
-
-    /* Start function */
-    tag = doc->createElement(KXMLQLCEFXStartScene);
-    root.appendChild(tag);
-    str.setNum(startScene());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
-    if (startSceneEnabled() == true)
-        tag.setAttribute(KXMLQLCFunctionEnabled, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCFunctionEnabled, KXMLQLCFalse);
-
-    /* Stop function */
-    tag = doc->createElement(KXMLQLCEFXStopScene);
-    root.appendChild(tag);
-    str.setNum(stopScene());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
-    if (stopSceneEnabled() == true)
-        tag.setAttribute(KXMLQLCFunctionEnabled, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCFunctionEnabled, KXMLQLCFalse);
 
     /********************************************
      * X-Axis
@@ -894,28 +772,6 @@ bool EFX::loadXML(const QDomElement* root)
             /* Rotation */
             setRotation(tag.text().toInt());
         }
-        else if (tag.tagName() == KXMLQLCEFXStartScene)
-        {
-            /* Start scene */
-            setStartScene(tag.text().toInt());
-
-            if (tag.attribute(KXMLQLCFunctionEnabled) ==
-                    KXMLQLCTrue)
-                setStartSceneEnabled(true);
-            else
-                setStartSceneEnabled(false);
-        }
-        else if (tag.tagName() == KXMLQLCEFXStopScene)
-        {
-            /* Stop scene */
-            setStopScene(tag.text().toInt());
-
-            if (tag.attribute(KXMLQLCFunctionEnabled) ==
-                    KXMLQLCTrue)
-                setStopSceneEnabled(true);
-            else
-                setStopSceneEnabled(false);
-        }
         else if (tag.tagName() == KXMLQLCEFXAxis)
         {
             /* Axes */
@@ -1018,47 +874,23 @@ void EFX::slotBusValueChanged(quint32 id, quint32 value)
 }
 
 /*****************************************************************************
- * Point calculation functions
- *****************************************************************************/
-
-/*****************************************************************************
  * Running
  *****************************************************************************/
 
 void EFX::arm()
 {
-    class Scene* startScene = NULL;
-    class Scene* stopScene = NULL;
     int serialNumber = 0;
 
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
 
-    /* Initialization scene */
-    if (m_startSceneID != Function::invalidId() &&
-            m_startSceneEnabled == true)
-    {
-        startScene = static_cast <class Scene*>
-                                 (doc->function(m_startSceneID));
-    }
-
-    /* De-initialization scene */
-    if (m_stopSceneID != Function::invalidId() &&
-            m_stopSceneEnabled == true)
-{
-        stopScene = static_cast <class Scene*>
-                                (doc->function(m_stopSceneID));
-    }
-
     QListIterator <EFXFixture*> it(m_fixtures);
     while (it.hasNext() == true)
-{
+    {
         EFXFixture* ef = it.next();
         Q_ASSERT(ef != NULL);
 
         ef->setSerialNumber(serialNumber++);
-        ef->setStartScene(startScene);
-        ef->setStopScene(stopScene);
 
         /* If fxi == NULL, the fixture has been destroyed */
         Fixture* fxi = doc->fixture(ef->fixture());
@@ -1070,6 +902,8 @@ void EFX::arm()
         const QLCFixtureMode* mode = fxi->fixtureMode();
         if (mode == NULL)
             continue;
+
+        QList <quint32> intensityChannels;
 
         /* Find exact channel numbers for MSB/LSB pan and tilt */
         for (quint32 i = 0; i < quint32(mode->channels().size()); i++)
@@ -1091,7 +925,17 @@ void EFX::arm()
                 else if (ch->controlByte() == QLCChannel::LSB)
                     ef->setLsbTiltChannel(fxi->universeAddress() + i);
             }
+            else if (ch->group() == QLCChannel::Intensity)
+            {
+                if (ch->searchCapability(/*D*/"immer", false) != NULL ||
+                    ch->searchCapability(/*I*/"ntensity", false) != NULL)
+                {
+                    intensityChannels << (fxi->universeAddress() + i);
+                }
+            }
         }
+
+        ef->setIntensityChannels(intensityChannels);
     }
 
     resetElapsed();
@@ -1146,4 +990,20 @@ void EFX::write(MasterTimer* timer, UniverseArray* universes)
     /* Check for stop condition */
     if (ready == m_fixtures.count())
         stop();
+}
+
+/*****************************************************************************
+ * Intensity
+ *****************************************************************************/
+
+void EFX::adjustIntensity(qreal fraction)
+{
+    QListIterator <EFXFixture*> it(m_fixtures);
+    while (it.hasNext() == true)
+    {
+        EFXFixture* ef = it.next();
+        ef->adjustIntensity(fraction);
+    }
+
+    Function::adjustIntensity(fraction);
 }

@@ -424,48 +424,6 @@ protected:
     PropagationMode m_propagationMode;
 
     /*********************************************************************
-     * Start & Stop Scenes
-     *********************************************************************/
-public:
-    /** Set the start scene */
-    void setStartScene(t_function_id id);
-
-    /** Get the start scene */
-    t_function_id startScene() const;
-
-    /** Set start scene enabled status */
-    void setStartSceneEnabled(bool set);
-
-    /** Get start scene enabled status */
-    bool startSceneEnabled() const;
-
-    /** Set the stop scene */
-    void setStopScene(t_function_id id);
-
-    /** Get the stop scene */
-    t_function_id stopScene() const;
-
-    /** Set stop scene enabled status */
-    void setStopSceneEnabled(bool set);
-
-    /** Get stop scene enabled status */
-    bool stopSceneEnabled() const;
-
-public slots:
-    /** Catches Doc::functionRemoved() so that destroyed members can be
-        removed immediately. */
-    void slotFunctionRemoved(t_function_id function);
-
-protected:
-    /** Start (initialisation) scene */
-    t_function_id m_startSceneID;
-    bool m_startSceneEnabled;
-
-    /** Stop (de-initialisation) scene */
-    t_function_id m_stopSceneID;
-    bool m_stopSceneEnabled;
-
-    /*********************************************************************
      * Load & Save
      *********************************************************************/
 public:
@@ -514,6 +472,13 @@ protected:
      * is 64, then this is 1/64.
      */
     qreal m_stepSize;
+
+    /*********************************************************************
+     * Intensity
+     *********************************************************************/
+public:
+    /** @reimp */
+    void adjustIntensity(qreal fraction);
 };
 
 #endif

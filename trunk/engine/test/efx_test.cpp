@@ -90,11 +90,6 @@ void EFX_Test::initial()
 
     QVERIFY(e.fixtures().size() == 0);
     QVERIFY(e.propagationMode() == EFX::Parallel);
-
-    QVERIFY(e.startScene() == Function::invalidId());
-    QVERIFY(e.startSceneEnabled() == false);
-    QVERIFY(e.stopScene() == Function::invalidId());
-    QVERIFY(e.stopSceneEnabled() == false);
 }
 
 void EFX_Test::algorithmNames()
@@ -517,66 +512,6 @@ void EFX_Test::propagationMode()
     QVERIFY(EFX::stringToPropagationMode("Serial") == EFX::Serial);
     QVERIFY(EFX::stringToPropagationMode("Parallel") == EFX::Parallel);
     QVERIFY(EFX::stringToPropagationMode("Foobar") == EFX::Parallel);
-}
-
-void EFX_Test::startStopScenes()
-{
-    EFX e(m_doc);
-
-    QVERIFY(e.startSceneEnabled() == false);
-    QVERIFY(e.startScene() == Function::invalidId());
-
-    QVERIFY(e.stopSceneEnabled() == false);
-    QVERIFY(e.stopScene() == Function::invalidId());
-
-    e.setStartScene(15);
-    QVERIFY(e.startSceneEnabled() == false);
-    QVERIFY(e.startScene() == 15);
-
-    e.setStartSceneEnabled(true);
-    QVERIFY(e.startSceneEnabled() == true);
-    QVERIFY(e.startScene() == 15);
-
-    e.setStopScene(73);
-    QVERIFY(e.stopSceneEnabled() == false);
-    QVERIFY(e.stopScene() == 73);
-
-    e.setStopSceneEnabled(true);
-    QVERIFY(e.stopSceneEnabled() == true);
-    QVERIFY(e.stopScene() == 73);
-
-    e.setStartScene(Function::invalidId());
-    QVERIFY(e.startSceneEnabled() == false);
-    QVERIFY(e.startScene() == Function::invalidId());
-
-    e.setStopScene(Function::invalidId());
-    QVERIFY(e.stopSceneEnabled() == false);
-    QVERIFY(e.stopScene() == Function::invalidId());
-
-    /* Test function removal slot */
-    e.setStartScene(15);
-    e.setStartSceneEnabled(true);
-    e.setStopScene(20);
-    e.setStopSceneEnabled(true);
-
-    e.slotFunctionRemoved(10);
-    QVERIFY(e.startScene() == 15);
-    QVERIFY(e.stopScene() == 20);
-
-    e.slotFunctionRemoved(15);
-    QVERIFY(e.startScene() == Function::invalidId());
-    QVERIFY(e.startSceneEnabled() == false);
-    QVERIFY(e.stopScene() == 20);
-    QVERIFY(e.stopSceneEnabled() == true);
-
-    e.setStartScene(15);
-    e.setStartSceneEnabled(true);
-
-    e.slotFunctionRemoved(20);
-    QVERIFY(e.startScene() == 15);
-    QVERIFY(e.startSceneEnabled() == true);
-    QVERIFY(e.stopScene() == Function::invalidId());
-    QVERIFY(e.stopSceneEnabled() == false);
 }
 
 void EFX_Test::previewCircle()
@@ -1548,8 +1483,6 @@ void EFX_Test::copyFrom()
     e1.setXPhase(163);
     e1.setYPhase(94);
     e1.setPropagationMode(EFX::Serial);
-    e1.setStartScene(99);
-    e1.setStopScene(88);
     EFXFixture* ef1 = new EFXFixture(&e1);
     ef1->setFixture(12);
     e1.addFixture(ef1);
@@ -1575,8 +1508,6 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.xPhase() == 163);
     QVERIFY(e2.yPhase() == 94);
     QVERIFY(e2.propagationMode() == EFX::Serial);
-    QVERIFY(e2.startScene() == 99);
-    QVERIFY(e2.stopScene() == 88);
     QVERIFY(e2.fixtures().size() == 2);
     QVERIFY(e2.fixtures().at(0)->fixture() == 12);
     QVERIFY(e2.fixtures().at(1)->fixture() == 34);
@@ -1604,8 +1535,6 @@ void EFX_Test::copyFrom()
     e3.setXPhase(136);
     e3.setYPhase(49);
     e3.setPropagationMode(EFX::Parallel);
-    e3.setStartScene(77);
-    e3.setStopScene(66);
     EFXFixture* ef3 = new EFXFixture(&e3);
     ef3->setFixture(56);
     e3.addFixture(ef3);
@@ -1630,8 +1559,6 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.xPhase() == 136);
     QVERIFY(e2.yPhase() == 49);
     QVERIFY(e2.propagationMode() == EFX::Parallel);
-    QVERIFY(e2.startScene() == 77);
-    QVERIFY(e2.stopScene() == 66);
     QVERIFY(e2.fixtures().size() == 2);
     QVERIFY(e2.fixtures().at(0)->fixture() == 56);
     QVERIFY(e2.fixtures().at(1)->fixture() == 78);
@@ -1661,8 +1588,6 @@ void EFX_Test::createCopy()
     e1->setXPhase(163);
     e1->setYPhase(94);
     e1->setPropagationMode(EFX::Serial);
-    e1->setStartScene(99);
-    e1->setStopScene(88);
     EFXFixture* ef1 = new EFXFixture(e1);
     ef1->setFixture(12);
     e1->addFixture(ef1);
@@ -1695,8 +1620,6 @@ void EFX_Test::createCopy()
     QVERIFY(copy->xPhase() == 163);
     QVERIFY(copy->yPhase() == 94);
     QVERIFY(copy->propagationMode() == EFX::Serial);
-    QVERIFY(copy->startScene() == 99);
-    QVERIFY(copy->stopScene() == 88);
     QVERIFY(copy->fixtures().size() == 2);
     QVERIFY(copy->fixtures().at(0)->fixture() == 12);
     QVERIFY(copy->fixtures().at(1)->fixture() == 34);
@@ -1860,18 +1783,6 @@ void EFX_Test::loadSuccess()
     rot.appendChild(rotText);
     root.appendChild(rot);
 
-    QDomElement stas = doc.createElement("StartScene");
-    stas.setAttribute("Enabled", "True");
-    QDomText stasText = doc.createTextNode("13");
-    stas.appendChild(stasText);
-    root.appendChild(stas);
-
-    QDomElement stos = doc.createElement("StopScene");
-    stos.setAttribute("Enabled", "True");
-    QDomText stosText = doc.createTextNode("77");
-    stos.appendChild(stosText);
-    root.appendChild(stos);
-
     /* X Axis */
     QDomElement xax = doc.createElement("Axis");
     xax.setAttribute("Name", "X");
@@ -1972,9 +1883,6 @@ void EFX_Test::loadSuccess()
     QVERIFY(e.yFrequency() == 3);
     QVERIFY(e.yPhase() == 80);
 
-    QVERIFY(e.startScene() == 13);
-    QVERIFY(e.stopScene() == 77);
-
     QVERIFY(e.propagationMode() == EFX::Serial);
     QVERIFY(e.fixtures().size() == 3);
     QVERIFY(e.fixtures().at(0)->fixture() == 33);
@@ -2066,10 +1974,6 @@ void EFX_Test::save()
     e1.setXPhase(163);
     e1.setYPhase(94);
     e1.setPropagationMode(EFX::Serial);
-    e1.setStartScene(99);
-    e1.setStartSceneEnabled(true);
-    e1.setStopScene(88);
-    //e1.setStartSceneEnabled(false);
 
     EFXFixture* ef1 = new EFXFixture(&e1);
     ef1->setFixture(12);
@@ -2093,7 +1997,7 @@ void EFX_Test::save()
     bool dir = false, run = false, bus = false, algo = false, w = false,
          h = false, rot = false, xoff = false, yoff = false,
          xfreq = false, yfreq = false, xpha = false, ypha = false,
-         prop = false, stas = false, stos = false;
+         prop = false;
     int fixtureid = 0, fixturedirection = 0;
     QList <QString> fixtures;
 
@@ -2140,18 +2044,6 @@ void EFX_Test::save()
         {
             QVERIFY(tag.text() == "Serial");
             prop = true;
-        }
-        else if (tag.tagName() == "StartScene")
-        {
-            QVERIFY(tag.text() == "99");
-            QVERIFY(tag.attribute("Enabled") == "True");
-            stas = true;
-        }
-        else if (tag.tagName() == "StopScene")
-        {
-            QVERIFY(tag.text() == "88");
-            QVERIFY(tag.attribute("Enabled") == "False");
-            stos = true;
         }
         else if (tag.tagName() == "Axis")
         {
@@ -2278,8 +2170,6 @@ void EFX_Test::save()
     QVERIFY(xpha == true);
     QVERIFY(ypha == true);
     QVERIFY(prop == true);
-    QVERIFY(stas == true);
-    QVERIFY(stos == true);
 }
 
 void EFX_Test::armSuccess()
@@ -2332,187 +2222,18 @@ void EFX_Test::armSuccess()
     ef2->setFixture(fxi2->id());
     e->addFixture(ef2);
 
-    e->setStartScene(s1->id());
-    e->setStartSceneEnabled(true);
-    e->setStopScene(s2->id());
-    e->setStopSceneEnabled(true);
-
     e->arm();
 
     QVERIFY(e->algorithm() == EFX::Circle);
 
     QVERIFY(e->m_fixtures.size() == 2);
 
-    QVERIFY(e->m_fixtures.at(0)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(0)->m_stopScene == s2);
     QVERIFY(e->m_fixtures.at(0)->m_serialNumber == 0);
     QVERIFY(e->m_fixtures.at(0)->m_msbPanChannel == 0 + 7);
     QVERIFY(e->m_fixtures.at(0)->m_msbTiltChannel == 0 + 9);
     QVERIFY(e->m_fixtures.at(0)->m_lsbPanChannel == 0 + 8);
     QVERIFY(e->m_fixtures.at(0)->m_lsbTiltChannel == 0 + 10);
 
-    QVERIFY(e->m_fixtures.at(1)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(1)->m_stopScene == s2);
-    QVERIFY(e->m_fixtures.at(1)->m_serialNumber == 1);
-    QVERIFY(e->m_fixtures.at(1)->m_msbPanChannel == 512 + 7);
-    QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == 512 + 9);
-    QVERIFY(e->m_fixtures.at(1)->m_lsbPanChannel == 512 + 8);
-    QVERIFY(e->m_fixtures.at(1)->m_lsbTiltChannel == 512 + 10);
-
-    delete doc;
-}
-
-void EFX_Test::armMissingStartScene()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    /* Basically any fixture with 16bit pan & tilt channels will do, but
-       then the exact channel numbers and mode name has to be changed
-       below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
-    QVERIFY(def != NULL);
-
-    const QLCFixtureMode* mode = def->mode("Mode 4");
-    QVERIFY(mode != NULL);
-
-    Fixture* fxi1 = new Fixture(doc);
-    fxi1->setFixtureDefinition(def, mode);
-    fxi1->setName("Test Scanner");
-    fxi1->setAddress(0);
-    fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
-
-    Fixture* fxi2 = new Fixture(doc);
-    fxi2->setFixtureDefinition(def, mode);
-    fxi2->setName("Test Scanner");
-    fxi2->setAddress(0);
-    fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("INIT");
-    s1->setValue(fxi1->id(), 0, 205);// Shutter open
-    s1->setValue(fxi2->id(), 0, 205);// Shutter open
-    doc->addFunction(s1);
-
-    Scene* s2 = new Scene(doc);
-    s2->setName("DEINIT");
-    s2->setValue(fxi1->id(), 0, 0);// Shutter closed
-    s2->setValue(fxi2->id(), 0, 0);// Shutter closed
-    doc->addFunction(s2);
-
-    EFX* e = new EFX(doc);
-    e->setName("Test EFX");
-
-    EFXFixture* ef1 = new EFXFixture(e);
-    ef1->setFixture(fxi1->id());
-    e->addFixture(ef1);
-
-    EFXFixture* ef2 = new EFXFixture(e);
-    ef2->setFixture(fxi2->id());
-    e->addFixture(ef2);
-
-    e->setStartScene(42);
-    e->setStartSceneEnabled(true);
-    e->setStopScene(s2->id());
-    e->setStopSceneEnabled(true);
-
-    e->arm();
-
-    QVERIFY(e->algorithm() == EFX::Circle);
-
-    QVERIFY(e->m_fixtures.size() == 2);
-
-    QVERIFY(e->m_fixtures.at(0)->m_startScene == NULL);
-    QVERIFY(e->m_fixtures.at(0)->m_stopScene == s2);
-    QVERIFY(e->m_fixtures.at(0)->m_serialNumber == 0);
-    QVERIFY(e->m_fixtures.at(0)->m_msbPanChannel == 0 + 7);
-    QVERIFY(e->m_fixtures.at(0)->m_msbTiltChannel == 0 + 9);
-    QVERIFY(e->m_fixtures.at(0)->m_lsbPanChannel == 0 + 8);
-    QVERIFY(e->m_fixtures.at(0)->m_lsbTiltChannel == 0 + 10);
-
-    QVERIFY(e->m_fixtures.at(1)->m_startScene == NULL);
-    QVERIFY(e->m_fixtures.at(1)->m_stopScene == s2);
-    QVERIFY(e->m_fixtures.at(1)->m_serialNumber == 1);
-    QVERIFY(e->m_fixtures.at(1)->m_msbPanChannel == 512 + 7);
-    QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == 512 + 9);
-    QVERIFY(e->m_fixtures.at(1)->m_lsbPanChannel == 512 + 8);
-    QVERIFY(e->m_fixtures.at(1)->m_lsbTiltChannel == 512 + 10);
-
-    delete doc;
-}
-
-void EFX_Test::armMissingStopScene()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    /* Basically any fixture with 16bit pan & tilt channels will do, but
-       then the exact channel numbers and mode name has to be changed
-       below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
-    QVERIFY(def != NULL);
-
-    const QLCFixtureMode* mode = def->mode("Mode 4");
-    QVERIFY(mode != NULL);
-
-    Fixture* fxi1 = new Fixture(doc);
-    fxi1->setFixtureDefinition(def, mode);
-    fxi1->setName("Test Scanner");
-    fxi1->setAddress(0);
-    fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
-
-    Fixture* fxi2 = new Fixture(doc);
-    fxi2->setFixtureDefinition(def, mode);
-    fxi2->setName("Test Scanner");
-    fxi2->setAddress(0);
-    fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("INIT");
-    s1->setValue(fxi1->id(), 0, 205);// Shutter open
-    s1->setValue(fxi2->id(), 0, 205);// Shutter open
-    doc->addFunction(s1);
-
-    Scene* s2 = new Scene(doc);
-    s2->setName("DEINIT");
-    s2->setValue(fxi1->id(), 0, 0);// Shutter closed
-    s2->setValue(fxi2->id(), 0, 0);// Shutter closed
-    doc->addFunction(s2);
-
-    EFX* e = new EFX(doc);
-    e->setName("Test EFX");
-
-    EFXFixture* ef1 = new EFXFixture(e);
-    ef1->setFixture(fxi1->id());
-    e->addFixture(ef1);
-
-    EFXFixture* ef2 = new EFXFixture(e);
-    ef2->setFixture(fxi2->id());
-    e->addFixture(ef2);
-
-    e->setStartScene(s1->id());
-    e->setStartSceneEnabled(true);
-    e->setStopScene(42);
-    e->setStopSceneEnabled(true);
-
-    e->arm();
-
-    QVERIFY(e->algorithm() == EFX::Circle);
-
-    QVERIFY(e->m_fixtures.size() == 2);
-
-    QVERIFY(e->m_fixtures.at(0)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(0)->m_stopScene == NULL);
-    QVERIFY(e->m_fixtures.at(0)->m_serialNumber == 0);
-    QVERIFY(e->m_fixtures.at(0)->m_msbPanChannel == 0 + 7);
-    QVERIFY(e->m_fixtures.at(0)->m_msbTiltChannel == 0 + 9);
-    QVERIFY(e->m_fixtures.at(0)->m_lsbPanChannel == 0 + 8);
-    QVERIFY(e->m_fixtures.at(0)->m_lsbTiltChannel == 0 + 10);
-
-    QVERIFY(e->m_fixtures.at(1)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(1)->m_stopScene == NULL);
     QVERIFY(e->m_fixtures.at(1)->m_serialNumber == 1);
     QVERIFY(e->m_fixtures.at(1)->m_msbPanChannel == 512 + 7);
     QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == 512 + 9);
@@ -2572,11 +2293,6 @@ void EFX_Test::armMissingFixture()
     ef2->setFixture(42);
     e->addFixture(ef2);
 
-    e->setStartScene(s1->id());
-    e->setStartSceneEnabled(true);
-    e->setStopScene(s2->id());
-    e->setStopSceneEnabled(true);
-
     e->arm();
 
     QVERIFY(e->algorithm() == EFX::Circle);
@@ -2584,8 +2300,6 @@ void EFX_Test::armMissingFixture()
     QVERIFY(e->m_fixtures.size() == 2);
 
     QVERIFY(e->m_fixtures.at(0)->fixture() == fxi1->id());
-    QVERIFY(e->m_fixtures.at(0)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(0)->m_stopScene == s2);
     QVERIFY(e->m_fixtures.at(0)->m_serialNumber == 0);
     QVERIFY(e->m_fixtures.at(0)->m_msbPanChannel == 0 + 7);
     QVERIFY(e->m_fixtures.at(0)->m_msbTiltChannel == 0 + 9);
@@ -2593,8 +2307,6 @@ void EFX_Test::armMissingFixture()
     QVERIFY(e->m_fixtures.at(0)->m_lsbTiltChannel == 0 + 10);
 
     QVERIFY(e->m_fixtures.at(1)->fixture() == 42);
-    QVERIFY(e->m_fixtures.at(1)->m_startScene == s1);
-    QVERIFY(e->m_fixtures.at(1)->m_stopScene == s2);
     QVERIFY(e->m_fixtures.at(1)->m_serialNumber == 1);
     QVERIFY(e->m_fixtures.at(1)->m_msbPanChannel == QLCChannel::invalid());
     QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == QLCChannel::invalid());
@@ -2603,87 +2315,3 @@ void EFX_Test::armMissingFixture()
 
     delete doc;
 }
-
-void EFX_Test::writeStartStopScenes()
-{
-    Doc* doc = new Doc(this, m_cache);
-
-    /* Basically any fixture with 16bit pan & tilt channels will do, but
-       then the exact channel numbers and mode name has to be changed
-       below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
-    QVERIFY(def != NULL);
-
-    const QLCFixtureMode* mode = def->mode("Mode 4");
-    QVERIFY(mode != NULL);
-
-    Fixture* fxi1 = new Fixture(doc);
-    fxi1->setFixtureDefinition(def, mode);
-    fxi1->setName("Test Scanner");
-    fxi1->setAddress(0);
-    fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
-
-    Fixture* fxi2 = new Fixture(doc);
-    fxi2->setFixtureDefinition(def, mode);
-    fxi2->setName("Test Scanner");
-    fxi2->setAddress(0);
-    fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("INIT");
-    s1->setValue(fxi1->id(), 0, 205);// Shutter open
-    s1->setValue(fxi2->id(), 0, 205);// Shutter open
-    doc->addFunction(s1);
-
-    Scene* s2 = new Scene(doc);
-    s2->setName("DEINIT");
-    s2->setValue(fxi1->id(), 0, 0);// Shutter closed
-    s2->setValue(fxi2->id(), 0, 0);// Shutter closed
-    doc->addFunction(s2);
-
-    EFX* e = new EFX(doc);
-    e->setName("Test EFX");
-
-    EFXFixture* ef1 = new EFXFixture(e);
-    ef1->setFixture(fxi1->id());
-    e->addFixture(ef1);
-
-    EFXFixture* ef2 = new EFXFixture(e);
-    ef2->setFixture(fxi2->id());
-    e->addFixture(ef2);
-
-    e->setStartScene(s1->id());
-    e->setStartSceneEnabled(true);
-    e->setStopScene(s2->id());
-    e->setStopSceneEnabled(true);
-
-    e->arm();
-    s1->arm();
-    s2->arm();
-
-    Bus::instance()->setValue(0, 50);
-
-    UniverseArray unis(512 * 4);
-    OutputMapStub* oms = new OutputMapStub(this);
-    oms->setUniverses(&unis);
-    MasterTimerStub* mts = new MasterTimerStub(this, oms, unis);
-
-    QVERIFY(e->stopped() == true);
-    mts->startFunction(e, false);
-    QVERIFY(e->stopped() == false);
-
-    e->write(mts, &unis);
-    QVERIFY(e->stopped() == false);
-    QVERIFY(unis.preGMValues()[0] == (char) 205); // Start scene: shutter open
-    QVERIFY(unis.preGMValues()[512 + 0] == (char) 205); // Start scene: shutter open
-
-    e->stop();
-    mts->stopFunction(e); // Runs postRun, that writes stop scene stuff
-    QVERIFY(unis.preGMValues()[0] == (char) 0); // Stop scene: shutter closed
-    QVERIFY(unis.preGMValues()[512 + 0] == (char) 0); // Stop scene: shutter closed
-
-    delete doc;
-}
-

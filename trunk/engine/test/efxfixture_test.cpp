@@ -70,8 +70,6 @@ void EFXFixture_Test::initial()
     QVERIFY(ef.fixture() == Fixture::invalidId());
     QVERIFY(ef.direction() == EFX::Forward);
     QVERIFY(ef.serialNumber() == 0);
-    QVERIFY(ef.startScene() == NULL);
-    QVERIFY(ef.stopScene() == NULL);
     QVERIFY(ef.isValid() == false);
     QVERIFY(ef.isReady() == false);
 
@@ -79,9 +77,6 @@ void EFXFixture_Test::initial()
     QVERIFY(ef.m_direction == EFX::Forward);
     QVERIFY(ef.m_serialNumber == 0);
     QVERIFY(ef.m_runTimeDirection == EFX::Forward);
-    QVERIFY(ef.m_startScene == NULL);
-    QVERIFY(ef.m_stopScene == NULL);
-    QVERIFY(ef.m_initialized == false);
     QVERIFY(ef.m_ready == false);
     QVERIFY(ef.m_iterator == 0);
     QVERIFY(ef.m_skipIterator == 0);
@@ -103,9 +98,6 @@ void EFXFixture_Test::copyFrom()
     ef.m_direction = EFX::Backward;
     ef.m_serialNumber = 25;
     ef.m_runTimeDirection = EFX::Backward;
-    ef.m_startScene = reinterpret_cast<Scene*>(0xDEADBEEF);
-    ef.m_stopScene = reinterpret_cast<Scene*>(0x00BADA55);
-    ef.m_initialized = true;
     ef.m_ready = true;
     ef.m_iterator = 313.37;
     ef.m_skipIterator = 4.2;
@@ -123,9 +115,6 @@ void EFXFixture_Test::copyFrom()
     QVERIFY(ef.m_direction == EFX::Backward);
     QVERIFY(ef.m_serialNumber == 25);
     QVERIFY(ef.m_runTimeDirection == EFX::Backward);
-    QVERIFY(ef.m_startScene == reinterpret_cast<Scene*>(0xDEADBEEF));
-    QVERIFY(ef.m_stopScene == reinterpret_cast<Scene*>(0x00BADA55));
-    QVERIFY(ef.m_initialized == true);
     QVERIFY(ef.m_ready == true);
     QVERIFY(ef.m_iterator == 313.37);
     QVERIFY(ef.m_skipIterator == 4.2);
@@ -287,12 +276,6 @@ void EFXFixture_Test::protectedProperties()
     ef.setSerialNumber(15);
     QVERIFY(ef.serialNumber() == 15);
 
-    ef.setStartScene(reinterpret_cast<Scene*>(0xDEADBEEF));
-    QVERIFY(ef.startScene() == reinterpret_cast<Scene*>(0xDEADBEEF));
-
-    ef.setStopScene(reinterpret_cast<Scene*>(0xDEADBEEF));
-    QVERIFY(ef.stopScene() == reinterpret_cast<Scene*>(0xDEADBEEF));
-
     ef.setLsbPanChannel(56);
     QVERIFY(ef.m_lsbPanChannel == 56);
 
@@ -384,9 +367,6 @@ void EFXFixture_Test::reset()
     ef4->m_direction = EFX::Forward;
     ef4->m_serialNumber = 3;
     ef4->m_runTimeDirection = EFX::Backward;
-    ef4->m_startScene = reinterpret_cast<Scene*>(0xDEADBEEF);
-    ef4->m_stopScene = reinterpret_cast<Scene*>(0x00BADA55);
-    ef4->m_initialized = true;
     ef4->m_ready = true;
     ef4->m_iterator = 313.37;
     ef4->m_skipIterator = 4.2;
@@ -404,9 +384,6 @@ void EFXFixture_Test::reset()
     QVERIFY(ef4->m_direction == EFX::Forward);
     QVERIFY(ef4->m_serialNumber == 3);
     QVERIFY(ef4->m_runTimeDirection == EFX::Forward);
-    QVERIFY(ef4->m_startScene == reinterpret_cast<Scene*>(0xDEADBEEF));
-    QVERIFY(ef4->m_stopScene == reinterpret_cast<Scene*>(0x00BADA55));
-    QVERIFY(ef4->m_initialized == false);
     QVERIFY(ef4->m_ready == false);
     QVERIFY(ef4->m_iterator == 0);
     QVERIFY(ef4->m_skipIterator == 0);
@@ -417,36 +394,6 @@ void EFXFixture_Test::reset()
     QVERIFY(ef4->m_msbPanChannel == 5);
     QVERIFY(ef4->m_lsbTiltChannel == 2);
     QVERIFY(ef4->m_msbTiltChannel == 6);
-}
-
-void EFXFixture_Test::startStop()
-{
-    EFX e(m_doc);
-    EFXFixture ef(&e);
-
-    SceneStub s1(m_doc);
-    s1.setValue(0, 1);
-    s1.setValue(1, 2);
-    s1.setValue(2, 3);
-    ef.setStartScene(&s1);
-
-    SceneStub s2(m_doc);
-    s2.setValue(0, 4);
-    s2.setValue(1, 5);
-    s2.setValue(2, 6);
-    ef.setStopScene(&s2);
-
-    UniverseArray array(512 * 4);
-
-    ef.start(&array);
-    QVERIFY(array.preGMValues()[0] == (char) 1);
-    QVERIFY(array.preGMValues()[1] == (char) 2);
-    QVERIFY(array.preGMValues()[2] == (char) 3);
-
-    ef.stop(&array);
-    QVERIFY(array.preGMValues()[0] == (char) 4);
-    QVERIFY(array.preGMValues()[1] == (char) 5);
-    QVERIFY(array.preGMValues()[2] == (char) 6);
 }
 
 void EFXFixture_Test::setPoint8bit()
@@ -510,7 +457,6 @@ void EFXFixture_Test::nextStepLoop()
     ef->setLsbPanChannel(2);
     ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
-    QVERIFY(ef->m_initialized == false);
     QVERIFY(ef->m_iterator == 0);
 
     /* Run two cycles (2 * 50 = 100) and reset the checking iterator in
@@ -523,7 +469,6 @@ void EFXFixture_Test::nextStepLoop()
         if (i == 50)
             checkIter = 0;
         QVERIFY(ef->m_iterator == checkIter);
-        QVERIFY(ef->m_initialized == true);
         QVERIFY(ef->isReady() == false); // Loop is never ready
     }
 }
@@ -552,7 +497,6 @@ void EFXFixture_Test::nextStepSingleShot()
     ef->setLsbPanChannel(2);
     ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
-    QVERIFY(ef->m_initialized == false);
     QVERIFY(ef->m_iterator == 0);
 
     ef->reset();
@@ -564,7 +508,6 @@ void EFXFixture_Test::nextStepSingleShot()
     {
         ef->nextStep(&array);
         checkIter += e.m_stepSize;
-        QVERIFY(ef->m_initialized == true);
         QVERIFY(ef->m_iterator == checkIter);
         QVERIFY(ef->isReady() == false);
     }

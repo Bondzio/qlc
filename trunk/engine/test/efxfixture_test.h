@@ -48,7 +48,6 @@ private slots:
     void updateSkipThreshold();
     void isValid();
     void reset();
-    void startStop();
     void setPoint8bit();
     void setPoint16bit();
     void nextStepLoop();

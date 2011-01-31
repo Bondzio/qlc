@@ -467,6 +467,7 @@ bool Function::stopAndWait()
 void Function::adjustIntensity(qreal fraction)
 {
     m_intensity = CLAMP(fraction, 0.0, 1.0);
+    emit intensityChanged(m_intensity);
 }
 
 void Function::resetIntensity()

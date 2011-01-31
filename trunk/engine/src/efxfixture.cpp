@@ -41,9 +41,6 @@ EFXFixture::EFXFixture(EFX* parent)
     m_serialNumber = 0;
     m_direction = Function::Forward;
     m_runTimeDirection = Function::Forward;
-    m_startScene = NULL;
-    m_stopScene = NULL;
-    m_initialized = false;
     m_ready = false;
 
     m_skipIterator = 0;
@@ -56,6 +53,8 @@ EFXFixture::EFXFixture(EFX* parent)
     m_msbPanChannel = QLCChannel::invalid();
     m_lsbTiltChannel = QLCChannel::invalid();
     m_msbTiltChannel = QLCChannel::invalid();
+
+    m_intensity = 1.0;
 }
 
 void EFXFixture::copyFrom(const EFXFixture* ef)
@@ -66,9 +65,6 @@ void EFXFixture::copyFrom(const EFXFixture* ef)
     m_serialNumber = ef->m_serialNumber;
     m_direction = ef->m_direction;
     m_runTimeDirection = ef->m_runTimeDirection;
-    m_startScene = ef->m_startScene;
-    m_stopScene = ef->m_stopScene;
-    m_initialized = ef->m_initialized;
     m_ready = ef->m_ready;
 
     m_skipIterator = ef->m_skipIterator;
@@ -200,26 +196,6 @@ int EFXFixture::serialNumber() const
     return m_serialNumber;
 }
 
-void EFXFixture::setStartScene(Scene* scene)
-{
-    m_startScene = scene;
-}
-
-Scene* EFXFixture::startScene() const
-{
-    return m_startScene;
-}
-
-void EFXFixture::setStopScene(Scene* scene)
-{
-    m_stopScene = scene;
-}
-
-Scene* EFXFixture::stopScene() const
-{
-    return m_stopScene;
-}
-
 void EFXFixture::setLsbPanChannel(quint32 ch)
 {
     m_lsbPanChannel = ch;
@@ -238,6 +214,11 @@ void EFXFixture::setLsbTiltChannel(quint32 ch)
 void EFXFixture::setMsbTiltChannel(quint32 ch)
 {
     m_msbTiltChannel = ch;
+}
+
+void EFXFixture::setIntensityChannels(QList <quint32> channels)
+{
+    m_intensityChannels = channels;
 }
 
 void EFXFixture::updateSkipThreshold()
@@ -275,7 +256,6 @@ void EFXFixture::reset()
     m_tiltValue = 0;
     m_skipIterator = 0;
     m_iterator = 0;
-    m_initialized = false;
     m_ready = false;
     m_runTimeDirection = m_direction;
 
@@ -364,26 +344,15 @@ void EFXFixture::nextStep(UniverseArray* universes)
 
 void EFXFixture::start(UniverseArray* universes)
 {
-    if (m_initialized == false)
-    {
-        // On the first pass, write HTP & LTP values
-        m_initialized = true;
-        if (m_startScene != NULL)
-            m_startScene->writeValues(universes, m_fixture);
-    }
-    else
-    {
-        // On the next passes, keep writing only HTP/intensity values
-        if (m_startScene != NULL)
-            m_startScene->writeValues(universes, m_fixture, QLCChannel::Intensity);
-    }
+    foreach (quint32 ich, m_intensityChannels)
+        universes->write(ich, uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)),
+                         QLCChannel::Intensity);
 }
 
 void EFXFixture::stop(UniverseArray* universes)
 {
-    if (m_stopScene != NULL)
-        m_stopScene->writeValues(universes, m_fixture);
-    m_initialized = false;
+    foreach (quint32 ich, m_intensityChannels)
+        universes->write(ich, uchar(0), QLCChannel::Intensity);
 }
 
 void EFXFixture::setPoint(UniverseArray* universes)
@@ -412,4 +381,13 @@ void EFXFixture::setPoint(UniverseArray* universes)
                                         * double(UCHAR_MAX));
         universes->write(m_lsbTiltChannel, value, QLCChannel::Tilt);
     }
+}
+
+/*****************************************************************************
+ * Intensity
+ *****************************************************************************/
+
+void EFXFixture::adjustIntensity(qreal fraction)
+{
+    m_intensity = fraction;
 }

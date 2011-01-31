@@ -81,12 +81,10 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
     m_busLowLimit = KDefaultBusLowLimit;
     m_busHighLimit = KDefaultBusHighLimit;
 
-    m_sliderValue = 0;
     m_levelValue = 0;
     m_levelValueChanged = false;
 
     m_playbackFunction = Function::invalidId();
-    m_playbackFunctionStartedByMe = false;
     m_playbackValue = 0;
     m_playbackValueChanged = false;
 
@@ -120,6 +118,7 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
     m_slider->setInvertedAppearance(false);
     connect(m_slider, SIGNAL(valueChanged(int)),
             this, SLOT(slotSliderMoved(int)));
+    m_externalMovement = false;
 
     /* Put stretchable space after the slider (to its right side) */
     m_hbox->addStretch();
@@ -207,7 +206,7 @@ bool VCSlider::copyFrom(VCWidget* widget)
 
     /* Copy mode & current value */
     setSliderMode(slider->sliderMode());
-    setSliderValue(slider->sliderValue());
+    m_slider->setValue(slider->sliderValue());
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);
@@ -263,7 +262,8 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
                         this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
                 connect(function, SIGNAL(stopped(t_function_id)),
                         this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
-                m_playbackFunctionStartedByMe = false;
+                connect(function, SIGNAL(intensityChanged(qreal)),
+                        this, SLOT(slotPlaybackFunctionIntensityChanged(qreal)));
             }
         }
     }
@@ -285,6 +285,8 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
                         this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
                 disconnect(function, SIGNAL(stopped(t_function_id)),
                         this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
+                disconnect(function, SIGNAL(intensityChanged(qreal)),
+                        this, SLOT(slotPlaybackFunctionIntensityChanged(qreal)));
             }
         }
     }
@@ -413,8 +415,8 @@ void VCSlider::setSliderMode(SliderMode mode)
         /* Set the slider range */
         m_slider->setRange(busLowLimit() * MasterTimer::frequency(),
                            busHighLimit() * MasterTimer::frequency());
-        setSliderValue(Bus::instance()->value(bus()));
-        slotSliderMoved(sliderValue());
+        m_slider->setValue(Bus::instance()->value(bus()));
+        slotSliderMoved(m_slider->value());
 
         /* Reconnect to bus emitter */
         connect(Bus::instance(), SIGNAL(nameChanged(quint32, const QString&)),
@@ -432,7 +434,7 @@ void VCSlider::setSliderMode(SliderMode mode)
         /* Set the slider range */
         uchar level = levelValue();
         m_slider->setRange(levelLowLimit(), levelHighLimit());
-        setSliderValue(level);
+        m_slider->setValue(level);
         slotSliderMoved(level);
 
         m_bottomLabel->show();
@@ -447,7 +449,7 @@ void VCSlider::setSliderMode(SliderMode mode)
 
         uchar level = playbackValue();
         m_slider->setRange(0, UCHAR_MAX);
-        setSliderValue(level);
+        m_slider->setValue(level);
         slotSliderMoved(level);
 
         _app->masterTimer()->registerDMXSource(this);
@@ -497,7 +499,7 @@ void VCSlider::setBusValue(int value)
 void VCSlider::slotBusValueChanged(quint32 bus, quint32 value)
 {
     if (bus == m_bus && m_slider->isSliderDown() == false)
-        setSliderValue(value);
+        m_slider->setValue(value);
 }
 
 void VCSlider::slotBusNameChanged(quint32 bus, const QString&)
@@ -597,6 +599,9 @@ t_function_id VCSlider::playbackFunction() const
 
 void VCSlider::setPlaybackValue(uchar value)
 {
+    if (m_externalMovement == true)
+        return;
+
     m_playbackValueMutex.lock();
     m_playbackValue = value;
     m_playbackValueChanged = true;
@@ -610,15 +615,22 @@ uchar VCSlider::playbackValue() const
 
 void VCSlider::slotPlaybackFunctionRunning(t_function_id fid)
 {
-    if (fid == playbackFunction() && m_playbackFunctionStartedByMe == false)
-        setSliderValue(m_slider->maximum());
+    Q_UNUSED(fid);
 }
 
 void VCSlider::slotPlaybackFunctionStopped(t_function_id fid)
 {
+    m_externalMovement = true;
     if (fid == playbackFunction())
-        setSliderValue(0);
-    m_playbackFunctionStartedByMe = false;
+        m_slider->setValue(0);
+    m_externalMovement = false;
+}
+
+void VCSlider::slotPlaybackFunctionIntensityChanged(qreal fraction)
+{
+    m_externalMovement = true;
+    m_slider->setValue(int(floor((qreal(m_slider->maximum()) * fraction) + 0.5)));
+    m_externalMovement = false;
 }
 
 /*****************************************************************************
@@ -676,8 +688,6 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
     m_playbackValueMutex.lock();
      uchar value = m_playbackValue;
      bool changed = m_playbackValueChanged;
-     m_playbackValueChanged = false;
-    m_playbackValueMutex.unlock();
 
     qreal percentage = qreal(value) / qreal(UCHAR_MAX);
 
@@ -706,23 +716,20 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
             if (value == 0)
             {
                 if (function->stopped() == false)
-                {
-                    m_playbackFunctionStartedByMe = false;
                     function->stop();
-                }
             }
             else
             {
                 if (function->stopped() == true)
-                {
-                    m_playbackFunctionStartedByMe = true;
                     timer->startFunction(function, false);
-                }
                 function->adjustIntensity(percentage);
             }
         }
         break;
     }
+
+     m_playbackValueChanged = false;
+    m_playbackValueMutex.unlock();
 }
 
 /*****************************************************************************
@@ -743,22 +750,15 @@ QString VCSlider::topLabelText()
  * Slider
  *****************************************************************************/
 
-void VCSlider::setSliderValue(int value)
+int VCSlider::sliderValue() const
 {
-    m_sliderValue = value;
-    m_slider->setValue(value);
-}
-
-int VCSlider::sliderValue()
-{
-    return m_sliderValue;
+    Q_ASSERT(m_slider != NULL);
+    return m_slider->value();
 }
 
 void VCSlider::slotSliderMoved(int value)
 {
     QString num;
-
-    m_sliderValue = value;
 
     switch (sliderMode())
     {
@@ -831,9 +831,15 @@ void VCSlider::slotSliderMoved(int value)
         break;
     }
 
+    if (m_slider->isSliderDown() == true)
+        sendFeedBack(value);
+}
+
+void VCSlider::sendFeedBack(int value)
+{
     /* Send input feedback */
     if (m_inputUniverse != InputMap::invalidUniverse() &&
-            m_inputChannel != KInputChannelInvalid)
+        m_inputChannel != KInputChannelInvalid)
     {
         if (invertedAppearance() == true)
             value = m_slider->maximum() - value;
@@ -842,8 +848,7 @@ void VCSlider::slotSliderMoved(int value)
                          float(m_slider->maximum()), float(0),
                          float(UCHAR_MAX));
 
-        _app->inputMap()->feedBack(m_inputUniverse, m_inputChannel,
-                                   int(fb));
+        _app->inputMap()->feedBack(m_inputUniverse, m_inputChannel, int(fb));
     }
 }
 
@@ -877,7 +882,7 @@ QString VCSlider::tapButtonText()
 void VCSlider::slotTapButtonClicked()
 {
     int t = m_time->elapsed();
-    setSliderValue(static_cast<int> (t * 0.001 * MasterTimer::frequency()));
+    m_slider->setValue(static_cast<int> (t * 0.001 * MasterTimer::frequency()));
     Bus::instance()->tap(m_bus);
     m_time->restart();
 }

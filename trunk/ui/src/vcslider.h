@@ -393,10 +393,10 @@ public:
 protected slots:
     void slotPlaybackFunctionRunning(t_function_id fid);
     void slotPlaybackFunctionStopped(t_function_id fid);
+    void slotPlaybackFunctionIntensityChanged(qreal fraction);
 
 protected:
     t_function_id m_playbackFunction;
-    bool m_playbackFunctionStartedByMe;
     uchar m_playbackValue;
     bool m_playbackValueChanged;
     QMutex m_playbackValueMutex;
@@ -436,24 +436,18 @@ protected:
      * Slider
      *********************************************************************/
 public:
-    /**
-     * Set the current slider value
-     */
-    void setSliderValue(int value);
+    int sliderValue() const;
 
-    /**
-     * Get the current slider value
-     */
-    int sliderValue();
-
-public slots:
+private slots:
     void slotSliderMoved(int value);
+
+private:
+    void sendFeedBack(int value);
 
 protected:
     QHBoxLayout* m_hbox;
     QSlider* m_slider;
-
-    int m_sliderValue;
+    bool m_externalMovement;
 
     /*********************************************************************
      * Bottom label

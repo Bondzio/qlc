@@ -714,7 +714,7 @@ void VCSliderProperties::slotLevelByGroupClicked()
 void VCSliderProperties::slotAttachPlaybackFunctionClicked()
 {
     FunctionSelection fs(this, false, Function::invalidId(),
-                         Function::Scene | Function::Chaser);
+                         Function::Scene | Function::Chaser | Function::EFX, true);
     if (fs.exec() != QDialog::Accepted)
         return;
 

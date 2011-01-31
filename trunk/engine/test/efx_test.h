@@ -49,7 +49,6 @@ private slots:
     void yPhase();
     void fixtures();
     void propagationMode();
-    void startStopScenes();
 
     void previewCircle();
     void previewEight();
@@ -75,10 +74,7 @@ private slots:
     void save();
 
     void armSuccess();
-    void armMissingStartScene();
-    void armMissingStopScene();
     void armMissingFixture();
-    void writeStartStopScenes();
 
 private:
     Doc* m_doc;

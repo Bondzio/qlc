@@ -645,13 +645,14 @@ void VCButton::pressFunction()
         {
             /* if the button is in a SoloFrame and the function is running but was started by a different function (a chaser or collection), 
              * turn of other functions and start it anyway.
-             */            
+             */
             if (isOn() == true && !(isChildOfSoloFrame() && f->initiatedByOtherFunction()))
                 f->stop();
             else
-            {              
+            {
                 emit functionStarting();
                 _app->masterTimer()->startFunction(f, false);
+                f->adjustIntensity(1.0);
             }
         }
     }

@@ -82,8 +82,10 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, quint32 fixtureID,
     m_valueSlider = NULL;
     m_numberLabel = NULL;
 
-    setMinimumWidth(50);
+    m_group = QLCChannel::NoGroup;
+    m_universeAddress = UINT_MAX;
 
+    setMinimumWidth(50);
     init();
 
     setStyle(App::saneStyle());
@@ -91,7 +93,10 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, quint32 fixtureID,
 
 ConsoleChannel::~ConsoleChannel()
 {
+    m_valueChangedMutex.lock();
+    m_outputDMX = false;
     _app->masterTimer()->unregisterDMXSource(this);
+    m_valueChangedMutex.unlock();
 }
 
 void ConsoleChannel::init()
@@ -151,6 +156,13 @@ void ConsoleChannel::init()
             this, SLOT(slotValueEdited(const QString&)));
     connect(m_valueSlider, SIGNAL(valueChanged(int)),
             this, SLOT(slotValueChange(int)));
+
+    // Listen to fixture changes so channel & group are updated when they change
+    connect(_app->doc(), SIGNAL(fixtureChanged(quint32)),
+            this, SLOT(slotFixtureChanged(quint32)));
+
+    // Grab channel & group for writeDMX
+    slotFixtureChanged(m_fixtureID);
 
     /* Register this object as a source of DMX data */
     _app->masterTimer()->registerDMXSource(this);
@@ -490,7 +502,18 @@ void ConsoleChannel::writeDMX(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
 
-    if (m_outputDMX == false)
+    m_valueChangedMutex.lock();
+
+    if (m_group == QLCChannel::Intensity || m_valueChanged == true)
+        universes->write(m_universeAddress, m_value, m_group);
+
+    m_valueChanged = false;
+    m_valueChangedMutex.unlock();
+}
+
+void ConsoleChannel::slotFixtureChanged(quint32 fixtureID)
+{
+    if (fixtureID != m_fixtureID)
         return;
 
     m_valueChangedMutex.lock();
@@ -498,18 +521,11 @@ void ConsoleChannel::writeDMX(MasterTimer* timer, UniverseArray* universes)
     const QLCChannel* qlcch = m_fixture->channel(m_channel);
     Q_ASSERT(qlcch != NULL);
 
-    if (qlcch->group() != QLCChannel::Intensity && m_valueChanged == false)
-    {
-        /* Value has not changed and this is not an intensity channel.
-           LTP in effect. */
-    }
-    else
-    {
-        quint32 ch = m_fixture->universeAddress() + m_channel;
-        universes->write(ch, m_value, qlcch->group());
-    }
+    // Store group and absolute address for writeDMX since the Fixture and
+    // QLCChannel instances can get deleted while context is in writeDMX().
+    m_group = qlcch->group();
+    m_universeAddress = m_fixture->universeAddress() + m_channel;
 
-    m_valueChanged = false;
     m_valueChangedMutex.unlock();
 }
 

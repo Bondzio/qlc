@@ -26,6 +26,7 @@
 #include <QMutex>
 #include <QIcon>
 
+#include "qlcchannel.h"
 #include "qlctypes.h"
 #include "dmxsource.h"
 
@@ -120,6 +121,13 @@ public:
     /** @reimp */
     void writeDMX(MasterTimer* timer, UniverseArray* universes);
 
+public slots:
+    void slotFixtureChanged(quint32 fixtureID);
+
+protected:
+    quint32 m_universeAddress;
+    QLCChannel::Group m_group;
+
     /*********************************************************************
      * Enable/disable
      *********************************************************************/
@@ -143,8 +151,8 @@ public:
     void setCheckable(bool checkable);
 
     /*********************************************************************
-    * Fixture channel
-    *********************************************************************/
+     * Fixture channel
+     *********************************************************************/
 public:
     quint32 channel() const {
         return m_channel;

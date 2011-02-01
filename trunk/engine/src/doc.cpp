@@ -79,7 +79,11 @@ Doc::~Doc()
     // Delete all fixture instances
     QListIterator <quint32> fxit(m_fixtures.keys());
     while (fxit.hasNext() == true)
-        delete m_fixtures.take(fxit.next());
+    {
+        Fixture* fxi = m_fixtures.take(fxit.next());
+        emit fixtureRemoved(fxi->id());
+        delete fxi;
+    }
 }
 
 /*****************************************************************************

@@ -166,8 +166,6 @@ void FixtureManager::slotDocumentChanged(Doc* doc)
 {
     Q_ASSERT(doc != NULL);
 
-    updateView();
-
     /* Connect fixture list change signals from the new document object */
     connect(doc, SIGNAL(fixtureAdded(quint32)),
             this, SLOT(slotFixtureAdded(quint32)));

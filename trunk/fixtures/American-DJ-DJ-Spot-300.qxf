@@ -2,18 +2,18 @@
 <FixtureDefinition>
  <Creator>
   <Name>Q Light Controller</Name>
-  <Version>3.0.7</Version>
+  <Version>3.1.0</Version>
   <Author>raymorris</Author>
  </Creator>
  <Manufacturer>American DJ</Manufacturer>
  <Model>DJ Spot 300</Model>
  <Type>Moving Head</Type>
  <Channel Name="Pan">
-  <Group Byte="1">Pan</Group>
+  <Group Byte="0">Pan</Group>
   <Capability Min="0" Max="255">Pan</Capability>
  </Channel>
  <Channel Name="Tilt">
-  <Group Byte="1">Tilt</Group>
+  <Group Byte="0">Tilt</Group>
   <Capability Min="0" Max="255">Tilt</Capability>
  </Channel>
  <Channel Name="Color">
@@ -90,4 +90,3 @@
   <Channel Number="7">Pan / tilt speed</Channel>
  </Mode>
 </FixtureDefinition>
-

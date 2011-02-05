@@ -63,7 +63,10 @@ const QSize VCButton::defaultSize(QSize(50, 50));
  * Initialization
  *****************************************************************************/
 
-VCButton::VCButton(QWidget* parent) : VCWidget(parent)
+VCButton::VCButton(QWidget* parent)
+    : VCWidget(parent)
+    , m_adjustIntensity(false)
+    , m_intensityAdjustment(1.0)
 {
     /* Set the class name "VCButton" as the object name as well */
     setObjectName(VCButton::staticMetaObject.className());
@@ -132,6 +135,8 @@ bool VCButton::copyFrom(VCWidget* widget)
     setIcon(button->icon());
     setKeySequence(button->keySequence());
     setFunction(button->function());
+    setAdjustIntensity(button->adjustIntensity());
+    setIntensityAdjustment(button->intensityAdjustment());
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);
@@ -353,6 +358,16 @@ bool VCButton::loadXML(const QDomElement* root)
         {
             setKeySequence(QKeySequence(tag.text()));
         }
+        else if (tag.tagName() == KXMLQLCVCButtonIntensity)
+        {
+            bool adjust;
+            if (tag.attribute(KXMLQLCVCButtonIntensityAdjust) == KXMLQLCTrue)
+                adjust = true;
+            else
+                adjust = false;
+            setIntensityAdjustment(double(tag.text().toInt()) / double(100));
+            setAdjustIntensity(adjust);
+        }
         else if (tag.tagName() == "KeyBind") /* Legacy */
         {
             loadKeyBind(&tag);
@@ -411,6 +426,14 @@ bool VCButton::saveXML(QDomDocument* doc, QDomElement* vc_root)
         text = doc->createTextNode(m_keySequence.toString());
         tag.appendChild(text);
     }
+
+    /* Intensity adjustment */
+    tag = doc->createElement(KXMLQLCVCButtonIntensity);
+    tag.setAttribute(KXMLQLCVCButtonIntensityAdjust,
+                     adjustIntensity() ? KXMLQLCTrue : KXMLQLCFalse);
+    root.appendChild(tag);
+    text = doc->createTextNode(QString::number(int(intensityAdjustment() * 100)));
+    tag.appendChild(text);
 
     /* External input */
     saveXMLInput(doc, &root);
@@ -632,6 +655,30 @@ VCButton::Action VCButton::stringToAction(const QString& str)
 }
 
 /*****************************************************************************
+ * Intensity adjustment
+ *****************************************************************************/
+
+void VCButton::setAdjustIntensity(bool adjust)
+{
+    m_adjustIntensity = adjust;
+}
+
+bool VCButton::adjustIntensity() const
+{
+    return m_adjustIntensity;
+}
+
+void VCButton::setIntensityAdjustment(qreal fraction)
+{
+    m_intensityAdjustment = fraction;
+}
+
+qreal VCButton::intensityAdjustment() const
+{
+    return m_intensityAdjustment;
+}
+
+/*****************************************************************************
  * Button press / release handlers
  *****************************************************************************/
 
@@ -652,7 +699,8 @@ void VCButton::pressFunction()
             {
                 emit functionStarting();
                 _app->masterTimer()->startFunction(f, false);
-                f->adjustIntensity(1.0);
+                if (adjustIntensity() == true)
+                    f->adjustIntensity(intensityAdjustment());
             }
         }
     }

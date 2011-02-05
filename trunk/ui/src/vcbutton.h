@@ -49,6 +49,9 @@ class QEvent;
 
 #define KXMLQLCVCButtonKey "Key"
 
+#define KXMLQLCVCButtonIntensity "Intensity"
+#define KXMLQLCVCButtonIntensityAdjust "Adjust"
+
 class VCButton : public VCWidget
 {
     Q_OBJECT
@@ -270,6 +273,36 @@ public:
 
 protected:
     Action m_action;
+
+    /*********************************************************************
+     * Intensity adjustment
+     *********************************************************************/
+public:
+    /**
+     * Make the button adjust the attached function's intensity when the
+     * button is used to start the function.
+     *
+     * @param adjust true to make the button adjust intensity, false to disable
+     *               intensity adjustment
+     */
+    void setAdjustIntensity(bool adjust);
+
+    /** Check, whether the button adjusts intensity */
+    bool adjustIntensity() const;
+
+    /**
+     * Set the amount of intensity adjustment.
+     *
+     * @param fraction Intensity adjustment amount (0.0 - 1.0)
+     */
+    void setIntensityAdjustment(qreal fraction);
+
+    /** Get the amount of intensity adjustment. */
+    qreal intensityAdjustment() const;
+
+protected:
+    bool m_adjustIntensity;
+    qreal m_intensityAdjustment;
 
     /*********************************************************************
      * Button press / release handlers

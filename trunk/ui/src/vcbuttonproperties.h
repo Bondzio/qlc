@@ -36,13 +36,11 @@ class KeyBind;
 class VCButtonProperties : public QDialog, public Ui_VCButtonProperties
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCButtonProperties)
 
 public:
     VCButtonProperties(VCButton* button, QWidget* parent);
     ~VCButtonProperties();
-
-private:
-    Q_DISABLE_COPY(VCButtonProperties)
 
 protected slots:
     void slotAttachFunction();
@@ -54,6 +52,9 @@ protected slots:
     void slotAutoDetectInputToggled(bool checked);
     void slotInputValueChanged(quint32 universe, quint32 channel);
     void slotChooseInputClicked();
+
+    void slotIntensitySliderMoved(int value);
+    void slotIntensityEdited(const QString& text);
 
     void accept();
 

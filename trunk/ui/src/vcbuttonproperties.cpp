@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QIntValidator>
 #include <QKeySequence>
 #include <QRadioButton>
 #include <QMessageBox>
@@ -67,16 +68,18 @@ VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent)
     m_inputChannel = m_button->inputChannel();
     updateInputSource();
 
-    connect(m_autoDetectInputButton, SIGNAL(toggled(bool)),
-            this, SLOT(slotAutoDetectInputToggled(bool)));
-    connect(m_chooseInputButton, SIGNAL(clicked()),
-            this, SLOT(slotChooseInputClicked()));
-
     /* Press action */
     if (button->action() == VCButton::Toggle)
         m_toggle->setChecked(true);
     else
         m_flash->setChecked(true);
+
+    /* Intensity adjustment */
+    m_intensityEdit->setValidator(new QIntValidator(0, 100, this));
+    m_intensityGroup->setChecked(m_button->adjustIntensity());
+    int intensity = int(floor(m_button->intensityAdjustment() * double(100)));
+    m_intensityEdit->setText(QString::number(intensity));
+    m_intensitySlider->setValue(intensity);
 
     /* Button connections */
     connect(m_attachFunction, SIGNAL(clicked()),
@@ -85,6 +88,14 @@ VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent)
             this, SLOT(slotSetFunction()));
     connect(m_attachKey, SIGNAL(clicked()), this, SLOT(slotAttachKey()));
     connect(m_detachKey, SIGNAL(clicked()), this, SLOT(slotDetachKey()));
+    connect(m_autoDetectInputButton, SIGNAL(toggled(bool)),
+            this, SLOT(slotAutoDetectInputToggled(bool)));
+    connect(m_chooseInputButton, SIGNAL(clicked()),
+            this, SLOT(slotChooseInputClicked()));
+    connect(m_intensitySlider, SIGNAL(valueChanged(int)),
+            this, SLOT(slotIntensitySliderMoved(int)));
+    connect(m_intensityEdit, SIGNAL(textEdited(QString)),
+            this, SLOT(slotIntensityEdited(QString)));
 }
 
 VCButtonProperties::~VCButtonProperties()
@@ -236,12 +247,24 @@ void VCButtonProperties::updateInputSource()
     m_inputChannelEdit->setText(chName);
 }
 
+void VCButtonProperties::slotIntensitySliderMoved(int value)
+{
+    m_intensityEdit->setText(QString::number(value));
+}
+
+void VCButtonProperties::slotIntensityEdited(const QString& text)
+{
+    m_intensitySlider->setValue(text.toInt());
+}
+
 void VCButtonProperties::accept()
 {
     m_button->setCaption(m_nameEdit->text());
     m_button->setFunction(m_function);
     m_button->setKeySequence(m_keySequence);
     m_button->setInputSource(m_inputUniverse, m_inputChannel);
+    m_button->setAdjustIntensity(m_intensityGroup->isChecked());
+    m_button->setIntensityAdjustment(double(m_intensitySlider->value()) / double(100));
 
     if (m_toggle->isChecked() == true)
         m_button->setAction(VCButton::Toggle);

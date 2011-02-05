@@ -8,6 +8,7 @@ fixtures.files += American-DJ-Galaxian-3D.qxf
 fixtures.files += American-DJ-Mega-Bar-LED.qxf
 fixtures.files += American-DJ-Mega-Flash-DMX.qxf
 fixtures.files += American-DJ-Quad-Gem-DMX.qxf
+fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
 fixtures.files += Chauvet-200b.qxf
 fixtures.files += Chauvet-DMX-Mega-Strobe-III.qxf

@@ -18,15 +18,26 @@ popd
 # UI tests
 #############################################################################
 
-pushd .
-cd ui/test
-./test_ui
-RESULT=$?
-if [ $RESULT != 0 ]; then
-	echo "UI unit test failed ($RESULT). Please fix before commit."
-	exit $RESULT
-fi
-popd
+TESTDIR=ui/test
+TESTS=`find ${TESTDIR} -type dir -maxdepth 1 -mindepth 1`
+for test in ${TESTS}
+do
+    # Ignore .svn
+    if [ `echo ${test} | grep ".svn"` ]; then
+        continue
+    fi
+
+    # Isolate just the test name
+    test=`echo ${test} | sed 's/ui\/test\///'`
+
+    # Execute the test
+    ${TESTDIR}/${test}/${test}_test
+    RESULT=${?}
+    if [ ${RESULT} != 0 ]; then
+	    echo "${RESULT} UI unit tests failed. Please fix before commit."
+	    exit ${RESULT}
+    fi
+done
 
 #############################################################################
 # Enttec wing tests

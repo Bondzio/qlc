@@ -1,8 +1,8 @@
 /*
-  Q Light Controller - Unit test
-  main.cpp
+  Q Light Controller
+  aboutbox_test.h
 
-  Copyright (c) Heikki Junnila
+  Copyright (C) Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,21 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QApplication>
-#include <QtTest>
+#ifndef ABOUTBOX_TEST_H
+#define ABOUTBOX_TEST_H
 
-#include "vcwidgetproperties_test.h"
+#include <QObject>
 
-int main(int argc, char** argv)
+class AboutBox_Test : public QObject
 {
-    QApplication qapp(argc, argv);
-    int r;
+    Q_OBJECT
 
-    VCWidgetProperties_Test props;
-    r = QTest::qExec(&props, argc, argv);
-    if (r != 0)
-        return r;
+private slots:
+    void initial();
+    void slotTimeout();
+};
 
-    return 0;
-}
-
+#endif

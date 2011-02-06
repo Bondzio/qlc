@@ -138,3 +138,5 @@ void VCWidgetProperties_Test::load()
     QVERIFY(p.state() == Qt::WindowMinimized);
     QVERIFY(p.visible() == true);
 }
+
+QTEST_MAIN(VCWidgetProperties_Test)

@@ -23,18 +23,18 @@
 #include <QLabel>
 #include <QTimer>
 
+#include "qlcconfig.h"
 #include "aboutbox.h"
-#include "app.h"
 
 AboutBox::AboutBox(QWidget* parent) : QDialog (parent)
 {
     setupUi(this);
 
-    m_titleLabel->setText(App::longName());
-    m_versionLabel->setText(App::version());
+    m_titleLabel->setText(APPNAME);
+    m_versionLabel->setText(APPVERSION);
     m_copyrightLabel->setText(QString("Copyright &copy; Heikki Junnila %1")
                               .arg(tr("and contributors:")));
-    m_websiteLabel->setText(tr("Website: %1").arg("<A HREF=\"http://www.sf.net/projects/qlc\">http://www.sf.net/projects/qlc</a>"));
+    m_websiteLabel->setText(tr("Website: %1").arg("<A HREF=\"http://qlc.sourceforge.net\">http://qlc.sourceforge.net</A>"));
 
     connect(m_contributors, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(slotItemClicked()));

@@ -67,10 +67,11 @@ void Doc_Test::createFixtureId()
 {
     Doc doc(this, m_fixtureDefCache);
 
-    for (quint32 i = 0; i < 1048576; i++)
+    for (quint32 i = 0; i < 16384; i++)
     {
         quint32 id = doc.createFixtureId();
-        doc.m_fixtures[i] = NULL; // Just insert empty data to the map
+        doc.m_fixtures[i] = new Fixture(&doc);
+        doc.m_fixtures[i]->setID(id);
         QCOMPARE(id, i);
     }
 }

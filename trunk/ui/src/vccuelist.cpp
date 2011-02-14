@@ -79,10 +79,10 @@ VCCueList::VCCueList(QWidget* parent) : VCWidget(parent)
 
     slotModeChanged(mode());
 
-    connect(_app->doc(), SIGNAL(functionRemoved(t_function_id)),
-            this, SLOT(slotFunctionRemoved(t_function_id)));
-    connect(_app->doc(), SIGNAL(functionChanged(t_function_id)),
-            this, SLOT(slotFunctionChanged(t_function_id)));
+    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
+    connect(_app->doc(), SIGNAL(functionChanged(quint32)),
+            this, SLOT(slotFunctionChanged(quint32)));
 
     setNextInputSource(InputMap::invalidUniverse(), KInputChannelInvalid);
     setPreviousInputSource(InputMap::invalidUniverse(), KInputChannelInvalid);
@@ -140,12 +140,12 @@ bool VCCueList::copyFrom(VCWidget* widget)
  * Cue list
  *****************************************************************************/
 
-void VCCueList::setChaser(t_function_id fid)
+void VCCueList::setChaser(quint32 fid)
 {
     m_chaser = fid;
 }
 
-t_function_id VCCueList::chaser() const
+quint32 VCCueList::chaser() const
 {
     return m_chaser;
 }
@@ -171,7 +171,7 @@ void VCCueList::updateList()
     }
 }
 
-void VCCueList::slotFunctionRemoved(t_function_id fid)
+void VCCueList::slotFunctionRemoved(quint32 fid)
 {
     if (m_chaser == fid)
     {
@@ -180,7 +180,7 @@ void VCCueList::slotFunctionRemoved(t_function_id fid)
     }
 }
 
-void VCCueList::slotFunctionChanged(t_function_id fid)
+void VCCueList::slotFunctionChanged(quint32 fid)
 {
     if (m_chaser == fid)
         updateList();

@@ -779,7 +779,7 @@ void VirtualConsole::slotAddButtonMatrix()
             int index = (y * h) + x;
             if (index < abm.functions().size())
             {
-                t_function_id fid = abm.functions().at(index);
+                quint32 fid = abm.functions().at(index);
                 Function* function = _app->doc()->function(fid);
                 if (function != NULL)
                 {

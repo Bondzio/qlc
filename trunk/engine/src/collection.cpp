@@ -42,8 +42,8 @@ Collection::Collection(Doc* doc) : Function(doc)
     setName(tr("New Collection"));
 
     // Listen to member Function removals
-    connect(doc, SIGNAL(functionRemoved(t_function_id)),
-            this, SLOT(slotFunctionRemoved(t_function_id)));
+    connect(doc, SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 Collection::~Collection()
@@ -108,7 +108,7 @@ bool Collection::copyFrom(const Function* function)
  * Contents
  *****************************************************************************/
 
-bool Collection::addFunction(t_function_id fid)
+bool Collection::addFunction(quint32 fid)
 {
     if (fid != m_id && m_functions.contains(fid) == false)
     {
@@ -122,7 +122,7 @@ bool Collection::addFunction(t_function_id fid)
     }
 }
 
-bool Collection::removeFunction(t_function_id fid)
+bool Collection::removeFunction(quint32 fid)
 {
     if (m_functions.removeAll(fid) > 0)
     {
@@ -135,12 +135,12 @@ bool Collection::removeFunction(t_function_id fid)
     }
 }
 
-QList <t_function_id> Collection::functions() const
+QList <quint32> Collection::functions() const
 {
     return m_functions;
 }
 
-void Collection::slotFunctionRemoved(t_function_id fid)
+void Collection::slotFunctionRemoved(quint32 fid)
 {
     removeFunction(fid);
 }
@@ -169,7 +169,7 @@ bool Collection::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionName, name());
 
     /* Steps */
-    QListIterator <t_function_id> it(m_functions);
+    QListIterator <quint32> it(m_functions);
     while (it.hasNext() == true)
     {
         /* Step tag */
@@ -236,7 +236,7 @@ void Collection::arm()
 
     /* Check that all member functions exist (nonexistent functions can
        be present only when a corrupted file has been loaded) */
-    QMutableListIterator<t_function_id> it(m_functions);
+    QMutableListIterator<quint32> it(m_functions);
     while (it.hasNext() == true)
     {
         /* Remove any nonexistent member functions */
@@ -264,7 +264,7 @@ void Collection::postRun(MasterTimer* timer, UniverseArray* universes)
 
     /** Stop the member functions only if they have been started by this
         collection. */
-    QSetIterator <t_function_id> it(m_runningChildren);
+    QSetIterator <quint32> it(m_runningChildren);
     while (it.hasNext() == true)
     {
         Function* function = doc->function(it.next());
@@ -285,7 +285,7 @@ void Collection::write(MasterTimer* timer, UniverseArray* universes)
         Doc* doc = qobject_cast <Doc*> (parent());
         Q_ASSERT(doc != NULL);
 
-        QListIterator <t_function_id> it(m_functions);
+        QListIterator <quint32> it(m_functions);
         while (it.hasNext() == true)
         {
             Function* function = doc->function(it.next());
@@ -298,8 +298,8 @@ void Collection::write(MasterTimer* timer, UniverseArray* universes)
 
             // Listen to the children's stopped signals so that this collection
             // can give up its rights to stop the function later.
-            connect(function, SIGNAL(stopped(t_function_id)),
-                    this, SLOT(slotChildStopped(t_function_id)));
+            connect(function, SIGNAL(stopped(quint32)),
+                    this, SLOT(slotChildStopped(quint32)));
 
             timer->startFunction(function, true);
         }
@@ -311,14 +311,14 @@ void Collection::write(MasterTimer* timer, UniverseArray* universes)
         stop();
 }
 
-void Collection::slotChildStopped(t_function_id fid)
+void Collection::slotChildStopped(quint32 fid)
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
 
     Function* function = doc->function(fid);
-    disconnect(function, SIGNAL(stopped(t_function_id)),
-               this, SLOT(slotChildStopped(t_function_id)));
+    disconnect(function, SIGNAL(stopped(quint32)),
+               this, SLOT(slotChildStopped(quint32)));
 
     m_runningChildren.remove(fid);
 }

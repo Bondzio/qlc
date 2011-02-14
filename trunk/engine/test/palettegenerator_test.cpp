@@ -121,8 +121,8 @@ void PaletteGenerator_Test::createColours()
 
     PaletteGenerator pg(&doc, list);
     pg.createColours();
-    QCOMPARE(doc.functions(), 10); // 10 colours
-    for (t_function_id i = 0; i < 10; i++)
+    QCOMPARE(doc.functions().size(), 10); // 10 colours
+    for (quint32 i = 0; i < 10; i++)
     {
         Scene* s = qobject_cast<Scene*> (doc.function(i));
         QVERIFY(s != NULL);

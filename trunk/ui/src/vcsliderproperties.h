@@ -164,7 +164,7 @@ protected:
 
 protected:
     /** The currently selected playback function */
-    t_function_id m_playbackFunctionId;
+    quint32 m_playbackFunctionId;
 
     /*********************************************************************
      * OK & Cancel

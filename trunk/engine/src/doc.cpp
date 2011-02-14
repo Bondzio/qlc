@@ -44,14 +44,8 @@ Doc::Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache)
     , m_mode(Design)
     , m_fixtureDefCache(fixtureDefCache)
     , m_latestFixtureId(0)
+    , m_latestFunctionId(0)
 {
-    // Allocate function array
-    m_functionArray = (Function**) malloc(sizeof(Function*) *
-                                          KFunctionArraySize);
-    for (t_function_id i = 0; i < KFunctionArraySize; i++)
-        m_functionArray[i] = NULL;
-    m_functionAllocation = 0;
-
     /* Connect to bus emitter so that Doc can be marked as modified when
        bus name changes. */
     connect(Bus::instance(), SIGNAL(nameChanged(quint32,const QString&)),
@@ -62,19 +56,14 @@ Doc::Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache)
 
 Doc::~Doc()
 {
-    // Delete all functions
-    for (t_function_id i = 0; i < KFunctionArraySize; i++)
+    // Delete all function instances
+    QListIterator <quint32> funcit(m_functions.keys());
+    while (funcit.hasNext() == true)
     {
-        if (m_functionArray[i] != NULL)
-        {
-            delete m_functionArray[i];
-            m_functionArray[i] = NULL;
-
-            emit functionRemoved(i);
-        }
+        Function* func = m_functions.take(funcit.next());
+        emit functionRemoved(func->id());
+        delete func;
     }
-    delete [] m_functionArray;
-    m_functionAllocation = 0;
 
     // Delete all fixture instances
     QListIterator <quint32> fxit(m_fixtures.keys());
@@ -118,16 +107,13 @@ void Doc::setMode(Doc::Mode mode)
         return;
     m_mode = mode;
 
-    /* Go thru all functions and arm/disarm them, depending on new mode */
-    for (int i = 0; i < KFunctionArraySize; i++)
+    foreach(Function* func, m_functions.values())
     {
-        Function* function = m_functionArray[i];
-        if (function == NULL)
-            continue;
+        Q_ASSERT(func != NULL);
+        if (mode == Operate)
+            func->arm();
         else if (mode == Design)
-            function->disarm();
-        else if (mode == Operate)
-            function->arm();
+            func->disarm();
     }
 
     emit modeChanged(m_mode);
@@ -311,128 +297,94 @@ int Doc::totalPowerConsumption(int& fuzzy) const
  * Functions
  *****************************************************************************/
 
-bool Doc::addFunction(Function* function, t_function_id id)
+quint32 Doc::createFunctionId()
 {
-    bool ok = false;
-
-    Q_ASSERT(function != NULL);
-
-    if (functions() >= KFunctionArraySize)
+    /* This results in an endless loop if there are UINT_MAX-1 functions. That,
+       however, seems a bit unlikely. Are there even 4294967295-1 functions in
+       total in the whole world? */
+    while (m_functions.contains(m_latestFunctionId) == true ||
+           m_latestFunctionId == Fixture::invalidId())
     {
-        qWarning() << Q_FUNC_INFO << "Cannot add more than" << KFunctionArraySize
-                   << "functions";
-        return false;
+        m_latestFunctionId++;
     }
+
+    return m_latestFunctionId;
+}
+
+bool Doc::addFunction(Function* func, quint32 id)
+{
+    Q_ASSERT(func != NULL);
 
     if (id == Function::invalidId())
+        id = createFunctionId();
+
+    if (m_functions.contains(id) == true || id == Fixture::invalidId())
     {
-        /**
-         * Find the next free space from function array.
-         *
-         * @todo Already with a couple hundred functions this becomes
-         * unbearably slow. With a thousand functions... Oh boy...!
-         */
-        for (t_function_id i = 0; i < KFunctionArraySize; i++)
-        {
-            if (m_functionArray[i] == NULL)
-            {
-                /* Found a place for the function */
-                assignFunction(function, i);
-                ok = true;
-                break;
-            }
-        }
-    }
-    else if (id >= 0 && id < KFunctionArraySize)
-    {
-        if (m_functionArray[id] == NULL)
-        {
-            /* Found a place for the function */
-            assignFunction(function, id);
-            ok = true;
-        }
-        else
-        {
-            qWarning() << Q_FUNC_INFO << "Unable to assign function"
-                       << function->name() << "to ID" << id
-                       << "because another function already has the same ID.";
-        }
+        qWarning() << Q_FUNC_INFO << "a function with ID" << id << "already exists!";
+        return false;
     }
     else
     {
-        /* Pure and honest epic fail */
+        // Listen to function changes
+        connect(func, SIGNAL(changed(quint32)),
+                this, SLOT(slotFunctionChanged(quint32)));
+
+        // Make the function listen to fixture removals
+        connect(this, SIGNAL(fixtureRemoved(quint32)),
+                func, SLOT(slotFixtureRemoved(quint32)));
+
+        // Place the function in the map and assign it the new ID
+        m_functions[id] = func;
+        func->setID(id);
+        emit functionAdded(id);
+        setModified();
+
+        return true;
     }
-
-    return ok;
 }
 
-int Doc::functions() const
+QList <Function*> Doc::functions() const
 {
-    return m_functionAllocation;
+    return m_functions.values();
 }
 
-quint32 Doc::functionsFree() const
+bool Doc::deleteFunction(quint32 id)
 {
-    return KFunctionArraySize - functions();
-}
-
-bool Doc::deleteFunction(t_function_id id)
-{
-    if (m_functionArray[id] != NULL)
+    if (m_functions.contains(id) == true)
     {
-        delete m_functionArray[id];
-        m_functionArray[id] = NULL;
-        m_functionAllocation--;
+        Function* func = m_functions.take(id);
+        Q_ASSERT(func != NULL);
 
         emit functionRemoved(id);
         setModified();
+        delete func;
 
         return true;
     }
     else
     {
+        qWarning() << Q_FUNC_INFO << "No function with id" << id;
         return false;
     }
 }
 
-Function* Doc::function(t_function_id id)
+Function* Doc::function(quint32 id)
 {
-    if (id >= 0 && id < KFunctionArraySize)
-        return m_functionArray[id];
+    if (m_functions.contains(id) == true)
+        return m_functions[id];
     else
         return NULL;
-}
-
-void Doc::assignFunction(Function* function, t_function_id id)
-{
-    Q_ASSERT(function != NULL);
-    Q_ASSERT(id >= 0 && id < KFunctionArraySize);
-
-    /* Pass function change signals thru Doc */
-    connect(function, SIGNAL(changed(t_function_id)),
-            this, SLOT(slotFunctionChanged(t_function_id)));
-
-    /* Make the function listen to fixture removals so that it can
-       get rid of nonexisting members. */
-    connect(this, SIGNAL(fixtureRemoved(quint32)),
-            function, SLOT(slotFixtureRemoved(quint32)));
-
-    m_functionAllocation++;
-    m_functionArray[id] = function;
-    function->setID(id);
-    emit functionAdded(id);
-    setModified();
-}
-
-void Doc::slotFunctionChanged(t_function_id fid)
-{
-    setModified();
-    emit functionChanged(fid);
 }
 
 /*****************************************************************************
  * Monitoring/listening methods
  *****************************************************************************/
+
+void Doc::slotFunctionChanged(quint32 fid)
+{
+    setModified();
+    emit functionChanged(fid);
+}
 
 void Doc::slotFixtureChanged(quint32 id)
 {
@@ -493,8 +445,6 @@ bool Doc::loadXML(const QDomElement* root)
 bool Doc::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
     QDomElement root;
-    QDomElement tag;
-    QDomText text;
 
     Q_ASSERT(doc != NULL);
     Q_ASSERT(wksp_root != NULL);
@@ -513,12 +463,12 @@ bool Doc::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     }
 
     /* Write functions into an XML document */
-    for (t_function_id i = 0; i < KFunctionArraySize; i++)
+    QListIterator <Function*> funcit(functions());
+    while (funcit.hasNext() == true)
     {
-        if (m_functionArray[i] != NULL)
-        {
-            m_functionArray[i]->saveXML(doc, &root);
-        }
+        Function* func(funcit.next());
+        Q_ASSERT(func != NULL);
+        func->saveXML(doc, &root);
     }
 
     /* Write buses */

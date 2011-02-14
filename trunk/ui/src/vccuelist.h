@@ -86,17 +86,17 @@ public:
     void updateList();
 
     /** Set the chaser whose steps are used as the cue list */
-    void setChaser(t_function_id fid);
+    void setChaser(quint32 fid);
 
     /** Get the chaser that's used as the cue list */
-    t_function_id chaser() const;
+    quint32 chaser() const;
 
 protected slots:
     /** Removes destroyed functions from the list */
-    void slotFunctionRemoved(t_function_id fid);
+    void slotFunctionRemoved(quint32 fid);
 
     /** Updates name in the list if function got changed */
-    void slotFunctionChanged(t_function_id fid);
+    void slotFunctionChanged(quint32 fid);
 
     /** Skip to the next cue */
     void slotNextCue();
@@ -117,7 +117,7 @@ protected:
 
 protected:
     QTreeWidget* m_list;
-    t_function_id m_chaser;
+    quint32 m_chaser;
     ChaserRunner* m_runner;
 
     /*************************************************************************

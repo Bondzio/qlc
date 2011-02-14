@@ -280,7 +280,7 @@ void Collection_Test::save()
         QDomElement tag = node.toElement();
         if (tag.tagName() == "Step")
         {
-            t_function_id fid = tag.text().toUInt();
+            quint32 fid = tag.text().toUInt();
             QVERIFY(fid == 0 || fid == 1 || fid == 2 || fid == 3);
             fids++;
         }

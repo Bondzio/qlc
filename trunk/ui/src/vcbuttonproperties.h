@@ -44,7 +44,7 @@ public:
 
 protected slots:
     void slotAttachFunction();
-    void slotSetFunction(t_function_id fid = Function::invalidId());
+    void slotSetFunction(quint32 fid = Function::invalidId());
 
     void slotAttachKey();
     void slotDetachKey();
@@ -65,7 +65,7 @@ protected:
     VCButton* m_button;
 
     QKeySequence m_keySequence;
-    t_function_id m_function;
+    quint32 m_function;
     quint32 m_inputUniverse;
     quint32 m_inputChannel;
 };

@@ -112,7 +112,7 @@ void VCButtonProperties::slotAttachFunction()
     }
 }
 
-void VCButtonProperties::slotSetFunction(t_function_id fid)
+void VCButtonProperties::slotSetFunction(quint32 fid)
 {
     Function* func;
 

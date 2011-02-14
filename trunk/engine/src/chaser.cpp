@@ -53,8 +53,8 @@ Chaser::Chaser(Doc* doc) : Function(doc)
             this, SLOT(slotBusTapped(quint32)));
 
     // Listen to member Function removals
-    connect(doc, SIGNAL(functionRemoved(t_function_id)),
-            this, SLOT(slotFunctionRemoved(t_function_id)));
+    connect(doc, SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 Chaser::~Chaser()
@@ -119,7 +119,7 @@ bool Chaser::copyFrom(const Function* function)
  * Contents
  *****************************************************************************/
 
-bool Chaser::addStep(t_function_id id)
+bool Chaser::addStep(quint32 id)
 {
     if (id != m_id)
     {
@@ -151,7 +151,7 @@ bool Chaser::raiseStep(int index)
 {
     if (index > 0 && index < m_steps.count())
     {
-        t_function_id fid = m_steps.takeAt(index);
+        quint32 fid = m_steps.takeAt(index);
         m_steps.insert(index - 1, fid);
 
         emit changed(m_id);
@@ -167,7 +167,7 @@ bool Chaser::lowerStep(int index)
 {
     if (index >= 0 && index < (m_steps.count() - 1))
     {
-        t_function_id fid = m_steps.takeAt(index);
+        quint32 fid = m_steps.takeAt(index);
         m_steps.insert(index + 1, fid);
 
         emit changed(m_id);
@@ -179,7 +179,7 @@ bool Chaser::lowerStep(int index)
     }
 }
 
-QList <t_function_id> Chaser::steps() const
+QList <quint32> Chaser::steps() const
 {
     return m_steps;
 }
@@ -190,7 +190,7 @@ QList <Function*> Chaser::stepFunctions() const
     Q_ASSERT(doc != NULL);
 
     QList <Function*> list;
-    QListIterator <t_function_id> it(m_steps);
+    QListIterator <quint32> it(m_steps);
     while (it.hasNext() == true)
     {
         Function* function = doc->function(it.next());
@@ -201,7 +201,7 @@ QList <Function*> Chaser::stepFunctions() const
     return list;
 }
 
-void Chaser::slotFunctionRemoved(t_function_id fid)
+void Chaser::slotFunctionRemoved(quint32 fid)
 {
     m_steps.removeAll(fid);
 }
@@ -250,7 +250,7 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag.appendChild(text);
 
     /* Steps */
-    QListIterator <t_function_id> it(m_steps);
+    QListIterator <quint32> it(m_steps);
     while (it.hasNext() == true)
     {
         /* Step tag */
@@ -312,7 +312,7 @@ bool Chaser::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionStep)
         {
-            t_function_id fid = -1;
+            quint32 fid = -1;
             int num = 0;
 
             num = tag.attribute(KXMLQLCFunctionNumber).toInt();

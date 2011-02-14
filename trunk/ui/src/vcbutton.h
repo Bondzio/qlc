@@ -230,7 +230,7 @@ public:
      *
      * @param function An ID of a function to attach
      */
-    void setFunction(t_function_id function);
+    void setFunction(quint32 function);
 
     /**
      * Get the ID of the function attached to a VCButton
@@ -238,17 +238,17 @@ public:
      * @return The ID of the attached function or Function::invalidId()
      *         if there isn't one
      */
-    t_function_id function() const {
+    quint32 function() const {
         return m_function;
     }
 
 protected slots:
     /** Invalidates the button's function if the function is destroyed */
-    void slotFunctionRemoved(t_function_id fid);
+    void slotFunctionRemoved(quint32 fid);
 
 protected:
     /** The function that this button is controlling */
-    t_function_id m_function;
+    quint32 m_function;
 
     /*********************************************************************
      * Button action
@@ -316,13 +316,13 @@ protected:
 
 protected slots:
     /** Handler for function running signal */
-    void slotFunctionRunning(t_function_id fid);
+    void slotFunctionRunning(quint32 fid);
 
     /** Handler for function stop signal */
-    void slotFunctionStopped(t_function_id fid);
+    void slotFunctionStopped(quint32 fid);
 
     /** Basically the same as slotFunctionStopped() but for flash signal */
-    void slotFunctionFlashing(t_function_id fid, bool state);
+    void slotFunctionFlashing(quint32 fid, bool state);
 
     /** Slot for brief widget blink when controlled function stops */
     void slotBlinkReady();

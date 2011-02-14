@@ -91,10 +91,6 @@ bool IntensityGenerator::createOddEvenChaser()
     if (m_odd == NULL || m_even == NULL)
         return false;
 
-    // Abort if doc can't fit the chaser and its two members
-    if (m_doc->functionsFree() < 3)
-        return false;
-
     // Create the chaser only if both steps contain something
     if (m_odd->values().size() != 0 && m_even->values().size() != 0)
     {
@@ -129,10 +125,6 @@ bool IntensityGenerator::createOddEvenChaser()
 bool IntensityGenerator::createFullZeroChaser()
 {
     if (m_full == NULL || m_zero == NULL)
-        return false;
-
-    // Abort if doc can't fit the chaser and its two members
-    if (m_doc->functionsFree() < 3)
         return false;
 
     // Create the chaser only if both steps contain something
@@ -170,10 +162,6 @@ bool IntensityGenerator::createSequenceChasers()
     if (m_sequence.size() == 0)
         return false;
 
-    // Abort if doc can't fit the two chasers and their sequence members
-    if (m_doc->functionsFree() < quint32(m_sequence.size() + 2))
-        return false;
-
     // Abort immediately if doc won't take all sequence steps
     QListIterator <Scene*> it(m_sequence);
     while (it.hasNext() == true)
@@ -197,10 +185,6 @@ bool IntensityGenerator::createSequenceChasers()
 bool IntensityGenerator::createRandomChaser()
 {
     if (m_random.size() == 0)
-        return false;
-
-    // Abort if doc can't fit the chaser and its members
-    if (m_doc->functionsFree() < quint32(m_random.size() + 1))
         return false;
 
     // Abort immediately if doc won't take all sequence steps

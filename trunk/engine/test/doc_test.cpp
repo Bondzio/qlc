@@ -59,8 +59,8 @@ void Doc_Test::defaults()
     QVERIFY(doc.m_modified == false);
     QVERIFY(doc.m_latestFixtureId == 0);
     QVERIFY(doc.m_fixtures.size() == 0);
-    QVERIFY(doc.m_functionAllocation == 0);
-    QVERIFY(doc.m_functionArray != NULL);
+    QVERIFY(doc.m_latestFunctionId == 0);
+    QVERIFY(doc.m_functions.size() == 0);
 }
 
 void Doc_Test::createFixtureId()
@@ -357,15 +357,14 @@ void Doc_Test::totalPowerConsumption()
 void Doc_Test::addFunction()
 {
     Doc doc(this, m_fixtureDefCache);
-    QVERIFY(doc.m_functionAllocation == 0);
+    QVERIFY(doc.functions().size() == 0);
 
     Scene* s = new Scene(&doc);
     QVERIFY(s->id() == Function::invalidId());
     QVERIFY(doc.addFunction(s) == true);
     QVERIFY(s->id() == 0);
-    QVERIFY(doc.m_functionAllocation == 1);
+    QVERIFY(doc.functions().size() == 1);
     QVERIFY(doc.isModified() == true);
-    QCOMPARE(int(doc.functionsFree()), KFunctionArraySize - 1);
 
     doc.resetModified();
 
@@ -373,9 +372,8 @@ void Doc_Test::addFunction()
     QVERIFY(c->id() == Function::invalidId());
     QVERIFY(doc.addFunction(c) == true);
     QVERIFY(c->id() == 1);
-    QVERIFY(doc.m_functionAllocation == 2);
+    QVERIFY(doc.functions().size() == 2);
     QVERIFY(doc.isModified() == true);
-    QCOMPARE(int(doc.functionsFree()), KFunctionArraySize - 2);
 
     doc.resetModified();
 
@@ -384,24 +382,22 @@ void Doc_Test::addFunction()
     QVERIFY(doc.addFunction(o, 0) == false);
     QVERIFY(doc.isModified() == false);
     QVERIFY(o->id() == Function::invalidId());
-    QVERIFY(doc.m_functionAllocation == 2);
+    QVERIFY(doc.functions().size() == 2);
     QVERIFY(doc.addFunction(o, 2) == true);
     QVERIFY(o->id() == 2);
-    QVERIFY(doc.m_functionAllocation == 3);
+    QVERIFY(doc.functions().size() == 3);
     QVERIFY(doc.isModified() == true);
-    QCOMPARE(int(doc.functionsFree()), KFunctionArraySize - 3);
 
     doc.resetModified();
 
     EFX* e = new EFX(&doc);
     QVERIFY(e->id() == Function::invalidId());
-    QVERIFY(doc.addFunction(e, KFunctionArraySize) == false);
+    QVERIFY(doc.addFunction(e, 1) == false);
     QVERIFY(e->id() == Function::invalidId());
     QVERIFY(doc.addFunction(e) == true);
     QVERIFY(e->id() == 3);
-    QVERIFY(doc.m_functionAllocation == 4);
+    QVERIFY(doc.functions().size() == 4);
     QVERIFY(doc.isModified() == true);
-    QCOMPARE(int(doc.functionsFree()), KFunctionArraySize - 4);
 }
 
 void Doc_Test::deleteFunction()
@@ -421,7 +417,7 @@ void Doc_Test::deleteFunction()
 
     QPointer <Scene> ptr(s2);
     QVERIFY(ptr != NULL);
-    t_function_id id = s2->id();
+    quint32 id = s2->id();
     QVERIFY(doc.deleteFunction(id) == true);
     QVERIFY(doc.isModified() == true);
 
@@ -443,7 +439,7 @@ void Doc_Test::deleteFunction()
     QVERIFY(doc.m_fixtures.contains(id) == false);
     QVERIFY(doc.isModified() == true);
 
-    QVERIFY(doc.functions() == 0);
+    QVERIFY(doc.functions().size() == 0);
 }
 
 void Doc_Test::function()
@@ -463,31 +459,9 @@ void Doc_Test::function()
     QVERIFY(doc.function(s2->id()) == s2);
     QVERIFY(doc.function(s3->id()) == s3);
 
-    t_function_id id = s2->id();
+    quint32 id = s2->id();
     doc.deleteFunction(id);
     QVERIFY(doc.function(id) == NULL);
-}
-
-void Doc_Test::functionLimits()
-{
-    Doc doc(this, m_fixtureDefCache);
-
-    for (t_function_id id = 0; id < KFunctionArraySize; id++)
-    {
-        Scene* s = new Scene(&doc);
-        s->setName(QString("Test %1").arg(id));
-        QVERIFY(doc.addFunction(s) == true);
-        QVERIFY(doc.m_functionAllocation == id + 1);
-    }
-
-    doc.resetModified();
-
-    Scene* over = new Scene(&doc);
-    over->setName("Over Limits");
-    QVERIFY(doc.addFunction(over) == false);
-    QVERIFY(doc.m_functionAllocation == KFunctionArraySize);
-    delete over;
-    QVERIFY(doc.isModified() == false);
 }
 
 void Doc_Test::load()
@@ -515,10 +489,10 @@ void Doc_Test::load()
     root.appendChild(document.createElement("ExtraTag"));
 
     QVERIFY(doc.fixtures().size() == 0);
-    QVERIFY(doc.functions() == 0);
+    QVERIFY(doc.functions().size() == 0);
     QVERIFY(doc.loadXML(&root) == true);
     QVERIFY(doc.fixtures().size() == 3);
-    QVERIFY(doc.functions() == 4);
+    QVERIFY(doc.functions().size() == 4);
     QVERIFY(Bus::instance()->value(0) == 1);
     QVERIFY(Bus::instance()->value(7) == 2);
     QVERIFY(Bus::instance()->value(12) == 3);
@@ -674,7 +648,7 @@ QDomElement Doc_Test::createFixtureNode(QDomDocument& doc, quint32 id)
     return root;
 }
 
-QDomElement Doc_Test::createCollectionNode(QDomDocument& doc, t_function_id id)
+QDomElement Doc_Test::createCollectionNode(QDomDocument& doc, quint32 id)
 {
     QDomElement root = doc.createElement("Function");
     root.setAttribute("Type", "Collection");

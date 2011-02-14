@@ -52,7 +52,7 @@ extern App* _app;
 
 FunctionSelection::FunctionSelection(QWidget* parent,
                                      bool multiple,
-                                     t_function_id disableFunction,
+                                     quint32 disableFunction,
                                      int filter,
                                      bool constFilter)
         : QDialog(parent)
@@ -217,19 +217,8 @@ void FunctionSelection::addFunction(Function* function)
 
 void FunctionSelection::addFunctionErrorMessage()
 {
-    if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
-        return;
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-        return;
-    }
+    QMessageBox::critical(this, tr("Function creation failed"),
+                          tr("Unable to create new function."));
 }
 
 void FunctionSelection::updateFunctionItem(QTreeWidgetItem* item,
@@ -247,18 +236,11 @@ void FunctionSelection::refillTree()
     m_tree->clear();
 
     /* Fill the tree */
-    for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
+    foreach (Function* function, _app->doc()->functions())
     {
-        QTreeWidgetItem* item;
-        Function* function;
-
-        function = _app->doc()->function(fid);
-        if (function == NULL)
-            continue;
-
         if (m_filter & function->type())
         {
-            item = new QTreeWidgetItem(m_tree);
+            QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
             updateFunctionItem(item, function);
 
             if (disabledFunctions().contains(function->id()))
@@ -269,12 +251,12 @@ void FunctionSelection::refillTree()
 
 void FunctionSelection::slotItemSelectionChanged()
 {
-    QList <t_function_id> removeList(m_selection);
+    QList <quint32> removeList(m_selection);
 
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
     {
-        t_function_id id = it.next()->text(KColumnID).toInt();
+        quint32 id = it.next()->text(KColumnID).toInt();
         if (m_selection.contains(id) == false)
             m_selection.append(id);
 

@@ -104,24 +104,24 @@ public:
      *
      * @param id This function's unique ID
      */
-    void setID(t_function_id id);
+    void setID(quint32 id);
 
     /**
      * Get this function's unique ID
      */
-    t_function_id id() const;
+    quint32 id() const;
 
     /**
      * Get the value for an invalid function ID (for comparison etc.)
      */
-    static t_function_id invalidId();
+    static quint32 invalidId();
 
 protected:
-    t_function_id m_id;
+    quint32 m_id;
 
 signals:
     /** Signal telling that the contents of this function have changed */
-    void changed(t_function_id fid);
+    void changed(quint32 fid);
 
     /*********************************************************************
      * Name
@@ -331,7 +331,7 @@ signals:
      * @param state true if the function flashing, false if the function
      *              just stopped flashing
      */
-    void flashing(t_function_id fid, bool state);
+    void flashing(quint32 fid, bool state);
 
 private:
     bool m_flashing;
@@ -410,7 +410,7 @@ signals:
      *
      * @param id The ID of the started function
      */
-    void running(t_function_id id);
+    void running(quint32 id);
 
     /**
      * Emitted when a function is really finished (i.e. removed from
@@ -418,7 +418,7 @@ signals:
      *
      * @param id The ID of the stopped function
      */
-    void stopped(t_function_id id);
+    void stopped(quint32 id);
 
 private:
     bool m_initiatedByOtherFunction;

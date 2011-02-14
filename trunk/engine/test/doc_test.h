@@ -46,7 +46,6 @@ private slots:
     void addFunction();
     void deleteFunction();
     void function();
-    void functionLimits();
 
     void load();
     void loadWrongRoot();
@@ -54,7 +53,7 @@ private slots:
 
 private:
     QDomElement createFixtureNode(QDomDocument& doc, quint32 id);
-    QDomElement createCollectionNode(QDomDocument& doc, t_function_id id);
+    QDomElement createCollectionNode(QDomDocument& doc, quint32 id);
     QDomElement createBusNode(QDomDocument& doc, quint32 id, quint32 value);
 
 private:

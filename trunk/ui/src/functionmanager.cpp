@@ -367,12 +367,6 @@ void FunctionManager::slotAddScene()
     {
         addFunction(f);
     }
-    else if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
-    }
     else
     {
         QMessageBox::critical(this, tr("Function creation failed"),
@@ -386,12 +380,6 @@ void FunctionManager::slotAddChaser()
     if (_app->doc()->addFunction(f) == true)
     {
         addFunction(f);
-    }
-    else if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
     }
     else
     {
@@ -407,12 +395,6 @@ void FunctionManager::slotAddCollection()
     {
         addFunction(f);
     }
-    else if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
-    }
     else
     {
         QMessageBox::critical(this, tr("Function creation failed"),
@@ -426,12 +408,6 @@ void FunctionManager::slotAddEFX()
     if (_app->doc()->addFunction(f) == true)
     {
         addFunction(f);
-    }
-    else if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
     }
     else
     {
@@ -579,16 +555,8 @@ void FunctionManager::initTree()
 void FunctionManager::updateTree()
 {
     m_tree->clear();
-    for (t_function_id fid = 0; fid < KFunctionArraySize; fid++)
-    {
-        Function* function = _app->doc()->function(fid);
-        if (function != NULL)
-        {
-            QTreeWidgetItem* item;
-            item = new QTreeWidgetItem(m_tree);
-            updateFunctionItem(item, function);
-        }
-    }
+    foreach (Function* function, _app->doc()->functions())
+        updateFunctionItem(new QTreeWidgetItem(m_tree), function);
 }
 
 void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
@@ -627,7 +595,7 @@ void FunctionManager::deleteSelectedFunctions()
     while (it.hasNext() == true)
     {
         QTreeWidgetItem* item;
-        t_function_id fid;
+        quint32 fid;
 
         item = it.next();
         fid = item->text(KColumnID).toInt();
@@ -660,7 +628,7 @@ void FunctionManager::slotTreeContextMenuRequested(const QPoint& point)
  * Helpers
  *****************************************************************************/
 
-void FunctionManager::copyFunction(t_function_id fid)
+void FunctionManager::copyFunction(quint32 fid)
 {
     Function* function = _app->doc()->function(fid);
     Q_ASSERT(function != NULL);
@@ -673,12 +641,6 @@ void FunctionManager::copyFunction(t_function_id fid)
         QTreeWidgetItem* item;
         item = new QTreeWidgetItem(m_tree);
         updateFunctionItem(item, copy);
-    }
-    else if (_app->doc()->functions() >= KFunctionArraySize)
-    {
-        QMessageBox::critical(this, tr("Too many functions"),
-                              tr("You can't create more than %1 functions.")
-                              .arg(KFunctionArraySize));
     }
     else
     {

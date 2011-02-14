@@ -155,7 +155,7 @@ protected:
      *********************************************************************/
 protected:
     /** Create a copy of the given function */
-    void copyFunction(t_function_id fid);
+    void copyFunction(quint32 fid);
 
     /** Add a new function */
     void addFunction(Function* function);

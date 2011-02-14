@@ -34,8 +34,6 @@
 #include "bus.h"
 #include "doc.h"
 
-#define KInvalidFunctionID -1
-
 const QString KSceneString      (      "Scene" );
 const QString KChaserString     (     "Chaser" );
 const QString KEFXString        (        "EFX" );
@@ -94,21 +92,21 @@ bool Function::copyFrom(const Function* function)
  * ID
  *****************************************************************************/
 
-void Function::setID(t_function_id id)
+void Function::setID(quint32 id)
 {
     /* Don't set doc modified status or emit changed signal, because this
        function is called only once during function creation. */
     m_id = id;
 }
 
-t_function_id Function::id() const
+quint32 Function::id() const
 {
     return m_id;
 }
 
-t_function_id Function::invalidId()
+quint32 Function::invalidId()
 {
-    return KInvalidFunctionID;
+    return UINT_MAX;
 }
 
 /*****************************************************************************
@@ -292,14 +290,14 @@ bool Function::loader(const QDomElement* root, Doc* doc)
     }
 
     /* Get common information from the tag's attributes */
-    t_function_id id = root->attribute(KXMLQLCFunctionID).toInt();
+    quint32 id = root->attribute(KXMLQLCFunctionID).toInt();
     QString name = root->attribute(KXMLQLCFunctionName);
     Type type = Function::stringToType(root->attribute(KXMLQLCFunctionType));
 
     /* Check for ID validity before creating the function */
-    if (id < 0 || id >= KFunctionArraySize)
+    if (id == Function::invalidId())
     {
-        qWarning() << "Function ID" << id << "out of bounds.";
+        qWarning() << Q_FUNC_INFO << "Function ID" << id << "is not allowed.";
         return false;
     }
 

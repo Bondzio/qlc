@@ -60,7 +60,7 @@ protected slots:
     void slotDetachClicked();
 
 protected:
-    t_function_id m_chaser;
+    quint32 m_chaser;
 
     /************************************************************************
      * Next Cue

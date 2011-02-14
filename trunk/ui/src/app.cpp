@@ -496,11 +496,8 @@ void App::slotDocModified(bool state)
            .arg(m_doc->fixtures().size())
            .arg(totalPowerConsumption) + msg);
 
-    m_functionAllocationIndicator->setText(tr("Functions: %1/%2")
-                                           .arg(m_doc->functions()).arg(KFunctionArraySize));
-    m_functionAllocationIndicator->setToolTip(
-        tr("Space left for %n functions", "",
-           KFunctionArraySize - m_doc->functions()));
+    m_functionAllocationIndicator->setText(tr("Functions: %1").arg(m_doc->functions().size()));
+    m_functionAllocationIndicator->setToolTip(m_functionAllocationIndicator->text());
 }
 
 /*****************************************************************************
@@ -652,8 +649,7 @@ void App::initStatusBar()
     m_functionAllocationIndicator = new QLabel(statusBar());
     m_functionAllocationIndicator->setFrameStyle(QFrame::StyledPanel |
             QFrame::Sunken);
-    m_functionAllocationIndicator->setText(tr("Functions: %1/%2")
-                                           .arg(KFunctionArraySize).arg(KFunctionArraySize));
+    m_functionAllocationIndicator->setText(tr("Functions: %1").arg(0));
     statusBar()->addWidget(m_functionAllocationIndicator);
 
     /* Mode Indicator */

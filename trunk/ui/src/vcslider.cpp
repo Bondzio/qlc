@@ -258,10 +258,10 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
             Function* function = _app->doc()->function(playbackFunction());
             if (function != NULL)
             {
-                connect(function, SIGNAL(running(t_function_id)),
-                        this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
-                connect(function, SIGNAL(stopped(t_function_id)),
-                        this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
+                connect(function, SIGNAL(running(quint32)),
+                        this, SLOT(slotPlaybackFunctionRunning(quint32)));
+                connect(function, SIGNAL(stopped(quint32)),
+                        this, SLOT(slotPlaybackFunctionStopped(quint32)));
                 connect(function, SIGNAL(intensityChanged(qreal)),
                         this, SLOT(slotPlaybackFunctionIntensityChanged(qreal)));
             }
@@ -281,10 +281,10 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
             Function* function = _app->doc()->function(playbackFunction());
             if (function != NULL)
             {
-                disconnect(function, SIGNAL(running(t_function_id)),
-                        this, SLOT(slotPlaybackFunctionRunning(t_function_id)));
-                disconnect(function, SIGNAL(stopped(t_function_id)),
-                        this, SLOT(slotPlaybackFunctionStopped(t_function_id)));
+                disconnect(function, SIGNAL(running(quint32)),
+                        this, SLOT(slotPlaybackFunctionRunning(quint32)));
+                disconnect(function, SIGNAL(stopped(quint32)),
+                        this, SLOT(slotPlaybackFunctionStopped(quint32)));
                 disconnect(function, SIGNAL(intensityChanged(qreal)),
                         this, SLOT(slotPlaybackFunctionIntensityChanged(qreal)));
             }
@@ -587,12 +587,12 @@ void VCSlider::slotFixtureRemoved(quint32 fxi_id)
  * Playback
  *****************************************************************************/
 
-void VCSlider::setPlaybackFunction(t_function_id fid)
+void VCSlider::setPlaybackFunction(quint32 fid)
 {
     m_playbackFunction = fid;
 }
 
-t_function_id VCSlider::playbackFunction() const
+quint32 VCSlider::playbackFunction() const
 {
     return m_playbackFunction;
 }
@@ -613,12 +613,12 @@ uchar VCSlider::playbackValue() const
     return m_playbackValue;
 }
 
-void VCSlider::slotPlaybackFunctionRunning(t_function_id fid)
+void VCSlider::slotPlaybackFunctionRunning(quint32 fid)
 {
     Q_UNUSED(fid);
 }
 
-void VCSlider::slotPlaybackFunctionStopped(t_function_id fid)
+void VCSlider::slotPlaybackFunctionStopped(quint32 fid)
 {
     m_externalMovement = true;
     if (fid == playbackFunction())

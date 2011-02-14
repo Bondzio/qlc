@@ -171,7 +171,7 @@ int main(int argc, char** argv)
 
     /* Registering needed to pass signals with these types between
        different contexts (threads) */
-    qRegisterMetaType <t_function_id>("t_function_id");
+    qRegisterMetaType <quint32>("quint32");
     qRegisterMetaType <QHash<quint32,uchar> >("QHash<quint32,uchar>");
 
     /* Create and initialize the QLC application object */

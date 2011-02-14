@@ -42,7 +42,7 @@ public:
         SoloFrame
     };
 
-    QList <t_function_id> functions() const {
+    QList <quint32> functions() const {
         return m_functions;
     }
     quint32 horizontalCount() const {
@@ -68,12 +68,12 @@ protected slots:
     void accept();
 
 private:
-    void addFunction(t_function_id fid);
+    void addFunction(quint32 fid);
     void setAllocationText();
     void setFrameStyle(FrameStyle style);
 
 private:
-    QList <t_function_id> m_functions;
+    QList <quint32> m_functions;
     quint32 m_horizontalCount;
     quint32 m_verticalCount;
     quint32 m_buttonSize;

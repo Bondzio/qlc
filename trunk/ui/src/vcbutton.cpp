@@ -99,8 +99,8 @@ VCButton::VCButton(QWidget* parent)
     setStyle(App::saneStyle());
 
     /* Listen to function removals */
-    connect(_app->doc(), SIGNAL(functionRemoved(t_function_id)),
-            this, SLOT(slotFunctionRemoved(t_function_id)));
+    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 VCButton::~VCButton()
@@ -585,30 +585,30 @@ void VCButton::slotInputValueChanged(quint32 universe,
  * Function attachment
  *****************************************************************************/
 
-void VCButton::setFunction(t_function_id fid)
+void VCButton::setFunction(quint32 fid)
 {
     Function* old = _app->doc()->function(m_function);
     if (old != NULL)
     {
         /* Get rid of old function connections */
-        disconnect(old, SIGNAL(running(t_function_id)),
-                   this, SLOT(slotFunctionRunning(t_function_id)));
-        disconnect(old, SIGNAL(stopped(t_function_id)),
-                   this, SLOT(slotFunctionStopped(t_function_id)));
-        disconnect(old, SIGNAL(flashing(t_function_id,bool)),
-                   this, SLOT(slotFunctionFlashing(t_function_id,bool)));
+        disconnect(old, SIGNAL(running(quint32)),
+                   this, SLOT(slotFunctionRunning(quint32)));
+        disconnect(old, SIGNAL(stopped(quint32)),
+                   this, SLOT(slotFunctionStopped(quint32)));
+        disconnect(old, SIGNAL(flashing(quint32,bool)),
+                   this, SLOT(slotFunctionFlashing(quint32,bool)));
     }
 
     Function* function = _app->doc()->function(fid);
     if (function != NULL)
     {
         /* Connect to the new function */
-        connect(function, SIGNAL(running(t_function_id)),
-                this, SLOT(slotFunctionRunning(t_function_id)));
-        connect(function, SIGNAL(stopped(t_function_id)),
-                this, SLOT(slotFunctionStopped(t_function_id)));
-        connect(function, SIGNAL(flashing(t_function_id,bool)),
-                this, SLOT(slotFunctionFlashing(t_function_id,bool)));
+        connect(function, SIGNAL(running(quint32)),
+                this, SLOT(slotFunctionRunning(quint32)));
+        connect(function, SIGNAL(stopped(quint32)),
+                this, SLOT(slotFunctionStopped(quint32)));
+        connect(function, SIGNAL(flashing(quint32,bool)),
+                this, SLOT(slotFunctionFlashing(quint32,bool)));
 
         m_function = fid;
 
@@ -622,7 +622,7 @@ void VCButton::setFunction(t_function_id fid)
     }
 }
 
-void VCButton::slotFunctionRemoved(t_function_id fid)
+void VCButton::slotFunctionRemoved(quint32 fid)
 {
     /* Invalidate the button's function if it's the one that was removed */
     if (fid == m_function)
@@ -724,13 +724,13 @@ void VCButton::releaseFunction()
     }
 }
 
-void VCButton::slotFunctionRunning(t_function_id fid)
+void VCButton::slotFunctionRunning(quint32 fid)
 {
     if (fid == m_function && m_action != Flash)
         setOn(true);
 }
 
-void VCButton::slotFunctionStopped(t_function_id fid)
+void VCButton::slotFunctionStopped(quint32 fid)
 {
     if (fid == m_function && m_action != Flash)
     {
@@ -740,7 +740,7 @@ void VCButton::slotFunctionStopped(t_function_id fid)
     }
 }
 
-void VCButton::slotFunctionFlashing(t_function_id fid, bool state)
+void VCButton::slotFunctionFlashing(quint32 fid, bool state)
 {
     if (fid == m_function)
         setOn(state);

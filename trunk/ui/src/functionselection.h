@@ -59,7 +59,7 @@ public:
      */
     FunctionSelection(QWidget* parent,
                       bool multiple,
-                      t_function_id disableFunction = Function::invalidId(),
+                      quint32 disableFunction = Function::invalidId(),
                       int filter = Function::Scene | Function::Chaser |
                                    Function::EFX | Function::Collection,
                       bool constFilter = false);
@@ -73,31 +73,31 @@ public:
      * Disabled functions
      *********************************************************************/
 public:
-    void setDisabledFunctions(const QList <t_function_id>& ids)
+    void setDisabledFunctions(const QList <quint32>& ids)
     {
         m_disabledFunctions = ids;
     }
 
-    QList <t_function_id> disabledFunctions() const
+    QList <quint32> disabledFunctions() const
     {
         return m_disabledFunctions;
     }
 
 protected:
-    QList <t_function_id> m_disabledFunctions;
+    QList <quint32> m_disabledFunctions;
 
     /*********************************************************************
      * Selection
      *********************************************************************/
 public:
     /** Get a list of selected function IDs */
-    const QList <t_function_id> selection() const {
+    const QList <quint32> selection() const {
         return m_selection;
     }
 
 protected:
     /** The list of selected function IDs */
-    QList <t_function_id> m_selection;
+    QList <quint32> m_selection;
 
     /*********************************************************************
      * Toolbar
@@ -165,7 +165,7 @@ protected slots:
 
 protected:
     int m_filter;
-    t_function_id m_disable;
+    quint32 m_disable;
 };
 
 #endif

@@ -72,7 +72,7 @@ public:
      * @param fid The function to add
      * @return true if successful, otherwise false
      */
-    bool addFunction(t_function_id fid);
+    bool addFunction(quint32 fid);
 
     /**
      * Remove a function from this collection. If the function is not a
@@ -81,20 +81,20 @@ public:
      * @param fid The function to remove
      * @return true if successful, otherwise false
      */
-    bool removeFunction(t_function_id fid);
+    bool removeFunction(quint32 fid);
 
     /**
      * Get this function's list of member functions
      */
-    QList <t_function_id> functions() const;
+    QList <quint32> functions() const;
 
 public slots:
     /** Catches Doc::functionRemoved() so that destroyed members can be
         removed immediately. */
-    void slotFunctionRemoved(t_function_id function);
+    void slotFunctionRemoved(quint32 function);
 
 protected:
-    QList <t_function_id> m_functions;
+    QList <quint32> m_functions;
 
     /*********************************************************************
      * Save & Load
@@ -127,11 +127,11 @@ public:
 
 protected slots:
     /** Called whenever one of this function's child functions stops */
-    void slotChildStopped(t_function_id fid);
+    void slotChildStopped(quint32 fid);
 
 protected:
     /** Number of currently running children */
-    QSet <t_function_id> m_runningChildren;
+    QSet <quint32> m_runningChildren;
 };
 
 #endif

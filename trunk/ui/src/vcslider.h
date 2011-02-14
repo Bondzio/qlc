@@ -366,7 +366,7 @@ public:
      *
      * @param fid The ID of the function
      */
-    void setPlaybackFunction(t_function_id fid);
+    void setPlaybackFunction(quint32 fid);
 
     /**
      * Get the function used as the slider's playback function (when in
@@ -374,7 +374,7 @@ public:
      *
      * @return The ID of the function
      */
-    t_function_id playbackFunction() const;
+    quint32 playbackFunction() const;
 
     /**
      * Set the level of the currently selected playback function.
@@ -391,12 +391,12 @@ public:
     uchar playbackValue() const;
 
 protected slots:
-    void slotPlaybackFunctionRunning(t_function_id fid);
-    void slotPlaybackFunctionStopped(t_function_id fid);
+    void slotPlaybackFunctionRunning(quint32 fid);
+    void slotPlaybackFunctionStopped(quint32 fid);
     void slotPlaybackFunctionIntensityChanged(qreal fraction);
 
 protected:
-    t_function_id m_playbackFunction;
+    quint32 m_playbackFunction;
     uchar m_playbackValue;
     bool m_playbackValueChanged;
     QMutex m_playbackValueMutex;

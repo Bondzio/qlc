@@ -82,7 +82,7 @@ public:
      *
      * @param fid The ID of the function to add
      */
-    bool addStep(t_function_id fid);
+    bool addStep(quint32 fid);
 
     /**
      * Remove a function from the given step index. If the given index is
@@ -116,7 +116,7 @@ public:
      *
      * @return List of function IDs
      */
-    QList <t_function_id> steps() const;
+    QList <quint32> steps() const;
 
     /**
      * Get the chaser's list of steps as function pointers
@@ -134,10 +134,10 @@ public slots:
      *
      * @param fid The ID of the function that was removed
      */
-    void slotFunctionRemoved(t_function_id fid);
+    void slotFunctionRemoved(quint32 fid);
 
 protected:
-    QList <t_function_id> m_steps;
+    QList <quint32> m_steps;
 
     /*********************************************************************
      * Save & Load

@@ -92,9 +92,9 @@ void CollectionEditor::slotAdd()
     FunctionSelection sel(this, true, m_original->id());
     if (sel.exec() == QDialog::Accepted)
     {
-        t_function_id fid;
+        quint32 fid;
 
-        QListIterator <t_function_id> it(sel.selection());
+        QListIterator <quint32> it(sel.selection());
         while (it.hasNext() == true)
         {
             fid = it.next();
@@ -110,7 +110,7 @@ void CollectionEditor::slotRemove()
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item != NULL)
     {
-        t_function_id id = item->text(KColumnFunctionID).toInt();
+        quint32 id = item->text(KColumnFunctionID).toInt();
         m_fc->removeFunction(id);
         delete item;
     }
@@ -129,12 +129,12 @@ void CollectionEditor::updateFunctionList()
 {
     m_tree->clear();
 
-    QListIterator <t_function_id> it(m_fc->functions());
+    QListIterator <quint32> it(m_fc->functions());
     while (it.hasNext() == true)
     {
         QTreeWidgetItem* item;
         Function* function;
-        t_function_id fid;
+        quint32 fid;
         QString s;
 
         fid = it.next();

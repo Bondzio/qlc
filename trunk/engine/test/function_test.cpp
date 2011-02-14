@@ -76,7 +76,7 @@ void Function_Test::flashUnflash()
     Doc doc(this, cache);
 
     Function_Stub* stub = new Function_Stub(&doc);
-    QSignalSpy spy(stub, SIGNAL(flashing(t_function_id,bool)));
+    QSignalSpy spy(stub, SIGNAL(flashing(quint32,bool)));
 
     QVERIFY(stub->flashing() == false);
     stub->flash(NULL);
@@ -113,7 +113,7 @@ void Function_Test::preRunPostRun()
     Doc doc(this, cache);
 
     Function_Stub* stub = new Function_Stub(&doc);
-    QSignalSpy spyRunning(stub, SIGNAL(running(t_function_id)));
+    QSignalSpy spyRunning(stub, SIGNAL(running(quint32)));
     stub->preRun(NULL);
     QVERIFY(stub->stopped() == false);
     QCOMPARE(spyRunning.size(), 1);
@@ -121,7 +121,7 @@ void Function_Test::preRunPostRun()
 
     stub->incrementElapsed();
 
-    QSignalSpy spyStopped(stub, SIGNAL(stopped(t_function_id)));
+    QSignalSpy spyStopped(stub, SIGNAL(stopped(quint32)));
     stub->postRun(NULL, NULL);
     QVERIFY(stub->stopped() == true);
     QCOMPARE(stub->elapsed(), quint32(0));
@@ -140,7 +140,7 @@ void Function_Test::stopAndWait()
     stub->incrementElapsed();
 
     // @todo Make stopAndWait() return before the 2s watchdog timer
-    //QSignalSpy spyStopped(stub, SIGNAL(stopped(t_function_id)));
+    //QSignalSpy spyStopped(stub, SIGNAL(stopped(quint32)));
     //QVERIFY(stub->stopAndWait() == true);
 }
 
@@ -153,7 +153,7 @@ void Function_Test::stopAndWaitFail()
     stub->preRun(NULL);
     stub->incrementElapsed();
 
-    QSignalSpy spyStopped(stub, SIGNAL(stopped(t_function_id)));
+    QSignalSpy spyStopped(stub, SIGNAL(stopped(quint32)));
     QVERIFY(stub->stopAndWait() == false);
 }
 
@@ -189,14 +189,14 @@ void Function_Test::slotFixtureRemoved()
     QVERIFY(doc.addFixture(fxi, fxi->id()) == true);
     QVERIFY(doc.addFunction(stub) == true);
 
-    QCOMPARE(stub->m_slotFixtureRemovedId, Fixture::invalidId());
+    QCOMPARE(stub->m_slotFixtureRemovedId, Function::invalidId());
     doc.deleteFixture(42);
     QCOMPARE(stub->m_slotFixtureRemovedId, quint32(42));
 }
 
 void Function_Test::invalidId()
 {
-    QCOMPARE(Function::invalidId(), -1);
+    QCOMPARE(Function::invalidId(), quint32(UINT_MAX));
 }
 
 void Function_Test::typeString()
@@ -283,7 +283,7 @@ void Function_Test::loaderWrongRoot()
     QDomElement root = doc.createElement("Scene");
 
     QVERIFY(Function::loader(&root, &d) == false);
-    QVERIFY(d.functions() == 0);
+    QVERIFY(d.functions().size() == 0);
 }
 
 void Function_Test::loaderWrongID()
@@ -293,14 +293,14 @@ void Function_Test::loaderWrongID()
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Function");
-    root.setAttribute("ID", QString("%1").arg(KFunctionArraySize));
+    root.setAttribute("ID", QString("%1").arg(Function::invalidId()));
 
     QVERIFY(Function::loader(&root, &d) == false);
-    QVERIFY(d.functions() == 0);
+    QVERIFY(d.functions().size() == 0);
 
     root.setAttribute("ID", "-4");
     QVERIFY(Function::loader(&root, &d) == false);
-    QVERIFY(d.functions() == 0);
+    QVERIFY(d.functions().size() == 0);
 }
 
 void Function_Test::loaderScene()
@@ -330,7 +330,7 @@ void Function_Test::loaderScene()
     /* Just verify that a Scene function gets loaded. The rest of Scene
        loading is tested in Scene_test. */
     QVERIFY(Function::loader(&root, &d) == true);
-    QVERIFY(d.functions() == 1);
+    QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(15) != NULL);
     QVERIFY(d.function(15)->type() == Function::Scene);
     QVERIFY(d.function(15)->name() == QString("Lipton"));
@@ -385,7 +385,7 @@ void Function_Test::loaderChaser()
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
     QVERIFY(Function::loader(&root, &d) == true);
-    QVERIFY(d.functions() == 1);
+    QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(1) != NULL);
     QVERIFY(d.function(1)->type() == Function::Chaser);
     QVERIFY(d.function(1)->name() == QString("Malarkey"));
@@ -410,7 +410,7 @@ void Function_Test::loaderCollection()
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
     QVERIFY(Function::loader(&root, &d) == true);
-    QVERIFY(d.functions() == 1);
+    QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(120) != NULL);
     QVERIFY(d.function(120)->type() == Function::Collection);
     QVERIFY(d.function(120)->name() == QString("Spiers"));
@@ -566,7 +566,7 @@ void Function_Test::loaderEFX()
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
     QVERIFY(Function::loader(&root, &d) == true);
-    QVERIFY(d.functions() == 1);
+    QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(0) != NULL);
     QVERIFY(d.function(0)->type() == Function::EFX);
     QVERIFY(d.function(0)->name() == QString("Guarnere"));
@@ -586,6 +586,6 @@ void Function_Test::loaderUnknownType()
     /* Just verify that a Scene function gets loaded. The rest of Scene
        loading is tested in Scene_test. */
     QVERIFY(Function::loader(&root, &d) == false);
-    QVERIFY(d.functions() == 0);
+    QVERIFY(d.functions().size() == 0);
     QVERIFY(d.function(15) == NULL);
 }

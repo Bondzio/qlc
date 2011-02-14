@@ -306,13 +306,7 @@ void Chaser_Test::createCopy()
     doc.addFunction(c1);
     QVERIFY(c1->id() != Function::invalidId());
 
-    // Verify that the function is not created when Doc is full
-    doc.m_functionAllocation = KFunctionArraySize;
     Function* f = c1->createCopy(&doc);
-    QVERIFY(f == NULL);
-
-    doc.m_functionAllocation = 1;
-    f = c1->createCopy(&doc);
     QVERIFY(f != NULL);
     QVERIFY(f != c1);
     QVERIFY(f->id() != c1->id());
@@ -553,7 +547,7 @@ void Chaser_Test::save()
         }
         else if (tag.tagName() == "Step")
         {
-            t_function_id fid = tag.text().toUInt();
+            quint32 fid = tag.text().toUInt();
             QVERIFY(fid == 0 || fid == 1 || fid == 2 || fid == 3);
             fids++;
         }

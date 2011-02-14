@@ -107,6 +107,10 @@ public:
      */
     void resetModified();
 
+signals:
+    /** Signal that this Doc has been modified (or unmodified) */
+    void modified(bool state);
+
 protected:
     /** Modified status (true; needs saving, false; does not) */
     bool m_modified;
@@ -217,25 +221,16 @@ public:
      *
      * @param function The function to add
      * @param id The requested ID for the function
-     * @return true if the function was successfully added to doc,
-     *         otherwise false.
+     * @return true if the function was successfully added to doc, otherwise false.
      */
-    bool addFunction(Function* function,
-                     t_function_id id = Function::invalidId());
+    bool addFunction(Function* function, quint32 id = Function::invalidId());
 
     /**
-     * Get the number of functions currently present/allocated
+     * Get a list of currently available functions
      *
-     * @return Number of functions
+     * @return List of functions
      */
-    int functions() const;
-
-    /**
-     * Get the number of available function slots.
-     *
-     * @return Number of functions that sill fit to Doc
-     */
-    quint32 functionsFree() const;
+    QList <Function*> functions() const;
 
     /**
      * Delete the given function
@@ -243,7 +238,7 @@ public:
      * @param id The ID of the function to delete
      * @return true if the function was found and deleted
      */
-    bool deleteFunction(t_function_id id);
+    bool deleteFunction(quint32 id);
 
     /**
      * Get a function that has the given ID
@@ -251,9 +246,14 @@ public:
      * @param id The ID of the function to get
      * @return A function at the given ID or NULL if not found
      */
-    Function* function(t_function_id id);
+    Function* function(quint32 id);
 
 protected:
+    /**
+     * Create a new function Id
+     */
+    quint32 createFunctionId();
+
     /**
      * Assign the given function ID to the function, place the function
      * at the same index in m_functionArray, increase function count and
@@ -262,7 +262,7 @@ protected:
      * @param function The function to assign
      * @param id The ID to assign to the function
      */
-    void assignFunction(Function* function, t_function_id id);
+    void assignFunction(Function* function, quint32 id);
 
 public slots:
     /** Catch fixture property changes */
@@ -270,30 +270,27 @@ public slots:
 
 protected slots:
     /** Slot that catches function change signals */
-    void slotFunctionChanged(t_function_id fid);
+    void slotFunctionChanged(quint32 fid);
 
     /** Catches bus name changes so that Doc can be marked as modified */
     void slotBusNameChanged();
 
 signals:
-    /** Signal that this Doc has been modified (or unmodified) */
-    void modified(bool state);
-
     /** Signal that a function has been added */
-    void functionAdded(t_function_id function);
+    void functionAdded(quint32 function);
 
     /** Signal that a function has been removed */
-    void functionRemoved(t_function_id function);
+    void functionRemoved(quint32 function);
 
     /** Signal that a function has been changed */
-    void functionChanged(t_function_id function);
+    void functionChanged(quint32 function);
 
 protected:
-    /** Array that holds all functions */
-    Function** m_functionArray;
+    /** Functions */
+    QMap <quint32,Function*> m_functions;
 
-    /** Number of allocated functions */
-    int m_functionAllocation;
+    /** Latest assigned function ID */
+    quint32 m_latestFunctionId;
 
     /*********************************************************************
      * Load & Save

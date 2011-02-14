@@ -90,7 +90,7 @@ void AddVCButtonMatrix::slotAddClicked()
     fs.setDisabledFunctions(functions());
     if (fs.exec() == true)
     {
-        QListIterator <t_function_id> it(fs.selection());
+        QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
             addFunction(it.next());
     }
@@ -142,7 +142,7 @@ void AddVCButtonMatrix::accept()
     QDialog::accept();
 }
 
-void AddVCButtonMatrix::addFunction(t_function_id fid)
+void AddVCButtonMatrix::addFunction(quint32 fid)
 {
     Function* function = _app->doc()->function(fid);
     if (function == NULL)

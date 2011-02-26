@@ -25,7 +25,6 @@
 #include <QFrame>
 #include <QTime>
 
-#include "qlctypes.h"
 
 class QToolButton;
 class QSlider;

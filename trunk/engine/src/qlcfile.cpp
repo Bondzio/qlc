@@ -31,7 +31,6 @@
 #endif
 
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlcfile.h"
 
 QDomDocument QLCFile::readXML(const QString& path)

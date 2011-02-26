@@ -26,6 +26,7 @@
 
 #include "qlcfixturemode.h"
 #include "qlcchannel.h"
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "vcxypadfixture.h"

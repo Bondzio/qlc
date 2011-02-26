@@ -54,10 +54,10 @@ VCProperties::VCProperties() : VCWidgetProperties()
     m_gmChannelMode = UniverseArray::GMIntensity;
     m_gmValueMode = UniverseArray::GMReduce;
     m_gmInputUniverse = InputMap::invalidUniverse();
-    m_gmInputChannel = KInputChannelInvalid;
+    m_gmInputChannel = InputMap::invalidChannel();
 
     m_blackoutInputUniverse = InputMap::invalidUniverse();
-    m_blackoutInputChannel = KInputChannelInvalid;
+    m_blackoutInputChannel = InputMap::invalidChannel();
 
     m_slidersVisible = true;
 
@@ -67,9 +67,9 @@ VCProperties::VCProperties() : VCWidgetProperties()
     m_holdHighLimit = 10;
 
     m_fadeInputUniverse = InputMap::invalidUniverse();
-    m_fadeInputChannel = KInputChannelInvalid;
+    m_fadeInputChannel = InputMap::invalidChannel();
     m_holdInputUniverse = InputMap::invalidUniverse();
-    m_holdInputChannel = KInputChannelInvalid;
+    m_holdInputChannel = InputMap::invalidChannel();
 }
 
 VCProperties::VCProperties(const VCProperties& properties)
@@ -259,7 +259,7 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Fade slider external input */
     if (m_fadeInputUniverse != InputMap::invalidUniverse() &&
-        m_fadeInputChannel != KInputChannelInvalid)
+        m_fadeInputChannel != InputMap::invalidChannel())
     {
         subtag = doc->createElement(KXMLQLCVCPropertiesInput);
         tag.appendChild(subtag);
@@ -285,7 +285,7 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Hold slider external input */
     if (m_holdInputUniverse != InputMap::invalidUniverse() &&
-        m_holdInputChannel != KInputChannelInvalid)
+        m_holdInputChannel != InputMap::invalidChannel())
     {
         subtag = doc->createElement(KXMLQLCVCPropertiesInput);
         tag.appendChild(subtag);
@@ -311,7 +311,7 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Grand Master external input */
     if (m_gmInputUniverse != InputMap::invalidUniverse() &&
-        m_gmInputChannel != KInputChannelInvalid)
+        m_gmInputChannel != InputMap::invalidChannel())
     {
         subtag = doc->createElement(KXMLQLCVCPropertiesInput);
         tag.appendChild(subtag);
@@ -329,7 +329,7 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Grand Master external input */
     if (m_blackoutInputUniverse != InputMap::invalidUniverse() &&
-        m_blackoutInputChannel != KInputChannelInvalid)
+        m_blackoutInputChannel != InputMap::invalidChannel())
     {
         subtag = doc->createElement(KXMLQLCVCPropertiesInput);
         tag.appendChild(subtag);
@@ -399,7 +399,7 @@ bool VCProperties::loadProperties(const QDomElement* root)
             quint32 low = 0;
             quint32 high = 10;
             quint32 universe = InputMap::invalidUniverse();
-            quint32 channel = KInputChannelInvalid;
+            quint32 channel = InputMap::invalidChannel();
             QDomElement subtag;
 
             /* Bus low limit */
@@ -440,7 +440,7 @@ bool VCProperties::loadProperties(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCPropertiesGrandMaster)
         {
             quint32 universe = InputMap::invalidUniverse();
-            quint32 channel = KInputChannelInvalid;
+            quint32 channel = InputMap::invalidChannel();
 
             str = tag.attribute(KXMLQLCVCPropertiesGrandMasterChannelMode);
             m_gmChannelMode = UniverseArray::stringToGMChannelMode(str);
@@ -457,7 +457,7 @@ bool VCProperties::loadProperties(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCPropertiesBlackout)
         {
             quint32 universe = InputMap::invalidUniverse();
-            quint32 channel = KInputChannelInvalid;
+            quint32 channel = InputMap::invalidChannel();
             /* External input */
             bool inputOK = loadXMLInput(tag.firstChild().toElement(),
                                         &universe, &channel);
@@ -500,9 +500,9 @@ bool VCProperties::loadXMLInput(const QDomElement& tag, quint32* universe,
         if (str.isNull() == false)
             *channel = str.toUInt();
         else
-            *channel = KInputChannelInvalid;
+            *channel = InputMap::invalidChannel();
 
-        if (*universe != InputMap::invalidUniverse() && *channel != KInputChannelInvalid)
+        if (*universe != InputMap::invalidUniverse() && *channel != InputMap::invalidChannel())
             return true;
         else
             return false;

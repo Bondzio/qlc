@@ -113,7 +113,7 @@ QString MIDIInput::infoText(quint32 input)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (input == KInputInvalid)
+    if (input == QLCInPlugin::invalidInput())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");

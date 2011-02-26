@@ -25,6 +25,7 @@
 
 #include "qlcinputchannel.h"
 #include "qlcinputprofile.h"
+#include "qlcinplugin.h"
 
 #include "selectinputchannel.h"
 #include "inputpatch.h"
@@ -44,7 +45,7 @@ extern App* _app;
 SelectInputChannel::SelectInputChannel(QWidget* parent) : QDialog(parent)
 {
     m_universe = InputMap::invalidUniverse();
-    m_channel = KInputChannelInvalid;
+    m_channel = InputMap::invalidChannel();
 
     setupUi(this);
     fillTree();
@@ -88,7 +89,7 @@ void SelectInputChannel::fillTree()
     chItem->setText(KColumnUniverse, QString("%1")
                     .arg(InputMap::invalidUniverse()));
     chItem->setText(KColumnChannel, QString("%1")
-                    .arg(KInputChannelInvalid));
+                    .arg(InputMap::invalidChannel()));
 
     for (uni = 0; uni < _app->inputMap()->universes(); uni++)
     {
@@ -100,7 +101,7 @@ void SelectInputChannel::fillTree()
         uniItem = new QTreeWidgetItem(m_tree);
         updateUniverseItem(uniItem, uni, patch);
 
-        if (patch->plugin() != NULL && patch->input() != KInputInvalid)
+        if (patch->plugin() != NULL && patch->input() != QLCInPlugin::invalidInput())
         {
             /* Add a manual option to each patched universe */
             chItem = new QTreeWidgetItem(uniItem);
@@ -147,7 +148,7 @@ void SelectInputChannel::updateChannelItem(QTreeWidgetItem* item,
         item->setText(KColumnName,
                       tr("<Double click here to enter channel number manually>"));
         item->setText(KColumnChannel,
-                      QString("%1").arg(KInputChannelInvalid));
+                      QString("%1").arg(InputMap::invalidChannel()));
     }
     else
     {
@@ -201,7 +202,7 @@ void SelectInputChannel::updateUniverseItem(QTreeWidgetItem* item,
 
     item->setText(KColumnName, name);
     item->setText(KColumnUniverse, QString("%1").arg(universe));
-    item->setText(KColumnChannel, QString("%1").arg(KInputChannelInvalid));
+    item->setText(KColumnChannel, QString("%1").arg(InputMap::invalidChannel()));
 }
 
 void SelectInputChannel::slotItemChanged(QTreeWidgetItem* item, int column)

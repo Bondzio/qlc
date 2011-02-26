@@ -28,7 +28,6 @@
 #include "qlcfixturedef.h"
 #include "qlccapability.h"
 #include "qlcchannel.h"
-#include "qlctypes.h"
 
 #include "fixture.h"
 #include "doc.h"
@@ -459,13 +458,6 @@ bool Fixture::loadXML(const QDomElement* root,
         qWarning() << Q_FUNC_INFO << "Fixture address range" << address << "-"
                    << address + channels - 1 << "out of DMX bounds";
         address = 0;
-    }
-
-    /* Make sure that universe is something sensible */
-    if (universe >= KUniverseCount)
-    {
-        qWarning() << Q_FUNC_INFO << "Fixture universe" << universe << "out of bounds";
-        universe = 0;
     }
 
     /* Check that the invalid ID is not used */

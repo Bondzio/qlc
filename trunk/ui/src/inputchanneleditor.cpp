@@ -24,6 +24,7 @@
 #include <QSpinBox>
 #include <QIcon>
 
+#include "inputmap.h"
 #include "qlcinputprofile.h"
 #include "qlcinputchannel.h"
 #include "inputchanneleditor.h"
@@ -67,7 +68,7 @@ InputChannelEditor::InputChannelEditor(QWidget* parent,
 
         /* Channel number */
         num = profile->channelNumber(channel);
-        if (num != KInputChannelInvalid)
+        if (num != InputMap::invalidChannel())
             m_numberSpin->setValue(num + 1);
         else
             m_numberSpin->setValue(1);

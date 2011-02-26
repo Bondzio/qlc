@@ -29,6 +29,7 @@
 
 #include "outputpatcheditor.h"
 #include "fixturemanager.h"
+#include "qlcoutplugin.h"
 #include "outputpatch.h"
 #include "outputmap.h"
 #include "monitor.h"
@@ -140,11 +141,11 @@ void OutputPatchEditor::fillTree()
        to an input universe */
     QTreeWidgetItem* pitem = new QTreeWidgetItem(m_tree);
     pitem->setText(KColumnName, KOutputNone);
-    pitem->setText(KColumnOutput, QString::number(KOutputInvalid));
+    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
     pitem->setFlags(pitem->flags() | Qt::ItemIsUserCheckable);
 
     /* Set "Nothing" selected if there is no valid output selected */
-    if (m_currentOutput == KOutputInvalid)
+    if (m_currentOutput == QLCOutPlugin::invalidOutput())
         pitem->setCheckState(KColumnName, Qt::Checked);
     else
         pitem->setCheckState(KColumnName, Qt::Unchecked);
@@ -169,7 +170,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
         delete pitem->child(0);
 
     pitem->setText(KColumnName, pluginName);
-    pitem->setText(KColumnOutput, QString::number(KOutputInvalid));
+    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
 
     /* Go thru available inputs provided by each plugin and put them as their
        parent plugin's leaf nodes */
@@ -211,7 +212,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
     {
         QTreeWidgetItem* iitem = new QTreeWidgetItem(pitem);
         iitem->setText(KColumnName, KOutputNone);
-        iitem->setText(KColumnOutput, QString::number(KOutputInvalid));
+        iitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsEnabled);
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsSelectable);
         iitem->setCheckState(KColumnName, Qt::Unchecked);
@@ -256,7 +257,7 @@ void OutputPatchEditor::slotCurrentItemChanged(QTreeWidgetItem* item)
         {
             /* Plugin node selected */
             plugin = item->text(KColumnName);
-            output = KOutputInvalid;
+            output = QLCOutPlugin::invalidOutput();
         }
 
         info = _app->outputMap()->pluginStatus(plugin, output);
@@ -317,7 +318,7 @@ void OutputPatchEditor::slotItemChanged(QTreeWidgetItem* item)
     else
     {
         m_currentPluginName = QString();
-        m_currentOutput = KOutputInvalid;
+        m_currentOutput = QLCOutPlugin::invalidOutput();
     }
 
     /* Apply the patch immediately so that input data can be used in the

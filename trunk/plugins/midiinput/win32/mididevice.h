@@ -25,7 +25,6 @@
 #include <Windows.h>
 #include <QObject>
 
-#include "qlctypes.h"
 
 class MIDIDevice;
 class MIDIInput;

@@ -46,7 +46,7 @@ void OutputPatch_Test::defaults()
 {
     OutputPatch op(this);
     QVERIFY(op.m_plugin == NULL);
-    QVERIFY(op.m_output == KOutputInvalid);
+    QVERIFY(op.m_output == QLCOutPlugin::invalidOutput());
     QVERIFY(op.pluginName() == KOutputNone);
     QVERIFY(op.outputName() == KOutputNone);
     QVERIFY(op.isDMXZeroBased() == false);
@@ -54,7 +54,7 @@ void OutputPatch_Test::defaults()
 
 void OutputPatch_Test::patch()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -105,7 +105,7 @@ void OutputPatch_Test::dump()
     uni[169] = 50;
     uni[511] = 25;
 
-    OutputMap om(this);
+    OutputMap om(this, 4);
     OutputPatch* op = new OutputPatch(this);
 
     om.loadPlugins(testPluginDir());

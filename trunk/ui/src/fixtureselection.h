@@ -25,7 +25,6 @@
 #include <QDialog>
 #include <QList>
 
-#include "qlctypes.h"
 #include "ui_fixtureselection.h"
 
 class QTreeWidgetItem;

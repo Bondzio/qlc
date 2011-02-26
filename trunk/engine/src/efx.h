@@ -26,7 +26,6 @@
 #include <QPoint>
 #include <QList>
 
-#include "qlctypes.h"
 
 #include "efxfixture.h"
 #include "function.h"

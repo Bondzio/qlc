@@ -945,7 +945,7 @@ void VirtualConsole::slotToolsBlackout()
     Q_ASSERT(_app->outputMap() != NULL);
     _app->outputMap()->setBlackout(!_app->outputMap()->blackout());
     if (s_properties.blackoutInputUniverse() != InputMap::invalidUniverse() &&
-        s_properties.blackoutInputChannel() != KInputChannelInvalid)
+        s_properties.blackoutInputChannel() != InputMap::invalidChannel())
     {
         uchar value = (_app->outputMap()->blackout()) ? 255 : 0;
         _app->inputMap()->feedBack(s_properties.blackoutInputUniverse(),

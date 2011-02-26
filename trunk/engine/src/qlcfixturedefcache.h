@@ -27,8 +27,6 @@
 #include <QMap>
 #include <QDir>
 
-#include "qlctypes.h"
-
 class QLCFixtureDef;
 
 /**

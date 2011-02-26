@@ -119,7 +119,7 @@ QString PeperoniOut::infoText(quint32 output)
         str += tr("The shared library usbdmx.dll could not be found or is too old to be used with QLC.");
         str += QString("</P>");
     }
-    else if (output == KOutputInvalid)
+    else if (output == QLCOutPlugin::invalidOutput())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");

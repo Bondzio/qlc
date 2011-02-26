@@ -24,6 +24,7 @@
 #include <QString>
 #include <QLabel>
 
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "virtualconsole.h"
@@ -179,7 +180,7 @@ void VCDockSlider::slotSliderValueChanged(int value)
     }
 
     /* Send input feedback */
-    if (uni != InputMap::invalidUniverse() && ch != KInputChannelInvalid)
+    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
     {
         if (m_slider->invertedAppearance() == true)
             value = m_slider->maximum() - value;

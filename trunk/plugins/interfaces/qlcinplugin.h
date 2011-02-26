@@ -27,7 +27,6 @@
 #include <QString>
 #include <QObject>
 
-#include "qlctypes.h"
 
 /*****************************************************************************
  * InputPlugin
@@ -69,7 +68,7 @@
  * they are still handled internally as 0-based.
  *
  * An info text can be fetched for each plugin with infoText(). If the input
- * parameter == KInputInvalid, the plugin should provide a brief status snippet
+ * parameter == QLCInPlugin::invalidInput(), the plugin should provide a brief status snippet
  * on its overall state. If the input line parameter is given, the plugin
  * should provide information concerning ONLY that particular input line.
  * This info is displayed to the user as-is.
@@ -158,7 +157,10 @@ public:
      * @param input If specified, information for the given input line is
      *              expected. Otherwise provides information for the plugin
      */
-    virtual QString infoText(quint32 input = KInputInvalid) = 0;
+    virtual QString infoText(quint32 input = QLCInPlugin::invalidInput()) = 0;
+
+    /** Invalid input number */
+    static quint32 invalidInput() { return UINT_MAX; }
 
 signals:
     /**

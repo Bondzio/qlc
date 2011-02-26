@@ -495,7 +495,7 @@ void VCButton::setOn(bool on)
 
     /* Send input feedback */
     if (m_inputUniverse != InputMap::invalidUniverse() &&
-            m_inputChannel != KInputChannelInvalid)
+            m_inputChannel != InputMap::invalidChannel())
     {
         if (on == true)
         {

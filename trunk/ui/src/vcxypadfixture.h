@@ -26,7 +26,6 @@
 #include <QVariant>
 #include <QString>
 
-#include "qlctypes.h"
 
 class VCXYPadFixture;
 class UniverseArray;

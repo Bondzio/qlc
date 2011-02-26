@@ -35,7 +35,7 @@ class QUdpSocket;
  * EWingInput
  *****************************************************************************/
 
-class QLC_DECLSPEC EWingInput : public QLCInPlugin
+class EWingInput : public QLCInPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCInPlugin)
@@ -70,7 +70,7 @@ public:
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = KInputInvalid);
+    QString infoText(quint32 input = QLCInPlugin::invalidInput());
 
 signals:
     /** @reimp */

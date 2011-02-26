@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "ui_vcsliderproperties.h"
-#include "qlctypes.h"
 
 class QTreeWidgetItem;
 

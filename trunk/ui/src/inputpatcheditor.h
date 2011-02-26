@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "qlcinputprofile.h"
-#include "qlctypes.h"
 
 #include "ui_inputpatcheditor.h"
 #include "inputpatch.h"

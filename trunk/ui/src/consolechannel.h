@@ -27,7 +27,6 @@
 #include <QIcon>
 
 #include "qlcchannel.h"
-#include "qlctypes.h"
 #include "dmxsource.h"
 
 class QContextMenuEvent;

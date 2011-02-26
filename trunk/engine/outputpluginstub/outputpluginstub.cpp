@@ -34,7 +34,7 @@ void OutputPluginStub::init()
 {
     m_configureCalled = 0;
     m_canConfigure = false;
-    m_array = QByteArray(int(KUniverseCount * 512), char(0));
+    m_array = QByteArray(int(4 * 512), char(0));
 }
 
 QString OutputPluginStub::name()
@@ -48,7 +48,7 @@ QString OutputPluginStub::name()
 
 void OutputPluginStub::open(quint32 output)
 {
-    if (m_openLines.contains(output) == false && output < KUniverseCount)
+    if (m_openLines.contains(output) == false && output < 4)
         m_openLines.append(output);
 }
 
@@ -61,7 +61,7 @@ QStringList OutputPluginStub::outputs()
 {
     QStringList list;
 
-    for (quint32 i = 0; i < KUniverseCount; i++)
+    for (quint32 i = 0; i < 4; i++)
         list << QString("%1: Stub %1").arg(i + 1);
 
     return list;

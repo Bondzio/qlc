@@ -26,7 +26,6 @@
 
 #include "qlcinputchannel.h"
 #include "ui_inputchanneleditor.h"
-#include "qlctypes.h"
 
 class QLCInputChannel;
 

@@ -24,7 +24,6 @@
 
 #include <QtGlobal>
 
-#include "qlctypes.h"
 #include "fixture.h"
 
 class QDomDocument;

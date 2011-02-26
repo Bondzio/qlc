@@ -93,7 +93,7 @@ QString MIDIOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == KOutputInvalid)
+    if (output == QLCOutPlugin::invalidOutput())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");

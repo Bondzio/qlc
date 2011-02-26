@@ -43,6 +43,7 @@
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "vcslider.h"
+#include "qlctypes.h"
 #include "qlcfile.h"
 #include "chaser.h"
 #include "scene.h"
@@ -839,7 +840,7 @@ void VCSlider::sendFeedBack(int value)
 {
     /* Send input feedback */
     if (m_inputUniverse != InputMap::invalidUniverse() &&
-        m_inputChannel != KInputChannelInvalid)
+        m_inputChannel != InputMap::invalidChannel())
     {
         if (invertedAppearance() == true)
             value = m_slider->maximum() - value;

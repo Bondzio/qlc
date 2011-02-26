@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "ui_addvcbuttonmatrix.h"
-#include "qlctypes.h"
 
 class AddVCButtonMatrix : public QDialog, public Ui_AddVCButtonMatrix
 {

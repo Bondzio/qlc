@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "ui_capabilitywizard.h"
-#include "qlctypes.h"
 
 class QLCCapability;
 class QLCChannel;

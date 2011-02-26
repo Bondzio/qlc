@@ -299,7 +299,7 @@ edit:
 
             if (another == NULL || another == channel)
             {
-                if (ice.channel() != KInputChannelInvalid)
+                if (ice.channel() != InputMap::invalidChannel())
                     m_profile->remapChannel(channel, ice.channel());
                 if (ice.name().isEmpty() == false)
                     channel->setName(ice.name());

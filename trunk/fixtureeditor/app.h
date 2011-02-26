@@ -23,7 +23,6 @@
 #define APP_H
 
 #include <QMainWindow>
-#include "qlctypes.h"
 
 class QToolBar;
 class QAction;

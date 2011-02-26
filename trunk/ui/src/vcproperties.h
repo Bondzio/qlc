@@ -27,7 +27,6 @@
 #include "vcwidgetproperties.h"
 #include "ui_vcproperties.h"
 #include "universearray.h"
-#include "qlctypes.h"
 
 class VirtualConsole;
 class QDomDocument;

@@ -23,7 +23,6 @@
 #define QLCPHYSICAL_H
 
 #include <QString>
-#include "qlctypes.h"
 
 class QDomElement;
 class QDomDocument;

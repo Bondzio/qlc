@@ -28,7 +28,6 @@
 #include <QDir>
 
 #include "qlcinputprofile.h"
-#include "qlctypes.h"
 
 class QLCInPlugin;
 class InputPatch;
@@ -59,7 +58,7 @@ public:
      * Create a new InputMap object, with the given amount of input
      * universes.
      */
-    InputMap(QObject* parent, quint32 universes = KInputUniverseCount);
+    InputMap(QObject* parent, quint32 universes);
 
     /**
      * Destroy an InputMap object
@@ -111,6 +110,11 @@ public:
      * Set the universe that is used for editing functions etc.
      */
     void setEditorUniverse(quint32 uni);
+
+    /**
+     * Invalid channel number.
+     */
+    static quint32 invalidChannel();
 
 protected:
     /** Total number of supported input universes */
@@ -213,8 +217,7 @@ public:
      * @param pluginName Name of the plugin, whose status to get
      * @param input A specific input identifier
      */
-    QString pluginStatus(const QString& pluginName = QString(),
-                         quint32 input = KInputInvalid);
+    QString pluginStatus(const QString& pluginName, quint32 input);
 
     /**
      * Append the given plugin to our list of plugins. Will fail if

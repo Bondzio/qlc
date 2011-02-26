@@ -23,7 +23,6 @@
 #define VCWIDGETPROPERTIES_H
 
 #include <QtXml>
-#include "qlctypes.h"
 
 class QWidget;
 

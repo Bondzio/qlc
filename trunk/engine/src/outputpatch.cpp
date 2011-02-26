@@ -24,7 +24,6 @@
 #include <QtXml>
 
 #include "qlcoutplugin.h"
-#include "qlctypes.h"
 #include "outputpatch.h"
 #include "outputmap.h"
 
@@ -37,7 +36,7 @@ OutputPatch::OutputPatch(QObject* parent) : QObject(parent)
     Q_ASSERT(parent != NULL);
 
     m_plugin = NULL;
-    m_output = KOutputInvalid;
+    m_output = QLCOutPlugin::invalidOutput();
     m_dmxZeroBased = false;
 }
 
@@ -53,13 +52,13 @@ OutputPatch::~OutputPatch()
 
 void OutputPatch::set(QLCOutPlugin* plugin, quint32 output)
 {
-    if (m_plugin != NULL && m_output != KOutputInvalid)
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
         m_plugin->close(m_output);
 
     m_plugin = plugin;
     m_output = output;
 
-    if (m_plugin != NULL && m_output != KOutputInvalid)
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
         m_plugin->open(m_output);
 }
 
@@ -78,7 +77,7 @@ QLCOutPlugin* OutputPatch::plugin() const
 
 QString OutputPatch::outputName() const
 {
-    if (m_plugin != NULL && m_output != KOutputInvalid &&
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput() &&
         m_output < quint32(m_plugin->outputs().size()))
     {
         return m_plugin->outputs()[m_output];
@@ -94,7 +93,7 @@ quint32 OutputPatch::output() const
     if (m_plugin != NULL && m_output < quint32(m_plugin->outputs().size()))
         return m_output;
     else
-        return KOutputInvalid;
+        return QLCOutPlugin::invalidOutput();
 }
 
 void OutputPatch::setDMXZeroBased(bool set)
@@ -114,6 +113,6 @@ bool OutputPatch::isDMXZeroBased() const
 void OutputPatch::dump(const QByteArray& universe)
 {
     /* Don't do anything if there is no plugin and/or output line. */
-    if (m_plugin != NULL && m_output != KOutputInvalid)
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
         m_plugin->outputDMX(m_output, universe);
 }

@@ -28,7 +28,6 @@
 #include <QObject>
 #include <QMutex>
 
-#include "qlctypes.h"
 
 class PeperoniDevice : public QObject
 {

@@ -39,7 +39,7 @@ void InputPatch_Test::defaults()
 {
     InputPatch ip(this);
     QVERIFY(ip.m_plugin == NULL);
-    QVERIFY(ip.m_input == KInputInvalid);
+    QVERIFY(ip.m_input == QLCInPlugin::invalidInput());
     QVERIFY(ip.m_profile == NULL);
     QVERIFY(ip.pluginName() == KInputNone);
     QVERIFY(ip.inputName() == KInputNone);
@@ -50,7 +50,7 @@ void InputPatch_Test::defaults()
 
 void InputPatch_Test::patch()
 {
-    InputMap im(this);
+    InputMap im(this, 4);
     QDir dir(TESTPLUGINDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));

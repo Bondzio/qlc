@@ -26,7 +26,6 @@
 #include <QDialog>
 
 #include "ui_vccuelistproperties.h"
-#include "qlctypes.h"
 
 class VCCueList;
 

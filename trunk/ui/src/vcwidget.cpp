@@ -74,7 +74,7 @@ VCWidget::VCWidget(QWidget* parent) : QWidget(parent)
     setEnabled(true);
 
     m_inputUniverse = InputMap::invalidUniverse();
-    m_inputChannel = KInputChannelInvalid;
+    m_inputChannel = InputMap::invalidChannel();
 
     connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
@@ -308,13 +308,13 @@ void VCWidget::editProperties()
 
 void VCWidget::setInputSource(quint32 uni, quint32 ch)
 {
-    if (uni == InputMap::invalidUniverse() || ch == KInputChannelInvalid)
+    if (uni == InputMap::invalidUniverse() || ch == InputMap::invalidChannel())
     {
         /* If either one of the new values is invalid we end up here
            to disconnect from inputmap and setting both of the values
            invalid. */
         m_inputUniverse = InputMap::invalidUniverse();
-        m_inputChannel = KInputChannelInvalid;
+        m_inputChannel = InputMap::invalidChannel();
 
         /* Even though we might not be connected, it is safe to do a
            disconnect in any case. */
@@ -327,7 +327,7 @@ void VCWidget::setInputSource(quint32 uni, quint32 ch)
                                                     uchar)));
     }
     else if (m_inputUniverse == InputMap::invalidUniverse() ||
-             m_inputChannel == KInputChannelInvalid)
+             m_inputChannel == InputMap::invalidChannel())
     {
         /* Execution comes here only if both of the new values
            are valid and the existing values are invalid, in which
@@ -548,7 +548,7 @@ bool VCWidget::saveXMLInput(QDomDocument* doc, QDomElement* root,
     Q_ASSERT(doc != NULL);
     Q_ASSERT(root != NULL);
 
-    if (uni != InputMap::invalidUniverse() && ch != KInputChannelInvalid)
+    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
     {
         QDomElement tag;
         QDomText text;

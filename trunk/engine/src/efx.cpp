@@ -29,6 +29,7 @@
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
 #include "qlcchannel.h"
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "universearray.h"

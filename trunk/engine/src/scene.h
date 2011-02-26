@@ -28,7 +28,6 @@
 #include "fadechannel.h"
 #include "scenevalue.h"
 #include "dmxsource.h"
-#include "qlctypes.h"
 #include "function.h"
 #include "fixture.h"
 

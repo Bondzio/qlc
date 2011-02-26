@@ -32,7 +32,7 @@
  * EPlaybackWing
  ****************************************************************************/
 
-class QLC_DECLSPEC EPlaybackWing : public EWing
+class EPlaybackWing : public EWing
 {
     Q_OBJECT
 

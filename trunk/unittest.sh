@@ -31,7 +31,8 @@ do
     test=`echo ${test} | sed 's/ui\/test\///'`
 
     # Execute the test
-    ${TESTDIR}/${test}/${test}_test
+    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:engine/src \
+	    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:engine/src ${TESTDIR}/${test}/${test}_test
     RESULT=${?}
     if [ ${RESULT} != 0 ]; then
 	    echo "${RESULT} UI unit tests failed. Please fix before commit."

@@ -24,7 +24,6 @@
 #include <QtXml>
 
 #include "qlcinplugin.h"
-#include "qlctypes.h"
 
 #include "inputpatch.h"
 #include "inputmap.h"
@@ -38,7 +37,7 @@ InputPatch::InputPatch(QObject* parent) : QObject(parent)
     Q_ASSERT(parent != NULL);
 
     m_plugin = NULL;
-    m_input = KInputInvalid;
+    m_input = QLCInPlugin::invalidInput();
     m_profile = NULL;
     m_feedbackEnabled = true;
 }
@@ -56,7 +55,7 @@ InputPatch::~InputPatch()
 void InputPatch::set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
                      QLCInputProfile* profile)
 {
-    if (m_plugin != NULL && m_input != KInputInvalid)
+    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
         m_plugin->close(m_input);
 
     m_plugin = plugin;
@@ -65,7 +64,7 @@ void InputPatch::set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
     m_feedbackEnabled = enableFeedback;
 
     /* Open the assigned plugin input */
-    if (m_plugin != NULL && m_input != KInputInvalid)
+    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
         m_plugin->open(m_input);
 }
 
@@ -87,12 +86,12 @@ quint32 InputPatch::input() const
     if (m_plugin != NULL && m_input < quint32(m_plugin->inputs().count()))
         return m_input;
     else
-        return KInputInvalid;
+        return QLCInPlugin::invalidInput();
 }
 
 QString InputPatch::inputName() const
 {
-    if (m_plugin != NULL && m_input != KInputInvalid &&
+    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput() &&
             m_input < quint32(m_plugin->inputs().count()))
         return m_plugin->inputs()[m_input];
     else

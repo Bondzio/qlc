@@ -27,6 +27,8 @@
 #include "qlcinputprofile.h"
 #include "qlcfile.h"
 
+#include "inputmap.h"
+
 /****************************************************************************
  * Initialization
  ****************************************************************************/
@@ -141,7 +143,7 @@ bool QLCInputProfile::remapChannel(QLCInputChannel* ich, quint32 number)
         return false;
 
     quint32 old = channelNumber(ich);
-    if (old != KInputChannelInvalid && m_channels.contains(number) == false)
+    if (old != InputMap::invalidChannel() && m_channels.contains(number) == false)
     {
         m_channels.take(old);
         insertChannel(number, ich);
@@ -164,7 +166,7 @@ QLCInputChannel* QLCInputProfile::channel(quint32 channel) const
 quint32 QLCInputProfile::channelNumber(const QLCInputChannel* channel) const
 {
     if (channel == NULL)
-        return KInputChannelInvalid;
+        return InputMap::invalidChannel();
 
     QMapIterator <quint32,QLCInputChannel*> it(m_channels);
     while (it.hasNext() == true)
@@ -174,7 +176,7 @@ quint32 QLCInputProfile::channelNumber(const QLCInputChannel* channel) const
             return it.key();
     }
 
-    return KInputChannelInvalid;
+    return InputMap::invalidChannel();
 }
 
 QMap <quint32,QLCInputChannel*> QLCInputProfile::channels() const

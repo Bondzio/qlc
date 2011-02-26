@@ -25,8 +25,6 @@
 #include <QString>
 #include <QList>
 
-#include "qlctypes.h"
-
 #define KXMLQLCChannel          QString("Channel")
 #define KXMLQLCChannelNumber    QString("Number")
 #define KXMLQLCChannelName      QString("Name")

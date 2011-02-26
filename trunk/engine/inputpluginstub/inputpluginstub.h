@@ -60,7 +60,7 @@ public:
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = KInputInvalid);
+    QString infoText(quint32 input = QLCInPlugin::invalidInput());
 
     /** Tell the plugin to emit valueChanged signal */
     void emitValueChanged(quint32 input, quint32 channel, uchar value) {

@@ -22,8 +22,6 @@
 #ifndef QLCTYPES_H
 #define QLCTYPES_H
 
-#include <limits.h>
-
 /*****************************************************************************
  * Utils
  *****************************************************************************/
@@ -86,60 +84,5 @@
  */
 #define SCALE(x, src_min, src_max, dest_min, dest_max) \
 	((x - src_min) * (dest_max / (src_max - src_min)))
-
-/*****************************************************************************
- * Output universes & channels
- *****************************************************************************/
-
-/**
- * Number of supported universes
- */
-const quint32 KUniverseCount ( 4 );
-
-/*****************************************************************************
- * Output lines
- *****************************************************************************/
-
-/**
- * Invalid output line number
- */
-const quint32 KOutputInvalid ( UINT_MAX );
-
-/*****************************************************************************
- * Input universes
- *****************************************************************************/
-
-/**
- * Number of input universes
- */
-const quint32 KInputUniverseCount ( 4 );
-
-/*****************************************************************************
- * Input lines
- *****************************************************************************/
-
-/**
- * Invalid input line number
- */
-const quint32 KInputInvalid ( UINT_MAX );
-
-/*****************************************************************************
- * Input channels
- *****************************************************************************/
-
-/**
- * Smallest input channel
- */
-const quint32 KInputChannelMin ( 0 );
-
-/**
- * Largest input channel
- */
-const quint32 KInputChannelMax ( UINT_MAX - 1);
-
-/**
- * Largest input channel
- */
-const quint32 KInputChannelInvalid ( UINT_MAX );
 
 #endif

@@ -33,6 +33,7 @@
 #include <QList>
 #include <QtXml>
 
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "vcxypadproperties.h"

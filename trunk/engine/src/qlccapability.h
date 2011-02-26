@@ -24,7 +24,6 @@
 
 #include <QList>
 
-#include "qlctypes.h"
 
 #define KXMLQLCCapability    "Capability"
 #define KXMLQLCCapabilityMin "Min"

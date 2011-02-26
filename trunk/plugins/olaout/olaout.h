@@ -28,7 +28,6 @@
 #include <QList>
 #include <ola/Logging.h>
 #include "qlcoutplugin.h"
-#include "qlctypes.h"
 #include "olaoutthread.h"
 
 class ConfigureOlaOut;
@@ -54,7 +53,7 @@ public:
     QString name();
     void configure();
     bool canConfigure();
-    QString infoText(quint32 output = KOutputInvalid);
+    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
 
     void outputDMX(quint32 output, const QByteArray& universe);
 

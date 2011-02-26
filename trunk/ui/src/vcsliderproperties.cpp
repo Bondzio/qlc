@@ -34,6 +34,7 @@
 #include "qlcinputprofile.h"
 #include "qlcinputchannel.h"
 #include "qlccapability.h"
+#include "qlcinplugin.h"
 #include "qlcchannel.h"
 
 #include "vcsliderproperties.h"
@@ -316,7 +317,7 @@ void VCSliderProperties::updateInputSource()
     QString chName;
 
     if (m_inputUniverse == InputMap::invalidUniverse() ||
-            m_inputChannel == KInputChannelInvalid)
+            m_inputChannel == InputMap::invalidChannel())
     {
         /* Nothing selected for input universe and/or channel */
         uniName = KInputNone;

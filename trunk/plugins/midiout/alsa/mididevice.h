@@ -27,7 +27,6 @@
 
 #include <alsa/asoundlib.h>
 
-#include "qlctypes.h"
 
 class MIDIDevice;
 class MIDIOut;

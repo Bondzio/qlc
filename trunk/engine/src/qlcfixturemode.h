@@ -28,7 +28,6 @@
 #include "qlcfixturedef.h"
 #include "qlcphysical.h"
 #include "qlcchannel.h"
-#include "qlctypes.h"
 
 #define KXMLQLCFixtureMode              "Mode"
 #define KXMLQLCFixtureModeName          "Name"

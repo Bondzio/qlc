@@ -243,8 +243,9 @@ void AddFixture::findAddress()
 {
     /* Find the next free address space for x fixtures, each taking y
        channels, leaving z channels gap in-between. */
-    quint32 address = m_doc.findAddress(
-                            (m_channelsValue + m_gapValue) * m_amountValue);
+    quint32 address = findAddress((m_channelsValue + m_gapValue) * m_amountValue,
+                                  m_doc.fixtures(),
+                                  m_outputMap.universes());
 
     /* Set the address only if the channel space was really found */
     if (address != QLCChannel::invalid())
@@ -257,6 +258,59 @@ void AddFixture::findAddress()
         else
             m_addressSpin->setValue((address & 0x01FF) + 1);
     }
+}
+
+quint32 AddFixture::findAddress(quint32 numChannels,
+                                const QList <Fixture*> fixtures,
+                                quint32 maxUniverses)
+{
+    /* Try to find contiguous space from one universe at a time */
+    for (quint32 universe = 0; universe < maxUniverses; universe++)
+    {
+        quint32 ch = findAddress(universe, numChannels, fixtures);
+        if (ch != QLCChannel::invalid())
+            return ch;
+    }
+
+    return QLCChannel::invalid();
+}
+
+quint32 AddFixture::findAddress(quint32 universe, quint32 numChannels,
+                                const QList <Fixture*> fixtures)
+{
+    quint32 freeSpace = 0;
+    quint32 maxChannels = 512;
+
+    /* Construct a map of unallocated channels */
+    int map[maxChannels];
+    std::fill(map, map + maxChannels, 0);
+
+    QListIterator <Fixture*> fxit(fixtures);
+    while (fxit.hasNext() == true)
+    {
+        Fixture* fxi(fxit.next());
+        Q_ASSERT(fxi != NULL);
+
+        if (fxi->universe() != universe)
+            continue;
+
+        for (quint32 ch = 0; ch < fxi->channels(); ch++)
+            map[fxi->universeAddress() + ch] = 1;
+    }
+
+    /* Try to find the next contiguous free address space */
+    for (quint32 ch = 0; ch < maxChannels; ch++)
+    {
+        if (map[ch] == 0)
+            freeSpace++;
+        else
+            freeSpace = 0;
+
+        if (freeSpace == numChannels)
+            return (ch - freeSpace + 1) | (universe << 9);
+    }
+
+    return QLCChannel::invalid();
 }
 
 void AddFixture::updateMaximumAmount()

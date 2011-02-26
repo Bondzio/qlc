@@ -27,7 +27,6 @@
 
 #include "dmxsource.h"
 #include "vcwidget.h"
-#include "qlctypes.h"
 
 class QDomDocument;
 class QDomElement;

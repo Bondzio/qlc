@@ -30,7 +30,6 @@
 #include <linux/input.h>
 #include <linux/types.h>
 
-#include "qlctypes.h"
 #include "hiddevice.h"
 
 class HIDEventDevice;

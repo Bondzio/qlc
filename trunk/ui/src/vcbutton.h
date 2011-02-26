@@ -25,7 +25,6 @@
 #include <QKeySequence>
 #include <QWidget>
 
-#include "qlctypes.h"
 #include "vcwidget.h"
 
 class QDomDocument;

@@ -24,7 +24,6 @@
 
 #include <QTextBrowser>
 #include <QMainWindow>
-#include "qlctypes.h"
 
 class QToolBar;
 class QAction;

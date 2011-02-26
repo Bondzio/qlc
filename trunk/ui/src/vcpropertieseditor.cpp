@@ -25,6 +25,7 @@
 
 #include "qlcinputprofile.h"
 #include "qlcinputchannel.h"
+#include "qlcinplugin.h"
 #include "qlcfile.h"
 
 #include "vcpropertieseditor.h"
@@ -404,7 +405,7 @@ void VCPropertiesEditor::updateBlackoutInputSource()
 bool VCPropertiesEditor::inputSourceNames(quint32 universe, quint32 channel,
                                           QString& uniName, QString& chName) const
 {
-    if (universe == InputMap::invalidUniverse() || channel == KInputChannelInvalid)
+    if (universe == InputMap::invalidUniverse() || channel == InputMap::invalidChannel())
     {
         /* Nothing selected for input universe and/or channel */
         return false;

@@ -32,7 +32,7 @@
  * EShortcutWing
  ****************************************************************************/
 
-class QLC_DECLSPEC EShortcutWing : public EWing
+class EShortcutWing : public EWing
 {
     Q_OBJECT
 

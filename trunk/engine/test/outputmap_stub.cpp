@@ -28,7 +28,7 @@
  * OutputMap Stub
  ****************************************************************************/
 
-OutputMapStub::OutputMapStub(QObject* parent) : OutputMap(parent)
+OutputMapStub::OutputMapStub(QObject* parent) : OutputMap(parent, 4)
 {
     m_unis = NULL;
 }

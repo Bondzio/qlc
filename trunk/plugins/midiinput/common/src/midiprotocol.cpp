@@ -20,8 +20,9 @@
 */
 
 #include <QtCore>
-#include "qlctypes.h"
+
 #include "midiprotocol.h"
+#include "qlctypes.h"
 
 /****************************************************************************
  * MIDI conversion functions

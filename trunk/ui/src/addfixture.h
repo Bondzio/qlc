@@ -23,8 +23,8 @@
 #define ADDFIXTURE_H
 
 #include <QWidget>
+#include <QList>
 
-#include "qlctypes.h"
 #include "ui_addfixture.h"
 #include "fixture.h"
 
@@ -151,6 +151,30 @@ protected:
     /** Find the next free address space for current fixture selection,
         amount and address gap. Sets the address to address spin. */
     void findAddress();
+
+    /**
+     * Attempt to find the next contiguous free address space for the given
+     * number of channels. The address will not span multiple universes.
+     * If a suitable address space cannot be found, QLCChannel::invalid() is
+     * returned
+     *
+     * @param numChannels Number of channels in the address space
+     * @return The address or QLCChannel::invalid() if not found
+     */
+    static quint32 findAddress(quint32 numChannels, QList <Fixture*> fixtures,
+                               quint32 maxUniverses);
+
+    /**
+     * Try to find the next free address from the given universe for
+     * the given number of channels. QLCChannel::invalid() is returned if
+     * an adequate address range cannot be found.
+     *
+     * @param universe The universe to search from
+     * @param numChannels Number of free channels required
+     * @return An address or QLCChannel::invalid() if address space not available
+     */
+    static quint32 findAddress(quint32 universe, quint32 numChannels,
+                               QList <Fixture*> fixtures);
 
     /** Update the maximum amount of fixtures for the universe */
     void updateMaximumAmount();

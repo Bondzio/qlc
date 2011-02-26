@@ -25,6 +25,7 @@
 #include <QtXml>
 
 #include "qlcfixturedef.h"
+#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "universearray.h"

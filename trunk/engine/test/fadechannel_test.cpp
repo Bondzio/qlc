@@ -20,6 +20,8 @@
 */
 
 #include <QtTest>
+
+#include "qlctypes.h"
 #include "qlcchannel.h"
 #include "fadechannel_test.h"
 

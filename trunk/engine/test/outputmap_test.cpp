@@ -47,7 +47,7 @@ static QDir testPluginDir()
 
 void OutputMap_Test::initial()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
     QVERIFY(om.m_universes == 4);
     QVERIFY(om.universes() == 4);
     QVERIFY(om.m_blackout == false);
@@ -66,7 +66,7 @@ void OutputMap_Test::initial()
 
 void OutputMap_Test::appendPlugin()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
     QVERIFY(om.m_plugins.size() == 0);
 
     QSignalSpy spy(&om, SIGNAL(pluginAdded(const QString&)));
@@ -85,7 +85,7 @@ void OutputMap_Test::appendPlugin()
 
 void OutputMap_Test::notOutputPlugin()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
     QCOMPARE(om.m_plugins.size(), 0);
 
     // Loading should fail because the plugin is not an output plugin
@@ -102,7 +102,7 @@ void OutputMap_Test::notOutputPlugin()
 
 void OutputMap_Test::setPatch()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -111,33 +111,33 @@ void OutputMap_Test::setPatch()
 
     QVERIFY(om.setPatch(0, "Foobar", 0) == true);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == KOutputInvalid);
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == KOutputInvalid);
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == KOutputInvalid);
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == KOutputInvalid);
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
 
-    QVERIFY(om.setPatch(KUniverseCount, stub->name(), 0) == false);
+    QVERIFY(om.setPatch(4, stub->name(), 0) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == KOutputInvalid);
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == KOutputInvalid);
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == KOutputInvalid);
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == KOutputInvalid);
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
 
     QVERIFY(om.setPatch(4, stub->name(), 4) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == KOutputInvalid);
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == KOutputInvalid);
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == KOutputInvalid);
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == KOutputInvalid);
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
 
     QVERIFY(om.setPatch(3, stub->name(), 0) == true);
     QVERIFY(om.patch(3)->plugin() == stub);
@@ -158,7 +158,7 @@ void OutputMap_Test::setPatch()
 
 void OutputMap_Test::claimReleaseDumpReset()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -202,7 +202,7 @@ void OutputMap_Test::claimReleaseDumpReset()
 
 void OutputMap_Test::blackout()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -276,7 +276,7 @@ void OutputMap_Test::blackout()
 
 void OutputMap_Test::pluginNames()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     QVERIFY(om.pluginNames().size() == 0);
 
@@ -291,7 +291,7 @@ void OutputMap_Test::pluginNames()
 
 void OutputMap_Test::pluginOutputs()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -306,7 +306,7 @@ void OutputMap_Test::pluginOutputs()
 
 void OutputMap_Test::universeNames()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     QCOMPARE(quint32(om.universeNames().size()), om.universes());
     QVERIFY(om.universeNames().at(0).contains("None"));
@@ -336,7 +336,7 @@ void OutputMap_Test::universeNames()
 
 void OutputMap_Test::configure()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -356,7 +356,7 @@ void OutputMap_Test::configure()
 
 void OutputMap_Test::slotConfigurationChanged()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -372,10 +372,10 @@ void OutputMap_Test::slotConfigurationChanged()
 
 void OutputMap_Test::mapping()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
     for (quint32 i = 0; i < 20; i++)
-        QCOMPARE(om.mapping("Dummy Output", i), KOutputInvalid);
+        QCOMPARE(om.mapping("Dummy Output", i), QLCOutPlugin::invalidOutput());
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -383,10 +383,10 @@ void OutputMap_Test::mapping()
     QVERIFY(stub != NULL);
 
     QVERIFY(om.setPatch(1, stub->name(), quint32(0)) == true);
-    QCOMPARE(om.mapping("Dummy Output", 0), KOutputInvalid);
+    QCOMPARE(om.mapping("Dummy Output", 0), QLCOutPlugin::invalidOutput());
     QCOMPARE(om.mapping("Dummy Output", 1), OutputMap::invalidUniverse());
-    QCOMPARE(om.mapping("Dummy Output", 2), KOutputInvalid);
-    QCOMPARE(om.mapping("Dummy Output", 3), KOutputInvalid);
+    QCOMPARE(om.mapping("Dummy Output", 2), QLCOutPlugin::invalidOutput());
+    QCOMPARE(om.mapping("Dummy Output", 3), QLCOutPlugin::invalidOutput());
     QCOMPARE(om.mapping(stub->name(), 0), quint32(1));
     QCOMPARE(om.mapping(stub->name(), 1), OutputMap::invalidUniverse());
     QCOMPARE(om.mapping(stub->name(), 2), OutputMap::invalidUniverse());
@@ -395,9 +395,9 @@ void OutputMap_Test::mapping()
 
 void OutputMap_Test::pluginStatus()
 {
-    OutputMap om(this);
+    OutputMap om(this, 4);
 
-    QVERIFY(om.pluginStatus("Foo").contains("No plugin"));
+    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidOutput()).contains("No plugin"));
     QVERIFY(om.pluginStatus("Bar", 0).contains("No plugin"));
     QVERIFY(om.pluginStatus("Baz", 1).contains("No plugin"));
     QVERIFY(om.pluginStatus("Xyzzy", 2).contains("No plugin"));
@@ -409,7 +409,7 @@ void OutputMap_Test::pluginStatus()
     QVERIFY(stub != NULL);
 
     om.appendPlugin(stub);
-    QVERIFY(om.pluginStatus(stub->name()) == stub->infoText(KInputInvalid));
+    QVERIFY(om.pluginStatus(stub->name(), 4) == stub->infoText(QLCOutPlugin::invalidOutput()));
     QVERIFY(om.pluginStatus(stub->name(), 0) == stub->infoText(0));
     QVERIFY(om.pluginStatus(stub->name(), 1) == stub->infoText(1));
     QVERIFY(om.pluginStatus(stub->name(), 2) == stub->infoText(2));

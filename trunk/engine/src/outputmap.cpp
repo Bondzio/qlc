@@ -31,7 +31,6 @@
 
 #include "qlcoutplugin.h"
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlci18n.h"
 #include "qlcfile.h"
 
@@ -232,7 +231,7 @@ bool OutputMap::setPatch(quint32 universe, const QString& pluginName,
 
 OutputPatch* OutputMap::patch(quint32 universe) const
 {
-    if (universe < KUniverseCount)
+    if (universe < universes())
         return m_patch[universe];
     else
         return NULL;
@@ -241,7 +240,7 @@ OutputPatch* OutputMap::patch(quint32 universe) const
 QStringList OutputMap::universeNames() const
 {
     QStringList list;
-    for (quint32 i = 0; i < KUniverseCount; i++)
+    for (quint32 i = 0; i < universes(); i++)
     {
         OutputPatch* p(patch(i));
         Q_ASSERT(p != NULL);
@@ -262,7 +261,7 @@ quint32 OutputMap::mapping(const QString& pluginName, quint32 output) const
             return uni;
     }
 
-    return KOutputInvalid;
+    return QLCOutPlugin::invalidOutput();
 }
 
 /*****************************************************************************
@@ -395,7 +394,7 @@ void OutputMap::loadDefaults()
     QString output;
     QString key;
 
-    for (quint32 i = 0; i < KUniverseCount; i++)
+    for (quint32 i = 0; i < universes(); i++)
     {
         /* Zero-based addressing */
         key = QString("/outputmap/universe%1/dmxzerobased").arg(i);
@@ -428,7 +427,7 @@ void OutputMap::saveDefaults()
     QString key;
     QString str;
 
-    for (quint32 i = 0; i < KUniverseCount; i++)
+    for (quint32 i = 0; i < universes(); i++)
     {
         OutputPatch* outputPatch = patch(i);
         Q_ASSERT(outputPatch != NULL);

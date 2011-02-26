@@ -26,7 +26,6 @@
 #include <QList>
 
 #include "qlcchannel.h"
-#include "qlctypes.h"
 
 #define KXMLFixture "Fixture"
 #define KXMLFixtureName "Name"

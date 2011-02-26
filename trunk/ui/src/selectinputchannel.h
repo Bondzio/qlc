@@ -24,7 +24,6 @@
 
 #include <QDialog>
 
-#include "qlctypes.h"
 #include "ui_selectinputchannel.h"
 
 class QTreeWidgetItem;

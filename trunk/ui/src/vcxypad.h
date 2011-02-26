@@ -28,7 +28,6 @@
 #include <QMutex>
 #include <QList>
 
-#include "qlctypes.h"
 
 #include "vcxypadfixture.h"
 #include "dmxsource.h"

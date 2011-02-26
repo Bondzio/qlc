@@ -30,7 +30,6 @@
 #include <alsa/asoundlib.h>
 
 #include "qlcinplugin.h"
-#include "qlctypes.h"
 
 class ConfigureMIDIInput;
 class MIDIInputEvent;
@@ -81,7 +80,7 @@ public:
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = KInputInvalid);
+    QString infoText(quint32 input = QLCInPlugin::invalidInput());
 
 protected:
     void customEvent(QEvent* event);

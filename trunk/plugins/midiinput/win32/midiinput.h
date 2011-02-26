@@ -27,7 +27,6 @@
 #include <QList>
 
 #include "qlcinplugin.h"
-#include "qlctypes.h"
 
 class MIDIDevice;
 class MIDIInput;
@@ -68,7 +67,7 @@ public:
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = KInputInvalid);
+    QString infoText(quint32 input = QLCInPlugin::invalidInput());
 
     /*********************************************************************
      * Configuration

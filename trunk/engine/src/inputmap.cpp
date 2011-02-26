@@ -35,7 +35,6 @@
 #include "qlcinputchannel.h"
 #include "qlcinplugin.h"
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlcfile.h"
 #include "qlci18n.h"
 
@@ -97,6 +96,11 @@ void InputMap::setEditorUniverse(quint32 uni)
         m_editorUniverse = uni;
     else
         m_editorUniverse = 0;
+}
+
+quint32 InputMap::invalidChannel()
+{
+    return UINT_MAX;
 }
 
 /*****************************************************************************
@@ -450,7 +454,7 @@ bool InputMap::inputSourceNames(quint32 universe, quint32 channel,
                                 QString& uniName, QString& chName) const
 {
     if (universe == InputMap::invalidUniverse() ||
-        channel == KInputChannelInvalid)
+        channel == InputMap::invalidChannel())
     {
         /* Nothing given for input universe and/or channel */
         return false;

@@ -26,7 +26,6 @@
 #include <QList>
 
 #include "ui_functionwizard.h"
-#include "qlctypes.h"
 
 class QLCChannel;
 class Fixture;

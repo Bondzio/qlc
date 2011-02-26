@@ -135,7 +135,7 @@ QString HIDInput::infoText(quint32 input)
 
     str += QString("<H3>%1</H3>").arg(name());
 
-    if (input == KInputInvalid)
+    if (input == QLCInPlugin::invalidInput())
     {
         /* Plugin or just an invalid input selected. Display generic
            information. */

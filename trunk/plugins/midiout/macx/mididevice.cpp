@@ -28,6 +28,7 @@
 
 #include "midiprotocol.h"
 #include "mididevice.h"
+#include "qlctypes.h"
 #include "midiout.h"
 
 MIDIDevice::MIDIDevice(MIDIOut* parent, MIDIEntityRef entity)

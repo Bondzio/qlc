@@ -25,7 +25,6 @@
 #include <QWidget>
 #include <QList>
 
-#include "qlctypes.h"
 #include "function.h"
 #include "app.h"
 

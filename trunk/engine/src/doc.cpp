@@ -212,56 +212,6 @@ Fixture* Doc::fixture(quint32 id) const
         return NULL;
 }
 
-quint32 Doc::findAddress(quint32 numChannels) const
-{
-    /* Try to find contiguous space from one universe at a time */
-    for (quint32 universe = 0; universe < KUniverseCount; universe++)
-    {
-        quint32 ch = findAddress(universe, numChannels);
-        if (ch != QLCChannel::invalid())
-            return ch;
-    }
-
-    return QLCChannel::invalid();
-}
-
-quint32 Doc::findAddress(quint32 universe, quint32 numChannels) const
-{
-    quint32 freeSpace = 0;
-    quint32 maxChannels = 512;
-
-    /* Construct a map of unallocated channels */
-    int map[maxChannels];
-    std::fill(map, map + maxChannels, 0);
-
-    QListIterator <Fixture*> fxit(fixtures());
-    while (fxit.hasNext() == true)
-    {
-        Fixture* fxi(fxit.next());
-        Q_ASSERT(fxi != NULL);
-
-        if (fxi->universe() != universe)
-            continue;
-
-        for (quint32 ch = 0; ch < fxi->channels(); ch++)
-            map[fxi->universeAddress() + ch] = 1;
-    }
-
-    /* Try to find the next contiguous free address space */
-    for (quint32 ch = 0; ch < maxChannels; ch++)
-    {
-        if (map[ch] == 0)
-            freeSpace++;
-        else
-            freeSpace = 0;
-
-        if (freeSpace == numChannels)
-            return (ch - freeSpace + 1) | (universe << 9);
-    }
-
-    return QLCChannel::invalid();
-}
-
 int Doc::totalPowerConsumption(int& fuzzy) const
 {
     int totalPowerConsumption = 0;

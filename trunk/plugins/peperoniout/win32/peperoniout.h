@@ -73,7 +73,7 @@ public:
     QStringList outputs();
 
     /** @reimp */
-    QString infoText(quint32 output = KOutputInvalid);
+    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
 
     /** @reimp */
     void outputDMX(quint32 output, const QByteArray& universe);

@@ -10,7 +10,6 @@
 #include <unistd.h>
 
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlcfile.h"
 
 #include "launcher.h"

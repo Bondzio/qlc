@@ -25,7 +25,6 @@
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "function.h"
-#include "qlctypes.h"
 
 class QDomDocument;
 class QDomElement;

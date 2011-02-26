@@ -25,7 +25,6 @@
 #include <QtPlugin>
 #include <QObject>
 
-#include "qlctypes.h"
 
 /**
  * QLCOutPlugin is an interface for all output plugins. Output plugins provide
@@ -61,7 +60,7 @@
  * they are still handled internally as 0-based.
  *
  * An info text can be fetched for each plugin with infoText(). If the output
- * parameter == KOutputInvalid, the plugin should provide a brief status snippet
+ * parameter == QLCOutPlugin::invalidOutput(), the plugin should provide a brief status snippet
  * on its overall state. If the output line parameter is given, the plugin
  * should provide information concerning ONLY that particular output line.
  * This info is displayed to the user as-is.
@@ -149,7 +148,7 @@ public:
 
     /**
      * Provide an information text to be displayed in the output manager.
-     * If @output is KOutputInvalid, the info text contains info regarding
+     * If @output is QLCOutPlugin::invalidOutput(), the info text contains info regarding
      * the whole plugin. Otherwise it contains info on the specific output.
      * This information is meant to help users during output mapping.
      *
@@ -158,7 +157,10 @@ public:
      *
      * @param output The output to get info from
      */
-    virtual QString infoText(quint32 output = KOutputInvalid) = 0;
+    virtual QString infoText(quint32 output = QLCOutPlugin::invalidOutput()) = 0;
+
+    /** Invalid output number */
+    static quint32 invalidOutput() { return UINT_MAX; }
 
     /*************************************************************************
      * Configure

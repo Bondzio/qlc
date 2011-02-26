@@ -568,7 +568,7 @@ void Fixture_Test::loadWrongUniverse()
     QVERIFY(fxi.name() == "Foobar");
     QVERIFY(fxi.channels() == 18);
     QVERIFY(fxi.address() == 25);
-    QVERIFY(fxi.universe() == 0);
+    QVERIFY(fxi.universe() == 4);
 }
 
 void Fixture_Test::loadWrongID()

@@ -26,7 +26,6 @@
 #include <QHash>
 #include <QList>
 
-#include "qlctypes.h"
 
 class MonitorFixture;
 class MonitorLayout;

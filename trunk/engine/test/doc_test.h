@@ -40,7 +40,6 @@ private slots:
     void addFixture();
     void deleteFixture();
     void fixture();
-    void findAddress();
     void totalPowerConsumption();
 
     void addFunction();

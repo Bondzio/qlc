@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "ui_collectioneditor.h"
-#include "qlctypes.h"
 
 class FunctionSelection;
 class Collection;

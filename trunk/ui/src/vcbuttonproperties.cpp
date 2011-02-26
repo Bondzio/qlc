@@ -32,6 +32,7 @@
 #include "qlcinputchannel.h"
 #include "qlcinputprofile.h"
 #include "qlcfixturedef.h"
+#include "qlcinplugin.h"
 
 #include "vcbuttonproperties.h"
 #include "selectinputchannel.h"
@@ -191,7 +192,7 @@ void VCButtonProperties::updateInputSource()
     QString chName;
 
     if (m_inputUniverse == InputMap::invalidUniverse() ||
-            m_inputChannel == KInputChannelInvalid)
+            m_inputChannel == InputMap::invalidChannel())
     {
         /* Nothing selected for input universe and/or channel */
         uniName = KInputNone;

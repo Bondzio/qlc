@@ -28,8 +28,6 @@
 #include <QFile>
 
 #include "qlcfixturedefcache.h"
-#include "qlcoutplugin.h"
-#include "qlcinplugin.h"
 #include "doc.h"
 
 class QProgressDialog;
@@ -48,11 +46,8 @@ class QTimer;
 class QMenu;
 
 class DummyOutPlugin;
-class DummyInPlugin;
 class QLCFixtureDef;
-class QLCInPlugin;
 class MasterTimer;
-class QLCPlugin;
 class OutputMap;
 class InputMap;
 class App;

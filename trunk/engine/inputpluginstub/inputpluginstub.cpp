@@ -22,7 +22,6 @@
 #include <QtPlugin>
 
 #include "inputpluginstub.h"
-#include "qlctypes.h"
 
 /****************************************************************************
  * Initialization
@@ -49,7 +48,7 @@ QString InputPluginStub::name()
 
 void InputPluginStub::open(quint32 input)
 {
-    if (m_openLines.contains(input) == false && input < KInputUniverseCount)
+    if (m_openLines.contains(input) == false && input < 4)
         m_openLines.append(input);
 }
 
@@ -62,7 +61,7 @@ QStringList InputPluginStub::inputs()
 {
     QStringList list;
 
-    for (quint32 i = 0; i < KInputUniverseCount; i++)
+    for (quint32 i = 0; i < 4; i++)
         list << QString("%1: Stub %1").arg(i + 1);
 
     return list;

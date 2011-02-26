@@ -238,10 +238,10 @@ void UniverseArray_Test::reset()
 
 void UniverseArray_Test::setGMValueEfficiency()
 {
-    UniverseArray* ua = new UniverseArray(512 * KUniverseCount);
+    UniverseArray* ua = new UniverseArray(512 * 4);
     int i;
 
-    for (i = 0; i < int(512 * KUniverseCount); i++)
+    for (i = 0; i < int(512 * 4); i++)
         ua->write(i, 200, QLCChannel::Intensity);
 
     /* This applies 50%(127) Grand Master to ALL channels in all universes.
@@ -257,13 +257,13 @@ void UniverseArray_Test::setGMValueEfficiency()
         ua->setGMValue(127);
     }
 
-    for (i = 0; i < int(512 * KUniverseCount); i++)
+    for (i = 0; i < int(512 * 4); i++)
         QCOMPARE(ua->postGMValues().data()[i], char(100));
 }
 
 void UniverseArray_Test::writeEfficiency()
 {
-    UniverseArray* ua = new UniverseArray(512 * KUniverseCount);
+    UniverseArray* ua = new UniverseArray(512 * 4);
     ua->setGMValue(127);
 
     int i;
@@ -275,10 +275,10 @@ void UniverseArray_Test::writeEfficiency()
        less than 1ms so there's a full 22ms to spare after GM. */
     QBENCHMARK
     {
-        for (i = 0; i < int(512 * KUniverseCount); i++)
+        for (i = 0; i < int(512 * 4); i++)
             ua->write(i, 200, QLCChannel::Intensity);
     }
 
-    for (i = 0; i < int(512 * KUniverseCount); i++)
+    for (i = 0; i < int(512 * 4); i++)
         QCOMPARE(ua->postGMValues().data()[i], char(100));
 }

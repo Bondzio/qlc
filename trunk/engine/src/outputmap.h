@@ -29,7 +29,6 @@
 #include <QHash>
 #include <QDir>
 
-#include "qlctypes.h"
 
 class QDomDocument;
 class QDomElement;
@@ -59,7 +58,7 @@ public:
      *
      * @param universes Number of universes
      */
-    OutputMap(QObject* parent, quint32 universes = KUniverseCount);
+    OutputMap(QObject* parent, quint32 universes);
 
     /**
      * Destroy a OutputMap object
@@ -260,8 +259,7 @@ public:
      * @param pluginName Name of the plugin, whose status to get
      * @param output Plugin's output line for getting more specific info
      */
-    QString pluginStatus(const QString& pluginName = QString(),
-                         quint32 output = KOutputInvalid);
+    QString pluginStatus(const QString& pluginName, quint32 output);
 
     /**
      * Append the given plugin to our list of plugins. Will fail if

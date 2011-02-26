@@ -70,13 +70,14 @@
 #include "qlcfixturedefcache.h"
 #include "qlcfixturedef.h"
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
 
 #define KModeTextOperate QObject::tr("Operate")
 #define KModeTextDesign QObject::tr("Design")
+#define KInputUniverseCount 4
+#define KUniverseCount 4
 
 App* _app;
 QStyle* App::s_saneStyle = NULL;

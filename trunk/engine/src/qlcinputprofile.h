@@ -27,7 +27,6 @@
 #include <QHash>
 #include <QMap>
 
-#include "qlctypes.h"
 
 class QLCInputChannel;
 class QLCInputProfile;
@@ -121,7 +120,7 @@ public:
      * Get the channel number for the given input channel.
      *
      * @param channel The channel whose number to get
-     * @return Channel number or KInputChannelInvalid if not found
+     * @return Channel number or InputMap::invalidChannel() if not found
      */
     quint32 channelNumber(const QLCInputChannel* channel) const;
 

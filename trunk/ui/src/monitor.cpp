@@ -41,7 +41,6 @@
 #include "app.h"
 #include "doc.h"
 
-#include "qlctypes.h"
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "monitor/geometry"

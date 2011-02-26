@@ -25,7 +25,6 @@
 #include <QObject>
 #include <QFile>
 
-#include "qlctypes.h"
 
 class HIDInput;
 

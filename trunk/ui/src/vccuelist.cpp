@@ -84,8 +84,8 @@ VCCueList::VCCueList(QWidget* parent) : VCWidget(parent)
     connect(_app->doc(), SIGNAL(functionChanged(quint32)),
             this, SLOT(slotFunctionChanged(quint32)));
 
-    setNextInputSource(InputMap::invalidUniverse(), KInputChannelInvalid);
-    setPreviousInputSource(InputMap::invalidUniverse(), KInputChannelInvalid);
+    setNextInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
+    setPreviousInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
     m_nextLatestValue = 0;
     m_previousLatestValue = 0;
 }
@@ -290,7 +290,7 @@ void VCCueList::setNextInputSource(quint32 uni, quint32 ch)
                this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
     m_nextInputUniverse = uni;
     m_nextInputChannel = ch;
-    if (uni != InputMap::invalidUniverse() && ch != KInputChannelInvalid)
+    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
         connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                 this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
 }
@@ -301,7 +301,7 @@ void VCCueList::setPreviousInputSource(quint32 uni, quint32 ch)
                this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
     m_previousInputUniverse = uni;
     m_previousInputChannel = ch;
-    if (uni != InputMap::invalidUniverse() && ch != KInputChannelInvalid)
+    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
         connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                 this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
 }

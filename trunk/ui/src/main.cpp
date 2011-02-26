@@ -30,7 +30,6 @@
 #include <QDir>
 
 #include "qlcconfig.h"
-#include "qlctypes.h"
 #include "qlci18n.h"
 
 #include "app.h"

@@ -234,62 +234,6 @@ void Doc_Test::fixture()
     QVERIFY(doc.fixture(Fixture::invalidId()) == NULL);
 }
 
-void Doc_Test::findAddress()
-{
-    Doc doc(this, m_fixtureDefCache);
-
-    /* All addresses are available (except for fixtures taking more than
-       one complete universe). */
-    QVERIFY(doc.findAddress(15) == 0);
-    QVERIFY(doc.findAddress(0) == QLCChannel::invalid());
-    QVERIFY(doc.findAddress(512) == 0);
-    QVERIFY(doc.findAddress(513) == QLCChannel::invalid());
-
-    Fixture* f1 = new Fixture(&doc);
-    f1->setChannels(15);
-    f1->setAddress(10);
-    doc.addFixture(f1);
-
-    /* There's a fixture taking 15 channels (10-24) */
-    QVERIFY(doc.findAddress(10) == 0);
-    QVERIFY(doc.findAddress(11) == 25);
-
-    Fixture* f2 = new Fixture(&doc);
-    f2->setChannels(15);
-    f2->setAddress(10);
-    doc.addFixture(f2);
-
-    /* Now there are two fixtures at the same address, with all channels
-       overlapping. */
-    QVERIFY(doc.findAddress(10) == 0);
-    QVERIFY(doc.findAddress(11) == 25);
-
-    /* Now only some channels overlap (f2: 0-14, f1: 10-24) */
-    f2->setAddress(0);
-    QVERIFY(doc.findAddress(1) == 25);
-    QVERIFY(doc.findAddress(10) == 25);
-    QVERIFY(doc.findAddress(11) == 25);
-
-    Fixture* f3 = new Fixture(&doc);
-    f3->setChannels(5);
-    f3->setAddress(30);
-    doc.addFixture(f3);
-
-    doc.resetModified();
-
-    /* Next free slot for max 5 channels is between 25 and 30 */
-    QVERIFY(doc.findAddress(1) == 25);
-    QVERIFY(doc.findAddress(5) == 25);
-    QVERIFY(doc.findAddress(6) == 35);
-    QVERIFY(doc.findAddress(11) == 35);
-
-    /* Next free slot is found only from the next universe */
-    QVERIFY(doc.findAddress(500) == 512);
-
-    /* findAddress() must not affect modified state */
-    QVERIFY(doc.isModified() == false);
-}
-
 void Doc_Test::totalPowerConsumption()
 {
     Doc doc(this, m_fixtureDefCache);

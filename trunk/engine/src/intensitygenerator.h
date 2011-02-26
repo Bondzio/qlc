@@ -25,7 +25,6 @@
 #include <QList>
 
 #include "qlcchannel.h"
-#include "qlctypes.h"
 
 class Fixture;
 class Scene;

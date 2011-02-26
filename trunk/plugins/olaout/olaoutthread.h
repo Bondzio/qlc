@@ -29,7 +29,6 @@
 #include <ola/network/SelectServer.h>
 #include <ola/network/Socket.h>
 #include <olad/OlaDaemon.h>
-#include "qlctypes.h"
 
 // This should really be in qlctypes.h!
 enum { K_UNIVERSE_SIZE = 512 };

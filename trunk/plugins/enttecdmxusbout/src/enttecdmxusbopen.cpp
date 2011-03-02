@@ -26,7 +26,7 @@
 #include <QTime>
 
 #include "enttecdmxusbopen.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 #include "qlcftdi.h"
 
 #define DMX_MAB 16

@@ -23,7 +23,7 @@
 
 #include "midiprotocol_test.h"
 #include "midiprotocol.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 
 using namespace QLCMIDIProtocol;
 

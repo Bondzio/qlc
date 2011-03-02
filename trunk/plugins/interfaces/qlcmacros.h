@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlctypes.h
+  qlcmacros.h
 
   Copyright (C) Heikki Junnila
 
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef QLCTYPES_H
-#define QLCTYPES_H
+#ifndef QLCMACROS_H
+#define QLCMACROS_H
 
 /*****************************************************************************
  * Utils

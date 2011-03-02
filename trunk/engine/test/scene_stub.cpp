@@ -20,7 +20,7 @@
 */
 
 #include "doc.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 #include "scene_stub.h"
 #include "universearray.h"
 

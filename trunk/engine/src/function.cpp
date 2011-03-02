@@ -23,7 +23,7 @@
 #include <QDebug>
 #include <QtXml>
 
-#include "qlctypes.h"
+#include "qlcmacros.h"
 #include "qlcfile.h"
 
 #include "mastertimer.h"

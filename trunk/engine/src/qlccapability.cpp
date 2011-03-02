@@ -25,7 +25,7 @@
 #include <QtXml>
 
 #include "qlccapability.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 
 /************************************************************************
  * Initialization

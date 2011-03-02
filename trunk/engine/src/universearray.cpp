@@ -22,7 +22,7 @@
 #include <math.h>
 
 #include "universearray.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 
 #define KXMLQLCGMValueModeLimit "Limit"
 #define KXMLQLCGMValueModeReduce "Reduce"

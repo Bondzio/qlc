@@ -22,7 +22,7 @@
 #include <QtCore>
 
 #include "midiprotocol.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 
 /****************************************************************************
  * MIDI conversion functions

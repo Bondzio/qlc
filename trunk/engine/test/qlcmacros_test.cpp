@@ -22,7 +22,7 @@
 #include <QtTest>
 
 #include "qlcmacros_test.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 
 void QLCMacros_Test::min()
 {

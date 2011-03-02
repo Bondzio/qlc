@@ -43,7 +43,7 @@
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "vcslider.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 #include "qlcfile.h"
 #include "chaser.h"
 #include "scene.h"

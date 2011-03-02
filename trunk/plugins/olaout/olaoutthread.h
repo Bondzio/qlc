@@ -30,7 +30,7 @@
 #include <ola/network/Socket.h>
 #include <olad/OlaDaemon.h>
 
-// This should really be in qlctypes.h!
+// This should really be in qlcmacros.h!
 enum { K_UNIVERSE_SIZE = 512 };
 
 // Used to pass data between the threads

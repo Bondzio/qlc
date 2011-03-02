@@ -31,7 +31,7 @@
 #include "monitorfixture.h"
 #include "outputpatch.h"
 #include "outputmap.h"
-#include "qlctypes.h"
+#include "qlcmacros.h"
 #include "fixture.h"
 #include "app.h"
 #include "doc.h"

@@ -39,8 +39,14 @@ class OutputPatchEditor : public QDialog, public Ui_OutputPatchEditor
      * Initialization
      ********************************************************************/
 public:
-    OutputPatchEditor(QWidget* parent, quint32 universe,
-                      const OutputPatch* patch);
+    /**
+     * Create a new output patch editor for the given universe.
+     *
+     * @param parent The owning parent widget
+     * @param universe The universe whose settings to edit
+     * @param outputMap The output map object that handles DMX output
+     */
+    OutputPatchEditor(QWidget* parent, quint32 universe, OutputMap* outputMap);
     ~OutputPatchEditor();
 
 public slots:
@@ -63,6 +69,7 @@ protected slots:
     void slotZeroBasedDMXClicked();
 
 protected:
+    OutputMap* m_outputMap;
     int m_universe;
 
     QString m_originalPluginName;

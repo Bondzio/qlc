@@ -173,22 +173,20 @@ void OutputManager::updateTree()
 {
     m_tree->clear();
     for (quint32 uni = 0; uni < _app->outputMap()->universes(); uni++)
-    {
-        OutputPatch* op = _app->outputMap()->patch(uni);
-        updateItem(new QTreeWidgetItem(m_tree), op, uni);
-    }
+        updateItem(new QTreeWidgetItem(m_tree), uni);
 }
 
-void OutputManager::updateItem(QTreeWidgetItem* item, OutputPatch* op,
-                               int universe)
+void OutputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
 {
     Q_ASSERT(item != NULL);
+
+    OutputPatch* op = _app->outputMap()->patch(universe);
     Q_ASSERT(op != NULL);
 
-    item->setText(KColumnUniverse, QString("%1").arg(universe + 1));
+    item->setText(KColumnUniverse, QString::number(universe + 1));
     item->setText(KColumnPlugin, op->pluginName());
     item->setText(KColumnOutputName, op->outputName());
-    item->setText(KColumnOutput, QString("%1").arg(op->output() + 1));
+    item->setText(KColumnOutput, QString::number(op->output() + 1));
 }
 
 void OutputManager::slotPluginConfigurationChanged()
@@ -202,19 +200,12 @@ void OutputManager::slotPluginConfigurationChanged()
 
 void OutputManager::slotEditClicked()
 {
-    QTreeWidgetItem* item;
-    OutputPatch* patch;
-    int universe;
-
-    item = m_tree->currentItem();
+    QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
         return;
 
-    universe = item->text(KColumnUniverse).toInt() - 1;
-    patch = _app->outputMap()->patch(universe);
-    Q_ASSERT(patch != NULL);
-
-    OutputPatchEditor ope(this, universe, patch);
+    quint32 universe = item->text(KColumnUniverse).toUInt() - 1;
+    OutputPatchEditor ope(this, universe, _app->outputMap());
     if (ope.exec() == QDialog::Accepted)
-        updateItem(item, patch, universe);
+        updateItem(item, universe);
 }

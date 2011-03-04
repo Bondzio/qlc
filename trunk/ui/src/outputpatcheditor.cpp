@@ -34,29 +34,29 @@
 #include "outputmap.h"
 #include "monitor.h"
 #include "apputil.h"
-#include "app.h"
 
 #define KColumnName   0
 #define KColumnOutput 1
 #define SETTINGS_GEOMETRY "outputpatcheditor/geometry"
 
-extern App* _app;
-
-OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe,
-                                     const OutputPatch* patch)
-        : QDialog(parent)
+OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMap* outputMap)
+    : QDialog(parent)
+    , m_outputMap(outputMap)
+    , m_universe(universe)
 {
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(universe < outputMap->universes());
+
     QSettings settings;
     QVariant value;
     QString key;
 
     setupUi(this);
     m_infoBrowser->setOpenExternalLinks(true);
+    setWindowTitle(tr("Mapping properties for output universe %1").arg(universe + 1));
 
-    Q_ASSERT(universe < _app->outputMap()->universes());
-    m_universe = universe;
-    setWindowTitle(tr("Mapping properties for output universe %1")
-                   .arg(universe + 1));
+    OutputPatch* patch = outputMap->patch(m_universe);
+    Q_ASSERT(patch != NULL);
 
     m_originalPluginName = patch->pluginName();
     m_currentPluginName = patch->pluginName();
@@ -85,7 +85,7 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe,
     fillTree();
 
     /* Listen to plugin configuration changes */
-    connect(_app->outputMap(),
+    connect(m_outputMap,
             SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged(const QString&)));
 
@@ -104,7 +104,7 @@ OutputPatchEditor::~OutputPatchEditor()
 void OutputPatchEditor::reject()
 {
     /* Revert changes to original values (stored when this dialog opens) */
-    _app->outputMap()->setPatch(m_universe, m_originalPluginName,
+    m_outputMap->setPatch(m_universe, m_originalPluginName,
                                 m_originalOutput);
 
     storeDMXZeroBasedSetting(m_originalDMXZeroBasedSetting);
@@ -151,7 +151,7 @@ void OutputPatchEditor::fillTree()
         pitem->setCheckState(KColumnName, Qt::Unchecked);
 
     /* Go thru available plugins and put them as the tree's root nodes. */
-    QStringListIterator pit(_app->outputMap()->pluginNames());
+    QStringListIterator pit(m_outputMap->pluginNames());
     while (pit.hasNext() == true)
         fillPluginItem(pit.next(), new QTreeWidgetItem(m_tree));
 
@@ -175,7 +175,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
     /* Go thru available inputs provided by each plugin and put them as their
        parent plugin's leaf nodes */
     quint32 i = 0;
-    QStringListIterator iit(_app->outputMap()->pluginOutputs(pluginName));
+    QStringListIterator iit(m_outputMap->pluginOutputs(pluginName));
     while (iit.hasNext() == true)
     {
         QTreeWidgetItem* iitem = new QTreeWidgetItem(pitem);
@@ -192,7 +192,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
         else
         {
             iitem->setCheckState(KColumnName, Qt::Unchecked);
-            quint32 uni = _app->outputMap()->mapping(pluginName, i);
+            quint32 uni = m_outputMap->mapping(pluginName, i);
             if (uni != OutputMap::invalidUniverse())
             {
                 /* If a mapping exists for this plugin and output, make it
@@ -239,7 +239,7 @@ void OutputPatchEditor::slotCurrentItemChanged(QTreeWidgetItem* item)
     if (item == NULL)
     {
         /* Nothing selected */
-        info = _app->outputMap()->pluginStatus(QString(), 0);
+        info = m_outputMap->pluginStatus(QString(), 0);
         configurable = false;
     }
     else
@@ -260,8 +260,8 @@ void OutputPatchEditor::slotCurrentItemChanged(QTreeWidgetItem* item)
             output = QLCOutPlugin::invalidOutput();
         }
 
-        info = _app->outputMap()->pluginStatus(plugin, output);
-        configurable = _app->outputMap()->canConfigurePlugin(plugin);
+        info = m_outputMap->pluginStatus(plugin, output);
+        configurable = m_outputMap->canConfigurePlugin(plugin);
     }
 
     /* Display information for the selected plugin or output */
@@ -323,7 +323,7 @@ void OutputPatchEditor::slotItemChanged(QTreeWidgetItem* item)
 
     /* Apply the patch immediately so that input data can be used in the
        input profile editor */
-    _app->outputMap()->setPatch(m_universe, m_currentPluginName, m_currentOutput);
+    m_outputMap->setPatch(m_universe, m_currentPluginName, m_currentOutput);
 }
 
 void OutputPatchEditor::slotPluginConfigurationChanged(const QString& pluginName)
@@ -361,12 +361,12 @@ void OutputPatchEditor::slotConfigureClicked()
 
     /* Configure the plugin. Changes in plugin outputs are handled with
        slotPluginConfigurationChanged(). */
-    _app->outputMap()->configurePlugin(plugin);
+    m_outputMap->configurePlugin(plugin);
 }
 
 void OutputPatchEditor::slotReconnectClicked()
 {
-    OutputPatch* outputPatch = _app->outputMap()->patch(m_universe);
+    OutputPatch* outputPatch = m_outputMap->patch(m_universe);
     if (outputPatch != NULL)
         outputPatch->set(outputPatch->plugin(), outputPatch->output());
 
@@ -386,7 +386,7 @@ void OutputPatchEditor::slotZeroBasedDMXClicked()
 
 void OutputPatchEditor::storeDMXZeroBasedSetting(bool set)
 {
-    OutputPatch* outputPatch = _app->outputMap()->patch(m_universe);
+    OutputPatch* outputPatch = m_outputMap->patch(m_universe);
     if (outputPatch != NULL)
         outputPatch->setDMXZeroBased(set);
 

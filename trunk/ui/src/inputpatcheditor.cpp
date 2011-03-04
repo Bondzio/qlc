@@ -558,7 +558,7 @@ void InputPatchEditor::slotProfileItemChanged(QTreeWidgetItem* item)
 void InputPatchEditor::slotAddProfileClicked()
 {
     /* Create a new input profile and start editing it */
-    InputProfileEditor ite(this, NULL);
+    InputProfileEditor ite(this, NULL, m_inputMap);
 edit:
     if (ite.exec() == QDialog::Accepted)
     {
@@ -687,7 +687,7 @@ void InputPatchEditor::slotEditProfileClicked()
         return;
 
     /* Edit the profile and update the item if OK was pressed */
-    InputProfileEditor ite(this, profile);
+    InputProfileEditor ite(this, profile, m_inputMap);
 edit:
     if (ite.exec() == QDialog::Rejected)
         return;

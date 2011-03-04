@@ -40,9 +40,6 @@
 #include "inputprofileeditor.h"
 #include "inputmap.h"
 #include "apputil.h"
-#include "app.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "inputprofileeditor/geometry"
 
@@ -55,11 +52,15 @@ extern App* _app;
  * Initialization
  ****************************************************************************/
 
-InputProfileEditor::InputProfileEditor(QWidget* parent, QLCInputProfile* profile)
+InputProfileEditor::InputProfileEditor(QWidget* parent, QLCInputProfile* profile,
+                                       InputMap* inputMap)
     : QDialog(parent)
+    , m_inputMap(inputMap)
     , m_wizardActive(false)
     , m_latestItem(NULL)
 {
+    Q_ASSERT(inputMap != NULL);
+
     setupUi(this);
 
     /* Connect the buttons to slots */
@@ -75,7 +76,7 @@ InputProfileEditor::InputProfileEditor(QWidget* parent, QLCInputProfile* profile
             this, SLOT(slotEditClicked()));
 
     /* Listen to input data */
-    connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+    connect(inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
 
     if (profile == NULL)

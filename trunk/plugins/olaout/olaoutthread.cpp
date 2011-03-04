@@ -21,7 +21,8 @@
 */
 
 #include <QDebug>
-#include <ola/Closure.h>
+//#include <ola/Closure.h>
+#include <ola/Callback.h>
 #include "olaoutthread.h"
 
 
@@ -60,8 +61,8 @@ bool OlaOutThread::start(Priority priority)
         m_pipe = new ola::network::LoopbackSocket();
         m_pipe->Init();
 
-        m_pipe->SetOnData(ola::NewClosure(this, &OlaOutThread::new_pipe_data));
-        m_pipe->SetOnClose(ola::NewSingleClosure(this, &OlaOutThread::pipe_closed));
+        m_pipe->SetOnData(ola::NewCallback(this, &OlaOutThread::new_pipe_data));
+        m_pipe->SetOnClose(ola::NewSingleCallback(this, &OlaOutThread::pipe_closed));
         m_ss->AddSocket(m_pipe);
     }
 

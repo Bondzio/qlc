@@ -30,6 +30,7 @@ class QTreeWidgetItem;
 class QLCInputProfile;
 class QLCInputChannel;
 class InputPatch;
+class InputMap;
 
 class SelectInputChannel : public QDialog, public Ui_SelectInputChannel
 {
@@ -40,11 +41,14 @@ class SelectInputChannel : public QDialog, public Ui_SelectInputChannel
      * Initialization
      ********************************************************************/
 public:
-    SelectInputChannel(QWidget* parent);
+    SelectInputChannel(QWidget* parent, InputMap* inputMap);
     ~SelectInputChannel();
 
 protected slots:
     void accept();
+
+private:
+    InputMap* m_inputMap;
 
     /********************************************************************
      * Selection

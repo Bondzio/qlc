@@ -299,7 +299,7 @@ void VCSliderProperties::slotInputValueChanged(quint32 universe,
 
 void VCSliderProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputUniverse = sic.universe();

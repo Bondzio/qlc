@@ -186,7 +186,7 @@ void VCCueListProperties::slotNextDetachClicked()
 
 void VCCueListProperties::slotNextChooseInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_nextInputUniverse = sic.universe();
@@ -260,7 +260,7 @@ void VCCueListProperties::slotPreviousDetachClicked()
 
 void VCCueListProperties::slotPreviousChooseInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_previousInputUniverse = sic.universe();

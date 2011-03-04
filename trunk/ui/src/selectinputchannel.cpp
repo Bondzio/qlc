@@ -30,9 +30,6 @@
 #include "selectinputchannel.h"
 #include "inputpatch.h"
 #include "inputmap.h"
-#include "app.h"
-
-extern App* _app;
 
 #define KColumnName     0
 #define KColumnUniverse 1
@@ -42,8 +39,12 @@ extern App* _app;
  * Initialization
  ****************************************************************************/
 
-SelectInputChannel::SelectInputChannel(QWidget* parent) : QDialog(parent)
+SelectInputChannel::SelectInputChannel(QWidget* parent, InputMap* inputMap)
+    : QDialog(parent)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(inputMap != NULL);
+
     m_universe = InputMap::invalidUniverse();
     m_channel = InputMap::invalidChannel();
 
@@ -91,10 +92,10 @@ void SelectInputChannel::fillTree()
     chItem->setText(KColumnChannel, QString("%1")
                     .arg(InputMap::invalidChannel()));
 
-    for (uni = 0; uni < _app->inputMap()->universes(); uni++)
+    for (uni = 0; uni < m_inputMap->universes(); uni++)
     {
         /* Get the patch associated to the current universe */
-        patch = _app->inputMap()->patch(uni);
+        patch = m_inputMap->patch(uni);
         Q_ASSERT(patch != NULL);
 
         /* Make an item for each universe */

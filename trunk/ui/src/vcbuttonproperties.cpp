@@ -174,7 +174,7 @@ void VCButtonProperties::slotInputValueChanged(quint32 universe,
 
 void VCButtonProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputUniverse = sic.universe();

@@ -174,7 +174,7 @@ void VCPropertiesEditor::slotFadeInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseFadeInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setFadeInputSource(sic.universe(), sic.channel());
@@ -240,7 +240,7 @@ void VCPropertiesEditor::slotHoldInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseHoldInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setHoldInputSource(sic.universe(), sic.channel());
@@ -313,7 +313,7 @@ void VCPropertiesEditor::slotGrandMasterInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseGrandMasterInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setGrandMasterInputSource(sic.universe(), sic.channel());
@@ -370,7 +370,7 @@ void VCPropertiesEditor::slotBlackoutInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseBlackoutInputClicked()
 {
-    SelectInputChannel sic(this);
+    SelectInputChannel sic(this, _app->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setBlackoutInputSource(sic.universe(), sic.channel());

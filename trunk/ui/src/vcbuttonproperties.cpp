@@ -46,12 +46,15 @@
 #include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
-VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent)
-        : QDialog(parent)
+VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent,
+                                       Doc* doc, InputMap* inputMap)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
 {
     Q_ASSERT(button != NULL);
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
 
@@ -119,7 +122,7 @@ void VCButtonProperties::slotSetFunction(quint32 fid)
 
     m_function = fid;
 
-    func = _app->doc()->function(m_function);
+    func = m_doc->function(m_function);
     if (func == NULL)
     {
         m_functionEdit->setText(tr("No function"));
@@ -152,13 +155,13 @@ void VCButtonProperties::slotAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(_app->inputMap(),
+        connect(m_inputMap,
                 SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
+        disconnect(m_inputMap,
                    SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
@@ -174,7 +177,7 @@ void VCButtonProperties::slotInputValueChanged(quint32 universe,
 
 void VCButtonProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputUniverse = sic.universe();
@@ -200,7 +203,7 @@ void VCButtonProperties::updateInputSource()
     }
     else
     {
-        patch = _app->inputMap()->patch(m_inputUniverse);
+        patch = m_inputMap->patch(m_inputUniverse);
         if (patch == NULL || patch->plugin() == NULL)
         {
             /* There is no patch for the given universe */

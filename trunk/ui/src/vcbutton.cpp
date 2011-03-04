@@ -148,7 +148,7 @@ bool VCButton::copyFrom(VCWidget* widget)
 
 void VCButton::editProperties()
 {
-    VCButtonProperties prop(this, _app);
+    VCButtonProperties prop(this, _app, _app->doc(), _app->inputMap());
     if (prop.exec() == QDialog::Accepted)
         _app->doc()->setModified();
 }

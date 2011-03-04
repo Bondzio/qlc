@@ -26,12 +26,14 @@
 
 #include "ui_addvcbuttonmatrix.h"
 
+class Doc;
+
 class AddVCButtonMatrix : public QDialog, public Ui_AddVCButtonMatrix
 {
     Q_OBJECT
 
 public:
-    AddVCButtonMatrix(QWidget* parent);
+    AddVCButtonMatrix(QWidget* parent, Doc* doc);
     ~AddVCButtonMatrix();
 
 public:
@@ -77,6 +79,7 @@ private:
     quint32 m_verticalCount;
     quint32 m_buttonSize;
     FrameStyle m_frameStyle;
+    Doc* m_doc;
 };
 
 #endif

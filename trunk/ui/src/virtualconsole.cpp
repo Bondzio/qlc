@@ -748,7 +748,7 @@ void VirtualConsole::slotAddButtonMatrix()
     if (parent == NULL)
         return;
 
-    AddVCButtonMatrix abm(this);
+    AddVCButtonMatrix abm(this, _app->doc());
     if (abm.exec() == QDialog::Rejected)
         return;
 

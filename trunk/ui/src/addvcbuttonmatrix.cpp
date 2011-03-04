@@ -26,10 +26,7 @@
 #include "functionselection.h"
 #include "vcbutton.h"
 #include "function.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define KColumnFunction 0
 #define KColumnType     1
@@ -39,8 +36,12 @@ extern App* _app;
 #define BUTTON_SIZE "addvcbuttonmatrix/buttonsize"
 #define FRAME_STYLE "addvcbuttonmatrix/framestyle"
 
-AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent) : QDialog(parent)
+AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
+
     QSettings settings;
     QVariant var;
 
@@ -144,7 +145,7 @@ void AddVCButtonMatrix::accept()
 
 void AddVCButtonMatrix::addFunction(quint32 fid)
 {
-    Function* function = _app->doc()->function(fid);
+    Function* function = m_doc->function(fid);
     if (function == NULL)
         return;
 

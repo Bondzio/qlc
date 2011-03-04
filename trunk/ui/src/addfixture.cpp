@@ -42,7 +42,6 @@
 #include "outputmap.h"
 #include "apputil.h"
 #include "doc.h"
-#include "app.h"
 
 #define SETTINGS_GEOMETRY "addfixture/geometry"
 

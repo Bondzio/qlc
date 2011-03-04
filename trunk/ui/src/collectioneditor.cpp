@@ -33,21 +33,20 @@
 #include "function.h"
 #include "fixture.h"
 #include "apputil.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "collectioneditor/geometry"
 
 #define KColumnFunction 0
 #define KColumnFunctionID 1
 
-CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
-        : QDialog(parent)
+CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_original(fc)
 {
+    Q_ASSERT(doc != NULL);
     Q_ASSERT(fc != NULL);
-    m_original = fc;
 
     setupUi(this);
 
@@ -56,7 +55,7 @@ CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc)
     connect(m_add, SIGNAL(clicked()), this, SLOT(slotAdd()));
     connect(m_remove, SIGNAL(clicked()), this, SLOT(slotRemove()));
 
-    m_fc = new Collection(_app->doc());
+    m_fc = new Collection(doc);
     m_fc->copyFrom(fc);
     Q_ASSERT(m_fc != NULL);
 
@@ -120,7 +119,7 @@ void CollectionEditor::accept()
 {
     m_fc->setName(m_nameEdit->text());
     m_original->copyFrom(m_fc);
-    _app->doc()->setModified();
+    m_doc->setModified();
 
     QDialog::accept();
 }
@@ -138,7 +137,7 @@ void CollectionEditor::updateFunctionList()
         QString s;
 
         fid = it.next();
-        function = _app->doc()->function(fid);
+        function = m_doc->function(fid);
         Q_ASSERT(function != NULL);
 
         item = new QTreeWidgetItem(m_tree);

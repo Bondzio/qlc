@@ -29,22 +29,24 @@
 #include "ui_efxeditor.h"
 #include "efx.h"
 
+class Doc;
 class QPaintEvent;
 class EFXPreviewArea;
 
 class EFXEditor : public QDialog, public Ui_EFXEditor
 {
     Q_OBJECT
+    Q_DISABLE_COPY(EFXEditor)
 
     /*********************************************************************
      * Initialization
      *********************************************************************/
 public:
-    EFXEditor(QWidget* parent, EFX* efx);
+    EFXEditor(QWidget* parent, EFX* efx, Doc* doc);
     ~EFXEditor();
 
 private:
-    Q_DISABLE_COPY(EFXEditor)
+    Doc* m_doc;
 
 protected:
     void initGeneralPage();

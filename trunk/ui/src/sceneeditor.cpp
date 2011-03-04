@@ -37,10 +37,7 @@
 #include "sceneeditor.h"
 #include "fixture.h"
 #include "scene.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define KColumnName         0
 #define KColumnManufacturer 1
@@ -57,17 +54,20 @@ extern App* _app;
 #define GREEN "green"
 #define BLUE "blue"
 
-SceneEditor::SceneEditor(QWidget* parent, Scene* scene) : QDialog(parent)
+SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_original(scene)
 {
+    Q_ASSERT(doc != NULL);
     Q_ASSERT(scene != NULL);
-    m_original = scene;
 
     m_currentTab = KTabGeneral;
 
     /* Create a copy of the original scene so that we can freely modify it.
        Keep also a pointer to the original so that we can move the
        contents from the copied chaser to the original when OK is clicked */
-    m_scene = new Scene(_app->doc());
+    m_scene = new Scene(doc);
     m_scene->copyFrom(scene);
     Q_ASSERT(m_scene != NULL);
 
@@ -151,7 +151,7 @@ void SceneEditor::init()
 
         if (fixtureItem(scv.fxi) == NULL)
         {
-            Fixture* fixture = _app->doc()->fixture(scv.fxi);
+            Fixture* fixture = m_doc->fixture(scv.fxi);
             if (fixture == NULL)
                 continue;
 
@@ -175,7 +175,7 @@ void SceneEditor::setSceneValue(const SceneValue& scv)
     FixtureConsole* fc;
     Fixture* fixture;
 
-    fixture = _app->doc()->fixture(scv.fxi);
+    fixture = m_doc->fixture(scv.fxi);
     Q_ASSERT(fixture != NULL);
 
     fc = fixtureConsole(fixture);
@@ -350,7 +350,7 @@ void SceneEditor::slotColorTool()
     if (fc == NULL)
         return;
 
-    Fixture* fxi = _app->doc()->fixture(fc->fixture());
+    Fixture* fxi = m_doc->fixture(fc->fixture());
     Q_ASSERT(fxi != NULL);
 
     QSet <quint32> cyan = fxi->channels(CYAN, Qt::CaseInsensitive, QLCChannel::Intensity);
@@ -433,7 +433,7 @@ bool SceneEditor::isColorToolAvailable()
     if (fc == NULL)
         return false;
 
-    fxi = _app->doc()->fixture(fc->fixture());
+    fxi = m_doc->fixture(fc->fixture());
     Q_ASSERT(fxi != NULL);
 
     cyan = fxi->channel(CYAN, Qt::CaseInsensitive, QLCChannel::Intensity);
@@ -490,7 +490,7 @@ QList <Fixture*> SceneEditor::selectedFixtures() const
 
         item = it.next();
         fxi_id = item->text(KColumnID).toInt();
-        fixture = _app->doc()->fixture(fxi_id);
+        fixture = m_doc->fixture(fxi_id);
         Q_ASSERT(fixture != NULL);
 
         list.append(fixture);
@@ -549,7 +549,7 @@ void SceneEditor::slotAddFixtureClicked()
     }
 
     /* Get a list of new fixtures to add to the scene */
-    FixtureSelection fs(this, _app->doc(), true, disabled);
+    FixtureSelection fs(this, m_doc, true, disabled);
     if (fs.exec() == QDialog::Accepted)
     {
         Fixture* fixture;
@@ -557,7 +557,7 @@ void SceneEditor::slotAddFixtureClicked()
         QListIterator <quint32> it(fs.selection);
         while (it.hasNext() == true)
         {
-            fixture = _app->doc()->fixture(it.next());
+            fixture = m_doc->fixture(it.next());
             Q_ASSERT(fixture != NULL);
 
             addFixtureItem(fixture);

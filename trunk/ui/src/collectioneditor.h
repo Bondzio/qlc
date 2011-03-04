@@ -28,17 +28,19 @@
 
 class FunctionSelection;
 class Collection;
+class Doc;
 
 class CollectionEditor : public QDialog, public Ui_CollectionEditor
 {
     Q_OBJECT
+    Q_DISABLE_COPY(CollectionEditor)
 
 public:
-    CollectionEditor(QWidget* parent, Collection* fc);
+    CollectionEditor(QWidget* parent, Collection* fc, Doc* doc);
     ~CollectionEditor();
 
 private:
-    Q_DISABLE_COPY(CollectionEditor)
+    Doc* m_doc;
 
 protected slots:
     void slotNameEdited(const QString& text);

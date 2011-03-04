@@ -34,10 +34,7 @@
 #include "apputil.h"
 #include "fixture.h"
 #include "chaser.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "chasereditor/geometry"
 
@@ -45,9 +42,13 @@ extern App* _app;
 #define KColumnFunction   1
 #define KColumnFunctionID 2
 
-ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser) : QDialog(parent)
+ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_original(chaser)
 {
     Q_ASSERT(chaser != NULL);
+    Q_ASSERT(doc != NULL);
 
     setupUi(this);
 
@@ -65,10 +66,9 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser) : QDialog(parent)
     /* Create a copy of the original chaser so that we can freely modify
        it and keep a pointer to the original so that we can move the
        contents from the copied chaser to the original when OK is clicked */
-    m_chaser = new Chaser(_app->doc());
+    m_chaser = new Chaser(m_doc);
     m_chaser->copyFrom(chaser);
     Q_ASSERT(m_chaser != NULL);
-    m_original = chaser;
 
     /* Name edit */
     m_nameEdit->setText(m_chaser->name());
@@ -145,7 +145,7 @@ void ChaserEditor::updateStepList(int selectIndex)
         QString str;
 
         fid = it.next();
-        function = _app->doc()->function(fid);
+        function = m_doc->function(fid);
         Q_ASSERT(function != NULL);
 
         item = new QTreeWidgetItem(m_tree);
@@ -270,6 +270,6 @@ void ChaserEditor::accept()
     m_original->copyFrom(m_chaser);
 
     /* Mark doc as modified, close and accept */
-    _app->doc()->setModified();
+    m_doc->setModified();
     QDialog::accept();
 }

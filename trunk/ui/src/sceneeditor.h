@@ -26,12 +26,12 @@
 #include <QList>
 #include <QMap>
 
-
 #include "ui_sceneeditor.h"
 #include "fixture.h"
 #include "scene.h"
 
 class QAction;
+class Doc;
 
 class SceneEditor : public QDialog, public Ui_SceneEditor
 {
@@ -42,8 +42,11 @@ class SceneEditor : public QDialog, public Ui_SceneEditor
      * Initialization
      *********************************************************************/
 public:
-    SceneEditor(QWidget* parent, Scene* scene);
+    SceneEditor(QWidget* parent, Scene* scene, Doc* doc);
     ~SceneEditor();
+
+private:
+    Doc* m_doc;
 
 protected:
     void init();

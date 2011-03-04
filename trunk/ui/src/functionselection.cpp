@@ -332,23 +332,22 @@ int FunctionSelection::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function));
+        SceneEditor editor(this, qobject_cast<Scene*> (function), _app->doc());
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function));
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), _app->doc());
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this,
-                                qobject_cast<Collection*> (function));
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), _app->doc());
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)
     {
-        EFXEditor editor(this, qobject_cast<EFX*> (function));
+        EFXEditor editor(this, qobject_cast<EFX*> (function), _app->doc());
         result = editor.exec();
     }
     else

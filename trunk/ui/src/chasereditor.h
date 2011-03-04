@@ -25,19 +25,22 @@
 #include <QDialog>
 #include "ui_chasereditor.h"
 
+class Doc;
 class Chaser;
 class FunctionSelection;
 
 class ChaserEditor : public QDialog, public Ui_ChaserEditor
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ChaserEditor)
 
 public:
-    ChaserEditor(QWidget* parent, Chaser* chaser);
+    ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc);
     ~ChaserEditor();
 
 private:
-    Q_DISABLE_COPY(ChaserEditor)
+    /** The document that owns the Chaser */
+    Doc* m_doc;
 
 protected:
     /** Fill known buses to the bus combo and select current */

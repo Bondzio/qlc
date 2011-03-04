@@ -40,10 +40,7 @@
 #include "efxeditor.h"
 #include "fixture.h"
 #include "apputil.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "efxeditor/geometry"
 
@@ -58,17 +55,20 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-EFXEditor::EFXEditor(QWidget* parent, EFX* efx) : QDialog(parent)
+EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_original(efx)
 {
-    setupUi(this);
-
+    Q_ASSERT(doc != NULL);
     Q_ASSERT(efx != NULL);
-    m_original = efx;
+
+    setupUi(this);
 
     /* Create a copy of the original scene so that we can freely modify it.
        Keep also a pointer to the original so that we can move the
        contents from the copied chaser to the original when OK is clicked */
-    m_efx = new EFX(_app->doc());
+    m_efx = new EFX(doc);
     m_efx->copyFrom(efx);
     Q_ASSERT(m_efx != NULL);
 
@@ -307,7 +307,7 @@ void EFXEditor::addFixtureItem(EFXFixture* ef)
 
     Q_ASSERT(ef != NULL);
 
-    fxi = _app->doc()->fixture(ef->fixture());
+    fxi = m_doc->fixture(ef->fixture());
     if (fxi == NULL)
         return;
 
@@ -382,7 +382,7 @@ void EFXEditor::slotAddFixtureClicked()
     }
 
     /* Disable all fixtures that don't have pan OR tilt channels */
-    QListIterator <Fixture*> fxit(_app->doc()->fixtures());
+    QListIterator <Fixture*> fxit(m_doc->fixtures());
     while (fxit.hasNext() == true)
     {
         Fixture* fixture(fxit.next());
@@ -407,7 +407,7 @@ void EFXEditor::slotAddFixtureClicked()
     }
 
     /* Get a list of new fixtures to add to the scene */
-    FixtureSelection fs(this, _app->doc(), true, disabled);
+    FixtureSelection fs(this, m_doc, true, disabled);
     if (fs.exec() == QDialog::Accepted)
     {
         QListIterator <quint32> it(fs.selection);

@@ -24,13 +24,11 @@
 
 #include <QDialog>
 
-#include "qlcinputprofile.h"
-
 #include "ui_inputpatcheditor.h"
+#include "qlcinputprofile.h"
 #include "inputpatch.h"
 
 class QStringList;
-class InputPatch;
 class InputMap;
 
 class InputPatchEditor : public QDialog, public Ui_InputPatchEditor
@@ -42,10 +40,17 @@ class InputPatchEditor : public QDialog, public Ui_InputPatchEditor
      * Initialization
      ************************************************************************/
 public:
-    InputPatchEditor(QWidget* parent, quint32 universe, const InputPatch* patch);
+    /**
+     * Create a new input patch editor for the given universe.
+     *
+     * @param widget Parent widget
+     * @param universe The universe whose settings are being edited
+     * @param inputMap The input map object that manages input plugin data
+     */
+    InputPatchEditor(QWidget* parent, quint32 universe, InputMap* inputMap);
     ~InputPatchEditor();
 
-protected slots:
+public slots:
     void reject();
     void accept();
 
@@ -64,6 +69,9 @@ protected:
 
     bool m_originalFeedbackEnabled;
     bool m_currentFeedbackEnabled;
+
+private:
+    InputMap* m_inputMap;
 
     /************************************************************************
      * Mapping page

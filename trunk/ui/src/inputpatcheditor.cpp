@@ -43,9 +43,6 @@
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "apputil.h"
-#include "app.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "inputpatcheditor/geometry"
 
@@ -56,19 +53,21 @@ extern App* _app;
 /* Profile column structure */
 #define KProfileColumnName 0
 
-InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe,
-                                   const InputPatch* inputPatch)
-        : QDialog(parent)
+InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* inputMap)
+    : QDialog(parent)
+    , m_universe(universe)
+    , m_inputMap(inputMap)
 {
-    Q_ASSERT(universe < _app->inputMap()->universes());
-    Q_ASSERT(inputPatch != NULL);
+    Q_ASSERT(universe < m_inputMap->universes());
+    Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
     m_infoBrowser->setOpenExternalLinks(true);
-
-    m_universe = universe;
     setWindowTitle(tr("Mapping properties for input universe %1")
                    .arg(m_universe + 1));
+
+    InputPatch* inputPatch = m_inputMap->patch(universe);
+    Q_ASSERT(inputPatch != NULL);
 
     /* Copy these so they can be applied if the user cancels */
     m_originalPluginName = inputPatch->pluginName();
@@ -91,7 +90,7 @@ InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe,
     m_mapTree->setCurrentItem(m_mapTree->topLevelItem(0));
 
     /* Listen to plugin configuration changes */
-    connect(_app->inputMap(),
+    connect(m_inputMap,
             SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged(const QString&)));
 
@@ -110,7 +109,7 @@ InputPatchEditor::~InputPatchEditor()
 
 void InputPatchEditor::reject()
 {
-    _app->inputMap()->setPatch(m_universe, m_originalPluginName,
+    m_inputMap->setPatch(m_universe, m_originalPluginName,
                                m_originalInput, m_originalFeedbackEnabled,
                                m_originalProfileName);
 
@@ -120,7 +119,7 @@ void InputPatchEditor::reject()
 void InputPatchEditor::accept()
 {
     if (m_editorUniverseRadio->isChecked() == true)
-        _app->inputMap()->setEditorUniverse(m_universe);
+        m_inputMap->setEditorUniverse(m_universe);
 
     QDialog::accept();
 }
@@ -171,7 +170,7 @@ void InputPatchEditor::setupMappingPage()
     m_feedbackEnabledCheck->setChecked(m_currentFeedbackEnabled);
 
     /* Set checked if the current universe is also the editor universe */
-    if (_app->inputMap()->editorUniverse() == m_universe)
+    if (m_inputMap->editorUniverse() == m_universe)
         m_editorUniverseRadio->setChecked(true);
 }
 
@@ -197,7 +196,7 @@ void InputPatchEditor::fillMappingTree()
         pitem->setCheckState(KMapColumnName, Qt::Unchecked);
 
     /* Go thru available plugins and put them as the tree's root nodes. */
-    QStringListIterator pit(_app->inputMap()->pluginNames());
+    QStringListIterator pit(m_inputMap->pluginNames());
     while (pit.hasNext() == true)
         fillPluginItem(pit.next(), new QTreeWidgetItem(m_mapTree));
 
@@ -222,7 +221,7 @@ void InputPatchEditor::fillPluginItem(const QString& pluginName, QTreeWidgetItem
     /* Go thru available inputs provided by each plugin and put
        them as their parent plugin's leaf nodes. */
     quint32 i = 0;
-    QStringListIterator iit(_app->inputMap()->pluginInputs(pluginName));
+    QStringListIterator iit(m_inputMap->pluginInputs(pluginName));
     while (iit.hasNext() == true)
     {
         iitem = new QTreeWidgetItem(pitem);
@@ -240,7 +239,7 @@ void InputPatchEditor::fillPluginItem(const QString& pluginName, QTreeWidgetItem
         else
         {
             iitem->setCheckState(KMapColumnName, Qt::Unchecked);
-            quint32 uni = _app->inputMap()->mapping(pluginName, i);
+            quint32 uni = m_inputMap->mapping(pluginName, i);
             if (uni != InputMap::invalidUniverse())
             {
                 /* If a mapping exists for this plugin and
@@ -276,7 +275,7 @@ void InputPatchEditor::slotMapCurrentItemChanged(QTreeWidgetItem* item)
 
     if (item == NULL)
     {
-        info = _app->inputMap()->pluginStatus(QString(), 0);
+        info = m_inputMap->pluginStatus(QString(), 0);
         configurable = false;
     }
     else
@@ -297,8 +296,8 @@ void InputPatchEditor::slotMapCurrentItemChanged(QTreeWidgetItem* item)
             input = QLCInPlugin::invalidInput();
         }
 
-        info = _app->inputMap()->pluginStatus(plugin, input);
-        configurable = _app->inputMap()->canConfigurePlugin(plugin);
+        info = m_inputMap->pluginStatus(plugin, input);
+        configurable = m_inputMap->canConfigurePlugin(plugin);
     }
 
     /* Display information for the selected plugin or input */
@@ -361,7 +360,7 @@ void InputPatchEditor::slotMapItemChanged(QTreeWidgetItem* item)
 
     /* Apply the patch immediately so that input data can be used in the
        input profile editor */
-    _app->inputMap()->setPatch(m_universe, m_currentPluginName,
+    m_inputMap->setPatch(m_universe, m_currentPluginName,
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
 }
@@ -382,12 +381,12 @@ void InputPatchEditor::slotConfigureInputClicked()
 
     /* Configure the plugin. Changes in plugin outputs are handled with
        slotPluginConfigurationChanged(). */
-    _app->inputMap()->configurePlugin(plugin);
+    m_inputMap->configurePlugin(plugin);
 }
 
 void InputPatchEditor::slotReconnectClicked()
 {
-    InputPatch* inputPatch = _app->inputMap()->patch(m_universe);
+    InputPatch* inputPatch = m_inputMap->patch(m_universe);
     if (inputPatch != NULL)
         inputPatch->set(inputPatch->plugin(), inputPatch->input(),
                         inputPatch->feedbackEnabled(), inputPatch->profile());
@@ -407,7 +406,7 @@ void InputPatchEditor::slotFeedbackToggled(bool enable)
 
     /* Apply the patch immediately so that input data can be used in the
        input profile editor */
-    _app->inputMap()->setPatch(m_universe, m_currentPluginName,
+    m_inputMap->setPatch(m_universe, m_currentPluginName,
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
 }
@@ -480,7 +479,7 @@ void InputPatchEditor::fillProfileTree()
     updateProfileItem(KInputNone, item);
 
     /* Insert available input profiles to the tree */
-    QStringListIterator it(_app->inputMap()->profileNames());
+    QStringListIterator it(m_inputMap->profileNames());
     while (it.hasNext() == true)
     {
         item = new QTreeWidgetItem(m_profileTree);
@@ -551,7 +550,7 @@ void InputPatchEditor::slotProfileItemChanged(QTreeWidgetItem* item)
     m_currentProfileName = item->text(KProfileColumnName);
 
     /* Apply the patch immediately */
-    _app->inputMap()->setPatch(m_universe, m_currentPluginName,
+    m_inputMap->setPatch(m_universe, m_currentPluginName,
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
 }
@@ -604,7 +603,7 @@ edit:
         else
         {
             /* Add the new profile to input map */
-            _app->inputMap()->addProfile(profile);
+            m_inputMap->addProfile(profile);
 
             /* Add the new profile to our tree widget */
             QTreeWidgetItem* item;
@@ -628,7 +627,7 @@ void InputPatchEditor::slotRemoveProfileClicked()
 
     /* Get the currently selected profile object by its name */
     name = item->text(KProfileColumnName);
-    profile = _app->inputMap()->profile(name);
+    profile = m_inputMap->profile(name);
     if (profile == NULL)
         return;
 
@@ -656,7 +655,7 @@ void InputPatchEditor::slotRemoveProfileClicked()
 
             /* Successful deletion. Remove the profile from
                input map and our tree widget */
-            _app->inputMap()->removeProfile(name);
+            m_inputMap->removeProfile(name);
             delete item;
         }
         else
@@ -683,7 +682,7 @@ void InputPatchEditor::slotEditProfileClicked()
 
     /* Get the currently selected profile by its name */
     name = item->text(KProfileColumnName);
-    profile = _app->inputMap()->profile(name);
+    profile = m_inputMap->profile(name);
     if (profile == NULL)
         return;
 

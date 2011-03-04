@@ -262,10 +262,7 @@ void InputManager::slotEditClicked()
         return;
 
     quint32 universe = item->text(KColumnUniverse).toInt() - 1;
-    InputPatch* patch = _app->inputMap()->patch(universe);
-    Q_ASSERT(patch != NULL);
-
-    InputPatchEditor ipe(this, universe, patch);
+    InputPatchEditor ipe(this, universe, _app->inputMap());
     if (ipe.exec() == QDialog::Accepted)
         updateTree();
 }

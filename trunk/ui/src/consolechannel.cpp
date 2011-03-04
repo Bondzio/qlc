@@ -519,12 +519,17 @@ void ConsoleChannel::slotFixtureChanged(quint32 fixtureID)
     m_valueChangedMutex.lock();
 
     const QLCChannel* qlcch = m_fixture->channel(m_channel);
-    Q_ASSERT(qlcch != NULL);
-
-    // Store group and absolute address for writeDMX since the Fixture and
-    // QLCChannel instances can get deleted while context is in writeDMX().
-    m_group = qlcch->group();
-    m_universeAddress = m_fixture->universeAddress() + m_channel;
+    if (qlcch == NULL)
+    {
+        this->deleteLater();
+    }
+    else
+    {
+        // Store group and absolute address for writeDMX since the Fixture and
+        // QLCChannel instances can get deleted while context is in writeDMX().
+        m_group = qlcch->group();
+        m_universeAddress = m_fixture->universeAddress() + m_channel;
+    }
 
     m_valueChangedMutex.unlock();
 }

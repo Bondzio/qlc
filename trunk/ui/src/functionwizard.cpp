@@ -42,10 +42,11 @@
 #define KColumnCaps 1
 #define KColumnID   2
 
-extern App* _app;
-
-FunctionWizard::FunctionWizard(QWidget* parent) : QDialog(parent)
+FunctionWizard::FunctionWizard(QWidget* parent, Doc* doc)
+    : QDialog(parent)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
     setupUi(this);
     m_fixtureTree->sortItems(KColumnName, Qt::AscendingOrder);
 }
@@ -56,7 +57,7 @@ FunctionWizard::~FunctionWizard()
 
 void FunctionWizard::slotAddClicked()
 {
-    FixtureSelection fs(this, _app->doc(), true, fixtureIds());
+    FixtureSelection fs(this, m_doc, true, fixtureIds());
     if (fs.exec() == QDialog::Accepted)
     {
         QListIterator <quint32> it(fs.selection);
@@ -74,7 +75,7 @@ void FunctionWizard::slotRemoveClicked()
 
 void FunctionWizard::accept()
 {
-    PaletteGenerator pal(_app->doc(), fixtures());
+    PaletteGenerator pal(m_doc, fixtures());
 
     if (m_coloursCheck->isChecked() == true)
         pal.createColours();
@@ -85,7 +86,7 @@ void FunctionWizard::accept()
 
     if (m_intensityCheck->isChecked() == true)
     {
-        IntensityGenerator gen(_app->doc(), fixtures());
+        IntensityGenerator gen(m_doc, fixtures());
         gen.createOddEvenChaser();
         gen.createFullZeroChaser();
         gen.createSequenceChasers();
@@ -101,7 +102,7 @@ void FunctionWizard::accept()
 
 void FunctionWizard::addFixture(quint32 fxi_id)
 {
-    Fixture* fxi = _app->doc()->fixture(fxi_id);
+    Fixture* fxi = m_doc->fixture(fxi_id);
     Q_ASSERT(fxi != NULL);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(m_fixtureTree);
@@ -133,7 +134,7 @@ QList <Fixture*> FunctionWizard::fixtures() const
         Q_ASSERT(item != NULL);
 
         quint32 id = item->data(KColumnID, Qt::UserRole).toInt();
-        Fixture* fxi = _app->doc()->fixture(id);
+        Fixture* fxi = m_doc->fixture(id);
         Q_ASSERT(fxi != NULL);
 
         list << fxi;

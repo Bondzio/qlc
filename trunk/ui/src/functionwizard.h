@@ -30,19 +30,23 @@
 class QLCChannel;
 class Fixture;
 class Scene;
+class Doc;
 
 class FunctionWizard : public QDialog, public Ui_FunctionWizard
 {
     Q_OBJECT
 
 public:
-    FunctionWizard(QWidget* parent = 0);
+    FunctionWizard(QWidget* parent, Doc* doc);
     ~FunctionWizard();
 
 protected slots:
     void slotAddClicked();
     void slotRemoveClicked();
     void accept();
+
+private:
+    Doc* m_doc;
 
     /********************************************************************
      * Fixtures

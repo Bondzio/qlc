@@ -418,7 +418,7 @@ void FunctionManager::slotAddEFX()
 
 void FunctionManager::slotWizard()
 {
-    FunctionWizard fw(this);
+    FunctionWizard fw(this, _app->doc());
     if (fw.exec() == QDialog::Accepted)
         updateTree();
 }

@@ -739,7 +739,7 @@ void EFXPreviewArea::paintEvent(QPaintEvent* e)
         m_iter++;
 
     /* Plain points with highlight color */
-    color = palette().color(QPalette::Highlight);
+    color = palette().color(QPalette::Text);
     pen.setColor(color);
     painter.setPen(pen);
     painter.drawPolygon(m_points);

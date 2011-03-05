@@ -32,6 +32,7 @@ class QToolBar;
 class BusManager : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BusManager)
 
     /*********************************************************************
      * Initialization
@@ -43,13 +44,10 @@ public:
     }
 
     /** Create a BusManager with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    static void createAndShow(QWidget* parent);
 
     /** Normal public destructor */
     ~BusManager();
-
-private:
-    Q_DISABLE_COPY(BusManager)
 
 protected:
     /** Protected constructor to prevent multiple instances. */

@@ -35,15 +35,12 @@
 
 #include "busmanager.h"
 #include "apputil.h"
-#include "app.h"
 #include "bus.h"
 
 #define SETTINGS_GEOMETRY "busmanager/geometry"
 
 #define KColumnID   0
 #define KColumnName 1
-
-extern App* _app;
 
 BusManager* BusManager::s_instance = NULL;
 
@@ -91,50 +88,47 @@ BusManager::~BusManager()
     BusManager::s_instance = NULL;
 }
 
-void BusManager::create(QWidget* parent)
+void BusManager::createAndShow(QWidget* parent)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
-
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new BusManager(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new BusManager(parent);
-    window = area->addSubWindow(s_instance);
-#endif
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/bus.png"));
-    window->setWindowTitle(tr("Bus Manager"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-    window->show();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
+    if (s_instance == NULL)
     {
-        window->restoreGeometry(var.toByteArray());
-        AppUtil::ensureWidgetIsVisible(window);
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new BusManager(parent, Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new BusManager(sub);
+        window = area->addSubWindow(sub);
+    #endif
+
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/bus.png"));
+        window->setWindowTitle(tr("Bus Manager"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
+        window->show();
+
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+        {
+            window->restoreGeometry(var.toByteArray());
+            AppUtil::ensureWidgetIsVisible(window);
+        }
     }
     else
     {
-        /* Backwards compatibility */
-        QVariant w = settings.value("busmanager/width");
-        QVariant h = settings.value("busmanager/height");
-        if (w.isValid() == true && h.isValid() == true)
-            window->resize(w.toInt(), h.toInt());
-        else
-            window->resize(300, 400);
     }
+
+    window->show();
+    window->raise();
 }
 
 /****************************************************************************

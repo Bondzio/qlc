@@ -1162,7 +1162,13 @@ void App::slotFunctionManager()
 
 void App::slotBusManager()
 {
-    BusManager::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    BusManager::createAndShow(parent);
 }
 
 void App::slotOutputManager()

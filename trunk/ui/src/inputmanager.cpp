@@ -41,7 +41,6 @@
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "apputil.h"
-#include "app.h"
 #include "doc.h"
 
 #define SETTINGS_GEOMETRY "inputmanager/geometry"
@@ -53,17 +52,18 @@
 #define KColumnEditor   4
 #define KColumnInputNum 5
 
-extern App* _app;
-
 InputManager* InputManager::s_instance = NULL;
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-InputManager::InputManager(QWidget* parent, Qt::WindowFlags flags)
+InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags flags)
     : QWidget(parent, flags)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(inputMap != NULL);
+
     /* Create a new layout for this widget */
     new QVBoxLayout(this);
 
@@ -96,16 +96,12 @@ InputManager::InputManager(QWidget* parent, Qt::WindowFlags flags)
     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotTimerTimeout()));
 
     /* Listen to input map's input data signals */
-    connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+    connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
             this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 
     /* Listen to plugin configuration changes */
-    connect(_app->inputMap(), SIGNAL(pluginConfigurationChanged(const QString&)),
+    connect(m_inputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged()));
-
-    /* Listen to mode changes to close the manager */
-    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
 
     updateTree();
 }
@@ -121,60 +117,41 @@ InputManager::~InputManager()
     InputManager::s_instance = NULL;
 }
 
-void InputManager::create(QWidget* parent)
+void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
-
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new InputManager(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new InputManager(parent);
-    window = area->addSubWindow(s_instance);
-#endif
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/input.png"));
-    window->setWindowTitle(tr("Input Manager"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-    window->show();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
+    if (s_instance == NULL)
     {
-        window->restoreGeometry(var.toByteArray());
-        AppUtil::ensureWidgetIsVisible(window);
-    }
-    else
-    {
-        QVariant w = settings.value("inputmanager/width");
-        QVariant h = settings.value("inputmanager/height");
-        if (w.isValid() == true && h.isValid() == true)
-            window->resize(w.toInt(), h.toInt());
-        else
-            window->resize(700, 300);
-    }
-}
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new InputManager(parent, inputMap, Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        MdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new InputManager(sub, inputMap);
+        window = area->addSubWindow(sub);
+    #endif
 
-void InputManager::slotModeChanged(Doc::Mode mode)
-{
-    /* Close this when entering operate mode */
-    if (mode == Doc::Operate)
-#ifdef __APPLE__
-        deleteLater();
-#else
-        parent()->deleteLater();
-#endif
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/input.png"));
+        window->setWindowTitle(tr("Input Manager"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
+        window->show();
+
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+        {
+            window->restoreGeometry(var.toByteArray());
+            AppUtil::ensureWidgetIsVisible(window);
+        }
+    }
 }
 
 /*****************************************************************************
@@ -184,9 +161,9 @@ void InputManager::slotModeChanged(Doc::Mode mode)
 void InputManager::updateTree()
 {
     m_tree->clear();
-    for (quint32 i = 0; i < _app->inputMap()->universes(); i++)
+    for (quint32 i = 0; i < m_inputMap->universes(); i++)
     {
-        InputPatch* inputPatch = _app->inputMap()->patch(i);
+        InputPatch* inputPatch = m_inputMap->patch(i);
         Q_ASSERT(inputPatch != NULL);
 
         QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
@@ -204,7 +181,7 @@ void InputManager::updateItem(QTreeWidgetItem* item, InputPatch* ip,
     item->setText(KColumnPlugin, ip->pluginName());
     item->setText(KColumnInput, ip->inputName());
     item->setText(KColumnProfile, ip->profileName());
-    if (_app->inputMap()->editorUniverse() == universe)
+    if (m_inputMap->editorUniverse() == universe)
     {
         item->setCheckState(KColumnEditor, Qt::Checked);
         item->setFlags(item->flags() & ~Qt::ItemIsUserCheckable);
@@ -256,7 +233,7 @@ void InputManager::slotEditClicked()
         return;
 
     quint32 universe = item->text(KColumnUniverse).toInt() - 1;
-    InputPatchEditor ipe(this, universe, _app->inputMap());
+    InputPatchEditor ipe(this, universe, m_inputMap);
     if (ipe.exec() == QDialog::Accepted)
         updateTree();
 }

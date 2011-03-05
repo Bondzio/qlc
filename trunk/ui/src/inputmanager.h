@@ -24,8 +24,6 @@
 
 #include <QWidget>
 
-#include "app.h"
-
 class QTreeWidgetItem;
 class QTreeWidget;
 class QToolBar;
@@ -47,20 +45,18 @@ public:
     static InputManager* instance() { return s_instance; }
 
     /** Create an instance with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    static void createAndShow(QWidget* parent, InputMap* inputMap);
 
     /** Normal public destructor */
     virtual ~InputManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    InputManager(QWidget* parent, Qt::WindowFlags flags = 0);
-
-protected slots:
-    void slotModeChanged(Doc::Mode mode);
+    InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags flags = 0);
 
 protected:
     static InputManager* s_instance;
+    InputMap* m_inputMap;
 
     /*************************************************************************
      * Tree widget

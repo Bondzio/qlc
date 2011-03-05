@@ -35,19 +35,18 @@
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "vcframe.h"
-#include "app.h"
-#include "bus.h"
-
-extern App* _app;
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-VCPropertiesEditor::VCPropertiesEditor(QWidget* parent,
-                                       const VCProperties& properties)
+VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& properties,
+                                       InputMap* inputMap)
     : QDialog(parent)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(inputMap != NULL);
+
     setupUi(this);
 
     m_properties = properties;
@@ -153,14 +152,12 @@ void VCPropertiesEditor::slotAutoDetectFadeInputToggled(bool checked)
         if (m_autoDetectHoldInputButton->isChecked() == true)
             m_autoDetectHoldInputButton->toggle();
 
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotFadeInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotFadeInputValueChanged(quint32,quint32)));
     }
 }
@@ -174,7 +171,7 @@ void VCPropertiesEditor::slotFadeInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseFadeInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setFadeInputSource(sic.universe(), sic.channel());
@@ -219,14 +216,12 @@ void VCPropertiesEditor::slotAutoDetectHoldInputToggled(bool checked)
         if (m_autoDetectFadeInputButton->isChecked() == true)
             m_autoDetectFadeInputButton->toggle();
 
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotHoldInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotHoldInputValueChanged(quint32,quint32)));
     }
 }
@@ -240,7 +235,7 @@ void VCPropertiesEditor::slotHoldInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseHoldInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setHoldInputSource(sic.universe(), sic.channel());
@@ -292,14 +287,12 @@ void VCPropertiesEditor::slotAutoDetectGrandMasterInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotGrandMasterInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotGrandMasterInputValueChanged(quint32,quint32)));
     }
 }
@@ -313,7 +306,7 @@ void VCPropertiesEditor::slotGrandMasterInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseGrandMasterInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setGrandMasterInputSource(sic.universe(), sic.channel());
@@ -349,14 +342,12 @@ void VCPropertiesEditor::slotAutoDetectBlackoutInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotBlackoutInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotBlackoutInputValueChanged(quint32,quint32)));
     }
 }
@@ -370,7 +361,7 @@ void VCPropertiesEditor::slotBlackoutInputValueChanged(quint32 universe,
 
 void VCPropertiesEditor::slotChooseBlackoutInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_properties.setBlackoutInputSource(sic.universe(), sic.channel());
@@ -411,7 +402,7 @@ bool VCPropertiesEditor::inputSourceNames(quint32 universe, quint32 channel,
         return false;
     }
 
-    InputPatch* patch = _app->inputMap()->patch(universe);
+    InputPatch* patch = m_inputMap->patch(universe);
     if (patch == NULL || patch->plugin() == NULL)
     {
         /* There is no patch for the given universe */

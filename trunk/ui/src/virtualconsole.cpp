@@ -915,7 +915,7 @@ void VirtualConsole::slotAddLabel()
 
 void VirtualConsole::slotToolsSettings()
 {
-    VCPropertiesEditor vcpe(this, s_properties);
+    VCPropertiesEditor vcpe(this, s_properties, _app->inputMap());
     if (vcpe.exec() == QDialog::Accepted)
     {
         s_properties = vcpe.properties();

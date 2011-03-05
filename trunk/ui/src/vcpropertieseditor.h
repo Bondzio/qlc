@@ -25,7 +25,6 @@
 #include <QDialog>
 
 #include "ui_vcproperties.h"
-
 #include "vcwidgetproperties.h"
 #include "universearray.h"
 #include "vcproperties.h"
@@ -33,6 +32,7 @@
 class VirtualConsole;
 class QDomDocument;
 class QDomElement;
+class InputMap;
 class VCFrame;
 
 class VCPropertiesEditor : public QDialog, public Ui_VCPropertiesEditor
@@ -44,13 +44,15 @@ class VCPropertiesEditor : public QDialog, public Ui_VCPropertiesEditor
      * Initialization
      *********************************************************************/
 public:
-    VCPropertiesEditor(QWidget* parent, const VCProperties& properties);
+    VCPropertiesEditor(QWidget* parent, const VCProperties& properties,
+                       InputMap* inputMap);
     ~VCPropertiesEditor();
 
     VCProperties properties() const;
 
 protected:
     VCProperties m_properties;
+    InputMap* m_inputMap;
 
     /*********************************************************************
      * Layout page

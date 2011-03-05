@@ -28,13 +28,16 @@
 #include "fixture.h"
 #include "app.h"
 
+class QLCFixtureDefCache;
 class QTreeWidgetItem;
 class FixtureConsole;
 class QTextBrowser;
 class QTreeWidget;
 class QTabWidget;
+class OutputMap;
 class QSplitter;
 class QAction;
+class Doc;
 
 #define KXMLQLCFixtureManager "FixtureManager"
 #define KXMLQLCFixtureManagerSplitterSize "SplitterSize"
@@ -42,6 +45,7 @@ class QAction;
 class FixtureManager : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FixtureManager)
 
     /********************************************************************
      * Initialization
@@ -52,17 +56,16 @@ public:
         return s_instance;
     }
 
-    /** Create an instance  with parent. Fails if s_instance != NULL. */
-    static void create(QWidget* parent);
-
+    /** Create or show the FixtureManager window. */
+    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                              const QLCFixtureDefCache& fixtureDefCache);
     ~FixtureManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    FixtureManager(QWidget* parent, Qt::WindowFlags f = 0);
-
-private:
-    Q_DISABLE_COPY(FixtureManager)
+    FixtureManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                   const QLCFixtureDefCache& fixtureDefCache,
+                   Qt::WindowFlags flags = 0);
 
 protected:
     /** The singleton FixtureManager instance */
@@ -80,6 +83,11 @@ public slots:
 
     /** Callback that listens to mode change signals */
     void slotModeChanged(Doc::Mode mode);
+
+private:
+    Doc* m_doc;
+    OutputMap* m_outputMap;
+    const QLCFixtureDefCache& m_fixtureDefCache;
 
     /********************************************************************
      * Data view

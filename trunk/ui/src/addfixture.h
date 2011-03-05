@@ -39,6 +39,7 @@ class Doc;
 class AddFixture : public QDialog, public Ui_AddFixture
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AddFixture)
 
 public:
     /**
@@ -60,8 +61,8 @@ public:
      */
     AddFixture(QWidget* parent,
                const QLCFixtureDefCache& fixtureDefCache,
-               const Doc& doc,
-               const OutputMap& outputMap,
+               const Doc* doc,
+               const OutputMap* outputMap,
                const QString& selectManufacturer = KXMLFixtureGeneric,
                const QString& selectModel = KXMLFixtureGeneric,
                const QString& selectMode = QString(),
@@ -72,9 +73,6 @@ public:
 
     /** Destructor */
     ~AddFixture();
-
-private:
-    Q_DISABLE_COPY(AddFixture)
 
     /*********************************************************************
      * Value getters
@@ -122,8 +120,8 @@ public:
 
 protected:
     const QLCFixtureDefCache& m_fixtureDefCache;
-    const Doc& m_doc;
-    const OutputMap& m_outputMap;
+    const Doc* m_doc;
+    const OutputMap* m_outputMap;
 
     const QLCFixtureDef* m_fixtureDef;
     const QLCFixtureMode* m_mode;

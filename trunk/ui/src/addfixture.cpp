@@ -49,8 +49,8 @@
 
 AddFixture::AddFixture(QWidget* parent,
                        const QLCFixtureDefCache& fixtureDefCache,
-                       const Doc& doc,
-                       const OutputMap& outputMap,
+                       const Doc* doc,
+                       const OutputMap* outputMap,
                        const QString& selectManufacturer,
                        const QString& selectModel,
                        const QString& selectMode,
@@ -58,10 +58,10 @@ AddFixture::AddFixture(QWidget* parent,
                        int selectUniverse,
                        int selectAddress,
                        int selectChannels)
-        : QDialog(parent),
-        m_fixtureDefCache(fixtureDefCache),
-        m_doc(doc),
-        m_outputMap(outputMap)
+    : QDialog(parent),
+    m_fixtureDefCache(fixtureDefCache),
+    m_doc(doc),
+    m_outputMap(outputMap)
 {
     m_addressValue = 0;
     m_universeValue = 0;
@@ -98,7 +98,7 @@ AddFixture::AddFixture(QWidget* parent,
     fillTree(selectManufacturer, selectModel);
 
     /* Fill universe combo with available universes */
-    m_universeCombo->addItems(m_outputMap.universeNames());
+    m_universeCombo->addItems(m_outputMap->universeNames());
 
     /* Simulate first selection and find the next free address */
     slotSelectionChanged();
@@ -113,7 +113,7 @@ AddFixture::AddFixture(QWidget* parent,
         m_universeCombo->setCurrentIndex(selectUniverse);
         slotUniverseActivated(selectUniverse);
 
-        OutputPatch* op = m_outputMap.patch(selectUniverse);
+        OutputPatch* op = m_outputMap->patch(selectUniverse);
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(selectAddress);
         else
@@ -243,15 +243,15 @@ void AddFixture::findAddress()
     /* Find the next free address space for x fixtures, each taking y
        channels, leaving z channels gap in-between. */
     quint32 address = findAddress((m_channelsValue + m_gapValue) * m_amountValue,
-                                  m_doc.fixtures(),
-                                  m_outputMap.universes());
+                                  m_doc->fixtures(),
+                                  m_outputMap->universes());
 
     /* Set the address only if the channel space was really found */
     if (address != QLCChannel::invalid())
     {
         m_universeCombo->setCurrentIndex(address >> 9);
 
-        OutputPatch* op = m_outputMap.patch(m_universeValue);
+        OutputPatch* op = m_outputMap->patch(m_universeValue);
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(address & 0x01FF);
         else
@@ -355,8 +355,8 @@ void AddFixture::slotUniverseActivated(int universe)
     int value = m_addressSpin->value();
     bool zeroBaseChanged = true;
 
-    OutputPatch* op1 = m_outputMap.patch(m_universeValue);
-    OutputPatch* op2 = m_outputMap.patch(universe);
+    OutputPatch* op1 = m_outputMap->patch(m_universeValue);
+    OutputPatch* op2 = m_outputMap->patch(universe);
     if (op1 != NULL && op2 != NULL &&
         op1->isDMXZeroBased() == op2->isDMXZeroBased())
     {
@@ -372,7 +372,7 @@ void AddFixture::slotUniverseActivated(int universe)
        setting accordingly (e.g. x in 0-511 is x+1 in 1-512 & vice versa) */
     if (zeroBaseChanged == true)
     {
-        OutputPatch* op = m_outputMap.patch(universe);
+        OutputPatch* op = m_outputMap->patch(universe);
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(value - 1);
         else
@@ -382,7 +382,7 @@ void AddFixture::slotUniverseActivated(int universe)
 
 void AddFixture::slotAddressChanged(int value)
 {
-    OutputPatch* op = m_outputMap.patch(m_universeCombo->currentIndex());
+    OutputPatch* op = m_outputMap->patch(m_universeCombo->currentIndex());
     if (op != NULL && op->isDMXZeroBased() == true)
         m_addressValue = value;
     else
@@ -398,7 +398,7 @@ void AddFixture::slotChannelsChanged(int value)
 
     /* Set the maximum possible address so that channels cannot overflow
        beyond DMX's range of 512 channels */
-    OutputPatch* op = m_outputMap.patch(m_universeValue);
+    OutputPatch* op = m_outputMap->patch(m_universeValue);
     if (op != NULL && op->isDMXZeroBased() == true)
         m_addressSpin->setRange(0, 512 - value);
     else

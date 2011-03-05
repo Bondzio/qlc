@@ -52,10 +52,7 @@
 #include "outputmap.h"
 #include "fixture.h"
 #include "apputil.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define SETTINGS_GEOMETRY "fixturemanager/geometry"
 #define SETTINGS_SPLITTER "fixturemanager/splitterstate"
@@ -76,14 +73,21 @@ extern App* _app;
 
 FixtureManager* FixtureManager::s_instance = NULL;
 
-
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-FixtureManager::FixtureManager(QWidget* parent, Qt::WindowFlags flags)
-        : QWidget(parent, flags)
+FixtureManager::FixtureManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                               const QLCFixtureDefCache& fixtureDefCache,
+                               Qt::WindowFlags flags)
+    : QWidget(parent, flags)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_fixtureDefCache(fixtureDefCache)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+
     new QVBoxLayout(this);
 
     m_console = NULL;
@@ -94,13 +98,13 @@ FixtureManager::FixtureManager(QWidget* parent, Qt::WindowFlags flags)
     updateView();
 
     /* Connect fixture list change signals from the new document object */
-    connect(_app->doc(), SIGNAL(fixtureAdded(quint32)),
+    connect(m_doc, SIGNAL(fixtureAdded(quint32)),
             this, SLOT(slotFixtureAdded(quint32)));
 
-    connect(_app->doc(), SIGNAL(fixtureRemoved(quint32)),
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 
-    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
 }
 
@@ -116,50 +120,54 @@ FixtureManager::~FixtureManager()
     FixtureManager::s_instance = NULL;
 }
 
-void FixtureManager::create(QWidget* parent)
+void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                   const QLCFixtureDefCache& fixtureDefCache)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
-
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new FixtureManager(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new FixtureManager(parent);
-    window = area->addSubWindow(s_instance);
-#endif
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/fixture.png"));
-    window->setWindowTitle(tr("Fixture Manager"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-    window->show();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
+    if (s_instance == NULL)
     {
-        window->restoreGeometry(var.toByteArray());
-        AppUtil::ensureWidgetIsVisible(window);
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new FixtureManager(parent, doc, outputMap, fixtureDefCache,
+                                        Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new FixtureManager(sub, doc, outputMap, fixtureDefCache);
+        window = area->addSubWindow(sub);
+    #endif
+
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/fixture.png"));
+        window->setWindowTitle(tr("Fixture Manager"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
+        window->show();
+
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+        {
+            window->restoreGeometry(var.toByteArray());
+            AppUtil::ensureWidgetIsVisible(window);
+        }
     }
     else
     {
-        /* Backwards compatibility */
-        QVariant w = settings.value("fixturemanager/width");
-        QVariant h = settings.value("fixturemanager/height");
-        if (w.isValid() == true && h.isValid() == true)
-            window->resize(w.toInt(), h.toInt());
-        else
-            window->resize(600, 400);
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
     }
+
+    window->show();
+    window->raise();
 }
 
 /*****************************************************************************
@@ -168,7 +176,7 @@ void FixtureManager::create(QWidget* parent)
 
 void FixtureManager::slotFixtureAdded(quint32 id)
 {
-    Fixture* fxi = _app->doc()->fixture(id);
+    Fixture* fxi = m_doc->fixture(id);
     if (fxi != NULL)
     {
         // Create a new list view item and fill it with fixture info
@@ -272,7 +280,7 @@ void FixtureManager::updateView()
     m_tree->clear();
 
     // Add all fixtures
-    foreach (Fixture* fixture, _app->doc()->fixtures())
+    foreach (Fixture* fixture, m_doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
 
@@ -313,7 +321,7 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
     item->setText(KColumnUniverse, QString("%1").arg(fxi->universe() + 1));
 
     // Address column, show 0-based or 1-based DMX addresses
-    OutputPatch* op = _app->outputMap()->patch(fxi->universe());
+    OutputPatch* op = m_outputMap->patch(fxi->universe());
     if (op != NULL && op->isDMXZeroBased() == true)
         s.sprintf("%.3d - %.3d", fxi->address(),
                   fxi->address() + fxi->channels() - 1);
@@ -345,7 +353,7 @@ void FixtureManager::slotSelectionChanged()
 
         // Set the text view's contents
         id = item->text(KColumnID).toUInt();
-        fxi = _app->doc()->fixture(id);
+        fxi = m_doc->fixture(id);
         Q_ASSERT(fxi != NULL);
         m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
                         .arg(fixtureInfoStyleSheetHeader())
@@ -373,7 +381,7 @@ void FixtureManager::slotSelectionChanged()
         m_tab->setCurrentIndex(page);
 
         // Enable/disable actions
-        if (_app->doc()->mode() == Doc::Design)
+        if (m_doc->mode() == Doc::Design)
         {
             m_addAction->setEnabled(true);
             m_removeAction->setEnabled(true);
@@ -393,7 +401,7 @@ void FixtureManager::slotSelectionChanged()
         QString info;
 
         // Add is not available in operate mode
-        if (_app->doc()->mode() == Doc::Design)
+        if (m_doc->mode() == Doc::Design)
             m_addAction->setEnabled(true);
         else
             m_addAction->setEnabled(false);
@@ -404,7 +412,7 @@ void FixtureManager::slotSelectionChanged()
         if (selectedCount > 1)
         {
             // Enable removal of multiple items in design mode
-            if (_app->doc()->mode() == Doc::Design)
+            if (m_doc->mode() == Doc::Design)
             {
                 m_removeAction->setEnabled(true);
                 info = tr("<HTML><BODY><H1>Multiple fixtures selected</H1>" \
@@ -448,7 +456,7 @@ void FixtureManager::slotSelectionChanged()
 
 void FixtureManager::slotDoubleClicked(QTreeWidgetItem* item)
 {
-    if (item != NULL && _app->doc()->mode() != Doc::Operate)
+    if (item != NULL && m_doc->mode() != Doc::Operate)
         slotProperties();
 }
 
@@ -515,8 +523,7 @@ void FixtureManager::initToolBar()
 
 void FixtureManager::slotAdd()
 {
-    AddFixture af(this, _app->fixtureDefCache(), *_app->doc(),
-                  *_app->outputMap());
+    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap);
     if (af.exec() == QDialog::Rejected)
         return;
 
@@ -550,7 +557,7 @@ void FixtureManager::slotAdd()
         modname = name;
 
     /* Create the fixture */
-    Fixture* fxi = new Fixture(_app->doc());
+    Fixture* fxi = new Fixture(m_doc);
 
     /* Add the first fixture without gap, at the given address */
     fxi->setAddress(address);
@@ -566,7 +573,7 @@ void FixtureManager::slotAdd()
 
     /* Attempt to add the fixture to doc. If the first one fails,
        it is very likely that others would, too. */
-    if (_app->doc()->addFixture(fxi) == false)
+    if (m_doc->addFixture(fxi) == false)
     {
         /* Adding failed. Display error and bail out. */
         addFixtureErrorMessage();
@@ -590,7 +597,7 @@ void FixtureManager::slotAdd()
             modname = name;
 
         /* Create the fixture */
-        Fixture* fxi = new Fixture(_app->doc());
+        Fixture* fxi = new Fixture(m_doc);
 
         /* Assign the next address AFTER the previous fixture
            address space plus gap. */
@@ -607,7 +614,7 @@ void FixtureManager::slotAdd()
 
         /* Attempt to add the fixture to doc. If one fails,
         it is very likely that others would, too. */
-        if (_app->doc()->addFixture(fxi) == false)
+        if (m_doc->addFixture(fxi) == false)
         {
             /* Adding failed. Display error and bail out. */
             addFixtureErrorMessage();
@@ -653,13 +660,13 @@ void FixtureManager::slotRemove()
         /** @todo This is REALLY bogus here, since Fixture or Doc should do
             this. However, FixtureManager is the only place to destroy fixtures,
             so it's rather safe to reset the fixture's address space here. */
-        Fixture* fxi = _app->doc()->fixture(id);
+        Fixture* fxi = m_doc->fixture(id);
         Q_ASSERT(fxi != NULL);
-        UniverseArray* ua = _app->outputMap()->claimUniverses();
+        UniverseArray* ua = m_outputMap->claimUniverses();
         ua->reset(fxi->address(), fxi->channels());
-        _app->outputMap()->releaseUniverses();
+        m_outputMap->releaseUniverses();
 
-        _app->doc()->deleteFixture(id);
+        m_doc->deleteFixture(id);
     }
 }
 
@@ -670,7 +677,7 @@ void FixtureManager::slotProperties()
         return;
 
     quint32 id = item->text(KColumnID).toUInt();
-    Fixture* fxi = _app->doc()->fixture(id);
+    Fixture* fxi = m_doc->fixture(id);
     if (fxi == NULL)
         return;
 
@@ -690,10 +697,8 @@ void FixtureManager::slotProperties()
         model = KXMLFixtureGeneric;
     }
 
-    AddFixture af(this, _app->fixtureDefCache(), *(_app->doc()),
-                  *(_app->outputMap()), manuf, model, mode,
-                  fxi->name(), fxi->universe(), fxi->address(),
-                  fxi->channels());
+    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap, manuf, model, mode,
+                  fxi->name(), fxi->universe(), fxi->address(), fxi->channels());
     af.setWindowTitle(tr("Change fixture properties"));
     if (af.exec() == QDialog::Accepted)
     {

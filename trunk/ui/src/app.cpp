@@ -1140,7 +1140,13 @@ void App::slotFileQuit()
 
 void App::slotFixtureManager()
 {
-    FixtureManager::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    FixtureManager::createAndShow(parent, doc(), outputMap(), fixtureDefCache());
 }
 
 void App::slotFunctionManager()

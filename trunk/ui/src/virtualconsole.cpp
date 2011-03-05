@@ -1379,9 +1379,8 @@ void VirtualConsole::initDockArea()
     if (m_dockArea != NULL)
         delete m_dockArea;
 
-    m_dockArea = new VCDockArea(this);
-    m_dockArea->setSizePolicy(QSizePolicy::Maximum,
-                              QSizePolicy::Expanding);
+    m_dockArea = new VCDockArea(this, _app->outputMap(), _app->inputMap());
+    m_dockArea->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
 
     // Add the dock area into the master horizontal layout
     layout()->addWidget(m_dockArea);

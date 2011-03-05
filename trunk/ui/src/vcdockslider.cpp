@@ -32,18 +32,19 @@
 #include "vcdockslider.h"
 #include "mastertimer.h"
 #include "inputmap.h"
-#include "app.h"
 #include "doc.h"
 #include "bus.h"
-
-extern App* _app;
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-VCDockSlider::VCDockSlider(QWidget* parent, quint32 bus) : QFrame(parent)
+VCDockSlider::VCDockSlider(QWidget* parent, InputMap* inputMap, quint32 bus)
+    : QFrame(parent)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(inputMap != NULL);
+
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
@@ -79,7 +80,7 @@ VCDockSlider::VCDockSlider(QWidget* parent, quint32 bus) : QFrame(parent)
             this, SLOT(slotBusValueChanged(quint32, quint32)));
 
     /* External input connection */
-    connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+    connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
 
     /* Property refresh has effect on bus value, store it now and restore below */
@@ -189,7 +190,7 @@ void VCDockSlider::slotSliderValueChanged(int value)
                          float(m_slider->maximum()), float(0),
                          float(UCHAR_MAX));
 
-        _app->inputMap()->feedBack(uni, ch, int(fb));
+        m_inputMap->feedBack(uni, ch, int(fb));
     }
 }
 

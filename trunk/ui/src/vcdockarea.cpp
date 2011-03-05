@@ -31,17 +31,20 @@
 #include "vcproperties.h"
 #include "vcdockslider.h"
 #include "vcdockarea.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "bus.h"
-#include "app.h"
 
-extern App* _app;
-
-VCDockArea::VCDockArea(QWidget* parent) : QFrame(parent)
+VCDockArea::VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap)
+    : QFrame(parent)
 {
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+
     new QHBoxLayout(this);
     layout()->setMargin(0);
 
-    m_gm = new GrandMasterSlider(this);
+    m_gm = new GrandMasterSlider(this, outputMap, inputMap);
     layout()->addWidget(m_gm);
 
     QVBoxLayout* vbox = new QVBoxLayout;
@@ -49,11 +52,11 @@ VCDockArea::VCDockArea(QWidget* parent) : QFrame(parent)
     layout()->addItem(vbox);
 
     /* Default fade time slider */
-    m_fade = new VCDockSlider(this, Bus::defaultFade());
+    m_fade = new VCDockSlider(this, inputMap, Bus::defaultFade());
     vbox->addWidget(m_fade);
 
     /* Default hold time slider */
-    m_hold = new VCDockSlider(this, Bus::defaultHold());
+    m_hold = new VCDockSlider(this, inputMap, Bus::defaultHold());
     vbox->addWidget(m_hold);
 }
 

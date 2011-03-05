@@ -24,6 +24,8 @@
 
 #include <QFrame>
 
+class OutputMap;
+class InputMap;
 class QSlider;
 class QLabel;
 
@@ -33,7 +35,7 @@ class GrandMasterSlider : public QFrame
     Q_DISABLE_COPY(GrandMasterSlider)
 
 public:
-    GrandMasterSlider(QWidget* parent);
+    GrandMasterSlider(QWidget* parent, OutputMap* outputMap, InputMap* inputMap);
     virtual ~GrandMasterSlider();
 
     void refreshProperties();
@@ -45,6 +47,8 @@ protected:
     QLabel* m_valueLabel;
     QSlider* m_slider;
     QLabel* m_nameLabel;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
 
     /*************************************************************************
      * External input

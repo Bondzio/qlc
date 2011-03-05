@@ -30,12 +30,15 @@
 #include "vcproperties.h"
 #include "outputmap.h"
 #include "inputmap.h"
-#include "app.h"
 
-extern App* _app;
-
-GrandMasterSlider::GrandMasterSlider(QWidget* parent) : QFrame(parent)
+GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, InputMap* inputMap)
+    : QFrame(parent)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
@@ -65,10 +68,10 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent) : QFrame(parent)
     layout()->addWidget(m_nameLabel);
 
     // Get the current grand master value
-    m_slider->setValue(_app->outputMap()->peekUniverses()->gMValue());
+    m_slider->setValue(m_outputMap->peekUniverses()->gMValue());
 
     /* External input connection */
-    connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+    connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
 
     refreshProperties();
@@ -107,18 +110,18 @@ void GrandMasterSlider::refreshProperties()
     setToolTip(tooltip);
 
     /* Set properties to UniverseArray */
-    UniverseArray* uni = _app->outputMap()->claimUniverses();
+    UniverseArray* uni = m_outputMap->claimUniverses();
     uni->setGMChannelMode(VirtualConsole::properties().grandMasterChannelMode());
     uni->setGMValueMode(VirtualConsole::properties().grandMasterValueMode());
-    _app->outputMap()->releaseUniverses();
+    m_outputMap->releaseUniverses();
 }
 
 void GrandMasterSlider::slotValueChanged(int value)
 {
     // Write new grand master value to universes
-    UniverseArray* uni = _app->outputMap()->claimUniverses();
+    UniverseArray* uni = m_outputMap->claimUniverses();
     uni->setGMValue(value);
-    _app->outputMap()->releaseUniverses();
+    m_outputMap->releaseUniverses();
 
     // Display value
     QString str;

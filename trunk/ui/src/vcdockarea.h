@@ -28,6 +28,8 @@ class GrandMasterSlider;
 class VCDockSlider;
 class QShowEvent;
 class QHideEvent;
+class OutputMap;
+class InputMap;
 
 class VCDockArea : public QFrame
 {
@@ -38,7 +40,7 @@ class VCDockArea : public QFrame
      * Initialization
      *********************************************************************/
 public:
-    VCDockArea(QWidget* parent);
+    VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap);
     ~VCDockArea();
 
     /*********************************************************************

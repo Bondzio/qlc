@@ -25,8 +25,8 @@
 #include <QFrame>
 #include <QTime>
 
-
 class QToolButton;
+class InputMap;
 class QSlider;
 class QLabel;
 
@@ -39,11 +39,14 @@ class VCDockSlider : public QFrame
      * Initialization
      *********************************************************************/
 public:
-    VCDockSlider(QWidget* parent, quint32 bus);
+    VCDockSlider(QWidget* parent, InputMap* inputMap, quint32 bus);
     ~VCDockSlider();
 
     /** Refresh properties from VCProperties */
     void refreshProperties();
+
+private:
+    InputMap* m_inputMap;
 
     /*********************************************************************
      * Bus

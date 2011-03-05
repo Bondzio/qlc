@@ -235,8 +235,8 @@
    <slot>slotEditClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
-     <y>131</y>
+     <x>430</x>
+     <y>168</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -260,11 +260,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_tree</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>VCXYPadProperties</receiver>
+   <slot>slotEditClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>30</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotAddClicked()</slot>
   <slot>slotRemoveClicked()</slot>
   <slot>slotEditClicked()</slot>
   <slot>slotSelectionChanged(QTreeWidgetItem*)</slot>
+  <slot>slotItemDoubleClicked(QTreeWidgetItem*)</slot>
  </slots>
 </ui>

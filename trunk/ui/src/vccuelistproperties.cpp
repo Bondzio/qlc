@@ -31,9 +31,8 @@
 #include "inputmap.h"
 #include "doc.h"
 
-VCCueListProperties::VCCueListProperties(QWidget* parent, VCCueList* cueList,
-                                         Doc* doc, InputMap* inputMap)
-    : QDialog(parent)
+VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, InputMap* inputMap)
+    : QDialog(cueList)
     , m_doc(doc)
     , m_inputMap(inputMap)
 {

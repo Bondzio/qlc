@@ -202,7 +202,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCCueList)
         {
-            VCCueList::loader(&tag, this);
+            /* Create a new cuelist into its parent */
+            VCCueList* cuelist = new VCCueList(this, _app->doc(), _app->inputMap(), _app->masterTimer());
+            if (cuelist->loadXML(&tag) == false)
+                delete cuelist;
+            else
+                cuelist->show();
         }
         else
         {

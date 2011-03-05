@@ -37,7 +37,6 @@
 #include "function.h"
 #include "inputmap.h"
 #include "chaser.h"
-#include "app.h"
 #include "doc.h"
 
 #define KColumnNumber 0
@@ -45,12 +44,18 @@
 
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
 
-extern App* _app;
-
-VCCueList::VCCueList(QWidget* parent) : VCWidget(parent)
+VCCueList::VCCueList(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent)
     , m_chaser(Function::invalidId())
     , m_runner(NULL)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     /* Set the class name "VCCueList" as the object name as well */
     setObjectName(VCCueList::staticMetaObject.className());
 
@@ -79,9 +84,9 @@ VCCueList::VCCueList(QWidget* parent) : VCWidget(parent)
 
     slotModeChanged(mode());
 
-    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+    connect(m_doc, SIGNAL(functionRemoved(quint32)),
             this, SLOT(slotFunctionRemoved(quint32)));
-    connect(_app->doc(), SIGNAL(functionChanged(quint32)),
+    connect(m_doc, SIGNAL(functionChanged(quint32)),
             this, SLOT(slotFunctionChanged(quint32)));
 
     setNextInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
@@ -102,7 +107,7 @@ VCWidget* VCCueList::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCCueList* cuelist = new VCCueList(parent);
+    VCCueList* cuelist = new VCCueList(parent, m_doc, m_inputMap, m_masterTimer);
     if (cuelist->copyFrom(this) == false)
     {
         delete cuelist;
@@ -154,7 +159,7 @@ void VCCueList::updateList()
 {
     m_list->clear();
 
-    Chaser* cha = qobject_cast<Chaser*> (_app->doc()->function(chaser()));
+    Chaser* cha = qobject_cast<Chaser*> (m_doc->function(chaser()));
     if (cha == NULL)
         return;
 
@@ -234,10 +239,10 @@ void VCCueList::createRunner()
     Q_ASSERT(m_runner == NULL);
 
     QList <Function*> cues;
-    Chaser* cha = qobject_cast<Chaser*> (_app->doc()->function(chaser()));
+    Chaser* cha = qobject_cast<Chaser*> (m_doc->function(chaser()));
     if (cha != NULL)
         cues = cha->stepFunctions();
-    m_runner = new ChaserRunner(_app->doc(), cues, Bus::defaultHold(),
+    m_runner = new ChaserRunner(m_doc, cues, Bus::defaultHold(),
                                 Function::Forward, Function::Loop);
     m_runner->setAutoStep(false);
     connect(m_runner, SIGNAL(currentStepChanged(int)),
@@ -286,23 +291,23 @@ void VCCueList::slotKeyPressed(const QKeySequence& keySequence)
 
 void VCCueList::setNextInputSource(quint32 uni, quint32 ch)
 {
-    disconnect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+    disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
     m_nextInputUniverse = uni;
     m_nextInputChannel = ch;
     if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
-        connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                 this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
 }
 
 void VCCueList::setPreviousInputSource(quint32 uni, quint32 ch)
 {
-    disconnect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+    disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
     m_previousInputUniverse = uni;
     m_previousInputChannel = ch;
     if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
-        connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32, quint32, uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                 this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
 }
 
@@ -370,14 +375,14 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
     if (mode == Doc::Operate)
     {
         Q_ASSERT(m_runner == NULL);
-        _app->masterTimer()->registerDMXSource(this);
+        m_masterTimer->registerDMXSource(this);
 
         updateList();
         m_list->setEnabled(true);
     }
     else
     {
-        _app->masterTimer()->unregisterDMXSource(this);
+        m_masterTimer->unregisterDMXSource(this);
         if (m_runner != NULL)
             delete m_runner;
         m_runner = NULL;
@@ -392,10 +397,10 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
 
 void VCCueList::editProperties()
 {
-    VCCueListProperties prop(_app, this, _app->doc(), _app->inputMap());
+    VCCueListProperties prop(this, m_doc, m_inputMap);
     if (prop.exec() == QDialog::Accepted)
     {
-        _app->doc()->setModified();
+        m_doc->setModified();
         updateList();
     }
 }
@@ -403,28 +408,6 @@ void VCCueList::editProperties()
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCCueList::loader(const QDomElement* root, QWidget* parent)
-{
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCCueList)
-    {
-        qWarning() << Q_FUNC_INFO << "CueList node not found";
-        return false;
-    }
-
-    /* Create a new cuelist into its parent */
-    VCCueList* cuelist = new VCCueList(parent);
-    Q_ASSERT(cuelist != NULL);
-
-    /* Continue loading */
-    bool ret = cuelist->loadXML(root);
-    cuelist->updateList();
-    cuelist->show();
-    return ret;
-}
 
 bool VCCueList::loadXML(const QDomElement* root)
 {
@@ -524,8 +507,8 @@ bool VCCueList::loadXML(const QDomElement* root)
             // member functions and assign that chaser to this cue list.
             if (legacyChaser == NULL)
             {
-                legacyChaser = new Chaser(_app->doc());
-                if (_app->doc()->addFunction(legacyChaser) == true)
+                legacyChaser = new Chaser(m_doc);
+                if (m_doc->addFunction(legacyChaser) == true)
                 {
                     setChaser(legacyChaser->id());
                     legacyChaser->setName(caption());
@@ -547,6 +530,8 @@ bool VCCueList::loadXML(const QDomElement* root)
 
         node = node.nextSibling();
     }
+
+    updateList();
 
     return true;
 }

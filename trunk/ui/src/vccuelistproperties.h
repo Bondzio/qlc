@@ -40,8 +40,7 @@ class VCCueListProperties : public QDialog, public Ui_VCCueListProperties
      * Initialization
      ************************************************************************/
 public:
-    VCCueListProperties(QWidget* parent, VCCueList* cueList,
-                        Doc* doc, InputMap* inputMap);
+    VCCueListProperties(VCCueList* cueList, Doc* doc, InputMap* inputMap);
     ~VCCueListProperties();
 
 public slots:

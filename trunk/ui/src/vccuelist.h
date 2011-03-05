@@ -35,7 +35,10 @@ class QTreeWidget;
 
 class VCCueListProperties;
 class ChaserRunner;
+class MasterTimer;
+class InputMap;
 class Chaser;
+class Doc;
 
 #define KXMLQLCVCCueList "CueList"
 #define KXMLQLCVCCueListFunction "Function" // Legacy
@@ -62,7 +65,7 @@ class VCCueList : public VCWidget, public DMXSource
      *************************************************************************/
 public:
     /** Normal constructor */
-    VCCueList(QWidget* parent);
+    VCCueList(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
 
     /** Destructor */
     ~VCCueList();
@@ -119,6 +122,9 @@ protected:
     QTreeWidget* m_list;
     quint32 m_chaser;
     ChaserRunner* m_runner;
+    Doc* m_doc;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*************************************************************************
      * DMX Source
@@ -202,7 +208,6 @@ public:
      * Load & Save
      *************************************************************************/
 public:
-    static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 };

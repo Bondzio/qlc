@@ -866,7 +866,7 @@ void VirtualConsole::slotAddCueList()
     if (parent == NULL)
         return;
 
-    VCCueList* cuelist = new VCCueList(parent);
+    VCCueList* cuelist = new VCCueList(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(cuelist != NULL);
     cuelist->show();
     cuelist->move(parent->lastClickPoint());

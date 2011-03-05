@@ -39,7 +39,7 @@ class VCXYPadProperties : public QDialog, public Ui_VCXYPadProperties
      * Initialization
      ********************************************************************/
 public:
-    VCXYPadProperties(QWidget* parent, VCXYPad* xypad, Doc* doc);
+    VCXYPadProperties(VCXYPad* xypad, Doc* doc);
     ~VCXYPadProperties();
 
     /********************************************************************

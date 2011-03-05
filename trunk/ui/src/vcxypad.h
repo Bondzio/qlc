@@ -28,7 +28,6 @@
 #include <QMutex>
 #include <QList>
 
-
 #include "vcxypadfixture.h"
 #include "dmxsource.h"
 #include "vcwidget.h"
@@ -39,6 +38,7 @@ class QPaintEvent;
 class QMouseEvent;
 class MasterTimer;
 class QByteArray;
+class Doc;
 
 #define KXMLQLCVCXYPad "XYPad"
 #define KXMLQLCVCXYPadPosition "Position"
@@ -48,16 +48,18 @@ class QByteArray;
 class VCXYPad : public VCWidget, public DMXSource
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCXYPad)
 
     /*********************************************************************
      * Initialization
      *********************************************************************/
 public:
-    VCXYPad(QWidget* parent);
+    VCXYPad(QWidget* parent, Doc* doc, MasterTimer* masterTimer);
     virtual ~VCXYPad();
 
 private:
-    Q_DISABLE_COPY(VCXYPad)
+    Doc* m_doc;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard
@@ -123,9 +125,7 @@ protected slots:
      * Load & Save
      *********************************************************************/
 public:
-    static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);
-
     bool saveXML(QDomDocument* doc, QDomElement* root);
 
     /*********************************************************************

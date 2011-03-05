@@ -44,8 +44,8 @@
  * Initialization
  ****************************************************************************/
 
-VCXYPadProperties::VCXYPadProperties(QWidget* parent, VCXYPad* xypad, Doc* doc)
-    : QDialog(parent)
+VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc)
+    : QDialog(xypad)
     , m_doc(doc)
 {
     Q_ASSERT(doc != NULL);

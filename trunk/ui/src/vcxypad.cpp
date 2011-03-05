@@ -41,17 +41,20 @@
 #include "mastertimer.h"
 #include "vcxypad.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 /*****************************************************************************
  * VCXYPad Initialization
  *****************************************************************************/
 
-VCXYPad::VCXYPad(QWidget* parent) : VCWidget(parent)
+VCXYPad::VCXYPad(QWidget* parent, Doc* doc, MasterTimer* masterTimer)
+    : VCWidget(parent)
+    , m_doc(doc)
+    , m_masterTimer(masterTimer)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     /* Set the class name "VCXYPad" as the object name as well */
     setObjectName(VCXYPad::staticMetaObject.className());
 
@@ -81,7 +84,7 @@ VCWidget* VCXYPad::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCXYPad* xypad = new VCXYPad(parent);
+    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_masterTimer);
     if (xypad->copyFrom(this) == false)
     {
         delete xypad;
@@ -116,9 +119,9 @@ bool VCXYPad::copyFrom(VCWidget* widget)
 
 void VCXYPad::editProperties()
 {
-    VCXYPadProperties prop(_app, this, _app->doc());
+    VCXYPadProperties prop(this, m_doc);
     if (prop.exec() == QDialog::Accepted)
-        _app->doc()->setModified();
+        m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -203,9 +206,9 @@ void VCXYPad::slotModeChanged(Doc::Mode mode)
     }
 
     if (mode == Doc::Operate)
-        _app->masterTimer()->registerDMXSource(this);
+        m_masterTimer->registerDMXSource(this);
     else
-        _app->masterTimer()->unregisterDMXSource(this);
+        m_masterTimer->unregisterDMXSource(this);
 
     /* Reset this flag so that the pad won't immediately set a value
        when mode is changed */
@@ -217,27 +220,6 @@ void VCXYPad::slotModeChanged(Doc::Mode mode)
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCXYPad::loader(const QDomElement* root, QWidget* parent)
-{
-    VCXYPad* xypad = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCXYPad)
-    {
-        qWarning() << Q_FUNC_INFO << "XY Pad node not found";
-        return false;
-    }
-
-    /* Create a new xy pad into its parent */
-    xypad = new VCXYPad(parent);
-    xypad->show();
-
-    /* Continue loading */
-    return xypad->loadXML(root);
-}
 
 bool VCXYPad::loadXML(const QDomElement* root)
 {

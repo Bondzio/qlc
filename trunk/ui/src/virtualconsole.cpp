@@ -853,7 +853,7 @@ void VirtualConsole::slotAddXYPad()
     if (parent == NULL)
         return;
 
-    VCXYPad* xypad = new VCXYPad(parent);
+    VCXYPad* xypad = new VCXYPad(parent, _app->doc(), _app->masterTimer());
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());

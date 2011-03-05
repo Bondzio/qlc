@@ -170,7 +170,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCXYPad)
         {
-            VCXYPad::loader(&tag, this);
+            /* Create a new xy pad into its parent */
+            VCXYPad* xypad = new VCXYPad(this, _app->doc(), _app->masterTimer());
+            if (xypad->loadXML(&tag) == false)
+                delete xypad;
+            else
+                xypad->show();
         }
         else if (tag.tagName() == KXMLQLCVCSlider)
         {

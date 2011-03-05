@@ -27,6 +27,9 @@
 class QDomDocument;
 class QDomElement;
 class QPaintEvent;
+class MasterTimer;
+class InputMap;
+class Doc;
 
 #define KXMLQLCVCLabel "Label"
 
@@ -39,10 +42,7 @@ class VCLabel : public VCWidget
      * Initialization
      *********************************************************************/
 public:
-    /** Normal constructor */
-    VCLabel(QWidget* parent);
-
-    /** Destructor */
+    VCLabel(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
     ~VCLabel();
 
     /*********************************************************************

@@ -122,9 +122,6 @@ protected:
     QTreeWidget* m_list;
     quint32 m_chaser;
     ChaserRunner* m_runner;
-    Doc* m_doc;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /*************************************************************************
      * DMX Source

@@ -70,11 +70,6 @@ public:
     VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
     ~VCButton();
 
-private:
-    Doc* m_doc;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
-
     /*********************************************************************
      * Clipboard
      *********************************************************************/

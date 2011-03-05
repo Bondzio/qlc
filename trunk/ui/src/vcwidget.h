@@ -61,20 +61,19 @@ class QFile;
 class VCWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCWidget)
 
     /*********************************************************************
      * Initialization
      *********************************************************************/
-protected:
-    /** Protected constructor so nobody makes an instance of this class
-        unless inherited */
-    VCWidget(QWidget* parent);
-
 public:
+    VCWidget(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCWidget();
 
-private:
-    Q_DISABLE_COPY(VCWidget)
+protected:
+    Doc* m_doc;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard

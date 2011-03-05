@@ -45,17 +45,10 @@
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
 
 VCCueList::VCCueList(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent)
+    : VCWidget(parent, doc, inputMap, masterTimer)
     , m_chaser(Function::invalidId())
     , m_runner(NULL)
-    , m_doc(doc)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
-
     /* Set the class name "VCCueList" as the object name as well */
     setObjectName(VCCueList::staticMetaObject.className());
 

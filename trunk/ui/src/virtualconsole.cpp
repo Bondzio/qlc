@@ -853,7 +853,7 @@ void VirtualConsole::slotAddXYPad()
     if (parent == NULL)
         return;
 
-    VCXYPad* xypad = new VCXYPad(parent, _app->doc(), _app->masterTimer());
+    VCXYPad* xypad = new VCXYPad(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());
@@ -905,7 +905,7 @@ void VirtualConsole::slotAddLabel()
     if (parent == NULL)
         return;
 
-    VCLabel* label = new VCLabel(parent);
+    VCLabel* label = new VCLabel(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(label != NULL);
     label->show();
     label->move(parent->lastClickPoint());

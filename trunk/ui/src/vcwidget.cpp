@@ -48,14 +48,18 @@
 #include "vcproperties.h"
 #include "inputmap.h"
 #include "vcwidget.h"
-#include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
-VCWidget::VCWidget(QWidget* parent) : QWidget(parent)
+VCWidget::VCWidget(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
+    : QWidget(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(parent != NULL);
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     /* Set the class name "VCWidget" as the object name as well */
     setObjectName(VCWidget::staticMetaObject.className());
@@ -76,7 +80,7 @@ VCWidget::VCWidget(QWidget* parent) : QWidget(parent)
     m_inputUniverse = InputMap::invalidUniverse();
     m_inputChannel = InputMap::invalidChannel();
 
-    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
     m_mode = Doc::Design;
 
@@ -143,7 +147,7 @@ void VCWidget::setBackgroundImage(const QString& path)
     pal.setBrush(QPalette::Window, QBrush(QPixmap(path)));
     setPalette(pal);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -160,7 +164,7 @@ void VCWidget::setBackgroundColor(const QColor& color)
     pal.setColor(QPalette::Window, color);
     setPalette(pal);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCWidget::resetBackgroundColor()
@@ -186,7 +190,7 @@ void VCWidget::resetBackgroundColor()
         setPalette(pal);
     }
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -202,7 +206,7 @@ void VCWidget::setForegroundColor(const QColor& color)
     pal.setColor(QPalette::WindowText, color);
     setPalette(pal);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCWidget::resetForegroundColor()
@@ -224,7 +228,7 @@ void VCWidget::resetForegroundColor()
     else if (m_backgroundImage.isEmpty() == false)
         setBackgroundImage(m_backgroundImage);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -235,14 +239,14 @@ void VCWidget::setFont(const QFont& font)
 {
     m_hasCustomFont = true;
     QWidget::setFont(font);
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCWidget::resetFont()
 {
     m_hasCustomFont = false;
     setFont(QFont());
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -253,7 +257,7 @@ void VCWidget::setCaption(const QString& text)
 {
     setWindowTitle(text);
     update();
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -264,7 +268,7 @@ void VCWidget::setFrameStyle(int style)
 {
     m_frameStyle = style;
     update();
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCWidget::resetFrameStyle()
@@ -298,7 +302,7 @@ int VCWidget::stringToFrameStyle(const QString& style)
 
 void VCWidget::editProperties()
 {
-    QMessageBox::information(_app, staticMetaObject.className(),
+    QMessageBox::information(this, staticMetaObject.className(),
                              tr("This widget has no properties"));
 }
 
@@ -318,13 +322,8 @@ void VCWidget::setInputSource(quint32 uni, quint32 ch)
 
         /* Even though we might not be connected, it is safe to do a
            disconnect in any case. */
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,
-                                            quint32,
-                                            uchar)),
-                   this, SLOT(slotInputValueChanged(quint32,
-                                                    quint32,
-                                                    uchar)));
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
     }
     else if (m_inputUniverse == InputMap::invalidUniverse() ||
              m_inputChannel == InputMap::invalidChannel())
@@ -335,14 +334,8 @@ void VCWidget::setInputSource(quint32 uni, quint32 ch)
         m_inputUniverse = uni;
         m_inputChannel = ch;
 
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,
-                                         quint32,
-                                         uchar)),
-                this,
-                SLOT(slotInputValueChanged(quint32,
-                                           quint32,
-                                           uchar)));
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
     }
     else
     {
@@ -872,7 +865,7 @@ void VCWidget::mouseMoveEvent(QMouseEvent* e)
         {
             QPoint p(mapFromGlobal(QCursor::pos()));
             resize(QSize(p.x(), p.y()));
-            _app->doc()->setModified();
+            m_doc->setModified();
         }
         else if (e->buttons() & Qt::LeftButton ||
                  e->buttons() & Qt::MidButton)
@@ -882,7 +875,7 @@ void VCWidget::mouseMoveEvent(QMouseEvent* e)
             p.setY(p.y() - m_mousePressPoint.y());
 
             move(p);
-            _app->doc()->setModified();
+            m_doc->setModified();
         }
     }
     else

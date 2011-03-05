@@ -61,17 +61,10 @@ const QSize VCButton::defaultSize(QSize(50, 50));
  *****************************************************************************/
 
 VCButton::VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent)
-    , m_doc(doc)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
+    : VCWidget(parent, doc, inputMap, masterTimer)
     , m_adjustIntensity(false)
     , m_intensityAdjustment(1.0)
 {
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
-
     /* Set the class name "VCButton" as the object name as well */
     setObjectName(VCButton::staticMetaObject.className());
 

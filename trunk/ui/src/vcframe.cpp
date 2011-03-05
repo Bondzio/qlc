@@ -45,15 +45,8 @@
 #include "doc.h"
 
 VCFrame::VCFrame(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent)
-    , m_doc(doc)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
+    : VCWidget(parent, doc, inputMap, masterTimer)
 {
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
-
     /* Set the class name "VCFrame" as the object name as well */
     setObjectName(VCFrame::staticMetaObject.className());
 
@@ -152,7 +145,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCLabel)
         {
             /* Create a new label into its parent */
-            VCLabel* label = new VCLabel(this);
+            VCLabel* label = new VCLabel(this, m_doc, m_inputMap, m_masterTimer);
             if (label->loadXML(&tag) == false)
                 delete label;
             else
@@ -170,7 +163,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCXYPad)
         {
             /* Create a new xy pad into its parent */
-            VCXYPad* xypad = new VCXYPad(this, m_doc, m_masterTimer);
+            VCXYPad* xypad = new VCXYPad(this, m_doc, m_inputMap, m_masterTimer);
             if (xypad->loadXML(&tag) == false)
                 delete xypad;
             else

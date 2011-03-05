@@ -60,15 +60,8 @@ const QSize VCSlider::defaultSize(QSize(60, 200));
  *****************************************************************************/
 
 VCSlider::VCSlider(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent)
-    , m_doc(doc)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
+    : VCWidget(parent, doc, inputMap, masterTimer)
 {
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
-
     /* Set the class name "VCSlider" as the object name as well */
     setObjectName(VCSlider::staticMetaObject.className());
 

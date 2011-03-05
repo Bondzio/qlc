@@ -82,11 +82,6 @@ public:
     /** Destructor */
     ~VCSlider();
 
-private:
-    Doc* m_doc;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
-
     /*********************************************************************
      * Clipboard
      *********************************************************************/

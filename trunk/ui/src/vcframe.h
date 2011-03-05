@@ -49,12 +49,6 @@ public:
     /* Check if this is the virtual console's draw area */
     bool isBottomFrame();
 
-protected:
-    Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
-
     /*********************************************************************
      * Clipboard
      *********************************************************************/

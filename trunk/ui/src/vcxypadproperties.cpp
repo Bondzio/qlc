@@ -106,7 +106,7 @@ QList <quint32> VCXYPadProperties::selectedFixtureIDs() const
     while (it.hasNext() == true)
     {
         QVariant var(it.next()->data(KColumnFixture, Qt::UserRole));
-        VCXYPadFixture fxi(var);
+        VCXYPadFixture fxi(m_doc, var);
         list << fxi.fixture();
     }
 
@@ -120,7 +120,7 @@ QList <VCXYPadFixture> VCXYPadProperties::selectedFixtures() const
 
     /* Put all selected fixtures to a list and return it */
     while (it.hasNext() == true)
-        list << it.next()->data(KColumnFixture, Qt::UserRole);
+        list << VCXYPadFixture(m_doc, it.next()->data(KColumnFixture, Qt::UserRole));
 
     return list;
 }
@@ -131,7 +131,7 @@ QTreeWidgetItem* VCXYPadProperties::fixtureItem(const VCXYPadFixture& fxi)
     while (*it != NULL)
     {
         QVariant var((*it)->data(KColumnFixture, Qt::UserRole));
-        VCXYPadFixture another(var);
+        VCXYPadFixture another(m_doc, var);
         if (fxi.fixture() == another.fixture())
             return *it;
         else
@@ -147,7 +147,7 @@ void VCXYPadProperties::removeFixtureItem(quint32 fxi_id)
     while (*it != NULL)
     {
         QVariant var((*it)->data(KColumnFixture, Qt::UserRole));
-        VCXYPadFixture fxi(var);
+        VCXYPadFixture fxi(m_doc, var);
         if (fxi.fixture() == fxi_id)
         {
             delete (*it);
@@ -167,7 +167,7 @@ void VCXYPadProperties::slotAddClicked()
     while (*twit != NULL)
     {
         QVariant var((*twit)->data(KColumnFixture, Qt::UserRole));
-        VCXYPadFixture fxi(var);
+        VCXYPadFixture fxi(m_doc, var);
         disabled << fxi.fixture();
         ++twit;
     }
@@ -203,7 +203,7 @@ void VCXYPadProperties::slotAddClicked()
         QListIterator <quint32> it(fs.selection);
         while (it.hasNext() == true)
         {
-            VCXYPadFixture fxi;
+            VCXYPadFixture fxi(m_doc);
             fxi.setFixture(it.next());
             item = new QTreeWidgetItem(m_tree);
             updateFixtureItem(item, fxi);
@@ -272,7 +272,7 @@ void VCXYPadProperties::accept()
     while (*it != NULL)
     {
         QVariant var((*it)->data(KColumnFixture, Qt::UserRole));
-        m_xypad->appendFixture(var);
+        m_xypad->appendFixture(VCXYPadFixture(m_doc, var));
         ++it;
     }
 

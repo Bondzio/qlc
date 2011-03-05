@@ -32,16 +32,14 @@
 #include "vcxypadfixture.h"
 #include "universearray.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-VCXYPadFixture::VCXYPadFixture()
+VCXYPadFixture::VCXYPadFixture(Doc* doc)
+    : m_doc(doc)
 {
     m_fixture = Fixture::invalidId();
 
@@ -59,12 +57,8 @@ VCXYPadFixture::VCXYPadFixture()
     m_yMSB = QLCChannel::invalid();
 }
 
-VCXYPadFixture::VCXYPadFixture(const VCXYPadFixture& vc_fxi)
-{
-    *this = vc_fxi;
-}
-
-VCXYPadFixture::VCXYPadFixture(const QVariant& variant)
+VCXYPadFixture::VCXYPadFixture(Doc* doc, const QVariant& variant)
+    : m_doc(doc)
 {
     if (variant.canConvert(QVariant::StringList) == true)
     {
@@ -84,13 +78,13 @@ VCXYPadFixture::VCXYPadFixture(const QVariant& variant)
         else
         {
             /* Construct empty fixture */
-            *this = VCXYPadFixture();
+            *this = VCXYPadFixture(doc);
         }
     }
     else
     {
         /* Construct empty fixture */
-        *this = VCXYPadFixture();
+        *this = VCXYPadFixture(doc);
     }
 
     m_xMSB = QLCChannel::invalid();
@@ -106,6 +100,9 @@ VCXYPadFixture::~VCXYPadFixture()
 
 VCXYPadFixture& VCXYPadFixture::operator=(const VCXYPadFixture& fxi)
 {
+    m_doc = fxi.m_doc;
+    Q_ASSERT(m_doc != NULL);
+
     m_fixture = fxi.m_fixture;
 
     m_xMin = fxi.m_xMin;
@@ -164,7 +161,7 @@ QString VCXYPadFixture::name() const
     if (m_fixture == Fixture::invalidId())
         return QString();
 
-    Fixture* fxi = _app->doc()->fixture(m_fixture);
+    Fixture* fxi = m_doc->fixture(m_fixture);
     if (fxi != NULL)
         return fxi->name();
     else
@@ -175,7 +172,7 @@ void VCXYPadFixture::arm()
 {
     Fixture* fxi = NULL;
 
-    fxi = _app->doc()->fixture(m_fixture);
+    fxi = m_doc->fixture(m_fixture);
     if (fxi == NULL)
     {
         m_xLSB = QLCChannel::invalid();

@@ -131,7 +131,7 @@ void VCXYPad::appendFixture(const VCXYPadFixture& fxi)
 
 void VCXYPad::removeFixture(quint32 fxi_id)
 {
-    VCXYPadFixture fixture;
+    VCXYPadFixture fixture(m_doc);
     fixture.setFixture(fxi_id);
 
     m_fixtures.removeAll(fixture);
@@ -192,7 +192,7 @@ void VCXYPad::slotModeChanged(Doc::Mode mode)
     QMutableListIterator <VCXYPadFixture> it(m_fixtures);
     while (it.hasNext() == true)
     {
-        VCXYPadFixture fxi(it.next());
+        VCXYPadFixture fxi = it.next();
         if (mode == Doc::Operate)
             fxi.arm();
         else
@@ -265,7 +265,7 @@ bool VCXYPad::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCXYPadFixture)
         {
-            VCXYPadFixture fxi;
+            VCXYPadFixture fxi(m_doc);
             if (fxi.loadXML(&tag) == true)
                 appendFixture(fxi);
         }
@@ -303,9 +303,8 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
     root.setAttribute(KXMLQLCVCCaption, caption());
 
     /* Fixtures */
-    VCXYPadFixture fixture;
-    foreach (fixture, m_fixtures)
-    fixture.saveXML(doc, &root);
+    foreach (VCXYPadFixture fixture, m_fixtures)
+        fixture.saveXML(doc, &root);
 
     /* Current XY Position */
     tag = doc->createElement(KXMLQLCVCXYPadPosition);

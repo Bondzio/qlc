@@ -26,11 +26,11 @@
 #include <QVariant>
 #include <QString>
 
-
 class VCXYPadFixture;
 class UniverseArray;
 class QDomDocument;
 class QDomElement;
+class Doc;
 
 #define KXMLQLCVCXYPadFixture "Fixture"
 #define KXMLQLCVCXYPadFixtureID "ID"
@@ -49,9 +49,8 @@ class VCXYPadFixture
      * Initialization
      ********************************************************************/
 public:
-    VCXYPadFixture();
-    VCXYPadFixture(const QVariant& variant);
-    VCXYPadFixture(const VCXYPadFixture& vc_fxi);
+    VCXYPadFixture(Doc* doc);
+    VCXYPadFixture(Doc* doc, const QVariant& variant);
     ~VCXYPadFixture();
 
     /** Assignment operator */
@@ -62,6 +61,9 @@ public:
 
     /* Serialization operator for VCXYPadFixtureEditor */
     operator QVariant() const;
+
+private:
+    Doc* m_doc;
 
     /********************************************************************
      * Fixture

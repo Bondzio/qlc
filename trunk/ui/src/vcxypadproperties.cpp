@@ -32,8 +32,7 @@
 #include "vcxypadfixture.h"
 #include "vcxypad.h"
 #include "apputil.h"
-
-extern App* _app;
+#include "doc.h"
 
 #define SETTINGS_GEOMETRY "vcxypad/geometry"
 
@@ -45,9 +44,11 @@ extern App* _app;
  * Initialization
  ****************************************************************************/
 
-VCXYPadProperties::VCXYPadProperties(QWidget* parent, VCXYPad* xypad)
+VCXYPadProperties::VCXYPadProperties(QWidget* parent, VCXYPad* xypad, Doc* doc)
     : QDialog(parent)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
     Q_ASSERT(xypad != NULL);
     m_xypad = xypad;
 
@@ -172,7 +173,7 @@ void VCXYPadProperties::slotAddClicked()
     }
 
     /* Disable all fixtures that don't have pan OR tilt channels */
-    foreach(Fixture* fixture, _app->doc()->fixtures())
+    foreach(Fixture* fixture, m_doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
 
@@ -196,7 +197,7 @@ void VCXYPadProperties::slotAddClicked()
 
     /* Get a list of new fixtures to add to the pad */
     QTreeWidgetItem* item = NULL;
-    FixtureSelection fs(this, _app->doc(), true, disabled);
+    FixtureSelection fs(this, m_doc, true, disabled);
     if (fs.exec() == QDialog::Accepted)
     {
         QListIterator <quint32> it(fs.selection);

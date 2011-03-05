@@ -28,20 +28,19 @@
 #include "vcxypadfixture.h"
 
 class VCXYPad;
+class Doc;
 
 class VCXYPadProperties : public QDialog, public Ui_VCXYPadProperties
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCXYPadProperties)
 
     /********************************************************************
      * Initialization
      ********************************************************************/
 public:
-    VCXYPadProperties(QWidget* parent, VCXYPad* xypad);
+    VCXYPadProperties(QWidget* parent, VCXYPad* xypad, Doc* doc);
     ~VCXYPadProperties();
-
-private:
-    Q_DISABLE_COPY(VCXYPadProperties)
 
     /********************************************************************
      * Tree
@@ -52,8 +51,7 @@ protected:
     QList <VCXYPadFixture> selectedFixtures() const;
     QTreeWidgetItem* fixtureItem(const VCXYPadFixture& fxi);
 
-    void updateFixtureItem(QTreeWidgetItem* item,
-                           const VCXYPadFixture& fxi);
+    void updateFixtureItem(QTreeWidgetItem* item, const VCXYPadFixture& fxi);
     void removeFixtureItem(quint32 fxi_id);
 
 protected slots:
@@ -64,8 +62,9 @@ protected slots:
 
     void accept();
 
-protected:
+private:
     VCXYPad* m_xypad;
+    Doc* m_doc;
 };
 
 #endif

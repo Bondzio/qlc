@@ -116,7 +116,7 @@ bool VCXYPad::copyFrom(VCWidget* widget)
 
 void VCXYPad::editProperties()
 {
-    VCXYPadProperties prop(_app, this);
+    VCXYPadProperties prop(_app, this, _app->doc());
     if (prop.exec() == QDialog::Accepted)
         _app->doc()->setModified();
 }

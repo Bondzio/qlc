@@ -29,14 +29,16 @@
 #include "assignhotkey.h"
 #include "vccuelist.h"
 #include "inputmap.h"
-#include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
-VCCueListProperties::VCCueListProperties(QWidget* parent, VCCueList* cueList)
-        : QDialog(parent)
+VCCueListProperties::VCCueListProperties(QWidget* parent, VCCueList* cueList,
+                                         Doc* doc, InputMap* inputMap)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
     Q_ASSERT(cueList != NULL);
     m_cueList = cueList;
 
@@ -140,7 +142,7 @@ void VCCueListProperties::slotTabChanged()
 
 void VCCueListProperties::updateChaserName()
 {
-    Function* function = _app->doc()->function(m_chaser);
+    Function* function = m_doc->function(m_chaser);
     if (function != NULL)
         m_chaserEdit->setText(function->name());
     else
@@ -186,7 +188,7 @@ void VCCueListProperties::slotNextDetachClicked()
 
 void VCCueListProperties::slotNextChooseInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_nextInputUniverse = sic.universe();
@@ -199,14 +201,12 @@ void VCCueListProperties::slotNextAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotNextInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotNextInputValueChanged(quint32,quint32)));
     }
 }
@@ -223,9 +223,8 @@ void VCCueListProperties::updateNextInputSource()
     QString uniName;
     QString chName;
 
-    if (_app->inputMap()->inputSourceNames(m_nextInputUniverse,
-                                           m_nextInputChannel,
-                                           uniName, chName) == true)
+    if (m_inputMap->inputSourceNames(m_nextInputUniverse, m_nextInputChannel,
+                                     uniName, chName) == true)
     {
         /* Display the gathered information */
         m_nextInputUniverseEdit->setText(uniName);
@@ -260,7 +259,7 @@ void VCCueListProperties::slotPreviousDetachClicked()
 
 void VCCueListProperties::slotPreviousChooseInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_previousInputUniverse = sic.universe();
@@ -276,14 +275,12 @@ void VCCueListProperties::slotPreviousAutoDetectInputToggled(bool checked)
         if (m_nextAutoDetectInputButton->isChecked() == true)
             m_nextAutoDetectInputButton->toggle();
 
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotPreviousInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotPreviousInputValueChanged(quint32,quint32)));
     }
 }
@@ -300,9 +297,8 @@ void VCCueListProperties::updatePreviousInputSource()
     QString uniName;
     QString chName;
 
-    if (_app->inputMap()->inputSourceNames(m_previousInputUniverse,
-                                           m_previousInputChannel,
-                                           uniName, chName) == true)
+    if (m_inputMap->inputSourceNames(m_previousInputUniverse, m_previousInputChannel,
+                                     uniName, chName) == true)
     {
         /* Display the gathered information */
         m_previousInputUniverseEdit->setText(uniName);

@@ -28,6 +28,8 @@
 #include "ui_vccuelistproperties.h"
 
 class VCCueList;
+class InputMap;
+class Doc;
 
 class VCCueListProperties : public QDialog, public Ui_VCCueListProperties
 {
@@ -38,7 +40,8 @@ class VCCueListProperties : public QDialog, public Ui_VCCueListProperties
      * Initialization
      ************************************************************************/
 public:
-    VCCueListProperties(QWidget* parent, VCCueList* cueList);
+    VCCueListProperties(QWidget* parent, VCCueList* cueList,
+                        Doc* doc, InputMap* inputMap);
     ~VCCueListProperties();
 
 public slots:
@@ -47,6 +50,8 @@ public slots:
 
 protected:
     VCCueList* m_cueList;
+    Doc* m_doc;
+    InputMap* m_inputMap;
 
     /************************************************************************
      * Cues

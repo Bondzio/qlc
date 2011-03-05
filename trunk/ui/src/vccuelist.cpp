@@ -392,7 +392,7 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
 
 void VCCueList::editProperties()
 {
-    VCCueListProperties prop(_app, this);
+    VCCueListProperties prop(_app, this, _app->doc(), _app->inputMap());
     if (prop.exec() == QDialog::Accepted)
     {
         _app->doc()->setModified();

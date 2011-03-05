@@ -20,6 +20,7 @@
 */
 
 #include <QMdiSubWindow>
+#include <QApplication>
 #include <QActionGroup>
 #include <QFontDialog>
 #include <QScrollArea>
@@ -38,7 +39,6 @@
 #include "outputmap.h"
 #include "monitor.h"
 #include "apputil.h"
-#include "app.h"
 #include "doc.h"
 
 #include "qlcfile.h"
@@ -48,16 +48,20 @@
 #define SETTINGS_VALUESTYLE "monitor/valuestyle"
 #define SETTINGS_CHANNELSTYLE "monitor/channelstyle"
 
-extern App* _app;
-
 Monitor* Monitor::s_instance = NULL;
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-Monitor::Monitor(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
+Monitor::Monitor(QWidget* parent, Doc* doc, OutputMap* outputMap, Qt::WindowFlags f)
+    : QWidget(parent, f)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+
     /* Master layout for toolbar and scroll area */
     new QVBoxLayout(this);
 
@@ -80,7 +84,7 @@ Monitor::Monitor(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
     initToolBar();
 
     /* Create a bunch of MonitorFixtures for each fixture */
-    foreach(Fixture* fxi, _app->doc()->fixtures())
+    foreach(Fixture* fxi, m_doc->fixtures())
     {
         Q_ASSERT(fxi != NULL);
         createMonitorFixture(fxi);
@@ -92,9 +96,9 @@ Monitor::Monitor(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
     m_scrollArea->show();
 
     /* Listen to fixture additions and changes from Doc */
-    connect(_app->doc(), SIGNAL(fixtureAdded(quint32)),
+    connect(m_doc, SIGNAL(fixtureAdded(quint32)),
             this, SLOT(slotFixtureAdded(quint32)));
-    connect(_app->doc(), SIGNAL(fixtureChanged(quint32)),
+    connect(m_doc, SIGNAL(fixtureChanged(quint32)),
             this, SLOT(slotFixtureChanged(quint32)));
 
     m_timer = startTimer(1000 / 50);
@@ -123,7 +127,7 @@ void Monitor::loadSettings()
     {
         QFont fn;
         fn.fromString(var.toString());
-        if (fn != _app->font())
+        if (fn != QApplication::font())
             m_monitorWidget->setFont(fn);
     }
 
@@ -155,38 +159,49 @@ void Monitor::saveSettings()
     settings.setValue(SETTINGS_CHANNELSTYLE, channelStyle());
 }
 
-void Monitor::create(QWidget* parent)
+void Monitor::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
+    if (s_instance == NULL)
+    {
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new Monitor(parent, doc, outputMap, Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new Monitor(sub, doc, outputMap);
+        window = area->addSubWindow(sub);
+    #endif
 
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new Monitor(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new Monitor(parent);
-    window = area->addSubWindow(s_instance);
-#endif
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/monitor.png"));
+        window->setWindowTitle(tr("Fixture Monitor"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/monitor.png"));
-    window->setWindowTitle(tr("Fixture Monitor"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+            window->restoreGeometry(var.toByteArray());
+        AppUtil::ensureWidgetIsVisible(window);
+    }
+    else
+    {
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
+    }
 
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        window->restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(window);
     window->show();
+    window->raise();
 }
 
 /****************************************************************************
@@ -324,7 +339,7 @@ void Monitor::createMonitorFixture(Fixture* fxi)
 
 void Monitor::slotFixtureAdded(quint32 fxi_id)
 {
-    Fixture* fxi = _app->doc()->fixture(fxi_id);
+    Fixture* fxi = m_doc->fixture(fxi_id);
     if (fxi != NULL)
         createMonitorFixture(fxi);
 }
@@ -345,7 +360,7 @@ void Monitor::timerEvent(QTimerEvent* e)
 {
     Q_UNUSED(e);
 
-    const UniverseArray* universes = _app->outputMap()->peekUniverses();
+    const UniverseArray* universes = m_outputMap->peekUniverses();
     QList <MonitorFixture*> list = findChildren <MonitorFixture*>();
     QListIterator <MonitorFixture*> it(list);
     while (it.hasNext() == true)

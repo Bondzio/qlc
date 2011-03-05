@@ -1202,7 +1202,13 @@ void App::slotControlVC()
 
 void App::slotControlMonitor()
 {
-    Monitor::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    Monitor::createAndShow(parent, doc(), outputMap());
 }
 
 #ifndef __APPLE__

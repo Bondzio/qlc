@@ -52,8 +52,8 @@ public:
         return s_instance;
     }
 
-    /** Create a Monitor with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    /** Create or show Monitor */
+    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap);
 
     /** Normal public destructor */
     ~Monitor();
@@ -63,11 +63,13 @@ protected:
     void saveSettings();
 
     /** Protected constructor to prevent multiple instances. */
-    Monitor(QWidget* parent, Qt::WindowFlags f = 0);
+    Monitor(QWidget* parent, Doc* doc, OutputMap* outputMap, Qt::WindowFlags f = 0);
 
 protected:
     /** The singleton Monitor instance */
     static Monitor* s_instance;
+    Doc* m_doc;
+    OutputMap* m_outputMap;
 
     /*********************************************************************
      * Channel & Value styles

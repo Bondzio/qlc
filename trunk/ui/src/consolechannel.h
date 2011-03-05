@@ -38,8 +38,11 @@ class QSlider;
 class QLabel;
 class QMenu;
 
+class MasterTimer;
 class QLCChannel;
+class OutputMap;
 class Fixture;
+class Doc;
 
 class ConsoleChannel : public QGroupBox, public DMXSource
 {
@@ -50,13 +53,18 @@ class ConsoleChannel : public QGroupBox, public DMXSource
      * Initialization
      *********************************************************************/
 public:
-    ConsoleChannel(QWidget *parent, quint32 fixtureID,
-                   quint32 channel);
+    ConsoleChannel(QWidget *parent, Doc* doc, OutputMap* outputMap,
+                   MasterTimer* masterTimer, quint32 fixtureID, quint32 channel);
     ~ConsoleChannel();
 
 protected:
     /** Initialize the UI */
     void init();
+
+private:
+    Doc* m_doc;
+    OutputMap* m_outputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Menu

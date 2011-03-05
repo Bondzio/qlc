@@ -41,8 +41,6 @@
 #include "universearray.h"
 #include "consolechannel.h"
 
-extern App* _app;
-
 #define CMARGIN_LEFT      1
 #define CMARGIN_TOP       1
 #define CMARGIN_TOP_CHECK 15 /* Leave some space for the check box */
@@ -53,9 +51,18 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-ConsoleChannel::ConsoleChannel(QWidget* parent, quint32 fixtureID,
-                               quint32 channel) : QGroupBox(parent)
+ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                               MasterTimer* masterTimer, quint32 fixtureID,
+                               quint32 channel)
+    : QGroupBox(parent)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_masterTimer(masterTimer)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     /* Set the class name as the object name */
     setObjectName(ConsoleChannel::staticMetaObject.className());
 
@@ -63,7 +70,7 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, quint32 fixtureID,
     m_fixtureID = fixtureID;
 
     // Check that we have an actual fixture
-    m_fixture = _app->doc()->fixture(m_fixtureID);
+    m_fixture = m_doc->fixture(m_fixtureID);
     Q_ASSERT(m_fixture != NULL);
 
     // Check that the given channel is valid
@@ -95,7 +102,7 @@ ConsoleChannel::~ConsoleChannel()
 {
     m_valueChangedMutex.lock();
     m_outputDMX = false;
-    _app->masterTimer()->unregisterDMXSource(this);
+    m_masterTimer->unregisterDMXSource(this);
     m_valueChangedMutex.unlock();
 }
 
@@ -158,14 +165,14 @@ void ConsoleChannel::init()
             this, SLOT(slotValueChange(int)));
 
     // Listen to fixture changes so channel & group are updated when they change
-    connect(_app->doc(), SIGNAL(fixtureChanged(quint32)),
+    connect(m_doc, SIGNAL(fixtureChanged(quint32)),
             this, SLOT(slotFixtureChanged(quint32)));
 
     // Grab channel & group for writeDMX
     slotFixtureChanged(m_fixtureID);
 
     /* Register this object as a source of DMX data */
-    _app->masterTimer()->registerDMXSource(this);
+    m_masterTimer->registerDMXSource(this);
 }
 
 /*****************************************************************************
@@ -542,7 +549,7 @@ void ConsoleChannel::enable(bool state)
 {
     setChecked(state);
 
-    const UniverseArray* unis(_app->outputMap()->peekUniverses());
+    const UniverseArray* unis(m_outputMap->peekUniverses());
     m_value = unis->preGMValues()[m_fixture->universeAddress() + m_channel];
 
     emit valueChanged(m_channel, m_value, isEnabled());

@@ -59,16 +59,13 @@ FixtureConsole::~FixtureConsole()
 
 void FixtureConsole::setFixture(quint32 id)
 {
-    ConsoleChannel* cc = NULL;
-    Fixture* fxi = NULL;
-
     /* Get rid of any previous channels */
     while (m_channels.isEmpty() == false)
         delete m_channels.takeFirst();
 
     m_fixture = id;
 
-    fxi = _app->doc()->fixture(m_fixture);
+    Fixture* fxi = _app->doc()->fixture(m_fixture);
     Q_ASSERT(fxi != NULL);
 
     /* Create channel units */
@@ -79,7 +76,8 @@ void FixtureConsole::setFixture(quint32 id)
         if (ch->group() == QLCChannel::NoGroup)
             continue;
 
-        cc = new ConsoleChannel(this, m_fixture, i);
+        ConsoleChannel* cc = new ConsoleChannel(this, _app->doc(), _app->outputMap(),
+                                                _app->masterTimer(), m_fixture, i);
         cc->setCheckable(m_channelsCheckable);
         layout()->addWidget(cc);
 
@@ -159,9 +157,7 @@ QList <SceneValue> FixtureConsole::values() const
     QListIterator <QObject*> it(children());
     while (it.hasNext() == true)
     {
-        ConsoleChannel* cc;
-
-        cc = qobject_cast<ConsoleChannel*> (it.next());
+        ConsoleChannel* cc = qobject_cast<ConsoleChannel*> (it.next());
         if (cc != NULL && cc->isEnabled() == true)
         {
             list.append(SceneValue(m_fixture, cc->channel(),

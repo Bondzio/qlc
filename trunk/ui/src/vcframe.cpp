@@ -166,7 +166,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCButton)
         {
-            VCButton::loader(&tag, this);
+            /* Create a new button into its parent */
+            VCButton* button = new VCButton(this, _app->doc(), _app->inputMap(), _app->masterTimer());
+            if (button->loadXML(&tag) == false)
+                delete button;
+            else
+                button->show();
         }
         else if (tag.tagName() == KXMLQLCVCXYPad)
         {

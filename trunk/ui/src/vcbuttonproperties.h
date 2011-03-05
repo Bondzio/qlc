@@ -38,7 +38,7 @@ class VCButtonProperties : public QDialog, public Ui_VCButtonProperties
     Q_DISABLE_COPY(VCButtonProperties)
 
 public:
-    VCButtonProperties(VCButton* button, QWidget* parent, Doc* doc, InputMap* inputMap);
+    VCButtonProperties(VCButton* button, Doc* doc, InputMap* inputMap);
     ~VCButtonProperties();
 
 protected slots:

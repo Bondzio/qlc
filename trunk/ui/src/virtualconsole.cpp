@@ -738,7 +738,7 @@ void VirtualConsole::slotAddButton()
     if (parent == NULL)
         return;
 
-    VCButton* button = new VCButton(parent);
+    VCButton* button = new VCButton(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(button != NULL);
     button->show();
     button->move(parent->lastClickPoint());
@@ -773,7 +773,7 @@ void VirtualConsole::slotAddButtonMatrix()
     {
         for (int x = 0; x < h; x++)
         {
-            VCButton* button = new VCButton(frame);
+            VCButton* button = new VCButton(frame, _app->doc(), _app->inputMap(), _app->masterTimer());
             Q_ASSERT(button != NULL);
             button->move(QPoint(10 + (x * sz), 10 + (y * sz)));
             button->resize(QSize(sz, sz));

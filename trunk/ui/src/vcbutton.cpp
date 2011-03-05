@@ -51,10 +51,7 @@
 #include "vcbutton.h"
 #include "function.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 const QSize VCButton::minimumSize(QSize(20, 20));
 const QSize VCButton::defaultSize(QSize(50, 50));
@@ -63,11 +60,18 @@ const QSize VCButton::defaultSize(QSize(50, 50));
  * Initialization
  *****************************************************************************/
 
-VCButton::VCButton(QWidget* parent)
+VCButton::VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
     , m_adjustIntensity(false)
     , m_intensityAdjustment(1.0)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     /* Set the class name "VCButton" as the object name as well */
     setObjectName(VCButton::staticMetaObject.className());
 
@@ -99,7 +103,7 @@ VCButton::VCButton(QWidget* parent)
     setStyle(App::saneStyle());
 
     /* Listen to function removals */
-    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+    connect(m_doc, SIGNAL(functionRemoved(quint32)),
             this, SLOT(slotFunctionRemoved(quint32)));
 }
 
@@ -115,7 +119,7 @@ VCWidget* VCButton::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCButton* button = new VCButton(parent);
+    VCButton* button = new VCButton(parent, m_doc, m_inputMap, m_masterTimer);
     if (button->copyFrom(this) == false)
     {
         delete button;
@@ -148,9 +152,9 @@ bool VCButton::copyFrom(VCWidget* widget)
 
 void VCButton::editProperties()
 {
-    VCButtonProperties prop(this, _app, _app->doc(), _app->inputMap());
+    VCButtonProperties prop(this, m_doc, m_inputMap);
     if (prop.exec() == QDialog::Accepted)
-        _app->doc()->setModified();
+        m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -166,7 +170,7 @@ void VCButton::setBackgroundColor(const QColor& color)
     pal.setColor(QPalette::Button, color);
     setPalette(pal);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCButton::resetBackgroundColor()
@@ -191,7 +195,7 @@ void VCButton::resetBackgroundColor()
         setPalette(pal);
     }
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -208,7 +212,7 @@ void VCButton::setForegroundColor(const QColor& color)
     pal.setColor(QPalette::ButtonText, color);
     setPalette(pal);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 void VCButton::resetForegroundColor()
@@ -230,7 +234,7 @@ void VCButton::resetForegroundColor()
     else if (m_backgroundImage.isEmpty() == false)
         setBackgroundImage(m_backgroundImage);
 
-    _app->doc()->setModified();
+    m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -279,27 +283,6 @@ void VCButton::slotResetIcon()
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCButton::loader(const QDomElement* root, QWidget* parent)
-{
-    VCButton* button = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCButton)
-    {
-        qWarning() << Q_FUNC_INFO << "Button node not found";
-        return false;
-    }
-
-    /* Create a new button into its parent */
-    button = new VCButton(parent);
-    button->show();
-
-    /* Continue loading */
-    return button->loadXML(root);
-}
 
 bool VCButton::loadXML(const QDomElement* root)
 {
@@ -499,13 +482,13 @@ void VCButton::setOn(bool on)
     {
         if (on == true)
         {
-            _app->inputMap()->feedBack(m_inputUniverse,
+            m_inputMap->feedBack(m_inputUniverse,
                                        m_inputChannel,
                                        UCHAR_MAX);
         }
         else
         {
-            _app->inputMap()->feedBack(m_inputUniverse,
+            m_inputMap->feedBack(m_inputUniverse,
                                        m_inputChannel,
                                        0);
         }
@@ -587,7 +570,7 @@ void VCButton::slotInputValueChanged(quint32 universe,
 
 void VCButton::setFunction(quint32 fid)
 {
-    Function* old = _app->doc()->function(m_function);
+    Function* old = m_doc->function(m_function);
     if (old != NULL)
     {
         /* Get rid of old function connections */
@@ -599,7 +582,7 @@ void VCButton::setFunction(quint32 fid)
                    this, SLOT(slotFunctionFlashing(quint32,bool)));
     }
 
-    Function* function = _app->doc()->function(fid);
+    Function* function = m_doc->function(fid);
     if (function != NULL)
     {
         /* Connect to the new function */
@@ -687,7 +670,7 @@ void VCButton::pressFunction()
     Function* f = NULL;
     if (m_action == Toggle)
     {
-        f = _app->doc()->function(m_function);
+        f = m_doc->function(m_function);
         if (f != NULL)
         {
             /* if the button is in a SoloFrame and the function is running but was started by a different function (a chaser or collection), 
@@ -698,7 +681,7 @@ void VCButton::pressFunction()
             else
             {
                 emit functionStarting();
-                _app->masterTimer()->startFunction(f, false);
+                m_masterTimer->startFunction(f, false);
                 if (adjustIntensity() == true)
                     f->adjustIntensity(intensityAdjustment());
             }
@@ -706,9 +689,9 @@ void VCButton::pressFunction()
     }
     else if (m_action == Flash && isOn() == false)
     {
-        f = _app->doc()->function(m_function);
+        f = m_doc->function(m_function);
         if (f != NULL)
-            f->flash(_app->masterTimer());
+            f->flash(m_masterTimer);
     }
 }
 
@@ -718,9 +701,9 @@ void VCButton::releaseFunction()
 
     if (m_action == Flash && isOn() == true)
     {
-        f = _app->doc()->function(m_function);
+        f = m_doc->function(m_function);
         if (f != NULL)
-            f->unFlash(_app->masterTimer());
+            f->unFlash(m_masterTimer);
     }
 }
 

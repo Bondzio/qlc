@@ -54,6 +54,7 @@ class QEvent;
 class VCButton : public VCWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCButton)
 
 public:
     /** Minimum size for a button */
@@ -66,11 +67,13 @@ public:
      * Initialization
      *********************************************************************/
 public:
-    VCButton(QWidget* parent);
+    VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
     ~VCButton();
 
 private:
-    Q_DISABLE_COPY(VCButton)
+    Doc* m_doc;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard
@@ -152,15 +155,6 @@ protected:
      * Load & Save
      *********************************************************************/
 public:
-    /**
-     * Create and load a new VCButton from an XML document
-     *
-     * @param btn_root A VCButton XML root node
-     * @param parent A parent VCFrame for the new VCButton
-     * @return true if successful; otherwise false
-     */
-    static bool loader(const QDomElement* btn_root, QWidget* parent);
-
     /**
      * Load a VCButton's properties from an XML document node
      *

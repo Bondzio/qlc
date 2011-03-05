@@ -46,9 +46,8 @@
 #include "app.h"
 #include "doc.h"
 
-VCButtonProperties::VCButtonProperties(VCButton* button, QWidget* parent,
-                                       Doc* doc, InputMap* inputMap)
-    : QDialog(parent)
+VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, InputMap* inputMap)
+    : QDialog(button)
     , m_doc(doc)
     , m_inputMap(inputMap)
 {

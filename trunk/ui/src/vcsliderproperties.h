@@ -27,22 +27,25 @@
 #include "ui_vcsliderproperties.h"
 
 class QTreeWidgetItem;
-
 class QLCCapability;
 class QLCChannel;
 class VCSlider;
+class InputMap;
 class Fixture;
+class Doc;
 
 class VCSliderProperties : public QDialog, public Ui_VCSliderProperties
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCSliderProperties)
 
 public:
-    VCSliderProperties(QWidget* parent, VCSlider* slider);
+    VCSliderProperties(QWidget* parent, VCSlider* slider, Doc* doc, InputMap* inputMap);
     ~VCSliderProperties();
 
 private:
-    Q_DISABLE_COPY(VCSliderProperties)
+    Doc* m_doc;
+    InputMap* m_inputMap;
 
     /*********************************************************************
      * General page

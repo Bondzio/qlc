@@ -44,19 +44,21 @@
 #include "vcslider.h"
 #include "inputmap.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 #define KColumnName  0
 #define KColumnType  1
 #define KColumnRange 2
 #define KColumnID    3
 
-VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider)
-        : QDialog(parent)
+VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider,
+                                       Doc* doc, InputMap* inputMap)
+    : QDialog(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
     Q_ASSERT(slider != NULL);
     m_slider = slider;
 
@@ -277,14 +279,12 @@ void VCSliderProperties::slotAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
 }
@@ -299,7 +299,7 @@ void VCSliderProperties::slotInputValueChanged(quint32 universe,
 
 void VCSliderProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this, _app->inputMap());
+    SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputUniverse = sic.universe();
@@ -325,7 +325,7 @@ void VCSliderProperties::updateInputSource()
     }
     else
     {
-        patch = _app->inputMap()->patch(m_inputUniverse);
+        patch = m_inputMap->patch(m_inputUniverse);
         if (patch == NULL || patch->plugin() == NULL)
         {
             /* There is no patch for the given universe */
@@ -410,7 +410,7 @@ void VCSliderProperties::slotBusHighLimitSpinChanged(int value)
 
 void VCSliderProperties::levelUpdateFixtures()
 {
-    foreach(Fixture* fixture, _app->doc()->fixtures())
+    foreach(Fixture* fixture, m_doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
         levelUpdateFixtureNode(fixture->id());
@@ -423,7 +423,7 @@ void VCSliderProperties::levelUpdateFixtureNode(quint32 id)
     Fixture* fxi;
     QString str;
 
-    fxi = _app->doc()->fixture(id);
+    fxi = m_doc->fixture(id);
     Q_ASSERT(fxi != NULL);
 
     item = levelFixtureNode(id);
@@ -734,7 +734,7 @@ void VCSliderProperties::slotDetachPlaybackFunctionClicked()
 
 void VCSliderProperties::updatePlaybackFunctionName()
 {
-    Function* function = _app->doc()->function(m_playbackFunctionId);
+    Function* function = m_doc->function(m_playbackFunctionId);
     if (function != NULL)
     {
         m_playbackFunctionEdit->setText(function->name());

@@ -234,7 +234,7 @@ void VCSlider::setCaption(const QString& text)
 
 void VCSlider::editProperties()
 {
-    VCSliderProperties prop(_app, this);
+    VCSliderProperties prop(_app, this, _app->doc(), _app->inputMap());
     if (prop.exec() == QDialog::Accepted)
         _app->doc()->setModified();
 }

@@ -173,7 +173,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCSlider)
         {
-            VCSlider::loader(&tag, this);
+            /* Create a new slider into its parent */
+            VCSlider* slider = new VCSlider(this, _app->doc(), _app->inputMap(), _app->masterTimer());
+            if (slider->loadXML(&tag) == false)
+                delete slider;
+            else
+                slider->show();
         }
         else if (tag.tagName() == KXMLQLCVCSoloFrame)
         {

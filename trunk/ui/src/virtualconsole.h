@@ -90,8 +90,8 @@ protected:
      * Properties
      *********************************************************************/
 public:
-    /** Get VC properties read-only */
-    static const VCProperties properties() {
+    /** Get VC properties */
+    static VCProperties properties() {
         return s_properties;
     }
 

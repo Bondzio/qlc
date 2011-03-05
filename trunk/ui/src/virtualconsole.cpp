@@ -805,7 +805,7 @@ void VirtualConsole::slotAddSlider()
     if (parent == NULL)
         return;
 
-    VCSlider* slider = new VCSlider(parent);
+    VCSlider* slider = new VCSlider(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(slider != NULL);
     slider->show();
     slider->move(parent->lastClickPoint());
@@ -834,7 +834,7 @@ void VirtualConsole::slotAddSliderMatrix()
 
     for (int i = 0; i < count; i++)
     {
-        VCSlider* slider = new VCSlider(frame);
+        VCSlider* slider = new VCSlider(frame, _app->doc(), _app->inputMap(), _app->masterTimer());
         Q_ASSERT(slider != NULL);
         slider->move(QPoint(10 + (width * i), 10));
         slider->resize(QSize(width, height));

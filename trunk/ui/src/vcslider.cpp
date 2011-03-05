@@ -51,8 +51,6 @@
 #include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
 static const quint32 KDefaultBusLowLimit ( 0 );
 static const quint32 KDefaultBusHighLimit ( 10 );
 const QSize VCSlider::defaultSize(QSize(60, 200));
@@ -61,8 +59,16 @@ const QSize VCSlider::defaultSize(QSize(60, 200));
  * Initialization
  *****************************************************************************/
 
-VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
+VCSlider::VCSlider(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent)
+    , m_doc(doc)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     /* Set the class name "VCSlider" as the object name as well */
     setObjectName(VCSlider::staticMetaObject.className());
 
@@ -150,7 +156,7 @@ VCSlider::VCSlider(QWidget* parent) : VCWidget(parent)
 
     /* Listen to fixture removals so that LevelChannels can be removed when
        they no longer point to an existing fixture->channel */
-    connect(_app->doc(), SIGNAL(fixtureRemoved(quint32)),
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 }
 
@@ -163,8 +169,7 @@ VCSlider::~VCSlider()
     /* When application exits these are already NULL and unregistration
        is no longer necessary. But a normal deletion of a VCSlider in
        design mode must unregister the slider. */
-    if (_app != NULL && _app->masterTimer() != NULL)
-        _app->masterTimer()->unregisterDMXSource(this);
+    m_masterTimer->unregisterDMXSource(this);
 }
 
 /*****************************************************************************
@@ -175,7 +180,7 @@ VCWidget* VCSlider::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCSlider* slider = new VCSlider(parent);
+    VCSlider* slider = new VCSlider(parent, m_doc, m_inputMap, m_masterTimer);
     if (slider->copyFrom(this) == false)
     {
         delete slider;
@@ -234,9 +239,9 @@ void VCSlider::setCaption(const QString& text)
 
 void VCSlider::editProperties()
 {
-    VCSliderProperties prop(_app, this, _app->doc(), _app->inputMap());
+    VCSliderProperties prop(this, m_doc, m_inputMap);
     if (prop.exec() == QDialog::Accepted)
-        _app->doc()->setModified();
+        m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -256,7 +261,7 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
         {
             /* Follow playback function running/stopped status in case the
                function is started from another control. */
-            Function* function = _app->doc()->function(playbackFunction());
+            Function* function = m_doc->function(playbackFunction());
             if (function != NULL)
             {
                 connect(function, SIGNAL(running(quint32)),
@@ -279,7 +284,7 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
         {
             /* Stop following playback function running/stopped status in case
                the function is changed in Design mode to another. */
-            Function* function = _app->doc()->function(playbackFunction());
+            Function* function = m_doc->function(playbackFunction());
             if (function != NULL)
             {
                 disconnect(function, SIGNAL(running(quint32)),
@@ -406,7 +411,7 @@ void VCSlider::setSliderMode(SliderMode mode)
     if ((m_sliderMode == Level && mode != Level) ||
         (m_sliderMode == Playback && mode != Playback))
     {
-        _app->masterTimer()->unregisterDMXSource(this);
+        m_masterTimer->unregisterDMXSource(this);
     }
 
     m_sliderMode = mode;
@@ -441,7 +446,7 @@ void VCSlider::setSliderMode(SliderMode mode)
         m_bottomLabel->show();
         m_tapButton->hide();
 
-        _app->masterTimer()->registerDMXSource(this);
+        m_masterTimer->registerDMXSource(this);
     }
     else if (mode == Playback)
     {
@@ -453,7 +458,7 @@ void VCSlider::setSliderMode(SliderMode mode)
         m_slider->setValue(level);
         slotSliderMoved(level);
 
-        _app->masterTimer()->registerDMXSource(this);
+        m_masterTimer->registerDMXSource(this);
     }
 }
 
@@ -656,7 +661,7 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
     while (it.hasNext() == true)
     {
         LevelChannel lch(it.next());
-        Fixture* fxi = _app->doc()->fixture(lch.fixture);
+        Fixture* fxi = m_doc->fixture(lch.fixture);
         if (fxi != NULL)
         {
             const QLCChannel* qlcch = fxi->channel(lch.channel);
@@ -681,7 +686,7 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
 
 void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
 {
-    Function* function = _app->doc()->function(m_playbackFunction);
+    Function* function = m_doc->function(m_playbackFunction);
     if (function == NULL)
         return;
 
@@ -849,7 +854,7 @@ void VCSlider::sendFeedBack(int value)
                          float(m_slider->maximum()), float(0),
                          float(UCHAR_MAX));
 
-        _app->inputMap()->feedBack(m_inputUniverse, m_inputChannel, int(fb));
+        m_inputMap->feedBack(m_inputUniverse, m_inputChannel, int(fb));
     }
 }
 
@@ -898,7 +903,7 @@ bool VCSlider::isButton(quint32 universe, quint32 channel)
     QLCInputProfile* profile = NULL;
     QLCInputChannel* ch = NULL;
 
-    patch = _app->inputMap()->patch(universe);
+    patch = m_inputMap->patch(universe);
     if (patch != NULL)
     {
         profile = patch->profile();
@@ -949,27 +954,6 @@ void VCSlider::slotInputValueChanged(quint32 universe, quint32 channel,
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCSlider::loader(const QDomElement* root, QWidget* parent)
-{
-    VCSlider* slider = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCSlider)
-    {
-        qWarning() << Q_FUNC_INFO << "Slider node not found";
-        return false;
-    }
-
-    /* Create a new slider into its parent */
-    slider = new VCSlider(parent);
-    slider->show();
-
-    /* Continue loading */
-    return slider->loadXML(root);
-}
 
 bool VCSlider::loadXML(const QDomElement* root)
 {

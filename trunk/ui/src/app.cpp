@@ -149,6 +149,8 @@ App::~App()
     if (VirtualConsole::instance() != NULL)
         delete VirtualConsole::instance();
 
+    VirtualConsole::properties().resetContents();
+
     // Store outputmap defaults
     if (m_outputMap != NULL)
         m_outputMap->saveDefaults();

@@ -51,9 +51,8 @@
 #define KColumnRange 2
 #define KColumnID    3
 
-VCSliderProperties::VCSliderProperties(QWidget* parent, VCSlider* slider,
-                                       Doc* doc, InputMap* inputMap)
-    : QDialog(parent)
+VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc, InputMap* inputMap)
+    : QDialog(slider)
     , m_doc(doc)
     , m_inputMap(inputMap)
 {

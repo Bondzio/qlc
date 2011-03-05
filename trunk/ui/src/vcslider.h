@@ -77,10 +77,15 @@ public:
      *********************************************************************/
 public:
     /** Normal constructor */
-    VCSlider(QWidget* parent);
+    VCSlider(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
 
     /** Destructor */
     ~VCSlider();
+
+private:
+    Doc* m_doc;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard
@@ -512,7 +517,6 @@ protected slots:
      * Load & Save
      *********************************************************************/
 public:
-    static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);
     bool loadXMLLevel(const QDomElement* level_root);
     bool loadXMLPlayback(const QDomElement* pb_root);

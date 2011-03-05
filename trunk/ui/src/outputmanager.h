@@ -46,21 +46,19 @@ public:
         return s_instance;
     }
 
-    /** Create an instance with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    /** Create or show OutputManager */
+    static void createAndShow(QWidget* parent, OutputMap* outputMap);
 
     /** Normal public destructor */
     virtual ~OutputManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    OutputManager(QWidget* parent, Qt::WindowFlags flags = 0);
-
-protected slots:
-    void slotModeChanged(Doc::Mode mode);
+    OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFlags flags = 0);
 
 protected:
     static OutputManager* s_instance;
+    OutputMap* m_outputMap;
 
     /*********************************************************************
      * Tree widget

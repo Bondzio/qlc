@@ -570,7 +570,6 @@ void App::slotModeChanged(Doc::Mode mode)
         m_fileQuitAction->setEnabled(false);
 
         m_functionManagerAction->setEnabled(false);
-        m_outputManagerAction->setEnabled(false);
         m_inputManagerAction->setEnabled(false);
 
         m_modeToggleAction->setIcon(QIcon(":/design.png"));
@@ -598,7 +597,6 @@ void App::slotModeChanged(Doc::Mode mode)
         m_fileQuitAction->setEnabled(true);
 
         m_functionManagerAction->setEnabled(true);
-        m_outputManagerAction->setEnabled(true);
         m_inputManagerAction->setEnabled(true);
 
         m_modeToggleAction->setIcon(QIcon(":/operate.png"));
@@ -1173,7 +1171,13 @@ void App::slotBusManager()
 
 void App::slotOutputManager()
 {
-    OutputManager::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    OutputManager::createAndShow(parent, outputMap());
 }
 
 void App::slotInputManager()

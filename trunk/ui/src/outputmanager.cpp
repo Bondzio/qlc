@@ -28,6 +28,7 @@
 #include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
+#include <QDebug>
 #include <QMenu>
 
 #include "qlcoutplugin.h"
@@ -45,17 +46,18 @@
 #define KColumnOutputName 2
 #define KColumnOutput     3
 
-extern App* _app;
-
 OutputManager* OutputManager::s_instance = NULL;
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-OutputManager::OutputManager(QWidget* parent, Qt::WindowFlags flags)
-        : QWidget(parent, flags)
+OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFlags flags)
+    : QWidget(parent, flags)
+    , m_outputMap(outputMap)
 {
+    Q_ASSERT(outputMap != NULL);
+
     /* Create a new layout for this widget */
     new QVBoxLayout(this);
 
@@ -81,10 +83,7 @@ OutputManager::OutputManager(QWidget* parent, Qt::WindowFlags flags)
     connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
             this, SLOT(slotEditClicked()));
 
-    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
-
-    connect(_app->outputMap(), SIGNAL(pluginConfigurationChanged(const QString&)),
+    connect(m_outputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged()));
 
     updateTree();
@@ -101,60 +100,52 @@ OutputManager::~OutputManager()
     OutputManager::s_instance = NULL;
 }
 
-void OutputManager::create(QWidget* parent)
+void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
-
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new OutputManager(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new OutputManager(parent);
-    window = area->addSubWindow(s_instance);
-#endif
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/output.png"));
-    window->setWindowTitle(tr("Output Manager"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-    window->show();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
+    if (s_instance == NULL)
     {
-        window->restoreGeometry(var.toByteArray());
-        AppUtil::ensureWidgetIsVisible(window);
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new OutputManager(parent, outputMap, Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new OutputManager(sub, outputMap);
+        window = area->addSubWindow(sub);
+    #endif
+
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/output.png"));
+        window->setWindowTitle(tr("Output Manager"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
+        window->show();
+
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+        {
+            window->restoreGeometry(var.toByteArray());
+            AppUtil::ensureWidgetIsVisible(window);
+        }
     }
     else
     {
-        QVariant w = settings.value("outputmanager/width");
-        QVariant h = settings.value("outputmanager/height");
-        if (w.isValid() == true && h.isValid() == true)
-            window->resize(w.toInt(), h.toInt());
-        else
-            window->resize(700, 300);
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
     }
-}
 
-void OutputManager::slotModeChanged(Doc::Mode mode)
-{
-    /* Close this when entering operate mode */
-    if (mode == Doc::Operate)
-#ifdef __APPLE__
-        deleteLater();
-#else
-        parent()->deleteLater();
-#endif
+    window->show();
+    window->raise();
 }
 
 /*****************************************************************************
@@ -164,7 +155,7 @@ void OutputManager::slotModeChanged(Doc::Mode mode)
 void OutputManager::updateTree()
 {
     m_tree->clear();
-    for (quint32 uni = 0; uni < _app->outputMap()->universes(); uni++)
+    for (quint32 uni = 0; uni < m_outputMap->universes(); uni++)
         updateItem(new QTreeWidgetItem(m_tree), uni);
 }
 
@@ -172,7 +163,7 @@ void OutputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
 {
     Q_ASSERT(item != NULL);
 
-    OutputPatch* op = _app->outputMap()->patch(universe);
+    OutputPatch* op = m_outputMap->patch(universe);
     Q_ASSERT(op != NULL);
 
     item->setText(KColumnUniverse, QString::number(universe + 1));
@@ -197,7 +188,7 @@ void OutputManager::slotEditClicked()
         return;
 
     quint32 universe = item->text(KColumnUniverse).toUInt() - 1;
-    OutputPatchEditor ope(this, universe, _app->outputMap());
+    OutputPatchEditor ope(this, universe, m_outputMap);
     if (ope.exec() == QDialog::Accepted)
-        updateItem(item, universe);
+        updateTree();
 }

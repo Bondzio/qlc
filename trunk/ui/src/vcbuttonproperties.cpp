@@ -108,7 +108,7 @@ VCButtonProperties::~VCButtonProperties()
 
 void VCButtonProperties::slotAttachFunction()
 {
-    FunctionSelection sel(this, false);
+    FunctionSelection sel(this, m_doc, false);
     if (sel.exec() == QDialog::Accepted)
     {
         /* Get the first selected function */
@@ -118,11 +118,8 @@ void VCButtonProperties::slotAttachFunction()
 
 void VCButtonProperties::slotSetFunction(quint32 fid)
 {
-    Function* func;
-
     m_function = fid;
-
-    func = m_doc->function(m_function);
+    Function* func = m_doc->function(m_function);
     if (func == NULL)
     {
         m_functionEdit->setText(tr("No function"));

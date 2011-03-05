@@ -49,6 +49,7 @@ public:
      * Constructor
      *
      * @param parent The parent widget
+     * @param doc The Doc object, whose functions to select from
      * @param multiple Set true to enable multiple selection
      * @param disableID A function ID to disable (when adding steps to
      *                  a chaser, disable the chaser itself)
@@ -56,8 +57,7 @@ public:
      *               functions are shown by default.
      * @param constFilter If true, don't allow user filter selection
      */
-    FunctionSelection(QWidget* parent,
-                      bool multiple,
+    FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
                       quint32 disableFunction = Function::invalidId(),
                       int filter = Function::Scene | Function::Chaser |
                                    Function::EFX | Function::Collection,
@@ -67,6 +67,9 @@ public:
      * Destructor
      */
     ~FunctionSelection();
+
+private:
+    Doc* m_doc;
 
     /*********************************************************************
      * Disabled functions

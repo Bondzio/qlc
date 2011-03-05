@@ -87,7 +87,7 @@ AddVCButtonMatrix::~AddVCButtonMatrix()
 
 void AddVCButtonMatrix::slotAddClicked()
 {
-    FunctionSelection fs(this, true);
+    FunctionSelection fs(this, m_doc, true);
     fs.setDisabledFunctions(functions());
     if (fs.exec() == true)
     {

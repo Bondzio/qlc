@@ -37,26 +37,23 @@
 #include "chaser.h"
 #include "scene.h"
 #include "efx.h"
-#include "app.h"
 #include "doc.h"
 
 #define KColumnName 0
 #define KColumnType 1
 #define KColumnID   2
 
-extern App* _app;
-
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-FunctionSelection::FunctionSelection(QWidget* parent,
-                                     bool multiple,
-                                     quint32 disableFunction,
-                                     int filter,
-                                     bool constFilter)
-        : QDialog(parent)
+FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
+                                     quint32 disableFunction, int filter, bool constFilter)
+    : QDialog(parent)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
+
     m_toolbar = NULL;
     m_addSceneAction = NULL;
     m_addChaserAction = NULL;
@@ -142,10 +139,10 @@ void FunctionSelection::initToolBar()
 
 void FunctionSelection::slotNewScene()
 {
-    Function* function = new Scene(_app->doc());
+    Function* function = new Scene(m_doc);
     function->setName(tr("New Scene"));
 
-    if (_app->doc()->addFunction(function) == true)
+    if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
         addFunctionErrorMessage();
@@ -153,10 +150,10 @@ void FunctionSelection::slotNewScene()
 
 void FunctionSelection::slotNewChaser()
 {
-    Function* function = new Chaser(_app->doc());
+    Function* function = new Chaser(m_doc);
     function->setName(tr("New Chaser"));
 
-    if (_app->doc()->addFunction(function) == true)
+    if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
         addFunctionErrorMessage();
@@ -164,10 +161,10 @@ void FunctionSelection::slotNewChaser()
 
 void FunctionSelection::slotNewEFX()
 {
-    Function* function = new EFX(_app->doc());
+    Function* function = new EFX(m_doc);
     function->setName(tr("New EFX"));
 
-    if (_app->doc()->addFunction(function) == true)
+    if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
         addFunctionErrorMessage();
@@ -175,10 +172,10 @@ void FunctionSelection::slotNewEFX()
 
 void FunctionSelection::slotNewCollection()
 {
-    Function* function = new Collection(_app->doc());
+    Function* function = new Collection(m_doc);
     function->setName(tr("New Collection"));
 
-    if (_app->doc()->addFunction(function) == true)
+    if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
         addFunctionErrorMessage();
@@ -203,7 +200,7 @@ void FunctionSelection::addFunction(Function* function)
 
     if (editFunction(function) == QDialog::Rejected)
     {
-        _app->doc()->deleteFunction(function->id());
+        m_doc->deleteFunction(function->id());
         delete item;
     }
     else
@@ -236,7 +233,7 @@ void FunctionSelection::refillTree()
     m_tree->clear();
 
     /* Fill the tree */
-    foreach (Function* function, _app->doc()->functions())
+    foreach (Function* function, m_doc->functions())
     {
         if (m_filter & function->type())
         {
@@ -332,22 +329,22 @@ int FunctionSelection::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), _app->doc());
+        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), _app->doc());
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), _app->doc());
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)
     {
-        EFXEditor editor(this, qobject_cast<EFX*> (function), _app->doc());
+        EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
         result = editor.exec();
     }
     else

@@ -151,7 +151,7 @@ void VCCueListProperties::updateChaserName()
 
 void VCCueListProperties::slotAttachClicked()
 {
-    FunctionSelection fs(this, false, Function::invalidId(), Function::Chaser, true);
+    FunctionSelection fs(this, m_doc, false, Function::invalidId(), Function::Chaser, true);
     if (fs.exec() == QDialog::Accepted)
     {
         if (fs.selection().isEmpty() == false)

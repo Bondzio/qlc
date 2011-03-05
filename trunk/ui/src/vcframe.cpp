@@ -162,7 +162,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCLabel)
         {
-            VCLabel::loader(&tag, this);
+            /* Create a new label into its parent */
+            VCLabel* label = new VCLabel(this);
+            if (label->loadXML(&tag) == false)
+                delete label;
+            else
+                label->show();
         }
         else if (tag.tagName() == KXMLQLCVCButton)
         {

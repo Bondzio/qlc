@@ -31,10 +31,7 @@
 
 #include "virtualconsole.h"
 #include "vclabel.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 VCLabel::VCLabel(QWidget* parent) : VCWidget(parent)
 {
@@ -70,27 +67,6 @@ VCWidget* VCLabel::createCopy(VCWidget* parent)
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCLabel::loader(const QDomElement* root, QWidget* parent)
-{
-    VCLabel* label = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCLabel)
-    {
-        qWarning() << Q_FUNC_INFO << "Label node not found";
-        return false;
-    }
-
-    /* Create a new label into its parent */
-    label = new VCLabel(parent);
-    label->show();
-
-    /* Continue loading */
-    return label->loadXML(root);
-}
 
 bool VCLabel::loadXML(const QDomElement* root)
 {

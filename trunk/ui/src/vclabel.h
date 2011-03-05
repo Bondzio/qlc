@@ -33,6 +33,7 @@ class QPaintEvent;
 class VCLabel : public VCWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCLabel)
 
     /*********************************************************************
      * Initialization
@@ -44,9 +45,6 @@ public:
     /** Destructor */
     ~VCLabel();
 
-private:
-    Q_DISABLE_COPY(VCLabel)
-
     /*********************************************************************
     * Clipboard
     *********************************************************************/
@@ -57,7 +55,6 @@ public:
      * Load & Save
      *********************************************************************/
 public:
-    static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 

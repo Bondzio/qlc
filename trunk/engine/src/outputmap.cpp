@@ -224,7 +224,9 @@ bool OutputMap::setPatch(quint32 universe, const QString& pluginName,
         return false;
     }
 
+    m_universeMutex.lock();
     m_patch[universe]->set(plugin(pluginName), output);
+    m_universeMutex.unlock();
 
     return true;
 }

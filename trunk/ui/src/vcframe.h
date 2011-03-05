@@ -41,13 +41,19 @@ class VCFrame : public VCWidget
      * Initialization
      *********************************************************************/
 public:
-    VCFrame(QWidget* parent);
+    VCFrame(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCFrame();
 
     void init(bool bottomFrame = false);
 
     /* Check if this is the virtual console's draw area */
     bool isBottomFrame();
+
+protected:
+    Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard

@@ -761,9 +761,9 @@ void VirtualConsole::slotAddButtonMatrix()
 
     VCWidget* frame = NULL;
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
-        frame = new VCFrame(parent);
+        frame = new VCFrame(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     else
-        frame = new VCSoloFrame(parent, _app->doc());
+        frame = new VCSoloFrame(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the buttons nicely
@@ -826,7 +826,7 @@ void VirtualConsole::slotAddSliderMatrix()
     int height = avsm.height();
     int count = avsm.amount();
 
-    VCFrame* frame = new VCFrame(parent);
+    VCFrame* frame = new VCFrame(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the sliders nicely
@@ -879,7 +879,7 @@ void VirtualConsole::slotAddFrame()
     if (parent == NULL)
         return;
 
-    VCFrame* frame = new VCFrame(parent);
+    VCFrame* frame = new VCFrame(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(frame != NULL);
     frame->show();
     frame->move(parent->lastClickPoint());
@@ -892,7 +892,7 @@ void VirtualConsole::slotAddSoloFrame()
     if (parent == NULL)
         return;
 
-    VCSoloFrame* soloframe = new VCSoloFrame(parent, _app->doc());
+    VCSoloFrame* soloframe = new VCSoloFrame(parent, _app->doc(), _app->inputMap(), _app->masterTimer());
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());

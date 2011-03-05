@@ -132,7 +132,7 @@ void VCProperties::resetContents()
         delete m_contents;
 
     /* Create new contents */
-    m_contents = new VCFrame(_app);
+    m_contents = new VCFrame(_app, _app->doc(), _app->inputMap(), _app->masterTimer());
 }
 
 /*****************************************************************************
@@ -167,7 +167,7 @@ bool VCProperties::loadXML(const QDomElement* vc_root)
         {
             /* Contents */
             if (m_contents == NULL)
-                m_contents = new VCFrame(_app);
+                m_contents = new VCFrame(_app, _app->doc(), _app->inputMap(), _app->masterTimer());
             Q_ASSERT(m_contents != NULL);
             m_contents->loadXML(&tag);
         }

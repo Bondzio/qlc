@@ -29,15 +29,17 @@
 #include "monitor.h"
 
 class QByteArray;
+class OutputMap;
 class QFrame;
 class QLabel;
+class Doc;
 
 class MonitorFixture : public QFrame
 {
     Q_OBJECT
 
 public:
-    MonitorFixture(QWidget* parent = NULL);
+    MonitorFixture(QWidget* parent, Doc* doc, OutputMap* outputMap);
     virtual ~MonitorFixture();
 
     /** Less-than operator for qSort() */
@@ -45,6 +47,10 @@ public:
 
     /** Update channel and value label styles */
     void updateLabelStyles();
+
+private:
+    Doc* m_doc;
+    OutputMap* m_outputMap;
 
     /********************************************************************
      * Fixture

@@ -33,13 +33,16 @@
 #include "outputmap.h"
 #include "qlcmacros.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
-MonitorFixture::MonitorFixture(QWidget* parent) : QFrame(parent)
+MonitorFixture::MonitorFixture(QWidget* parent, Doc* doc, OutputMap* outputMap)
+    : QFrame(parent)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+
     m_fixtureLabel = NULL;
     m_fixture = Fixture::invalidId();
     m_channelStyle = Monitor::DMXChannels;
@@ -53,9 +56,9 @@ MonitorFixture::MonitorFixture(QWidget* parent) : QFrame(parent)
     setBackgroundRole(QPalette::Window);
 
     /* Listen to existing fixture changes and removals */
-    connect(_app->doc(), SIGNAL(fixtureChanged(quint32)),
+    connect(m_doc, SIGNAL(fixtureChanged(quint32)),
             this, SLOT(slotFixtureChanged(quint32)));
-    connect(_app->doc(), SIGNAL(fixtureRemoved(quint32)),
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 }
 
@@ -75,10 +78,10 @@ bool MonitorFixture::operator<(const MonitorFixture& mof)
     Fixture* fxi;
     Fixture* mof_fxi;
 
-    fxi = _app->doc()->fixture(m_fixture);
+    fxi = m_doc->fixture(m_fixture);
     Q_ASSERT(fxi != NULL);
 
-    mof_fxi = _app->doc()->fixture(mof.fixture());
+    mof_fxi = m_doc->fixture(mof.fixture());
     Q_ASSERT(mof_fxi != NULL);
 
     if ((*fxi) < (*mof_fxi))
@@ -110,7 +113,7 @@ void MonitorFixture::setFixture(quint32 fxi_id)
         delete m_valueLabels.takeFirst();
 
     m_fixture = fxi_id;
-    fxi = _app->doc()->fixture(m_fixture);
+    fxi = m_doc->fixture(m_fixture);
     if (fxi != NULL)
     {
         /* The grid layout uses columns and rows. The first row is for
@@ -159,7 +162,7 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
     if (m_fixture == Fixture::invalidId())
         return;
 
-    Fixture* fxi = _app->doc()->fixture(m_fixture);
+    Fixture* fxi = m_doc->fixture(m_fixture);
     Q_ASSERT(fxi != NULL);
 
     /* Start channel numbering from this fixture's address */
@@ -169,7 +172,7 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
         i = 1;
 
     /* +1 if addresses should be shown 1-based */
-    OutputPatch* op = _app->outputMap()->patch(fxi->universe());
+    OutputPatch* op = m_outputMap->patch(fxi->universe());
     if (op != NULL && op->isDMXZeroBased() == false &&
         style == Monitor::DMXChannels)
     {
@@ -212,7 +215,7 @@ void MonitorFixture::updateValues(const QByteArray& universes)
         return;
 
     /* Check that this MonitorFixture's fixture really exists */
-    fxi = _app->doc()->fixture(m_fixture);
+    fxi = m_doc->fixture(m_fixture);
     if (fxi == NULL)
         return;
 

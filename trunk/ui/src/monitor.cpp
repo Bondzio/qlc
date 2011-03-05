@@ -321,7 +321,7 @@ void Monitor::updateFixtureLabelStyles()
 
 void Monitor::createMonitorFixture(Fixture* fxi)
 {
-    MonitorFixture* mof = new MonitorFixture(m_monitorWidget);
+    MonitorFixture* mof = new MonitorFixture(m_monitorWidget, m_doc, m_outputMap);
     mof->setFixture(fxi->id());
     mof->slotChannelStyleChanged(channelStyle());
     mof->slotValueStyleChanged(valueStyle());

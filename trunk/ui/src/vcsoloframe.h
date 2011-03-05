@@ -30,6 +30,7 @@ class QDomDocument;
 class QDomElement;
 class QMouseEvent;
 class QString;
+class Doc;
 
 #define KXMLQLCVCSoloFrame "SoloFrame"
 
@@ -42,8 +43,11 @@ class VCSoloFrame : public VCFrame
      * Initialization
      *************************************************************************/
 public:
-    VCSoloFrame(QWidget* parent);
+    VCSoloFrame(QWidget* parent, Doc* doc);
     virtual ~VCSoloFrame();
+
+private:
+    Doc* m_doc;
 
     /*************************************************************************
      * Clipboard
@@ -65,9 +69,6 @@ protected slots:
     /*************************************************************************
      * Load & Save
      *************************************************************************/
-public:
-    static bool loader(const QDomElement* root, QWidget* parent);
-
 protected:
     virtual QString xmlTagName() const { return KXMLQLCVCSoloFrame; }
 

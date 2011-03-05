@@ -763,7 +763,7 @@ void VirtualConsole::slotAddButtonMatrix()
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
         frame = new VCFrame(parent);
     else
-        frame = new VCSoloFrame(parent);
+        frame = new VCSoloFrame(parent, _app->doc());
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the buttons nicely
@@ -892,7 +892,7 @@ void VirtualConsole::slotAddSoloFrame()
     if (parent == NULL)
         return;
 
-    VCSoloFrame* soloframe = new VCSoloFrame(parent);
+    VCSoloFrame* soloframe = new VCSoloFrame(parent, _app->doc());
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());

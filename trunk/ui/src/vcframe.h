@@ -35,6 +35,7 @@ class QString;
 class VCFrame : public VCWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCFrame)
 
     /*********************************************************************
      * Initialization
@@ -47,11 +48,6 @@ public:
 
     /* Check if this is the virtual console's draw area */
     bool isBottomFrame();
-
-private:
-    /** Prevent copying thru operator= or copy constructor since QObject's
-        parental properties get confused when copied. */
-    Q_DISABLE_COPY(VCFrame)
 
     /*********************************************************************
      * Clipboard
@@ -80,10 +76,10 @@ public:
     static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* vc_root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
-	
+
 protected:
-	/** Can be overridden by subclasses */
-	virtual QString xmlTagName() const { return KXMLQLCVCFrame; }
+    /** Can be overridden by subclasses */
+    virtual QString xmlTagName() const { return KXMLQLCVCFrame; }
 
     /*********************************************************************
      * Custom menu

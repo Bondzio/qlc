@@ -37,13 +37,14 @@
 #include "vcsoloframe.h"
 #include "vcbutton.h"
 #include "function.h"
-#include "app.h"
 #include "doc.h"
 
-extern App* _app;
-
-VCSoloFrame::VCSoloFrame(QWidget* parent) : VCFrame(parent)
+VCSoloFrame::VCSoloFrame(QWidget* parent, Doc* doc)
+    : VCFrame(parent)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
+
     /* Set the class name "VCSoloFrame" as the object name as well */
     setObjectName(VCSoloFrame::staticMetaObject.className());
 
@@ -62,7 +63,7 @@ VCWidget* VCSoloFrame::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCSoloFrame* frame = new VCSoloFrame(parent);
+    VCSoloFrame* frame = new VCSoloFrame(parent, m_doc);
     if (frame->copyFrom(this) == false)
     {
         delete frame;
@@ -140,7 +141,7 @@ void VCSoloFrame::slotButtonFunctionStarting()
             VCButton* button = it.next();
             if (button->action() == VCButton::Toggle)
             {
-                Function* f = _app->doc()->function(button->function());
+                Function* f = m_doc->function(button->function());
                 if (f != NULL)
                 {
                     f->stopAndWait();
@@ -153,27 +154,6 @@ void VCSoloFrame::slotButtonFunctionStarting()
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
-
-bool VCSoloFrame::loader(const QDomElement* root, QWidget* parent)
-{
-    VCSoloFrame* soloframe = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCSoloFrame)
-    {
-        qWarning() << Q_FUNC_INFO << "Frame node not found!";
-        return false;
-    }
-
-    /* Create a new frame into its parent */
-    soloframe = new VCSoloFrame(parent);
-    soloframe->show();
-
-    /* Continue loading */
-    return soloframe->loadXML(root);
-}
 
 void VCSoloFrame::paintEvent(QPaintEvent* e)
 {

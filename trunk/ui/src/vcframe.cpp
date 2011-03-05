@@ -193,7 +193,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCSoloFrame)
         {
-            VCSoloFrame::loader(&tag, this);
+            /* Create a new frame into its parent */
+            VCSoloFrame* soloframe = new VCSoloFrame(this, _app->doc());
+            if (soloframe->loadXML(&tag) == false)
+                delete soloframe;
+            else
+                soloframe->show();
         }
         else if (tag.tagName() == KXMLQLCVCCueList)
         {

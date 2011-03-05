@@ -98,27 +98,6 @@ bool VCFrame::copyFrom(VCWidget* widget)
  * Load & Save
  *****************************************************************************/
 
-bool VCFrame::loader(const QDomElement* root, QWidget* parent)
-{
-    VCFrame* frame = NULL;
-
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(parent != NULL);
-
-    if (root->tagName() != KXMLQLCVCFrame)
-    {
-        qWarning() << Q_FUNC_INFO << "Frame node not found";
-        return false;
-    }
-
-    /* Create a new frame into its parent */
-    frame = new VCFrame(parent);
-    frame->show();
-
-    /* Continue loading */
-    return frame->loadXML(root);
-}
-
 bool VCFrame::loadXML(const QDomElement* root)
 {
     bool visible = false;
@@ -158,7 +137,12 @@ bool VCFrame::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCFrame)
         {
-            VCFrame::loader(&tag, this);
+            /* Create a new frame into its parent */
+            VCFrame* frame = new VCFrame(this);
+            if (frame->loadXML(&tag) == false)
+                delete frame;
+            else
+                frame->show();
         }
         else if (tag.tagName() == KXMLQLCVCLabel)
         {

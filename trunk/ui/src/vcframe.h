@@ -73,7 +73,6 @@ public:
      * Load & Save
      *********************************************************************/
 public:
-    static bool loader(const QDomElement* root, QWidget* parent);
     bool loadXML(const QDomElement* vc_root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 

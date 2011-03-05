@@ -327,7 +327,7 @@ bool VCButton::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCButtonFunction)
         {
             str = tag.attribute(KXMLQLCVCButtonFunctionID);
-            setFunction(str.toInt());
+            setFunction(str.toUInt());
         }
         else if (tag.tagName() == KXMLQLCVCWidgetInput)
         {

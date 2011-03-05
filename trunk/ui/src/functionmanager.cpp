@@ -49,7 +49,6 @@
 #include "apputil.h"
 #include "chaser.h"
 #include "scene.h"
-#include "app.h"
 #include "doc.h"
 #include "efx.h"
 
@@ -60,17 +59,18 @@
 #define KColumnBus  2
 #define KColumnID   3
 
-extern App* _app;
-
 FunctionManager* FunctionManager::s_instance = NULL;
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-FunctionManager::FunctionManager(QWidget* parent, Qt::WindowFlags flags)
-        : QWidget(parent, flags)
+FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
+    : QWidget(parent, flags)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
+
     new QVBoxLayout(this);
 
     initActions();
@@ -80,13 +80,13 @@ FunctionManager::FunctionManager(QWidget* parent, Qt::WindowFlags flags)
     initTree();
     updateActionStatus();
 
-    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
     updateTree();
 
     m_tree->sortItems(KColumnName, Qt::AscendingOrder);
 
-    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+    connect(m_doc, SIGNAL(functionRemoved(quint32)),
             this, SLOT(slotFunctionRemoved(quint32)));
 }
 
@@ -101,50 +101,52 @@ FunctionManager::~FunctionManager()
     FunctionManager::s_instance = NULL;
 }
 
-void FunctionManager::create(QWidget* parent)
+void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
 {
-    QWidget* window;
+    QWidget* window = NULL;
 
     /* Must not create more than one instance */
-    if (s_instance != NULL)
-        return;
-
-#ifdef __APPLE__
-    /* Create a separate window for OSX */
-    s_instance = new FunctionManager(parent, Qt::Window);
-    window = s_instance;
-#else
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (_app->centralWidget());
-    Q_ASSERT(area != NULL);
-    s_instance = new FunctionManager(parent);
-    window = area->addSubWindow(s_instance);
-#endif
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/function.png"));
-    window->setWindowTitle(tr("Function Manager"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-    window->show();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
+    if (s_instance == NULL)
     {
-        window->restoreGeometry(var.toByteArray());
-        AppUtil::ensureWidgetIsVisible(window);
+    #ifdef __APPLE__
+        /* Create a separate window for OSX */
+        s_instance = new FunctionManager(parent, doc, Qt::Window);
+        window = s_instance;
+    #else
+        /* Create an MDI window for X11 & Win32 */
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+        Q_ASSERT(area != NULL);
+        QMdiSubWindow* sub = new QMdiSubWindow;
+        s_instance = new FunctionManager(sub, doc);
+        window = area->addSubWindow(sub);
+    #endif
+
+        /* Set some common properties for the window and show it */
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        window->setWindowIcon(QIcon(":/function.png"));
+        window->setWindowTitle(tr("Function Manager"));
+        window->setContextMenuPolicy(Qt::CustomContextMenu);
+        window->show();
+
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_GEOMETRY);
+        if (var.isValid() == true)
+        {
+            window->restoreGeometry(var.toByteArray());
+            AppUtil::ensureWidgetIsVisible(window);
+        }
     }
     else
     {
-        /* Backwards compatibility */
-        QVariant w = settings.value("functionmanager/width");
-        QVariant h = settings.value("functionmanager/height");
-        if (w.isValid() == true && h.isValid() == true)
-            window->resize(w.toInt(), h.toInt());
-        else
-            window->resize(600, 400);
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
     }
+
+    window->show();
+    window->raise();
 }
 
 void FunctionManager::slotModeChanged(Doc::Mode mode)
@@ -337,7 +339,7 @@ void FunctionManager::slotBusTriggered(QAction* action)
         item = it.next();
         Q_ASSERT(item != NULL);
 
-        function = _app->doc()->function(item->text(KColumnID).toUInt());
+        function = m_doc->function(item->text(KColumnID).toUInt());
         Q_ASSERT(function != NULL);
 
         function->setBus(bus);
@@ -370,8 +372,8 @@ void FunctionManager::slotBusNameChanged(quint32 id, const QString& name)
 
 void FunctionManager::slotAddScene()
 {
-    Function* f = new Scene(_app->doc());
-    if (_app->doc()->addFunction(f) == true)
+    Function* f = new Scene(m_doc);
+    if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
     }
@@ -384,8 +386,8 @@ void FunctionManager::slotAddScene()
 
 void FunctionManager::slotAddChaser()
 {
-    Function* f = new Chaser(_app->doc());
-    if (_app->doc()->addFunction(f) == true)
+    Function* f = new Chaser(m_doc);
+    if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
     }
@@ -398,8 +400,8 @@ void FunctionManager::slotAddChaser()
 
 void FunctionManager::slotAddCollection()
 {
-    Function* f = new Collection(_app->doc());
-    if (_app->doc()->addFunction(f) == true)
+    Function* f = new Collection(m_doc);
+    if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
     }
@@ -412,8 +414,8 @@ void FunctionManager::slotAddCollection()
 
 void FunctionManager::slotAddEFX()
 {
-    Function* f = new EFX(_app->doc());
-    if (_app->doc()->addFunction(f) == true)
+    Function* f = new EFX(m_doc);
+    if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
     }
@@ -426,7 +428,7 @@ void FunctionManager::slotAddEFX()
 
 void FunctionManager::slotWizard()
 {
-    FunctionWizard fw(this, _app->doc());
+    FunctionWizard fw(this, m_doc);
     if (fw.exec() == QDialog::Accepted)
         updateTree();
 }
@@ -444,7 +446,7 @@ int FunctionManager::slotEdit()
     Q_ASSERT(item != NULL);
 
     // Find the selected function
-    function = _app->doc()->function(item->text(KColumnID).toUInt());
+    function = m_doc->function(item->text(KColumnID).toUInt());
     if (function == NULL)
         return QDialog::Rejected;
 
@@ -563,7 +565,7 @@ void FunctionManager::initTree()
 void FunctionManager::updateTree()
 {
     m_tree->clear();
-    foreach (Function* function, _app->doc()->functions())
+    foreach (Function* function, m_doc->functions())
         updateFunctionItem(new QTreeWidgetItem(m_tree), function);
 }
 
@@ -599,7 +601,7 @@ QIcon FunctionManager::functionIcon(const Function* function) const
 
 void FunctionManager::deleteSelectedFunctions()
 {
-    disconnect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+    disconnect(m_doc, SIGNAL(functionRemoved(quint32)),
                this, SLOT(slotFunctionRemoved(quint32)));
 
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
@@ -610,12 +612,12 @@ void FunctionManager::deleteSelectedFunctions()
 
         item = it.next();
         fid = item->text(KColumnID).toUInt();
-        _app->doc()->deleteFunction(fid);
+        m_doc->deleteFunction(fid);
 
         delete item;
     }
 
-    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+    connect(m_doc, SIGNAL(functionRemoved(quint32)),
             this, SLOT(slotFunctionRemoved(quint32)));
 }
 
@@ -643,11 +645,11 @@ void FunctionManager::slotTreeContextMenuRequested(const QPoint& point)
 
 void FunctionManager::copyFunction(quint32 fid)
 {
-    Function* function = _app->doc()->function(fid);
+    Function* function = m_doc->function(fid);
     Q_ASSERT(function != NULL);
 
     /* Attempt to create a copy of the function to Doc */
-    Function* copy = function->createCopy(_app->doc());
+    Function* copy = function->createCopy(m_doc);
     if (copy != NULL)
     {
         /* Create a new item for the copied function */
@@ -697,22 +699,22 @@ int FunctionManager::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), _app->doc());
+        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), _app->doc());
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), _app->doc());
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)
     {
-        EFXEditor editor(this, qobject_cast<EFX*> (function), _app->doc());
+        EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
         result = editor.exec();
     }
     else

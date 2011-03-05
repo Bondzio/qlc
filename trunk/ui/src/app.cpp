@@ -1151,7 +1151,13 @@ void App::slotFixtureManager()
 
 void App::slotFunctionManager()
 {
-    FunctionManager::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    FunctionManager::createAndShow(parent, doc());
 }
 
 void App::slotBusManager()

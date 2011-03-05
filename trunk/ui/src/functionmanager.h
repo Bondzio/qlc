@@ -36,6 +36,7 @@ class QToolBar;
 class QAction;
 class Fixture;
 class QMenu;
+class Doc;
 
 class FunctionManager : public QWidget
 {
@@ -51,15 +52,15 @@ public:
         return s_instance;
     }
 
-    /** Create an instance with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    /** Create or show FunctionManager */
+    static void createAndShow(QWidget* parent, Doc* doc);
 
     /** Normal public destructor */
     ~FunctionManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    FunctionManager(QWidget* parent, Qt::WindowFlags flags = 0);
+    FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
 protected slots:
     void slotModeChanged(Doc::Mode mode);
@@ -67,6 +68,7 @@ protected slots:
 
 protected:
     static FunctionManager* s_instance;
+    Doc* m_doc;
 
     /*********************************************************************
      * Function tree

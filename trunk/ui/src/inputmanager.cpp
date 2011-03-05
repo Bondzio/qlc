@@ -42,6 +42,7 @@
 #include "inputmap.h"
 #include "apputil.h"
 #include "app.h"
+#include "doc.h"
 
 #define SETTINGS_GEOMETRY "inputmanager/geometry"
 
@@ -98,15 +99,15 @@ InputManager::InputManager(QWidget* parent, Qt::WindowFlags flags)
     connect(_app->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
             this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 
-    /* Listen to document changes */
-    connect(_app, SIGNAL(documentChanged(Doc*)),
-            this, SLOT(slotDocumentChanged(Doc*)));
-    /* Use the initial document */
-    slotDocumentChanged(_app->doc());
-
     /* Listen to plugin configuration changes */
     connect(_app->inputMap(), SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged()));
+
+    /* Listen to mode changes to close the manager */
+    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+            this, SLOT(slotModeChanged(Doc::Mode)));
+
+    updateTree();
 }
 
 InputManager::~InputManager()
@@ -174,13 +175,6 @@ void InputManager::slotModeChanged(Doc::Mode mode)
 #else
         parent()->deleteLater();
 #endif
-}
-
-void InputManager::slotDocumentChanged(Doc* doc)
-{
-    connect(doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
-    updateTree();
 }
 
 /*****************************************************************************

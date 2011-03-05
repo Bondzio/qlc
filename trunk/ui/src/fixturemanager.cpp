@@ -93,11 +93,15 @@ FixtureManager::FixtureManager(QWidget* parent, Qt::WindowFlags flags)
     initDataView();
     updateView();
 
-    /* Listen to document changes */
-    connect(_app, SIGNAL(documentChanged(Doc*)),
-            this, SLOT(slotDocumentChanged(Doc*)));
-    /* Use the initial document object */
-    slotDocumentChanged(_app->doc());
+    /* Connect fixture list change signals from the new document object */
+    connect(_app->doc(), SIGNAL(fixtureAdded(quint32)),
+            this, SLOT(slotFixtureAdded(quint32)));
+
+    connect(_app->doc(), SIGNAL(fixtureRemoved(quint32)),
+            this, SLOT(slotFixtureRemoved(quint32)));
+
+    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+            this, SLOT(slotModeChanged(Doc::Mode)));
 }
 
 FixtureManager::~FixtureManager()
@@ -161,21 +165,6 @@ void FixtureManager::create(QWidget* parent)
 /*****************************************************************************
  * Doc signal handlers
  *****************************************************************************/
-
-void FixtureManager::slotDocumentChanged(Doc* doc)
-{
-    Q_ASSERT(doc != NULL);
-
-    /* Connect fixture list change signals from the new document object */
-    connect(doc, SIGNAL(fixtureAdded(quint32)),
-            this, SLOT(slotFixtureAdded(quint32)));
-
-    connect(doc, SIGNAL(fixtureRemoved(quint32)),
-            this, SLOT(slotFixtureRemoved(quint32)));
-
-    connect(doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
-}
 
 void FixtureManager::slotFixtureAdded(quint32 id)
 {

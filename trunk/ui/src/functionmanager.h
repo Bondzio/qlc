@@ -63,7 +63,7 @@ protected:
 
 protected slots:
     void slotModeChanged(Doc::Mode mode);
-    void slotDocumentChanged(Doc* doc);
+    void slotFunctionRemoved(quint32 fid);
 
 protected:
     static FunctionManager* s_instance;

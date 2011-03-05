@@ -91,10 +91,6 @@ Monitor::Monitor(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
     m_monitorWidget->show();
     m_scrollArea->show();
 
-    /* Listen to Document changes */
-    connect(_app, SIGNAL(documentChanged(Doc*)),
-            this, SLOT(slotDocumentChanged(Doc*)));
-
     /* Listen to fixture additions and changes from Doc */
     connect(_app->doc(), SIGNAL(fixtureAdded(quint32)),
             this, SLOT(slotFixtureAdded(quint32)));
@@ -324,19 +320,6 @@ void Monitor::createMonitorFixture(Fixture* fxi)
 
     m_monitorLayout->addItem(new MonitorLayoutItem(mof));
     m_monitorFixtures.append(mof);
-}
-
-void Monitor::slotDocumentChanged(Doc* doc)
-{
-    Q_UNUSED(doc);
-
-    /* Since the new document specifies, whether the monitor should be
-       visible or not, we can just destroy this instance. */
-#ifdef __APPLE__
-    deleteLater();
-#else
-    parentWidget()->deleteLater();
-#endif
 }
 
 void Monitor::slotFixtureAdded(quint32 fxi_id)

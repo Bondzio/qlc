@@ -56,6 +56,11 @@ Doc::Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache)
 
 Doc::~Doc()
 {
+    clearContents();
+}
+
+void Doc::clearContents()
+{
     // Delete all function instances
     QListIterator <quint32> funcit(m_functions.keys());
     while (funcit.hasNext() == true)

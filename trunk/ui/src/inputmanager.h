@@ -58,7 +58,6 @@ protected:
 
 protected slots:
     void slotModeChanged(Doc::Mode mode);
-    void slotDocumentChanged(Doc* doc);
 
 protected:
     static InputManager* s_instance;

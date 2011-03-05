@@ -80,13 +80,14 @@ FunctionManager::FunctionManager(QWidget* parent, Qt::WindowFlags flags)
     initTree();
     updateActionStatus();
 
-    /* Listen to document changes */
-    connect(_app, SIGNAL(documentChanged(Doc*)),
-            this, SLOT(slotDocumentChanged(Doc*)));
-    /* Use the initial document */
-    slotDocumentChanged(_app->doc());
+    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+            this, SLOT(slotModeChanged(Doc::Mode)));
+    updateTree();
 
     m_tree->sortItems(KColumnName, Qt::AscendingOrder);
+
+    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 FunctionManager::~FunctionManager()
@@ -157,11 +158,18 @@ void FunctionManager::slotModeChanged(Doc::Mode mode)
 #endif
 }
 
-void FunctionManager::slotDocumentChanged(Doc* doc)
+void FunctionManager::slotFunctionRemoved(quint32 fid)
 {
-    connect(doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
-    updateTree();
+    // This slot is used only when Doc::clearContents is called.
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        if (item->text(KColumnID).toUInt() == fid)
+        {
+            delete item;
+            break;
+        }
+    }
 }
 
 /*****************************************************************************
@@ -329,7 +337,7 @@ void FunctionManager::slotBusTriggered(QAction* action)
         item = it.next();
         Q_ASSERT(item != NULL);
 
-        function = _app->doc()->function(item->text(KColumnID).toInt());
+        function = _app->doc()->function(item->text(KColumnID).toUInt());
         Q_ASSERT(function != NULL);
 
         function->setBus(bus);
@@ -436,7 +444,7 @@ int FunctionManager::slotEdit()
     Q_ASSERT(item != NULL);
 
     // Find the selected function
-    function = _app->doc()->function(item->text(KColumnID).toInt());
+    function = _app->doc()->function(item->text(KColumnID).toUInt());
     if (function == NULL)
         return QDialog::Rejected;
 
@@ -452,7 +460,7 @@ void FunctionManager::slotClone()
 {
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
-        copyFunction(it.next()->text(KColumnID).toInt());
+        copyFunction(it.next()->text(KColumnID).toUInt());
 }
 
 void FunctionManager::slotDelete()
@@ -569,7 +577,7 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
     item->setIcon(KColumnName, functionIcon(function));
     item->setText(KColumnType, function->typeString());
     item->setText(KColumnBus, Bus::instance()->idName(function->busID()));
-    item->setText(KColumnID, QString("%1").arg(function->id()));
+    item->setText(KColumnID, QString::number(function->id()));
 }
 
 QIcon FunctionManager::functionIcon(const Function* function) const
@@ -591,6 +599,9 @@ QIcon FunctionManager::functionIcon(const Function* function) const
 
 void FunctionManager::deleteSelectedFunctions()
 {
+    disconnect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+               this, SLOT(slotFunctionRemoved(quint32)));
+
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
     {
@@ -598,12 +609,14 @@ void FunctionManager::deleteSelectedFunctions()
         quint32 fid;
 
         item = it.next();
-        fid = item->text(KColumnID).toInt();
+        fid = item->text(KColumnID).toUInt();
         _app->doc()->deleteFunction(fid);
 
         delete item;
     }
 
+    connect(_app->doc(), SIGNAL(functionRemoved(quint32)),
+            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 void FunctionManager::slotTreeSelectionChanged()

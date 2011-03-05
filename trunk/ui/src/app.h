@@ -138,11 +138,7 @@ public:
     Doc* doc() {
         return m_doc;
     }
-    void newDocument();
-
-signals:
-    /** Tells that the current Doc object has changed. */
-    void documentChanged(Doc* newDoc);
+    void clearDocument();
 
 protected slots:
     void slotDocModified(bool state);

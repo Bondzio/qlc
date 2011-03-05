@@ -72,9 +72,6 @@ protected:
      * Doc signal handlers
      ********************************************************************/
 public slots:
-    /** Listen to document changes (after App::newDocument())*/
-    void slotDocumentChanged(Doc* doc);
-
     /** Callback for Doc::fixtureAdded() signals */
     void slotFixtureAdded(quint32 id);
 

@@ -59,6 +59,11 @@ public:
      */
     ~Doc();
 
+    /**
+     * Remove all functions and fixtures from the doc, signalling each removal.
+     */
+    void clearContents();
+
     /*********************************************************************
      * Main operating mode
      *********************************************************************/

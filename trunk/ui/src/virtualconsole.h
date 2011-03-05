@@ -381,9 +381,6 @@ public slots:
     /** Slot that catches main application mode changes */
     void slotModeChanged(Doc::Mode mode);
 
-    /** Slot that catches main document changes */
-    void slotDocumentChanged(Doc* doc);
-
     /*********************************************************************
      * Load & Save
      *********************************************************************/

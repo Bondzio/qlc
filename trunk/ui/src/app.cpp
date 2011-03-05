@@ -450,8 +450,7 @@ void App::initInputMap()
 void App::initDoc()
 {
     // Delete existing document object and create a new one
-    if (m_doc != NULL)
-        delete m_doc;
+    Q_ASSERT(m_doc == NULL);
     m_doc = new Doc(this, fixtureDefCache());
 
     connect(m_doc, SIGNAL(modified(bool)),
@@ -459,8 +458,6 @@ void App::initDoc()
 
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
-
-    emit documentChanged(m_doc);
 }
 
 void App::slotDocModified(bool state)
@@ -961,12 +958,12 @@ bool App::slotFileNew()
         if (result == QMessageBox::Yes)
         {
             slotFileSave();
-            newDocument();
+            clearDocument();
             result = true;
         }
         else if (result == QMessageBox::No)
         {
-            newDocument();
+            clearDocument();
             result = true;
         }
         else
@@ -976,16 +973,16 @@ bool App::slotFileNew()
     }
     else
     {
-        newDocument();
+        clearDocument();
         result = true;
     }
 
     return result;
 }
 
-void App::newDocument()
+void App::clearDocument()
 {
-    initDoc();
+    doc()->clearContents();
     VirtualConsole::resetContents();
     outputMap()->resetUniverses();
     doc()->resetModified();
@@ -1050,7 +1047,7 @@ QFile::FileError App::slotFileOpen()
         return QFile::NoError;
 
     /* Clear existing document data */
-    newDocument();
+    clearDocument();
 
     /* Load the file */
     QFile::FileError error = loadXML(fn);
@@ -1058,7 +1055,7 @@ QFile::FileError App::slotFileOpen()
         doc()->resetModified();
 
     /* Update these in any case, since they are at least emptied now as
-       a result of calling newDocument() a few lines ago. */
+       a result of calling clearDocument() a few lines ago. */
     if (FunctionManager::instance() != NULL)
         FunctionManager::instance()->updateTree();
     if (OutputManager::instance() != NULL)

@@ -119,9 +119,6 @@ protected:
     void createMonitorFixture(Fixture* fxi);
 
 protected slots:
-    /** Slot for toplevel document changes (to rehash contents) */
-    void slotDocumentChanged(Doc* doc);
-
     /** Slot for fixture additions (to append the new fixture to layout) */
     void slotFixtureAdded(quint32 fxi_id);
 

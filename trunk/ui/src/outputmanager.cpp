@@ -81,14 +81,13 @@ OutputManager::OutputManager(QWidget* parent, Qt::WindowFlags flags)
     connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
             this, SLOT(slotEditClicked()));
 
-    /* Listen to document changes */
-    connect(_app, SIGNAL(documentChanged(Doc*)),
-            this, SLOT(slotDocumentChanged(Doc*)));
-    /* Use the initial document */
-    slotDocumentChanged(_app->doc());
+    connect(_app->doc(), SIGNAL(modeChanged(Doc::Mode)),
+            this, SLOT(slotModeChanged(Doc::Mode)));
 
     connect(_app->outputMap(), SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged()));
+
+    updateTree();
 }
 
 OutputManager::~OutputManager()
@@ -156,13 +155,6 @@ void OutputManager::slotModeChanged(Doc::Mode mode)
 #else
         parent()->deleteLater();
 #endif
-}
-
-void OutputManager::slotDocumentChanged(Doc* doc)
-{
-    connect(doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
-    updateTree();
 }
 
 /*****************************************************************************

@@ -59,6 +59,7 @@
 #include "inputmap.h"
 #include "aboutbox.h"
 #include "monitor.h"
+#include "vcframe.h"
 #include "bus.h"
 #include "app.h"
 #include "doc.h"
@@ -149,7 +150,8 @@ App::~App()
     if (VirtualConsole::instance() != NULL)
         delete VirtualConsole::instance();
 
-    VirtualConsole::properties().resetContents();
+    if (VirtualConsole::properties().contents())
+        delete VirtualConsole::properties().contents();
 
     // Store outputmap defaults
     if (m_outputMap != NULL)
@@ -1197,7 +1199,13 @@ void App::slotInputManager()
 
 void App::slotControlVC()
 {
-    VirtualConsole::create(this);
+    QWidget* parent;
+#ifdef __APPLE__
+    parent = this;
+#else
+    parent = centralWidget();
+#endif
+    VirtualConsole::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer());
 }
 
 void App::slotControlMonitor()
@@ -1483,6 +1491,10 @@ bool App::loadXML(const QDomDocument* doc)
 
         node = node.nextSibling();
     }
+
+    /* Display VC if appropriate */
+    if (VirtualConsole::properties().visible() == true)
+        slotControlVC();
 
     return true;
 }

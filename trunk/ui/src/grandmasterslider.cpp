@@ -113,7 +113,10 @@ void GrandMasterSlider::refreshProperties()
     UniverseArray* uni = m_outputMap->claimUniverses();
     uni->setGMChannelMode(VirtualConsole::properties().grandMasterChannelMode());
     uni->setGMValueMode(VirtualConsole::properties().grandMasterValueMode());
+    uchar value = uni->gMValue();
     m_outputMap->releaseUniverses();
+
+    slotValueChanged(value);
 }
 
 void GrandMasterSlider::slotValueChanged(int value)

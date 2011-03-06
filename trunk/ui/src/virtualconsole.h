@@ -72,19 +72,25 @@ public:
         return s_instance;
     }
 
-    /** Create a VC with parent. Fails if s_instance is not NULL. */
-    static void create(QWidget* parent);
+    /** Create or show a VirtualConsole */
+    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                              InputMap* inputMap, MasterTimer* masterTimer);
 
     /** Public destructor */
     ~VirtualConsole();
 
 protected:
     /** Protected constructor to prevent multiple instances */
-    VirtualConsole(QWidget* parent, Qt::WindowFlags flags = 0);
+    VirtualConsole(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+                   MasterTimer* masterTimer, Qt::WindowFlags flags = 0);
 
 protected:
     /** The singleton instance */
     static VirtualConsole* s_instance;
+    Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Properties

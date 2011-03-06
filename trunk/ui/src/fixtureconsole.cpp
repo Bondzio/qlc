@@ -31,10 +31,7 @@
 #include "consolechannel.h"
 #include "inputmap.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
-
-extern App* _app;
 
 /*****************************************************************************
  * Initialization

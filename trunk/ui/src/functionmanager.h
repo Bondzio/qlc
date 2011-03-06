@@ -53,14 +53,16 @@ public:
     }
 
     /** Create or show FunctionManager */
-    static void createAndShow(QWidget* parent, Doc* doc);
+    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                              InputMap* inputMap, MasterTimer* masterTimer);
 
     /** Normal public destructor */
     ~FunctionManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
+    FunctionManager(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+                    MasterTimer* masterTimer, Qt::WindowFlags flags = 0);
 
 protected slots:
     void slotModeChanged(Doc::Mode mode);
@@ -69,6 +71,9 @@ protected slots:
 protected:
     static FunctionManager* s_instance;
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Function tree

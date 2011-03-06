@@ -40,9 +40,11 @@
 #include "vcsliderproperties.h"
 #include "selectinputchannel.h"
 #include "functionselection.h"
+#include "mastertimer.h"
 #include "inputpatch.h"
-#include "vcslider.h"
+#include "outputmap.h"
 #include "inputmap.h"
+#include "vcslider.h"
 #include "fixture.h"
 #include "doc.h"
 
@@ -51,13 +53,18 @@
 #define KColumnRange 2
 #define KColumnID    3
 
-VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc, InputMap* inputMap)
+VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc, OutputMap* outputMap,
+                                       InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(slider)
     , m_doc(doc)
+    , m_outputMap(outputMap)
     , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
     Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(slider != NULL);
     m_slider = slider;
 
@@ -713,7 +720,8 @@ void VCSliderProperties::slotLevelByGroupClicked()
 
 void VCSliderProperties::slotAttachPlaybackFunctionClicked()
 {
-    FunctionSelection fs(this, m_doc, false, Function::invalidId(),
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
+                         false, Function::invalidId(),
                          Function::Scene | Function::Chaser | Function::EFX, true);
     if (fs.exec() != QDialog::Accepted)
         return;

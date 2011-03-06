@@ -50,14 +50,17 @@
 #include "vcwidget.h"
 #include "doc.h"
 
-VCWidget::VCWidget(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
+VCWidget::VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+                   MasterTimer* masterTimer)
     : QWidget(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
     , m_inputMap(inputMap)
     , m_masterTimer(masterTimer)
 {
     Q_ASSERT(parent != NULL);
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
     Q_ASSERT(inputMap != NULL);
     Q_ASSERT(masterTimer != NULL);
 

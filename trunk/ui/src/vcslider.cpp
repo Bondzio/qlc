@@ -59,8 +59,8 @@ const QSize VCSlider::defaultSize(QSize(60, 200));
  * Initialization
  *****************************************************************************/
 
-VCSlider::VCSlider(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCSlider::VCSlider(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
 {
     /* Set the class name "VCSlider" as the object name as well */
     setObjectName(VCSlider::staticMetaObject.className());
@@ -173,7 +173,7 @@ VCWidget* VCSlider::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCSlider* slider = new VCSlider(parent, m_doc, m_inputMap, m_masterTimer);
+    VCSlider* slider = new VCSlider(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (slider->copyFrom(this) == false)
     {
         delete slider;
@@ -232,7 +232,7 @@ void VCSlider::setCaption(const QString& text)
 
 void VCSlider::editProperties()
 {
-    VCSliderProperties prop(this, m_doc, m_inputMap);
+    VCSliderProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }

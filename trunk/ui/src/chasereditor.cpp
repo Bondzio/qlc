@@ -31,6 +31,9 @@
 
 #include "functionselection.h"
 #include "chasereditor.h"
+#include "mastertimer.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "apputil.h"
 #include "fixture.h"
 #include "chaser.h"
@@ -42,13 +45,20 @@
 #define KColumnFunction   1
 #define KColumnFunctionID 2
 
-ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
+ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap* outputMap,
+                           InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
     , m_original(chaser)
 {
     Q_ASSERT(chaser != NULL);
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     setupUi(this);
 
@@ -188,7 +198,8 @@ void ChaserEditor::slotBusComboActivated(int index)
 
 void ChaserEditor::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, true, m_original->id(), Function::Scene, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
+                         true, m_original->id(), Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
         QListIterator <quint32> it(fs.selection());

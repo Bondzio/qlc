@@ -47,8 +47,8 @@
  * VCXYPad Initialization
  *****************************************************************************/
 
-VCXYPad::VCXYPad(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCXYPad::VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
 {
     /* Set the class name "VCXYPad" as the object name as well */
     setObjectName(VCXYPad::staticMetaObject.className());
@@ -79,7 +79,7 @@ VCWidget* VCXYPad::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_inputMap, m_masterTimer);
+    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (xypad->copyFrom(this) == false)
     {
         delete xypad;

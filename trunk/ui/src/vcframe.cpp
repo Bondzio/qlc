@@ -44,8 +44,8 @@
 #include "vcxypad.h"
 #include "doc.h"
 
-VCFrame::VCFrame(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCFrame::VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
 {
     /* Set the class name "VCFrame" as the object name as well */
     setObjectName(VCFrame::staticMetaObject.className());
@@ -70,7 +70,7 @@ VCWidget* VCFrame::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCFrame* frame = new VCFrame(parent, m_doc, m_inputMap, m_masterTimer);
+    VCFrame* frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (frame->copyFrom(this) == false)
     {
         delete frame;
@@ -136,7 +136,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCFrame)
         {
             /* Create a new frame into its parent */
-            VCFrame* frame = new VCFrame(this, m_doc, m_inputMap, m_masterTimer);
+            VCFrame* frame = new VCFrame(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (frame->loadXML(&tag) == false)
                 delete frame;
             else
@@ -145,7 +145,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCLabel)
         {
             /* Create a new label into its parent */
-            VCLabel* label = new VCLabel(this, m_doc, m_inputMap, m_masterTimer);
+            VCLabel* label = new VCLabel(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (label->loadXML(&tag) == false)
                 delete label;
             else
@@ -154,7 +154,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCButton)
         {
             /* Create a new button into its parent */
-            VCButton* button = new VCButton(this, m_doc, m_inputMap, m_masterTimer);
+            VCButton* button = new VCButton(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (button->loadXML(&tag) == false)
                 delete button;
             else
@@ -163,7 +163,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCXYPad)
         {
             /* Create a new xy pad into its parent */
-            VCXYPad* xypad = new VCXYPad(this, m_doc, m_inputMap, m_masterTimer);
+            VCXYPad* xypad = new VCXYPad(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (xypad->loadXML(&tag) == false)
                 delete xypad;
             else
@@ -172,7 +172,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCSlider)
         {
             /* Create a new slider into its parent */
-            VCSlider* slider = new VCSlider(this, m_doc, m_inputMap, m_masterTimer);
+            VCSlider* slider = new VCSlider(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (slider->loadXML(&tag) == false)
                 delete slider;
             else
@@ -181,7 +181,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCSoloFrame)
         {
             /* Create a new frame into its parent */
-            VCSoloFrame* soloframe = new VCSoloFrame(this, m_doc, m_inputMap, m_masterTimer);
+            VCSoloFrame* soloframe = new VCSoloFrame(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (soloframe->loadXML(&tag) == false)
                 delete soloframe;
             else
@@ -190,7 +190,7 @@ bool VCFrame::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCCueList)
         {
             /* Create a new cuelist into its parent */
-            VCCueList* cuelist = new VCCueList(this, m_doc, m_inputMap, m_masterTimer);
+            VCCueList* cuelist = new VCCueList(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             if (cuelist->loadXML(&tag) == false)
                 delete cuelist;
             else

@@ -67,7 +67,8 @@ public:
      * Initialization
      *********************************************************************/
 public:
-    VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
+    VCButton(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+             MasterTimer* masterTimer);
     ~VCButton();
 
     /*********************************************************************

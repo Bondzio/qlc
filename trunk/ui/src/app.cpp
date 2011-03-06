@@ -1146,7 +1146,8 @@ void App::slotFixtureManager()
 #else
     parent = centralWidget();
 #endif
-    FixtureManager::createAndShow(parent, doc(), outputMap(), fixtureDefCache());
+    FixtureManager::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer(),
+                                  fixtureDefCache());
 }
 
 void App::slotFunctionManager()
@@ -1157,7 +1158,7 @@ void App::slotFunctionManager()
 #else
     parent = centralWidget();
 #endif
-    FunctionManager::createAndShow(parent, doc());
+    FunctionManager::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer());
 }
 
 void App::slotBusManager()

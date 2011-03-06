@@ -742,8 +742,7 @@ VCFrame* VirtualConsole::closestParent() const
                 // Try the widget's parent widget. If it has
                 // none or it's not a VCWidget, the loop
                 // should end on the next pass & parent == NULL
-                widget = qobject_cast<VCWidget*>
-                         (widget->parentWidget());
+                widget = qobject_cast<VCWidget*> (widget->parentWidget());
             }
         }
 
@@ -757,7 +756,7 @@ void VirtualConsole::slotAddButton()
     if (parent == NULL)
         return;
 
-    VCButton* button = new VCButton(parent, m_doc, m_inputMap, m_masterTimer);
+    VCButton* button = new VCButton(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(button != NULL);
     button->show();
     button->move(parent->lastClickPoint());
@@ -770,7 +769,7 @@ void VirtualConsole::slotAddButtonMatrix()
     if (parent == NULL)
         return;
 
-    AddVCButtonMatrix abm(this, m_doc);
+    AddVCButtonMatrix abm(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (abm.exec() == QDialog::Rejected)
         return;
 
@@ -780,9 +779,9 @@ void VirtualConsole::slotAddButtonMatrix()
 
     VCWidget* frame = NULL;
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
-        frame = new VCFrame(parent, m_doc, m_inputMap, m_masterTimer);
+        frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     else
-        frame = new VCSoloFrame(parent, m_doc, m_inputMap, m_masterTimer);
+        frame = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the buttons nicely
@@ -792,7 +791,7 @@ void VirtualConsole::slotAddButtonMatrix()
     {
         for (int x = 0; x < h; x++)
         {
-            VCButton* button = new VCButton(frame, m_doc, m_inputMap, m_masterTimer);
+            VCButton* button = new VCButton(frame, m_doc, m_outputMap, m_inputMap, m_masterTimer);
             Q_ASSERT(button != NULL);
             button->move(QPoint(10 + (x * sz), 10 + (y * sz)));
             button->resize(QSize(sz, sz));
@@ -824,7 +823,7 @@ void VirtualConsole::slotAddSlider()
     if (parent == NULL)
         return;
 
-    VCSlider* slider = new VCSlider(parent, m_doc, m_inputMap, m_masterTimer);
+    VCSlider* slider = new VCSlider(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(slider != NULL);
     slider->show();
     slider->move(parent->lastClickPoint());
@@ -845,7 +844,7 @@ void VirtualConsole::slotAddSliderMatrix()
     int height = avsm.height();
     int count = avsm.amount();
 
-    VCFrame* frame = new VCFrame(parent, m_doc, m_inputMap, m_masterTimer);
+    VCFrame* frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the sliders nicely
@@ -853,7 +852,7 @@ void VirtualConsole::slotAddSliderMatrix()
 
     for (int i = 0; i < count; i++)
     {
-        VCSlider* slider = new VCSlider(frame, m_doc, m_inputMap, m_masterTimer);
+        VCSlider* slider = new VCSlider(frame, m_doc, m_outputMap, m_inputMap, m_masterTimer);
         Q_ASSERT(slider != NULL);
         slider->move(QPoint(10 + (width * i), 10));
         slider->resize(QSize(width, height));
@@ -872,7 +871,7 @@ void VirtualConsole::slotAddXYPad()
     if (parent == NULL)
         return;
 
-    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_inputMap, m_masterTimer);
+    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());
@@ -885,7 +884,7 @@ void VirtualConsole::slotAddCueList()
     if (parent == NULL)
         return;
 
-    VCCueList* cuelist = new VCCueList(parent, m_doc, m_inputMap, m_masterTimer);
+    VCCueList* cuelist = new VCCueList(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(cuelist != NULL);
     cuelist->show();
     cuelist->move(parent->lastClickPoint());
@@ -898,7 +897,7 @@ void VirtualConsole::slotAddFrame()
     if (parent == NULL)
         return;
 
-    VCFrame* frame = new VCFrame(parent, m_doc, m_inputMap, m_masterTimer);
+    VCFrame* frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(frame != NULL);
     frame->show();
     frame->move(parent->lastClickPoint());
@@ -911,7 +910,7 @@ void VirtualConsole::slotAddSoloFrame()
     if (parent == NULL)
         return;
 
-    VCSoloFrame* soloframe = new VCSoloFrame(parent, m_doc, m_inputMap, m_masterTimer);
+    VCSoloFrame* soloframe = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());
@@ -924,7 +923,7 @@ void VirtualConsole::slotAddLabel()
     if (parent == NULL)
         return;
 
-    VCLabel* label = new VCLabel(parent, m_doc, m_inputMap, m_masterTimer);
+    VCLabel* label = new VCLabel(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(label != NULL);
     label->show();
     label->move(parent->lastClickPoint());

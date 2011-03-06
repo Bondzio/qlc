@@ -30,8 +30,11 @@
 #include "collectioneditor.h"
 #include "chasereditor.h"
 #include "sceneeditor.h"
+#include "mastertimer.h"
 #include "collection.h"
+#include "outputmap.h"
 #include "efxeditor.h"
+#include "inputmap.h"
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
@@ -47,12 +50,22 @@
  * Initialization
  *****************************************************************************/
 
-FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
-                                     quint32 disableFunction, int filter, bool constFilter)
+FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                     InputMap* inputMap, MasterTimer* masterTimer,
+                                     bool multiple,
+                                     quint32 disableFunction,
+                                     int filter,
+                                     bool constFilter)
     : QDialog(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     m_toolbar = NULL;
     m_addSceneAction = NULL;
@@ -329,17 +342,20 @@ int FunctionSelection::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
+        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc, m_outputMap,
+                           m_inputMap, m_masterTimer);
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc, m_outputMap,
+                            m_inputMap, m_masterTimer);
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc,
+                                m_outputMap, m_inputMap, m_masterTimer);
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)

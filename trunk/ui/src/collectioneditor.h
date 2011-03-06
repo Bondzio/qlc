@@ -27,7 +27,10 @@
 #include "ui_collectioneditor.h"
 
 class FunctionSelection;
+class MasterTimer;
 class Collection;
+class OutputMap;
+class InputMap;
 class Doc;
 
 class CollectionEditor : public QDialog, public Ui_CollectionEditor
@@ -36,11 +39,15 @@ class CollectionEditor : public QDialog, public Ui_CollectionEditor
     Q_DISABLE_COPY(CollectionEditor)
 
 public:
-    CollectionEditor(QWidget* parent, Collection* fc, Doc* doc);
+    CollectionEditor(QWidget* parent, Collection* fc, Doc* doc, OutputMap* outputMap,
+                     InputMap* inputMap, MasterTimer* masterTimer);
     ~CollectionEditor();
 
 private:
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
 protected slots:
     void slotNameEdited(const QString& text);

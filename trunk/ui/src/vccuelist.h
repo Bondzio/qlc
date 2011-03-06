@@ -65,7 +65,7 @@ class VCCueList : public VCWidget, public DMXSource
      *************************************************************************/
 public:
     /** Normal constructor */
-    VCCueList(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
+    VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
 
     /** Destructor */
     ~VCCueList();

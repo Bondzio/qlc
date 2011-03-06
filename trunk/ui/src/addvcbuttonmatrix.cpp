@@ -24,6 +24,9 @@
 
 #include "addvcbuttonmatrix.h"
 #include "functionselection.h"
+#include "mastertimer.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "vcbutton.h"
 #include "function.h"
 #include "doc.h"
@@ -36,11 +39,18 @@
 #define BUTTON_SIZE "addvcbuttonmatrix/buttonsize"
 #define FRAME_STYLE "addvcbuttonmatrix/framestyle"
 
-AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent, Doc* doc)
+AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                     InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     QSettings settings;
     QVariant var;
@@ -87,7 +97,7 @@ AddVCButtonMatrix::~AddVCButtonMatrix()
 
 void AddVCButtonMatrix::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true);
     fs.setDisabledFunctions(functions());
     if (fs.exec() == true)
     {

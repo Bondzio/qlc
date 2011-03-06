@@ -35,6 +35,9 @@
 #include "fixtureselection.h"
 #include "fixtureconsole.h"
 #include "sceneeditor.h"
+#include "mastertimer.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "fixture.h"
 #include "scene.h"
 #include "doc.h"
@@ -54,12 +57,19 @@
 #define GREEN "green"
 #define BLUE "blue"
 
-SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
+SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc, OutputMap* outputMap,
+                         InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
     , m_original(scene)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(scene != NULL);
 
     m_currentTab = KTabGeneral;
@@ -617,7 +627,7 @@ void SceneEditor::addFixtureTab(Fixture* fixture)
 
     Q_ASSERT(fixture != NULL);
 
-    console = new FixtureConsole(this);
+    console = new FixtureConsole(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     console->setChannelsCheckable(true);
     console->setFixture(fixture->id());
     m_tab->addTab(console, fixture->name());

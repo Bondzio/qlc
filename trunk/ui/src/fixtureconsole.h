@@ -30,6 +30,10 @@
 
 class QDomDocument;
 class QDomElement;
+class MasterTimer;
+class OutputMap;
+class InputMap;
+class Doc;
 
 #define KXMLQLCFixtureConsole "Console"
 
@@ -42,8 +46,15 @@ class FixtureConsole : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    FixtureConsole(QWidget* parent);
+    FixtureConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                   InputMap* inputMap, MasterTimer* masterTimer);
     ~FixtureConsole();
+
+private:
+    Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Fixture

@@ -46,14 +46,19 @@
 #include "app.h"
 #include "doc.h"
 
-VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, InputMap* inputMap)
+VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* outputMap,
+                                       InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(button)
     , m_doc(doc)
+    , m_outputMap(outputMap)
     , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(button != NULL);
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
     Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     setupUi(this);
 
@@ -107,7 +112,7 @@ VCButtonProperties::~VCButtonProperties()
 
 void VCButtonProperties::slotAttachFunction()
 {
-    FunctionSelection sel(this, m_doc, false);
+    FunctionSelection sel(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, false);
     if (sel.exec() == QDialog::Accepted)
     {
         /* Get the first selected function */

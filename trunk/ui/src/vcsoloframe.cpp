@@ -39,8 +39,8 @@
 #include "function.h"
 #include "doc.h"
 
-VCSoloFrame::VCSoloFrame(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCFrame(parent, doc, inputMap, masterTimer)
+VCSoloFrame::VCSoloFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCFrame(parent, doc, outputMap, inputMap, masterTimer)
 {
     /* Set the class name "VCSoloFrame" as the object name as well */
     setObjectName(VCSoloFrame::staticMetaObject.className());
@@ -60,7 +60,7 @@ VCWidget* VCSoloFrame::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCSoloFrame* frame = new VCSoloFrame(parent, m_doc, m_inputMap, m_masterTimer);
+    VCSoloFrame* frame = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (frame->copyFrom(this) == false)
     {
         delete frame;

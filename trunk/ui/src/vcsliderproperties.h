@@ -28,9 +28,11 @@
 
 class QTreeWidgetItem;
 class QLCCapability;
+class MasterTimer;
 class QLCChannel;
-class VCSlider;
+class OutputMap;
 class InputMap;
+class VCSlider;
 class Fixture;
 class Doc;
 
@@ -40,12 +42,15 @@ class VCSliderProperties : public QDialog, public Ui_VCSliderProperties
     Q_DISABLE_COPY(VCSliderProperties)
 
 public:
-    VCSliderProperties(VCSlider* slider, Doc* doc, InputMap* inputMap);
+    VCSliderProperties(VCSlider* slider, Doc* doc, OutputMap* outputMap,
+                       InputMap* inputMap, MasterTimer* masterTimer);
     ~VCSliderProperties();
 
 private:
     Doc* m_doc;
+    OutputMap* m_outputMap;
     InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * General page

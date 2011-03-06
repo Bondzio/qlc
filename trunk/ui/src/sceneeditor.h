@@ -30,6 +30,9 @@
 #include "fixture.h"
 #include "scene.h"
 
+class MasterTimer;
+class OutputMap;
+class InputMap;
 class QAction;
 class Doc;
 
@@ -42,11 +45,15 @@ class SceneEditor : public QDialog, public Ui_SceneEditor
      * Initialization
      *********************************************************************/
 public:
-    SceneEditor(QWidget* parent, Scene* scene, Doc* doc);
+    SceneEditor(QWidget* parent, Scene* scene, Doc* doc, OutputMap* outputMap,
+                InputMap* inputMap, MasterTimer* masterTimer);
     ~SceneEditor();
 
 private:
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
 protected:
     void init();

@@ -29,10 +29,12 @@
 #include "function.h"
 
 class QTreeWidgetItem;
+class MasterTimer;
+class OutputMap;
+class InputMap;
 class QToolBar;
 class QAction;
 class QWidget;
-
 class Fixture;
 class Doc;
 
@@ -57,7 +59,9 @@ public:
      *               functions are shown by default.
      * @param constFilter If true, don't allow user filter selection
      */
-    FunctionSelection(QWidget* parent, Doc* doc, bool multiple,
+    FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                      InputMap* inputMap, MasterTimer* masterTimer,
+                      bool multiple,
                       quint32 disableFunction = Function::invalidId(),
                       int filter = Function::Scene | Function::Chaser |
                                    Function::EFX | Function::Collection,
@@ -70,6 +74,9 @@ public:
 
 private:
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Disabled functions

@@ -60,8 +60,9 @@ const QSize VCButton::defaultSize(QSize(50, 50));
  * Initialization
  *****************************************************************************/
 
-VCButton::VCButton(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCButton::VCButton(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+                   MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
     , m_adjustIntensity(false)
     , m_intensityAdjustment(1.0)
 {
@@ -112,7 +113,7 @@ VCWidget* VCButton::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCButton* button = new VCButton(parent, m_doc, m_inputMap, m_masterTimer);
+    VCButton* button = new VCButton(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (button->copyFrom(this) == false)
     {
         delete button;
@@ -145,7 +146,7 @@ bool VCButton::copyFrom(VCWidget* widget)
 
 void VCButton::editProperties()
 {
-    VCButtonProperties prop(this, m_doc, m_inputMap);
+    VCButtonProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }

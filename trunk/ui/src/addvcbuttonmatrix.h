@@ -26,6 +26,9 @@
 
 #include "ui_addvcbuttonmatrix.h"
 
+class MasterTimer;
+class OutputMap;
+class InputMap;
 class Doc;
 
 class AddVCButtonMatrix : public QDialog, public Ui_AddVCButtonMatrix
@@ -33,7 +36,8 @@ class AddVCButtonMatrix : public QDialog, public Ui_AddVCButtonMatrix
     Q_OBJECT
 
 public:
-    AddVCButtonMatrix(QWidget* parent, Doc* doc);
+    AddVCButtonMatrix(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                      InputMap* inputMap, MasterTimer* masterTimer);
     ~AddVCButtonMatrix();
 
 public:
@@ -79,7 +83,11 @@ private:
     quint32 m_verticalCount;
     quint32 m_buttonSize;
     FrameStyle m_frameStyle;
+
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 };
 
 #endif

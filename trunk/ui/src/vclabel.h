@@ -42,7 +42,8 @@ class VCLabel : public VCWidget
      * Initialization
      *********************************************************************/
 public:
-    VCLabel(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
+    VCLabel(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+            MasterTimer* masterTimer);
     ~VCLabel();
 
     /*********************************************************************

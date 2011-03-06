@@ -46,10 +46,12 @@
 #include "fixtureconsole.h"
 #include "fixturemanager.h"
 #include "universearray.h"
+#include "mastertimer.h"
 #include "outputpatch.h"
 #include "addfixture.h"
 #include "collection.h"
 #include "outputmap.h"
+#include "inputmap.h"
 #include "fixture.h"
 #include "apputil.h"
 #include "doc.h"
@@ -78,15 +80,20 @@ FixtureManager* FixtureManager::s_instance = NULL;
  *****************************************************************************/
 
 FixtureManager::FixtureManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                               InputMap* inputMap, MasterTimer* masterTimer,
                                const QLCFixtureDefCache& fixtureDefCache,
                                Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
     , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
     , m_fixtureDefCache(fixtureDefCache)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
 
     new QVBoxLayout(this);
 
@@ -121,6 +128,7 @@ FixtureManager::~FixtureManager()
 }
 
 void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                   InputMap* inputMap, MasterTimer* masterTimer,
                                    const QLCFixtureDefCache& fixtureDefCache)
 {
     QWidget* window = NULL;
@@ -130,15 +138,15 @@ void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputM
     {
     #ifdef __APPLE__
         /* Create a separate window for OSX */
-        s_instance = new FixtureManager(parent, doc, outputMap, fixtureDefCache,
-                                        Qt::Window);
+        s_instance = new FixtureManager(parent, doc, outputMap, inputMap, masterTimer,
+                                        fixtureDefCache, Qt::Window);
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
         QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new FixtureManager(sub, doc, outputMap, fixtureDefCache);
+        s_instance = new FixtureManager(sub, doc, outputMap, inputMap, masterTimer, fixtureDefCache);
         window = area->addSubWindow(sub);
     #endif
 
@@ -367,7 +375,7 @@ void FixtureManager::slotSelectionChanged()
         delete m_tab->widget(KTabConsole);
 
         /* Create a new console for the selected fixture */
-        m_console = new FixtureConsole(this);
+        m_console = new FixtureConsole(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
         m_console->setFixture(id);
         m_console->setChannelsCheckable(false);
 

@@ -132,7 +132,7 @@ void VCProperties::resetContents()
         delete m_contents;
 
     /* Create new contents */
-    m_contents = new VCFrame(_app, _app->doc(), _app->inputMap(), _app->masterTimer());
+    m_contents = new VCFrame(_app, _app->doc(), _app->outputMap(), _app->inputMap(), _app->masterTimer());
 }
 
 /*****************************************************************************
@@ -166,8 +166,10 @@ bool VCProperties::loadXML(const QDomElement* vc_root)
         else if (tag.tagName() == KXMLQLCVCFrame)
         {
             /* Contents */
-            if (m_contents == NULL)
-                m_contents = new VCFrame(_app, _app->doc(), _app->inputMap(), _app->masterTimer());
+            if (m_contents == NULL) {
+                m_contents = new VCFrame(_app, _app->doc(), _app->outputMap(),
+                                         _app->inputMap(), _app->masterTimer());
+            }
             Q_ASSERT(m_contents != NULL);
             m_contents->loadXML(&tag);
         }

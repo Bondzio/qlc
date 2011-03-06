@@ -31,13 +31,18 @@
 #include "inputmap.h"
 #include "doc.h"
 
-VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, InputMap* inputMap)
+VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap* outputMap,
+                                         InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(cueList)
     , m_doc(doc)
+    , m_outputMap(outputMap)
     , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
     Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(cueList != NULL);
     m_cueList = cueList;
 
@@ -150,7 +155,8 @@ void VCCueListProperties::updateChaserName()
 
 void VCCueListProperties::slotAttachClicked()
 {
-    FunctionSelection fs(this, m_doc, false, Function::invalidId(), Function::Chaser, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
+                         false, Function::invalidId(), Function::Chaser, true);
     if (fs.exec() == QDialog::Accepted)
     {
         if (fs.selection().isEmpty() == false)

@@ -40,8 +40,19 @@ extern App* _app;
  * Initialization
  *****************************************************************************/
 
-FixtureConsole::FixtureConsole(QWidget* parent) : QWidget(parent)
+FixtureConsole::FixtureConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                               InputMap* inputMap, MasterTimer* masterTimer)
+    : QWidget(parent)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
 {
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
+
     m_fixture = Fixture::invalidId();
     m_channelsCheckable = false;
     m_externalInputEnabled = false;
@@ -65,7 +76,7 @@ void FixtureConsole::setFixture(quint32 id)
 
     m_fixture = id;
 
-    Fixture* fxi = _app->doc()->fixture(m_fixture);
+    Fixture* fxi = m_doc->fixture(m_fixture);
     Q_ASSERT(fxi != NULL);
 
     /* Create channel units */
@@ -76,8 +87,7 @@ void FixtureConsole::setFixture(quint32 id)
         if (ch->group() == QLCChannel::NoGroup)
             continue;
 
-        ConsoleChannel* cc = new ConsoleChannel(this, _app->doc(), _app->outputMap(),
-                                                _app->masterTimer(), m_fixture, i);
+        ConsoleChannel* cc = new ConsoleChannel(this, m_doc, m_outputMap, m_masterTimer, m_fixture, i);
         cc->setCheckable(m_channelsCheckable);
         layout()->addWidget(cc);
 
@@ -144,8 +154,7 @@ void FixtureConsole::setSceneValue(const SceneValue& scv)
     }
 }
 
-void FixtureConsole::slotValueChanged(quint32 channel, uchar value,
-                                      bool enabled)
+void FixtureConsole::slotValueChanged(quint32 channel, uchar value, bool enabled)
 {
     emit valueChanged(m_fixture, channel, value, enabled);
 }
@@ -210,34 +219,21 @@ void FixtureConsole::enableExternalInput(bool enable)
 {
     if (enable == true && m_externalInputEnabled == false)
     {
-        connect(_app->inputMap(),
-                SIGNAL(inputValueChanged(quint32,
-                                         quint32,
-                                         uchar)),
-                this, SLOT(slotInputValueChanged(quint32,
-                                                 quint32,
-                                                 uchar)));
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
         m_externalInputEnabled = true;
     }
     else if (enable == false && m_externalInputEnabled == true)
     {
-        disconnect(_app->inputMap(),
-                   SIGNAL(inputValueChanged(quint32,
-                                            quint32,
-                                            uchar)),
-                   this,
-                   SLOT(slotInputValueChanged(quint32,
-                                              quint32,
-                                              uchar)));
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
         m_externalInputEnabled = false;
     }
 }
 
-void FixtureConsole::slotInputValueChanged(quint32 uni,
-        quint32 ch,
-        uchar value)
+void FixtureConsole::slotInputValueChanged(quint32 uni, quint32 ch, uchar value)
 {
-    if (uni == _app->inputMap()->editorUniverse())
+    if (uni == m_inputMap->editorUniverse())
     {
         ConsoleChannel* cc;
 

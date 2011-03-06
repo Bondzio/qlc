@@ -44,8 +44,8 @@
 
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
 
-VCCueList::VCCueList(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
     , m_chaser(Function::invalidId())
     , m_runner(NULL)
 {
@@ -100,7 +100,7 @@ VCWidget* VCCueList::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCCueList* cuelist = new VCCueList(parent, m_doc, m_inputMap, m_masterTimer);
+    VCCueList* cuelist = new VCCueList(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (cuelist->copyFrom(this) == false)
     {
         delete cuelist;
@@ -390,7 +390,7 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
 
 void VCCueList::editProperties()
 {
-    VCCueListProperties prop(this, m_doc, m_inputMap);
+    VCCueListProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (prop.exec() == QDialog::Accepted)
     {
         m_doc->setModified();

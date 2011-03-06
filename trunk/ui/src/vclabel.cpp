@@ -35,8 +35,9 @@
 #include "vclabel.h"
 #include "doc.h"
 
-VCLabel::VCLabel(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, inputMap, masterTimer)
+VCLabel::VCLabel(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
+                 MasterTimer* masterTimer)
+    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
 {
     /* Set the class name "VCLabel" as the object name as well */
     setObjectName(VCLabel::staticMetaObject.className());
@@ -57,7 +58,7 @@ VCWidget* VCLabel::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCLabel* label = new VCLabel(parent, m_doc, m_inputMap, m_masterTimer);
+    VCLabel* label = new VCLabel(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (label->copyFrom(this) == false)
     {
         delete label;

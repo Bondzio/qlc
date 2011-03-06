@@ -41,7 +41,7 @@ class VCFrame : public VCWidget
      * Initialization
      *********************************************************************/
 public:
-    VCFrame(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
+    VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCFrame();
 
     void init(bool bottomFrame = false);

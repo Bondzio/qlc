@@ -54,7 +54,7 @@ class VCXYPad : public VCWidget, public DMXSource
      * Initialization
      *********************************************************************/
 public:
-    VCXYPad(QWidget* parent, Doc* doc, InputMap* inputMap, MasterTimer* masterTimer);
+    VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCXYPad();
 
     /*********************************************************************

@@ -29,7 +29,10 @@
 
 #include "functionselection.h"
 #include "collectioneditor.h"
+#include "mastertimer.h"
 #include "collection.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "function.h"
 #include "fixture.h"
 #include "apputil.h"
@@ -40,12 +43,20 @@
 #define KColumnFunction 0
 #define KColumnFunctionID 1
 
-CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
+CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc,
+                                   OutputMap* outputMap, InputMap* inputMap,
+                                   MasterTimer* masterTimer)
     : QDialog(parent)
     , m_doc(doc)
+    , m_outputMap(outputMap)
+    , m_inputMap(inputMap)
+    , m_masterTimer(masterTimer)
     , m_original(fc)
 {
     Q_ASSERT(doc != NULL);
+    Q_ASSERT(outputMap != NULL);
+    Q_ASSERT(inputMap != NULL);
+    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(fc != NULL);
 
     setupUi(this);
@@ -88,7 +99,7 @@ void CollectionEditor::slotNameEdited(const QString& text)
 
 void CollectionEditor::slotAdd()
 {
-    FunctionSelection sel(this, m_doc, true, m_original->id());
+    FunctionSelection sel(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true, m_original->id());
     if (sel.exec() == QDialog::Accepted)
     {
         quint32 fid;

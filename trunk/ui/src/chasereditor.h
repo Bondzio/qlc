@@ -27,7 +27,9 @@
 
 class Doc;
 class Chaser;
-class FunctionSelection;
+class InputMap;
+class OutputMap;
+class MasterTimer;
 
 class ChaserEditor : public QDialog, public Ui_ChaserEditor
 {
@@ -35,12 +37,15 @@ class ChaserEditor : public QDialog, public Ui_ChaserEditor
     Q_DISABLE_COPY(ChaserEditor)
 
 public:
-    ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc);
+    ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap* outputMap,
+                 InputMap* inputMap, MasterTimer* masterTimer);
     ~ChaserEditor();
 
 private:
-    /** The document that owns the Chaser */
     Doc* m_doc;
+    OutputMap* m_outputMap;
+    InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
 protected:
     /** Fill known buses to the bus combo and select current */

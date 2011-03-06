@@ -38,7 +38,8 @@ class VCButtonProperties : public QDialog, public Ui_VCButtonProperties
     Q_DISABLE_COPY(VCButtonProperties)
 
 public:
-    VCButtonProperties(VCButton* button, Doc* doc, InputMap* inputMap);
+    VCButtonProperties(VCButton* button, Doc* doc, OutputMap* outputMap,
+                       InputMap* inputMap, MasterTimer* masterTimer);
     ~VCButtonProperties();
 
 protected slots:
@@ -63,7 +64,9 @@ protected:
 protected:
     VCButton* m_button;
     Doc* m_doc;
+    OutputMap* m_outputMap;
     InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     QKeySequence m_keySequence;
     quint32 m_function;

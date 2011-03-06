@@ -27,7 +27,9 @@
 
 #include "ui_vccuelistproperties.h"
 
+class MasterTimer;
 class VCCueList;
+class OutputMap;
 class InputMap;
 class Doc;
 
@@ -40,7 +42,8 @@ class VCCueListProperties : public QDialog, public Ui_VCCueListProperties
      * Initialization
      ************************************************************************/
 public:
-    VCCueListProperties(VCCueList* cueList, Doc* doc, InputMap* inputMap);
+    VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap* outputMap,
+                        InputMap* inputMap, MasterTimer* masterTimer);
     ~VCCueListProperties();
 
 public slots:
@@ -50,7 +53,9 @@ public slots:
 protected:
     VCCueList* m_cueList;
     Doc* m_doc;
+    OutputMap* m_outputMap;
     InputMap* m_inputMap;
+    MasterTimer* m_masterTimer;
 
     /************************************************************************
      * Cues

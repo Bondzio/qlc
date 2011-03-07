@@ -130,7 +130,7 @@ void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
-        MdiArea* area = qobject_cast<QMdiArea*> (parent);
+        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new InputManager(sub, inputMap);

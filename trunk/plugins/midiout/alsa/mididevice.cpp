@@ -29,6 +29,7 @@
 
 #include "midiprotocol.h"
 #include "mididevice.h"
+#include "qlcmacros.h"
 #include "midiout.h"
 
 MIDIDevice::MIDIDevice(MIDIOut* parent, const snd_seq_addr_t* address)

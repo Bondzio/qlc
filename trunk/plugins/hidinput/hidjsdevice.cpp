@@ -30,6 +30,7 @@
 #include <QFile>
 
 #include "hidjsdevice.h"
+#include "qlcmacros.h"
 #include "hidinput.h"
 
 HIDJsDevice::HIDJsDevice(HIDInput* parent, quint32 line, const QString& path)

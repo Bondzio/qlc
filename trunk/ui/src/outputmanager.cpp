@@ -117,6 +117,7 @@ void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new OutputManager(sub, outputMap);
+        sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
 

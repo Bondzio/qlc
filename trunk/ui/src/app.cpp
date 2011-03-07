@@ -23,7 +23,6 @@
 #include <QCoreApplication>
 #include <QProgressDialog>
 #include <QDesktopWidget>
-#include <QMdiSubWindow>
 #include <QStyleFactory>
 #include <QApplication>
 #include <QImageReader>

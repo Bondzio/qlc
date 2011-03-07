@@ -164,6 +164,7 @@ void VirtualConsole::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputM
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new VirtualConsole(sub, doc, outputMap, inputMap, masterTimer);
+        sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
 

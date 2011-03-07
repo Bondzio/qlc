@@ -105,6 +105,7 @@ void BusManager::createAndShow(QWidget* parent)
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new BusManager(sub);
+        sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
 
@@ -125,6 +126,11 @@ void BusManager::createAndShow(QWidget* parent)
     }
     else
     {
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
     }
 
     window->show();

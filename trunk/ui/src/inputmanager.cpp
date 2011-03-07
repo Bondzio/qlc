@@ -134,6 +134,7 @@ void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new InputManager(sub, inputMap);
+        sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
 
@@ -152,6 +153,17 @@ void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
             AppUtil::ensureWidgetIsVisible(window);
         }
     }
+    else
+    {
+    #ifdef __APPLE__
+        window = s_instance;
+    #else
+        window = s_instance->parentWidget();
+    #endif
+    }
+
+    window->show();
+    window->raise();
 }
 
 /*****************************************************************************

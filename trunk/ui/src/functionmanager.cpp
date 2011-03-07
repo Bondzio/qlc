@@ -127,6 +127,7 @@ void FunctionManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* output
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
         s_instance = new FunctionManager(sub, doc, outputMap, inputMap, masterTimer);
+        sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
 

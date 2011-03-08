@@ -45,12 +45,14 @@ QLCChannel::QLCChannel()
 {
     m_group = Intensity;
     m_controlByte = MSB;
+    m_colour = NoColour;
 }
 
 QLCChannel::QLCChannel(const QLCChannel* channel)
 {
     m_group = Intensity;
     m_controlByte = MSB;
+    m_colour = NoColour;
 
     if (channel != NULL)
         *this = *channel;
@@ -71,6 +73,7 @@ QLCChannel& QLCChannel::operator=(const QLCChannel& channel)
         m_name = channel.m_name;
         m_group = channel.m_group;
         m_controlByte = channel.m_controlByte;
+        m_colour = channel.m_colour;
 
         /* Clear old capabilities */
         while (m_capabilities.isEmpty() == false)
@@ -207,6 +210,16 @@ QLCChannel::ControlByte QLCChannel::controlByte() const
     return m_controlByte;
 }
 
+void QLCChannel::setColour(QLCChannel::PrimaryColour colour)
+{
+    m_colour = colour;
+}
+
+QLCChannel::PrimaryColour QLCChannel::colour() const
+{
+    return m_colour;
+}
+
 /*****************************************************************************
  * Capabilities
  *****************************************************************************/
@@ -296,7 +309,7 @@ void QLCChannel::sortCapabilities()
 bool QLCChannel::saveXML(QDomDocument* doc, QDomElement* root) const
 {
     QDomElement chtag;
-    QDomElement grptag;
+    QDomElement tag;
     QDomText text;
 
     Q_ASSERT(doc != NULL);
@@ -308,13 +321,22 @@ bool QLCChannel::saveXML(QDomDocument* doc, QDomElement* root) const
     root->appendChild(chtag);
 
     /* Group */
-    grptag = doc->createElement(KXMLQLCChannelGroup);
+    tag = doc->createElement(KXMLQLCChannelGroup);
     text = doc->createTextNode(groupToString(m_group));
-    grptag.appendChild(text);
+    tag.appendChild(text);
 
     /* Group control byte */
-    grptag.setAttribute(KXMLQLCChannelGroupByte, QString::number(controlByte()));
-    chtag.appendChild(grptag);
+    tag.setAttribute(KXMLQLCChannelGroupByte, QString::number(controlByte()));
+    chtag.appendChild(tag);
+
+    /* Colour */
+    if (m_colour != NoColour)
+    {
+        tag = doc->createElement(KXMLQLCChannelColour);
+        text = doc->createTextNode(QString::number(m_colour));
+        tag.appendChild(text);
+        chtag.appendChild(tag);
+    }
 
     /* Capabilities */
     QListIterator <QLCCapability*> it(m_capabilities);
@@ -374,6 +396,10 @@ bool QLCChannel::loadXML(const QDomElement* root)
             str = tag.attribute(KXMLQLCChannelGroupByte);
             setControlByte(ControlByte(str.toInt()));
             setGroup(stringToGroup(tag.text()));
+        }
+        else if (tag.tagName() == KXMLQLCChannelColour)
+        {
+            setColour(PrimaryColour(tag.text().toInt()));
         }
         else
         {

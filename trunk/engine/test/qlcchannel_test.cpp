@@ -86,6 +86,29 @@ void QLCChannel_Test::controlByte()
     delete channel;
 }
 
+void QLCChannel_Test::colour()
+{
+    QCOMPARE(int(QLCChannel::NoColour), 0);
+    QCOMPARE(int(QLCChannel::Red), 0xFF0000);
+    QCOMPARE(int(QLCChannel::Green), 0x00FF00);
+    QCOMPARE(int(QLCChannel::Blue), 0x0000FF);
+    QCOMPARE(int(QLCChannel::Cyan), 0x00FFFF);
+    QCOMPARE(int(QLCChannel::Magenta), 0xFF00FF);
+    QCOMPARE(int(QLCChannel::Yellow), 0xFFFF00);
+
+    QLCChannel* channel = new QLCChannel();
+    QCOMPARE(channel->colour(), QLCChannel::NoColour);
+
+    channel->setColour(QLCChannel::Green);
+    QCOMPARE(channel->colour(), QLCChannel::Green);
+
+    channel->setColour(QLCChannel::Magenta);
+    QCOMPARE(channel->colour(), QLCChannel::Magenta);
+
+    channel->setColour(QLCChannel::NoColour);
+    QCOMPARE(channel->colour(), QLCChannel::NoColour);
+}
+
 void QLCChannel_Test::searchCapabilityByValue()
 {
     QLCChannel* channel = new QLCChannel();
@@ -296,6 +319,7 @@ void QLCChannel_Test::copy()
     channel->setName("Foobar");
     channel->setGroup(QLCChannel::Tilt);
     channel->setControlByte(QLCChannel::ControlByte(3));
+    channel->setColour(QLCChannel::Yellow);
 
     QLCCapability* cap1 = new QLCCapability(10, 19, "10-19");
     QVERIFY(channel->addCapability(cap1) == true);
@@ -327,6 +351,7 @@ void QLCChannel_Test::copy()
     QVERIFY(copy->name() == "Foobar");
     QVERIFY(copy->group() == QLCChannel::Tilt);
     QVERIFY(copy->controlByte() == QLCChannel::ControlByte(3));
+    QVERIFY(copy->colour() == QLCChannel::Yellow);
 
     /* Verify that the capabilities in the copied channel are also
        copies i.e. their pointers are not the same as the originals. */
@@ -387,6 +412,11 @@ void QLCChannel_Test::load()
     QDomText groupName = doc.createTextNode("Tilt");
     group.appendChild(groupName);
 
+    QDomElement colour = doc.createElement("Colour");
+    QDomText colourText = doc.createTextNode(QString::number(QLCChannel::Cyan));
+    colour.appendChild(colourText);
+    root.appendChild(colour);
+
     QDomElement cap1 = doc.createElement("Capability");
     root.appendChild(cap1);
     cap1.setAttribute("Min", 0);
@@ -431,6 +461,7 @@ void QLCChannel_Test::load()
     QVERIFY(ch.name() == "Channel1");
     QVERIFY(ch.group() == QLCChannel::Tilt);
     QVERIFY(ch.controlByte() == QLCChannel::LSB);
+    QVERIFY(ch.colour() == QLCChannel::Cyan);
     QVERIFY(ch.capabilities().size() == 2);
     QVERIFY(ch.capabilities()[0]->name() == "Cap1");
     QVERIFY(ch.capabilities()[1]->name() == "Cap3");

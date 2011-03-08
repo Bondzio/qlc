@@ -30,6 +30,7 @@
 #define KXMLQLCChannelName      QString("Name")
 #define KXMLQLCChannelGroup     QString("Group")
 #define KXMLQLCChannelGroupByte QString("Byte")
+#define KXMLQLCChannelColour    QString("Colour")
 
 class QFile;
 class QString;
@@ -122,6 +123,17 @@ public:
         LSB = 1
     };
 
+    enum PrimaryColour
+    {
+        NoColour    = 0,
+        Red         = 0xFF0000,
+        Green       = 0x00FF00,
+        Blue        = 0x0000FF,
+        Cyan        = 0x00FFFF,
+        Magenta     = 0xFF00FF,
+        Yellow      = 0xFFFF00
+    };
+
     /** Get the channel's name */
     QString name() const;
 
@@ -134,9 +146,16 @@ public:
     /** Get the channel's control byte */
     ControlByte controlByte() const;
 
+    /** Set the colour that is controlled by this channel */
+    void setColour(PrimaryColour colour);
+
+    /** Get the colour that is controlled by this channel */
+    PrimaryColour colour() const;
+
 protected:
     QString m_name;
     ControlByte m_controlByte;
+    PrimaryColour m_colour;
 
     /*********************************************************************
      * Capabilities

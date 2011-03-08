@@ -123,17 +123,6 @@ public:
         LSB = 1
     };
 
-    enum PrimaryColour
-    {
-        NoColour    = 0,
-        Red         = 0xFF0000,
-        Green       = 0x00FF00,
-        Blue        = 0x0000FF,
-        Cyan        = 0x00FFFF,
-        Magenta     = 0xFF00FF,
-        Yellow      = 0xFFFF00
-    };
-
     /** Get the channel's name */
     QString name() const;
 
@@ -146,15 +135,41 @@ public:
     /** Get the channel's control byte */
     ControlByte controlByte() const;
 
+protected:
+    QString m_name;
+    ControlByte m_controlByte;
+
+    /*************************************************************************
+     * Colours
+     *************************************************************************/
+public:
+    enum PrimaryColour
+    {
+        NoColour    = 0,
+        Red         = 0xFF0000,
+        Green       = 0x00FF00,
+        Blue        = 0x0000FF,
+        Cyan        = 0x00FFFF,
+        Magenta     = 0xFF00FF,
+        Yellow      = 0xFFFF00
+    };
+
+    /** Get a list of possible channel groups */
+    static QStringList colourList();
+
+    /** Convert a Group to a string */
+    static QString colourToString(PrimaryColour colour);
+
+    /** Convert a string to a Group */
+    static PrimaryColour stringToColour(const QString& str);
+
     /** Set the colour that is controlled by this channel */
     void setColour(PrimaryColour colour);
 
     /** Get the colour that is controlled by this channel */
     PrimaryColour colour() const;
 
-protected:
-    QString m_name;
-    ControlByte m_controlByte;
+private:
     PrimaryColour m_colour;
 
     /*********************************************************************

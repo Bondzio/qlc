@@ -41,6 +41,14 @@
 #define KXMLQLCChannelGroupMaintenance QString("Maintenance")
 #define KXMLQLCChannelGroupNothing     QString("Nothing")
 
+#define KXMLQLCChannelColourGeneric    QString("Generic")
+#define KXMLQLCChannelColourRed        QString("Red")
+#define KXMLQLCChannelColourGreen      QString("Green")
+#define KXMLQLCChannelColourBlue       QString("Blue")
+#define KXMLQLCChannelColourCyan       QString("Cyan")
+#define KXMLQLCChannelColourMagenta    QString("Magenta")
+#define KXMLQLCChannelColourYellow     QString("Yellow")
+
 QLCChannel::QLCChannel()
 {
     m_group = Intensity;
@@ -210,6 +218,63 @@ QLCChannel::ControlByte QLCChannel::controlByte() const
     return m_controlByte;
 }
 
+/*****************************************************************************
+ * Colours
+ *****************************************************************************/
+
+QStringList QLCChannel::colourList()
+{
+    QStringList list;
+    list << KXMLQLCChannelColourGeneric;
+    list << KXMLQLCChannelColourRed;
+    list << KXMLQLCChannelColourGreen;
+    list << KXMLQLCChannelColourBlue;
+    list << KXMLQLCChannelColourCyan;
+    list << KXMLQLCChannelColourMagenta;
+    list << KXMLQLCChannelColourYellow;
+    return list;
+}
+
+QString QLCChannel::colourToString(PrimaryColour colour)
+{
+    switch (colour)
+    {
+    case Red:
+        return KXMLQLCChannelColourRed;
+    case Green:
+        return KXMLQLCChannelColourGreen;
+    case Blue:
+        return KXMLQLCChannelColourBlue;
+    case Cyan:
+        return KXMLQLCChannelColourCyan;
+    case Magenta:
+        return KXMLQLCChannelColourMagenta;
+    case Yellow:
+        return KXMLQLCChannelColourYellow;
+    case NoColour:
+    default:
+        return KXMLQLCChannelColourGeneric;
+    }
+}
+
+QLCChannel::PrimaryColour QLCChannel::stringToColour(const QString& str)
+{
+    if (str == KXMLQLCChannelColourRed)
+        return Red;
+    else if (str == KXMLQLCChannelColourGreen)
+        return Green;
+    else if (str == KXMLQLCChannelColourBlue)
+        return Blue;
+    else if (str == KXMLQLCChannelColourCyan)
+        return Cyan;
+    else if (str == KXMLQLCChannelColourMagenta)
+        return Magenta;
+    else if (str == KXMLQLCChannelColourYellow)
+        return Yellow;
+    else
+        return NoColour;
+}
+
 void QLCChannel::setColour(QLCChannel::PrimaryColour colour)
 {
     m_colour = colour;
@@ -333,7 +398,7 @@ bool QLCChannel::saveXML(QDomDocument* doc, QDomElement* root) const
     if (m_colour != NoColour)
     {
         tag = doc->createElement(KXMLQLCChannelColour);
-        text = doc->createTextNode(QString::number(m_colour));
+        text = doc->createTextNode(QLCChannel::colourToString(colour()));
         tag.appendChild(text);
         chtag.appendChild(tag);
     }
@@ -399,7 +464,7 @@ bool QLCChannel::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCChannelColour)
         {
-            setColour(PrimaryColour(tag.text().toInt()));
+            setColour(stringToColour(tag.text()));
         }
         else
         {

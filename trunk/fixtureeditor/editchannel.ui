@@ -6,43 +6,84 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>457</height>
+    <width>406</width>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Edit Channel</string>
   </property>
-  <layout class="QVBoxLayout">
-   <item>
-    <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLabel" name="m_nameLabel">
-       <property name="text">
-        <string>Name</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="m_nameEdit"/>
-     </item>
-    </layout>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="m_nameLabel">
+     <property name="text">
+      <string>Name</string>
+     </property>
+    </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLabel" name="m_groupLabel">
-       <property name="text">
-        <string>Group</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="m_groupCombo"/>
-     </item>
-    </layout>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="m_nameEdit"/>
    </item>
-   <item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="m_groupLabel">
+     <property name="text">
+      <string>Group</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="m_groupCombo"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="m_colourLabel">
+     <property name="text">
+      <string>Colour</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="m_colourCombo">
+     <property name="toolTip">
+      <string>Primary colour level controlled by this channel</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Generic</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Red</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Green</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Blue</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Cyan</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Magenta</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Yellow</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="m_controlByteGroup">
      <property name="title">
       <string>Control Byte</string>
@@ -65,7 +106,7 @@
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="4" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Capabilities</string>
@@ -193,7 +234,7 @@
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="5" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

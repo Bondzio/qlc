@@ -93,11 +93,26 @@ void EditChannel::init()
     /* Select the channel's group */
     for (int i = 0; i < m_groupCombo->count(); i++)
     {
-        if (m_groupCombo->itemText(i) ==
-            QLCChannel::groupToString(m_channel->group()))
+        if (m_groupCombo->itemText(i) == QLCChannel::groupToString(m_channel->group()))
         {
             m_groupCombo->setCurrentIndex(i);
             slotGroupActivated(QLCChannel::groupToString(m_channel->group()));
+            break;
+        }
+    }
+
+    /* Get available colours and insert them into the colour combo */
+    m_colourCombo->addItems(QLCChannel::colourList());
+    connect(m_colourCombo, SIGNAL(activated(const QString&)),
+            this, SLOT(slotColourActivated(const QString&)));
+
+    /* Select the channel's colour */
+    for (int i = 0; i < m_colourCombo->count(); i++)
+    {
+        if (m_colourCombo->itemText(i) == QLCChannel::colourToString(m_channel->colour()))
+        {
+            m_colourCombo->setCurrentIndex(i);
+            slotColourActivated(QLCChannel::colourToString(m_channel->colour()));
             break;
         }
     }
@@ -112,8 +127,7 @@ void EditChannel::init()
             this, SLOT(slotWizardClicked()));
 
     /* Capability list connections */
-    m_capabilityList->header()
-    ->setResizeMode(QHeaderView::ResizeToContents);
+    m_capabilityList->header()->setResizeMode(QHeaderView::ResizeToContents);
     connect(m_capabilityList,
             SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
             this,
@@ -139,6 +153,22 @@ void EditChannel::slotGroupActivated(const QString& group)
         m_msbRadio->click();
     else
         m_lsbRadio->click();
+
+    if (m_channel->group() == QLCChannel::Pan || m_channel->group() == QLCChannel::Tilt)
+        m_controlByteGroup->show();
+    else
+        m_controlByteGroup->hide();
+
+    if (m_channel->group() == QLCChannel::Intensity)
+    {
+        m_colourLabel->show();
+        m_colourCombo->show();
+    }
+    else
+    {
+        m_colourLabel->hide();
+        m_colourCombo->hide();
+    }
 }
 
 void EditChannel::slotMsbRadioToggled(bool toggled)
@@ -155,6 +185,11 @@ void EditChannel::slotLsbRadioToggled(bool toggled)
         m_channel->setControlByte(QLCChannel::LSB);
     else
         m_channel->setControlByte(QLCChannel::MSB);
+}
+
+void EditChannel::slotColourActivated(const QString& colour)
+{
+    m_channel->setColour(QLCChannel::stringToColour(colour));
 }
 
 /****************************************************************************

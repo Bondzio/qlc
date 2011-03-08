@@ -86,6 +86,20 @@ void QLCChannel_Test::controlByte()
     delete channel;
 }
 
+void QLCChannel_Test::colourList()
+{
+    QStringList list(QLCChannel::colourList());
+
+    QVERIFY(list.size() == 7);
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::NoColour)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Red)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Green)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Blue)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Cyan)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Magenta)));
+    QVERIFY(list.contains(QLCChannel::colourToString(QLCChannel::Yellow)));
+}
+
 void QLCChannel_Test::colour()
 {
     QCOMPARE(int(QLCChannel::NoColour), 0);

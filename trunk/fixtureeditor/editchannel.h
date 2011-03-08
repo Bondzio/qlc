@@ -61,6 +61,7 @@ protected slots:
     void slotGroupActivated(const QString& group);
     void slotMsbRadioToggled(bool toggled);
     void slotLsbRadioToggled(bool toggled);
+    void slotColourActivated(const QString& colour);
 
     /*********************************************************************
      * Capabilities

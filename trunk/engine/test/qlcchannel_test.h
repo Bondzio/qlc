@@ -33,6 +33,7 @@ private slots:
     void name();
     void group();
     void controlByte();
+    void colourList();
     void colour();
     void searchCapabilityByValue();
     void searchCapabilityByName();

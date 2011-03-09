@@ -210,7 +210,7 @@ void ConsoleChannel::initMenu()
         m_presetButton->setIcon(QIcon(":/tilt.png"));
         break;
     case QLCChannel::Colour:
-        setColourButton(ch);
+        m_presetButton->setIcon(QIcon(":/color.png"));
         break;
     case QLCChannel::Effect:
         m_presetButton->setIcon(QIcon(":/efx.png"));
@@ -231,7 +231,7 @@ void ConsoleChannel::initMenu()
         m_presetButton->setIcon(QIcon(":/maintenance.png"));
         break;
     case QLCChannel::Intensity:
-        setColourButton(ch);
+        setIntensityButton(ch);
         break;
     case QLCChannel::Beam:
         m_presetButton->setIcon(QIcon(":/beam.png"));
@@ -252,23 +252,26 @@ void ConsoleChannel::initMenu()
         initCapabilityMenu(ch);
 }
 
-void ConsoleChannel::setColourButton(const QLCChannel* channel)
+void ConsoleChannel::setIntensityButton(const QLCChannel* channel)
 {
-    if (channel->name().contains("red", Qt::CaseInsensitive) == true)
+    if (channel->colour() == QLCChannel::Red ||
+        channel->name().contains("red", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, Qt::red);
         m_presetButton->setPalette(pal);
         m_presetButton->setText("R"); // Don't localize
     }
-    else if (channel->name().contains("green", Qt::CaseInsensitive) == true)
+    else if (channel->colour() == QLCChannel::Green ||
+             channel->name().contains("green", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, Qt::green);
         m_presetButton->setPalette(pal);
         m_presetButton->setText("G"); // Don't localize
     }
-    else if (channel->name().contains("blue", Qt::CaseInsensitive) == true)
+    else if (channel->colour() == QLCChannel::Blue ||
+             channel->name().contains("blue", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, Qt::blue);
@@ -276,36 +279,33 @@ void ConsoleChannel::setColourButton(const QLCChannel* channel)
         m_presetButton->setPalette(pal);
         m_presetButton->setText("B"); // Don't localize
     }
-    else if (channel->name().contains("cyan", Qt::CaseInsensitive) == true)
+    else if (channel->colour() == QLCChannel::Cyan ||
+             channel->name().contains("cyan", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, QColor("cyan"));
         m_presetButton->setPalette(pal);
         m_presetButton->setText("C"); // Don't localize
     }
-    else if (channel->name().contains("magenta", Qt::CaseInsensitive) == true)
+    else if (channel->colour() == QLCChannel::Magenta ||
+             channel->name().contains("magenta", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, QColor("magenta"));
         m_presetButton->setPalette(pal);
         m_presetButton->setText("M"); // Don't localize
     }
-    else if (channel->name().contains("yellow", Qt::CaseInsensitive) == true)
+    else if (channel->colour() == QLCChannel::Yellow ||
+             channel->name().contains("yellow", Qt::CaseInsensitive) == true)
     {
         QPalette pal = m_presetButton->palette();
         pal.setColor(QPalette::Button, QColor("yellow"));
         m_presetButton->setPalette(pal);
         m_presetButton->setText("Y"); // Don't localize
     }
-    else if (channel->group() == QLCChannel::Colour)
+    else
     {
-        // None of the primary colour names matched, but since this is still
-        // a colour channel, it must be controlling a fixed color wheel
-        m_presetButton->setIcon(QIcon(":/color.png"));
-    }
-    else if (channel->group() == QLCChannel::Intensity)
-    {
-        // None of the primary colour names matched and since this is an
+        // None of the primary colours matched and since this is an
         // intensity channel, it must be controlling a plain dimmer OSLT.
         m_presetButton->setIcon(QIcon(":/intensity.png"));
     }

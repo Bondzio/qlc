@@ -82,8 +82,8 @@ protected:
     /** Initialize the context menu for fixtures with capabilities */
     void initCapabilityMenu(const QLCChannel* ch);
 
-    /** Set button background colour for RGB/CMY colour channels */
-    void setColourButton(const QLCChannel* ch);
+    /** Set button background colour for RGB/CMY/generic intensity channels */
+    void setIntensityButton(const QLCChannel* ch);
 
 protected:
     const QIcon colorIcon(const QString& name);

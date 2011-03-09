@@ -50,7 +50,8 @@
 #include "docbrowser.h"
 #include "fixtureeditor.h"
 
-#define KSettingsGeometry "workspace/geometry"
+#define SETTINGS_GEOMETRY "workspace/geometry"
+#define SETTINGS_OPENDIALOGSTATE "workspace/opendialog"
 
 App* _app;
 
@@ -77,7 +78,7 @@ App::App(QWidget* parent) : QMainWindow(parent)
     initToolBar();
 
     QSettings settings;
-    QVariant var = settings.value(KSettingsGeometry);
+    QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
 
@@ -87,7 +88,7 @@ App::App(QWidget* parent) : QMainWindow(parent)
 App::~App()
 {
     QSettings settings;
-    settings.setValue(KSettingsGeometry, saveGeometry());
+    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
     setCopyChannel(NULL);
 
@@ -300,24 +301,36 @@ void App::slotFileNew()
 
 void App::slotFileOpen()
 {
-    QString path;
+    QSettings settings;
 
     /* Create a file open dialog */
     QFileDialog dialog(this);
     dialog.setWindowTitle(tr("Open a fixture definition"));
+    dialog.setFileMode(QFileDialog::ExistingFiles);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
     dialog.setNameFilter(KFixtureFilter);
 
-    QDir dir = QLCFixtureDefCache::userDefinitionDirectory();
-    dialog.setDirectory(dir);
+    QVariant var = settings.value(SETTINGS_OPENDIALOGSTATE);
+    if (var.isValid() == true)
+    {
+        dialog.restoreState(var.toByteArray());
+    }
+    else
+    {
+        QDir dir = QLCFixtureDefCache::userDefinitionDirectory();
+        dialog.setDirectory(dir);
+    }
+
     /* Execute the dialog */
     if (dialog.exec() != QDialog::Accepted)
         return;
 
     /* Get a file name */
-    path = dialog.selectedFiles().first();
-    if (path.isEmpty() == false)
-        loadFixtureDefinition(path);
+    QStringListIterator it(dialog.selectedFiles());
+    while (it.hasNext() == true)
+        loadFixtureDefinition(it.next());
+
+    settings.setValue(SETTINGS_OPENDIALOGSTATE, dialog.saveState());
 }
 
 void App::slotFileSave()

@@ -107,10 +107,17 @@ public:
     /** Get the fixture's type string */
     QString type() const;
 
+    /** Set the definition's author */
+    void setAuthor(const QString& author);
+
+    /** Get the definition's author */
+    QString author() const;
+
 protected:
     QString m_manufacturer;
     QString m_model;
     QString m_type;
+    QString m_author;
 
     /*********************************************************************
      * Channels
@@ -172,6 +179,9 @@ public:
 protected:
     /** Load fixture contents from an XML document */
     bool loadXML(const QDomDocument* doc);
+
+    /** Load <Creator> information */
+    bool loadCreator(const QDomElement& creator);
 };
 
 #endif

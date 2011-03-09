@@ -62,6 +62,7 @@ QLCFixtureDef& QLCFixtureDef::operator=(const QLCFixtureDef& fixture)
         m_manufacturer = fixture.m_manufacturer;
         m_model = fixture.m_model;
         m_type = fixture.m_type;
+        m_author = fixture.m_author;
 
         /* Clear all channels */
         while (m_channels.isEmpty() == false)
@@ -120,6 +121,16 @@ void QLCFixtureDef::setType(const QString& type)
 QString QLCFixtureDef::type() const
 {
     return m_type;
+}
+
+void QLCFixtureDef::setAuthor(const QString& author)
+{
+    m_author = author;
+}
+
+QString QLCFixtureDef::author() const
+{
+    return m_author;
 }
 
 /****************************************************************************
@@ -249,7 +260,7 @@ QFile::FileError QLCFixtureDef::saveXML(const QString& fileName)
     if (file.open(QIODevice::WriteOnly) == false)
         return file.error();
 
-    QDomDocument doc(QLCFile::getXMLHeader(KXMLQLCFixtureDefDocument));
+    QDomDocument doc(QLCFile::getXMLHeader(KXMLQLCFixtureDefDocument, author()));
     Q_ASSERT(doc.isNull() == false);
 
     /* Create a text stream for the file */
@@ -348,6 +359,7 @@ bool QLCFixtureDef::loadXML(const QDomDocument* doc)
 
             if (tag.tagName() == KXMLQLCCreator)
             {
+                loadCreator(tag);
             }
             else if (tag.tagName() == KXMLQLCFixtureDefManufacturer)
             {
@@ -414,4 +426,42 @@ bool QLCFixtureDef::loadXML(const QDomDocument* doc)
     }
 
     return retval;
+}
+
+bool QLCFixtureDef::loadCreator(const QDomElement& creator)
+{
+    QDomNode node;
+    QDomElement tag;
+
+    if (creator.tagName() != KXMLQLCCreator)
+    {
+        qWarning() << Q_FUNC_INFO << "file creator information not found!";
+        return false;
+    }
+
+    node = creator.firstChild();
+    while (node.isNull() == false)
+    {
+        tag = node.toElement();
+        if (tag.tagName() == KXMLQLCCreatorName)
+        {
+            /* Ignore name */
+        }
+        else if (tag.tagName() == KXMLQLCCreatorVersion)
+        {
+            /* Ignore version */
+        }
+        else if (tag.tagName() == KXMLQLCCreatorAuthor)
+        {
+            setAuthor(tag.text());
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "unknown creator tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
 }

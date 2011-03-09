@@ -75,9 +75,10 @@ public:
      * Get a common XML file header as a QDomDocument
      *
      * @param content The content type (Settings, Workspace)
+     * @param author The file's author (overridden by current user name if empty)
      * @return A new QDomDocument containing the header
      */
-    static QDomDocument getXMLHeader(const QString& content);
+    static QDomDocument getXMLHeader(const QString& content, const QString& author = QString());
 
     /**
      * Get a string that gives a textual description for the given file

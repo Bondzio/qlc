@@ -128,6 +128,14 @@ void QLCFixtureEditor::init()
     connect(m_typeCombo, SIGNAL(activated(const QString&)),
             this, SLOT(slotTypeActivated(const QString&)));
 
+    // Display author name or suggest current user name if there isn't one.
+    // When the def already has an author, disable the field to prevent modification.
+    m_authorEdit->setText(m_fixtureDef->author());
+    if (m_authorEdit->text().length() > 0)
+        m_authorEdit->setEnabled(false);
+    else
+        m_authorEdit->setText(QLCFile::currentUserName());
+
     /* Channel page */
     connect(m_addChannelButton, SIGNAL(clicked()),
             this, SLOT(slotAddChannel()));

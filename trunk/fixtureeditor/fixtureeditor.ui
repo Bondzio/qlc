@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>592</width>
-    <height>546</height>
+    <width>510</width>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Fixture</string>
   </property>
-  <layout class="QVBoxLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="m_tab">
      <property name="currentIndex">
@@ -23,146 +23,148 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
-      <layout class="QVBoxLayout">
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="m_manufacturerLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Manufacturer</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="m_manufacturerEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>The manufacturer name for this fixture (e.g. Martin)</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="m_manufacturerLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Manufacturer</string>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="m_modelLabel">
-           <property name="text">
-            <string>Model</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="m_modelEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>The model name for this fixture (e.g. MAC250)</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="m_manufacturerEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The manufacturer name for this fixture (e.g. Martin)</string>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="m_typeLabel">
-           <property name="text">
-            <string>Type</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="m_typeCombo">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>The general type of this fixture</string>
-           </property>
-           <item>
-            <property name="text">
-             <string notr="true">Color Changer</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Dimmer</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Effect</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Fan</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Flower</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Hazer</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Laser</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Moving Head</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Other</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Scanner</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Smoke</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">Strobe</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
+       <item row="1" column="0">
+        <widget class="QLabel" name="m_modelLabel">
+         <property name="text">
+          <string>Model</string>
+         </property>
+        </widget>
        </item>
-       <item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="m_modelEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The model name for this fixture (e.g. MAC250)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="m_typeLabel">
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="m_typeCombo">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The general type of this fixture</string>
+         </property>
+         <item>
+          <property name="text">
+           <string notr="true">Color Changer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Dimmer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Effect</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Fan</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Flower</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Hazer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Laser</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Moving Head</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Other</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Scanner</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Smoke</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">Strobe</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="m_authorLabel">
+         <property name="text">
+          <string>Author</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="m_authorEdit">
+         <property name="toolTip">
+          <string>The author name of this fixture definition</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>

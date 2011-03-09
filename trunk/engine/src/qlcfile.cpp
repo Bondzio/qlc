@@ -65,7 +65,7 @@ QDomDocument QLCFile::readXML(const QString& path)
     return doc;
 }
 
-QDomDocument QLCFile::getXMLHeader(const QString& content)
+QDomDocument QLCFile::getXMLHeader(const QString& content, const QString& author)
 {
     if (content.isEmpty() == true)
         return QDomDocument();
@@ -100,7 +100,10 @@ QDomDocument QLCFile::getXMLHeader(const QString& content)
     /* Author */
     subtag = doc.createElement(KXMLQLCCreatorAuthor);
     tag.appendChild(subtag);
-    text = doc.createTextNode(currentUserName());
+    if (author.isEmpty() == true)
+        text = doc.createTextNode(currentUserName());
+    else
+        text = doc.createTextNode(author);
     subtag.appendChild(text);
 
     return doc;

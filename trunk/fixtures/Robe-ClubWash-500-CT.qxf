@@ -3,7 +3,7 @@
  <Creator>
   <Name>Q Light Controller</Name>
   <Version>3.1.0</Version>
-  <Author>hjunnila</Author>
+  <Author>Heikki Junnila</Author>
  </Creator>
  <Manufacturer>Robe</Manufacturer>
  <Model>ClubWash 500 CT</Model>
@@ -40,14 +40,17 @@
  </Channel>
  <Channel Name="Cyan">
   <Group Byte="0">Intensity</Group>
+  <Colour>Cyan</Colour>
   <Capability Min="0" Max="255">Cyan mix</Capability>
  </Channel>
  <Channel Name="Magenta">
   <Group Byte="0">Intensity</Group>
+  <Colour>Magenta</Colour>
   <Capability Min="0" Max="255">Magenta mix</Capability>
  </Channel>
  <Channel Name="Yellow">
   <Group Byte="0">Intensity</Group>
+  <Colour>Yellow</Colour>
   <Capability Min="0" Max="255">Yellow mix</Capability>
  </Channel>
  <Channel Name="CMY/dimmer speed">

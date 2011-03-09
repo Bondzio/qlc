@@ -46,41 +46,6 @@
      <property name="toolTip">
       <string>Primary colour level controlled by this channel</string>
      </property>
-     <item>
-      <property name="text">
-       <string>Generic</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Red</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Green</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Blue</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Cyan</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Magenta</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Yellow</string>
-      </property>
-     </item>
     </widget>
    </item>
    <item row="3" column="0" colspan="2">

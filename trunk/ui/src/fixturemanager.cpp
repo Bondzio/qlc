@@ -492,6 +492,12 @@ QString FixtureManager::fixtureInfoStyleSheetHeader()
     info += QString(".emphasis {" \
                     "	font-weight: bold;" \
                     "}");
+    info += QString(".author {" \
+                    "	font-weight: light;" \
+                    "	font-style: italic;" \
+                    "   text-align: right;" \
+                    "   font-size: small;"  \
+                    "}");
     info += "</STYLE>";
     return info;
 }

@@ -683,5 +683,13 @@ QString Fixture::status()
     // HTML document & table closure
     info += "</TABLE>";
 
+    if (isDimmer() == false)
+    {
+        info += "<HR>";
+        info += "<DIV CLASS='author' ALIGN='right'>";
+        info += tr("Fixture definition author:") + fixtureDef()->author();
+        info += "</DIV>";
+    }
+
     return info;
 }

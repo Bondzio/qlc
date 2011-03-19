@@ -427,7 +427,7 @@ void QLCChannel_Test::load()
     group.appendChild(groupName);
 
     QDomElement colour = doc.createElement("Colour");
-    QDomText colourText = doc.createTextNode(QString::number(QLCChannel::Cyan));
+    QDomText colourText = doc.createTextNode(QLCChannel::colourToString(QLCChannel::Cyan));
     colour.appendChild(colourText);
     root.appendChild(colour);
 
@@ -472,6 +472,7 @@ void QLCChannel_Test::load()
 
     QLCChannel ch;
     QVERIFY(ch.loadXML(&root) == true);
+    qDebug() << int(ch.colour());
     QVERIFY(ch.name() == "Channel1");
     QVERIFY(ch.group() == QLCChannel::Tilt);
     QVERIFY(ch.controlByte() == QLCChannel::LSB);

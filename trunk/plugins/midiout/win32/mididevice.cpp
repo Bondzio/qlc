@@ -27,6 +27,7 @@
 
 #include "midiprotocol.h"
 #include "mididevice.h"
+#include "qlcmacros.h"
 #include "midiout.h"
 
 MIDIDevice::MIDIDevice(MIDIOut* parent, UINT id) : QObject(parent)

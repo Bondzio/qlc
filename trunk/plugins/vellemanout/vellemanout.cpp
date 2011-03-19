@@ -27,9 +27,22 @@
 #include <windows.h>
 #include <stdint.h>
 
-#include "k8062d_dll.h"
 #include "vellemanout.h"
 
+/*****************************************************************************
+ * The Velleman interface for k8062d.dll
+ *****************************************************************************/
+
+extern "C"
+{
+    void StartDevice();
+    void StopDevice();
+
+    void SetChannelCount(int32_t Count);
+
+    void SetData(int32_t Channel, int32_t Data);
+    void SetAllData(int32_t Data[]);
+}
 
 /*****************************************************************************
  * Initialization

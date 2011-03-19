@@ -17,7 +17,7 @@ INCLUDEPATH += ../../interfaces
 #
 win32 {
     # Windows target
-    FTD2XXDIR    = C:/CDM20808
+    FTD2XXDIR    = C:/CDM20812
     LIBS        += -L$$FTD2XXDIR/i386 -lftd2xx
     INCLUDEPATH += $$FTD2XXDIR
     DEFINES     += FTD2XX

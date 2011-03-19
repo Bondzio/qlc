@@ -24,10 +24,13 @@ popd
 pushd .
 
 REM UI test
+
 cd ui\test
 SET OLDPATH=%PATH%
 PATH=%PATH%;..\..\engine\src
-test_ui.exe
+aboutbox\aboutbox_test.exe
+IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
+addfixture\addfixture_test.exe
 IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
 SET PATH=%OLDPATH%
 

@@ -8,7 +8,7 @@ QT     += core gui network testlib
 
 INCLUDEPATH += ../../interfaces
 INCLUDEPATH += ../src
-LIBS   += -L../src -lewinginput
+LIBS        += -L../src -lewinginput
 
 SOURCES += testeplaybackwing.cpp \
            testeprogramwing.cpp \

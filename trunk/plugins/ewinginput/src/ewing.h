@@ -26,6 +26,7 @@
 #include <QByteArray>
 #include <QObject>
 
+#include "qlcmacros.h"
 
 #define EWING_INVALID_CHANNEL -1
 
@@ -53,7 +54,7 @@
  * EWing
  ****************************************************************************/
 
-class EWing : public QObject
+class QLC_DECLSPEC EWing : public QObject
 {
     Q_OBJECT
 

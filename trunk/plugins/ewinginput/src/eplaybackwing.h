@@ -26,13 +26,14 @@
 #include <QByteArray>
 #include <QObject>
 
+#include "qlcmacros.h"
 #include "ewing.h"
 
 /****************************************************************************
  * EPlaybackWing
  ****************************************************************************/
 
-class EPlaybackWing : public EWing
+class QLC_DECLSPEC EPlaybackWing : public EWing
 {
     Q_OBJECT
 

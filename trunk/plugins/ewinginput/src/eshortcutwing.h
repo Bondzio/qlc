@@ -26,13 +26,14 @@
 #include <QByteArray>
 #include <QObject>
 
+#include "qlcmacros.h"
 #include "ewing.h"
 
 /****************************************************************************
  * EShortcutWing
  ****************************************************************************/
 
-class EShortcutWing : public EWing
+class QLC_DECLSPEC EShortcutWing : public EWing
 {
     Q_OBJECT
 

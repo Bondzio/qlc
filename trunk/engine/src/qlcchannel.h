@@ -22,6 +22,7 @@
 #ifndef QLC_CHANNEL_H
 #define QLC_CHANNEL_H
 
+#include <climits>
 #include <QString>
 #include <QList>
 

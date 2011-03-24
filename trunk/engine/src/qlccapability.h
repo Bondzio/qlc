@@ -22,8 +22,8 @@
 #ifndef QLCCAPABILITY_H
 #define QLCCAPABILITY_H
 
+#include <climits>
 #include <QList>
-
 
 #define KXMLQLCCapability    "Capability"
 #define KXMLQLCCapabilityMin "Min"

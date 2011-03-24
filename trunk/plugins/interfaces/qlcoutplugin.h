@@ -24,7 +24,7 @@
 
 #include <QtPlugin>
 #include <QObject>
-
+#include <climits>
 
 /**
  * QLCOutPlugin is an interface for all output plugins. Output plugins provide

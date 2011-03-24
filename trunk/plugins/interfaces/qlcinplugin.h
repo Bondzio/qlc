@@ -26,7 +26,7 @@
 #include <QtPlugin>
 #include <QString>
 #include <QObject>
-
+#include <climits>
 
 /*****************************************************************************
  * InputPlugin

@@ -137,6 +137,7 @@ void Doc_Test::addFixture()
 void Doc_Test::deleteFixture()
 {
     Doc doc(this, m_fixtureDefCache);
+    QSignalSpy spy(&doc, SIGNAL(fixtureRemoved(quint32)));
 
     QVERIFY(doc.fixtures().size() == 0);
     QVERIFY(doc.deleteFixture(0) == false);
@@ -170,35 +171,57 @@ void Doc_Test::deleteFixture()
     QVERIFY(doc.isModified() == true);
     doc.resetModified();
 
+    // Nonexistent ID
     QVERIFY(doc.deleteFixture(42) == false);
     QVERIFY(doc.fixtures().size() == 3);
     QVERIFY(doc.isModified() == false);
 
+    // Invalid ID
     QVERIFY(doc.deleteFixture(Fixture::invalidId()) == false);
     QVERIFY(doc.fixtures().size() == 3);
     QVERIFY(doc.isModified() == false);
 
+    // Existing ID
     quint32 id = f2->id();
+    QPointer <Fixture> f2ptr(f2);
+    QVERIFY(f2ptr != NULL);
     QVERIFY(doc.deleteFixture(id) == true);
     QVERIFY(doc.fixtures().size() == 2);
     QVERIFY(doc.isModified() == true);
+    QVERIFY(spy.size() == 1);
+    QVERIFY(spy.at(0).at(0) == id);
+    QVERIFY(f2ptr == NULL);
 
+    // The same ID we just removed
     QVERIFY(doc.deleteFixture(id) == false);
     QVERIFY(doc.fixtures().size() == 2);
     QVERIFY(doc.isModified() == true);
+    QVERIFY(spy.size() == 1);
+    QVERIFY(spy.at(0).at(0) == id);
 
     doc.resetModified();
 
-    Fixture* f4 = new Fixture(&doc);
-    f4->setName("Four");
-    f4->setChannels(5);
-    f4->setAddress(0);
-    f4->setUniverse(0);
-    doc.addFixture(f4);
-    QVERIFY(f1->id() == 0);
-    QVERIFY(f3->id() == 2);
-    QVERIFY(f4->id() == 3); // IDs are sequential
+    // Another ID just for repetition
+    id = f1->id();
+    QPointer <Fixture> f1ptr(f1);
+    QVERIFY(f1ptr != NULL);
+    QVERIFY(doc.deleteFixture(id) == true);
+    QVERIFY(doc.fixtures().size() == 1);
     QVERIFY(doc.isModified() == true);
+    QVERIFY(spy.size() == 2);
+    QVERIFY(spy.at(1).at(0) == id);
+    QVERIFY(f1ptr == NULL);
+
+    // And the last one...
+    id = f3->id();
+    QPointer <Fixture> f3ptr(f3);
+    QVERIFY(f3ptr != NULL);
+    QVERIFY(doc.deleteFixture(id) == true);
+    QVERIFY(doc.fixtures().size() == 0);
+    QVERIFY(doc.isModified() == true);
+    QVERIFY(spy.size() == 3);
+    QVERIFY(spy.at(2).at(0) == id);
+    QVERIFY(f3ptr == NULL);
 }
 
 void Doc_Test::fixture()

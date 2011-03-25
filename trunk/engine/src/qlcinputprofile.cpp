@@ -44,22 +44,20 @@ QLCInputProfile::QLCInputProfile(const QLCInputProfile& profile)
 
 QLCInputProfile::~QLCInputProfile()
 {
-    /* Delete existing channels but leave the pointers there */
-    QMutableMapIterator <quint32,QLCInputChannel*> it(m_channels);
-    while (it.hasNext() == true)
-        delete it.next().value();
-
-    /* Clear the list of freed pointers */
-    m_channels.clear();
+    destroyChannels();
 }
 
 QLCInputProfile& QLCInputProfile::operator=(const QLCInputProfile& profile)
 {
     if (this != &profile)
     {
+        /* Copy basic properties */
         m_manufacturer = profile.m_manufacturer;
         m_model = profile.m_model;
         m_path = profile.m_path;
+
+        /* Destroy all existing channels */
+        destroyChannels();
 
         /* Copy the other profile's channels */
         QMapIterator <quint32,QLCInputChannel*> it(profile.m_channels);
@@ -189,6 +187,17 @@ quint32 QLCInputProfile::channelNumber(const QLCInputChannel* channel) const
 QMap <quint32,QLCInputChannel*> QLCInputProfile::channels() const
 {
     return m_channels;
+}
+
+void QLCInputProfile::destroyChannels()
+{
+    /* Delete existing channels but leave the pointers there */
+    QMutableMapIterator <quint32,QLCInputChannel*> it(m_channels);
+    while (it.hasNext() == true)
+        delete it.next().value();
+
+    /* Clear the list of freed pointers */
+    m_channels.clear();
 }
 
 /****************************************************************************

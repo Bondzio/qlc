@@ -39,6 +39,7 @@ private slots:
     void channels();
     void channelNumber();
     void copy();
+    void assign();
     void load();
     void loadNoProfile();
     void loader();

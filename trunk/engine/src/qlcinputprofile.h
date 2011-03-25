@@ -132,6 +132,10 @@ public:
      */
     QMap <quint32,QLCInputChannel*> channels() const;
 
+private:
+    /** Delete and remove all channels */
+    void destroyChannels();
+
 protected:
     /** Channel objects present in this profile. This is a QMap and not a
         QList because not all channels might be present. */

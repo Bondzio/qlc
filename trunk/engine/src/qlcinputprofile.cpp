@@ -39,7 +39,6 @@ QLCInputProfile::QLCInputProfile()
 
 QLCInputProfile::QLCInputProfile(const QLCInputProfile& profile)
 {
-    qDebug() << Q_FUNC_INFO;
     *this = profile;
 }
 
@@ -56,7 +55,6 @@ QLCInputProfile::~QLCInputProfile()
 
 QLCInputProfile& QLCInputProfile::operator=(const QLCInputProfile& profile)
 {
-    qDebug() << Q_FUNC_INFO;
     if (this != &profile)
     {
         m_manufacturer = profile.m_manufacturer;

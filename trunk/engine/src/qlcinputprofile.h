@@ -52,6 +52,9 @@ public:
     /** Destructor */
     virtual ~QLCInputProfile();
 
+    /** Assignment operator */
+    QLCInputProfile& operator=(const QLCInputProfile& profile);
+
     /********************************************************************
      * Profile information
      ********************************************************************/

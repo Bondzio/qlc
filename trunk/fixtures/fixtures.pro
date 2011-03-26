@@ -148,6 +148,7 @@ fixtures.files += Stairville-SC250H.qxf
 fixtures.files += Stairville-ZF-1500.qxf
 fixtures.files += Varytec-Easy-Move-LED-XS-Spot.qxf
 fixtures.files += Varytec-Easy-Move-LED-XS-Wash.qxf
+fixtures.files += Varytec-Gigabar-II.qxf
 fixtures.files += Venue-LEDPAR64.qxf
 
 fixtures.path = $$INSTALLROOT/$$FIXTUREDIR

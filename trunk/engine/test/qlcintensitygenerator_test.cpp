@@ -54,97 +54,101 @@ void QLCIntensityGenerator_Test::randomScenes()
     Fixture* fxi2 = new Fixture(&doc);
     const QLCFixtureDef* def = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
     Q_ASSERT(def != NULL);
+    Q_ASSERT(def->modes().first() != NULL);
+    Q_ASSERT(def->modes().first()->channels().size() == 6);
     fxi2->setFixtureDefinition(def, def->modes().first());
-    Q_ASSERT(fxi->channels() == 6);
     fixtures << fxi2;
 
     QList <Scene*> scenes = QLCIntensityGenerator::randomScenes(fixtures, &doc, 31337);
     QCOMPARE(scenes.size(), 5);
     QCOMPARE(scenes[0]->values().size(), 5);
 
+    // Even though injecting the random seed to randomScenes() allows deterministic behaviour,
+    // the rand() algorithm implementation varies between platforms and platform versions.
+    // So let's not check the randomized values.
     QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[0]->values()[0].value, uchar(0));
+    //QCOMPARE(scenes[0]->values()[0].value, uchar(0));
     QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[0]->values()[1].value, uchar(UCHAR_MAX));
+    //QCOMPARE(scenes[0]->values()[1].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[0]->values()[2].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[0]->values()[2].value, uchar(UCHAR_MAX));
+    //QCOMPARE(scenes[0]->values()[2].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[0]->values()[3].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[0]->values()[3].value, uchar(0));
+    //QCOMPARE(scenes[0]->values()[3].value, uchar(0));
     QCOMPARE(scenes[0]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[0]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[0]->values()[4].value, uchar(128));
+    //QCOMPARE(scenes[0]->values()[4].value, uchar(128));
 
     QCOMPARE(scenes[1]->values().size(), 5);
     QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[1]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[1]->values()[0].value, uchar(0));
+    //QCOMPARE(scenes[1]->values()[0].value, uchar(0));
     QCOMPARE(scenes[1]->values()[1].fxi, fxi->id());
     QCOMPARE(scenes[1]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[1]->values()[1].value, uchar(0));
+    //QCOMPARE(scenes[1]->values()[1].value, uchar(0));
     QCOMPARE(scenes[1]->values()[2].fxi, fxi->id());
     QCOMPARE(scenes[1]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[1]->values()[2].value, uchar(0));
+    //QCOMPARE(scenes[1]->values()[2].value, uchar(0));
     QCOMPARE(scenes[1]->values()[3].fxi, fxi->id());
     QCOMPARE(scenes[1]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[1]->values()[3].value, uchar(UCHAR_MAX));
+    //QCOMPARE(scenes[1]->values()[3].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[1]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[1]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[1]->values()[4].value, uchar(6));
+    //QCOMPARE(scenes[1]->values()[4].value, uchar(6));
 
     QCOMPARE(scenes[2]->values().size(), 5);
     QCOMPARE(scenes[2]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[2]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[2]->values()[0].value, uchar(0));
+    //QCOMPARE(scenes[2]->values()[0].value, uchar(0));
     QCOMPARE(scenes[2]->values()[1].fxi, fxi->id());
     QCOMPARE(scenes[2]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[2]->values()[1].value, uchar(0));
+    //QCOMPARE(scenes[2]->values()[1].value, uchar(0));
     QCOMPARE(scenes[2]->values()[2].fxi, fxi->id());
     QCOMPARE(scenes[2]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[2]->values()[2].value, uchar(0));
+    //QCOMPARE(scenes[2]->values()[2].value, uchar(0));
     QCOMPARE(scenes[2]->values()[3].fxi, fxi->id());
     QCOMPARE(scenes[2]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[2]->values()[3].value, uchar(0));
+    //QCOMPARE(scenes[2]->values()[3].value, uchar(0));
     QCOMPARE(scenes[2]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[2]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[2]->values()[4].value, uchar(6));
+    //QCOMPARE(scenes[2]->values()[4].value, uchar(6));
 
     QCOMPARE(scenes[3]->values().size(), 5);
     QCOMPARE(scenes[3]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[3]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[3]->values()[0].value, uchar(0));
+    //QCOMPARE(scenes[3]->values()[0].value, uchar(0));
     QCOMPARE(scenes[3]->values()[1].fxi, fxi->id());
     QCOMPARE(scenes[3]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[3]->values()[1].value, uchar(0));
+    //QCOMPARE(scenes[3]->values()[1].value, uchar(0));
     QCOMPARE(scenes[3]->values()[2].fxi, fxi->id());
     QCOMPARE(scenes[3]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[3]->values()[2].value, uchar(0));
+    //QCOMPARE(scenes[3]->values()[2].value, uchar(0));
     QCOMPARE(scenes[3]->values()[3].fxi, fxi->id());
     QCOMPARE(scenes[3]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[3]->values()[3].value, uchar(UCHAR_MAX));
+    //QCOMPARE(scenes[3]->values()[3].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[3]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[3]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[3]->values()[4].value, uchar(128));
+    //QCOMPARE(scenes[3]->values()[4].value, uchar(128));
 
     QCOMPARE(scenes[4]->values().size(), 5);
     QCOMPARE(scenes[4]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[4]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[4]->values()[0].value, uchar(0));
+    //QCOMPARE(scenes[4]->values()[0].value, uchar(0));
     QCOMPARE(scenes[4]->values()[1].fxi, fxi->id());
     QCOMPARE(scenes[4]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[4]->values()[1].value, uchar(UCHAR_MAX));
+    //QCOMPARE(scenes[4]->values()[1].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[4]->values()[2].fxi, fxi->id());
     QCOMPARE(scenes[4]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[4]->values()[2].value, uchar(0));
+    //QCOMPARE(scenes[4]->values()[2].value, uchar(0));
     QCOMPARE(scenes[4]->values()[3].fxi, fxi->id());
     QCOMPARE(scenes[4]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[4]->values()[3].value, uchar(0));
+    //QCOMPARE(scenes[4]->values()[3].value, uchar(0));
     QCOMPARE(scenes[4]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[4]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[4]->values()[4].value, uchar(128));
+    //QCOMPARE(scenes[4]->values()[4].value, uchar(128));
 }
 
 void QLCIntensityGenerator_Test::sequenceScenes()
@@ -159,8 +163,9 @@ void QLCIntensityGenerator_Test::sequenceScenes()
     Fixture* fxi2 = new Fixture(&doc);
     const QLCFixtureDef* def = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
     Q_ASSERT(def != NULL);
+    Q_ASSERT(def->modes().first() != NULL);
+    Q_ASSERT(def->modes().first()->channels().size() == 6);
     fxi2->setFixtureDefinition(def, def->modes().first());
-    Q_ASSERT(fxi->channels() == 6);
     fixtures << fxi2;
 
     QList <Scene*> scenes = QLCIntensityGenerator::sequenceScenes(fixtures, &doc);
@@ -265,8 +270,9 @@ void QLCIntensityGenerator_Test::fullZeroScenes()
     Fixture* fxi2 = new Fixture(&doc);
     const QLCFixtureDef* def = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
     Q_ASSERT(def != NULL);
+    Q_ASSERT(def->modes().first() != NULL);
+    Q_ASSERT(def->modes().first()->channels().size() == 6);
     fxi2->setFixtureDefinition(def, def->modes().first());
-    Q_ASSERT(fxi->channels() == 6);
     fixtures << fxi2;
 
     QList <Scene*> scenes = QLCIntensityGenerator::fullZeroScenes(fixtures, &doc);
@@ -319,8 +325,9 @@ void QLCIntensityGenerator_Test::evenOddScenes()
     Fixture* fxi2 = new Fixture(&doc);
     const QLCFixtureDef* def = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
     Q_ASSERT(def != NULL);
+    Q_ASSERT(def->modes().first() != NULL);
+    Q_ASSERT(def->modes().first()->channels().size() == 6);
     fxi2->setFixtureDefinition(def, def->modes().first());
-    Q_ASSERT(fxi->channels() == 6);
     fixtures << fxi2;
 
     QList <Scene*> scenes = QLCIntensityGenerator::evenOddScenes(fixtures, &doc);

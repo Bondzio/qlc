@@ -48,7 +48,7 @@ HEADERS += bus_test.h \
            mastertimer_test.h \
            doc_test.h \
            palettegenerator_test.h \
-           qlcintensitygenerator_test.h
+           intensitygenerator_test.h
 
 # Interfaces
 HEADERS += ../../plugins/interfaces/qlcoutplugin.h
@@ -93,7 +93,7 @@ SOURCES += bus_test.cpp \
            mastertimer_test.cpp \
            doc_test.cpp \
            palettegenerator_test.cpp \
-           qlcintensitygenerator_test.cpp
+           intensitygenerator_test.cpp
     
 # Stubs
 SOURCES += mastertimer_stub.cpp \

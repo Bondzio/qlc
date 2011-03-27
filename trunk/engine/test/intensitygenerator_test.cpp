@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlcintensitygenerator_test.cpp
+  intensitygenerator_test.cpp
 
   Copyright (C) Heikki Junnila
 
@@ -28,12 +28,12 @@
 #include "scene.h"
 #include "doc.h"
 
-#include "qlcintensitygenerator_test.h"
-#include "qlcintensitygenerator.h"
+#include "intensitygenerator_test.h"
+#include "intensitygenerator.h"
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
-void QLCIntensityGenerator_Test::initTestCase()
+void IntensityGenerator_Test::initTestCase()
 {
     Bus::init(this);
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -42,7 +42,7 @@ void QLCIntensityGenerator_Test::initTestCase()
     QVERIFY(m_fixtureDefCache.load(dir) == true);
 }
 
-void QLCIntensityGenerator_Test::randomScenes()
+void IntensityGenerator_Test::randomScenes()
 {
     Doc doc(this, m_fixtureDefCache);
     QList <Fixture*> fixtures;
@@ -59,7 +59,7 @@ void QLCIntensityGenerator_Test::randomScenes()
     fxi2->setFixtureDefinition(def, def->modes().first());
     fixtures << fxi2;
 
-    QList <Scene*> scenes = QLCIntensityGenerator::randomScenes(fixtures, &doc, 31337);
+    QList <Scene*> scenes = IntensityGenerator::randomScenes(fixtures, &doc, 31337);
     QCOMPARE(scenes.size(), 5);
     QCOMPARE(scenes[0]->values().size(), 5);
 
@@ -151,7 +151,7 @@ void QLCIntensityGenerator_Test::randomScenes()
     //QCOMPARE(scenes[4]->values()[4].value, uchar(128));
 }
 
-void QLCIntensityGenerator_Test::sequenceScenes()
+void IntensityGenerator_Test::sequenceScenes()
 {
     Doc doc(this, m_fixtureDefCache);
     QList <Fixture*> fixtures;
@@ -168,7 +168,7 @@ void QLCIntensityGenerator_Test::sequenceScenes()
     fxi2->setFixtureDefinition(def, def->modes().first());
     fixtures << fxi2;
 
-    QList <Scene*> scenes = QLCIntensityGenerator::sequenceScenes(fixtures, &doc);
+    QList <Scene*> scenes = IntensityGenerator::sequenceScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 5);
     QCOMPARE(scenes[0]->values().size(), 5);
 
@@ -257,7 +257,7 @@ void QLCIntensityGenerator_Test::sequenceScenes()
     QCOMPARE(scenes[4]->values()[4].value, uchar(128));
 }
 
-void QLCIntensityGenerator_Test::fullZeroScenes()
+void IntensityGenerator_Test::fullZeroScenes()
 {
     Doc doc(this, m_fixtureDefCache);
 
@@ -275,7 +275,7 @@ void QLCIntensityGenerator_Test::fullZeroScenes()
     fxi2->setFixtureDefinition(def, def->modes().first());
     fixtures << fxi2;
 
-    QList <Scene*> scenes = QLCIntensityGenerator::fullZeroScenes(fixtures, &doc);
+    QList <Scene*> scenes = IntensityGenerator::fullZeroScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 2);
     QCOMPARE(scenes[1]->values().size(), 5);
     QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
@@ -312,7 +312,7 @@ void QLCIntensityGenerator_Test::fullZeroScenes()
     QCOMPARE(scenes[0]->values()[4].value, uchar(128));
 }
 
-void QLCIntensityGenerator_Test::evenOddScenes()
+void IntensityGenerator_Test::evenOddScenes()
 {
     Doc doc(this, m_fixtureDefCache);
 
@@ -330,7 +330,7 @@ void QLCIntensityGenerator_Test::evenOddScenes()
     fxi2->setFixtureDefinition(def, def->modes().first());
     fixtures << fxi2;
 
-    QList <Scene*> scenes = QLCIntensityGenerator::evenOddScenes(fixtures, &doc);
+    QList <Scene*> scenes = IntensityGenerator::evenOddScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 2);
     QCOMPARE(scenes[0]->values().size(), 5);
     QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());

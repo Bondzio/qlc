@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlcintensitygenerator_test.h
+  intensitygenerator_test.h
 
   Copyright (C) Heikki Junnila
 
@@ -19,13 +19,13 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef QLCINTENSITYGENERATOR_TEST_H
-#define QLCINTENSITYGENERATOR_TEST_H
+#ifndef INTENSITYGENERATOR_TEST_H
+#define INTENSITYGENERATOR_TEST_H
 
 #include <QObject>
 #include "qlcfixturedefcache.h"
 
-class QLCIntensityGenerator_Test : public QObject
+class IntensityGenerator_Test : public QObject
 {
     Q_OBJECT
 

@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlcintensitygenerator.h
+  intensitygenerator.h
 
   Copyright (C) Heikki Junnila
 
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef QLCINTENSITYGENERATOR_H
-#define QLCINTENSITYGENERATOR_H
+#ifndef INTENSITYGENERATOR_H
+#define INTENSITYGENERATOR_H
 
 #include <QList>
 
@@ -29,7 +29,7 @@ class Fixture;
 class Scene;
 class Doc;
 
-class QLCIntensityGenerator
+class IntensityGenerator
 {
 public:
     /**

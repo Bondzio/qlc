@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlcintensitygenerator.cpp
+  intensitygenerator.cpp
 
   Copyright (C) Heikki Junnila
 
@@ -28,10 +28,9 @@
 #include "scene.h"
 #include "doc.h"
 
-#include "qlcintensitygenerator.h"
+#include "intensitygenerator.h"
 
-QList <Scene*> QLCIntensityGenerator::randomScenes(const QList <Fixture*>& fixtures,
-                                                   Doc* doc, quint32 seed)
+QList <Scene*> IntensityGenerator::randomScenes(const QList <Fixture*>& fixtures, Doc* doc, quint32 seed)
 {
     QList <Scene*> scenes;
 
@@ -103,8 +102,7 @@ QList <Scene*> QLCIntensityGenerator::randomScenes(const QList <Fixture*>& fixtu
     return scenes;
 }
 
-QList <Scene*> QLCIntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtures,
-                                                     Doc* doc)
+QList <Scene*> IntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtures, Doc* doc)
 {
     QList <Scene*> scenes;
 
@@ -184,8 +182,7 @@ QList <Scene*> QLCIntensityGenerator::sequenceScenes(const QList <Fixture*>& fix
     return scenes;
 }
 
-QList <Scene*> QLCIntensityGenerator::fullZeroScenes(const QList <Fixture*>& fixtures,
-                                                     Doc* doc)
+QList <Scene*> IntensityGenerator::fullZeroScenes(const QList <Fixture*>& fixtures, Doc* doc)
 {
     QList <Scene*> scenes;
 
@@ -220,8 +217,7 @@ QList <Scene*> QLCIntensityGenerator::fullZeroScenes(const QList <Fixture*>& fix
     return scenes;
 }
 
-QList <Scene*> QLCIntensityGenerator::evenOddScenes(const QList <Fixture*>& fixtures,
-                                                    Doc* doc)
+QList <Scene*> IntensityGenerator::evenOddScenes(const QList <Fixture*>& fixtures, Doc* doc)
 {
     QList <Scene*> scenes;
 
@@ -285,7 +281,7 @@ QList <Scene*> QLCIntensityGenerator::evenOddScenes(const QList <Fixture*>& fixt
     return scenes;
 }
 
-quint32 QLCIntensityGenerator::intensityChannel(const Fixture* fixture)
+quint32 IntensityGenerator::intensityChannel(const Fixture* fixture)
 {
     if (fixture == NULL)
         return QLCChannel::invalid();
@@ -305,7 +301,7 @@ quint32 QLCIntensityGenerator::intensityChannel(const Fixture* fixture)
     return QLCChannel::invalid();
 }
 
-void QLCIntensityGenerator::adjustLimits(const QLCChannel* channel, uchar* min, uchar* max)
+void IntensityGenerator::adjustLimits(const QLCChannel* channel, uchar* min, uchar* max)
 {
     Q_ASSERT(channel != NULL);
     Q_ASSERT(min != NULL);

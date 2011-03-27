@@ -25,7 +25,7 @@
 
 #include <cstdlib>
 
-#include "qlcintensitygenerator.h"
+#include "intensitygenerator.h"
 #include "palettegenerator.h"
 #include "fixtureselection.h"
 #include "functionwizard.h"
@@ -90,7 +90,7 @@ void FunctionWizard::accept()
         QList <Scene*> sceneList;
 
         // Random chaser
-        sceneList = QLCIntensityGenerator::randomScenes(fixtures(), m_doc,
+        sceneList = IntensityGenerator::randomScenes(fixtures(), m_doc,
                                     QDateTime::currentDateTime().toTime_t());
         if (sceneList.size() > 0)
         {
@@ -107,7 +107,7 @@ void FunctionWizard::accept()
         }
 
         // Forward & Backward Sequence chasers
-        sceneList = QLCIntensityGenerator::sequenceScenes(fixtures(), m_doc);
+        sceneList = IntensityGenerator::sequenceScenes(fixtures(), m_doc);
         if (sceneList.size() > 0)
         {
             int i = 0;
@@ -130,7 +130,7 @@ void FunctionWizard::accept()
         }
 
         // Even/Odd chaser
-        sceneList = QLCIntensityGenerator::evenOddScenes(fixtures(), m_doc);
+        sceneList = IntensityGenerator::evenOddScenes(fixtures(), m_doc);
         if (sceneList.size() == 2)
         {
             Chaser* chaser = new Chaser(m_doc);
@@ -145,7 +145,7 @@ void FunctionWizard::accept()
         }
 
         // Full/Zero chaser
-        sceneList = QLCIntensityGenerator::fullZeroScenes(fixtures(), m_doc);
+        sceneList = IntensityGenerator::fullZeroScenes(fixtures(), m_doc);
         if (sceneList.size() == 2)
         {
             Chaser* chaser = new Chaser(m_doc);
@@ -186,7 +186,7 @@ void FunctionWizard::addFixture(quint32 fxi_id)
     if (!PaletteGenerator::findChannels(fxi, QLCChannel::Shutter).isEmpty())
         caps << QLCChannel::groupToString(QLCChannel::Shutter);
 
-    if (QLCIntensityGenerator::intensityChannel(fxi) != QLCChannel::invalid() || fxi->isDimmer())
+    if (IntensityGenerator::intensityChannel(fxi) != QLCChannel::invalid() || fxi->isDimmer())
         caps << QLCChannel::groupToString(QLCChannel::Intensity);
 
     item->setText(KColumnCaps, caps.join(", "));

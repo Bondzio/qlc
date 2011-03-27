@@ -96,7 +96,7 @@ void FunctionWizard::accept()
         {
             int i = 0;
             Chaser* chaser = new Chaser(m_doc);
-            chaser->setName(tr("Random"));
+            chaser->setName(tr("Random Multi"));
             m_doc->addFunction(chaser);
             foreach (Scene* scene, sceneList)
             {
@@ -126,6 +126,20 @@ void FunctionWizard::accept()
                 m_doc->addFunction(scene);
                 fw->addStep(scene->id());
                 bw->addStep(scene->id());
+            }
+        }
+
+        // Single-channel sequence chaser (use sequence scene list)
+        if (sceneList.size() > 0)
+        {
+            Chaser* chaser = new Chaser(m_doc);
+            chaser->setName(tr("Random Single"));
+            m_doc->addFunction(chaser);
+
+            while (sceneList.isEmpty() == false)
+            {
+                Scene* scene = sceneList.takeAt(rand() % sceneList.size());
+                chaser->addStep(scene->id());
             }
         }
 

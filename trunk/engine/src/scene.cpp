@@ -113,6 +113,7 @@ void Scene::setValue(const SceneValue& scv)
         m_values.append(scv);
     else
         m_values.replace(index, scv);
+    qSort(m_values.begin(), m_values.end());
 
     emit changed(m_id);
 }

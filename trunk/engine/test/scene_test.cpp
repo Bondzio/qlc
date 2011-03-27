@@ -408,16 +408,16 @@ void Scene_Test::arm()
     QVERIFY(ch.target() == 123);
 
     ch = s1->m_armedChannels.at(1);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 45);
-
-    ch = s1->m_armedChannels.at(2);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
+
+    ch = s1->m_armedChannels.at(2);
+    QVERIFY(ch.address() == fxi->universeAddress() + 7);
+    QVERIFY(ch.start() == 0);
+    QVERIFY(ch.current() == 0);
+    QVERIFY(ch.target() == 45);
 
     s1->disarm();
     QVERIFY(s1->m_armedChannels.size() == 0);
@@ -451,17 +451,18 @@ void Scene_Test::armMissingFixture()
     QVERIFY(s1->values().size() == 2); // The channel is removed
 
     FadeChannel ch;
-    ch = s1->m_armedChannels.at(0);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 45);
 
-    ch = s1->m_armedChannels.at(1);
+    ch = s1->m_armedChannels.at(0);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
+
+    ch = s1->m_armedChannels.at(1);
+    QVERIFY(ch.address() == fxi->universeAddress() + 7);
+    QVERIFY(ch.start() == 0);
+    QVERIFY(ch.current() == 0);
+    QVERIFY(ch.target() == 45);
 
     s1->disarm();
     QVERIFY(s1->m_armedChannels.size() == 0);
@@ -495,17 +496,18 @@ void Scene_Test::armTooManyChannels()
     QVERIFY(s1->values().size() == 2); // The channel is removed
 
     FadeChannel ch;
-    ch = s1->m_armedChannels.at(0);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 45);
 
-    ch = s1->m_armedChannels.at(1);
+    ch = s1->m_armedChannels.at(0);
     QVERIFY(ch.address() == fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
+
+    ch = s1->m_armedChannels.at(1);
+    QVERIFY(ch.address() == fxi->universeAddress() + 7);
+    QVERIFY(ch.start() == 0);
+    QVERIFY(ch.current() == 0);
+    QVERIFY(ch.target() == 45);
 
     s1->disarm();
     QVERIFY(s1->m_armedChannels.size() == 0);

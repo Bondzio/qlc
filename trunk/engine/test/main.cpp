@@ -36,6 +36,7 @@
 #include "qlci18n_test.h"
 
 // Engine
+#include "qlcintensitygenerator_test.h"
 #include "palettegenerator_test.h"
 #include "universearray_test.h"
 #include "chaserrunner_test.h"
@@ -218,6 +219,11 @@ int main(int argc, char** argv)
 
     PaletteGenerator_Test palette;
     r = QTest::qExec(&palette, argc, argv);
+    if (r != 0)
+        return r;
+
+    QLCIntensityGenerator_Test ig;
+    r = QTest::qExec(&ig, argc, argv);
     if (r != 0)
         return r;
 

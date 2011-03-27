@@ -60,6 +60,11 @@ public:
     /** Create shutter macros for each fixture's shutter capabilities */
     void createShutters();
 
+    /** Find fixture channels that belong to a certain group and have more
+        than one capability (i.e. there's something make a palette from) */
+    static QList <quint32> findChannels(const Fixture* fixture,
+                                        QLCChannel::Group group);
+
 protected:
     /**
      * Create scenes for each capability found from fixture's channels
@@ -75,11 +80,6 @@ protected:
      * @param group The channel group to create scenes for
      */
     void createGroupScenes(const Fixture* fxi, QLCChannel::Group group);
-
-    /** Find fixture channels that belong to a certain group and have more
-        than one capability (i.e. there's something make a palette from) */
-    static QList <quint32> findChannels(const Fixture* fixture,
-                                        QLCChannel::Group group);
 
     /** Add generated scenes to Doc */
     void addScenesToDoc();

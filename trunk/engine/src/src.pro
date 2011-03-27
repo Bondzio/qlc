@@ -54,7 +54,6 @@ HEADERS += bus.h \
            function.h \
            inputmap.h \
            inputpatch.h \
-           intensitygenerator.h \
            qlcintensitygenerator.h \
            mastertimer.h \
            universearray.h \
@@ -89,7 +88,6 @@ SOURCES += bus.cpp \
            function.cpp \
            inputmap.cpp \
            inputpatch.cpp \
-           intensitygenerator.cpp \
            qlcintensitygenerator.cpp \
            mastertimer.cpp \
            universearray.cpp \

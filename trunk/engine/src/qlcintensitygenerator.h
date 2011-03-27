@@ -24,6 +24,7 @@
 
 #include <QList>
 
+class QLCChannel;
 class Fixture;
 class Scene;
 class Doc;

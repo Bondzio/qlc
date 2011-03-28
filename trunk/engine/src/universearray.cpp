@@ -221,9 +221,9 @@ double UniverseArray::gMFraction() const
     return m_gMFraction;
 }
 
-const QByteArray UniverseArray::postGMValues() const
+const QByteArray* UniverseArray::postGMValues() const
 {
-    return *m_postGMValues;
+    return m_postGMValues;
 }
 
 const QByteArray UniverseArray::preGMValues() const

@@ -107,46 +107,46 @@ void UniverseArray_Test::setGMValue()
     ua.write(4, 50, QLCChannel::Intensity);
 
     ua.setGMValue(63);
-    QCOMPARE(ua.postGMValues().data()[0], char(2));
-    QCOMPARE(ua.postGMValues().data()[1], char(5));
-    QCOMPARE(ua.postGMValues().data()[2], char(30));
-    QCOMPARE(ua.postGMValues().data()[3], char(40));
-    QCOMPARE(ua.postGMValues().data()[4], char(12));
+    QCOMPARE(ua.postGMValues()->at(0), char(2));
+    QCOMPARE(ua.postGMValues()->at(1), char(5));
+    QCOMPARE(ua.postGMValues()->at(2), char(30));
+    QCOMPARE(ua.postGMValues()->at(3), char(40));
+    QCOMPARE(ua.postGMValues()->at(4), char(12));
 
     ua.setGMChannelMode(UniverseArray::GMAllChannels);
-    QCOMPARE(ua.postGMValues().data()[0], char(2));
-    QCOMPARE(ua.postGMValues().data()[1], char(5));
-    QCOMPARE(ua.postGMValues().data()[2], char(7));
-    QCOMPARE(ua.postGMValues().data()[3], char(10));
-    QCOMPARE(ua.postGMValues().data()[4], char(12));
+    QCOMPARE(ua.postGMValues()->at(0), char(2));
+    QCOMPARE(ua.postGMValues()->at(1), char(5));
+    QCOMPARE(ua.postGMValues()->at(2), char(7));
+    QCOMPARE(ua.postGMValues()->at(3), char(10));
+    QCOMPARE(ua.postGMValues()->at(4), char(12));
 
     ua.setGMChannelMode(UniverseArray::GMIntensity);
-    QCOMPARE(ua.postGMValues().data()[0], char(2));
-    QCOMPARE(ua.postGMValues().data()[1], char(5));
-    QCOMPARE(ua.postGMValues().data()[2], char(30));
-    QCOMPARE(ua.postGMValues().data()[3], char(40));
-    QCOMPARE(ua.postGMValues().data()[4], char(12));
+    QCOMPARE(ua.postGMValues()->at(0), char(2));
+    QCOMPARE(ua.postGMValues()->at(1), char(5));
+    QCOMPARE(ua.postGMValues()->at(2), char(30));
+    QCOMPARE(ua.postGMValues()->at(3), char(40));
+    QCOMPARE(ua.postGMValues()->at(4), char(12));
 
     ua.setGMValueMode(UniverseArray::GMLimit);
-    QCOMPARE(ua.postGMValues().data()[0], char(10));
-    QCOMPARE(ua.postGMValues().data()[1], char(20));
-    QCOMPARE(ua.postGMValues().data()[2], char(30));
-    QCOMPARE(ua.postGMValues().data()[3], char(40));
-    QCOMPARE(ua.postGMValues().data()[4], char(50));
+    QCOMPARE(ua.postGMValues()->at(0), char(10));
+    QCOMPARE(ua.postGMValues()->at(1), char(20));
+    QCOMPARE(ua.postGMValues()->at(2), char(30));
+    QCOMPARE(ua.postGMValues()->at(3), char(40));
+    QCOMPARE(ua.postGMValues()->at(4), char(50));
 
     ua.setGMValue(5);
-    QCOMPARE(ua.postGMValues().data()[0], char(5));
-    QCOMPARE(ua.postGMValues().data()[1], char(5));
-    QCOMPARE(ua.postGMValues().data()[2], char(30));
-    QCOMPARE(ua.postGMValues().data()[3], char(40));
-    QCOMPARE(ua.postGMValues().data()[4], char(5));
+    QCOMPARE(ua.postGMValues()->at(0), char(5));
+    QCOMPARE(ua.postGMValues()->at(1), char(5));
+    QCOMPARE(ua.postGMValues()->at(2), char(30));
+    QCOMPARE(ua.postGMValues()->at(3), char(40));
+    QCOMPARE(ua.postGMValues()->at(4), char(5));
 
     ua.setGMChannelMode(UniverseArray::GMAllChannels);
-    QCOMPARE(ua.postGMValues().data()[0], char(5));
-    QCOMPARE(ua.postGMValues().data()[1], char(5));
-    QCOMPARE(ua.postGMValues().data()[2], char(5));
-    QCOMPARE(ua.postGMValues().data()[3], char(5));
-    QCOMPARE(ua.postGMValues().data()[4], char(5));
+    QCOMPARE(ua.postGMValues()->at(0), char(5));
+    QCOMPARE(ua.postGMValues()->at(1), char(5));
+    QCOMPARE(ua.postGMValues()->at(2), char(5));
+    QCOMPARE(ua.postGMValues()->at(3), char(5));
+    QCOMPARE(ua.postGMValues()->at(4), char(5));
 }
 
 void UniverseArray_Test::applyGM()
@@ -187,29 +187,29 @@ void UniverseArray_Test::write()
     UniverseArray ua(10);
 
     QVERIFY(ua.write(10, 255, QLCChannel::Intensity) == false);
-    QCOMPARE(ua.postGMValues().data()[9], char(0));
-    QCOMPARE(ua.postGMValues().data()[4], char(0));
-    QCOMPARE(ua.postGMValues().data()[0], char(0));
+    QCOMPARE(ua.postGMValues()->at(9), char(0));
+    QCOMPARE(ua.postGMValues()->at(4), char(0));
+    QCOMPARE(ua.postGMValues()->at(0), char(0));
 
     QVERIFY(ua.write(9, 255, QLCChannel::Intensity) == true);
-    QCOMPARE(ua.postGMValues().data()[9], char(255));
-    QCOMPARE(ua.postGMValues().data()[4], char(0));
-    QCOMPARE(ua.postGMValues().data()[0], char(0));
+    QCOMPARE(ua.postGMValues()->at(9), char(255));
+    QCOMPARE(ua.postGMValues()->at(4), char(0));
+    QCOMPARE(ua.postGMValues()->at(0), char(0));
 
     QVERIFY(ua.write(0, 255, QLCChannel::Intensity) == true);
-    QCOMPARE(ua.postGMValues().data()[9], char(255));
-    QCOMPARE(ua.postGMValues().data()[4], char(0));
-    QCOMPARE(ua.postGMValues().data()[0], char(255));
+    QCOMPARE(ua.postGMValues()->at(9), char(255));
+    QCOMPARE(ua.postGMValues()->at(4), char(0));
+    QCOMPARE(ua.postGMValues()->at(0), char(255));
 
     ua.setGMValue(127);
-    QCOMPARE(ua.postGMValues().data()[9], char(127));
-    QCOMPARE(ua.postGMValues().data()[4], char(0));
-    QCOMPARE(ua.postGMValues().data()[0], char(127));
+    QCOMPARE(ua.postGMValues()->at(9), char(127));
+    QCOMPARE(ua.postGMValues()->at(4), char(0));
+    QCOMPARE(ua.postGMValues()->at(0), char(127));
 
     QVERIFY(ua.write(4, 200, QLCChannel::Intensity) == true);
-    QCOMPARE(ua.postGMValues().data()[9], char(127));
-    QCOMPARE(ua.postGMValues().data()[4], char(100));
-    QCOMPARE(ua.postGMValues().data()[0], char(127));
+    QCOMPARE(ua.postGMValues()->at(9), char(127));
+    QCOMPARE(ua.postGMValues()->at(4), char(100));
+    QCOMPARE(ua.postGMValues()->at(0), char(127));
 }
 
 void UniverseArray_Test::reset()
@@ -220,20 +220,20 @@ void UniverseArray_Test::reset()
     for (i = 0; i < 128; i++)
     {
         ua.write(i, 200, QLCChannel::Intensity);
-        QCOMPARE(ua.postGMValues().data()[i], char(200));
+        QCOMPARE(ua.postGMValues()->at(i), char(200));
     }
 
     // Reset channels 10-127 (512 shouldn't cause a crash)
     ua.reset(10, 512);
     for (i = 0; i < 10; i++)
-        QCOMPARE(ua.postGMValues().data()[i], char(200));
+        QCOMPARE(ua.postGMValues()->at(i), char(200));
     for (i = 10; i < 128; i++)
-        QCOMPARE(ua.postGMValues().data()[i], char(0));
+        QCOMPARE(ua.postGMValues()->at(i), char(0));
 
     // Reset all
     ua.reset();
     for (i = 0; i < 128; i++)
-        QCOMPARE(ua.postGMValues().data()[i], char(0));
+        QCOMPARE(ua.postGMValues()->at(i), char(0));
 }
 
 void UniverseArray_Test::setGMValueEfficiency()
@@ -258,7 +258,7 @@ void UniverseArray_Test::setGMValueEfficiency()
     }
 
     for (i = 0; i < int(512 * 4); i++)
-        QCOMPARE(ua->postGMValues().data()[i], char(100));
+        QCOMPARE(ua->postGMValues()->at(i), char(100));
 }
 
 void UniverseArray_Test::writeEfficiency()
@@ -280,5 +280,5 @@ void UniverseArray_Test::writeEfficiency()
     }
 
     for (i = 0; i < int(512 * 4); i++)
-        QCOMPARE(ua->postGMValues().data()[i], char(100));
+        QCOMPARE(ua->postGMValues()->at(i), char(100));
 }

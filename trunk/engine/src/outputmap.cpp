@@ -174,9 +174,9 @@ void OutputMap::dumpUniverses()
     m_universeMutex.lock();
     if (m_universeChanged == true && m_blackout == false)
     {
-        QByteArray postGM(m_universeArray->postGMValues());
+        const QByteArray* postGM(m_universeArray->postGMValues());
         for (quint32 i = 0; i < m_universes; i++)
-            m_patch[i]->dump(postGM.mid(i * 512, 512));
+            m_patch[i]->dump(postGM->mid(i * 512, 512));
 
         m_universeChanged = false;
     }

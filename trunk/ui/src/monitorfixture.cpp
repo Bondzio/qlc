@@ -202,7 +202,7 @@ void MonitorFixture::slotFixtureRemoved(quint32 fxi_id)
  * Values
  ****************************************************************************/
 
-void MonitorFixture::updateValues(const QByteArray& universes)
+void MonitorFixture::updateValues(const QByteArray* universes)
 {
     QLabel* label;
     uchar value;
@@ -225,7 +225,7 @@ void MonitorFixture::updateValues(const QByteArray& universes)
         label = it.next();
         Q_ASSERT(label != NULL);
 
-        value = uchar(universes[fxi->universeAddress() + i]);
+        value = uchar(universes->at(fxi->universeAddress() + i));
         i++;
 
         /* Set the label's text to reflect the changed value */

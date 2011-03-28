@@ -147,7 +147,7 @@ public:
      *
      * @return The current values
      */
-    const QByteArray postGMValues() const;
+    const QByteArray* postGMValues() const;
 
     /**
      * Get the current pre-Grand-Master values (used by functions and everyone

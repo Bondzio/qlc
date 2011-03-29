@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QMessageBox>
 #include <QToolButton>
+#include <QScrollArea>
 #include <QTabWidget>
 #include <QToolBar>
 #include <QLayout>
@@ -215,7 +216,7 @@ void SceneEditor::accept()
     m_scene->clear();
     for (int i = 1; i < m_tab->count(); i++)
     {
-        FixtureConsole* fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
+        FixtureConsole* fc = consoleTab(i);
         if (fc != NULL)
         {
             QListIterator <SceneValue> it(fc->values());
@@ -234,11 +235,9 @@ void SceneEditor::accept()
 
 void SceneEditor::slotTabChanged(int tab)
 {
-    FixtureConsole* fc;
-
     /* Disable external input from the previous console tab so that
        only the curren tab is affected. */
-    fc = qobject_cast<FixtureConsole*> (m_tab->widget(m_currentTab));
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc != NULL)
         fc->enableExternalInput(false);
     m_currentTab = tab;
@@ -266,7 +265,7 @@ void SceneEditor::slotTabChanged(int tab)
         m_colorToolAction->setEnabled(isColorToolAvailable());
 
         /* Enable external input on the current console tab */
-        fc = qobject_cast<FixtureConsole*> (m_tab->widget(tab));
+        FixtureConsole* fc = consoleTab(m_currentTab);
         Q_ASSERT(fc != NULL);
         fc->enableExternalInput(true);
     }
@@ -276,8 +275,7 @@ void SceneEditor::slotEnableAll()
 {
     for (int i = KTabFirstFixture; i < m_tab->count(); i++)
     {
-        FixtureConsole* fc;
-        fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
+        FixtureConsole* fc = consoleTab(i);
         if (fc != NULL)
             fc->enableAllChannels(true);
     }
@@ -287,8 +285,7 @@ void SceneEditor::slotDisableAll()
 {
     for (int i = KTabFirstFixture; i < m_tab->count(); i++)
     {
-        FixtureConsole* fc;
-        fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
+        FixtureConsole* fc = consoleTab(i);
         if (fc != NULL)
             fc->enableAllChannels(false);
     }
@@ -296,30 +293,24 @@ void SceneEditor::slotDisableAll()
 
 void SceneEditor::slotEnableCurrent()
 {
-    FixtureConsole* fc;
-
     /* QObject cast fails unless the widget is a FixtureConsole */
-    fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc != NULL)
         fc->enableAllChannels(true);
 }
 
 void SceneEditor::slotDisableCurrent()
 {
-    FixtureConsole* fc;
-
     /* QObject cast fails unless the widget is a FixtureConsole */
-    fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc != NULL)
         fc->enableAllChannels(false);
 }
 
 void SceneEditor::slotCopy()
 {
-    FixtureConsole* fc;
-
     /* QObject cast fails unless the widget is a FixtureConsole */
-    fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc != NULL)
     {
         m_copy = fc->values();
@@ -329,10 +320,8 @@ void SceneEditor::slotCopy()
 
 void SceneEditor::slotPaste()
 {
-    FixtureConsole* fc;
-
     /* QObject cast fails unless the widget is a FixtureConsole */
-    fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc != NULL && m_copy.isEmpty() == false)
         fc->setValues(m_copy);
 }
@@ -343,8 +332,7 @@ void SceneEditor::slotCopyToAll()
 
     for (int i = KTabFirstFixture; i < m_tab->count(); i++)
     {
-        FixtureConsole* fc;
-        fc = qobject_cast<FixtureConsole*> (m_tab->widget(i));
+        FixtureConsole* fc = consoleTab(i);
         if (fc != NULL)
             fc->setValues(m_copy);
     }
@@ -356,7 +344,7 @@ void SceneEditor::slotCopyToAll()
 void SceneEditor::slotColorTool()
 {
     /* QObject cast fails unless the widget is a FixtureConsole */
-    FixtureConsole* fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc == NULL)
         return;
 
@@ -432,14 +420,13 @@ void SceneEditor::slotColorTool()
 
 bool SceneEditor::isColorToolAvailable()
 {
-    FixtureConsole* fc;
     Fixture* fxi;
     QColor color;
     quint32 cyan, magenta, yellow;
     quint32 red, green, blue;
 
     /* QObject cast fails unless the widget is a FixtureConsole */
-    fc = qobject_cast<FixtureConsole*> (m_tab->currentWidget());
+    FixtureConsole* fc = consoleTab(m_currentTab);
     if (fc == NULL)
         return false;
 
@@ -612,10 +599,9 @@ FixtureConsole* SceneEditor::fixtureConsole(Fixture* fixture)
     /* Start from the first fixture tab */
     for (int i = KTabFirstFixture; i < m_tab->count(); i++)
     {
-        FixtureConsole* console;
-        console = qobject_cast<FixtureConsole*> (m_tab->widget(i));
-        if (console != NULL && console->fixture() == fixture->id())
-            return console;
+        FixtureConsole* fc = consoleTab(i);
+        if (fc != NULL && fc->fixture() == fixture->id())
+            return fc;
     }
 
     return NULL;
@@ -623,14 +609,17 @@ FixtureConsole* SceneEditor::fixtureConsole(Fixture* fixture)
 
 void SceneEditor::addFixtureTab(Fixture* fixture)
 {
-    FixtureConsole* console;
-
     Q_ASSERT(fixture != NULL);
 
-    console = new FixtureConsole(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    /* Put the console inside a scroll area */
+    QScrollArea* scrollArea = new QScrollArea(m_tab);
+
+    FixtureConsole* console = new FixtureConsole(scrollArea, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     console->setChannelsCheckable(true);
     console->setFixture(fixture->id());
-    m_tab->addTab(console, fixture->name());
+    scrollArea->setWidget(console);
+    scrollArea->setWidgetResizable(true);
+    m_tab->addTab(scrollArea, fixture->name());
 
     /* Start off with all channels disabled */
     console->enableAllChannels(false);
@@ -643,16 +632,28 @@ void SceneEditor::removeFixtureTab(Fixture* fixture)
     /* Start searching from the first fixture tab */
     for (int i = KTabFirstFixture; i < m_tab->count(); i++)
     {
-        FixtureConsole* console;
-        console = qobject_cast<FixtureConsole*> (m_tab->widget(i));
-        if (console != NULL && console->fixture() == fixture->id())
+        FixtureConsole* fc = consoleTab(i);
+        if (fc != NULL && fc->fixture() == fixture->id())
         {
             /* First remove the tab because otherwise Qt might
                remove two tabs -- undocumented feature, which
                might be intended or it might not. */
+            QScrollArea* area = qobject_cast<QScrollArea*> (m_tab->widget(i));
+            Q_ASSERT(area != NULL);
+            delete area; // Deletes also FixtureConsole
             m_tab->removeTab(i);
-            delete console;
             break;
         }
     }
+}
+
+FixtureConsole* SceneEditor::consoleTab(int tab)
+{
+    if (tab >= m_tab->count() || tab <= 0)
+        return NULL;
+
+    QScrollArea* area = qobject_cast<QScrollArea*> (m_tab->widget(tab));
+    Q_ASSERT(area != NULL);
+
+    return qobject_cast<FixtureConsole*> (area->widget());
 }

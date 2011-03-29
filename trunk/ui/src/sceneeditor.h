@@ -118,6 +118,7 @@ protected:
 
     void addFixtureTab(Fixture* fixture);
     void removeFixtureTab(Fixture* fixture);
+    FixtureConsole* consoleTab(int tab);
 
 protected:
     int m_currentTab;

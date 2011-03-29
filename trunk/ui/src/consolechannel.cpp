@@ -93,6 +93,7 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, OutputMap* outputMap,
     m_universeAddress = UINT_MAX;
 
     setMinimumWidth(50);
+    setMaximumWidth(50);
     init();
 
     setStyle(App::saneStyle());

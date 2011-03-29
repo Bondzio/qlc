@@ -73,6 +73,7 @@ protected:
 
 protected slots:
     void slotItemChanged(QTreeWidgetItem* item, int column);
+    void slotBusValueChanged(quint32 bus, quint32 value);
 
 protected:
     QTreeWidget* m_tree;

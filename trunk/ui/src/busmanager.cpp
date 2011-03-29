@@ -33,6 +33,7 @@
 #include <QString>
 #include <QIcon>
 
+#include "mastertimer.h"
 #include "busmanager.h"
 #include "apputil.h"
 #include "bus.h"
@@ -41,6 +42,7 @@
 
 #define KColumnID   0
 #define KColumnName 1
+#define KColumnTime 2
 
 BusManager* BusManager::s_instance = NULL;
 
@@ -68,13 +70,17 @@ BusManager::BusManager(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
     m_tree->setItemsExpandable(false);
     m_tree->setSortingEnabled(false);
     m_tree->setAllColumnsShowFocus(true);
-    m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+    m_tree->header()->setResizeMode(QHeaderView::Stretch);
 
     QStringList columns;
-    columns << tr("Bus ID") << tr("Name");
+    columns << tr("Bus") << tr("Name") << tr("Time");
     m_tree->setHeaderLabels(columns);
 
     fillTree();
+
+    // Listen to bus value changes
+    connect(Bus::instance(), SIGNAL(valueChanged(quint32,quint32)),
+            this, SLOT(slotBusValueChanged(quint32,quint32)));
 }
 
 BusManager::~BusManager()
@@ -180,6 +186,7 @@ void BusManager::fillTree()
         item->setText(KColumnID, QString("%1").arg(bus + 1));
         item->setText(KColumnName, Bus::instance()->name(bus));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
+        slotBusValueChanged(bus, Bus::instance()->value(bus));
     }
 
     /* Set first bus selected */
@@ -189,7 +196,7 @@ void BusManager::fillTree()
     connect(m_tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
             this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 }
-
+#include <QDebug>
 void BusManager::slotItemChanged(QTreeWidgetItem* item, int column)
 {
     int index;
@@ -197,8 +204,39 @@ void BusManager::slotItemChanged(QTreeWidgetItem* item, int column)
     Q_ASSERT(item != NULL);
 
     index = m_tree->indexOfTopLevelItem(item);
-    if (column == KColumnID) /* Reject ID column edits */
+    if (column == KColumnID)
+    {
+        /* Reject ID column edits */
         item->setText(KColumnID, QString("%1").arg(index + 1));
-    else /* Change bus name */
+    }
+    else if (column == KColumnName)
+    {
+        /* Change bus name */
         Bus::instance()->setName(index, item->text(KColumnName));
+    }
+    else
+    {
+        /* Change bus value */
+        bool ok = false;
+        qreal value = item->text(KColumnTime).remove(QRegExp("([A-Z]|[a-z])")).toDouble(&ok);
+        if (ok == true)
+        {
+            value = value * qreal(MasterTimer::frequency());
+            Bus::instance()->setValue(index, value);
+        }
+
+        // Ensure the column displays the current value
+        slotBusValueChanged(index, Bus::instance()->value(index));
+    }
+}
+
+void BusManager::slotBusValueChanged(quint32 bus, quint32 value)
+{
+    QTreeWidgetItem* item = m_tree->topLevelItem(bus);
+    if (item != NULL)
+    {
+        QString num;
+        num.sprintf("%.2fs", qreal(value) / qreal(MasterTimer::frequency()));
+        item->setText(KColumnTime, num);
+    }
 }

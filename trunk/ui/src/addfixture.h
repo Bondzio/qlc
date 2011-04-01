@@ -50,26 +50,10 @@ public:
      * @param parent The parent object that owns the dialog
      * @param fixtureDefCache A cache that holds available fixture defs
      * @param doc QLC Doc used to resolve a free address automatically
-     * @param selectManufacturer See $selectModel
-     * @param selectModel Together with $selectManufacturer specifies the
-     *                    fixture def to pre-select.
-     * @param selectMode Pre-selected fixture mode
-     * @param selectName Pre-selected name
-     * @param selectUniverse Pre-selected universe
-     * @param selectAddress Pre-selected address
-     * @param selectChannels Pre-selected channel amount
+     * @param fxi Fixture to edit (optional)
      */
-    AddFixture(QWidget* parent,
-               const QLCFixtureDefCache& fixtureDefCache,
-               const Doc* doc,
-               const OutputMap* outputMap,
-               const QString& selectManufacturer = KXMLFixtureGeneric,
-               const QString& selectModel = KXMLFixtureGeneric,
-               const QString& selectMode = QString(),
-               const QString& selectName = QString(),
-               int selectUniverse = -1,
-               int selectAddress = -1,
-               int selectChannels = 1);
+    AddFixture(QWidget* parent, const QLCFixtureDefCache& fixtureDefCache,
+               const Doc* doc, const OutputMap* outputMap, const Fixture* fxi = NULL);
 
     /** Destructor */
     ~AddFixture();

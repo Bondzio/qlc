@@ -712,8 +712,7 @@ void FixtureManager::slotProperties()
         model = KXMLFixtureGeneric;
     }
 
-    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap, manuf, model, mode,
-                  fxi->name(), fxi->universe(), fxi->address(), fxi->channels());
+    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap, fxi);
     af.setWindowTitle(tr("Change fixture properties"));
     if (af.exec() == QDialog::Accepted)
     {

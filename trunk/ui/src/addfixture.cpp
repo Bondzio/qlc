@@ -51,17 +51,11 @@ AddFixture::AddFixture(QWidget* parent,
                        const QLCFixtureDefCache& fixtureDefCache,
                        const Doc* doc,
                        const OutputMap* outputMap,
-                       const QString& selectManufacturer,
-                       const QString& selectModel,
-                       const QString& selectMode,
-                       const QString& selectName,
-                       int selectUniverse,
-                       int selectAddress,
-                       int selectChannels)
-    : QDialog(parent),
-    m_fixtureDefCache(fixtureDefCache),
-    m_doc(doc),
-    m_outputMap(outputMap)
+                       const Fixture* fxi)
+    : QDialog(parent)
+    , m_fixtureDefCache(fixtureDefCache)
+    , m_doc(doc)
+    , m_outputMap(outputMap)
 {
     m_addressValue = 0;
     m_universeValue = 0;
@@ -94,8 +88,11 @@ AddFixture::AddFixture(QWidget* parent,
     connect(m_amountSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotAmountSpinChanged(int)));
 
-    /* Fill fixture definition tree */
-    fillTree(selectManufacturer, selectModel);
+    /* Fill fixture definition tree (and select a fixture def) */
+    if (fxi != NULL && fxi->isDimmer() == false)
+        fillTree(fxi->fixtureDef()->manufacturer(), fxi->fixtureDef()->model());
+    else
+        fillTree(KXMLFixtureGeneric, KXMLFixtureGeneric);
 
     /* Fill universe combo with available universes */
     m_universeCombo->addItems(m_outputMap->universeNames());
@@ -103,44 +100,54 @@ AddFixture::AddFixture(QWidget* parent,
     /* Simulate first selection and find the next free address */
     slotSelectionChanged();
 
-    if (selectAddress == -1 && selectUniverse == -1)
+    // Universe
+    if (fxi != NULL)
+    {
+        m_universeCombo->setCurrentIndex(fxi->universe());
+        slotUniverseActivated(fxi->universe());
+
+        OutputPatch* op = m_outputMap->patch(fxi->universe());
+        if (op != NULL && op->isDMXZeroBased() == true)
+            m_addressSpin->setValue(fxi->address());
+        else
+            m_addressSpin->setValue(fxi->address() + 1);
+        m_addressValue = fxi->address();
+
+        m_multipleGroup->setEnabled(false);
+    }
+    else
     {
         slotUniverseActivated(0);
         findAddress();
     }
-    else
+
+    // Name
+    if (fxi != NULL)
     {
-        m_universeCombo->setCurrentIndex(selectUniverse);
-        slotUniverseActivated(selectUniverse);
-
-        OutputPatch* op = m_outputMap->patch(selectUniverse);
-        if (op != NULL && op->isDMXZeroBased() == true)
-            m_addressSpin->setValue(selectAddress);
-        else
-            m_addressSpin->setValue(selectAddress + 1);
-        m_addressValue = selectAddress;
-
-        m_multipleGroup->setEnabled(false);
+        m_nameEdit->setText(fxi->name());
+        slotNameEdited(fxi->name());
     }
 
-    if (selectName.isEmpty() == false)
+    // Mode
+    if (fxi != NULL)
     {
-        m_nameEdit->setText(selectName);
-        slotNameEdited(selectName);
-    }
-
-    if (selectMode.isEmpty() == false)
-    {
-        int index = m_modeCombo->findText(selectMode);
-        if (index != -1)
+        if (fxi->isDimmer() == false)
         {
-            m_modeCombo->setCurrentIndex(index);
-            slotModeActivated(m_modeCombo->itemText(index));
+            int index = m_modeCombo->findText(fxi->fixtureMode()->name());
+            if (index != -1)
+            {
+                m_modeCombo->setCurrentIndex(index);
+                slotModeActivated(m_modeCombo->itemText(index));
+            }
+        }
+        else
+        {
+            m_channelsSpin->setValue(fxi->channels());
         }
     }
     else
     {
-        m_channelsSpin->setValue(selectChannels);
+        m_channelsSpin->setValue(1);
     }
 
     QSettings settings;

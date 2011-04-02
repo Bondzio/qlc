@@ -66,7 +66,6 @@ protected:
     QString m_configDir;
     OlaOutThread *m_thread;
     OutputList m_output_list;
-    ola::LogDestination *m_log_destination;
     bool m_embedServer;
 };
 

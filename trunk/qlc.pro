@@ -18,7 +18,7 @@ unix:!macx:QMAKE_CLEAN     += $$DEBIAN_CLEAN
 unix:!macx:QMAKE_DISTCLEAN += $$DEBIAN_CLEAN
 
 # Unit testing thru "make test"
-unittests.target = test
+unittests.target = check
 QMAKE_EXTRA_TARGETS += unittests
 unix:unittests.commands += ./unittest.sh
 win32:unittests.commands += unittest.bat

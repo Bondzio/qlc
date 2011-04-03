@@ -101,6 +101,11 @@ public:
     static quint32 defaultHold();
 
     /**
+     * Get the bus ID of the default palette bus
+     */
+    static quint32 defaultPalette();
+
+    /**
      * Destructor
      */
     ~Bus();

@@ -25,8 +25,9 @@
 #include "bus.h"
 
 #define KBusCount 32
-#define KBusIDDefaultFade (KBusCount - KBusCount)
-#define KBusIDDefaultHold (KBusIDDefaultFade + 1)
+#define KBusIDDefaultFade 0
+#define KBusIDDefaultHold 1
+#define KBusIDDefaultPalette KBusCount - 1
 
 /****************************************************************************
  * BusEntry
@@ -91,6 +92,7 @@ Bus::Bus(QObject* parent) : QObject(parent)
 
     m_buses[defaultFade()]->name = QString("Fade");
     m_buses[defaultHold()]->name = QString("Hold");
+    m_buses[defaultPalette()]->name = QString("Palette");
 }
 
 quint32 Bus::count()
@@ -106,6 +108,11 @@ quint32 Bus::defaultFade()
 quint32 Bus::defaultHold()
 {
     return KBusIDDefaultHold;
+}
+
+quint32 Bus::defaultPalette()
+{
+    return KBusIDDefaultPalette;
 }
 
 Bus::~Bus()

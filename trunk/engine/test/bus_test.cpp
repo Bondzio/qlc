@@ -37,8 +37,10 @@ void Bus_Test::defaults()
     QVERIFY(Bus::count() == 32);
     QVERIFY(Bus::defaultFade() == 0);
     QVERIFY(Bus::defaultHold() == 1);
+    QCOMPARE(Bus::defaultPalette(), quint32(31));
     QVERIFY(Bus::instance()->name(0) == QString("Fade"));
     QVERIFY(Bus::instance()->name(1) == QString("Hold"));
+    QCOMPARE(Bus::instance()->name(31), QString("Palette"));
 }
 
 void Bus_Test::value()

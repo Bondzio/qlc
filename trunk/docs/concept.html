@@ -44,14 +44,16 @@ speed settings called buses, are possible. One function can have exactly one
 bus and many functions can share one bus. The speed setting of each bus can be
 changed at any time with a resolution of 1/64th of second. Any of the buses can
 be assigned in <A HREF="#Modes">design mode</A> to any function. The only
-exception to this comes from <A HREF="#Collection">collection</A> functions,
+exception to this is made by <A HREF="#Collection">collection</A> functions,
 which don't have a speed setting at all.
 </P>
 
 <P>
 Each bus can have a name set by the user can for convenience and to help in
-identification. The name of the first bus is, by default, "Fade" and it is
-assigned to all newly-created functions.
+identification. The name of the first bus is, "Fade" (unless you have already
+changed it) and it is assigned to all newly-created <A HREF="#Scene">Scenes</A>
+and <A HREF="#EFX">EFXs</A>. The second bus, named "Hold" by default, is assigned
+to all newly-created Chasers.
 </P>
 
 <P>
@@ -105,11 +107,10 @@ the next step.
 </P>
 
 <P>
-Copies of chaser functions can be created within the 4096 total function limit.
-All of the function's contents are copied to the duplicate. After copying, the
-two functions are completely independent entities that behave exactly the same.
-For chasers, only information on the member scenes get copied. The member
-scenes themselves are not copied.
+Copies of chaser functions can be created with the <A HREF="functionmanager.html">
+Function Manager</A>. The scenes inside a chaser are not duplicated when a chaser
+is copied. Only run order, direction, bus and the order of scenes are copied to the
+new chaser.
 </P>
 
 <A NAME="Collection" HREF="#Collection"><H3>Collection</H3></A>
@@ -127,11 +128,9 @@ function's speed is set individually thru their own buses.
 </P>
 
 <P>
-Copies of collection functions can be created within the 4096 total function
-limit. All of the function's contents are copied to the duplicate. After
-copying, the two functions are completely independent entities that behave
-exactly the same. For collections, only information on the member functions get
-copied. The member functions themselves are not copied.
+Copies of collection functions can be created with the <A HREF="functionmanager.html">
+Function Manager</A>. The functions inside a collection are not duplicated; only the
+list of functions is copied.
 </P>
 
 <A NAME="DMX" HREF="#DMX"><H3>DMX</H3></A>
@@ -196,9 +195,8 @@ If the function is set to do an infinite loop, it must be stopped manually.
 </P>
 
 <P>
-Copies of EFX functions can be created within the 4096 total function limit.
-All of the function's contents are copied to the duplicate. After copying, the
-two functions are completely independent entities that behave exactly the same.
+Copies of EFX functions can be created with the <A HREF="functionmanager.html">
+Function Manager</A>. All of the EFX's contents are copied to the duplicate.
 </P>
 
 <A NAME="Fixtures" HREF="#Fixtures"><H3>Fixtures</H3></A>
@@ -211,8 +209,8 @@ can, can be grouped together to form one single fixture.
 </P>
 
 <P>
-Users can store shared fixture information in a fixture library that contains
-the following properties for each fixture:
+With the Fixture Definition Editor, users can edit shared fixture information stored
+in a fixture library that contains the following properties for each fixture:
 </P>
 <UL>
 <LI>Manufacturer (e.g. Martin)</LI>
@@ -221,18 +219,17 @@ the following properties for each fixture:
 <LI>Physical properties (bulb type, beam angle, dimensions...)</LI>
 <LI>Channels:
 <UL>
- <LI>Channel group (Pan, Tilt, Gobo, Color, Speed etc.)</LI>
+ <LI>Channel group (Intensity, Pan, Tilt, Gobo, Color, Speed etc.)</LI>
  <LI>8bit and 16bit channel bindings for pan &amp; tilt groups</LI>
+ <LI>Optional primary colour for intensity channels (RGB/CMY)
  <LI>Value ranges for channel features (e.g. 0-5:Lamp on, 6-15:Strobe etc..)</LI>
 </UL>
 </LI>
 </UL>
 
-
 <P>
-These fixture entries can then be used to create fixture instances (256 at most
-at a time), that will, after instantiation, have additional properties defined
-by users:
+These fixture definitions can then be used to create actual fixtures, that will
+in the Q Light Controller application, have additional properties defined by users:
 </P>
 <UL>
 <LI>DMX Universe</LI>
@@ -251,8 +248,8 @@ fixtures in some systematic way to help identify each of them -- if necessary.
 <P>
 Generic dimmer devices don't need their own fixture definitions, because usually
 multiple dimmers are patched into a common address space, employing one or more
-dimmers. Users can create instances of these generic dimmer entities just by
-defining the number of channels each one of them should use.
+dimmer racks. Users can create instances of these generic dimmer entities just by
+defining the number of channels each one of them should have.
 </P>
 
 <A NAME="FixtureMode" HREF="#FixtureMode"><H3>Fixture Mode</H3></A>
@@ -269,8 +266,9 @@ they have been bundled together in QLC's fixture definitions into fixture modes.
 <A NAME="Functions" HREF="#Functions"><H3>Functions</H3></A>
 
 <P>
-Users can create 4096 functions, that are used to automate the setting of
-values to channels. Each function type has its own way for automating lights.
+The number of functions is practically unlimited. Functions are used to
+automate the setting of values to DMX channels. Each function type has its own
+way of automating lights.
 </P>
 
 <P>
@@ -284,9 +282,9 @@ The function types are:
 </UL>
 
 <P>
-Each function can be named, but the name is not used internally to identify
-individual functions. Nevertheless users are encouraged to name their functions
-in some systematic way to help identify each of them -- if necessary.
+Each function can be named and although the name is not used to uniquely identify
+individual functions, users are encouraged to name their functions in some systematic
+and concise way to help identify each of them. For your own comfort.
 </P>
 
 <A NAME="GrandMaster" HREF="#GrandMaster"><H3>Grand Master</H3></A>
@@ -336,9 +334,9 @@ like slider boards etc.
 
 <P>
 Input profiles can be thought of as <A HREF="#Fixtures">fixtures'</A> cousins;
-they contain information on specific devices that produce input data for the
-users. An input device can be, for example, a specific slider board like the
-Behringer BCF-2000, Korg nanoKONTROL or an Enttec Playback Wing.
+they contain information on specific devices that produce input data.
+An input device can be, for example, a slider board like the Behringer BCF-2000,
+Korg nanoKONTROL, an Enttec Playback Wing...
 </P>
 
 <A NAME="Modes" HREF="#Modes"><H3>Modes</H3></A>
@@ -367,10 +365,10 @@ hardware.
 <A NAME="Output" HREF="#Output"><H3>Output (line)</H3></A>
 
 <P>
-An output is a physical output line provided by some hardware which is accessed
+An output is a physical output line provided by a hardware device which is accessed
 thru an output plugin. In other words, it is a real DMX universe, but has been
 dubbed <u>output</u> to separate it from QLC's internal universes. You could
-think of them as individual output (XLR) connectors in your DMX hardware.
+think of them as individual XLR output connectors in your DMX hardware.
 </P>
 
 <A NAME="Scene" HREF="#Scene"><H3>Scene</H3></A>
@@ -388,9 +386,8 @@ all by the function.
 </P>
 
 <P>
-Copies of scene functions can be created within the 4096 total function limit.
-All of the function's contents are copied to the duplicate. After copying, the
-two functions are completely independent entities that behave exactly the same.
+Copies of scene functions can be created with the <A HREF="functionmanager.html">
+Function Manager</A>. All of the scene's contents are copied to the duplicate.
 </P>
 
 </BODY>

@@ -59,6 +59,21 @@ fi
 popd
 
 #############################################################################
+# Velleman Output tests
+#############################################################################
+
+pushd .
+cd plugins/vellemanout/test
+DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./vellemanout_test
+RESULT=$?
+if [ $RESULT != 0 ]; then
+	echo "Velleman Output unit test failed ($RESULT). Please fix before commit."
+	exit $RESULT
+fi
+popd
+
+#############################################################################
 # MIDI Input tests
 #############################################################################
 

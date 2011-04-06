@@ -65,6 +65,7 @@ public:
 
 protected:
     bool m_currentlyOpen;
+    qint32* m_values;
 
     /*************************************************************************
      * Configuration

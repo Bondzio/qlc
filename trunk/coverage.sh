@@ -16,10 +16,11 @@
 
 test[0]="engine/src"
 test[1]="plugins/ewinginput/src"
-test[2]="plugins/midiinput/common/src"
-test[3]="ui/test/aboutbox"
-test[4]="ui/test/addfixture"
-test[5]="ui/test/vcwidgetproperties"
+test[2]="plugins/vellemanout/src"
+test[3]="plugins/midiinput/common/src"
+test[4]="ui/test/aboutbox"
+test[5]="ui/test/addfixture"
+test[6]="ui/test/vcwidgetproperties"
 
 # Number of tests
 tlen=${#test[@]}

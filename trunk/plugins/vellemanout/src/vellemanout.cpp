@@ -20,12 +20,14 @@
 */
 
 #include <QStringList>
+#include <stdint.h>
 #include <QString>
 #include <QDebug>
 #include <QFile>
 
-#include <windows.h>
-#include <stdint.h>
+#ifdef WIN32
+#   include <windows.h>
+#endif
 
 #include "vellemanout.h"
 
@@ -50,10 +52,13 @@ extern "C"
 
 VellemanOut::~VellemanOut()
 {
+    close(0);
+    delete [] m_values;
 }
 
 void VellemanOut::init()
 {
+    m_values = new qint32[512];
     m_currentlyOpen = false;
 }
 
@@ -70,6 +75,12 @@ void VellemanOut::open(quint32 output)
 {
     if (output != 0)
         return;
+
+    if (m_currentlyOpen == false)
+    {
+        StartDevice();
+        m_currentlyOpen = true;
+    }
 }
 
 void VellemanOut::close(quint32 output)
@@ -77,8 +88,11 @@ void VellemanOut::close(quint32 output)
     if (output != 0)
         return;
 
-    m_currentlyOpen = false;
-    StopDevice();
+    if (m_currentlyOpen == true)
+    {
+        m_currentlyOpen = false;
+        StopDevice();
+    }
 }
 
 QStringList VellemanOut::outputs()
@@ -119,26 +133,14 @@ QString VellemanOut::infoText(quint32 output)
 
 void VellemanOut::outputDMX(quint32 output, const QByteArray& universe)
 {
-    if (output != 0)
+    if (output != 0 || m_currentlyOpen == false)
         return;
 
-    if (m_currentlyOpen == false)
-    {
-        StartDevice();
-        m_currentlyOpen = true;
-    }
+    SetChannelCount((int32_t) universe.size());
+    for (int i = 0; i < universe.size(); i++)
+        m_values[i] = (qint32) universe[i];
 
-    int32_t channelCount = (int32_t) universe.size();
-    SetChannelCount(channelCount);
-
-    int32_t values [512]; //Set up array to pass to SetAllData.
-    for (int32_t channelLoop = 0; channelLoop < channelCount; channelLoop++)
-    {
-        //Write the value to our temporary array.
-        values[channelLoop] = (quint32) universe[channelLoop];
-    }
-
-    SetAllData(values);
+    SetAllData((int32_t*) m_values);
 }
 
 /*****************************************************************************

@@ -1215,14 +1215,11 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
     {
         ua.zeroIntensityChannels();
-        qDebug() << "kakka" << uchar(ua.preGMValues().data()[0]);
 
         QVERIFY(cr.write(&ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
-        qDebug() << "paska" << uchar(ua.preGMValues().data()[0])
-                 << uchar(floor((qreal(255) * qreal(cr.m_intensity)) + 0.5));
         QCOMPARE(uchar(ua.preGMValues().data()[0]),
                 uchar(floor((qreal(255) * qreal(cr.m_intensity)) + 0.5)));
         QCOMPARE(uchar(ua.preGMValues().data()[1]),

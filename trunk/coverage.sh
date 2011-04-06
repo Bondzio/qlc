@@ -1,8 +1,52 @@
 #!/bin/bash
+#
+# To measure unit test coverage, perform these steps:
+# 0. export CCACHE_DISABLE=1        # (only if you use compiler cache)
+# 1. qmake
+# 2. make distclean
+# 3. qmake CONFIG+=coverage
+# 4. ./coverage.sh
+#
+# Human-readable HTML results are written under coverage/html.
+#
+
+#############################################################################
+# Test directories to find coverage measurements from
+#############################################################################
+
+test[0]="engine/src"
+test[1]="plugins/ewinginput/src"
+test[2]="plugins/midiinput/common/src"
+test[3]="ui/test/aboutbox"
+test[4]="ui/test/addfixture"
+test[5]="ui/test/vcwidgetproperties"
+
+# Number of tests
+tlen=${#test[@]}
+
+#############################################################################
+# Functions
+#############################################################################
+
+# arg1:srcdir arg2:testname
+function prepare {
+    lcov -d $1 -c -i -o coverage/${2}base.info
+}
+
+# arg1:srcdir arg2:testname
+function gather_data {
+    lcov -d ${1} -c -o coverage/${2}test.info
+    lcov -a coverage/${2}base.info -a coverage/${2}test.info \
+         -o coverage/${2}merge.info
+}
+
+#############################################################################
+# Initialization
+#############################################################################
 
 # Check if lcov is installed
 if [ -z `which lcov` ]; then
-    echo "Unable to produce coverage results because lcov is not installed."
+    echo "Unable to produce coverage results; can't find lcov."
 fi
 
 # Remove previous data
@@ -14,84 +58,44 @@ fi
 mkdir -p coverage/html
 
 #############################################################################
-# Engine
+# Preparation
 #############################################################################
 
-# Prepare for measurement
-lcov -d engine/src -c -i -o coverage/enginebase.info
-if [ $? != 0 ]; then
-    echo
-    echo "Error running lcov. Did you run \"qmake CONFIG+=coverage\" " \
-         "before compiling the sources? If not, go to the top level " \
-         "source directory and run \"make distclean\", then " \
-         "\"qmake CONFIG+=coverage\", and finally \"make\"." \
-         "After that you can run this script to produce unit test " \
-         "coverage results."
-    exit
+for ((i = 0; i < ${tlen}; i++))
+do
+    prepare ${test[i]} $i
+done
+
+#############################################################################
+# Run unit tests
+#############################################################################
+
+./unittest.sh
+FAILED=$?
+if [ ${FAILED} != 0 ]; then
+    echo "Will not measure coverage because ${FAILED} unit tests failed."
+    exit ${FAILED}
 fi
 
-# Run the unit test
-pushd .
-cd engine/test
-DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./test_engine
-popd
-
-# Measure coverage and combine results from before and after the unit test
-lcov -d engine/src -c -o coverage/enginetest.info
-lcov -a coverage/enginebase.info -a coverage/enginetest.info \
-     -o coverage/enginemerge.info
-
 #############################################################################
-# Enttec Wing
+# Gather results
 #############################################################################
 
-# Prepare for measurement
-lcov -d plugins/ewinginput/src -c -i -o coverage/ewingbase.info
-
-# Run the unit test
-pushd .
-cd plugins/ewinginput/test
-DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./test_ewing
-popd
-
-# Measure coverage and combine results from before and after the unit test
-lcov -d plugins/ewinginput/src -c -o coverage/ewingtest.info
-lcov -a coverage/ewingbase.info -a coverage/ewingtest.info \
-     -o coverage/ewingmerge.info
-
-#############################################################################
-# MIDI Input
-#############################################################################
-
-##########
-# Common #
-##########
-
-# Prepare for measurement
-lcov -d plugins/midiinput/common/src -c -i -o coverage/midiinputcommonbase.info
-
-# Run the unit test
-pushd .
-cd plugins/midiinput/common/test
-DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./test_common
-popd
-
-# Measure coverage and combine results from before and after the unit test
-lcov -d plugins/midiinput/common/src -c -o coverage/midiinputcommontest.info
-lcov -a coverage/midiinputcommonbase.info -a coverage/midiinputcommontest.info \
-     -o coverage/midiinputcommonmerge.info
+for ((i = 0; i < ${tlen}; i++))
+do
+    gather_data ${test[i]} $i
+done
 
 #############################################################################
 # All combined and HTMLized
 #############################################################################
 
-lcov -a coverage/enginemerge.info \
-     -a coverage/ewingmerge.info \
-     -a coverage/midiinputcommonmerge.info \
-     -o coverage/coverage.info
+for ((i = 0; i < ${tlen}; i++))
+do
+    mergeargs="${mergeargs} -a coverage/${i}merge.info"
+done
+
+lcov ${mergeargs} -o coverage/coverage.info
 
 # Remove stuff that isn't part of QLC sources
 lcov -r coverage/coverage.info moc_* -o coverage/coverage.info

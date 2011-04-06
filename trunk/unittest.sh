@@ -19,7 +19,7 @@ popd
 #############################################################################
 
 TESTDIR=ui/test
-TESTS=`find ${TESTDIR} -type dir -maxdepth 1 -mindepth 1`
+TESTS=`find ${TESTDIR} -type d -maxdepth 1 -mindepth 1`
 for test in ${TESTS}
 do
     # Ignore .svn
@@ -31,12 +31,15 @@ do
     test=`echo ${test} | sed 's/ui\/test\///'`
 
     # Execute the test
+    pushd .
+    cd ${TESTDIR}/${test}
     DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:engine/src \
-	    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:engine/src ${TESTDIR}/${test}/${test}_test
+        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:engine/src ./${test}_test
     RESULT=${?}
+    popd
     if [ ${RESULT} != 0 ]; then
-	    echo "${RESULT} UI unit tests failed. Please fix before commit."
-	    exit ${RESULT}
+        echo "${RESULT} UI unit tests failed. Please fix before commit."
+        exit ${RESULT}
     fi
 done
 

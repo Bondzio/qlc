@@ -23,13 +23,25 @@
 #define ADDFIXTURE_TEST_H
 
 #include <QObject>
+#include "qlcfixturedefcache.h"
 
 class AddFixture_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
+    void initTestCase();
+
     void findAddress();
+    void initialNoFixture();
+    void initialDimmer();
+    void initialScanner();
+
+    void selectionNothing();
+    void selectionGeneric();
+
+private:
+    QLCFixtureDefCache m_cache;
 };
 
 #endif

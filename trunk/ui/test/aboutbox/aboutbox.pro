@@ -1,4 +1,5 @@
 include(../../../variables.pri)
+include(../../../coverage.pri)
 
 TEMPLATE = app
 LANGUAGE = C++
@@ -8,6 +9,7 @@ QT      += testlib
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../../engine/src
+DEPENDPATH  += ../../src
 
 # Test sources
 SOURCES += aboutbox_test.cpp

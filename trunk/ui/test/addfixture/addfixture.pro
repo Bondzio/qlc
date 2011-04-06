@@ -1,4 +1,5 @@
 include(../../../variables.pri)
+include(../../../coverage.pri)
 
 TEMPLATE = app
 LANGUAGE = C++
@@ -9,6 +10,7 @@ QT      += gui
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../../engine/src
+DEPENDPATH  += ../../src
 LIBS        += -L../../../engine/src -lqlcengine
 
 # Test sources

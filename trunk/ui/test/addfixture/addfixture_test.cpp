@@ -23,17 +23,33 @@
 #include <QList>
 
 #include "qlcfixturedefcache.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
+#include "outputpatch.h"
+#include "outputmap.h"
+#include "qlcfile.h"
 #include "fixture.h"
 #include "doc.h"
+#include "bus.h"
 #include "addfixture_test.h"
 #define protected public
 #include "addfixture.h"
 #undef protected
 
+#define INTERNAL_FIXTUREDIR "../../../fixtures/"
+
+void AddFixture_Test::initTestCase()
+{
+    Bus::init(this);
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_cache.load(dir) == true);
+}
+
 void AddFixture_Test::findAddress()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this, m_cache);
     QList <Fixture*> fixtures;
 
     /* All addresses are available (except for fixtures taking more than
@@ -84,6 +100,400 @@ void AddFixture_Test::findAddress()
 
     while (fixtures.isEmpty() == false)
         delete fixtures.takeFirst();
+}
+
+void AddFixture_Test::initialNoFixture()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+
+    AddFixture af(NULL, m_cache, &doc, &om);
+    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
+    QVERIFY(&doc == af.m_doc);
+    QVERIFY(af.fixtureDef() == NULL);
+    QVERIFY(af.mode() == NULL);
+    QCOMPARE(af.name(), tr("Dimmers"));
+    QVERIFY(af.address() == 0);
+    QVERIFY(af.universe() == 0);
+    QVERIFY(af.amount() == 1);
+    QVERIFY(af.gap() == 0);
+    QVERIFY(af.channels() == 1);
+    QVERIFY(af.m_tree->columnCount() == 1);
+
+    // Check that all makes & models are put to the tree
+    QStringList makers(m_cache.manufacturers());
+    QVERIFY(makers.isEmpty() == false);
+    for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* top = af.m_tree->topLevelItem(i);
+
+        if (top->text(0) != KXMLFixtureGeneric)
+        {
+            QStringList models(m_cache.models(top->text(0)));
+            for (int j = 0; j < top->childCount(); j++)
+            {
+                QTreeWidgetItem* child = top->child(j);
+                QVERIFY(child->childCount() == 0);
+                QVERIFY(models.removeAll(child->text(0)) == 1);
+            }
+
+            QVERIFY(makers.removeAll(top->text(0)) == 1);
+        }
+        else
+        {
+            QVERIFY(i == af.m_tree->topLevelItemCount() - 1); // Generic should be last
+            QVERIFY(top->childCount() == 1);
+            QVERIFY(top->child(0)->text(0) == KXMLFixtureGeneric);
+        }
+    }
+    QVERIFY(makers.isEmpty() == true);
+
+    // Generic / Generic should be selected by default
+    QVERIFY(af.m_tree->currentItem() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->text(0), QString(KXMLFixtureGeneric));
+    QVERIFY(af.m_tree->currentItem()->parent() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->parent()->text(0), QString(KXMLFixtureGeneric));
+
+    QVERIFY(af.m_modeCombo->isEnabled() == false);
+    QCOMPARE(af.m_modeCombo->count(), 1);
+    QCOMPARE(af.m_modeCombo->itemText(0), QString(KXMLFixtureGeneric));
+
+    QVERIFY(af.m_universeCombo->isEnabled() == true);
+    QCOMPARE(af.m_universeCombo->currentIndex(), 0);
+    QCOMPARE(af.m_universeCombo->count(), 4);
+
+    QVERIFY(af.m_addressSpin->isEnabled() == true);
+    if (om.patch(0)->isDMXZeroBased() == true)
+    {
+        QCOMPARE(af.m_addressSpin->value(), 0);
+        QCOMPARE(af.m_addressSpin->minimum(), 0);
+        QCOMPARE(af.m_addressSpin->maximum(), 511);
+    }
+    else
+    {
+        QCOMPARE(af.m_addressSpin->value(), 1);
+        QCOMPARE(af.m_addressSpin->minimum(), 1);
+        QCOMPARE(af.m_addressSpin->maximum(), 512);
+    }
+
+    QVERIFY(af.m_channelsSpin->isEnabled() == true);
+    QCOMPARE(af.m_channelsSpin->value(), 1);
+
+    QVERIFY(af.m_nameEdit->isEnabled() == true);
+    QCOMPARE(af.m_nameEdit->text(), QString(KXMLFixtureDimmer + QString("s")));
+    QVERIFY(af.m_nameEdit->isModified() == false);
+
+    QVERIFY(af.m_multipleGroup->isEnabled() == true);
+    QVERIFY(af.m_gapSpin->isEnabled() == true);
+    QCOMPARE(af.m_gapSpin->value(), 0);
+    QVERIFY(af.m_amountSpin->isEnabled() == true);
+    QCOMPARE(af.m_amountSpin->value(), 1);
+}
+
+void AddFixture_Test::initialDimmer()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+    Fixture* fxi = new Fixture(&doc);
+    fxi->setChannels(6);
+    fxi->setName("My dimmer");
+    fxi->setUniverse(2);
+    fxi->setAddress(484);
+    doc.addFixture(fxi);
+
+    AddFixture af(NULL, m_cache, &doc, &om, fxi);
+    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
+    QVERIFY(&doc == af.m_doc);
+    QVERIFY(af.fixtureDef() == NULL);
+    QVERIFY(af.mode() == NULL);
+    QVERIFY(af.name() == QString("My dimmer"));
+    QVERIFY(af.address() == 484);
+    QVERIFY(af.universe() == 2);
+    QVERIFY(af.amount() == 1);
+    QVERIFY(af.gap() == 0);
+    QVERIFY(af.channels() == 6);
+
+    // Check that all makes & models are put to the tree
+    QStringList makers(m_cache.manufacturers());
+    QVERIFY(makers.isEmpty() == false);
+    for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* top = af.m_tree->topLevelItem(i);
+
+        if (top->text(0) != KXMLFixtureGeneric)
+        {
+            QStringList models(m_cache.models(top->text(0)));
+            for (int j = 0; j < top->childCount(); j++)
+            {
+                QTreeWidgetItem* child = top->child(j);
+                QVERIFY(child->childCount() == 0);
+                QVERIFY(models.removeAll(child->text(0)) == 1);
+            }
+
+            QVERIFY(makers.removeAll(top->text(0)) == 1);
+        }
+        else
+        {
+            QVERIFY(i == af.m_tree->topLevelItemCount() - 1); // Generic should be last
+            QVERIFY(top->childCount() == 1);
+            QVERIFY(top->child(0)->text(0) == KXMLFixtureGeneric);
+        }
+    }
+    QVERIFY(makers.isEmpty() == true);
+
+    // Generic / Generic should be selected for dimmers
+    QVERIFY(af.m_tree->currentItem() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->text(0), QString(KXMLFixtureGeneric));
+    QVERIFY(af.m_tree->currentItem()->parent() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->parent()->text(0), QString(KXMLFixtureGeneric));
+
+    QVERIFY(af.m_modeCombo->isEnabled() == false);
+    QCOMPARE(af.m_modeCombo->count(), 1);
+    QCOMPARE(af.m_modeCombo->itemText(0), QString(KXMLFixtureGeneric));
+
+    QVERIFY(af.m_universeCombo->isEnabled() == true);
+    QCOMPARE(af.m_universeCombo->currentIndex(), 2);
+    QCOMPARE(af.m_universeCombo->count(), 4);
+
+    QVERIFY(af.m_addressSpin->isEnabled() == true);
+    if (om.patch(0)->isDMXZeroBased() == true)
+    {
+        QCOMPARE(af.m_addressSpin->value(), 484);
+        QCOMPARE(af.m_addressSpin->minimum(), 0);
+        QCOMPARE(af.m_addressSpin->maximum(), int(512 - fxi->channels()));
+    }
+    else
+    {
+        QCOMPARE(af.m_addressSpin->value(), 485);
+        QCOMPARE(af.m_addressSpin->minimum(), 1);
+        QCOMPARE(af.m_addressSpin->maximum(), int(513 - fxi->channels()));
+    }
+
+    QVERIFY(af.m_channelsSpin->isEnabled() == true);
+    QCOMPARE(af.m_channelsSpin->value(), 6);
+
+    QVERIFY(af.m_nameEdit->isEnabled() == true);
+    QCOMPARE(af.m_nameEdit->text(), QString("My dimmer"));
+    QVERIFY(af.m_nameEdit->isModified() == true);
+
+    QVERIFY(af.m_multipleGroup->isEnabled() == false);
+    QVERIFY(af.m_gapSpin->isEnabled() == false);
+    QCOMPARE(af.m_gapSpin->value(), 0);
+
+    QVERIFY(af.m_amountSpin->isEnabled() == false);
+    QCOMPARE(af.m_amountSpin->value(), 1);
+}
+
+void AddFixture_Test::initialScanner()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+    Fixture* fxi = new Fixture(&doc);
+    fxi->setName("My scanner");
+
+    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC300");
+    Q_ASSERT(def != NULL);
+    Q_ASSERT(def != NULL);
+    Q_ASSERT(def->channels().size() > 0);
+    const QLCFixtureMode* mode = def->modes().first();
+    Q_ASSERT(def->modes().size() > 1);
+
+    fxi->setFixtureDefinition(def, mode);
+    fxi->setUniverse(2);
+    fxi->setAddress(484);
+    doc.addFixture(fxi);
+
+    AddFixture af(NULL, m_cache, &doc, &om, fxi);
+    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
+    QVERIFY(&doc == af.m_doc);
+    QVERIFY(af.fixtureDef() == def);
+    QVERIFY(af.mode() == mode);
+    QVERIFY(af.name() == QString("My scanner"));
+    QVERIFY(af.address() == 484);
+    QVERIFY(af.universe() == 2);
+    QVERIFY(af.amount() == 1);
+    QVERIFY(af.gap() == 0);
+    QVERIFY(af.channels() == fxi->channels());
+
+    // Check that all makes & models are put to the tree
+    QStringList makers(m_cache.manufacturers());
+    QVERIFY(makers.isEmpty() == false);
+    for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* top = af.m_tree->topLevelItem(i);
+
+        if (top->text(0) != KXMLFixtureGeneric)
+        {
+            QStringList models(m_cache.models(top->text(0)));
+            for (int j = 0; j < top->childCount(); j++)
+            {
+                QTreeWidgetItem* child = top->child(j);
+                QVERIFY(child->childCount() == 0);
+                QVERIFY(models.removeAll(child->text(0)) == 1);
+            }
+
+            QVERIFY(makers.removeAll(top->text(0)) == 1);
+        }
+        else
+        {
+            QVERIFY(i == af.m_tree->topLevelItemCount() - 1); // Generic should be last
+            QVERIFY(top->childCount() == 1);
+            QVERIFY(top->child(0)->text(0) == KXMLFixtureGeneric);
+        }
+    }
+    QVERIFY(makers.isEmpty() == true);
+
+    // Generic / Generic should be selected for dimmers
+    QVERIFY(af.m_tree->currentItem() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->text(0), def->model());
+    QVERIFY(af.m_tree->currentItem()->parent() != NULL);
+    QCOMPARE(af.m_tree->currentItem()->parent()->text(0), def->manufacturer());
+
+    QVERIFY(af.m_modeCombo->isEnabled() == true);
+    QCOMPARE(af.m_modeCombo->count(), def->modes().size());
+    QCOMPARE(af.m_modeCombo->itemText(0), mode->name());
+
+    QVERIFY(af.m_universeCombo->isEnabled() == true);
+    QCOMPARE(af.m_universeCombo->currentIndex(), 2);
+    QCOMPARE(af.m_universeCombo->count(), 4);
+
+    QVERIFY(af.m_addressSpin->isEnabled() == true);
+    if (om.patch(0)->isDMXZeroBased() == true)
+    {
+        QCOMPARE(af.m_addressSpin->value(), 484);
+    }
+    else
+    {
+        QCOMPARE(af.m_addressSpin->value(), 485);
+    }
+
+    QVERIFY(af.m_channelsSpin->isEnabled() == false);
+    QCOMPARE(af.m_channelsSpin->value(), (int) fxi->channels());
+
+    QVERIFY(af.m_nameEdit->isEnabled() == true);
+    QCOMPARE(af.m_nameEdit->text(), QString("My scanner"));
+    QVERIFY(af.m_nameEdit->isModified() == true);
+
+    QVERIFY(af.m_multipleGroup->isEnabled() == false);
+    QVERIFY(af.m_gapSpin->isEnabled() == false);
+    QCOMPARE(af.m_gapSpin->value(), 0);
+
+    QVERIFY(af.m_amountSpin->isEnabled() == false);
+    QCOMPARE(af.m_amountSpin->value(), 1);
+}
+
+void AddFixture_Test::selectionNothing()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+
+    AddFixture af(NULL, m_cache, &doc, &om);
+
+    af.m_tree->setCurrentItem(NULL);
+    QVERIFY(af.m_tree->currentItem() == NULL);
+
+    QVERIFY(af.fixtureDef() == NULL);
+    QVERIFY(af.mode() == NULL);
+    QVERIFY(af.name() == "");
+    QVERIFY(af.address() == 0);
+    QVERIFY(af.universe() == 0);
+    QVERIFY(af.amount() == 1);
+    QVERIFY(af.gap() == 0);
+    QVERIFY(af.channels() == 1);
+
+    QVERIFY(af.m_modeCombo->isEnabled() == false);
+    QCOMPARE(af.m_modeCombo->count(), 1);
+    QCOMPARE(af.m_modeCombo->itemText(0), QString());
+
+    QVERIFY(af.m_universeCombo->isEnabled() == false);
+    QCOMPARE(af.m_universeCombo->currentIndex(), 0);
+    QCOMPARE(af.m_universeCombo->count(), 4);
+
+    QVERIFY(af.m_addressSpin->isEnabled() == false);
+    if (om.patch(0)->isDMXZeroBased() == true)
+    {
+        QCOMPARE(af.m_addressSpin->value(), 0);
+        QCOMPARE(af.m_addressSpin->minimum(), 0);
+        QCOMPARE(af.m_addressSpin->maximum(), 511);
+    }
+    else
+    {
+        QCOMPARE(af.m_addressSpin->value(), 1);
+        QCOMPARE(af.m_addressSpin->minimum(), 1);
+        QCOMPARE(af.m_addressSpin->maximum(), 512);
+    }
+
+    QVERIFY(af.m_channelsSpin->isEnabled() == false);
+    QCOMPARE(af.m_channelsSpin->value(), 1);
+
+    QVERIFY(af.m_nameEdit->isEnabled() == false);
+
+    QVERIFY(af.m_multipleGroup->isEnabled() == false);
+    QVERIFY(af.m_gapSpin->isEnabled() == false);
+    QCOMPARE(af.m_gapSpin->value(), 0);
+    QVERIFY(af.m_amountSpin->isEnabled() == false);
+}
+
+void AddFixture_Test::selectionGeneric()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+
+    AddFixture af(NULL, m_cache, &doc, &om);
+
+    // Select the last item which should be Generic - Generic
+    QTreeWidgetItem* item = af.m_tree->topLevelItem(af.m_tree->topLevelItemCount() - 1);
+    QVERIFY(item != NULL);
+    // First, select the parent node so that selectionChanged() fires
+    QVERIFY(item->childCount() == 1);
+    af.m_tree->setCurrentItem(item);
+    // Then, select the child to fire again
+    item = item->child(0);
+    QVERIFY(item != NULL);
+    af.m_tree->setCurrentItem(item);
+    QVERIFY(af.m_tree->currentItem() == item);
+
+    QVERIFY(af.m_modeCombo->isEnabled() == false);
+    QCOMPARE(af.m_modeCombo->count(), 1);
+    QCOMPARE(af.m_modeCombo->itemText(0), QString(KXMLFixtureGeneric));
+    QVERIFY(af.fixtureDef() == NULL);
+    QVERIFY(af.mode() == NULL);
+
+    QVERIFY(af.m_universeCombo->isEnabled() == true);
+    QCOMPARE(af.m_universeCombo->currentIndex(), 0);
+    QCOMPARE(af.m_universeCombo->count(), 4);
+    QVERIFY(af.universe() == 0);
+
+    QVERIFY(af.m_addressSpin->isEnabled() == true);
+    if (om.patch(0)->isDMXZeroBased() == true)
+    {
+        QCOMPARE(af.m_addressSpin->value(), 0);
+        QCOMPARE(af.m_addressSpin->minimum(), 0);
+        QCOMPARE(af.m_addressSpin->maximum(), 511);
+    }
+    else
+    {
+        QCOMPARE(af.m_addressSpin->value(), 1);
+        QCOMPARE(af.m_addressSpin->minimum(), 1);
+        QCOMPARE(af.m_addressSpin->maximum(), 512);
+    }
+    QVERIFY(af.address() == 0);
+
+    QVERIFY(af.m_channelsSpin->isEnabled() == true);
+    QCOMPARE(af.m_channelsSpin->value(), 1);
+    QVERIFY(af.channels() == 1);
+
+    QVERIFY(af.m_nameEdit->isEnabled() == true);
+    QCOMPARE(af.name(), QString(KXMLFixtureDimmer) + QString("s"));
+
+    QVERIFY(af.m_multipleGroup->isEnabled() == true);
+    QVERIFY(af.m_gapSpin->isEnabled() == true);
+    QCOMPARE(af.m_gapSpin->value(), 0);
+    QVERIFY(af.gap() == 0);
+
+    QVERIFY(af.m_amountSpin->isEnabled() == true);
+    QVERIFY(af.m_amountSpin->value() == 1);
+    QVERIFY(af.amount() == 1);
 }
 
 QTEST_MAIN(AddFixture_Test)

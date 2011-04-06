@@ -126,6 +126,7 @@ AddFixture::AddFixture(QWidget* parent,
     {
         m_nameEdit->setText(fxi->name());
         slotNameEdited(fxi->name());
+        m_nameEdit->setModified(true); // Prevent auto-naming
     }
 
     // Mode
@@ -454,7 +455,11 @@ void AddFixture::slotSelectionChanged()
 
         /* Clear the name box unless it has been modified by user */
         if (m_nameEdit->isModified() == false)
+        {
             m_nameEdit->setText(QString());
+            slotNameEdited(QString());
+            m_nameEdit->setModified(false);
+        }
         m_nameEdit->setEnabled(false);
 
         m_channelsSpin->setValue(0);
@@ -462,6 +467,7 @@ void AddFixture::slotSelectionChanged()
         m_addressSpin->setEnabled(false);
         m_universeCombo->setEnabled(false);
 
+        m_multipleGroup->setEnabled(false);
         m_amountSpin->setEnabled(false);
         m_gapSpin->setEnabled(false);
         m_channelsSpin->setEnabled(false);
@@ -486,8 +492,11 @@ void AddFixture::slotSelectionChanged()
         /* Set the model name as the fixture's friendly name ONLY
            if the user hasn't modified the friendly name field. */
         if (m_nameEdit->isModified() == false)
-            m_nameEdit->setText(KXMLFixtureDimmer +
-                                QString("s")); // Plural :)
+        {
+            m_nameEdit->setText(tr("Dimmers"));
+            slotNameEdited(m_nameEdit->text());
+            m_nameEdit->setModified(false);
+        }
         m_nameEdit->setEnabled(true);
     }
     else
@@ -506,7 +515,11 @@ void AddFixture::slotSelectionChanged()
         /* Set the model name as the fixture's friendly name ONLY
            if the user hasn't modified the friendly name field. */
         if (m_nameEdit->isModified() == false)
+        {
             m_nameEdit->setText(m_fixtureDef->model());
+            slotNameEdited(m_nameEdit->text());
+            m_nameEdit->setModified(false);
+        }
         m_nameEdit->setEnabled(true);
     }
 
@@ -520,6 +533,7 @@ void AddFixture::slotSelectionChanged()
     m_addressSpin->setEnabled(true);
     m_universeCombo->setEnabled(true);
 
+    m_multipleGroup->setEnabled(true);
     m_amountSpin->setEnabled(true);
     m_gapSpin->setEnabled(true);
 

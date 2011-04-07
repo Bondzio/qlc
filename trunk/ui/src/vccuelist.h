@@ -85,14 +85,11 @@ protected:
      * Cue list
      *************************************************************************/
 public:
-    /** Update the contents of cue list */
-    void updateList();
+    /** Clear cue list contents */
+    void clear();
 
-    /** Set the chaser whose steps are used as the cue list */
-    void setChaser(quint32 fid);
-
-    /** Get the chaser that's used as the cue list */
-    quint32 chaser() const;
+    /** Append a function to the cue list */
+    void append(quint32 fid);
 
 protected slots:
     /** Removes destroyed functions from the list */
@@ -120,7 +117,6 @@ protected:
 
 protected:
     QTreeWidget* m_list;
-    quint32 m_chaser;
     ChaserRunner* m_runner;
 
     /*************************************************************************

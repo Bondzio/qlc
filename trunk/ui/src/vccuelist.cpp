@@ -36,17 +36,16 @@
 #include "vccuelist.h"
 #include "function.h"
 #include "inputmap.h"
-#include "chaser.h"
 #include "doc.h"
 
 #define KColumnNumber 0
 #define KColumnName   1
+#define KColumnID     2
 
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
 
 VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
-    , m_chaser(Function::invalidId())
     , m_runner(NULL)
 {
     /* Set the class name "VCCueList" as the object name as well */
@@ -117,8 +116,13 @@ bool VCCueList::copyFrom(VCWidget* widget)
         return false;
 
     /* Function list contents */
-    setChaser(cuelist->chaser());
-    updateList();
+    clear();
+    for (int i = 0; i < cuelist->m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = cuelist->m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+        append(item->text(KColumnID).toUInt());
+    }
 
     /* Key sequence */
     setNextKeySequence(cuelist->nextKeySequence());
@@ -138,50 +142,50 @@ bool VCCueList::copyFrom(VCWidget* widget)
  * Cue list
  *****************************************************************************/
 
-void VCCueList::setChaser(quint32 fid)
-{
-    m_chaser = fid;
-}
-
-quint32 VCCueList::chaser() const
-{
-    return m_chaser;
-}
-
-void VCCueList::updateList()
+void VCCueList::clear()
 {
     m_list->clear();
+}
 
-    Chaser* cha = qobject_cast<Chaser*> (m_doc->function(chaser()));
-    if (cha == NULL)
-        return;
+void VCCueList::append(quint32 fid)
+{
+    Function* function = m_doc->function(fid);
+    Q_ASSERT(function != NULL);
 
-    int i = 1;
-    QListIterator <Function*> it(cha->stepFunctions());
-    while (it.hasNext() == true)
-    {
-        Function* function(it.next());
-        QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-        item->setText(KColumnNumber, QString::number(i++));
-        item->setText(KColumnName, function->name());
-        if (function->type() != Function::Scene)
-            item->setDisabled(true);
-    }
+    QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
+    item->setText(KColumnNumber,
+                  QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
+    item->setText(KColumnName, function->name());
+    item->setText(KColumnID, QString("%1").arg(fid));
 }
 
 void VCCueList::slotFunctionRemoved(quint32 fid)
 {
-    if (m_chaser == fid)
+    /* Find all items matching the destroyed function ID and remove them */
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
     {
-        m_chaser = Function::invalidId();
-        updateList();
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+
+        if (item->text(KColumnID).toUInt() == fid)
+            delete item;
     }
 }
 
 void VCCueList::slotFunctionChanged(quint32 fid)
 {
-    if (m_chaser == fid)
-        updateList();
+    Function* function = m_doc->function(fid);
+    Q_ASSERT(function != NULL);
+
+    /* Find all items matching the changed function ID and update them */
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+
+        if (item->text(KColumnID).toUInt() == fid)
+            item->setText(KColumnName, function->name());
+    }
 }
 
 void VCCueList::slotNextCue()
@@ -232,9 +236,18 @@ void VCCueList::createRunner()
     Q_ASSERT(m_runner == NULL);
 
     QList <Function*> cues;
-    Chaser* cha = qobject_cast<Chaser*> (m_doc->function(chaser()));
-    if (cha != NULL)
-        cues = cha->stepFunctions();
+
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+
+        quint32 fid = item->text(KColumnID).toUInt();
+        Function* function = m_doc->function(fid);
+        if (function != NULL)
+            cues << function;
+    }
+
     m_runner = new ChaserRunner(m_doc, cues, Bus::defaultHold(),
                                 Function::Forward, Function::Loop);
     m_runner->setAutoStep(false);
@@ -369,8 +382,6 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
     {
         Q_ASSERT(m_runner == NULL);
         m_masterTimer->registerDMXSource(this);
-
-        updateList();
         m_list->setEnabled(true);
     }
     else
@@ -392,10 +403,7 @@ void VCCueList::editProperties()
 {
     VCCueListProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     if (prop.exec() == QDialog::Accepted)
-    {
         m_doc->setModified();
-        updateList();
-    }
 }
 
 /*****************************************************************************
@@ -407,7 +415,6 @@ bool VCCueList::loadXML(const QDomElement* root)
     QDomNode node;
     QDomElement tag;
     QString str;
-    Chaser* legacyChaser = NULL;
 
     Q_ASSERT(root != NULL);
 
@@ -486,35 +493,13 @@ bool VCCueList::loadXML(const QDomElement* root)
                 subNode = subNode.nextSibling();
             }
         }
-        else if (tag.tagName() == KXMLQLCVCCueListChaser)
-        {
-            setChaser(tag.text().toInt());
-        }
         else if (tag.tagName() == KXMLQLCVCCueListKey) /* Legacy */
         {
             setNextKeySequence(QKeySequence(tag.text()));
         }
         else if (tag.tagName() == KXMLQLCVCCueListFunction)
         {
-            // Legacy: Create a chaser to incorporate old-style cue list
-            // member functions and assign that chaser to this cue list.
-            if (legacyChaser == NULL)
-            {
-                legacyChaser = new Chaser(m_doc);
-                if (m_doc->addFunction(legacyChaser) == true)
-                {
-                    setChaser(legacyChaser->id());
-                    legacyChaser->setName(caption());
-                }
-                else
-                {
-                    delete legacyChaser;
-                    legacyChaser = NULL;
-                }
-            }
-
-            // Add cue list members to the chaser
-            legacyChaser->addStep(tag.text().toInt());
+            append(tag.text().toUInt());
         }
         else
         {
@@ -523,8 +508,6 @@ bool VCCueList::loadXML(const QDomElement* root)
 
         node = node.nextSibling();
     }
-
-    updateList();
 
     return true;
 }
@@ -547,11 +530,18 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     /* Caption */
     root.setAttribute(KXMLQLCVCCaption, caption());
 
-    /* Chaser */
-    tag = doc->createElement(KXMLQLCVCCueListChaser);
-    root.appendChild(tag);
-    text = doc->createTextNode(QString::number(chaser()));
-    tag.appendChild(text);
+    /* Cues */
+    QTreeWidgetItemIterator it(m_list);
+    while (*it != NULL)
+    {
+        tag = doc->createElement(KXMLQLCVCCueListFunction);
+        root.appendChild(tag);
+
+        text = doc->createTextNode((*it)->text(KColumnID));
+        tag.appendChild(text);
+
+        ++it;
+    }
 
     /* Next cue */
     tag = doc->createElement(KXMLQLCVCCueListNext);

@@ -60,15 +60,11 @@ protected:
     /************************************************************************
      * Cues
      ************************************************************************/
-protected:
-    void updateChaserName();
-
 protected slots:
-    void slotAttachClicked();
-    void slotDetachClicked();
-
-protected:
-    quint32 m_chaser;
+    void slotAddClicked();
+    void slotRemoveClicked();
+    void slotRaiseClicked();
+    void slotLowerClicked();
 
     /************************************************************************
      * Next Cue

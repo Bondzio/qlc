@@ -31,6 +31,10 @@
 #include "inputmap.h"
 #include "doc.h"
 
+#define KColumnNumber 0
+#define KColumnName   1
+#define KColumnID     2
+
 VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap* outputMap,
                                          InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(cueList)
@@ -57,12 +61,28 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
     m_nameEdit->setSelection(0, cueList->caption().length());
 
     /* Connections */
-    connect(m_attachButton, SIGNAL(clicked()), this, SLOT(slotAttachClicked()));
-    connect(m_detachButton, SIGNAL(clicked()), this, SLOT(slotDetachClicked()));
+    connect(m_addButton, SIGNAL(clicked()),
+            this, SLOT(slotAddClicked()));
+    connect(m_removeButton, SIGNAL(clicked()),
+            this, SLOT(slotRemoveClicked()));
+    connect(m_raiseButton, SIGNAL(clicked()),
+            this, SLOT(slotRaiseClicked()));
+    connect(m_lowerButton, SIGNAL(clicked()),
+            this, SLOT(slotLowerClicked()));
 
-    /* Chaser */
-    m_chaser = cueList->chaser();
-    updateChaserName();
+    /* Put all cues into the tree widget */
+    QTreeWidgetItemIterator it(m_cueList->m_list);
+    while (*it != NULL)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
+        item->setText(KColumnNumber, QString("%1")
+                      .arg(m_list->indexOfTopLevelItem(item) + 1));
+        item->setText(KColumnName, (*it)->text(KColumnName));
+        item->setText(KColumnID, (*it)->text(KColumnID));
+        ++it;
+    }
+
+    m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     /************************************************************************
      * Next Cue page
@@ -117,8 +137,17 @@ VCCueListProperties::~VCCueListProperties()
 
 void VCCueListProperties::accept()
 {
-    /* Replace existing chaser */
-    m_cueList->setChaser(m_chaser);
+    m_cueList->setCaption(m_nameEdit->text());
+
+    /* Replace existing list of cues */
+    m_cueList->clear();
+
+    QTreeWidgetItemIterator it(m_list);
+    while (*it != NULL)
+    {
+        m_cueList->append((*it)->text(KColumnID).toUInt());
+        ++it;
+    }
 
     /* Key sequences */
     m_cueList->setNextKeySequence(m_nextKeySequence);
@@ -144,31 +173,87 @@ void VCCueListProperties::slotTabChanged()
  * Cues
  ****************************************************************************/
 
-void VCCueListProperties::updateChaserName()
+void VCCueListProperties::slotAddClicked()
 {
-    Function* function = m_doc->function(m_chaser);
-    if (function != NULL)
-        m_chaserEdit->setText(function->name());
-    else
-        m_chaserEdit->setText(tr("Nothing"));
-}
-
-void VCCueListProperties::slotAttachClicked()
-{
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
-                         false, Function::invalidId(), Function::Chaser, true);
+    /* Select functions */
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true,
+                         Function::invalidId(), Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
-        if (fs.selection().isEmpty() == false)
-            m_chaser = fs.selection().first();
-        updateChaserName();
+        /* Append selected functions */
+        QListIterator <quint32> it(fs.selection());
+        while (it.hasNext() == true)
+        {
+            Function* function = m_doc->function(it.next());
+            Q_ASSERT(function != NULL);
+
+            QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
+            item->setText(KColumnNumber, QString("%1")
+                          .arg(m_list->indexOfTopLevelItem(item) + 1));
+            item->setText(KColumnName, function->name());
+            item->setText(KColumnID, QString("%1").arg(function->id()));
+        }
     }
 }
 
-void VCCueListProperties::slotDetachClicked()
+void VCCueListProperties::slotRemoveClicked()
 {
-    m_chaser = Function::invalidId();
-    updateChaserName();
+    QTreeWidgetItem* item = m_list->currentItem();
+    if (item != NULL)
+    {
+        QTreeWidgetItem* next = m_list->itemBelow(item);
+        if (next == NULL)
+            next = m_list->itemAbove(item);
+        delete item;
+
+        if (next != NULL)
+        {
+            m_list->setCurrentItem(next);
+
+            for (int i = m_list->indexOfTopLevelItem(next); i < m_list->topLevelItemCount(); i++)
+            {
+                m_list->topLevelItem(i)->setText(KColumnNumber, QString("%1").arg(i + 1));
+            }
+        }
+    }
+}
+
+void VCCueListProperties::slotRaiseClicked()
+{
+    QTreeWidgetItem* item = m_list->currentItem();
+    if (item == NULL)
+        return;
+
+    int index = m_list->indexOfTopLevelItem(item);
+    if (index == 0)
+        return;
+
+    m_list->takeTopLevelItem(index);
+    m_list->insertTopLevelItem(index - 1, item);
+    m_list->setCurrentItem(item);
+
+    item->setText(KColumnNumber, QString("%1").arg(index - 1 + 1));
+    m_list->itemBelow(item)->setText(KColumnNumber,
+                                     QString("%1").arg(index + 1));
+}
+
+void VCCueListProperties::slotLowerClicked()
+{
+    QTreeWidgetItem* item = m_list->currentItem();
+    if (item == NULL)
+        return;
+
+    int index = m_list->indexOfTopLevelItem(item);
+    if (index == m_list->topLevelItemCount() - 1)
+        return;
+
+    m_list->takeTopLevelItem(index);
+    m_list->insertTopLevelItem(index + 1, item);
+    m_list->setCurrentItem(item);
+
+    item->setText(KColumnNumber, QString("%1").arg(index + 1 + 1));
+    m_list->itemAbove(item)->setText(KColumnNumber,
+                                     QString("%1").arg(index + 1));
 }
 
 /****************************************************************************

@@ -50,8 +50,8 @@ class QFile;
 #define KXMLQLCVCWidgetBackgroundImage "BackgroundImage"
 #define KXMLQLCVCWidgetBackgroundImageNone "None"
 
-#define KVCFrameStyleSunken (QFrame::StyledPanel | QFrame::Sunken)
-#define KVCFrameStyleRaised (QFrame::StyledPanel | QFrame::Raised)
+#define KVCFrameStyleSunken (QFrame::Panel | QFrame::Sunken)
+#define KVCFrameStyleRaised (QFrame::Panel | QFrame::Raised)
 #define KVCFrameStyleNone   (QFrame::NoFrame)
 
 #define KXMLQLCVCWidgetInput "Input"

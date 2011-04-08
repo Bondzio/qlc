@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>488</width>
-    <height>347</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,8 +41,11 @@
        <string>Cues</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0" rowspan="5">
+       <item row="0" column="0" rowspan="10">
         <widget class="QTreeWidget" name="m_list">
+         <property name="toolTip">
+          <string>List of scenes that can be activated with this cue list</string>
+         </property>
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
@@ -68,7 +71,7 @@
          </column>
          <column>
           <property name="text">
-           <string>Function</string>
+           <string>Scene</string>
           </property>
          </column>
         </widget>
@@ -76,7 +79,7 @@
        <item row="0" column="1">
         <widget class="QToolButton" name="m_addButton">
          <property name="toolTip">
-          <string>Bind a key combination to skip to the next cue</string>
+          <string>Add scene(s) to the cue list</string>
          </property>
          <property name="text">
           <string notr="true">...</string>
@@ -96,7 +99,7 @@
        <item row="1" column="1">
         <widget class="QToolButton" name="m_removeButton">
          <property name="toolTip">
-          <string>Bind a key combination to skip to the next cue</string>
+          <string>Remove selected scene(s) from the cue list</string>
          </property>
          <property name="text">
           <string notr="true">...</string>
@@ -113,10 +116,10 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QToolButton" name="m_raiseButton">
          <property name="toolTip">
-          <string>Bind a key combination to skip to the next cue</string>
+          <string>Raise the selected scene</string>
          </property>
          <property name="text">
           <string notr="true">...</string>
@@ -133,10 +136,10 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <widget class="QToolButton" name="m_lowerButton">
          <property name="toolTip">
-          <string>Bind a key combination to skip to the next cue</string>
+          <string>Lower the selected scene</string>
          </property>
          <property name="text">
           <string notr="true">...</string>
@@ -153,7 +156,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="9" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -165,6 +168,74 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="5" column="1">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QToolButton" name="m_cutButton">
+         <property name="toolTip">
+          <string>Cut the selected scenes from their current positions</string>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="main.qrc">
+           <normaloff>:/editcut.png</normaloff>:/editcut.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QToolButton" name="m_copyButton">
+         <property name="toolTip">
+          <string>Copy the selected scenes</string>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="main.qrc">
+           <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QToolButton" name="m_pasteButton">
+         <property name="toolTip">
+          <string>Paste scenes from the clipboard to the currently selected position</string>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="main.qrc">
+           <normaloff>:/editpaste.png</normaloff>:/editpaste.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

@@ -22,12 +22,14 @@
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
 #include <QHeaderView>
+#include <QDebug>
 
 #include "vccuelistproperties.h"
 #include "selectinputchannel.h"
 #include "functionselection.h"
 #include "assignhotkey.h"
 #include "vccuelist.h"
+#include "qlcmacros.h"
 #include "inputmap.h"
 #include "doc.h"
 
@@ -97,6 +99,10 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
             this, SLOT(slotNextAutoDetectInputToggled(bool)));
     connect(m_nextChooseInputButton, SIGNAL(clicked()),
             this, SLOT(slotNextChooseInputClicked()));
+
+    connect(m_cutButton, SIGNAL(clicked()), this, SLOT(slotCutClicked()));
+    connect(m_copyButton, SIGNAL(clicked()), this, SLOT(slotCopyClicked()));
+    connect(m_pasteButton, SIGNAL(clicked()), this, SLOT(slotPasteClicked()));
 
     /* Key binding */
     m_nextKeySequence = QKeySequence(cueList->nextKeySequence());
@@ -185,37 +191,20 @@ void VCCueListProperties::slotAddClicked()
         while (it.hasNext() == true)
         {
             Function* function = m_doc->function(it.next());
-            Q_ASSERT(function != NULL);
-
-            QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-            item->setText(KColumnNumber, QString("%1")
-                          .arg(m_list->indexOfTopLevelItem(item) + 1));
-            item->setText(KColumnName, function->name());
-            item->setText(KColumnID, QString("%1").arg(function->id()));
+            updateFunctionItem(new QTreeWidgetItem(m_list), function);
         }
     }
 }
 
 void VCCueListProperties::slotRemoveClicked()
 {
-    QTreeWidgetItem* item = m_list->currentItem();
-    if (item != NULL)
-    {
-        QTreeWidgetItem* next = m_list->itemBelow(item);
-        if (next == NULL)
-            next = m_list->itemAbove(item);
-        delete item;
+    QList <QTreeWidgetItem*> items(m_list->selectedItems());
+    while (items.isEmpty() == false)
+        delete items.takeFirst();
 
-        if (next != NULL)
-        {
-            m_list->setCurrentItem(next);
-
-            for (int i = m_list->indexOfTopLevelItem(next); i < m_list->topLevelItemCount(); i++)
-            {
-                m_list->topLevelItem(i)->setText(KColumnNumber, QString("%1").arg(i + 1));
-            }
-        }
-    }
+    m_list->setCurrentItem(NULL);
+    m_clipboard.clear();
+    updateStepNumbers();
 }
 
 void VCCueListProperties::slotRaiseClicked()
@@ -233,8 +222,7 @@ void VCCueListProperties::slotRaiseClicked()
     m_list->setCurrentItem(item);
 
     item->setText(KColumnNumber, QString("%1").arg(index - 1 + 1));
-    m_list->itemBelow(item)->setText(KColumnNumber,
-                                     QString("%1").arg(index + 1));
+    m_list->itemBelow(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
 }
 
 void VCCueListProperties::slotLowerClicked()
@@ -252,8 +240,85 @@ void VCCueListProperties::slotLowerClicked()
     m_list->setCurrentItem(item);
 
     item->setText(KColumnNumber, QString("%1").arg(index + 1 + 1));
-    m_list->itemAbove(item)->setText(KColumnNumber,
-                                     QString("%1").arg(index + 1));
+    m_list->itemAbove(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
+}
+
+void VCCueListProperties::slotCutClicked()
+{
+    m_clipboard.clear();
+    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
+    while (it.hasNext() == true)
+        m_clipboard.cut(it.next());
+}
+
+void VCCueListProperties::slotCopyClicked()
+{
+    m_clipboard.clear();
+    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
+    while (it.hasNext() == true)
+        m_clipboard.copy(it.next());
+}
+
+void VCCueListProperties::slotPasteClicked()
+{
+    int insertionPoint = 0;
+    QTreeWidgetItem* currentItem = m_list->currentItem();
+    if (currentItem != NULL)
+        insertionPoint = m_list->indexOfTopLevelItem(currentItem);
+
+    m_list->setCurrentItem(NULL);
+
+    /** @todo Cutting is a bit glitchy still... It doesn't remove all cut items. */
+    QListIterator <QTreeWidgetItem*> it(QList<QTreeWidgetItem*> (m_clipboard.paste()));
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        Function* function = m_doc->function(item->text(KColumnID).toUInt());
+        if (function == NULL)
+            continue;
+
+        QTreeWidgetItem* copyItem = new QTreeWidgetItem;
+        m_list->insertTopLevelItem(insertionPoint, copyItem);
+        updateFunctionItem(copyItem, function);
+        copyItem->setSelected(true);
+
+        if (m_clipboard.action() == QLCClipboardAction::Cut)
+        {
+            if (item != NULL)
+            {
+                m_clipboard.removeAll(item);
+                delete item;
+                m_clipboard.copy(copyItem);
+            }
+        }
+
+        insertionPoint = m_list->indexOfTopLevelItem(copyItem) + 1;
+    }
+
+    if (m_clipboard.action() == QLCClipboardAction::Cut)
+        m_clipboard.setAction(QLCClipboardAction::Copy);
+
+    updateStepNumbers();
+}
+
+void VCCueListProperties::updateFunctionItem(QTreeWidgetItem* item, const Function* function)
+{
+    Q_ASSERT(item != NULL);
+    Q_ASSERT(function != NULL);
+
+    item->setText(KColumnNumber, QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
+    item->setText(KColumnName, function->name());
+    item->setText(KColumnID, QString("%1").arg(function->id()));
+}
+
+void VCCueListProperties::updateStepNumbers()
+{
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+        item->setText(KColumnNumber, QString("%1").arg(i + 1));
+    }
 }
 
 /****************************************************************************

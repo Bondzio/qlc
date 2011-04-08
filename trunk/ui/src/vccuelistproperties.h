@@ -26,11 +26,13 @@
 #include <QDialog>
 
 #include "ui_vccuelistproperties.h"
+#include "qlcclipboard.h"
 
 class MasterTimer;
 class VCCueList;
 class OutputMap;
 class InputMap;
+class Function;
 class Doc;
 
 class VCCueListProperties : public QDialog, public Ui_VCCueListProperties
@@ -65,6 +67,17 @@ protected slots:
     void slotRemoveClicked();
     void slotRaiseClicked();
     void slotLowerClicked();
+
+    void slotCutClicked();
+    void slotCopyClicked();
+    void slotPasteClicked();
+
+private:
+    void updateFunctionItem(QTreeWidgetItem* item, const Function* function);
+    void updateStepNumbers();
+
+private:
+    QLCClipboard <QTreeWidgetItem*> m_clipboard;
 
     /************************************************************************
      * Next Cue

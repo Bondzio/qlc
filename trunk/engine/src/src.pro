@@ -39,7 +39,8 @@ HEADERS += qlccapability.h \
            qlci18n.h \
            qlcinputchannel.h \
            qlcinputprofile.h \
-           qlcphysical.h
+           qlcphysical.h \
+           qlccapability.h
 
 # Engine
 HEADERS += bus.h \

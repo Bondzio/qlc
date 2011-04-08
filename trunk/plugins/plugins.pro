@@ -7,7 +7,7 @@ SUBDIRS              += udmxout
 SUBDIRS              += midiout
 #unix:SUBDIRS         += olaout
 !macx:!win32:SUBDIRS += dmx4linuxout
-SUBDIRS              += vellemanout
+!macx:SUBDIRS        += vellemanout
 
 # Input plugins
 SUBDIRS              += ewinginput

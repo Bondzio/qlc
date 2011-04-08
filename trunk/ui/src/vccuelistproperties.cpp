@@ -261,38 +261,36 @@ void VCCueListProperties::slotCopyClicked()
 
 void VCCueListProperties::slotPasteClicked()
 {
+    if (m_clipboard.action() == QLCClipboardAction::None)
+        return;
+
     int insertionPoint = 0;
     QTreeWidgetItem* currentItem = m_list->currentItem();
     if (currentItem != NULL)
         insertionPoint = m_list->indexOfTopLevelItem(currentItem);
 
-    m_list->setCurrentItem(NULL);
-
-    /** @todo Cutting is a bit glitchy still... It doesn't remove all cut items. */
-    QListIterator <QTreeWidgetItem*> it(QList<QTreeWidgetItem*> (m_clipboard.paste()));
+    QListIterator <QTreeWidgetItem*> it(m_clipboard.paste());
     while (it.hasNext() == true)
     {
         QTreeWidgetItem* item(it.next());
-        Function* function = m_doc->function(item->text(KColumnID).toUInt());
-        if (function == NULL)
-            continue;
-
-        QTreeWidgetItem* copyItem = new QTreeWidgetItem;
-        m_list->insertTopLevelItem(insertionPoint, copyItem);
-        updateFunctionItem(copyItem, function);
-        copyItem->setSelected(true);
-
-        if (m_clipboard.action() == QLCClipboardAction::Cut)
+        if (m_clipboard.action() == QLCClipboardAction::Copy)
         {
-            if (item != NULL)
-            {
-                m_clipboard.removeAll(item);
-                delete item;
-                m_clipboard.copy(copyItem);
-            }
+            Function* function = m_doc->function(item->text(KColumnID).toUInt());
+            if (function == NULL)
+                continue;
+
+            item = new QTreeWidgetItem;
+            m_list->insertTopLevelItem(insertionPoint, item);
+            updateFunctionItem(item, function);
+            item->setSelected(true);
+        }
+        else
+        {
+            m_list->takeTopLevelItem(m_list->indexOfTopLevelItem(item));
+            m_list->insertTopLevelItem(insertionPoint, item);
         }
 
-        insertionPoint = m_list->indexOfTopLevelItem(copyItem) + 1;
+        insertionPoint = CLAMP(m_list->indexOfTopLevelItem(item) + 1, 0, m_list->topLevelItemCount() - 1);
     }
 
     if (m_clipboard.action() == QLCClipboardAction::Cut)

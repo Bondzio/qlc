@@ -267,7 +267,10 @@ void VCCueListProperties::slotPasteClicked()
     int insertionPoint = 0;
     QTreeWidgetItem* currentItem = m_list->currentItem();
     if (currentItem != NULL)
+    {
         insertionPoint = m_list->indexOfTopLevelItem(currentItem);
+        currentItem->setSelected(false);
+    }
 
     QListIterator <QTreeWidgetItem*> it(m_clipboard.paste());
     while (it.hasNext() == true)

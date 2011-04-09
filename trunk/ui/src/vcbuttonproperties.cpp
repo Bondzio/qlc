@@ -69,7 +69,7 @@ VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* ou
 
     /* Key sequence */
     m_keySequence = QKeySequence(button->keySequence());
-    m_keyEdit->setText(m_keySequence.toString());
+    m_keyEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
 
     /* External input */
     m_inputUniverse = m_button->inputUniverse();
@@ -142,14 +142,14 @@ void VCButtonProperties::slotAttachKey()
     if (ahk.exec() == QDialog::Accepted)
     {
         m_keySequence = QKeySequence(ahk.keySequence());
-        m_keyEdit->setText(m_keySequence.toString());
+        m_keyEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
     }
 }
 
 void VCButtonProperties::slotDetachKey()
 {
     m_keySequence = QKeySequence();
-    m_keyEdit->setText(m_keySequence.toString());
+    m_keyEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
 }
 
 void VCButtonProperties::slotAutoDetectInputToggled(bool checked)

@@ -106,7 +106,7 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
 
     /* Key binding */
     m_nextKeySequence = QKeySequence(cueList->nextKeySequence());
-    m_nextKeyEdit->setText(m_nextKeySequence.toString());
+    m_nextKeyEdit->setText(m_nextKeySequence.toString(QKeySequence::NativeText));
 
     /* External input */
     m_nextInputUniverse = cueList->nextInputUniverse();
@@ -129,7 +129,7 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
 
     /* Key binding */
     m_previousKeySequence = QKeySequence(cueList->previousKeySequence());
-    m_previousKeyEdit->setText(m_previousKeySequence.toString());
+    m_previousKeyEdit->setText(m_previousKeySequence.toString(QKeySequence::NativeText));
 
     /* External input */
     m_previousInputUniverse = cueList->previousInputUniverse();
@@ -332,14 +332,14 @@ void VCCueListProperties::slotNextAttachClicked()
     if (ahk.exec() == QDialog::Accepted)
     {
         m_nextKeySequence = QKeySequence(ahk.keySequence());
-        m_nextKeyEdit->setText(m_nextKeySequence.toString());
+        m_nextKeyEdit->setText(m_nextKeySequence.toString(QKeySequence::NativeText));
     }
 }
 
 void VCCueListProperties::slotNextDetachClicked()
 {
     m_nextKeySequence = QKeySequence();
-    m_nextKeyEdit->setText(m_nextKeySequence.toString());
+    m_nextKeyEdit->setText(m_nextKeySequence.toString(QKeySequence::NativeText));
 }
 
 void VCCueListProperties::slotNextChooseInputClicked()
@@ -403,14 +403,14 @@ void VCCueListProperties::slotPreviousAttachClicked()
     if (ahk.exec() == QDialog::Accepted)
     {
         m_previousKeySequence = QKeySequence(ahk.keySequence());
-        m_previousKeyEdit->setText(m_previousKeySequence.toString());
+        m_previousKeyEdit->setText(m_previousKeySequence.toString(QKeySequence::NativeText));
     }
 }
 
 void VCCueListProperties::slotPreviousDetachClicked()
 {
     m_previousKeySequence = QKeySequence();
-    m_previousKeyEdit->setText(m_previousKeySequence.toString());
+    m_previousKeyEdit->setText(m_previousKeySequence.toString(QKeySequence::NativeText));
 }
 
 void VCCueListProperties::slotPreviousChooseInputClicked()

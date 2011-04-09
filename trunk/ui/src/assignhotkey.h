@@ -32,6 +32,7 @@ class QKeyEvent;
 class AssignHotKey : public QDialog, public Ui_AssignHotKey
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AssignHotKey)
 
     /*********************************************************************
      * Initialization
@@ -39,9 +40,6 @@ class AssignHotKey : public QDialog, public Ui_AssignHotKey
 public:
     AssignHotKey(QWidget* parent, const QKeySequence& keySequence);
     ~AssignHotKey();
-
-private:
-    Q_DISABLE_COPY(AssignHotKey)
 
 protected:
     void keyPressEvent(QKeyEvent* event);

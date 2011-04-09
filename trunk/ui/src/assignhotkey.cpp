@@ -21,11 +21,14 @@
 
 #include <QKeySequence>
 #include <QTextBrowser>
+#include <QSettings>
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDebug>
 
 #include "assignhotkey.h"
+
+#define SETTINGS_AUTOCLOSE "assignhotkey/autoclose"
 
 /*****************************************************************************
  * Initialization
@@ -35,14 +38,17 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
 {
     setupUi(this);
 
+    QString ctrl(QKeySequence(Qt::Key_Control).toString(QKeySequence::NativeText));
+    QString shift(QKeySequence(Qt::Key_Shift).toString(QKeySequence::NativeText));
+    QString alt(QKeySequence(Qt::Key_Alt).toString(QKeySequence::NativeText));
+    QString meta(QKeySequence(Qt::Key_Meta).toString(QKeySequence::NativeText));
+
     QString str("<HTML><HEAD><TITLE></TITLE></HEAD><BODY><CENTER>");
     str += QString("<H1>") + tr("Assign Key") + QString("</H1>");
     str += tr("Hit the key combination that you wish to assign. "
               "You may hit either a single key or a combination "
-              "using CTRL, ALT, and SHIFT.");
+              "using %1, %2, %3 and %4.").arg(ctrl).arg(shift).arg(alt).arg(meta);
     str += QString("</CENTER></BODY></HTML>");
-
-    /* TODO: For OSX, put the apple key to the above text */
 
     m_infoText->setText(str);
     m_infoText->setFocusPolicy(Qt::NoFocus);
@@ -53,14 +59,29 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
 
     m_keySequence = QKeySequence(keySequence);
     m_previewEdit->setText(m_keySequence.toString());
+
+    QSettings settings;
+    m_autoCloseCheckBox->setChecked(settings.value(SETTINGS_AUTOCLOSE).toBool());
 }
 
 AssignHotKey::~AssignHotKey()
 {
+    QSettings settings;
+    settings.setValue(SETTINGS_AUTOCLOSE, m_autoCloseCheckBox->isChecked());
 }
 
 void AssignHotKey::keyPressEvent(QKeyEvent* event)
 {
-    m_keySequence = QKeySequence(event->key() | event->modifiers());
-    m_previewEdit->setText(m_keySequence.toString());
+    int key = event->key();
+    if (event->key() == Qt::Key_Control || event->key() == Qt::Key_Alt ||
+        event->key() == Qt::Key_Shift || event->key() == Qt::Key_Meta)
+    {
+        key = 0;
+    }
+
+    m_keySequence = QKeySequence(key | event->modifiers());
+    m_previewEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
+
+    if (m_autoCloseCheckBox->isChecked() == true && key != 0)
+        accept();
 }

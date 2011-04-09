@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>AssignHotKey</class>
- <widget class="QDialog" name="AssignHotKey" >
-  <property name="geometry" >
+ <widget class="QDialog" name="AssignHotKey">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,40 +10,47 @@
     <height>343</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Assign a key combination to button</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="QTextBrowser" name="m_infoText" />
+    <widget class="QTextBrowser" name="m_infoText"/>
    </item>
    <item>
-    <widget class="QLabel" name="m_previewLabel" >
-     <property name="text" >
+    <widget class="QLabel" name="m_previewLabel">
+     <property name="text">
       <string>Key combination</string>
      </property>
-     <property name="alignment" >
+     <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="m_previewEdit" >
-     <property name="alignment" >
+    <widget class="QLineEdit" name="m_previewEdit">
+     <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
-     <property name="readOnly" >
+     <property name="readOnly">
       <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="m_buttonBox" >
-     <property name="orientation" >
+    <widget class="QCheckBox" name="m_autoCloseCheckBox">
+     <property name="text">
+      <string>Close automatically on key press</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="m_buttonBox">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -56,11 +64,11 @@
    <receiver>AssignHotKey</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -72,11 +80,11 @@
    <receiver>AssignHotKey</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

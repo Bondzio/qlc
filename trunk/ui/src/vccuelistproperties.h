@@ -24,9 +24,9 @@
 
 #include <QKeySequence>
 #include <QDialog>
+#include <QList>
 
 #include "ui_vccuelistproperties.h"
-#include "qlcclipboard.h"
 
 class MasterTimer;
 class VCCueList;
@@ -77,7 +77,7 @@ private:
     void updateStepNumbers();
 
 private:
-    QLCClipboard <QTreeWidgetItem*> m_clipboard;
+    QList <quint32> m_clipboard;
 
     /************************************************************************
      * Next Cue

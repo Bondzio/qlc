@@ -198,13 +198,8 @@ void VCCueListProperties::slotAddClicked()
 
 void VCCueListProperties::slotRemoveClicked()
 {
-    QList <QTreeWidgetItem*> items(m_list->selectedItems());
-    while (items.isEmpty() == false)
-        delete items.takeFirst();
-
-    m_list->setCurrentItem(NULL);
+    slotCutClicked();
     m_clipboard.clear();
-    updateStepNumbers();
 }
 
 void VCCueListProperties::slotRaiseClicked()
@@ -248,7 +243,14 @@ void VCCueListProperties::slotCutClicked()
     m_clipboard.clear();
     QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
     while (it.hasNext() == true)
-        m_clipboard.cut(it.next());
+    {
+        QTreeWidgetItem* item(it.next());
+        m_clipboard << quint32(item->text(KColumnID).toUInt());
+        delete item;
+    }
+
+    m_list->setCurrentItem(NULL);
+    updateStepNumbers();
 }
 
 void VCCueListProperties::slotCopyClicked()
@@ -256,12 +258,12 @@ void VCCueListProperties::slotCopyClicked()
     m_clipboard.clear();
     QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
     while (it.hasNext() == true)
-        m_clipboard.copy(it.next());
+        m_clipboard << quint32(it.next()->text(KColumnID).toUInt());
 }
 
 void VCCueListProperties::slotPasteClicked()
 {
-    if (m_clipboard.action() == QLCClipboardAction::None)
+    if (m_clipboard.isEmpty() == true)
         return;
 
     int insertionPoint = 0;
@@ -271,35 +273,25 @@ void VCCueListProperties::slotPasteClicked()
         insertionPoint = m_list->indexOfTopLevelItem(currentItem);
         currentItem->setSelected(false);
     }
-
-    QListIterator <QTreeWidgetItem*> it(m_clipboard.paste());
-    while (it.hasNext() == true)
+    else
     {
-        QTreeWidgetItem* item(it.next());
-        if (m_clipboard.action() == QLCClipboardAction::Copy)
-        {
-            Function* function = m_doc->function(item->text(KColumnID).toUInt());
-            if (function == NULL)
-                continue;
-
-            item = new QTreeWidgetItem;
-            m_list->insertTopLevelItem(insertionPoint, item);
-            updateFunctionItem(item, function);
-            item->setSelected(true);
-        }
-        else
-        {
-            if (m_list->indexOfTopLevelItem(item) < insertionPoint)
-                insertionPoint = CLAMP(insertionPoint - 1, 0, m_list->topLevelItemCount() - 1);
-            m_list->takeTopLevelItem(m_list->indexOfTopLevelItem(item));
-            m_list->insertTopLevelItem(insertionPoint, item);
-        }
-
-        insertionPoint = CLAMP(m_list->indexOfTopLevelItem(item) + 1, 0, m_list->topLevelItemCount() - 1);
+        insertionPoint = CLAMP(0, 0, m_list->topLevelItemCount() - 1);
     }
 
-    if (m_clipboard.action() == QLCClipboardAction::Cut)
-        m_clipboard.setAction(QLCClipboardAction::Copy);
+    QListIterator <quint32> it(m_clipboard);
+    while (it.hasNext() == true)
+    {
+        quint32 fid(it.next());
+        Function* function = m_doc->function(fid);
+        if (function == NULL)
+            continue;
+
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        m_list->insertTopLevelItem(insertionPoint, item);
+        updateFunctionItem(item, function);
+        item->setSelected(true);
+        insertionPoint = CLAMP(m_list->indexOfTopLevelItem(item) + 1, 0, m_list->topLevelItemCount() - 1);
+    }
 
     updateStepNumbers();
 }

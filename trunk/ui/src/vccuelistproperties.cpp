@@ -289,6 +289,8 @@ void VCCueListProperties::slotPasteClicked()
         }
         else
         {
+            if (m_list->indexOfTopLevelItem(item) < insertionPoint)
+                insertionPoint = CLAMP(insertionPoint - 1, 0, m_list->topLevelItemCount() - 1);
             m_list->takeTopLevelItem(m_list->indexOfTopLevelItem(item));
             m_list->insertTopLevelItem(insertionPoint, item);
         }

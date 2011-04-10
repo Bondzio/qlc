@@ -59,7 +59,7 @@ Chaser::Chaser(Doc* doc) : Function(doc)
 
 Chaser::~Chaser()
 {
-    m_steps.clear();
+    clear();
 }
 
 /*****************************************************************************
@@ -147,36 +147,10 @@ bool Chaser::removeStep(int index)
     }
 }
 
-bool Chaser::raiseStep(int index)
+void Chaser::clear()
 {
-    if (index > 0 && index < m_steps.count())
-    {
-        quint32 fid = m_steps.takeAt(index);
-        m_steps.insert(index - 1, fid);
-
-        emit changed(m_id);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Chaser::lowerStep(int index)
-{
-    if (index >= 0 && index < (m_steps.count() - 1))
-    {
-        quint32 fid = m_steps.takeAt(index);
-        m_steps.insert(index + 1, fid);
-
-        emit changed(m_id);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    m_steps.clear();
+    emit changed(m_id);
 }
 
 QList <quint32> Chaser::steps() const

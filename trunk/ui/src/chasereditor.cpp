@@ -28,6 +28,7 @@
 #include <QSettings>
 
 #include "qlcfixturedef.h"
+#include "qlcmacros.h"
 
 #include "functionselection.h"
 #include "chasereditor.h"
@@ -41,9 +42,9 @@
 
 #define SETTINGS_GEOMETRY "chasereditor/geometry"
 
-#define KColumnNumber     0
-#define KColumnFunction   1
-#define KColumnFunctionID 2
+#define KColumnNumber 0
+#define KColumnName   1
+#define KColumnID     2
 
 ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap* outputMap,
                            InputMap* inputMap, MasterTimer* masterTimer)
@@ -52,7 +53,7 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap*
     , m_outputMap(outputMap)
     , m_inputMap(inputMap)
     , m_masterTimer(masterTimer)
-    , m_original(chaser)
+    , m_chaser(chaser)
 {
     Q_ASSERT(chaser != NULL);
     Q_ASSERT(doc != NULL);
@@ -68,7 +69,7 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap*
     addAction(action);
 
     /* Resize columns to fit contents */
-    m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+    m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     /* Connect UI controls */
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
@@ -78,22 +79,30 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap*
     connect(m_raise, SIGNAL(clicked()), this, SLOT(slotRaiseClicked()));
     connect(m_lower, SIGNAL(clicked()), this, SLOT(slotLowerClicked()));
 
-    /* Create a copy of the original chaser so that we can freely modify
-       it and keep a pointer to the original so that we can move the
-       contents from the copied chaser to the original when OK is clicked */
-    m_chaser = new Chaser(m_doc);
-    m_chaser->copyFrom(chaser);
-    Q_ASSERT(m_chaser != NULL);
+    m_cutAction = new QAction(QIcon(":/editcut.png"), tr("Cut"), this);
+    m_cutButton->setDefaultAction(m_cutAction);
+    m_cutAction->setShortcut(QKeySequence(QKeySequence::Cut));
+    connect(m_cutAction, SIGNAL(triggered(bool)), this, SLOT(slotCutClicked()));
+
+    m_copyAction = new QAction(QIcon(":/editcopy.png"), tr("Copy"), this);
+    m_copyButton->setDefaultAction(m_copyAction);
+    m_copyAction->setShortcut(QKeySequence(QKeySequence::Copy));
+    connect(m_copyAction, SIGNAL(triggered(bool)), this, SLOT(slotCopyClicked()));
+
+    m_pasteAction = new QAction(QIcon(":/editpaste.png"), tr("Paste"), this);
+    m_pasteButton->setDefaultAction(m_pasteAction);
+    m_pasteAction->setShortcut(QKeySequence(QKeySequence::Paste));
+    connect(m_pasteAction, SIGNAL(triggered(bool)), this, SLOT(slotPasteClicked()));
 
     /* Name edit */
     m_nameEdit->setText(m_chaser->name());
     m_nameEdit->setSelection(0, m_nameEdit->text().length());
-    setWindowTitle(tr("Chaser - %1").arg(m_chaser->name()));
+    slotNameEdited(m_chaser->name());
 
     /* Bus */
-    connect(m_busCombo, SIGNAL(activated(int)),
-            this, SLOT(slotBusComboActivated(int)));
-    fillBusCombo();
+    m_busCombo->clear();
+    m_busCombo->addItems(Bus::instance()->idNames());
+    m_busCombo->setCurrentIndex(m_chaser->busID());
 
     /* Running order */
     switch (m_chaser->runOrder())
@@ -123,8 +132,17 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap*
     }
 
     /* Chaser steps */
-    updateStepList(0);
+    QListIterator <quint32> it(m_chaser->steps());
+    while (it.hasNext() == true)
+    {
+        Function* function = m_doc->function(it.next());
+        if (function == NULL)
+            continue;
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
+        updateFunctionItem(item, function);
+    }
 
+    /* Window position */
     QSettings settings;
     QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
@@ -136,58 +154,36 @@ ChaserEditor::~ChaserEditor()
 {
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
-    delete m_chaser;
 }
 
-void ChaserEditor::fillBusCombo()
+void ChaserEditor::accept()
 {
-    m_busCombo->clear();
-    m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_chaser->busID());
-}
+    m_chaser->setName(m_nameEdit->text());
 
-void ChaserEditor::updateStepList(int selectIndex)
-{
-    m_tree->clear();
+    if (m_loop->isChecked())
+        m_chaser->setRunOrder(Function::Loop);
+    else if (m_pingPong->isChecked())
+        m_chaser->setRunOrder(Function::PingPong);
+    else
+        m_chaser->setRunOrder(Function::SingleShot);
 
-    QListIterator <quint32> it(m_chaser->steps());
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item;
-        Function* function;
-        quint32 fid;
-        QString str;
+    if (m_forward->isChecked())
+        m_chaser->setDirection(Function::Forward);
+    else
+        m_chaser->setDirection(Function::Backward);
 
-        fid = it.next();
-        function = m_doc->function(fid);
-        Q_ASSERT(function != NULL);
+    m_chaser->setBus(m_busCombo->currentIndex());
 
-        item = new QTreeWidgetItem(m_tree);
-        item->setText(KColumnNumber, "###");
-        item->setText(KColumnFunction, function->name());
-        item->setText(KColumnFunctionID, str.setNum(fid));
-    }
-
-    /* Select the specified item */
-    m_tree->setCurrentItem(m_tree->topLevelItem(selectIndex));
-
-    /* Update the order number column */
-    updateOrderNumbers();
-}
-
-void ChaserEditor::updateOrderNumbers()
-{
-    int i = 1;
-    QString num;
-
-    QTreeWidgetItemIterator it(m_tree);
+    m_chaser->clear();
+    QTreeWidgetItemIterator it(m_list);
     while (*it != NULL)
     {
-        num.sprintf("%.03d", i++);
-        (*it)->setText(KColumnNumber, num);
+        m_chaser->addStep((*it)->text(KColumnID).toUInt());
         ++it;
     }
+
+    m_doc->setModified();
+    QDialog::accept();
 }
 
 void ChaserEditor::slotNameEdited(const QString& text)
@@ -195,97 +191,138 @@ void ChaserEditor::slotNameEdited(const QString& text)
     setWindowTitle(QString(tr("Chaser editor - %1")).arg(text));
 }
 
-void ChaserEditor::slotBusComboActivated(int index)
-{
-    Q_ASSERT(m_chaser != NULL);
-    m_chaser->setBus(index);
-}
-
 void ChaserEditor::slotAddClicked()
 {
     FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
-                         true, m_original->id(), Function::Scene, true);
+                         true, m_chaser->id(), Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
         QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
-            m_chaser->addStep(it.next());
-
-        // Update all steps in the list
-        updateStepList();
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
+            Function* function = m_doc->function(it.next());
+            updateFunctionItem(item, function);
+        }
     }
 }
 
 void ChaserEditor::slotRemoveClicked()
 {
-    QTreeWidgetItem* item = m_tree->currentItem();
-    if (item != NULL)
-    {
-        int index = item->text(KColumnNumber).toInt() - 1;
-        m_chaser->removeStep(index);
-        updateStepList(index - 1);
-    }
+    slotCutClicked();
+    m_clipboard.clear();
 }
 
 void ChaserEditor::slotRaiseClicked()
 {
-    QTreeWidgetItem* item;
-    int index;
+    QTreeWidgetItem* item = m_list->currentItem();
+    if (item == NULL)
+        return;
 
-    item = m_tree->currentItem();
-    if (item != NULL)
-    {
-        index = m_tree->indexOfTopLevelItem(item);
+    int index = m_list->indexOfTopLevelItem(item);
+    if (index == 0)
+        return;
 
-        /* Raise the step */
-        m_chaser->raiseStep(index);
+    m_list->takeTopLevelItem(index);
+    m_list->insertTopLevelItem(index - 1, item);
+    m_list->setCurrentItem(item);
 
-        /* Update step list and select the same item */
-        updateStepList(index - 1);
-    }
+    item->setText(KColumnNumber, QString("%1").arg(index - 1 + 1));
+    m_list->itemBelow(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
 }
 
 void ChaserEditor::slotLowerClicked()
 {
-    QTreeWidgetItem* item;
-    int index;
+    QTreeWidgetItem* item = m_list->currentItem();
+    if (item == NULL)
+        return;
 
-    item = m_tree->currentItem();
-    if (item != NULL)
-    {
-        index = m_tree->indexOfTopLevelItem(item);
+    int index = m_list->indexOfTopLevelItem(item);
+    if (index == m_list->topLevelItemCount() - 1)
+        return;
 
-        /* Raise the step */
-        m_chaser->lowerStep(index);
+    m_list->takeTopLevelItem(index);
+    m_list->insertTopLevelItem(index + 1, item);
+    m_list->setCurrentItem(item);
 
-        /* Update step list and select the same item */
-        updateStepList(index + 1);
-    }
+    item->setText(KColumnNumber, QString("%1").arg(index + 1 + 1));
+    m_list->itemAbove(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
 }
 
-void ChaserEditor::accept()
+void ChaserEditor::slotCutClicked()
 {
-    /* Name */
-    m_chaser->setName(m_nameEdit->text());
+    m_clipboard.clear();
+    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        m_clipboard << quint32(item->text(KColumnID).toUInt());
+        delete item;
+    }
 
-    /* Run Order */
-    if (m_singleShot->isChecked() == true)
-        m_chaser->setRunOrder(Chaser::SingleShot);
-    else if (m_pingPong->isChecked() == true)
-        m_chaser->setRunOrder(Chaser::PingPong);
+    m_list->setCurrentItem(NULL);
+    updateStepNumbers();
+}
+
+void ChaserEditor::slotCopyClicked()
+{
+    m_clipboard.clear();
+    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
+    while (it.hasNext() == true)
+        m_clipboard << quint32(it.next()->text(KColumnID).toUInt());
+}
+
+void ChaserEditor::slotPasteClicked()
+{
+    if (m_clipboard.isEmpty() == true)
+        return;
+
+    int insertionPoint = 0;
+    QTreeWidgetItem* currentItem = m_list->currentItem();
+    if (currentItem != NULL)
+    {
+        insertionPoint = m_list->indexOfTopLevelItem(currentItem);
+        currentItem->setSelected(false);
+    }
     else
-        m_chaser->setRunOrder(Chaser::Loop);
+    {
+        insertionPoint = CLAMP(0, 0, m_list->topLevelItemCount() - 1);
+    }
 
-    /* Direction */
-    if (m_backward->isChecked() == true)
-        m_chaser->setDirection(Chaser::Backward);
-    else
-        m_chaser->setDirection(Chaser::Forward);
+    QListIterator <quint32> it(m_clipboard);
+    while (it.hasNext() == true)
+    {
+        quint32 fid(it.next());
+        Function* function = m_doc->function(fid);
+        if (function == NULL)
+            continue;
 
-    /* Copy the temp chaser's contents to the original */
-    m_original->copyFrom(m_chaser);
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        m_list->insertTopLevelItem(insertionPoint, item);
+        updateFunctionItem(item, function);
+        item->setSelected(true);
+        insertionPoint = CLAMP(m_list->indexOfTopLevelItem(item) + 1, 0, m_list->topLevelItemCount() - 1);
+    }
 
-    /* Mark doc as modified, close and accept */
-    m_doc->setModified();
-    QDialog::accept();
+    updateStepNumbers();
+}
+
+void ChaserEditor::updateFunctionItem(QTreeWidgetItem* item, const Function* function)
+{
+    Q_ASSERT(item != NULL);
+    Q_ASSERT(function != NULL);
+
+    item->setText(KColumnNumber, QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
+    item->setText(KColumnName, function->name());
+    item->setText(KColumnID, QString("%1").arg(function->id()));
+}
+
+void ChaserEditor::updateStepNumbers()
+{
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+        item->setText(KColumnNumber, QString("%1").arg(i + 1));
+    }
 }

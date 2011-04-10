@@ -163,42 +163,6 @@ void Chaser_Test::steps()
     c.addStep(1);
     c.addStep(2);
     c.addStep(3);
-
-    QVERIFY(c.raiseStep(0) == false);
-    QVERIFY(c.steps().at(0) == 0);
-    QVERIFY(c.steps().at(1) == 1);
-    QVERIFY(c.steps().at(2) == 2);
-    QVERIFY(c.steps().at(3) == 3);
-
-    QVERIFY(c.raiseStep(1) == true);
-    QVERIFY(c.steps().at(0) == 1);
-    QVERIFY(c.steps().at(1) == 0);
-    QVERIFY(c.steps().at(2) == 2);
-    QVERIFY(c.steps().at(3) == 3);
-
-    QVERIFY(c.raiseStep(1) == true);
-    QVERIFY(c.steps().at(0) == 0);
-    QVERIFY(c.steps().at(1) == 1);
-    QVERIFY(c.steps().at(2) == 2);
-    QVERIFY(c.steps().at(3) == 3);
-
-    QVERIFY(c.lowerStep(3) == false);
-    QVERIFY(c.steps().at(0) == 0);
-    QVERIFY(c.steps().at(1) == 1);
-    QVERIFY(c.steps().at(2) == 2);
-    QVERIFY(c.steps().at(3) == 3);
-
-    QVERIFY(c.lowerStep(1) == true);
-    QVERIFY(c.steps().at(0) == 0);
-    QVERIFY(c.steps().at(1) == 2);
-    QVERIFY(c.steps().at(2) == 1);
-    QVERIFY(c.steps().at(3) == 3);
-
-    QVERIFY(c.lowerStep(0) == true);
-    QVERIFY(c.steps().at(0) == 2);
-    QVERIFY(c.steps().at(1) == 0);
-    QVERIFY(c.steps().at(2) == 1);
-    QVERIFY(c.steps().at(3) == 3);
 }
 
 void Chaser_Test::functionRemoval()

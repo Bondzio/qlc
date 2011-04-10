@@ -94,22 +94,9 @@ public:
     bool removeStep(int index);
 
     /**
-     * Raise the given step once from the given index to index - 1. If the
-     * index is already 0, this function fails.
-     *
-     * @param index The index of the step to raise
-     * @return true if successful, otherwise false
+     * Clear the chaser's list of steps
      */
-    bool raiseStep(int index);
-
-    /**
-     * Lower the given step once from the given index to index + 1. If the
-     * index is already size - 1, this function fails.
-     *
-     * @param index The index of the step to lower
-     * @return true if successful, otherwise false
-     */
-    bool lowerStep(int index);
+    void clear();
 
     /**
      * Get the chaser's list of steps as function IDs

@@ -27,9 +27,11 @@
 
 class Doc;
 class Chaser;
+class Function;
 class InputMap;
 class OutputMap;
 class MasterTimer;
+class QTreeWidgetItem;
 
 class ChaserEditor : public QDialog, public Ui_ChaserEditor
 {
@@ -48,17 +50,8 @@ private:
     MasterTimer* m_masterTimer;
 
 protected:
-    /** Fill known buses to the bus combo and select current */
-    void fillBusCombo();
-
-    /**
-     * Insert chaser steps into the editor's view and select an item
-     * @param selectIndex The index to select
-     */
-    void updateStepList(int selectIndex = 0);
-
-    /** Update correct order numbers to each step */
-    void updateOrderNumbers();
+    void updateFunctionItem(QTreeWidgetItem* item, const Function* function);
+    void updateStepNumbers();
 
 protected slots:
     void accept();
@@ -66,28 +59,23 @@ protected slots:
     /** Name has been edited */
     void slotNameEdited(const QString& text);
 
-    /** Bus has been activated */
-    void slotBusComboActivated(int index);
-
     /** Add a step */
     void slotAddClicked();
-
-    /** Remove the selected step */
     void slotRemoveClicked();
-
-    /** Raise the selected step */
     void slotRaiseClicked();
-
-    /** Lower the selected step */
     void slotLowerClicked();
 
-protected:
-    /** The copied chaser that is being edited */
-    Chaser* m_chaser;
+    void slotCutClicked();
+    void slotCopyClicked();
+    void slotPasteClicked();
 
-    /** The original chaser, whose contents will be replaced with the
-        contents of m_chaser, only if OK is clicked. */
-    Chaser* m_original;
+protected:
+    Chaser* m_chaser;
+    QList <quint32> m_clipboard;
+
+    QAction* m_cutAction;
+    QAction* m_copyAction;
+    QAction* m_pasteAction;
 };
 
 #endif

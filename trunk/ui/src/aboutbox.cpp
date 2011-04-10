@@ -30,6 +30,11 @@ AboutBox::AboutBox(QWidget* parent) : QDialog (parent)
 {
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_titleLabel->setText(APPNAME);
     m_versionLabel->setText(APPVERSION);
     m_copyrightLabel->setText(QString("Copyright &copy; Heikki Junnila %1")

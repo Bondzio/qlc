@@ -44,6 +44,11 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /* Multiple/single selection */
     if (multiple == true)
         m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);

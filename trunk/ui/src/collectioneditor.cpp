@@ -61,6 +61,11 @@ CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc,
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
     connect(m_add, SIGNAL(clicked()), this, SLOT(slotAdd()));

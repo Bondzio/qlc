@@ -65,6 +65,11 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /* Create a copy of the original scene so that we can freely modify it.
        Keep also a pointer to the original so that we can move the
        contents from the copied chaser to the original when OK is clicked */

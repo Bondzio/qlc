@@ -39,6 +39,11 @@ InputChannelEditor::InputChannelEditor(QWidget* parent,
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /* Connect to these already now so that the handlers get called
        during initialization. */
     connect(m_numberSpin, SIGNAL(valueChanged(int)),

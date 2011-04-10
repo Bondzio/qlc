@@ -67,6 +67,11 @@ AddFixture::AddFixture(QWidget* parent,
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     connect(m_tree, SIGNAL(itemSelectionChanged()),

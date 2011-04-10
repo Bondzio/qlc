@@ -52,6 +52,12 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMa
     QString key;
 
     setupUi(this);
+
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_infoBrowser->setOpenExternalLinks(true);
     setWindowTitle(tr("Mapping properties for output universe %1").arg(universe + 1));
 

@@ -49,6 +49,12 @@ SelectInputChannel::SelectInputChannel(QWidget* parent, InputMap* inputMap)
     m_channel = InputMap::invalidChannel();
 
     setupUi(this);
+
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     fillTree();
 }
 

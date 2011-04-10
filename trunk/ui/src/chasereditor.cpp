@@ -62,6 +62,11 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap*
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /* Resize columns to fit contents */
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 

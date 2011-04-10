@@ -62,6 +62,12 @@ InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* 
     Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
+
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_infoBrowser->setOpenExternalLinks(true);
     setWindowTitle(tr("Mapping properties for input universe %1")
                    .arg(m_universe + 1));

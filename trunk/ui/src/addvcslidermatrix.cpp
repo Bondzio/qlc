@@ -33,6 +33,11 @@ AddVCSliderMatrix::AddVCSliderMatrix(QWidget* parent)
 {
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     QSize size;
     QSettings settings;
     QVariant var = settings.value(SETTINGS_SLIDER_MATRIX_SIZE);

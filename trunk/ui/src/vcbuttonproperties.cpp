@@ -62,6 +62,11 @@ VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* ou
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /* Button text and function */
     m_button = button;
     m_nameEdit->setText(m_button->caption());

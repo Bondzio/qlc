@@ -54,6 +54,11 @@ VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc)
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_nameEdit->setText(m_xypad->caption());
     slotSelectionChanged(NULL);
     fillTree();

@@ -78,6 +78,9 @@ private:
 
 private:
     QList <quint32> m_clipboard;
+    QAction* m_cutAction;
+    QAction* m_copyAction;
+    QAction* m_pasteAction;
 
     /************************************************************************
      * Next Cue

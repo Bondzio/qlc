@@ -54,6 +54,11 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     /************************************************************************
      * Cues page
      ************************************************************************/
@@ -86,6 +91,21 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
 
     m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
 
+    m_cutAction = new QAction(QIcon(":/editcut.png"), tr("Cut"), this);
+    m_cutButton->setDefaultAction(m_cutAction);
+    m_cutAction->setShortcut(QKeySequence(QKeySequence::Cut));
+    connect(m_cutAction, SIGNAL(triggered(bool)), this, SLOT(slotCutClicked()));
+
+    m_copyAction = new QAction(QIcon(":/editcopy.png"), tr("Copy"), this);
+    m_copyButton->setDefaultAction(m_copyAction);
+    m_copyAction->setShortcut(QKeySequence(QKeySequence::Copy));
+    connect(m_copyAction, SIGNAL(triggered(bool)), this, SLOT(slotCopyClicked()));
+
+    m_pasteAction = new QAction(QIcon(":/editpaste.png"), tr("Paste"), this);
+    m_pasteButton->setDefaultAction(m_pasteAction);
+    m_pasteAction->setShortcut(QKeySequence(QKeySequence::Paste));
+    connect(m_pasteAction, SIGNAL(triggered(bool)), this, SLOT(slotPasteClicked()));
+
     /************************************************************************
      * Next Cue page
      ************************************************************************/
@@ -99,10 +119,6 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
             this, SLOT(slotNextAutoDetectInputToggled(bool)));
     connect(m_nextChooseInputButton, SIGNAL(clicked()),
             this, SLOT(slotNextChooseInputClicked()));
-
-    connect(m_cutButton, SIGNAL(clicked()), this, SLOT(slotCutClicked()));
-    connect(m_copyButton, SIGNAL(clicked()), this, SLOT(slotCopyClicked()));
-    connect(m_pasteButton, SIGNAL(clicked()), this, SLOT(slotPasteClicked()));
 
     /* Key binding */
     m_nextKeySequence = QKeySequence(cueList->nextKeySequence());

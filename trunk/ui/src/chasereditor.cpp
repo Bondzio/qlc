@@ -273,13 +273,13 @@ void ChaserEditor::slotLowerClicked()
     }
 
     // Move the items
-    it.toFront();
-    while (it.hasNext() == true)
+    it.toBack();
+    while (it.hasPrevious() == true)
     {
-        QTreeWidgetItem* item(it.next());
+        QTreeWidgetItem* item(it.previous());
         int index = m_list->indexOfTopLevelItem(item);
         m_list->takeTopLevelItem(index);
-        m_list->insertTopLevelItem(index + items.size(), item);
+        m_list->insertTopLevelItem(index + 1, item);
     }
 
     updateStepNumbers();

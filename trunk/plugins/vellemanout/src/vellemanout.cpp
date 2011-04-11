@@ -30,6 +30,7 @@
 #endif
 
 #include "vellemanout.h"
+#include "qlcmacros.h"
 
 /*****************************************************************************
  * The Velleman interface for k8062d.dll

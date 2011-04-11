@@ -25,8 +25,9 @@
 #include <QString>
 
 #include "qlcoutplugin.h"
+#include "qlcmacros.h"
 
-class VellemanOut : public QLCOutPlugin
+class QLC_DECLSPEC VellemanOut : public QLCOutPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCOutPlugin)

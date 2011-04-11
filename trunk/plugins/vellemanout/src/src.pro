@@ -5,6 +5,7 @@ TEMPLATE = lib
 LANGUAGE = C++
 TARGET   = vellemanout
 CONFIG  += plugin
+win32:DEFINES += QLC_EXPORT
 
 INCLUDEPATH += ../../interfaces
 

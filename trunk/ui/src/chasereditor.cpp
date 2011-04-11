@@ -197,13 +197,23 @@ void ChaserEditor::slotAddClicked()
                          true, m_chaser->id(), Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
+        int insertionPoint = m_list->topLevelItemCount();
+        QTreeWidgetItem* item = m_list->currentItem();
+        if (item != NULL)
+            insertionPoint = m_list->indexOfTopLevelItem(item);
+
+        /* Append selected functions */
         QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
         {
-            QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
             Function* function = m_doc->function(it.next());
+            item = new QTreeWidgetItem;
             updateFunctionItem(item, function);
+            m_list->insertTopLevelItem(insertionPoint++, item);
         }
+
+        m_list->setCurrentItem(item);
+        updateStepNumbers();
     }
 }
 

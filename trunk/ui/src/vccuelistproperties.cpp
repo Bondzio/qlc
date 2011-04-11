@@ -202,13 +202,23 @@ void VCCueListProperties::slotAddClicked()
                          Function::invalidId(), Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
+        int insertionPoint = m_list->topLevelItemCount();
+        QTreeWidgetItem* item = m_list->currentItem();
+        if (item != NULL)
+            insertionPoint = m_list->indexOfTopLevelItem(item);
+
         /* Append selected functions */
         QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
         {
             Function* function = m_doc->function(it.next());
-            updateFunctionItem(new QTreeWidgetItem(m_list), function);
+            item = new QTreeWidgetItem;
+            updateFunctionItem(item, function);
+            m_list->insertTopLevelItem(insertionPoint++, item);
         }
+
+        m_list->setCurrentItem(item);
+        updateStepNumbers();
     }
 }
 

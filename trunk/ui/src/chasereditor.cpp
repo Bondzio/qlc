@@ -26,6 +26,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QSettings>
+#include <QDebug>
 
 #include "qlcfixturedef.h"
 #include "qlcmacros.h"
@@ -225,38 +226,68 @@ void ChaserEditor::slotRemoveClicked()
 
 void ChaserEditor::slotRaiseClicked()
 {
-    QTreeWidgetItem* item = m_list->currentItem();
-    if (item == NULL)
-        return;
+    QList <QTreeWidgetItem*> items(m_list->selectedItems());
+    QListIterator <QTreeWidgetItem*> it(items);
 
-    int index = m_list->indexOfTopLevelItem(item);
-    if (index == 0)
-        return;
+    // Check, whether even one of the items would "bleed" over the edge and
+    // cancel the operation if that is the case.
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        int index = m_list->indexOfTopLevelItem(item);
+        if (index == 0)
+            return;
+    }
 
-    m_list->takeTopLevelItem(index);
-    m_list->insertTopLevelItem(index - 1, item);
-    m_list->setCurrentItem(item);
+    // Move the items
+    it.toFront();
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        int index = m_list->indexOfTopLevelItem(item);
+        m_list->takeTopLevelItem(index);
+        m_list->insertTopLevelItem(index - 1, item);
+    }
 
-    item->setText(KColumnNumber, QString("%1").arg(index - 1 + 1));
-    m_list->itemBelow(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
+    updateStepNumbers();
+
+    // Select the moved items
+    it.toFront();
+    while (it.hasNext() == true)
+        it.next()->setSelected(true);
 }
 
 void ChaserEditor::slotLowerClicked()
 {
-    QTreeWidgetItem* item = m_list->currentItem();
-    if (item == NULL)
-        return;
+    QList <QTreeWidgetItem*> items(m_list->selectedItems());
+    QListIterator <QTreeWidgetItem*> it(items);
 
-    int index = m_list->indexOfTopLevelItem(item);
-    if (index == m_list->topLevelItemCount() - 1)
-        return;
+    // Check, whether even one of the items would "bleed" over the edge and
+    // cancel the operation if that is the case.
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        int index = m_list->indexOfTopLevelItem(item);
+        if (index == m_list->topLevelItemCount() - 1)
+            return;
+    }
 
-    m_list->takeTopLevelItem(index);
-    m_list->insertTopLevelItem(index + 1, item);
-    m_list->setCurrentItem(item);
+    // Move the items
+    it.toFront();
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item(it.next());
+        int index = m_list->indexOfTopLevelItem(item);
+        m_list->takeTopLevelItem(index);
+        m_list->insertTopLevelItem(index + items.size(), item);
+    }
 
-    item->setText(KColumnNumber, QString("%1").arg(index + 1 + 1));
-    m_list->itemAbove(item)->setText(KColumnNumber, QString("%1").arg(index + 1));
+    updateStepNumbers();
+
+    // Select the items
+    it.toFront();
+    while (it.hasNext() == true)
+        it.next()->setSelected(true);
 }
 
 void ChaserEditor::slotCutClicked()

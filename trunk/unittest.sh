@@ -1,8 +1,15 @@
 #!/bin/bash
 
+if [ -z $1 ]; then
+    ARCH="unix"
+else
+    ARCH=$1
+fi
+
 #############################################################################
 # Engine tests
 #############################################################################
+
 pushd .
 cd engine/test
 DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
@@ -33,8 +40,8 @@ do
     # Execute the test
     pushd .
     cd ${TESTDIR}/${test}
-    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:engine/src \
-        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:engine/src ./${test}_test
+    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../../../engine/src \
+        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../engine/src ./${test}_test
     RESULT=${?}
     popd
     if [ ${RESULT} != 0 ]; then
@@ -62,16 +69,18 @@ popd
 # Velleman Output tests
 #############################################################################
 
-pushd .
-cd plugins/vellemanout/test
-DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./vellemanout_test
-RESULT=$?
-if [ $RESULT != 0 ]; then
-	echo "Velleman Output unit test failed ($RESULT). Please fix before commit."
-	exit $RESULT
+if [ $ARCH == "unix" ]; then
+    pushd .
+    cd plugins/vellemanout/test
+    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
+	    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./vellemanout_test
+    RESULT=$?
+    if [ $RESULT != 0 ]; then
+	    echo "Velleman Output unit test failed ($RESULT). Please fix before commit."
+	    exit $RESULT
+    fi
+    popd
 fi
-popd
 
 #############################################################################
 # MIDI Input tests

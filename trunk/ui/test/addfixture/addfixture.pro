@@ -7,6 +7,7 @@ TARGET   = addfixture_test
 
 QT      += testlib
 QT      += gui
+QT      += xml
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../../engine/src

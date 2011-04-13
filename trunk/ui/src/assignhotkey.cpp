@@ -38,10 +38,17 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
 {
     setupUi(this);
 
+#if defined(__APPLE__) || defined(WIN32)
     QString ctrl(QKeySequence(Qt::Key_Control).toString(QKeySequence::NativeText));
     QString shift(QKeySequence(Qt::Key_Shift).toString(QKeySequence::NativeText));
     QString alt(QKeySequence(Qt::Key_Alt).toString(QKeySequence::NativeText));
     QString meta(QKeySequence(Qt::Key_Meta).toString(QKeySequence::NativeText));
+#else
+    QString ctrl("Ctrl");
+    QString shift("Shift");
+    QString alt("Alt");
+    QString meta("Meta");
+#endif
 
     QString str("<HTML><HEAD><TITLE></TITLE></HEAD><BODY><CENTER>");
     str += QString("<H1>") + tr("Assign Key") + QString("</H1>");

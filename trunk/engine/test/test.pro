@@ -34,6 +34,7 @@ HEADERS += bus_test.h \
            fadechannel_test.h \
            fixture_test.h \
            function_test.h \
+           genericfader_test.h \
            scene_test.h \
            scenevalue_test.h \
            chaser_test.h \
@@ -79,6 +80,7 @@ SOURCES += bus_test.cpp \
            fadechannel_test.cpp \
            fixture_test.cpp \
            function_test.cpp \
+           genericfader_test.cpp \
            scene_test.cpp \
            scenevalue_test.cpp \
            chaser_test.cpp \

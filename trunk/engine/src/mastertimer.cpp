@@ -36,6 +36,7 @@
 #endif
 
 #include "universearray.h"
+#include "genericfader.h"
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "dmxsource.h"
@@ -49,16 +50,20 @@ const quint32 MasterTimer::s_frequency = 50;
  *****************************************************************************/
 
 MasterTimer::MasterTimer(QObject* parent, OutputMap* outputMap)
-        : QThread(parent),
-        m_outputMap(outputMap),
-        m_stopAllFunctions(false),
-        m_running(false)
+    : QThread(parent)
+    , m_outputMap(outputMap)
+    , m_stopAllFunctions(false)
+    , m_fader(new GenericFader)
+    , m_running(false)
 {
 }
 
 MasterTimer::~MasterTimer()
 {
     stop();
+
+    delete m_fader;
+    m_fader = NULL;
 }
 
 quint32 MasterTimer::frequency()
@@ -106,6 +111,13 @@ void MasterTimer::stopAllFunctions()
     /* Wait until all functions have been stopped */
     while (runningFunctions() > 0)
         msleep(10);
+
+    /* Remove all generic fader's channels */
+    m_functionListMutex.lock();
+    m_dmxSourceListMutex.lock();
+    fader()->removeAll();
+    m_dmxSourceListMutex.unlock();
+    m_functionListMutex.unlock();
 
     m_stopAllFunctions = false;
 }
@@ -276,6 +288,7 @@ void MasterTimer::timerTick()
 
     runFunctions(universes);
     runDMXSources(universes);
+    runFader(universes);
 
     m_outputMap->releaseUniverses();
     m_outputMap->dumpUniverses();
@@ -298,8 +311,7 @@ void MasterTimer::runFunctions(UniverseArray* universes)
                 function->preRun(this);
 
             /* Check for pre-conditions before getting data */
-            if (function->stopped() == true ||
-                    m_stopAllFunctions == true)
+            if (function->stopped() == true || m_stopAllFunctions == true)
             {
                 /* Function should be stopped instead */
                 m_functionListMutex.lock();
@@ -344,6 +356,26 @@ void MasterTimer::runDMXSources(UniverseArray* universes)
 
     /* No more sources. Get out and wait for next timer event. */
     m_dmxSourceListMutex.unlock();
+}
+
+/****************************************************************************
+ * Generic Fader
+ ****************************************************************************/
+
+GenericFader* MasterTimer::fader() const
+{
+    return m_fader;
+}
+
+void MasterTimer::runFader(UniverseArray* universes)
+{
+    m_functionListMutex.lock();
+    m_dmxSourceListMutex.lock();
+
+    fader()->write(universes);
+
+    m_dmxSourceListMutex.unlock();
+    m_functionListMutex.unlock();
 }
 
 void MasterTimer::stop()

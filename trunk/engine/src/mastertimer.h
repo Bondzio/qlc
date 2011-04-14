@@ -27,6 +27,7 @@
 #include <QList>
 
 class UniverseArray;
+class GenericFader;
 class OutputMap;
 class DMXSource;
 class Function;
@@ -117,6 +118,23 @@ protected:
 
     /** Mutex that guards access to m_functionList */
     QMutex m_dmxSourceListMutex;
+
+    /*************************************************************************
+     * Generic Fader
+     *************************************************************************/
+public:
+    /**
+     * Get a pointer to the MasterTimer's GenericFader. The pointer must not be
+     * deleted. The fader can be used e.g. by Scene functions to gracefully fade
+     * down such intensity (HTP) channels that are no longer in use.
+     */
+    GenericFader* fader() const;
+
+private:
+    void runFader(UniverseArray* universes);
+
+private:
+    GenericFader* m_fader;
 
     /*************************************************************************
      * Main thread

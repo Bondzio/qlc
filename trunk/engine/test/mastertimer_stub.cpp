@@ -28,8 +28,8 @@
 
 MasterTimerStub::MasterTimerStub(QObject* parent, OutputMap* outputMap,
                                  UniverseArray& universes)
-        : MasterTimer(parent, outputMap),
-        m_universes(universes)
+    : MasterTimer(parent, outputMap)
+    , m_universes(universes)
 {
 }
 

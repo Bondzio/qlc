@@ -33,6 +33,7 @@ class QDomDocument;
 class QDomElement;
 
 class UniverseArray;
+class GenericFader;
 class MasterTimer;
 class Function;
 class Bus;
@@ -376,11 +377,12 @@ public:
     /**
      * Called by MasterTimer when the function is stopped. No more write()
      * calls will arrive to the function after this call. The function may
-     * still write its last data packet to universes during this call.
-     * Used by e.g. EFX to write its stop scene values. MasterTimer's
-     * function list mutex is locked during this call, so functions must
-     * not attempt to start/stop additional functions from their postRun()
-     * methods because it would result in a deadlock.
+     * still write its last data packet to $universes during this call or
+     * hand over channel zero-fading to $timer's generic fader.
+     *
+     * MasterTimer's function list mutex is locked during this call, so
+     * functions must not attempt to start/stop additional functions from
+     * their postRun() method as it would result in a deadlock situation.
      *
      * @param timer The MasterTimer that has stopped running the function
      * @param universes Universe buffer to write the function's exit data

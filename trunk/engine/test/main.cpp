@@ -40,6 +40,7 @@
 #include "palettegenerator_test.h"
 #include "universearray_test.h"
 #include "chaserrunner_test.h"
+#include "genericfader_test.h"
 #include "mastertimer_test.h"
 #include "outputpatch_test.h"
 #include "fadechannel_test.h"
@@ -224,6 +225,11 @@ int main(int argc, char** argv)
 
     IntensityGenerator_Test ig;
     r = QTest::qExec(&ig, argc, argv);
+    if (r != 0)
+        return r;
+
+    GenericFader_Test gf;
+    r = QTest::qExec(&gf, argc, argv);
     if (r != 0)
         return r;
 

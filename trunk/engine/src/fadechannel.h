@@ -24,6 +24,7 @@
 
 #include <QtGlobal>
 #include "qlcchannel.h"
+#include "bus.h"
 
 /**
  * FadeChannel is a helper class used to store individual RUNTIME values for
@@ -65,6 +66,9 @@ public:
     /** Destructor */
     virtual ~FadeChannel();
 
+    /** Comparison operator */
+    bool operator==(const FadeChannel& fc);
+
     /************************************************************************
      * Values
      ************************************************************************/
@@ -105,6 +109,26 @@ public:
     /** Check if this channel is ready. Default is false. */
     bool isReady() const;
 
+
+
+    /** Set the speed bus for this channel */
+    void setBus(quint32 busId);
+
+    /** Get the speed bus for this channel */
+    quint32 bus() const;
+
+    /** Set the time elapsed for this channel */
+    void setElapsed(quint32 time);
+
+    /** Get the time elapsed for this channel */
+    quint32 elapsed() const;
+
+    /** Helper for getting the value from the channel's bus */
+    quint32 fadeTime() const;
+
+    /** Increment elapsed() and calculate the next step, returning new value */
+    uchar nextStep();
+
     /**
      * Calculate current value based on fadeTime and elapsedTime. Basically:
      * "what m_current should be, if you were given $fadeTime ticks to fade
@@ -126,6 +150,10 @@ private:
     qint32 m_target;
     qint32 m_current;
     bool m_ready;
+
+    quint32 m_bus;
+    quint32 m_elapsed;
+    bool m_removeWhenTargetReached;
 };
 
 #endif

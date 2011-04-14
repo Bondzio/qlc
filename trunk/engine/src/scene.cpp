@@ -29,6 +29,7 @@
 #include "qlcfile.h"
 
 #include "universearray.h"
+#include "genericfader.h"
 #include "mastertimer.h"
 #include "scene.h"
 #include "doc.h"
@@ -418,6 +419,27 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     // because then (ready == HTP_channel_count).
     if (ready == 0)
         stop();
+}
+
+void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    QList <FadeChannel> channels(m_armedChannels);
+    QMutableListIterator <FadeChannel> it(channels);
+    while (it.hasNext() == true)
+    {
+        FadeChannel& fc(it.next());
+        if (fc.group() == QLCChannel::Intensity)
+        {
+            fc.setTarget(0);
+            fc.setStart(fc.current());
+            fc.setBus(m_busID);
+            fc.setElapsed(0);
+            fc.setReady(false);
+            timer->fader()->add(fc);
+        }
+    }
+
+    Function::postRun(timer, universes);
 }
 
 void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,

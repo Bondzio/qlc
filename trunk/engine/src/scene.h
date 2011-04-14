@@ -159,6 +159,9 @@ public:
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
 
+    /** @reimpl */
+    void postRun(MasterTimer* timer, UniverseArray* universes);
+
     /**
      * Write the scene values to OutputMap. If fxi_id is given, writes
      * values only for the specified fixture.

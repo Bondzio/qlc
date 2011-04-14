@@ -53,6 +53,7 @@ HEADERS += bus.h \
            fadechannel.h \
            fixture.h \
            function.h \
+           genericfader.h \
            inputmap.h \
            inputpatch.h \
            intensitygenerator.h \
@@ -87,6 +88,7 @@ SOURCES += bus.cpp \
            fadechannel.cpp \
            fixture.cpp \
            function.cpp \
+           genericfader.cpp \
            inputmap.cpp \
            inputpatch.cpp \
            intensitygenerator.cpp \

@@ -23,6 +23,7 @@
 #include <QtXml>
 #include <QList>
 
+#include "mastertimer_stub.h"
 #include "efxfixture_test.h"
 #include "scene_stub.h"
 
@@ -437,6 +438,7 @@ void EFXFixture_Test::setPoint16bit()
 void EFXFixture_Test::nextStepLoop()
 {
     UniverseArray array(512 * 4);
+    MasterTimerStub mts(this, NULL, array);
 
     EFX e(m_doc);
     e.slotBusValueChanged(e.busID(), 50); /* 50 steps */
@@ -446,7 +448,7 @@ void EFXFixture_Test::nextStepLoop()
     e.addFixture(ef);
 
     /* Nothing should happen since isValid() == false */
-    ef->nextStep(&array);
+    ef->nextStep(&mts, &array);
     for (int i = 0; i < 512 * 4; i++)
         QVERIFY(array.preGMValues()[i] == 0);
 
@@ -464,7 +466,7 @@ void EFXFixture_Test::nextStepLoop()
     qreal checkIter = 0;
     for (int i = 0; i < 100; i++)
     {
-        ef->nextStep(&array);
+        ef->nextStep(&mts, &array);
         checkIter += e.m_stepSize;
         if (i == 50)
             checkIter = 0;
@@ -476,6 +478,7 @@ void EFXFixture_Test::nextStepLoop()
 void EFXFixture_Test::nextStepSingleShot()
 {
     UniverseArray array(512 * 4);
+    MasterTimerStub mts(this, NULL, array);
 
     EFX e(m_doc);
     e.slotBusValueChanged(e.busID(), 50); /* 50 steps */
@@ -486,7 +489,7 @@ void EFXFixture_Test::nextStepSingleShot()
     e.addFixture(ef);
 
     /* Nothing should happen since isValid() == false */
-    ef->nextStep(&array);
+    ef->nextStep(&mts, &array);
     for (int i = 0; i < 512 * 4; i++)
         QVERIFY(array.preGMValues()[i] == 0);
 
@@ -506,13 +509,13 @@ void EFXFixture_Test::nextStepSingleShot()
     qreal checkIter = 0;
     for (int i = 0; i < 50; i++)
     {
-        ef->nextStep(&array);
+        ef->nextStep(&mts, &array);
         checkIter += e.m_stepSize;
         QVERIFY(ef->m_iterator == checkIter);
         QVERIFY(ef->isReady() == false);
     }
 
-    ef->nextStep(&array);
+    ef->nextStep(&mts, &array);
 
     /* Single-shot EFX should now be ready */
     QVERIFY(ef->isReady() == true);

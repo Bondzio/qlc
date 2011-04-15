@@ -23,6 +23,8 @@
 #include <math.h>
 
 #include "universearray.h"
+#include "genericfader.h"
+#include "mastertimer.h"
 #include "efxfixture.h"
 #include "function.h"
 #include "scene.h"
@@ -42,6 +44,7 @@ EFXFixture::EFXFixture(EFX* parent)
     m_direction = Function::Forward;
     m_runTimeDirection = Function::Forward;
     m_ready = false;
+    m_started = false;
 
     m_skipIterator = 0;
     m_skipThreshold = 0;
@@ -66,6 +69,7 @@ void EFXFixture::copyFrom(const EFXFixture* ef)
     m_direction = ef->m_direction;
     m_runTimeDirection = ef->m_runTimeDirection;
     m_ready = ef->m_ready;
+    m_started = ef->m_started;
 
     m_skipIterator = ef->m_skipIterator;
     m_skipThreshold = ef->m_skipThreshold;
@@ -145,8 +149,7 @@ bool EFXFixture::loadXML(const QDomElement* root)
         }
         else
         {
-            qWarning() << "Unknown EFX Fixture tag:"
-            << tag.tagName();
+            qWarning() << "Unknown EFX Fixture tag:" << tag.tagName();
         }
         node = node.nextSibling();
     }
@@ -258,6 +261,7 @@ void EFXFixture::reset()
     m_iterator = 0;
     m_ready = false;
     m_runTimeDirection = m_direction;
+    m_started = false;
 
     updateSkipThreshold();
 }
@@ -271,7 +275,7 @@ bool EFXFixture::isReady() const
  * Running
  *****************************************************************************/
 
-void EFXFixture::nextStep(UniverseArray* universes)
+void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
 {
     /* Bail out without doing anything if this EFX is ready
       (after single-shot), or it has no pan&tilt channels (not valid). */
@@ -289,7 +293,7 @@ void EFXFixture::nextStep(UniverseArray* universes)
     }
     else
     {
-        start(universes);
+        start(timer, universes);
     }
 
     if (m_iterator < (M_PI * 2.0))
@@ -334,7 +338,7 @@ void EFXFixture::nextStep(UniverseArray* universes)
         {
             /* De-initialize the fixture and mark as ready. */
             m_ready = true;
-            stop(universes);
+            stop(timer, universes);
         }
 
         /* Reset iterator, since we've gone a full cycle. */
@@ -342,17 +346,48 @@ void EFXFixture::nextStep(UniverseArray* universes)
     }
 }
 
-void EFXFixture::start(UniverseArray* universes)
+void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
 {
+    Q_UNUSED(universes);
+
     foreach (quint32 ich, m_intensityChannels)
-        universes->write(ich, uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)),
-                         QLCChannel::Intensity);
+    {
+        if (m_started == false)
+        {
+            FadeChannel ch;
+            ch.setAddress(ich);
+            ch.setStart(0);
+            ch.setCurrent(ch.start());
+            ch.setTarget(uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)));
+            ch.setGroup(QLCChannel::Intensity);
+            ch.setBus(Bus::defaultFade());
+            timer->fader()->add(ch);
+        }
+    }
+
+    m_started = true;
 }
 
-void EFXFixture::stop(UniverseArray* universes)
+void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
 {
+    Q_UNUSED(universes);
+
     foreach (quint32 ich, m_intensityChannels)
-        universes->write(ich, uchar(0), QLCChannel::Intensity);
+    {
+        if (m_started == true)
+        {
+            FadeChannel ch;
+            ch.setAddress(ich);
+            ch.setStart(uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)));
+            ch.setCurrent(ch.start());
+            ch.setTarget(0);
+            ch.setGroup(QLCChannel::Intensity);
+            ch.setBus(Bus::defaultFade());
+            timer->fader()->add(ch);
+        }
+    }
+
+    m_started = false;
 }
 
 void EFXFixture::setPoint(UniverseArray* universes)

@@ -24,6 +24,7 @@
 
 #include "function.h"
 
+class MasterTimer;
 class EFXFixture;
 class Scene;
 class EFX;
@@ -119,10 +120,10 @@ protected:
     bool isValid();
 
     /* Run the start scene if necessary */
-    void start(UniverseArray* universes);
+    void start(MasterTimer* timer, UniverseArray* universes);
 
     /* Run the stop scene if necessary */
-    void stop(UniverseArray* universes);
+    void stop(MasterTimer* timer, UniverseArray* universes);
 
     /** Reset the fixture when the EFX is stopped */
     void reset();
@@ -141,6 +142,9 @@ protected:
     /** When running in single shot mode, the fixture is marked ready
         after it has completed a full cycle. */
     bool m_ready;
+
+    /** Indicates, whether start() has been called for this fixture */
+    bool m_started;
 
     /**
      * This fixture's current position in the pattern (a point on a
@@ -201,7 +205,7 @@ protected:
      *********************************************************************/
 protected:
     /** Calculate the next step data for this fixture */
-    void nextStep(UniverseArray* universes);
+    void nextStep(MasterTimer* timer, UniverseArray* universes);
 
     /** Write this EFXFixture's channel data to universes */
     void setPoint(UniverseArray* universes);

@@ -963,7 +963,7 @@ void EFX::postRun(MasterTimer* timer, UniverseArray* universes)
 
         /* Run the EFX's stop scene for Loop & PingPong modes */
         if (m_runOrder != SingleShot)
-            ef->stop(universes);
+            ef->stop(timer, universes);
         ef->reset();
     }
 
@@ -981,7 +981,7 @@ void EFX::write(MasterTimer* timer, UniverseArray* universes)
     {
         EFXFixture* ef = it.next();
         if (ef->isReady() == false)
-            ef->nextStep(universes);
+            ef->nextStep(timer, universes);
         else
             ready++;
     }

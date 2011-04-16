@@ -984,6 +984,7 @@ void App::clearDocument()
     doc()->clearContents();
     VirtualConsole::resetContents();
     outputMap()->resetUniverses();
+    setFileName(QString());
     doc()->resetModified();
 }
 

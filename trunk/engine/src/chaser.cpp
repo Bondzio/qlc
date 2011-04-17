@@ -354,6 +354,12 @@ void Chaser::write(MasterTimer* timer, UniverseArray* universes)
     incrementElapsed();
 }
 
+void Chaser::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    m_runner->postRun(timer, universes);
+    Function::postRun(timer, universes);
+}
+
 /*****************************************************************************
  * Intensity
  *****************************************************************************/

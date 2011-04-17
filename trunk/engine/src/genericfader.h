@@ -39,8 +39,9 @@ public:
      * be removed automatically from the fader when done.
      *
      * @param ch The channel to fade
+     * @param replace If true, replace an existing channel with the new one
      */
-    void add(const FadeChannel& ch);
+    void add(const FadeChannel& ch, bool replace = true);
 
     /**
      * Remove the channel specified by $address from the faded channels.

@@ -39,6 +39,7 @@ private slots:
     void initial();
     void directionRunOrder();
     void steps();
+    void clear();
     void functionRemoval();
     void copyFrom();
     void createCopy();
@@ -51,6 +52,10 @@ private slots:
 
     void arm();
     void tap();
+    void preRun();
+    void write();
+    void postRun();
+    void adjustIntensity();
 
 private:
     Doc* m_doc;

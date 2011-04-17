@@ -61,6 +61,8 @@ private slots:
 
     void writeForwardSingleShotHoldFiveAdjustIntensity();
 
+    void postRun();
+
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;

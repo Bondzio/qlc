@@ -58,7 +58,7 @@ QList <Scene*> IntensityGenerator::randomScenes(const QList <Fixture*>& fixtures
                         {
                             Q_ASSERT(scenes[i] != NULL);
                             if (rand() % 2 == 0)
-                                scenes[i]->setValue(fxi->id(), ch, 0);
+                                ; //scenes[i]->setValue(fxi->id(), ch, 0);
                             else
                                 scenes[i]->setValue(fxi->id(), ch, UCHAR_MAX);
                         }
@@ -87,7 +87,7 @@ QList <Scene*> IntensityGenerator::randomScenes(const QList <Fixture*>& fixtures
                         {
                             Q_ASSERT(scenes[i] != NULL);
                             if (rand() % 2 == 0)
-                                scenes[i]->setValue(fxi->id(), ch, min);
+                                ; //scenes[i]->setValue(fxi->id(), ch, min);
                             else
                                 scenes[i]->setValue(fxi->id(), ch, max);
                         }
@@ -127,6 +127,7 @@ QList <Scene*> IntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtur
                     }
                     else
                     {
+                        /*
                         for (int i = 0; i < scenes.size(); i++)
                         {
                             Scene* scene = scenes[i];
@@ -137,6 +138,7 @@ QList <Scene*> IntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtur
                             if (scene->value(fxi->id(), ch) == 0)
                                 scene->setValue(fxi->id(), ch, 0);
                         }
+                        */
                     }
 
                     sequence++;
@@ -161,6 +163,7 @@ QList <Scene*> IntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtur
                     }
                     else
                     {
+                        /*
                         for (int i = 0; i < scenes.size(); i++)
                         {
                             Scene* scene = scenes[i];
@@ -171,6 +174,7 @@ QList <Scene*> IntensityGenerator::sequenceScenes(const QList <Fixture*>& fixtur
                             if (scene->value(fxi->id(), ch) != max)
                                 scene->setValue(fxi->id(), ch, min);
                         }
+                        */
                     }
 
                     sequence++;
@@ -196,7 +200,7 @@ QList <Scene*> IntensityGenerator::fullZeroScenes(const QList <Fixture*>& fixtur
             for (quint32 ch = 0; ch < fxi->channels(); ch++)
             {
                 scenes[0]->setValue(fxi->id(), ch, UCHAR_MAX);
-                scenes[1]->setValue(fxi->id(), ch, 0);
+                //scenes[1]->setValue(fxi->id(), ch, 0);
             }
         }
         else
@@ -209,7 +213,7 @@ QList <Scene*> IntensityGenerator::fullZeroScenes(const QList <Fixture*>& fixtur
                 adjustLimits(fxi->channel(ch), &min, &max);
 
                 scenes[0]->setValue(fxi->id(), ch, max);
-                scenes[1]->setValue(fxi->id(), ch, min);
+                //scenes[1]->setValue(fxi->id(), ch, min);
             }
         }
     }
@@ -237,12 +241,12 @@ QList <Scene*> IntensityGenerator::evenOddScenes(const QList <Fixture*>& fixture
                 {
                     // Even
                     scenes[0]->setValue(fxi->id(), ch, UCHAR_MAX);
-                    scenes[1]->setValue(fxi->id(), ch, 0);
+                    //scenes[1]->setValue(fxi->id(), ch, 0);
                 }
                 else
                 {
                     // Odd
-                    scenes[0]->setValue(fxi->id(), ch, 0);
+                    //scenes[0]->setValue(fxi->id(), ch, 0);
                     scenes[1]->setValue(fxi->id(), ch, UCHAR_MAX);
                 }
 
@@ -262,14 +266,14 @@ QList <Scene*> IntensityGenerator::evenOddScenes(const QList <Fixture*>& fixture
                 if (sequence % 2)
                 {
                     // Even
-                    scenes[1]->setValue(fxi->id(), ch, min);
+                    //scenes[1]->setValue(fxi->id(), ch, min);
                     scenes[0]->setValue(fxi->id(), ch, max);
                 }
                 else
                 {
                     // Odd
                     scenes[1]->setValue(fxi->id(), ch, max);
-                    scenes[0]->setValue(fxi->id(), ch, min);
+                    //scenes[0]->setValue(fxi->id(), ch, min);
                 }
             }
 

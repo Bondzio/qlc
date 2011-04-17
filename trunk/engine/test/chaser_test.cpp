@@ -26,11 +26,11 @@
 #include "chaser_test.h"
 
 #include "universearray.h"
-#include "function.h"
 #include "fixture.h"
 #define protected public
 #define private public
 #include "chaserrunner.h"
+#include "function.h"
 #include "chaser.h"
 #include "scene.h"
 #include "doc.h"
@@ -163,6 +163,26 @@ void Chaser_Test::steps()
     c.addStep(1);
     c.addStep(2);
     c.addStep(3);
+}
+
+void Chaser_Test::clear()
+{
+    Chaser c(m_doc);
+    c.setID(50);
+    QCOMPARE(c.steps().size(), 0);
+
+    c.addStep(0);
+    c.addStep(1);
+    c.addStep(2);
+    c.addStep(470);
+    QCOMPARE(c.steps().size(), 4);
+
+    QSignalSpy spy(&c, SIGNAL(changed(quint32)));
+    c.clear();
+    QCOMPARE(c.steps().size(), 0);
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy.at(0).size(), 1);
+    QCOMPARE(spy.at(0).at(0).toUInt(), quint32(50));
 }
 
 void Chaser_Test::functionRemoval()
@@ -595,4 +615,92 @@ void Chaser_Test::tap()
     c->arm();
     c->slotBusTapped(Bus::defaultHold()); // Correct bus, m_runner != NULL
     QCOMPARE(c->m_runner->m_next, true);
+}
+
+void Chaser_Test::preRun()
+{
+    Chaser* c = new Chaser(m_doc);
+    m_doc->addFunction(c);
+
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    c->arm();
+    c->m_runner->m_elapsed = 31337;
+    c->m_stop = true;
+
+    c->preRun(&timer);
+    QCOMPARE(c->m_stop, false); // Make sure Function::preRun() is called
+    QCOMPARE(c->m_runner->m_elapsed, quint32(0)); // Make sure ChaserRunner::reset() is called
+    c->disarm();
+}
+
+void Chaser_Test::write()
+{
+    Chaser* c = new Chaser(m_doc);
+    m_doc->addFunction(c);
+
+    Scene* s1 = new Scene(m_doc);
+    m_doc->addFunction(s1);
+    c->addStep(s1->id());
+
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    c->arm();
+    c->preRun(&timer);
+
+    QCOMPARE(c->m_runner->m_elapsed, quint32(0));
+
+    // Chaser::run() does very little by itself. Make sure ChaserRunner is called.
+    c->write(&timer, &ua);
+    QCOMPARE(c->elapsed(), quint32(1));
+    QCOMPARE(c->m_runner->m_elapsed, quint32(1));
+    c->write(&timer, &ua);
+    QCOMPARE(c->elapsed(), quint32(2)); // Chaser counts overall tick count
+    QCOMPARE(c->m_runner->m_elapsed, quint32(1)); // Runner counts ticks per step
+
+    c->disarm();
+}
+
+void Chaser_Test::postRun()
+{
+    Chaser* c = new Chaser(m_doc);
+    m_doc->addFunction(c);
+
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    c->arm();
+    c->preRun(&timer);
+    QCOMPARE(c->m_stop, false);
+
+    // The chaser has no steps so ChaserRunner::postrun() shouldn't do much
+    c->postRun(&timer, &ua);
+    QCOMPARE(c->m_stop, true); // Make sure Function::postRun() is called
+
+    c->disarm();
+}
+
+void Chaser_Test::adjustIntensity()
+{
+    Chaser* c = new Chaser(m_doc);
+    m_doc->addFunction(c);
+
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    c->arm();
+    c->adjustIntensity(0.5);
+    QCOMPARE(c->m_runner->m_intensity, qreal(0.5));
+    c->adjustIntensity(0.8);
+    QCOMPARE(c->m_runner->m_intensity, qreal(0.8));
+    c->adjustIntensity(1.5);
+    QCOMPARE(c->m_runner->m_intensity, qreal(1.0));
+    c->adjustIntensity(-0.1);
+    QCOMPARE(c->m_runner->m_intensity, qreal(0.0));
+    c->disarm();
+
+    // Mustn't crash after disarm
+    c->adjustIntensity(1.0);
 }

@@ -23,7 +23,10 @@
 
 #include "universearray.h"
 #include "chaserrunner.h"
+#include "genericfader.h"
+#include "mastertimer.h"
 #include "fadechannel.h"
+#include "qlcmacros.h"
 #include "fixture.h"
 #include "scene.h"
 #include "doc.h"
@@ -199,6 +202,34 @@ bool ChaserRunner::write(UniverseArray* universes)
     return true;
 }
 
+void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    Q_UNUSED(universes);
+
+    // Nothing to do
+    if (m_steps.size() == 0)
+        return;
+
+    int step = CLAMP(m_currentStep, 0, m_steps.size() - 1);
+    Function* function = m_steps.at(step);
+    if (function == NULL)
+        return;
+
+    QMapIterator <quint32,FadeChannel> it(m_channelMap);
+    while (it.hasNext() == true)
+    {
+        FadeChannel ch(it.next().value());
+        if (ch.group() == QLCChannel::Intensity)
+        {
+            ch.setStart(ch.current());
+            ch.setTarget(0);
+            ch.setBus(function->busID());
+            ch.setReady(false);
+            timer->fader()->add(ch, false);
+        }
+    }
+}
+
 bool ChaserRunner::roundCheck()
 {
     if (m_currentStep < m_steps.size() && m_currentStep >= 0)
@@ -257,14 +288,17 @@ bool ChaserRunner::roundCheck()
                 m_currentStep = 1;
             m_direction = Function::Forward;
         }
+
+        // Make sure we don't go beyond limits.
+        m_currentStep = CLAMP(m_currentStep, 0, m_steps.size() - 1);
     }
 
     // Let's continue
     return true;
 }
 
-QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(
-                                        const UniverseArray* universes) const
+QMap <quint32,FadeChannel>
+ChaserRunner::createFadeChannels(const UniverseArray* universes) const
 {
     QMap <quint32,FadeChannel> map;
     if (m_currentStep >= m_steps.size() || m_currentStep < 0)
@@ -341,5 +375,5 @@ QMap <quint32,FadeChannel> ChaserRunner::createFadeChannels(
 
 void ChaserRunner::adjustIntensity(qreal fraction)
 {
-    m_intensity = fraction;
+    m_intensity = CLAMP(fraction, qreal(0.0), qreal(1.0));
 }

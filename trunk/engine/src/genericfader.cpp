@@ -33,9 +33,12 @@ GenericFader::~GenericFader()
 {
 }
 
-void GenericFader::add(const FadeChannel& ch)
+void GenericFader::add(const FadeChannel& ch, bool replace)
 {
-    m_channels[ch.address()] = ch;
+    if (replace == false && m_channels.contains(ch.address()) == true)
+        return;
+    else
+        m_channels[ch.address()] = ch;
 }
 
 void GenericFader::remove(quint32 address)

@@ -61,94 +61,41 @@ void IntensityGenerator_Test::randomScenes()
 
     QList <Scene*> scenes = IntensityGenerator::randomScenes(fixtures, &doc, 31337);
     QCOMPARE(scenes.size(), 5);
-    QCOMPARE(scenes[0]->values().size(), 5);
 
     // Even though injecting the random seed to randomScenes() allows deterministic behaviour,
     // the rand() algorithm implementation varies between platforms and platform versions.
     // So let's not check the randomized values.
+
+    // Step 1
+    QCOMPARE(scenes[0]->values().size(), 3);
     QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[0].channel, quint32(0));
-    //QCOMPARE(scenes[0]->values()[0].value, uchar(0));
+    QCOMPARE(scenes[0]->values()[0].channel, quint32(1));
     QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[1].channel, quint32(1));
-    //QCOMPARE(scenes[0]->values()[1].value, uchar(UCHAR_MAX));
+    QCOMPARE(scenes[0]->values()[1].channel, quint32(2));
     QCOMPARE(scenes[0]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[2].channel, quint32(2));
-    //QCOMPARE(scenes[0]->values()[2].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[0]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[3].channel, quint32(3));
-    //QCOMPARE(scenes[0]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[0]->values()[4].channel, quint32(5));
-    //QCOMPARE(scenes[0]->values()[4].value, uchar(128));
+    QCOMPARE(scenes[0]->values()[2].channel, quint32(5));
 
-    QCOMPARE(scenes[1]->values().size(), 5);
+    // Step 2
+    QCOMPARE(scenes[1]->values().size(), 1);
     QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[0].channel, quint32(0));
-    //QCOMPARE(scenes[1]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[1].channel, quint32(1));
-    //QCOMPARE(scenes[1]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[2].channel, quint32(2));
-    //QCOMPARE(scenes[1]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[3].channel, quint32(3));
-    //QCOMPARE(scenes[1]->values()[3].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[1]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[1]->values()[4].channel, quint32(5));
-    //QCOMPARE(scenes[1]->values()[4].value, uchar(6));
+    QCOMPARE(scenes[1]->values()[0].channel, quint32(3));
 
-    QCOMPARE(scenes[2]->values().size(), 5);
-    QCOMPARE(scenes[2]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[0].channel, quint32(0));
-    //QCOMPARE(scenes[2]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[1].channel, quint32(1));
-    //QCOMPARE(scenes[2]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[2].channel, quint32(2));
-    //QCOMPARE(scenes[2]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[3].channel, quint32(3));
-    //QCOMPARE(scenes[2]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[2]->values()[4].channel, quint32(5));
-    //QCOMPARE(scenes[2]->values()[4].value, uchar(6));
+    // Step 3
+    QCOMPARE(scenes[2]->values().size(), 0);
 
-    QCOMPARE(scenes[3]->values().size(), 5);
+    // Step 4
+    QCOMPARE(scenes[3]->values().size(), 2);
     QCOMPARE(scenes[3]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[0].channel, quint32(0));
-    //QCOMPARE(scenes[3]->values()[0].value, uchar(0));
+    QCOMPARE(scenes[3]->values()[0].channel, quint32(3));
     QCOMPARE(scenes[3]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[1].channel, quint32(1));
-    //QCOMPARE(scenes[3]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[3]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[2].channel, quint32(2));
-    //QCOMPARE(scenes[3]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[3]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[3].channel, quint32(3));
-    //QCOMPARE(scenes[3]->values()[3].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[3]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[3]->values()[4].channel, quint32(5));
-    //QCOMPARE(scenes[3]->values()[4].value, uchar(128));
+    QCOMPARE(scenes[3]->values()[1].channel, quint32(5));
 
-    QCOMPARE(scenes[4]->values().size(), 5);
+    // Step 5
+    QCOMPARE(scenes[4]->values().size(), 2);
     QCOMPARE(scenes[4]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[0].channel, quint32(0));
-    //QCOMPARE(scenes[4]->values()[0].value, uchar(0));
+    QCOMPARE(scenes[4]->values()[0].channel, quint32(1));
     QCOMPARE(scenes[4]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[1].channel, quint32(1));
-    //QCOMPARE(scenes[4]->values()[1].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[4]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[2].channel, quint32(2));
-    //QCOMPARE(scenes[4]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[3].channel, quint32(3));
-    //QCOMPARE(scenes[4]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[4]->values()[4].channel, quint32(5));
-    //QCOMPARE(scenes[4]->values()[4].value, uchar(128));
+    QCOMPARE(scenes[4]->values()[1].channel, quint32(5));
 }
 
 void IntensityGenerator_Test::sequenceScenes()
@@ -170,91 +117,31 @@ void IntensityGenerator_Test::sequenceScenes()
 
     QList <Scene*> scenes = IntensityGenerator::sequenceScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 5);
-    QCOMPARE(scenes[0]->values().size(), 5);
 
+    QCOMPARE(scenes[0]->values().size(), 1);
     QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[0].channel, quint32(0));
     QCOMPARE(scenes[0]->values()[0].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[0]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[0]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[0]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[0]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[0]->values()[4].value, uchar(6));
 
-    QCOMPARE(scenes[1]->values().size(), 5);
+    QCOMPARE(scenes[1]->values().size(), 1);
     QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[1]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[1]->values()[1].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[1]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[1]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[1]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[1]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[1]->values()[4].value, uchar(6));
+    QCOMPARE(scenes[1]->values()[0].channel, quint32(1));
+    QCOMPARE(scenes[1]->values()[0].value, uchar(UCHAR_MAX));
 
-    QCOMPARE(scenes[2]->values().size(), 5);
+    QCOMPARE(scenes[2]->values().size(), 1);
     QCOMPARE(scenes[2]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[2]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[2]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[2]->values()[2].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[2]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[2]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[2]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[2]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[2]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[2]->values()[4].value, uchar(6));
+    QCOMPARE(scenes[2]->values()[0].channel, quint32(2));
+    QCOMPARE(scenes[2]->values()[0].value, uchar(UCHAR_MAX));
 
-    QCOMPARE(scenes[3]->values().size(), 5);
+    QCOMPARE(scenes[3]->values().size(), 1);
     QCOMPARE(scenes[3]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[3]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[3]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[3]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[3]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[3]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[3]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[3]->values()[3].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[3]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[3]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[3]->values()[4].value, uchar(6));
+    QCOMPARE(scenes[3]->values()[0].channel, quint32(3));
+    QCOMPARE(scenes[3]->values()[0].value, uchar(UCHAR_MAX));
 
-    QCOMPARE(scenes[4]->values().size(), 5);
+    QCOMPARE(scenes[4]->values().size(), 1);
     QCOMPARE(scenes[4]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[4]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[4]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[4]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[4]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[4]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[4]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[4]->values()[4].value, uchar(128));
+    QCOMPARE(scenes[4]->values()[0].channel, quint32(5));
+    QCOMPARE(scenes[4]->values()[0].value, uchar(128));
 }
 
 void IntensityGenerator_Test::fullZeroScenes()
@@ -277,23 +164,8 @@ void IntensityGenerator_Test::fullZeroScenes()
 
     QList <Scene*> scenes = IntensityGenerator::fullZeroScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 2);
-    QCOMPARE(scenes[1]->values().size(), 5);
-    QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[1]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[1]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[1]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[1]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[1]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[1]->values()[4].value, uchar(6));
 
+    QCOMPARE(scenes[1]->values().size(), 0);
     QCOMPARE(scenes[0]->values().size(), 5);
     QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[0]->values()[0].channel, quint32(0));
@@ -310,6 +182,10 @@ void IntensityGenerator_Test::fullZeroScenes()
     QCOMPARE(scenes[0]->values()[4].fxi, fxi2->id());
     QCOMPARE(scenes[0]->values()[4].channel, quint32(5));
     QCOMPARE(scenes[0]->values()[4].value, uchar(128));
+
+    QCOMPARE(scenes[1]->values().size(), 0);
+    // Zero scene needs no values because non-participating HTP channels are faded
+    // automatically to zero
 }
 
 void IntensityGenerator_Test::evenOddScenes()
@@ -332,37 +208,23 @@ void IntensityGenerator_Test::evenOddScenes()
 
     QList <Scene*> scenes = IntensityGenerator::evenOddScenes(fixtures, &doc);
     QCOMPARE(scenes.size(), 2);
-    QCOMPARE(scenes[0]->values().size(), 5);
-    QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[0].channel, quint32(0));
-    QCOMPARE(scenes[0]->values()[0].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[0]->values()[1].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[0]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[0]->values()[2].value, uchar(0));
-    QCOMPARE(scenes[0]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[0]->values()[3].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[0]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[0]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[0]->values()[4].value, uchar(6));
 
-    QCOMPARE(scenes[1]->values().size(), 5);
+    QCOMPARE(scenes[0]->values().size(), 2);
+    QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
+    QCOMPARE(scenes[0]->values()[0].channel, quint32(1));
+    QCOMPARE(scenes[0]->values()[0].value, uchar(UCHAR_MAX));
+    QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
+    QCOMPARE(scenes[0]->values()[1].channel, quint32(3));
+    QCOMPARE(scenes[0]->values()[1].value, uchar(UCHAR_MAX));
+
+    QCOMPARE(scenes[1]->values().size(), 3);
     QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
     QCOMPARE(scenes[1]->values()[0].channel, quint32(0));
     QCOMPARE(scenes[1]->values()[0].value, uchar(UCHAR_MAX));
     QCOMPARE(scenes[1]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[1].channel, quint32(1));
-    QCOMPARE(scenes[1]->values()[1].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[2].channel, quint32(2));
-    QCOMPARE(scenes[1]->values()[2].value, uchar(UCHAR_MAX));
-    QCOMPARE(scenes[1]->values()[3].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[3].channel, quint32(3));
-    QCOMPARE(scenes[1]->values()[3].value, uchar(0));
-    QCOMPARE(scenes[1]->values()[4].fxi, fxi2->id());
-    QCOMPARE(scenes[1]->values()[4].channel, quint32(5));
-    QCOMPARE(scenes[1]->values()[4].value, uchar(128));
+    QCOMPARE(scenes[1]->values()[1].channel, quint32(2));
+    QCOMPARE(scenes[1]->values()[1].value, uchar(UCHAR_MAX));
+    QCOMPARE(scenes[1]->values()[2].fxi, fxi2->id());
+    QCOMPARE(scenes[1]->values()[2].channel, quint32(5));
+    QCOMPARE(scenes[1]->values()[2].value, uchar(128));
 }

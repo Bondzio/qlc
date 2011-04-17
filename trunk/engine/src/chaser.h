@@ -155,6 +155,9 @@ public:
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
 
+    /** @reimpl */
+    void postRun(MasterTimer* timer, UniverseArray* universes);
+
 protected:
     bool m_tapped;
     ChaserRunner* m_runner;

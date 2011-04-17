@@ -96,6 +96,14 @@ public:
      */
     bool write(UniverseArray* universes);
 
+    /**
+     * Hand over channel zero-fading from the current step to timer->fader().
+     *
+     * @param timer The MasterTimer that runs the show
+     * @param universes DMX address space
+     */
+    void postRun(MasterTimer* timer, UniverseArray* universes);
+
 signals:
     /** Tells that the current step number has changed. */
     void currentStepChanged(int stepNumber);

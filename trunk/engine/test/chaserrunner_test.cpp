@@ -23,6 +23,7 @@
 #include <QMap>
 
 #include "chaserrunner_test.h"
+#include "mastertimer_stub.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
 #include "universearray.h"
@@ -35,6 +36,7 @@
 
 #define private public
 #include "chaserrunner.h"
+#include "genericfader.h"
 #undef private
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
@@ -1286,5 +1288,29 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
 
     // SingleShot is completed
     QVERIFY(cr.write(&ua) == false);
+
+    // Check that clamping works
+    cr.adjustIntensity(1.7);
+    QCOMPARE(cr.m_intensity, 1.0);
+    cr.adjustIntensity(-0.1);
+    QCOMPARE(cr.m_intensity, 0.0);
 }
 
+void ChaserRunner_Test::postRun()
+{
+    QList <Function*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3;
+
+    ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward, Function::Loop);
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    Bus::instance()->setValue(Bus::defaultHold(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 0);
+
+    QVERIFY(cr.write(&ua) == true);
+    cr.postRun(&timer, &ua);
+
+    // The fader should contain only intensity (HTP) channels
+    QCOMPARE(timer.fader()->m_channels.size(), 1);
+}

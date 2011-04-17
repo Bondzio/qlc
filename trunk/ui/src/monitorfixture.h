@@ -57,14 +57,10 @@ private:
      ********************************************************************/
 public:
     void setFixture(quint32 fxi_id);
-    quint32 fixture() const {
-        return m_fixture;
-    }
+    quint32 fixture() const;
 
 public slots:
     void slotChannelStyleChanged(Monitor::ChannelStyle style);
-    void slotFixtureChanged(quint32 fxi_id);
-    void slotFixtureRemoved(quint32 fxi_id);
 
 protected:
     quint32 m_fixture;

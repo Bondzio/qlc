@@ -124,8 +124,11 @@ protected slots:
     /** Slot for fixture additions (to append the new fixture to layout) */
     void slotFixtureAdded(quint32 fxi_id);
 
-    /** Slot for fixture removals (to remove the fixture from layout) */
+    /** Slot for fixture contents & layout changes */
     void slotFixtureChanged(quint32 fxi_id);
+
+    /** Slot for fixture removals (to remove the fixture from layout) */
+    void slotFixtureRemoved(quint32 fxi_id);
 
 signals:
     void channelStyleChanged(Monitor::ChannelStyle style);

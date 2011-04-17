@@ -100,6 +100,8 @@ Monitor::Monitor(QWidget* parent, Doc* doc, OutputMap* outputMap, Qt::WindowFlag
             this, SLOT(slotFixtureAdded(quint32)));
     connect(m_doc, SIGNAL(fixtureChanged(quint32)),
             this, SLOT(slotFixtureChanged(quint32)));
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
+            this, SLOT(slotFixtureRemoved(quint32)));
 
     m_timer = startTimer(1000 / 50);
     QWidget::show();
@@ -109,6 +111,11 @@ Monitor::~Monitor()
 {
     killTimer(m_timer);
     m_timer = 0;
+
+    while (m_monitorFixtures.isEmpty() == false)
+    {
+        delete m_monitorFixtures.takeFirst();
+    }
 
     saveSettings();
 
@@ -349,8 +356,30 @@ void Monitor::slotFixtureChanged(quint32 fxi_id)
 {
     Q_UNUSED(fxi_id);
 
+    QListIterator <MonitorFixture*> it(m_monitorFixtures);
+    while (it.hasNext() == true)
+    {
+        MonitorFixture* mof = it.next();
+        if (mof->fixture() == fxi_id)
+            mof->setFixture(fxi_id);
+    }
+
     m_monitorLayout->sort();
     m_monitorWidget->updateGeometry();
+}
+
+void Monitor::slotFixtureRemoved(quint32 fxi_id)
+{
+    QMutableListIterator <MonitorFixture*> it(m_monitorFixtures);
+    while (it.hasNext() == true)
+    {
+        MonitorFixture* mof = it.next();
+        if (mof->fixture() == fxi_id)
+        {
+            it.remove();
+            delete mof;
+        }
+    }
 }
 
 /****************************************************************************

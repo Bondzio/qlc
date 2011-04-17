@@ -54,12 +54,6 @@ MonitorFixture::MonitorFixture(QWidget* parent, Doc* doc, OutputMap* outputMap)
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setAutoFillBackground(true);
     setBackgroundRole(QPalette::Window);
-
-    /* Listen to existing fixture changes and removals */
-    connect(m_doc, SIGNAL(fixtureChanged(quint32)),
-            this, SLOT(slotFixtureChanged(quint32)));
-    connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
-            this, SLOT(slotFixtureRemoved(quint32)));
 }
 
 MonitorFixture::~MonitorFixture()
@@ -79,10 +73,12 @@ bool MonitorFixture::operator<(const MonitorFixture& mof)
     Fixture* mof_fxi;
 
     fxi = m_doc->fixture(m_fixture);
-    Q_ASSERT(fxi != NULL);
+    if (fxi == NULL)
+        return false;
 
     mof_fxi = m_doc->fixture(mof.fixture());
-    Q_ASSERT(mof_fxi != NULL);
+    if (mof_fxi == NULL)
+        return false;
 
     if ((*fxi) < (*mof_fxi))
         return true;
@@ -151,6 +147,11 @@ void MonitorFixture::setFixture(quint32 fxi_id)
     }
 }
 
+quint32 MonitorFixture::fixture() const
+{
+    return m_fixture;
+}
+
 void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
 {
     QString str;
@@ -183,19 +184,6 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
     QListIterator <QLabel*> it(m_channelLabels);
     while (it.hasNext() == true)
         it.next()->setText(str.sprintf("<B>%.3d</B>", i++));
-}
-
-void MonitorFixture::slotFixtureChanged(quint32 fxi_id)
-{
-    /* Create this object's contents anew */
-    if (fxi_id == m_fixture)
-        setFixture(fxi_id);
-}
-
-void MonitorFixture::slotFixtureRemoved(quint32 fxi_id)
-{
-    if (fxi_id == m_fixture)
-        deleteLater(); /* Can't delete this immediately */
 }
 
 /****************************************************************************

@@ -128,11 +128,11 @@ App::~App()
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
-    if (FixtureManager::instance() != NULL)
-        delete FixtureManager::instance();
-
     if (Monitor::instance() != NULL)
         delete Monitor::instance();
+
+    if (FixtureManager::instance() != NULL)
+        delete FixtureManager::instance();
 
     if (FunctionManager::instance() != NULL)
         delete FunctionManager::instance();

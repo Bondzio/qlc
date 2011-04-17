@@ -26,7 +26,6 @@
 #include <QHash>
 #include <QList>
 
-
 class MonitorFixture;
 class MonitorLayout;
 class QDomDocument;
@@ -36,6 +35,7 @@ class OutputMap;
 class QAction;
 class Fixture;
 class Monitor;
+class QTimer;
 class Doc;
 
 class Monitor : public QWidget
@@ -143,13 +143,13 @@ protected:
     /*********************************************************************
      * Timer
      *********************************************************************/
-protected:
-    /** Timer that fires every 1/32th of a second and gets new values */
-    void timerEvent(QTimerEvent* e);
+private slots:
+    /** Timer callback */
+    void slotTimeout();
 
-protected:
-    /** Timer ID */
-    int m_timer;
+private:
+    /** Timer that fires every 1/32th of a second and gets new values */
+    QTimer* m_timer;
 };
 
 #endif

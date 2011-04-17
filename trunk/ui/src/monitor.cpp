@@ -29,6 +29,7 @@
 #include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
+#include <QTimer>
 #include <QFont>
 #include <QIcon>
 #include <QtXml>
@@ -103,14 +104,16 @@ Monitor::Monitor(QWidget* parent, Doc* doc, OutputMap* outputMap, Qt::WindowFlag
     connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 
-    m_timer = startTimer(1000 / 50);
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
+    m_timer->start(1000 / 50);
     QWidget::show();
 }
 
 Monitor::~Monitor()
 {
-    killTimer(m_timer);
-    m_timer = 0;
+    m_timer->stop();
+    delete m_timer;
 
     while (m_monitorFixtures.isEmpty() == false)
     {
@@ -386,10 +389,8 @@ void Monitor::slotFixtureRemoved(quint32 fxi_id)
  * Timer
  ****************************************************************************/
 
-void Monitor::timerEvent(QTimerEvent* e)
+void Monitor::slotTimeout()
 {
-    Q_UNUSED(e);
-
     const UniverseArray* universes = m_outputMap->peekUniverses();
     QList <MonitorFixture*> list = findChildren <MonitorFixture*>();
     QListIterator <MonitorFixture*> it(list);

@@ -261,12 +261,8 @@ void VCCueList::createRunner()
 
 void VCCueList::writeDMX(MasterTimer* timer, UniverseArray* universes)
 {
-    Q_UNUSED(timer);
-
-    if (m_runner == NULL)
-        return;
-    else
-        m_runner->write(universes);
+    if (m_runner != NULL)
+        m_runner->write(timer, universes);
 }
 
 /*****************************************************************************

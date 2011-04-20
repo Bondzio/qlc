@@ -345,10 +345,8 @@ void Chaser::preRun(MasterTimer* timer)
 
 void Chaser::write(MasterTimer* timer, UniverseArray* universes)
 {
-    Q_UNUSED(timer);
     Q_ASSERT(m_runner != NULL);
-
-    if (m_runner->write(universes) == false)
+    if (m_runner->write(timer, universes) == false)
         stop();
 
     incrementElapsed();

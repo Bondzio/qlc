@@ -113,7 +113,7 @@ void ChaserRunner::reset()
     m_channelMap.clear();
 }
 
-bool ChaserRunner::write(UniverseArray* universes)
+bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
 {
     // Nothing to do
     if (m_steps.size() == 0)
@@ -129,16 +129,14 @@ bool ChaserRunner::write(UniverseArray* universes)
         // always within m_steps limits.
 
         m_elapsed = 1;
-        m_channelMap = createFadeChannels(universes);
-
+        handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
     else if (m_elapsed == 0)
     {
         // First step
         m_elapsed = 1;
-        m_channelMap = createFadeChannels(universes);
-
+        handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
     else if ((isAutoStep() && m_elapsed >= Bus::instance()->value(m_holdBusId))
@@ -168,8 +166,8 @@ bool ChaserRunner::write(UniverseArray* universes)
         m_elapsed = 1;
         m_next = false;
         m_previous = false;
-        m_channelMap = createFadeChannels(universes);
 
+        handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
     else
@@ -204,6 +202,7 @@ bool ChaserRunner::write(UniverseArray* universes)
 
 void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
 {
+    quint32 bus = Bus::defaultFade();
     Q_UNUSED(universes);
 
     // Nothing to do
@@ -212,8 +211,8 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
 
     int step = CLAMP(m_currentStep, 0, m_steps.size() - 1);
     Function* function = m_steps.at(step);
-    if (function == NULL)
-        return;
+    if (function != NULL)
+        bus = function->busID();
 
     QMapIterator <quint32,FadeChannel> it(m_channelMap);
     while (it.hasNext() == true)
@@ -223,7 +222,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
         {
             ch.setStart(ch.current());
             ch.setTarget(0);
-            ch.setBus(function->busID());
+            ch.setBus(bus);
             ch.setReady(false);
             timer->fader()->add(ch, false);
         }
@@ -297,20 +296,35 @@ bool ChaserRunner::roundCheck()
     return true;
 }
 
+void ChaserRunner::handleChannelSwitch(MasterTimer* timer, const UniverseArray* universes)
+{
+    QMap <quint32,FadeChannel> zeroChannels;
+
+    // Create a channel map for the current step and pick a list of channels
+    // that can be given back to MasterTimer's GenericFader to be faded back to zero
+    m_channelMap = createFadeChannels(universes, zeroChannels);
+
+    // Give to-be-zeroed channels to MasterTimer, but don't overwrite channels
+    QMapIterator <quint32,FadeChannel> it(zeroChannels);
+    while (it.hasNext() == true)
+        timer->fader()->add(it.next().value(), false);
+}
+
 QMap <quint32,FadeChannel>
-ChaserRunner::createFadeChannels(const UniverseArray* universes) const
+ChaserRunner::createFadeChannels(const UniverseArray* universes,
+                                 QMap <quint32,FadeChannel>& zeroChannels) const
 {
     QMap <quint32,FadeChannel> map;
     if (m_currentStep >= m_steps.size() || m_currentStep < 0)
         return map;
 
-    // Put all current channels to a map of channels that will be faded to zero
-    QMap <quint32,FadeChannel> zeroChannels(m_channelMap);
-
-    // If the step is not a scene, don't attempt to create fade channels
     Scene* scene = qobject_cast<Scene*> (m_steps.at(m_currentStep));
-    if (scene == NULL)
-        return map;
+    Q_ASSERT(scene != NULL);
+
+    // Put all current channels to a map of channels that will be faded to zero.
+    // If the same channels are added to the new channel map, they are removed
+    // from this zero map.
+    zeroChannels = m_channelMap;
 
     QListIterator <SceneValue> it(scene->values());
     while (it.hasNext() == true)
@@ -363,8 +377,6 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes) const
             channel.setTarget(0);
         }
     }
-
-    map.unite(zeroChannels);
 
     return map;
 }

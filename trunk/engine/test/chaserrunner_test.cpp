@@ -402,11 +402,12 @@ void ChaserRunner_Test::createFadeChannels()
                     Function::Loop);
     UniverseArray ua(512);
     QMap <quint32,FadeChannel> map;
+    QMap <quint32,FadeChannel> zero;
     FadeChannel ch;
 
     // No handover
     QCOMPARE(cr.currentStep(), 0);
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
@@ -459,7 +460,7 @@ void ChaserRunner_Test::createFadeChannels()
     map[5].setCurrent(map[5].target());
     cr.m_channelMap = map;
     cr.m_currentStep = 1;
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
@@ -512,7 +513,7 @@ void ChaserRunner_Test::createFadeChannels()
     ua.write(5, 6, QLCChannel::Intensity);
     cr.m_channelMap.clear();
     cr.m_currentStep = 2;
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
@@ -557,11 +558,11 @@ void ChaserRunner_Test::createFadeChannels()
     QCOMPARE(ch.current(), uchar(6));
 
     cr.m_currentStep = 3;
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
     QVERIFY(map.isEmpty() == true);
 
     cr.m_currentStep = -1;
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
     QVERIFY(map.isEmpty() == true);
 }
 
@@ -590,10 +591,11 @@ void ChaserRunner_Test::createFadeChannelsAutoHTPZero()
                     Function::Loop);
     UniverseArray ua(512);
     QMap <quint32,FadeChannel> map;
+    QMap <quint32,FadeChannel> zero;
 
     // Normal first execution with step 0
     QCOMPARE(cr.currentStep(), 0);
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
 
     QVERIFY(map.contains(15) == true);
     FadeChannel& ch = map[15];
@@ -609,10 +611,10 @@ void ChaserRunner_Test::createFadeChannelsAutoHTPZero()
     // step, it should be auto-faded to zero.
     cr.m_channelMap = map;
     cr.m_currentStep = 1;
-    map = cr.createFadeChannels(&ua);
+    map = cr.createFadeChannels(&ua, zero);
 
-    QVERIFY(map.contains(15) == true);
-    ch = map[15];
+    QVERIFY(zero.contains(15) == true);
+    ch = zero[15];
     QCOMPARE(ch.address(), quint32(15));
     QCOMPARE(ch.start(), uchar(142));
     QCOMPARE(ch.target(), uchar(0));
@@ -625,8 +627,9 @@ void ChaserRunner_Test::writeNoSteps()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
-    QVERIFY(cr.write(&ua) == false);
+    QVERIFY(cr.write(&timer, &ua) == false);
 }
 
 void ChaserRunner_Test::writeMissingFixture()
@@ -637,12 +640,13 @@ void ChaserRunner_Test::writeMissingFixture()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultFade(), 5);
     Bus::instance()->setValue(Bus::defaultHold(), 5);
 
     for (int i = 0; i < 120; i++)
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
 }
 
 void ChaserRunner_Test::writeHoldZero()
@@ -652,11 +656,12 @@ void ChaserRunner_Test::writeHoldZero()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 0);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
 
-    QVERIFY(cr.write(&ua) == true);
+    QVERIFY(cr.write(&timer, &ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
     QCOMPARE(cr.currentStep(), 0);
@@ -669,7 +674,7 @@ void ChaserRunner_Test::writeHoldZero()
 
     ua.zeroIntensityChannels();
 
-    QVERIFY(cr.write(&ua) == true);
+    QVERIFY(cr.write(&timer, &ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
     QCOMPARE(cr.currentStep(), 1);
@@ -682,7 +687,7 @@ void ChaserRunner_Test::writeHoldZero()
 
     ua.zeroIntensityChannels();
 
-    QVERIFY(cr.write(&ua) == true);
+    QVERIFY(cr.write(&timer, &ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
     QCOMPARE(cr.currentStep(), 2);
@@ -695,7 +700,7 @@ void ChaserRunner_Test::writeHoldZero()
 
     ua.zeroIntensityChannels();
 
-    QVERIFY(cr.write(&ua) == true);
+    QVERIFY(cr.write(&timer, &ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
     QVERIFY(cr.m_channelMap.isEmpty() == false);
     QCOMPARE(cr.currentStep(), 0);
@@ -714,6 +719,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -728,7 +734,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
             break;
         }
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -744,7 +750,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -766,7 +772,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
             break;
         }
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -782,7 +788,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 1);
@@ -798,7 +804,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -814,7 +820,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -834,6 +840,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::Loop);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -848,7 +855,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
             break;
         }
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -864,7 +871,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -886,7 +893,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
             break;
         }
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -902,7 +909,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 1);
@@ -918,7 +925,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -934,7 +941,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -954,6 +961,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -962,7 +970,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -978,7 +986,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 1);
@@ -994,7 +1002,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -1007,7 +1015,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     }
 
     // SingleShot is completed
-    QVERIFY(cr.write(&ua) == false);
+    QVERIFY(cr.write(&timer, &ua) == false);
 }
 
 void ChaserRunner_Test::writeNoAutoStepHoldFive()
@@ -1018,6 +1026,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
                     Function::Loop);
     cr.setAutoStep(false);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1026,7 +1035,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -1044,7 +1053,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -1062,7 +1071,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -1080,7 +1089,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 1);
@@ -1101,6 +1110,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
                     Function::Loop);
     cr.setAutoStep(false);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1109,7 +1119,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -1146,7 +1156,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_newCurrent, -1);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
@@ -1166,7 +1176,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_newCurrent, -1);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
@@ -1186,7 +1196,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_newCurrent, -1);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
@@ -1207,6 +1217,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
     UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1218,7 +1229,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 0);
@@ -1243,7 +1254,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 1);
@@ -1268,7 +1279,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     {
         ua.zeroIntensityChannels();
 
-        QVERIFY(cr.write(&ua) == true);
+        QVERIFY(cr.write(&timer, &ua) == true);
         QCOMPARE(cr.m_elapsed, quint32(i + 1));
         QVERIFY(cr.m_channelMap.isEmpty() == false);
         QCOMPARE(cr.currentStep(), 2);
@@ -1287,7 +1298,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     }
 
     // SingleShot is completed
-    QVERIFY(cr.write(&ua) == false);
+    QVERIFY(cr.write(&timer, &ua) == false);
 
     // Check that clamping works
     cr.adjustIntensity(1.7);
@@ -1308,7 +1319,7 @@ void ChaserRunner_Test::postRun()
     Bus::instance()->setValue(Bus::defaultHold(), 0);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
 
-    QVERIFY(cr.write(&ua) == true);
+    QVERIFY(cr.write(&timer, &ua) == true);
     cr.postRun(&timer, &ua);
 
     // The fader should contain only intensity (HTP) channels

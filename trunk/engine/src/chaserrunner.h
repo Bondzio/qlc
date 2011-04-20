@@ -94,7 +94,7 @@ public:
      * @param universes UniverseArray to write values to
      * @return true if the chaser should continue, otherwise false
      */
-    bool write(UniverseArray* universes);
+    bool write(MasterTimer* timer, UniverseArray* universes);
 
     /**
      * Hand over channel zero-fading from the current step to timer->fader().
@@ -114,6 +114,16 @@ private:
     bool roundCheck();
 
     /**
+     * Build a new channel map of the current Function's channels and give previous
+     * to-be-zeroed channels (if any) back to MasterTimer's GenericFader. Stores
+     * the new channel map to m_channelMap.
+     *
+     * @param timer The MasterTimer that runs the show
+     * @param universes Current universe values
+     */
+    void handleChannelSwitch(MasterTimer* timer, const UniverseArray* universes);
+
+    /**
      * Create FadeChannel map for the currently active scene. If m_channelMap
      * is not empty, then the created FadeChannels' starting values are taken
      * from the old m_channelMap's current values. If the old map doesn't contain
@@ -127,7 +137,8 @@ private:
      *
      * @param universes Current UniverseArray
      */
-    QMap <quint32,FadeChannel> createFadeChannels(const UniverseArray* universes) const;
+    QMap <quint32,FadeChannel> createFadeChannels(const UniverseArray* universes,
+                                                  QMap<quint32,FadeChannel>& zeroChannels) const;
 
     /************************************************************************
      * Intensity

@@ -520,7 +520,7 @@
              <string>Attach a function to the slider</string>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
             <property name="icon">
              <iconset resource="main.qrc">
@@ -540,7 +540,7 @@
              <string>Detach the current function from the slider</string>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
             <property name="icon">
              <iconset resource="main.qrc">

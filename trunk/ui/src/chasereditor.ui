@@ -296,7 +296,7 @@
    <item row="7" column="3">
     <widget class="QToolButton" name="m_cutButton">
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="main.qrc">
@@ -313,7 +313,7 @@
    <item row="8" column="3">
     <widget class="QToolButton" name="m_copyButton">
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="main.qrc">
@@ -330,7 +330,7 @@
    <item row="9" column="3">
     <widget class="QToolButton" name="m_pasteButton">
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="main.qrc">

@@ -182,7 +182,7 @@
           <string>Cut the selected scenes from their current positions</string>
          </property>
          <property name="text">
-          <string>...</string>
+          <string notr="true">...</string>
          </property>
          <property name="icon">
           <iconset resource="main.qrc">
@@ -202,7 +202,7 @@
           <string>Copy the selected scenes</string>
          </property>
          <property name="text">
-          <string>...</string>
+          <string notr="true">...</string>
          </property>
          <property name="icon">
           <iconset resource="main.qrc">
@@ -222,7 +222,7 @@
           <string>Paste scenes from the clipboard to the currently selected position</string>
          </property>
          <property name="text">
-          <string>...</string>
+          <string notr="true">...</string>
          </property>
          <property name="icon">
           <iconset resource="main.qrc">

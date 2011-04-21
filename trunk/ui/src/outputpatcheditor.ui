@@ -111,7 +111,7 @@
          <string>Attempt to re-connect the current plugin</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="icon">
          <iconset resource="main.qrc">

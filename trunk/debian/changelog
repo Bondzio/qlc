@@ -1,3 +1,22 @@
+qlc (3.2.0) stable; urgency=low
+
+  * HTP (Highest Takes Precedence) for all intensity channels.
+  * Unlimited amount of fixtures and functions.
+  * Playback mode added to the Slider widget to allow function running & intensity
+    adjustment at the same time.
+  * External input support to the Cue List widget.
+  * Cut, Copy, Paste added to the Cue List widget.
+  * Cut, Copy, Paste added to the Chaser editor.
+  * QLC prefers user's home directory over system profile/fixture directories.
+  * Function wizard treats dimmer channels equally with intelligent fixtures'
+    intensity channels.
+  * Assign all "palette" functions generated with Function Wizard to the Palette Bus.
+  * All RGB/CMY colour mix channels are assigned to intensity group.
+  * Hide such channels from console & scene editor that have no group.
+  * Chaser and Cue List accept only Scene functions.
+
+ -- Heikki Junnila <hjunnila@users.sf.net>  Thu, 21 Apr 2011 11:52:35 +0300
+
 qlc (3.1.0) stable; urgency=high
   * Fixed Enttec Open DMX USB connectivity problems on some systems
   * Fixed a crash in Level-mode Virtual Console slider when a fixture was removed

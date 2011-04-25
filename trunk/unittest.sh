@@ -1,10 +1,6 @@
 #!/bin/bash
 
-if [ -z $1 ]; then
-    ARCH="unix"
-else
-    ARCH=$1
-fi
+ARCH=`uname`
 
 #############################################################################
 # Engine tests
@@ -69,7 +65,7 @@ popd
 # Velleman Output tests
 #############################################################################
 
-if [ $ARCH == "unix" ]; then
+if [ ${ARCH} != "Darwin" ]; then
     pushd .
     cd plugins/vellemanout/test
     DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \

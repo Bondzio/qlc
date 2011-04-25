@@ -10,17 +10,21 @@
 # Human-readable HTML results are written under coverage/html.
 #
 
+ARCH=`uname`
+
 #############################################################################
 # Test directories to find coverage measurements from
 #############################################################################
 
 test[0]="engine/src"
-test[1]="plugins/ewinginput/src"
-test[2]="plugins/vellemanout/src"
-test[3]="plugins/midiinput/common/src"
-test[4]="ui/test/aboutbox"
-test[5]="ui/test/addfixture"
-test[6]="ui/test/vcwidgetproperties"
+test[1]="ui/test/aboutbox"
+test[2]="ui/test/addfixture"
+test[3]="ui/test/vcwidgetproperties"
+test[4]="plugins/ewinginput/src"
+test[5]="plugins/midiinput/common/src"
+if [ ${ARCH} != "Darwin" ]; then
+    test[6]="plugins/vellemanout/src"
+fi
 
 # Number of tests
 tlen=${#test[@]}

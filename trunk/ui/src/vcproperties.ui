@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="m_tab">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="Layout">
       <attribute name="title">
@@ -724,8 +724,8 @@
    <slot>slotGrabKeyboardClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>79</x>
-     <y>98</y>
+     <x>101</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -740,8 +740,8 @@
    <slot>slotKeyRepeatOffClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>64</x>
-     <y>130</y>
+     <x>86</x>
+     <y>126</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
@@ -772,8 +772,8 @@
    <slot>slotGridXChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>100</y>
+     <x>426</x>
+     <y>97</y>
     </hint>
     <hint type="destinationlabel">
      <x>401</x>
@@ -788,8 +788,8 @@
    <slot>slotGridYChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>134</y>
+     <x>426</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>401</x>
@@ -804,8 +804,8 @@
    <slot>slotFadeLimitsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>347</x>
-     <y>103</y>
+     <x>360</x>
+     <y>101</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -820,8 +820,8 @@
    <slot>slotFadeLimitsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>140</y>
+     <x>360</x>
+     <y>138</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -836,8 +836,8 @@
    <slot>slotAutoDetectGrandMasterInputToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>326</x>
-     <y>271</y>
+     <x>119</x>
+     <y>81</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -852,8 +852,8 @@
    <slot>slotChooseGrandMasterInputClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>426</x>
-     <y>271</y>
+     <x>119</x>
+     <y>81</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -869,7 +869,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>340</x>
-     <y>264</y>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
@@ -885,7 +885,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>426</x>
-     <y>264</y>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -901,7 +901,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>340</x>
-     <y>264</y>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -917,7 +917,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>426</x>
-     <y>264</y>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>1</x>
@@ -932,8 +932,8 @@
    <slot>slotGrandMasterIntensityToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>60</x>
-     <y>83</y>
+     <x>71</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
@@ -948,8 +948,8 @@
    <slot>slotGrandMasterReduceToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>84</y>
+     <x>163</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>398</x>
@@ -964,8 +964,8 @@
    <slot>slotAutoDetectBlackoutInputToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>264</x>
-     <y>158</y>
+     <x>119</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -980,12 +980,44 @@
    <slot>slotChooseBlackoutInputClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>382</x>
-     <y>157</y>
+     <x>119</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
      <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_holdLowSpin</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>VCPropertiesEditor</receiver>
+   <slot>slotHoldLimitsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>322</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_holdHighSpin</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>VCPropertiesEditor</receiver>
+   <slot>slotHoldLimitsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>292</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>451</x>
+     <y>16</y>
     </hint>
    </hints>
   </connection>

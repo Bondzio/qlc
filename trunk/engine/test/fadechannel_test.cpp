@@ -41,6 +41,20 @@ void FadeChannel_Test::address()
     }
 }
 
+void FadeChannel_Test::comparison()
+{
+    FadeChannel ch1;
+    FadeChannel ch2;
+
+    ch1.setAddress(10);
+    ch2.setAddress(15);
+    QVERIFY((ch1 == ch2) == false);
+
+    ch1.setAddress(10);
+    ch2.setAddress(10);
+    QVERIFY((ch1 == ch2) == true);
+}
+
 void FadeChannel_Test::group()
 {
     FadeChannel fch;
@@ -87,6 +101,22 @@ void FadeChannel_Test::current()
         fch.setCurrent(i);
         QCOMPARE(fch.current(), i);
     }
+}
+
+void FadeChannel_Test::ready()
+{
+    FadeChannel ch;
+    QVERIFY(ch.isReady() == false);
+    ch.setReady(true);
+    QVERIFY(ch.isReady() == true);
+}
+
+void FadeChannel_Test::bus()
+{
+    FadeChannel ch;
+    QVERIFY(ch.bus() == Bus::defaultFade());
+    ch.setBus(19);
+    QVERIFY(ch.bus() == quint32(19));
 }
 
 void FadeChannel_Test::calculateCurrent()

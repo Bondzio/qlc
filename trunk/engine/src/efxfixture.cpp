@@ -276,8 +276,8 @@ void EFXFixture::updateSkipThreshold()
 bool EFXFixture::isValid()
 {
     if (m_msbPanChannel != QLCChannel::invalid() &&
-            m_msbTiltChannel != QLCChannel::invalid() &&
-            m_fixture != Fixture::invalidId())
+        m_msbTiltChannel != QLCChannel::invalid() &&
+        m_fixture != Fixture::invalidId())
     {
         return true;
     }
@@ -316,14 +316,19 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
     if (m_ready == true || isValid() == false)
         return;
 
-    if (m_iterator == 0)
+    if (m_iterator == 0 && m_started == false)
+    {
         updateSkipThreshold();
+        if (m_parent->propagationMode() == EFX::Asymmetric)
+            m_iterator = m_skipThreshold;
+    }
 
     if (m_parent->propagationMode() == EFX::Serial &&
-            m_skipIterator < m_skipThreshold)
+        m_skipIterator < m_skipThreshold)
     {
         /* Fixture still needs to wait for its turn in serial mode */
-        m_skipIterator += m_parent->m_stepSize;
+        quint32 busValue = Bus::instance()->value(m_parent->busID());
+        m_skipIterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
     }
     else
     {
@@ -332,13 +337,20 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
 
     if (m_iterator < (M_PI * 2.0))
     {
-        if (m_parent->propagationMode() != EFX::Serial ||
-            m_skipIterator >= m_skipThreshold)
+        if (m_parent->propagationMode() == EFX::Serial)
         {
-            /* Increment for next round. TODO: This check is made
-               twice (the other is just a couple of lines above,
-               reversed). */
-            m_iterator += m_parent->m_stepSize;
+            if (m_skipIterator >= m_skipThreshold)
+            {
+                /* Increment for next round. */
+                quint32 busValue = Bus::instance()->value(m_parent->busID());
+                m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+            }
+        }
+        else
+        {
+            /* Increment for next round. */
+            quint32 busValue = Bus::instance()->value(m_parent->busID());
+            m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
         }
 
         if (m_runTimeDirection == Function::Forward)
@@ -347,8 +359,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         }
         else
         {
-            m_parent->calculatePoint((M_PI * 2.0) - m_iterator,
-                                     &m_panValue, &m_tiltValue);
+            m_parent->calculatePoint((M_PI * 2.0) - m_iterator, &m_panValue, &m_tiltValue);
         }
 
         /* Write this fixture's data to universes. */

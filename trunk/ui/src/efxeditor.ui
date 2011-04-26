@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>523</width>
-    <height>580</height>
+    <width>446</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,6 +67,9 @@
          <property name="allColumnsShowFocus">
           <bool>true</bool>
          </property>
+         <attribute name="headerDefaultSectionSize">
+          <number>85</number>
+         </attribute>
          <column>
           <property name="text">
            <string>Step</string>
@@ -120,6 +123,13 @@
            <width>26</width>
            <height>26</height>
           </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -199,6 +209,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QRadioButton" name="m_asymmetricRadio">
+            <property name="toolTip">
+             <string>Each fixture starts moving immediately with an offset</string>
+            </property>
+            <property name="text">
+             <string>Asymmetric</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -225,21 +245,24 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Fade</string>
+             <string>Intensity</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="m_fadeBusCombo"/>
           </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
         </widget>
        </item>
       </layout>
@@ -418,20 +441,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="2">
-           <spacer>
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>16</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="6" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="m_xFrequencyLabel">
             <property name="enabled">
              <bool>false</bool>
@@ -441,7 +451,7 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <widget class="QSpinBox" name="m_xFrequencySpin">
             <property name="enabled">
              <bool>false</bool>
@@ -457,7 +467,7 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="m_yFrequencyLabel">
             <property name="enabled">
              <bool>false</bool>
@@ -467,7 +477,7 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <widget class="QSpinBox" name="m_yFrequencySpin">
             <property name="enabled">
              <bool>false</bool>
@@ -483,7 +493,7 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
+          <item row="9" column="0">
            <widget class="QLabel" name="m_xPhaseLabel">
             <property name="enabled">
              <bool>false</bool>
@@ -493,7 +503,7 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
+          <item row="9" column="1">
            <widget class="QSpinBox" name="m_xPhaseSpin">
             <property name="enabled">
              <bool>false</bool>
@@ -509,7 +519,7 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="0">
+          <item row="10" column="0">
            <widget class="QLabel" name="m_yPhaseLabel">
             <property name="enabled">
              <bool>false</bool>
@@ -519,7 +529,7 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
+          <item row="10" column="1">
            <widget class="QSpinBox" name="m_yPhaseSpin">
             <property name="enabled">
              <bool>false</bool>
@@ -534,6 +544,26 @@
              <number>90</number>
             </property>
            </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0" colspan="2">
+           <spacer>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>16</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>

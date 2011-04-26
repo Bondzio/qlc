@@ -64,8 +64,6 @@ EFX::EFX(Doc* doc) : Function(doc)
 
     m_algorithm = EFX::Circle;
 
-    m_stepSize = 0;
-
     setName(tr("New EFX"));
 
     m_fader = NULL;
@@ -73,8 +71,6 @@ EFX::EFX(Doc* doc) : Function(doc)
     /* Set default speed buses */
     setBus(Bus::defaultHold());
     setFadeBus(Bus::defaultFade());
-    connect(Bus::instance(), SIGNAL(valueChanged(quint32,quint32)),
-            this, SLOT(slotBusValueChanged(quint32,quint32)));
 }
 
 EFX::~EFX()
@@ -548,6 +544,8 @@ QString EFX::propagationModeToString(PropagationMode mode)
 {
     if (mode == Serial)
         return QString(KXMLQLCEFXPropagationModeSerial);
+    else if (mode == Asymmetric)
+        return QString(KXMLQLCEFXPropagationModeAsymmetric);
     else
         return QString(KXMLQLCEFXPropagationModeParallel);
 }
@@ -556,6 +554,8 @@ EFX::PropagationMode EFX::stringToPropagationMode(QString str)
 {
     if (str == QString(KXMLQLCEFXPropagationModeSerial))
         return Serial;
+    else if (str == QString(KXMLQLCEFXPropagationModeAsymmetric))
+        return Asymmetric;
     else
         return Parallel;
 }
@@ -871,28 +871,12 @@ bool EFX::loadXMLAxis(const QDomElement* root)
 void EFX::setFadeBus(quint32 id)
 {
     if (id < Bus::count())
-    {
         m_fadeBus = id;
-        slotBusValueChanged(id, Bus::instance()->value(id));
-    }
 }
 
 quint32 EFX::fadeBusID() const
 {
     return m_fadeBus;
-}
-
-void EFX::slotBusValueChanged(quint32 id, quint32 value)
-{
-    if (id == busID())
-    {
-        /* Size of one step */
-        m_stepSize = qreal(1) / (qreal(value) / qreal(M_PI * 2));
-    }
-    else if (id == fadeBusID())
-    {
-        //! @todo
-    }
 }
 
 /*****************************************************************************
@@ -973,13 +957,6 @@ void EFX::disarm()
     Q_ASSERT(m_fader != NULL);
     delete m_fader;
     m_fader = NULL;
-}
-
-void EFX::preRun(MasterTimer* timer)
-{
-    /* Set initial speed */
-    slotBusValueChanged(m_busID, Bus::instance()->value(m_busID));
-    Function::preRun(timer);
 }
 
 void EFX::postRun(MasterTimer* timer, UniverseArray* universes)

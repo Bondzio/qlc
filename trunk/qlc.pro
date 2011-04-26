@@ -20,14 +20,13 @@ unix:!macx:QMAKE_DISTCLEAN += $$DEBIAN_CLEAN
 # Unit testing thru "make check"
 unittests.target = check
 QMAKE_EXTRA_TARGETS += unittests
-unix:!macx:unittests.commands += ./unittest.sh unix
-!unix:macx:unittests.commands += ./unittest.sh apple
+unix:unittests.commands += ./unittest.sh
 win32:unittests.commands += unittest.bat
 
 # Unit test coverage measurement
 coverage.target = lcov
 QMAKE_EXTRA_TARGETS += coverage
-unix:!macx:coverage.commands += ./coverage.sh
+unix:coverage.commands += ./coverage.sh
 win32:coverage.commands = @echo Get a better OS.
 
 # Leave this on the last row of this file

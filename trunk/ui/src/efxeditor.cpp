@@ -115,6 +115,10 @@ void EFXEditor::initGeneralPage()
 
     connect(m_parallelRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotParallelRadioToggled(bool)));
+    connect(m_serialRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotSerialRadioToggled(bool)));
+    connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotAsymmetricRadioToggled(bool)));
 
     connect(m_movementBusCombo, SIGNAL(activated(int)),
             this, SLOT(slotMovementBusComboActivated(int)));
@@ -133,6 +137,8 @@ void EFXEditor::initGeneralPage()
     /* Set propagation mode */
     if (m_efx->propagationMode() == EFX::Serial)
         m_serialRadio->setChecked(true);
+    else if (m_efx->propagationMode() == EFX::Asymmetric)
+        m_asymmetricRadio->setChecked(true);
     else
         m_parallelRadio->setChecked(true);
 
@@ -531,11 +537,22 @@ void EFXEditor::slotLowerFixtureClicked()
 void EFXEditor::slotParallelRadioToggled(bool state)
 {
     Q_ASSERT(m_efx != NULL);
-
     if (state == true)
         m_efx->setPropagationMode(EFX::Parallel);
-    else
+}
+
+void EFXEditor::slotSerialRadioToggled(bool state)
+{
+    Q_ASSERT(m_efx != NULL);
+    if (state == true)
         m_efx->setPropagationMode(EFX::Serial);
+}
+
+void EFXEditor::slotAsymmetricRadioToggled(bool state)
+{
+    Q_ASSERT(m_efx != NULL);
+    if (state == true)
+        m_efx->setPropagationMode(EFX::Asymmetric);
 }
 
 void EFXEditor::slotMovementBusComboActivated(int index)

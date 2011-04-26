@@ -459,7 +459,7 @@ void EFXFixture_Test::nextStepLoop()
     MasterTimerStub mts(this, NULL, array);
 
     EFX e(m_doc);
-    e.slotBusValueChanged(e.busID(), 50); /* 50 steps */
+    Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
 
     EFXFixture* ef = new EFXFixture(&e);
     ef->setFixture(0);
@@ -477,6 +477,7 @@ void EFXFixture_Test::nextStepLoop()
     ef->setLsbPanChannel(2);
     ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
+    QVERIFY(ef->isReady() == false);
     QVERIFY(ef->m_iterator == 0);
 
     /* Run two cycles (2 * 50 = 100) and reset the checking iterator in
@@ -485,10 +486,15 @@ void EFXFixture_Test::nextStepLoop()
     for (int i = 0; i < 100; i++)
     {
         ef->nextStep(&mts, &array);
-        checkIter += e.m_stepSize;
+
+        quint32 busValue = Bus::instance()->value(e.busID());
+        qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+        checkIter += stepSize;
+
         if (i == 50)
             checkIter = 0;
-        QVERIFY(ef->m_iterator == checkIter);
+
+        QCOMPARE(ef->m_iterator, checkIter);
         QVERIFY(ef->isReady() == false); // Loop is never ready
     }
 }
@@ -499,7 +505,7 @@ void EFXFixture_Test::nextStepSingleShot()
     MasterTimerStub mts(this, NULL, array);
 
     EFX e(m_doc);
-    e.slotBusValueChanged(e.busID(), 50); /* 50 steps */
+    Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
     e.setRunOrder(EFX::SingleShot);
 
     EFXFixture* ef = new EFXFixture(&e);
@@ -518,17 +524,21 @@ void EFXFixture_Test::nextStepSingleShot()
     ef->setLsbPanChannel(2);
     ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
+    QVERIFY(ef->isReady() == false);
     QVERIFY(ef->m_iterator == 0);
 
     ef->reset();
 
-    /* Run one cycle (50 steps) and reset the checking iterator in
-       the middle to expect correct iterator values. */
+    /* Run one cycle (50 steps) */
     qreal checkIter = 0;
     for (int i = 0; i < 50; i++)
     {
         ef->nextStep(&mts, &array);
-        checkIter += e.m_stepSize;
+
+        quint32 busValue = Bus::instance()->value(e.busID());
+        qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+        checkIter += stepSize;
+
         QVERIFY(ef->m_iterator == checkIter);
         QVERIFY(ef->isReady() == false);
     }

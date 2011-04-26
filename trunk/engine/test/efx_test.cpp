@@ -520,12 +520,17 @@ void EFX_Test::propagationMode()
     e.setPropagationMode(EFX::Serial);
     QVERIFY(e.propagationMode() == EFX::Serial);
 
+    e.setPropagationMode(EFX::Asymmetric);
+    QVERIFY(e.propagationMode() == EFX::Asymmetric);
+
     QVERIFY(EFX::propagationModeToString(EFX::Serial) == "Serial");
     QVERIFY(EFX::propagationModeToString(EFX::Parallel) == "Parallel");
+    QVERIFY(EFX::propagationModeToString(EFX::Asymmetric) == "Asymmetric");
     QVERIFY(EFX::propagationModeToString(EFX::PropagationMode(7)) == "Parallel");
 
     QVERIFY(EFX::stringToPropagationMode("Serial") == EFX::Serial);
     QVERIFY(EFX::stringToPropagationMode("Parallel") == EFX::Parallel);
+    QVERIFY(EFX::stringToPropagationMode("Asymmetric") == EFX::Asymmetric);
     QVERIFY(EFX::stringToPropagationMode("Foobar") == EFX::Parallel);
 }
 

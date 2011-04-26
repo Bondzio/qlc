@@ -38,6 +38,7 @@ class Fixture;
 #define KXMLQLCEFXPropagationMode "PropagationMode"
 #define KXMLQLCEFXPropagationModeParallel "Parallel"
 #define KXMLQLCEFXPropagationModeSerial "Serial"
+#define KXMLQLCEFXPropagationModeAsymmetric "Asymmetric"
 #define KXMLQLCEFXAlgorithm "Algorithm"
 #define KXMLQLCEFXWidth "Width"
 #define KXMLQLCEFXHeight "Height"
@@ -401,12 +402,12 @@ protected:
      * Fixture propagation mode
      *********************************************************************/
 public:
-    /**
-     * Parallel mode means that all fixtures move exactly like others.
-     * Serial mode means that fixtures start moving one after the other,
-     * a bit delayed, creating a more dynamic effect.
-     */
-    enum PropagationMode { Parallel, Serial };
+    enum PropagationMode
+    {
+        Parallel, /**< All fixtures move in unison (el-cheapo) */
+        Serial, /**< Pattern propagates to the next fixture after a delay */
+        Asymmetric /**< All fixtures move with an offset */
+    };
 
     /** Set the EFX's fixture propagation mode (see the enum above) */
     void setPropagationMode(PropagationMode mode);
@@ -444,16 +445,6 @@ public:
     /** Get the bus that adjusts EFX intensity fade speed */
     quint32 fadeBusID() const;
 
-public slots:
-    /**
-     * This is called by buses for each function when the
-     * bus value is changed.
-     *
-     * @param id ID of the bus that has changed its value
-     * @param value Bus' new value
-     */
-    void slotBusValueChanged(quint32 id, quint32 value);
-
 private:
     quint32 m_fadeBus;
 
@@ -468,20 +459,10 @@ public:
     void disarm();
 
     /** @reimpl */
-    void preRun(MasterTimer* timer);
-
-    /** @reimpl */
     void postRun(MasterTimer* timer, UniverseArray* universes);
 
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
-
-protected:
-    /**
-     * The size of one step derived from m_cycleDuration. If m_cycleDuration
-     * is 64, then this is 1/64.
-     */
-    qreal m_stepSize;
 
     /*********************************************************************
      * Intensity

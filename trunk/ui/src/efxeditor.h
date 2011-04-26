@@ -85,6 +85,9 @@ protected slots:
     void slotLowerFixtureClicked();
 
     void slotParallelRadioToggled(bool state);
+    void slotSerialRadioToggled(bool state);
+    void slotAsymmetricRadioToggled(bool state);
+
     void slotMovementBusComboActivated(int index);
     void slotFadeBusComboActivated(int index);
 

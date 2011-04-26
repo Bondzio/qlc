@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <cmath>
 #include <QDebug>
 
 #include "universearray.h"
@@ -26,6 +27,7 @@
 #include "fadechannel.h"
 
 GenericFader::GenericFader()
+    : m_intensity(1)
 {
 }
 
@@ -63,7 +65,8 @@ void GenericFader::write(UniverseArray* ua)
             if (fc.group() == QLCChannel::Intensity || fc.isReady() == false)
             {
                 fc.setReady(true);
-                ua->write(fc.address(), fc.target(), fc.group());
+                uchar value = uchar(floor((qreal(fc.target()) * intensity()) + 0.5));
+                ua->write(fc.address(), value, fc.group());
 
                 // Remove all channels that reach zero
                 if (fc.target() == 0 && fc.current() == 0)
@@ -78,8 +81,19 @@ void GenericFader::write(UniverseArray* ua)
         }
         else
         {
-            ua->write(fc.address(), fc.current(), fc.group());
+            uchar value = uchar(floor((qreal(fc.current()) * intensity()) + 0.5));
+            ua->write(fc.address(), value, fc.group());
             fc.nextStep();
         }
     }
+}
+
+void GenericFader::adjustIntensity(qreal fraction)
+{
+    m_intensity = fraction;
+}
+
+qreal GenericFader::intensity() const
+{
+    return m_intensity;
 }

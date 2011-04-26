@@ -61,8 +61,23 @@ public:
      */
     void write(UniverseArray* universes);
 
+    /**
+     * Adjust the intensities of all channels by $fraction
+     *
+     * @param fraction 0.0 - 1.0
+     */
+    void adjustIntensity(qreal fraction);
+
+    /**
+     * Get the overall intensity adjustment
+     *
+     * @return 0.0 - 1.0
+     */
+    qreal intensity() const;
+
 private:
     QHash <quint32,FadeChannel> m_channels;
+    qreal m_intensity;
 };
 
 #endif

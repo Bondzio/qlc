@@ -26,12 +26,12 @@
 #include <QPoint>
 #include <QList>
 
-
 #include "efxfixture.h"
 #include "function.h"
 
 class QDomDocument;
 class QDomElement;
+class GenericFader;
 class QString;
 class Fixture;
 
@@ -395,6 +395,7 @@ public slots:
 
 protected:
     QList <EFXFixture*> m_fixtures;
+    GenericFader* m_fader;
 
     /*********************************************************************
      * Fixture propagation mode
@@ -436,6 +437,13 @@ protected:
     /*********************************************************************
      * Bus
      *********************************************************************/
+public:
+    /** Set the bus that adjusts EFX intensity fade speed */
+    void setFadeBus(quint32 bus);
+
+    /** Get the bus that adjusts EFX intensity fade speed */
+    quint32 fadeBusID() const;
+
 public slots:
     /**
      * This is called by buses for each function when the
@@ -445,6 +453,9 @@ public slots:
      * @param value Bus' new value
      */
     void slotBusValueChanged(quint32 id, quint32 value);
+
+private:
+    quint32 m_fadeBus;
 
     /*********************************************************************
      * Running

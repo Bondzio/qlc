@@ -47,9 +47,9 @@
 #define KColumnNumber  0
 #define KColumnName    1
 #define KColumnReverse 2
+#define KColumnIntensity 3
 
-#define KInitColumnName     0
-#define KInitColumnID       1
+#define PROPERTY_FIXTURE "fixture"
 
 /*****************************************************************************
  * Initialization
@@ -116,8 +116,10 @@ void EFXEditor::initGeneralPage()
     connect(m_parallelRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotParallelRadioToggled(bool)));
 
-    connect(m_busCombo, SIGNAL(activated(int)),
-            this, SLOT(slotBusComboActivated(int)));
+    connect(m_movementBusCombo, SIGNAL(activated(int)),
+            this, SLOT(slotMovementBusComboActivated(int)));
+    connect(m_fadeBusCombo, SIGNAL(activated(int)),
+            this, SLOT(slotFadeBusComboActivated(int)));
 
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
@@ -134,15 +136,25 @@ void EFXEditor::initGeneralPage()
     else
         m_parallelRadio->setChecked(true);
 
-    /* Init bus combo and select the EFX's bus */
-    fillBusCombo();
+    /* Init movement bus combo and select the EFX's movement bus */
+    fillMovementBusCombo();
+
+    /* Init fade bus combo and select the EFX's fade bus */
+    fillFadeBusCombo();
 }
 
-void EFXEditor::fillBusCombo()
+void EFXEditor::fillMovementBusCombo()
 {
-    m_busCombo->clear();
-    m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_efx->busID());
+    m_movementBusCombo->clear();
+    m_movementBusCombo->addItems(Bus::instance()->idNames());
+    m_movementBusCombo->setCurrentIndex(m_efx->busID());
+}
+
+void EFXEditor::fillFadeBusCombo()
+{
+    m_fadeBusCombo->clear();
+    m_fadeBusCombo->addItems(Bus::instance()->idNames());
+    //m_fadeBusCombo->setCurrentIndex(m_efx->busID());
 }
 
 void EFXEditor::initMovementPage()
@@ -318,14 +330,21 @@ void EFXEditor::addFixtureItem(EFXFixture* ef)
 
     item = new QTreeWidgetItem(m_tree);
     item->setText(KColumnName, fxi->name());
-    item->setData(0, Qt::UserRole,
-                  QVariant(reinterpret_cast<qulonglong> (ef)));
+    item->setData(0, Qt::UserRole, QVariant(reinterpret_cast<qulonglong> (ef)));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 
     if (ef->direction() == Function::Backward)
         item->setCheckState(KColumnReverse, Qt::Checked);
     else
         item->setCheckState(KColumnReverse, Qt::Unchecked);
+
+    QSpinBox* spin = new QSpinBox(this);
+    spin->setRange(0, 255);
+    spin->setValue(ef->fadeIntensity());
+    m_tree->setItemWidget(item, KColumnIntensity, spin);
+    spin->setProperty(PROPERTY_FIXTURE, (qulonglong) ef);
+    connect(spin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFixtureIntensityChanged(int)));
 
     updateIndices(m_tree->indexOfTopLevelItem(item),
                   m_tree->topLevelItemCount() - 1);
@@ -345,6 +364,7 @@ void EFXEditor::removeFixtureItem(EFXFixture* ef)
     Q_ASSERT(item != NULL);
 
     from = m_tree->indexOfTopLevelItem(item);
+    delete m_tree->itemWidget(item, KColumnIntensity);
     delete item;
 
     updateIndices(from, m_tree->topLevelItemCount() - 1);
@@ -368,6 +388,15 @@ void EFXEditor::slotFixtureItemChanged(QTreeWidgetItem* item, int column)
         else
             ef->setDirection(Function::Forward);
     }
+}
+
+void EFXEditor::slotFixtureIntensityChanged(int intensity)
+{
+    QSpinBox* spin = qobject_cast<QSpinBox*>(QObject::sender());
+    Q_ASSERT(spin != NULL);
+    EFXFixture* ef = (EFXFixture*) spin->property(PROPERTY_FIXTURE).toULongLong();
+    Q_ASSERT(ef != NULL);
+    ef->setFadeIntensity(uchar(intensity));
 }
 
 void EFXEditor::slotAddFixtureClicked()
@@ -509,10 +538,17 @@ void EFXEditor::slotParallelRadioToggled(bool state)
         m_efx->setPropagationMode(EFX::Serial);
 }
 
-void EFXEditor::slotBusComboActivated(int index)
+void EFXEditor::slotMovementBusComboActivated(int index)
 {
     Q_ASSERT(m_efx != NULL);
     m_efx->setBus(index);
+}
+
+void EFXEditor::slotFadeBusComboActivated(int index)
+{
+    Q_ASSERT(m_efx != NULL);
+    Q_UNUSED(index);
+    //m_efx->setBus(index);
 }
 
 /*****************************************************************************

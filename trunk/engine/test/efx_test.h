@@ -38,6 +38,7 @@ private slots:
 
     void initial();
     void algorithmNames();
+    void stringToAlgorithm();
     void width();
     void height();
     void rotation();
@@ -53,7 +54,6 @@ private slots:
     void previewCircle();
     void previewEight();
     void previewLine();
-    //void previewTriangle();
     void previewDiamond();
     void previewLissajous();
 
@@ -75,6 +75,10 @@ private slots:
 
     void armSuccess();
     void armMissingFixture();
+    void disarm();
+    void preRun();
+
+    void adjustIntensity();
 
 private:
     Doc* m_doc;

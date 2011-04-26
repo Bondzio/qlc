@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>478</width>
-    <height>551</height>
+    <width>523</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" rowspan="5" colspan="3">
+       <item row="1" column="0" rowspan="6" colspan="3">
         <widget class="QTreeWidget" name="m_tree">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -80,6 +80,11 @@
          <column>
           <property name="text">
            <string>Reverse</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Intensity</string>
           </property>
          </column>
         </widget>
@@ -118,7 +123,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="3">
+       <item row="4" column="3">
         <widget class="QToolButton" name="m_raiseFixtureButton">
          <property name="text">
           <string notr="true">...</string>
@@ -135,7 +140,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="3">
+       <item row="5" column="3">
         <widget class="QToolButton" name="m_lowerFixtureButton">
          <property name="text">
           <string notr="true">...</string>
@@ -152,20 +157,20 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="3">
+       <item row="6" column="3">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="6" column="0" colspan="2">
+       <item row="7" column="0">
         <widget class="QGroupBox" name="m_orderGroup">
          <property name="title">
           <string>Fixture order</string>
@@ -197,33 +202,44 @@
          </layout>
         </widget>
        </item>
-       <item row="6" column="2" colspan="2">
+       <item row="7" column="1" colspan="3">
         <widget class="QGroupBox" name="m_busGroup">
          <property name="title">
-          <string>Speed bus</string>
+          <string>Speed buses</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
-          <item>
-           <widget class="QComboBox" name="m_busCombo">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Movement</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="m_movementBusCombo">
             <property name="toolTip">
              <string>Bus that controls the speed of the pattern</string>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="verticalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Fade</string>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="m_fadeBusCombo"/>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
         </widget>
        </item>
       </layout>
@@ -649,8 +665,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>254</x>
+     <y>574</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -665,8 +681,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>322</x>
+     <y>574</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

@@ -28,6 +28,7 @@
 
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
+#include "genericfader.h"
 #include "qlcchannel.h"
 #include "qlcmacros.h"
 #include "qlcfile.h"
@@ -67,8 +68,11 @@ EFX::EFX(Doc* doc) : Function(doc)
 
     setName(tr("New EFX"));
 
-    /* Set Default Fade as the speed bus */
-    setBus(Bus::defaultFade());
+    m_fader = NULL;
+
+    /* Set default speed buses */
+    setBus(Bus::defaultHold());
+    setFadeBus(Bus::defaultFade());
     connect(Bus::instance(), SIGNAL(valueChanged(quint32,quint32)),
             this, SLOT(slotBusValueChanged(quint32,quint32)));
 }
@@ -830,8 +834,7 @@ bool EFX::loadXMLAxis(const QDomElement* root)
         }
         else
         {
-            qWarning() << "Unknown EFX axis tag: "
-            << tag.tagName();
+            qWarning() << "Unknown EFX axis tag:" << tag.tagName();
         }
 
         node = node.nextSibling();
@@ -865,13 +868,31 @@ bool EFX::loadXMLAxis(const QDomElement* root)
  * Bus
  *****************************************************************************/
 
+void EFX::setFadeBus(quint32 id)
+{
+    if (id < Bus::count())
+    {
+        m_fadeBus = id;
+        slotBusValueChanged(id, Bus::instance()->value(id));
+    }
+}
+
+quint32 EFX::fadeBusID() const
+{
+    return m_fadeBus;
+}
+
 void EFX::slotBusValueChanged(quint32 id, quint32 value)
 {
-    if (id != m_busID)
-        return;
-
-    /* Size of one step */
-    m_stepSize = qreal(1) / (qreal(value) / qreal(M_PI * 2));
+    if (id == busID())
+    {
+        /* Size of one step */
+        m_stepSize = qreal(1) / (qreal(value) / qreal(M_PI * 2));
+    }
+    else if (id == fadeBusID())
+    {
+        //! @todo
+    }
 }
 
 /*****************************************************************************
@@ -926,7 +947,8 @@ void EFX::arm()
                 else if (ch->controlByte() == QLCChannel::LSB)
                     ef->setLsbTiltChannel(fxi->universeAddress() + i);
             }
-            else if (ch->group() == QLCChannel::Intensity)
+            else if (ch->group() == QLCChannel::Intensity &&
+                     ch->colour() == QLCChannel::NoColour) // Don't touch RGB/CMY channels
             {
                 if (ch->searchCapability(/*D*/"immer", false) != NULL ||
                     ch->searchCapability(/*I*/"ntensity", false) != NULL)
@@ -937,13 +959,20 @@ void EFX::arm()
         }
 
         ef->setIntensityChannels(intensityChannels);
+        ef->setFadeBus(fadeBusID());
     }
+
+    Q_ASSERT(m_fader == NULL);
+    m_fader = new GenericFader;
 
     resetElapsed();
 }
 
 void EFX::disarm()
 {
+    Q_ASSERT(m_fader != NULL);
+    delete m_fader;
+    m_fader = NULL;
 }
 
 void EFX::preRun(MasterTimer* timer)
@@ -966,6 +995,8 @@ void EFX::postRun(MasterTimer* timer, UniverseArray* universes)
             ef->stop(timer, universes);
         ef->reset();
     }
+
+    m_fader->removeAll();
 
     Function::postRun(timer, universes);
 }
@@ -991,6 +1022,7 @@ void EFX::write(MasterTimer* timer, UniverseArray* universes)
     /* Check for stop condition */
     if (ready == m_fixtures.count())
         stop();
+    m_fader->write(universes);
 }
 
 /*****************************************************************************
@@ -999,6 +1031,9 @@ void EFX::write(MasterTimer* timer, UniverseArray* universes)
 
 void EFX::adjustIntensity(qreal fraction)
 {
+    if (m_fader != NULL)
+        m_fader->adjustIntensity(fraction);
+
     QListIterator <EFXFixture*> it(m_fixtures);
     while (it.hasNext() == true)
     {

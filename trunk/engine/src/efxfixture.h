@@ -32,6 +32,7 @@ class EFX;
 #define KXMLQLCEFXFixture "Fixture"
 #define KXMLQLCEFXFixtureID "ID"
 #define KXMLQLCEFXFixtureDirection "Direction"
+#define KXMLQLCEFXFixtureIntensity "Intensity"
 
 class EFXFixture
 {
@@ -70,12 +71,21 @@ public:
     /** Get this fixture's direction */
     Function::Direction direction() const;
 
+    /** Set a value to fade the fixture's intensity channel(s) to during start */
+    void setFadeIntensity(uchar value);
+
+    /** Get the value to fade the fixture's intensity channel(s) to during start */
+    uchar fadeIntensity() const;
+
 protected:
     /** The ID of the fixture this EFXFixture represents */
     quint32 m_fixture;
 
     /** This fixture's original running direction */
     Function::Direction m_direction;
+
+    /** Intensity target value during start */
+    uchar m_fadeIntensity;
 
     /*********************************************************************
      * Load & Save
@@ -111,6 +121,9 @@ protected:
 
     /** Set the channels that control intensity */
     void setIntensityChannels(QList <quint32> channels);
+
+    /** Set the fade bus for intensity adjustment speed */
+    void setFadeBus(quint32 id);
 
     /** Update the waiting threshold value for serial operation */
     void updateSkipThreshold();
@@ -200,6 +213,11 @@ protected:
      */
     QList <quint32> m_intensityChannels;
 
+    /**
+     * Bus used for intensity adjustment speed
+     */
+    quint32 m_fadeBus;
+
     /*********************************************************************
      * Running
      *********************************************************************/
@@ -220,6 +238,13 @@ public:
      * @param fraction Intensity fraction 0.0 - 1.0
      */
     void adjustIntensity(qreal fraction);
+
+    /**
+     * Get the adjusted intensity percentage
+     *
+     * @return Intensity 0.0 - 1.0
+     */
+    qreal intensity() const;
 
 private:
     qreal m_intensity;

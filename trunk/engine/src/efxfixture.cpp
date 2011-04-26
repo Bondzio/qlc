@@ -58,6 +58,9 @@ EFXFixture::EFXFixture(EFX* parent)
     m_msbTiltChannel = QLCChannel::invalid();
 
     m_intensity = 1.0;
+
+    m_fadeBus = Bus::defaultFade();
+    m_fadeIntensity = 255;
 }
 
 void EFXFixture::copyFrom(const EFXFixture* ef)
@@ -81,6 +84,11 @@ void EFXFixture::copyFrom(const EFXFixture* ef)
     m_msbPanChannel = ef->m_msbPanChannel;
     m_lsbTiltChannel = ef->m_lsbTiltChannel;
     m_msbTiltChannel = ef->m_msbTiltChannel;
+
+    m_intensity = ef->m_intensity;
+
+    m_fadeIntensity = ef->m_fadeIntensity;
+    m_fadeBus = ef->m_fadeBus;
 }
 
 EFXFixture::~EFXFixture()
@@ -110,6 +118,16 @@ void EFXFixture::setDirection(Function::Direction dir)
 Function::Direction EFXFixture::direction() const
 {
     return m_direction;
+}
+
+void EFXFixture::setFadeIntensity(uchar value)
+{
+    m_fadeIntensity = value;
+}
+
+uchar EFXFixture::fadeIntensity() const
+{
+    return m_fadeIntensity;
 }
 
 /*****************************************************************************
@@ -147,6 +165,11 @@ bool EFXFixture::loadXML(const QDomElement* root)
             dir = Function::stringToDirection(tag.text());
             setDirection(dir);
         }
+        else if (tag.tagName() == KXMLQLCEFXFixtureIntensity)
+        {
+            /* Intensity */
+            setFadeIntensity(uchar(tag.text().toUInt()));
+        }
         else
         {
             qWarning() << "Unknown EFX Fixture tag:" << tag.tagName();
@@ -180,6 +203,12 @@ bool EFXFixture::saveXML(QDomDocument* doc, QDomElement* efx_root) const
     subtag = doc->createElement(KXMLQLCEFXFixtureDirection);
     tag.appendChild(subtag);
     text = doc->createTextNode(Function::directionToString(m_direction));
+    subtag.appendChild(text);
+
+    /* Intensity */
+    subtag = doc->createElement(KXMLQLCEFXFixtureIntensity);
+    tag.appendChild(subtag);
+    text = doc->createTextNode(QString::number(fadeIntensity()));
     subtag.appendChild(text);
 
     return true;
@@ -222,6 +251,11 @@ void EFXFixture::setMsbTiltChannel(quint32 ch)
 void EFXFixture::setIntensityChannels(QList <quint32> channels)
 {
     m_intensityChannels = channels;
+}
+
+void EFXFixture::setFadeBus(quint32 id)
+{
+    m_fadeBus = id;
 }
 
 void EFXFixture::updateSkipThreshold()
@@ -349,19 +383,22 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
 void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(universes);
+    Q_UNUSED(timer);
 
-    foreach (quint32 ich, m_intensityChannels)
+    if (fadeIntensity() > 0 && m_started == false)
     {
-        if (m_started == false)
+        foreach (quint32 ich, m_intensityChannels)
         {
             FadeChannel ch;
             ch.setAddress(ich);
             ch.setStart(0);
             ch.setCurrent(ch.start());
-            ch.setTarget(uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)));
+            // Don't use intensity() multiplier because EFX's GenericFader takes care of that
+            ch.setTarget(fadeIntensity());
             ch.setGroup(QLCChannel::Intensity);
-            ch.setBus(Bus::defaultFade());
-            timer->fader()->add(ch);
+            ch.setBus(m_fadeBus);
+            // Fade channel up with EFX's own GenericFader to allow manual intensity control
+            m_parent->m_fader->add(ch);
         }
     }
 
@@ -372,18 +409,22 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(universes);
 
-    foreach (quint32 ich, m_intensityChannels)
+    if (fadeIntensity() > 0 && m_started == true)
     {
-        if (m_started == true)
+        foreach (quint32 ich, m_intensityChannels)
         {
             FadeChannel ch;
             ch.setAddress(ich);
-            ch.setStart(uchar(floor((qreal(UCHAR_MAX) * m_intensity) + 0.5)));
+            ch.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
             ch.setCurrent(ch.start());
             ch.setTarget(0);
             ch.setGroup(QLCChannel::Intensity);
-            ch.setBus(Bus::defaultFade());
+            ch.setBus(m_fadeBus);
+            // Give zero-fading to MasterTimer because EFX will stop after this call
             timer->fader()->add(ch);
+            // Remove the previously up-faded channel from EFX's internal fader to allow
+            // MasterTimer's fader take HTP precedence.
+            m_parent->m_fader->remove(ich);
         }
     }
 
@@ -425,4 +466,9 @@ void EFXFixture::setPoint(UniverseArray* universes)
 void EFXFixture::adjustIntensity(qreal fraction)
 {
     m_intensity = fraction;
+}
+
+qreal EFXFixture::intensity() const
+{
+    return m_intensity;
 }

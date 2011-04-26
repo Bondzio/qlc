@@ -34,8 +34,10 @@
 
 /* Expose protected members to the unit test */
 #define protected public
+#define private public
 #include "efxfixture.h"
 #include "efx.h"
+#undef private
 #undef protected
 
 #include "qlcchannel.h"
@@ -88,6 +90,10 @@ void EFXFixture_Test::initial()
     QVERIFY(ef.m_msbPanChannel == QLCChannel::invalid());
     QVERIFY(ef.m_lsbTiltChannel == QLCChannel::invalid());
     QVERIFY(ef.m_msbTiltChannel == QLCChannel::invalid());
+
+    QVERIFY(ef.m_intensity == 1.0);
+    QVERIFY(ef.m_fadeBus == Bus::defaultFade());
+    QVERIFY(ef.m_fadeIntensity == uchar(255));
 }
 
 void EFXFixture_Test::copyFrom()
@@ -109,23 +115,29 @@ void EFXFixture_Test::copyFrom()
     ef.m_msbPanChannel = 5;
     ef.m_lsbTiltChannel = 2;
     ef.m_msbTiltChannel = 6;
+    ef.m_intensity = 0.314159;
+    ef.m_fadeBus = 9;
+    ef.m_fadeIntensity = 125;
 
     EFXFixture copy(&e);
     copy.copyFrom(&ef);
-    QVERIFY(ef.m_fixture == 15);
-    QVERIFY(ef.m_direction == EFX::Backward);
-    QVERIFY(ef.m_serialNumber == 25);
-    QVERIFY(ef.m_runTimeDirection == EFX::Backward);
-    QVERIFY(ef.m_ready == true);
-    QVERIFY(ef.m_iterator == 313.37);
-    QVERIFY(ef.m_skipIterator == 4.2);
-    QVERIFY(ef.m_skipThreshold == 6.9);
-    QVERIFY(ef.m_panValue == 127.15);
-    QVERIFY(ef.m_tiltValue == 240.99);
-    QVERIFY(ef.m_lsbPanChannel == 1);
-    QVERIFY(ef.m_msbPanChannel == 5);
-    QVERIFY(ef.m_lsbTiltChannel == 2);
-    QVERIFY(ef.m_msbTiltChannel == 6);
+    QVERIFY(copy.m_fixture == 15);
+    QVERIFY(copy.m_direction == EFX::Backward);
+    QVERIFY(copy.m_serialNumber == 25);
+    QVERIFY(copy.m_runTimeDirection == EFX::Backward);
+    QVERIFY(copy.m_ready == true);
+    QVERIFY(copy.m_iterator == 313.37);
+    QVERIFY(copy.m_skipIterator == 4.2);
+    QVERIFY(copy.m_skipThreshold == 6.9);
+    QVERIFY(copy.m_panValue == 127.15);
+    QVERIFY(copy.m_tiltValue == 240.99);
+    QVERIFY(copy.m_lsbPanChannel == 1);
+    QVERIFY(copy.m_msbPanChannel == 5);
+    QVERIFY(copy.m_lsbTiltChannel == 2);
+    QVERIFY(copy.m_msbTiltChannel == 6);
+    QVERIFY(copy.m_intensity == 0.314159);
+    QVERIFY(copy.m_fadeBus == 9);
+    QVERIFY(copy.m_fadeIntensity == 125);
 }
 
 void EFXFixture_Test::publicProperties()
@@ -164,11 +176,17 @@ void EFXFixture_Test::loadSuccess()
     dir.appendChild(dirText);
     root.appendChild(dir);
 
+    QDomElement in = doc.createElement("Intensity");
+    QDomText inText = doc.createTextNode("91");
+    in.appendChild(inText);
+    root.appendChild(in);
+
     EFX e(m_doc);
     EFXFixture ef(&e);
     QVERIFY(ef.loadXML(&root) == true);
     QVERIFY(ef.fixture() == 83);
     QVERIFY(ef.direction() == EFX::Backward);
+    QVERIFY(ef.fadeIntensity() == 91);
 }
 
 void EFXFixture_Test::loadWrongRoot()

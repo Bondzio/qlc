@@ -31,6 +31,7 @@
 #include "efx_test.h"
 
 #include "universearray.h"
+#include "genericfader.h"
 #include "function.h"
 #include "fixture.h"
 #include "scene.h"
@@ -38,7 +39,10 @@
 
 /* Expose protected members to the unit test */
 #define protected public
+#define private public
+#include "efxfixture.h"
 #include "efx.h"
+#undef private
 #undef protected
 
 #include "qlcchannel.h"
@@ -90,6 +94,8 @@ void EFX_Test::initial()
 
     QVERIFY(e.fixtures().size() == 0);
     QVERIFY(e.propagationMode() == EFX::Parallel);
+
+    QVERIFY(e.m_fader == NULL);
 }
 
 void EFX_Test::algorithmNames()
@@ -122,6 +128,15 @@ void EFX_Test::algorithmNames()
     /* Invalid algorithm results in Circle as a fallback */
     e.setAlgorithm(EFX::Algorithm(31337));
     QVERIFY(e.algorithm() == EFX::Circle);
+}
+
+void EFX_Test::stringToAlgorithm()
+{
+    QCOMPARE(EFX::stringToAlgorithm("Eight"), EFX::Eight);
+    QCOMPARE(EFX::stringToAlgorithm("Circle"), EFX::Circle);
+    QCOMPARE(EFX::stringToAlgorithm("Lissajous"), EFX::Lissajous);
+    QCOMPARE(EFX::stringToAlgorithm("Line"), EFX::Line);
+    QCOMPARE(EFX::stringToAlgorithm("Foobar"), EFX::Circle);
 }
 
 void EFX_Test::width()
@@ -1649,6 +1664,12 @@ void EFX_Test::loadXAxis()
     pha.appendChild(phaText);
     ax.appendChild(pha);
 
+    // Unknown tag
+    QDomElement foo = doc.createElement("Foo");
+    QDomText fooText = doc.createTextNode("Bar");
+    foo.appendChild(fooText);
+    ax.appendChild(foo);
+
     EFX e(m_doc);
     QVERIFY(e.loadXMLAxis(&ax) == true);
 }
@@ -1977,10 +1998,12 @@ void EFX_Test::save()
 
     EFXFixture* ef1 = new EFXFixture(&e1);
     ef1->setFixture(12);
+    ef1->setFadeIntensity(128);
     e1.addFixture(ef1);
     EFXFixture* ef2 = new EFXFixture(&e1);
     ef2->setFixture(34);
     ef2->setDirection(EFX::Backward);
+    ef2->setFadeIntensity(64);
     e1.addFixture(ef2);
     EFXFixture* ef3 = new EFXFixture(&e1);
     ef3->setFixture(56);
@@ -1997,7 +2020,7 @@ void EFX_Test::save()
     bool dir = false, run = false, bus = false, algo = false, w = false,
          h = false, rot = false, xoff = false, yoff = false,
          xfreq = false, yfreq = false, xpha = false, ypha = false,
-         prop = false;
+         prop = false, intensity = false;
     int fixtureid = 0, fixturedirection = 0;
     QList <QString> fixtures;
 
@@ -2109,6 +2132,7 @@ void EFX_Test::save()
         else if (tag.tagName() == "Fixture")
         {
             bool expectBackward = false;
+            int expectIntensity = 255;
 
             QDomNode subnode = tag.firstChild();
             while (subnode.isNull() == false)
@@ -2122,9 +2146,18 @@ void EFX_Test::save()
                         fixtures.append(subtag.text());
 
                     if (subtag.text() == "34")
+                    {
+                        expectIntensity = 64;
                         expectBackward = true;
+                    }
                     else
+                    {
+                        if (subtag.text() == "12")
+                            expectIntensity = 128;
+                        else
+                            expectIntensity = 255;
                         expectBackward = false;
+                    }
 
                     fixtureid++;
                 }
@@ -2136,6 +2169,11 @@ void EFX_Test::save()
                     }
 
                     fixturedirection++;
+                }
+                else if (subtag.tagName() == "Intensity")
+                {
+                    QCOMPARE(subtag.text().toInt(), expectIntensity);
+                    intensity++;
                 }
                 else
                 {
@@ -2170,6 +2208,7 @@ void EFX_Test::save()
     QVERIFY(xpha == true);
     QVERIFY(ypha == true);
     QVERIFY(prop == true);
+    QVERIFY(intensity == true);
 }
 
 void EFX_Test::armSuccess()
@@ -2225,6 +2264,7 @@ void EFX_Test::armSuccess()
     e->arm();
 
     QVERIFY(e->algorithm() == EFX::Circle);
+    QVERIFY(e->m_fader != NULL);
 
     QVERIFY(e->m_fixtures.size() == 2);
 
@@ -2296,6 +2336,7 @@ void EFX_Test::armMissingFixture()
     e->arm();
 
     QVERIFY(e->algorithm() == EFX::Circle);
+    QVERIFY(e->m_fader != NULL);
 
     QVERIFY(e->m_fixtures.size() == 2);
 
@@ -2313,5 +2354,95 @@ void EFX_Test::armMissingFixture()
     QVERIFY(e->m_fixtures.at(1)->m_lsbPanChannel == QLCChannel::invalid());
     QVERIFY(e->m_fixtures.at(1)->m_lsbTiltChannel == QLCChannel::invalid());
 
+    delete doc;
+}
+
+void EFX_Test::disarm()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    EFX* e = new EFX(doc);
+    e->setName("Test EFX");
+
+    e->arm();
+    QVERIFY(e->m_fader != NULL);
+
+    e->disarm();
+    QVERIFY(e->m_fader == NULL);
+
+    delete doc;
+}
+
+void EFX_Test::preRun()
+{
+    Doc* doc = new Doc(this, m_cache);
+    UniverseArray ua(512);
+    MasterTimerStub timer(this, NULL, ua);
+
+    EFX* e = new EFX(doc);
+    e->setName("Test EFX");
+    e->arm();
+
+    QSignalSpy spy(e, SIGNAL(running(quint32)));
+    e->preRun(&timer);
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0].size(), 1);
+    QCOMPARE(spy[0][0].toUInt(), e->id());
+
+    e->disarm();
+    delete doc;
+}
+
+void EFX_Test::adjustIntensity()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    /* Basically any fixture with 16bit pan & tilt channels will do, but
+       then the exact channel numbers and mode name has to be changed
+       below. */
+    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 4");
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi1 = new Fixture(doc);
+    fxi1->setFixtureDefinition(def, mode);
+    fxi1->setName("Test Scanner");
+    fxi1->setAddress(0);
+    fxi1->setUniverse(0);
+    doc->addFixture(fxi1);
+
+    Fixture* fxi2 = new Fixture(doc);
+    fxi2->setFixtureDefinition(def, mode);
+    fxi2->setName("Test Scanner");
+    fxi2->setAddress(0);
+    fxi2->setUniverse(1);
+    doc->addFixture(fxi2);
+
+    EFX* e = new EFX(doc);
+    e->setName("Test EFX");
+
+    EFXFixture* ef1 = new EFXFixture(e);
+    ef1->setFixture(fxi1->id());
+    e->addFixture(ef1);
+
+    EFXFixture* ef2 = new EFXFixture(e);
+    ef2->setFixture(fxi2->id());
+    e->addFixture(ef2);
+
+    e->adjustIntensity(0.2);
+    QCOMPARE(e->intensity(), 0.2);
+    QCOMPARE(ef1->m_intensity, 0.2);
+    QCOMPARE(ef2->m_intensity, 0.2);
+
+    e->arm();
+
+    e->adjustIntensity(0.5);
+    QCOMPARE(e->m_fader->intensity(), 0.5);
+    QCOMPARE(ef1->intensity(), 0.5);
+    QCOMPARE(ef2->intensity(), 0.5);
+
+    e->disarm();
     delete doc;
 }

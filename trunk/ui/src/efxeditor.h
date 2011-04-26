@@ -50,7 +50,8 @@ private:
 
 protected:
     void initGeneralPage();
-    void fillBusCombo();
+    void fillMovementBusCombo();
+    void fillFadeBusCombo();
     void initMovementPage();
     void initInitializationPage();
 
@@ -77,13 +78,15 @@ protected:
 protected slots:
     void slotNameEdited(const QString &text);
     void slotFixtureItemChanged(QTreeWidgetItem* item, int column);
+    void slotFixtureIntensityChanged(int intensity);
     void slotAddFixtureClicked();
     void slotRemoveFixtureClicked();
     void slotRaiseFixtureClicked();
     void slotLowerFixtureClicked();
 
     void slotParallelRadioToggled(bool state);
-    void slotBusComboActivated(int index);
+    void slotMovementBusComboActivated(int index);
+    void slotFadeBusComboActivated(int index);
 
     /*********************************************************************
      * Movement page

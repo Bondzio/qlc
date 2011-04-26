@@ -64,38 +64,7 @@ void IntensityGenerator_Test::randomScenes()
 
     // Even though injecting the random seed to randomScenes() allows deterministic behaviour,
     // the rand() algorithm implementation varies between platforms and platform versions.
-    // So let's not check the randomized values.
-
-    // Step 1
-    QCOMPARE(scenes[0]->values().size(), 3);
-    QCOMPARE(scenes[0]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[0].channel, quint32(1));
-    QCOMPARE(scenes[0]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[1].channel, quint32(2));
-    QCOMPARE(scenes[0]->values()[2].fxi, fxi->id());
-    QCOMPARE(scenes[0]->values()[2].channel, quint32(5));
-
-    // Step 2
-    QCOMPARE(scenes[1]->values().size(), 1);
-    QCOMPARE(scenes[1]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[1]->values()[0].channel, quint32(3));
-
-    // Step 3
-    QCOMPARE(scenes[2]->values().size(), 0);
-
-    // Step 4
-    QCOMPARE(scenes[3]->values().size(), 2);
-    QCOMPARE(scenes[3]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[0].channel, quint32(3));
-    QCOMPARE(scenes[3]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[3]->values()[1].channel, quint32(5));
-
-    // Step 5
-    QCOMPARE(scenes[4]->values().size(), 2);
-    QCOMPARE(scenes[4]->values()[0].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[0].channel, quint32(1));
-    QCOMPARE(scenes[4]->values()[1].fxi, fxi->id());
-    QCOMPARE(scenes[4]->values()[1].channel, quint32(5));
+    // So let's not check the randomized contents at all.
 }
 
 void IntensityGenerator_Test::sequenceScenes()

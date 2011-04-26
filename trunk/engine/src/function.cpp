@@ -416,6 +416,10 @@ void Function::resetElapsed()
 void Function::incrementElapsed()
 {
     m_elapsed++;
+
+    // Prevent preRun() call when quint32 wraps around from UINT_MAX to 0
+    if (m_elapsed == 0)
+        m_elapsed = 1;
 }
 
 /*****************************************************************************

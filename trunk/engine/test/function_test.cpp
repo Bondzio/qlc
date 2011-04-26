@@ -26,7 +26,10 @@
 #include "function_test.h"
 
 #define protected public
+#define private public
 #include "function_stub.h"
+#include "function.h"
+#undef private
 #undef protected
 
 #include "doc.h"
@@ -105,6 +108,10 @@ void Function_Test::elapsed()
     QCOMPARE(stub->elapsed(), quint32(3));
     stub->resetElapsed();
     QCOMPARE(stub->elapsed(), quint32(0));
+
+    stub->m_elapsed = UINT_MAX;
+    stub->incrementElapsed();
+    QCOMPARE(stub->elapsed(), quint32(1));
 }
 
 void Function_Test::preRunPostRun()

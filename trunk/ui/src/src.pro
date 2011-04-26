@@ -8,10 +8,13 @@ CONFIG += qt
 QT     += core xml gui
 
 # Engine
-INCLUDEPATH += ../../engine/src
-DEPENDPATH  += ../../engine/src
-QMAKE_LIBDIR += ../../engine/src
-LIBS   += -lqlcengine
+INCLUDEPATH     += ../../engine/src
+DEPENDPATH      += ../../engine/src
+QMAKE_LIBDIR    += ../../engine/src
+LIBS            += -lqlcengine
+
+# X
+unix:!macx:LIBS += -lX11
 
 # Types
 INCLUDEPATH += ../../plugins/interfaces

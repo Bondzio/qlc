@@ -53,6 +53,9 @@ private slots:
     void nextStepLoop();
     void nextStepSingleShot();
 
+    void start();
+    void stop();
+
 private:
     Doc* m_doc;
     QLCFixtureDefCache m_cache;

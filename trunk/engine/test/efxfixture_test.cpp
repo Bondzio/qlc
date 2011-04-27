@@ -35,6 +35,7 @@
 /* Expose protected members to the unit test */
 #define protected public
 #define private public
+#include "genericfader.h"
 #include "efxfixture.h"
 #include "efx.h"
 #undef private
@@ -158,6 +159,9 @@ void EFXFixture_Test::publicProperties()
     ef.setDirection(EFX::Forward);
     QVERIFY(ef.direction() == EFX::Forward);
     QVERIFY(ef.m_runTimeDirection == EFX::Forward);
+
+    ef.setFadeIntensity(69);
+    QVERIFY(ef.fadeIntensity() == 69);
 }
 
 void EFXFixture_Test::loadSuccess()
@@ -306,6 +310,14 @@ void EFXFixture_Test::protectedProperties()
 
     ef.setMsbTiltChannel(102);
     QVERIFY(ef.m_msbTiltChannel == 102);
+
+    QList <quint32> chans;
+    chans << 1 << 412 << 1500 << 3 << 9000;
+    ef.setIntensityChannels(chans);
+    QVERIFY(ef.m_intensityChannels == chans);
+
+    ef.setFadeBus(26);
+    QVERIFY(ef.m_fadeBus == 26);
 }
 
 void EFXFixture_Test::updateSkipThreshold()
@@ -547,4 +559,75 @@ void EFXFixture_Test::nextStepSingleShot()
 
     /* Single-shot EFX should now be ready */
     QVERIFY(ef->isReady() == true);
+}
+
+void EFXFixture_Test::start()
+{
+    UniverseArray array(512 * 4);
+    MasterTimerStub mts(this, NULL, array);
+
+    EFX e(m_doc);
+    EFXFixture* ef = new EFXFixture(&e);
+    ef->setFixture(0);
+    e.addFixture(ef);
+
+    QList <quint32> chans;
+    chans << 1 << 2 << 15;
+    ef->setIntensityChannels(chans);
+
+    e.arm();
+
+    // Fade intensity == 0, no need to do fade-in
+    ef->setFadeIntensity(0);
+    ef->start(&mts, &array);
+    QCOMPARE(e.m_fader->m_channels.size(), 0);
+    ef->m_started = false;
+
+    // Fade intensity > 0, need to do fade-in
+    ef->setFadeIntensity(1);
+    ef->start(&mts, &array);
+    QCOMPARE(e.m_fader->m_channels.size(), 3);
+    QVERIFY(e.m_fader->m_channels.contains(1));
+    QVERIFY(e.m_fader->m_channels.contains(2));
+    QVERIFY(e.m_fader->m_channels.contains(15));
+
+    e.disarm();
+}
+
+void EFXFixture_Test::stop()
+{
+    UniverseArray array(512 * 4);
+    MasterTimerStub mts(this, NULL, array);
+
+    EFX e(m_doc);
+    EFXFixture* ef = new EFXFixture(&e);
+    ef->setFixture(0);
+    e.addFixture(ef);
+
+    QList <quint32> chans;
+    chans << 1 << 2 << 15;
+    ef->setIntensityChannels(chans);
+
+    e.arm();
+
+    // Not started yet
+    ef->stop(&mts, &array);
+    QCOMPARE(e.m_fader->m_channels.size(), 0);
+    QCOMPARE(mts.fader()->m_channels.size(), 0);
+
+    // Start
+    ef->start(&mts, &array);
+    QCOMPARE(e.m_fader->m_channels.size(), 3);
+
+    // Then stop
+    ef->stop(&mts, &array);
+    QCOMPARE(e.m_fader->m_channels.size(), 0);
+
+    // FadeChannels are handed over to MasterTimer's GenericFader
+    QCOMPARE(mts.fader()->m_channels.size(), 3);
+    QVERIFY(mts.fader()->m_channels.contains(1));
+    QVERIFY(mts.fader()->m_channels.contains(2));
+    QVERIFY(mts.fader()->m_channels.contains(15));
+
+    e.disarm();
 }

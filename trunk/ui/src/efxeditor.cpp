@@ -129,6 +129,9 @@ void EFXEditor::initGeneralPage()
     m_nameEdit->setText(m_efx->name());
     slotNameEdited(m_efx->name());
 
+    /* Resize columns to fit contents */
+    m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+
     /* Put all of the EFX's fixtures to the tree view */
     QListIterator <EFXFixture*> it(m_efx->fixtures());
     while (it.hasNext() == true)

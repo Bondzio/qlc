@@ -34,6 +34,8 @@ private slots:
     void initial();
     void findChannels();
     void createColours();
+    void createGobos();
+    void createShutters();
 
 private:
     QLCFixtureDefCache m_fixtureDefCache;

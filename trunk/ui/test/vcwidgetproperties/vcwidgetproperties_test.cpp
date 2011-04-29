@@ -23,7 +23,9 @@
 #include <QtTest>
 
 #include "vcwidgetproperties_test.h"
+#define protected public
 #include "vcwidgetproperties.h"
+#undef private
 
 void VCWidgetProperties_Test::stateAndVisibility()
 {
@@ -124,10 +126,14 @@ void VCWidgetProperties_Test::load()
     root.appendChild(v);
 
     QDomElement s = doc.createElement("State");
-    QDomText sText = doc.createTextNode(QString("%1")
-                                        .arg(Qt::WindowMinimized));
+    QDomText sText = doc.createTextNode(QString("%1").arg(Qt::WindowMinimized));
     s.appendChild(sText);
     root.appendChild(s);
+
+    QDomElement foo = doc.createElement("Foobar");
+    QDomText fooText = doc.createTextNode("1");
+    foo.appendChild(fooText);
+    root.appendChild(foo);
 
     VCWidgetProperties p;
     p.loadXML(&root);
@@ -137,6 +143,105 @@ void VCWidgetProperties_Test::load()
     QVERIFY(p.height() == 60);
     QVERIFY(p.state() == Qt::WindowMinimized);
     QVERIFY(p.visible() == true);
+}
+
+void VCWidgetProperties_Test::loadWrongRoot()
+{
+    QDomDocument doc;
+
+    QDomElement root = doc.createElement("WidgetPropertiez");
+    doc.appendChild(root);
+
+    VCWidgetProperties p;
+    QVERIFY(p.loadXML(&root) == false);
+    QVERIFY(p.x() == 100);
+    QVERIFY(p.y() == 100);
+    QVERIFY(p.width() == 0);
+    QVERIFY(p.height() == 0);
+    QVERIFY(p.state() == Qt::WindowNoState);
+    QVERIFY(p.visible() == false);
+}
+
+void VCWidgetProperties_Test::save()
+{
+    VCWidgetProperties p;
+    p.m_state = Qt::WindowMinimized;
+    p.m_visible = true;
+    p.m_x = 10;
+    p.m_y = 20;
+    p.m_width = 30;
+    p.m_height = 40;
+
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Root");
+    doc.appendChild(root);
+
+    QVERIFY(p.saveXML(&doc, &root) == true);
+    QVERIFY(root.firstChild().toElement().tagName() == "WidgetProperties");
+
+    bool s = false, v = false, x = false, y = false, w = false, h = false;
+    QDomNode node = root.firstChild().firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement e = node.toElement();
+        if (e.tagName() == "State")
+        {
+            s = true;
+            QCOMPARE(e.text(), QString::number(p.m_state));
+        }
+        else if (e.tagName() == "Visible")
+        {
+            v = true;
+            QCOMPARE(e.text(), QString::number(p.m_visible));
+        }
+        else if (e.tagName() == "X")
+        {
+            x = true;
+            QCOMPARE(e.text(), QString::number(p.m_x));
+        }
+        else if (e.tagName() == "Y")
+        {
+            y = true;
+            QCOMPARE(e.text(), QString::number(p.m_y));
+        }
+        else if (e.tagName() == "Width")
+        {
+            w = true;
+            QCOMPARE(e.text(), QString::number(p.m_width));
+        }
+        else if (e.tagName() == "Height")
+        {
+            h = true;
+            QCOMPARE(e.text(), QString::number(p.m_height));
+        }
+        else
+        {
+            QFAIL(QString("Unexpected widget property tag: %1").arg(e.tagName()).toUtf8().constData());
+        }
+
+        node = node.nextSibling();
+    }
+
+    QVERIFY(s && v && x && y && w && h);
+}
+
+void VCWidgetProperties_Test::copy()
+{
+    VCWidgetProperties p;
+    p.m_state = Qt::WindowMinimized;
+    p.m_visible = true;
+    p.m_x = 10;
+    p.m_y = 20;
+    p.m_width = 30;
+    p.m_height = 40;
+
+    VCWidgetProperties p2(p);
+    QCOMPARE(p2.state(), p.state());
+    QCOMPARE(p2.visible(), p.visible());
+    QCOMPARE(p2.x(), p.x());
+    QCOMPARE(p2.y(), p.y());
+    QCOMPARE(p2.width(), p.width());
+    QCOMPARE(p2.height(), p.height());
 }
 
 QTEST_MAIN(VCWidgetProperties_Test)

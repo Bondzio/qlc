@@ -66,8 +66,7 @@ bool VCWidgetProperties::loadXML(const QDomElement* root)
 
     Q_ASSERT(root != NULL);
 
-    if (root->tagName() != KXMLQLCWidgetProperties &&
-        root->tagName() != QString("Properties")) /* Legacy */
+    if (root->tagName() != KXMLQLCWidgetProperties)
     {
         qWarning() << Q_FUNC_INFO << "Widget Properties node not found";
         return false;

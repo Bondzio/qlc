@@ -33,6 +33,9 @@ private slots:
     void xy();
     void wh();
     void load();
+    void loadWrongRoot();
+    void save();
+    void copy();
 };
 
 #endif

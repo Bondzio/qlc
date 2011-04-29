@@ -31,6 +31,7 @@ class AboutBox_Test : public QObject
 private slots:
     void initial();
     void slotTimeout();
+    void itemClick();
 };
 
 #endif

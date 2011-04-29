@@ -80,4 +80,14 @@ void AboutBox_Test::slotTimeout()
     }
 }
 
+void AboutBox_Test::itemClick()
+{
+    AboutBox ab(NULL);
+    QVERIFY(ab.m_timer != NULL);
+    ab.slotItemClicked();
+    QVERIFY(ab.m_timer == NULL);
+    ab.slotItemClicked();
+    QVERIFY(ab.m_timer == NULL);
+}
+
 QTEST_MAIN(AboutBox_Test)

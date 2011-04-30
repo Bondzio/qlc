@@ -14,6 +14,7 @@ qlc (3.2.0) stable; urgency=low
   * All RGB/CMY colour mix channels are assigned to intensity group.
   * Hide such channels from console & scene editor that have no group.
   * Chaser and Cue List accept only Scene functions.
+  * All "stock" plugins are included in the main qlc debian package
 
  -- Heikki Junnila <hjunnila@users.sf.net>  Thu, 21 Apr 2011 11:52:35 +0300
 

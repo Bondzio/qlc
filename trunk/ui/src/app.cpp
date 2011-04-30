@@ -73,6 +73,7 @@
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
+#define SETTINGS_SLIDERSTYLE "workspace/sliderstyle"
 
 #define KModeTextOperate QObject::tr("Operate")
 #define KModeTextDesign QObject::tr("Design")
@@ -620,9 +621,11 @@ QStyle* App::saneStyle()
 {
     if (s_saneStyle == NULL)
     {
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_SLIDERSTYLE, QString("Cleanlooks"));
         QStringList keys(QStyleFactory::keys());
-        if (keys.contains("Cleanlooks") == true)
-            s_saneStyle = QStyleFactory::create("Cleanlooks");
+        if (keys.contains(var.toString()) == true)
+            s_saneStyle = QStyleFactory::create(var.toString());
         else
             s_saneStyle = QApplication::style();
     }

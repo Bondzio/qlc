@@ -680,13 +680,13 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
 void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
 {
     Function* function = m_doc->function(m_playbackFunction);
-    if (function == NULL)
+    if (function == NULL || mode() == Doc::Design)
         return;
 
     /* Grab current values inside a locked mutex */
     m_playbackValueMutex.lock();
-     uchar value = m_playbackValue;
-     bool changed = m_playbackValueChanged;
+    uchar value = m_playbackValue;
+    bool changed = m_playbackValueChanged;
 
     qreal percentage = qreal(value) / qreal(UCHAR_MAX);
 
@@ -727,7 +727,7 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
         break;
     }
 
-     m_playbackValueChanged = false;
+    m_playbackValueChanged = false;
     m_playbackValueMutex.unlock();
 }
 

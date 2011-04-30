@@ -224,7 +224,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit_add.png</normaloff>:/edit_add.png</iconset>
            </property>
            <property name="iconSize">
@@ -244,7 +244,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit_remove.png</normaloff>:/edit_remove.png</iconset>
            </property>
            <property name="iconSize">
@@ -264,7 +264,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
            </property>
            <property name="iconSize">
@@ -291,7 +291,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
            </property>
            <property name="iconSize">
@@ -311,7 +311,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/editpaste.png</normaloff>:/editpaste.png</iconset>
            </property>
            <property name="iconSize">
@@ -344,7 +344,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/check.png</normaloff>:/check.png</iconset>
            </property>
            <property name="iconSize">
@@ -401,7 +401,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit_add.png</normaloff>:/edit_add.png</iconset>
            </property>
            <property name="iconSize">
@@ -421,7 +421,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit_remove.png</normaloff>:/edit_remove.png</iconset>
            </property>
            <property name="iconSize">
@@ -441,7 +441,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
            </property>
            <property name="iconSize">
@@ -468,7 +468,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
            </property>
            <property name="iconSize">
@@ -501,7 +501,7 @@
             <string notr="true">...</string>
            </property>
            <property name="icon">
-            <iconset resource="../ui/src/main.qrc">
+            <iconset resource="../ui/src/qlcui.qrc">
              <normaloff>:/check.png</normaloff>:/check.png</iconset>
            </property>
            <property name="iconSize">
@@ -521,7 +521,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../ui/src/main.qrc"/>
+  <include location="../ui/src/qlcui.qrc"/>
  </resources>
  <connections/>
 </ui>

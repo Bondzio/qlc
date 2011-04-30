@@ -55,7 +55,7 @@
           <string notr="true">...</string>
          </property>
          <property name="icon">
-          <iconset resource="main.qrc">
+          <iconset resource="qlcui.qrc">
            <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
          </property>
          <property name="iconSize">
@@ -98,7 +98,7 @@
           <string notr="true">...</string>
          </property>
          <property name="icon">
-          <iconset resource="main.qrc">
+          <iconset resource="qlcui.qrc">
            <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
          </property>
          <property name="iconSize">
@@ -143,7 +143,7 @@
           <string notr="true">...</string>
          </property>
          <property name="icon">
-          <iconset resource="main.qrc">
+          <iconset resource="qlcui.qrc">
            <normaloff>:/edit_add.png</normaloff>:/edit_add.png</iconset>
          </property>
          <property name="iconSize">
@@ -163,7 +163,7 @@
           <string notr="true">...</string>
          </property>
          <property name="icon">
-          <iconset resource="main.qrc">
+          <iconset resource="qlcui.qrc">
            <normaloff>:/edit_remove.png</normaloff>:/edit_remove.png</iconset>
          </property>
          <property name="iconSize">
@@ -183,7 +183,7 @@
           <string notr="true">...</string>
          </property>
          <property name="icon">
-          <iconset resource="main.qrc">
+          <iconset resource="qlcui.qrc">
            <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
          </property>
          <property name="iconSize">
@@ -234,7 +234,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="main.qrc"/>
+  <include location="qlcui.qrc"/>
  </resources>
  <connections>
   <connection>

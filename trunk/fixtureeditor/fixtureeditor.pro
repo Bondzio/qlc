@@ -18,7 +18,7 @@ QMAKE_LIBDIR += ../engine/src
 LIBS    += -lqlcengine
 
 # Sources
-RESOURCES    += ../ui/src/main.qrc
+RESOURCES    += ../ui/src/qlcui.qrc
 win32:RC_FILE = fixtureeditor.rc
 
 HEADERS += ../ui/src/aboutbox.h \

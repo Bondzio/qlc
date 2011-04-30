@@ -4,6 +4,7 @@ TEMPLATE = subdirs
 
 SUBDIRS      += engine
 SUBDIRS      += ui
+SUBDIRS      += main
 SUBDIRS      += fixtures
 SUBDIRS      += inputprofiles
 SUBDIRS      += fixtureeditor

@@ -1,8 +1,8 @@
 include(../../variables.pri)
 
-TEMPLATE = app
+TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = qlc
+TARGET   = qlcui
 
 CONFIG += qt
 QT     += core xml gui
@@ -20,8 +20,8 @@ unix:!macx:LIBS += -lX11
 INCLUDEPATH += ../../plugins/interfaces
 
 # Resources
-RESOURCES    += main.qrc
-win32:RC_FILE = main.rc
+RESOURCES    += qlcui.qrc
+win32:RC_FILE = qlcui.rc
 
 # Sources
 HEADERS += aboutbox.h \
@@ -126,7 +126,6 @@ SOURCES += aboutbox.cpp \
            inputprofileeditor.cpp \
            inputmanager.cpp \
            inputpatcheditor.cpp \
-           main.cpp \
            monitor.cpp \
            monitorfixture.cpp \
            monitorlayout.cpp \
@@ -170,5 +169,5 @@ macx {
 }
 
 # Installation
-target.path = $$INSTALLROOT/$$BINDIR
+target.path = $$INSTALLROOT/$$LIBSDIR
 INSTALLS   += target

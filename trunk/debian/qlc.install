@@ -1,4 +1,5 @@
 usr/bin/*
+usr/lib/libqlcui*
 usr/lib/libqlcengine*
 usr/share/qlc/documents/*
 usr/share/applications/*

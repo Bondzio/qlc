@@ -26,8 +26,8 @@
     <message>
         <location filename="../common/configuremididevice.ui" line="46"/>
         <source>MIDI control method used as DMX channels</source>
-        <translatorcomment>Gefällt mir nicht</translatorcomment>
-        <translation type="unfinished">MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
+        <translatorcomment>Gefällt mir nicht. Sounds OK to me -Heikki</translatorcomment>
+        <translation>MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
     </message>
 </context>
 <context>
@@ -71,32 +71,32 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="130"/>
+        <location filename="mididevice.cpp" line="131"/>
         <source>Device is working correctly.</source>
         <translation>Gerät ist funktionsbereit.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="133"/>
+        <location filename="mididevice.cpp" line="134"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-Kanal: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="135"/>
+        <location filename="mididevice.cpp" line="136"/>
         <source>Mode: %1</source>
         <translation>Modus: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="142"/>
+        <location filename="mididevice.cpp" line="143"/>
         <source>Unknown device</source>
         <translation>Unbekanntest Gerät</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="144"/>
+        <location filename="mididevice.cpp" line="145"/>
         <source>ALSA sequencer interface is not available.</source>
         <translation>ALSA-Sequenzerinterface ist nicht erreichbar.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="173"/>
+        <location filename="mididevice.cpp" line="174"/>
         <source>Unknown</source>
         <translation>Unbekannt</translation>
     </message>
@@ -104,7 +104,7 @@
 <context>
     <name>MIDIOut</name>
     <message>
-        <location filename="midiout.cpp" line="121"/>
+        <location filename="midiout.cpp" line="142"/>
         <source>This plugin provides DMX output support for various MIDI devices.</source>
         <translation>Dieses Plugin bietet DMX-Output für verschiedene MIDI-Geräte.</translation>
     </message>

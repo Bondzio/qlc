@@ -71,27 +71,27 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="176"/>
+        <location filename="mididevice.cpp" line="177"/>
         <source>Device is working correctly.</source>
         <translation>Gerät ist funktionsbereit.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="178"/>
+        <location filename="mididevice.cpp" line="179"/>
         <source>Device might not work correctly.</source>
         <translation>Gerät funktioniert vielleicht nicht richtig.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="183"/>
+        <location filename="mididevice.cpp" line="184"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-Kanal: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="186"/>
+        <location filename="mididevice.cpp" line="187"/>
         <source>Mode: %1</source>
         <translation>Modus: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="202"/>
+        <location filename="mididevice.cpp" line="203"/>
         <source>Unknown</source>
         <translation>Unbekannt</translation>
     </message>

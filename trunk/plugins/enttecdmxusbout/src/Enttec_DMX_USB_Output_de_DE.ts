@@ -4,27 +4,27 @@
 <context>
     <name>EnttecDMXUSBOpen</name>
     <message>
-        <location filename="enttecdmxusbopen.cpp" line="96"/>
+        <location filename="enttecdmxusbopen.cpp" line="98"/>
         <source>DMX Frame Frequency</source>
         <translation>Häufigkeit der DMX-Frames</translation>
     </message>
     <message>
-        <location filename="enttecdmxusbopen.cpp" line="100"/>
+        <location filename="enttecdmxusbopen.cpp" line="102"/>
         <source>Bad</source>
         <translation>Faul</translation>
     </message>
     <message>
-        <location filename="enttecdmxusbopen.cpp" line="102"/>
+        <location filename="enttecdmxusbopen.cpp" line="104"/>
         <source>Good</source>
         <translation>Gut</translation>
     </message>
     <message>
-        <location filename="enttecdmxusbopen.cpp" line="104"/>
+        <location filename="enttecdmxusbopen.cpp" line="106"/>
         <source>Patch this widget to a universe to find out.</source>
         <translation>Patch dieses Geräte zu einem Universum zu finden.</translation>
     </message>
     <message>
-        <location filename="enttecdmxusbopen.cpp" line="105"/>
+        <location filename="enttecdmxusbopen.cpp" line="107"/>
         <source>System Timer Accuracy</source>
         <translation>System-Timer Genauigkeit</translation>
     </message>

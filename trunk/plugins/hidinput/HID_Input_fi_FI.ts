@@ -43,12 +43,12 @@
 <context>
     <name>HIDJsDevice</name>
     <message>
-        <location filename="hidjsdevice.cpp" line="184"/>
+        <location filename="hidjsdevice.cpp" line="185"/>
         <source>Axes: %1</source>
         <translation>Akseleita: %1</translation>
     </message>
     <message>
-        <location filename="hidjsdevice.cpp" line="186"/>
+        <location filename="hidjsdevice.cpp" line="187"/>
         <source>Buttons: %1</source>
         <translation>Nappeja: %1</translation>
     </message>

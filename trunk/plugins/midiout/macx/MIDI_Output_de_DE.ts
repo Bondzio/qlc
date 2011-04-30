@@ -26,8 +26,8 @@
     <message>
         <location filename="../common/configuremididevice.ui" line="46"/>
         <source>MIDI control method used as DMX channels</source>
-        <translatorcomment>Gefällt mir nicht</translatorcomment>
-        <translation type="unfinished">MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
+        <translatorcomment>Gefällt mir nicht. Sounds OK to me - Heikki</translatorcomment>
+        <translation>MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
     </message>
 </context>
 <context>
@@ -71,33 +71,33 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="81"/>
-        <location filename="mididevice.cpp" line="91"/>
+        <location filename="mididevice.cpp" line="82"/>
+        <location filename="mididevice.cpp" line="92"/>
         <source>Unknown %1</source>
         <translation>Unbekannt %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="153"/>
+        <location filename="mididevice.cpp" line="154"/>
         <source>Device is working correctly.</source>
         <translation>Gerät ist funktionsbereit.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="156"/>
+        <location filename="mididevice.cpp" line="157"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-Kanal: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="158"/>
+        <location filename="mididevice.cpp" line="159"/>
         <source>Mode: %1</source>
         <translation>Modus: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="164"/>
+        <location filename="mididevice.cpp" line="165"/>
         <source>Unknown device</source>
         <translation>Unbekanntest Gerät</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="167"/>
+        <location filename="mididevice.cpp" line="168"/>
         <source>MIDI interface is not available.</source>
         <translation>MIDI-Interface ist nicht erreichbar.</translation>
     </message>

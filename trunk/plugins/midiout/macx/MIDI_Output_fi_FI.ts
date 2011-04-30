@@ -70,33 +70,33 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="153"/>
+        <location filename="mididevice.cpp" line="154"/>
         <source>Device is working correctly.</source>
         <translation>Laite toimii oikein.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="81"/>
-        <location filename="mididevice.cpp" line="91"/>
+        <location filename="mididevice.cpp" line="82"/>
+        <location filename="mididevice.cpp" line="92"/>
         <source>Unknown %1</source>
         <translation>Tuntematon %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="156"/>
+        <location filename="mididevice.cpp" line="157"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-kanava: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="158"/>
+        <location filename="mididevice.cpp" line="159"/>
         <source>Mode: %1</source>
         <translation>Tila: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="164"/>
+        <location filename="mididevice.cpp" line="165"/>
         <source>Unknown device</source>
         <translation>Tuntematon laite</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="167"/>
+        <location filename="mididevice.cpp" line="168"/>
         <source>MIDI interface is not available.</source>
         <translation>MIDI-väylä ei ole käytettävissä.</translation>
     </message>

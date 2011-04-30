@@ -70,28 +70,28 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="176"/>
+        <location filename="mididevice.cpp" line="177"/>
         <source>Device is working correctly.</source>
         <translation>Laite toimii oikein.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="178"/>
+        <location filename="mididevice.cpp" line="179"/>
         <source>Device might not work correctly.</source>
         <oldsource>MIDI Output might not work correctly.</oldsource>
         <translation>Laite ei ehkä toimi oikein.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="183"/>
+        <location filename="mididevice.cpp" line="184"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-kanava: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="186"/>
+        <location filename="mididevice.cpp" line="187"/>
         <source>Mode: %1</source>
         <translation>Tila: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="202"/>
+        <location filename="mididevice.cpp" line="203"/>
         <source>Unknown</source>
         <translation>Tuntematon</translation>
     </message>

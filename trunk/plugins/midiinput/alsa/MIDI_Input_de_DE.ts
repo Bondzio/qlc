@@ -61,7 +61,7 @@
     <message>
         <location filename="../common/src/configuremidiinput.cpp" line="117"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Keiner</translation>
     </message>
 </context>
 <context>
@@ -203,7 +203,7 @@
 <context>
     <name>MIDIInput</name>
     <message>
-        <location filename="midiinput.cpp" line="121"/>
+        <location filename="midiinput.cpp" line="142"/>
         <source>This plugin provides input support for various MIDI devices.</source>
         <translation>Dieses Plugin bietet Eingangsunterstützung für verschiedene MIDI-Geräte.</translation>
     </message>

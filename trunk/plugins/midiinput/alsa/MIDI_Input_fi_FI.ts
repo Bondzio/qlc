@@ -177,7 +177,7 @@
     <message>
         <location filename="mididevice.cpp" line="114"/>
         <source>Device is working correctly.</source>
-        <translation>Laite toimii oikein</translation>
+        <translation>Laite toimii oikein.</translation>
     </message>
     <message>
         <location filename="mididevice.cpp" line="117"/>
@@ -203,7 +203,7 @@
 <context>
     <name>MIDIInput</name>
     <message>
-        <location filename="midiinput.cpp" line="121"/>
+        <location filename="midiinput.cpp" line="142"/>
         <source>This plugin provides input support for various MIDI devices.</source>
         <translation>Tämä liitännäinen tuottaa DMX-ulostulotuen erilaisille MIDI-laitteille.</translation>
     </message>

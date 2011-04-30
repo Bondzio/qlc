@@ -70,32 +70,32 @@
 <context>
     <name>MIDIDevice</name>
     <message>
-        <location filename="mididevice.cpp" line="130"/>
+        <location filename="mididevice.cpp" line="131"/>
         <source>Device is working correctly.</source>
         <translation>Laite toimii oikein.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="133"/>
+        <location filename="mididevice.cpp" line="134"/>
         <source>MIDI Channel: %1</source>
         <translation>MIDI-kanava: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="135"/>
+        <location filename="mididevice.cpp" line="136"/>
         <source>Mode: %1</source>
         <translation>Tila: %1</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="142"/>
+        <location filename="mididevice.cpp" line="143"/>
         <source>Unknown device</source>
         <translation>Tuntematon laite</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="144"/>
+        <location filename="mididevice.cpp" line="145"/>
         <source>ALSA sequencer interface is not available.</source>
         <translation>ALSA-sekvensseri-väylä ei ole käytettävissä.</translation>
     </message>
     <message>
-        <location filename="mididevice.cpp" line="173"/>
+        <location filename="mididevice.cpp" line="174"/>
         <source>Unknown</source>
         <translation>Tuntematon</translation>
     </message>
@@ -103,7 +103,7 @@
 <context>
     <name>MIDIOut</name>
     <message>
-        <location filename="midiout.cpp" line="121"/>
+        <location filename="midiout.cpp" line="142"/>
         <source>This plugin provides DMX output support for various MIDI devices.</source>
         <translation>Tämä liitännäinen tuottaa DMX-ulostulotuen erilaisille MIDI-laitteille.</translation>
     </message>

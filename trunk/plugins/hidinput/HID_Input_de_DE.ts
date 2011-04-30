@@ -29,7 +29,7 @@
     <message>
         <location filename="hideventdevice.cpp" line="323"/>
         <source>N/A</source>
-        <translation type="unfinished"></translation>
+        <translation>Keiner</translation>
     </message>
 </context>
 <context>
@@ -43,12 +43,12 @@
 <context>
     <name>HIDJsDevice</name>
     <message>
-        <location filename="hidjsdevice.cpp" line="184"/>
+        <location filename="hidjsdevice.cpp" line="185"/>
         <source>Axes: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Achse: %1</translation>
     </message>
     <message>
-        <location filename="hidjsdevice.cpp" line="186"/>
+        <location filename="hidjsdevice.cpp" line="187"/>
         <source>Buttons: %1</source>
         <translation>Schalter: %1</translation>
     </message>

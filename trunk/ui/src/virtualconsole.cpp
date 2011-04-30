@@ -1414,7 +1414,8 @@ void VirtualConsole::initDockArea()
  * Contents
  *****************************************************************************/
 
-void VirtualConsole::resetContents()
+void VirtualConsole::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                   InputMap* inputMap, MasterTimer* masterTimer)
 {
     /* Destroy existing contents */
     if (s_properties.m_contents != NULL)
@@ -1422,6 +1423,9 @@ void VirtualConsole::resetContents()
         delete s_properties.m_contents;
         s_properties.m_contents = NULL;
     }
+
+    /* Create new contents */
+    s_properties.resetContents(parent, doc, outputMap, inputMap, masterTimer);
 
     /* If there is an instance of the VC, make it re-read the contents */
     if (s_instance != NULL)
@@ -1434,10 +1438,7 @@ void VirtualConsole::resetContents()
 void VirtualConsole::initContents()
 {
     Q_ASSERT(layout() != NULL);
-
-    /* Create new contents if there isn't any yet */
-    if (contents() == NULL)
-        s_properties.resetContents();
+    Q_ASSERT(contents() != NULL);
 
     /* Add the contents area into the master horizontal layout */
     if (m_scrollArea == NULL)

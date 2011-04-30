@@ -19,19 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QWidget>
 #include <QtXml>
 
 #include "qlcfile.h"
 
 #include "virtualconsole.h"
 #include "vcproperties.h"
-#include "inputpatch.h"
+#include "outputmap.h"
 #include "inputmap.h"
 #include "vcframe.h"
-#include "app.h"
 #include "bus.h"
-
-extern App* _app;
+#include "doc.h"
 
 /*****************************************************************************
  * Properties Initialization
@@ -125,14 +124,15 @@ VCProperties& VCProperties::operator=(const VCProperties& properties)
  * VC Contents
  *****************************************************************************/
 
-void VCProperties::resetContents()
+void VCProperties::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                                 InputMap* inputMap, MasterTimer* masterTimer)
 {
     /* Get rid of any existing contents */
     if (m_contents != NULL)
         delete m_contents;
 
     /* Create new contents */
-    m_contents = new VCFrame(_app, _app->doc(), _app->outputMap(), _app->inputMap(), _app->masterTimer());
+    m_contents = new VCFrame(parent, doc, outputMap, inputMap, masterTimer);
 }
 
 /*****************************************************************************
@@ -166,10 +166,6 @@ bool VCProperties::loadXML(const QDomElement* vc_root)
         else if (tag.tagName() == KXMLQLCVCFrame)
         {
             /* Contents */
-            if (m_contents == NULL) {
-                m_contents = new VCFrame(_app, _app->doc(), _app->outputMap(),
-                                         _app->inputMap(), _app->masterTimer());
-            }
             Q_ASSERT(m_contents != NULL);
             m_contents->loadXML(&tag);
         }

@@ -80,7 +80,6 @@
 #define KInputUniverseCount 4
 #define KUniverseCount 4
 
-App* _app;
 QStyle* App::s_saneStyle = NULL;
 QProgressDialog* _pd = NULL;
 
@@ -90,8 +89,6 @@ QProgressDialog* _pd = NULL;
 
 App::App() : QMainWindow()
 {
-    _app = this;
-
     m_progressDialog = NULL;
     m_masterTimer = NULL;
     m_outputMap = NULL;
@@ -185,9 +182,6 @@ App::~App()
     if (m_blackoutIndicator != NULL)
         delete m_blackoutIndicator;
     m_blackoutIndicator = NULL;
-
-    // Remove the reference to the application
-    _app = NULL;
 }
 
 QString App::longName()
@@ -985,7 +979,7 @@ bool App::slotFileNew()
 void App::clearDocument()
 {
     doc()->clearContents();
-    VirtualConsole::resetContents();
+    VirtualConsole::resetContents(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     outputMap()->resetUniverses();
     setFileName(QString());
     doc()->resetModified();
@@ -1246,7 +1240,7 @@ void App::slotWindowMenuAboutToShow()
     m_windowMenu->addAction(m_windowAllToFrontAction);
     m_windowMenu->addSeparator();
 
-    QListIterator <QObject*> it(_app->children());
+    QListIterator <QObject*> it(children());
     while (it.hasNext() == true)
     {
         QWidget* w = qobject_cast<QWidget*> (it.next());

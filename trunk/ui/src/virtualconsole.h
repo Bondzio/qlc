@@ -346,7 +346,8 @@ public:
     }
 
     /** Reset the VC contents to an initial state */
-    static void resetContents();
+    static void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                              InputMap* inputMap, MasterTimer* masterTimer);
 
 protected:
     /** Place the contents area to the VC view */

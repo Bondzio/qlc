@@ -31,7 +31,12 @@
 class VirtualConsole;
 class QDomDocument;
 class QDomElement;
+class MasterTimer;
+class OutputMap;
+class InputMap;
 class VCFrame;
+class QWidget;
+class Doc;
 
 #define KXMLQLCVirtualConsole "VirtualConsole"
 
@@ -89,7 +94,8 @@ public:
     }
 
     /** Reset Virtual Console's bottom-most frame to initial state */
-    void resetContents();
+    void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
+                       InputMap* inputMap, MasterTimer* masterTimer);
 
 protected:
     /** The bottom-most frame in Virtual Console containing all widgets */

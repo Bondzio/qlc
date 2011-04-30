@@ -37,6 +37,8 @@ HEADERS += ../../interfaces/qlcinplugin.h
 PRO_FILE = src.pro
 TRANSLATIONS += ENTTEC_Wing_Input_fi_FI.ts
 TRANSLATIONS += ENTTEC_Wing_Input_de_DE.ts
+TRANSLATIONS += ENTTEC_Wing_Input_es_ES.ts
+TRANSLATIONS += ENTTEC_Wing_Input_fr_FR.ts
 include(../../../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that

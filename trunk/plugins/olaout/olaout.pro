@@ -31,6 +31,8 @@ HEADERS += ../interfaces/qlcoutplugin.h
 PRO_FILE = olaout.pro
 TRANSLATIONS += OLA_Output_fi_FI.ts
 TRANSLATIONS += OLA_Output_de_DE.ts
+TRANSLATIONS += OLA_Output_es_ES.ts
+TRANSLATIONS += OLA_Output_fr_FR.ts
 include(../../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that

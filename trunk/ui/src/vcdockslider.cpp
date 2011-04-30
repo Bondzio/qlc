@@ -45,11 +45,11 @@ VCDockSlider::VCDockSlider(QWidget* parent, InputMap* inputMap, quint32 bus)
 {
     Q_ASSERT(inputMap != NULL);
 
-    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     new QVBoxLayout(this);
-    layout()->setMargin(0);
+    layout()->setMargin(2);
 
     m_valueLabel = new QLabel(this);
     m_valueLabel->setAlignment(Qt::AlignHCenter);

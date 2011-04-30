@@ -39,7 +39,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     Q_ASSERT(outputMap != NULL);
     Q_ASSERT(inputMap != NULL);
 
-    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     new QVBoxLayout(this);

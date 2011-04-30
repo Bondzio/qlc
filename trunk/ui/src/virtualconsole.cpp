@@ -106,6 +106,8 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
 
     /* Main layout */
     new QHBoxLayout(this);
+    layout()->setMargin(1);
+    layout()->setSpacing(2);
 
     initActions();
     initMenuBar();

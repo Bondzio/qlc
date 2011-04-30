@@ -31,7 +31,7 @@
  <Channel Name="Dimmer/Strobe">
   <Group Byte="0">Intensity</Group>
   <Capability Min="0" Max="7">Closed</Capability>
-  <Capability Min="8" Max="134">100% -> 0%</Capability>
+  <Capability Min="8" Max="134">Dimmer (100% - 0%)</Capability>
   <Capability Min="135" Max="239">Strobe speed (slow -> fast)</Capability>
   <Capability Min="240" Max="255">Open</Capability>
  </Channel>

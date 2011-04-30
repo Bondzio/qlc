@@ -36,8 +36,8 @@ do
     # Execute the test
     pushd .
     cd ${TESTDIR}/${test}
-    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../../../engine/src \
-        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../engine/src ./${test}_test
+    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../../../engine/src:../../src \
+        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../engine/src:../../src ./${test}_test
     RESULT=${?}
     popd
     if [ ${RESULT} != 0 ]; then

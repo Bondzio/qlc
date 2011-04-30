@@ -17,13 +17,11 @@ ARCH=`uname`
 #############################################################################
 
 test[0]="engine/src"
-test[1]="ui/test/aboutbox"
-test[2]="ui/test/addfixture"
-test[3]="ui/test/vcwidgetproperties"
-test[4]="plugins/ewinginput/src"
-test[5]="plugins/midiinput/common/src"
+test[1]="ui/src"
+test[2]="plugins/ewinginput/src"
+test[3]="plugins/midiinput/common/src"
 if [ ${ARCH} != "Darwin" ]; then
-    test[6]="plugins/vellemanout/src"
+    test[4]="plugins/vellemanout/src"
 fi
 
 # Number of tests

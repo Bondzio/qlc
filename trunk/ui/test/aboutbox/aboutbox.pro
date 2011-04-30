@@ -1,21 +1,19 @@
 include(../../../variables.pri)
-include(../../../coverage.pri)
 
 TEMPLATE = app
 LANGUAGE = C++
 TARGET   = aboutbox_test
 
-QT      += testlib
+QT      += testlib gui xml
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../../engine/src
 DEPENDPATH  += ../../src
 
+QMAKE_LIBDIR += ../../src
+QMAKE_LIBDIR += ../../../engine/src
+LIBS         += -lqlcui -lqlcengine
+
 # Test sources
 SOURCES += aboutbox_test.cpp
 HEADERS += aboutbox_test.h
-
-# Sources to test
-SOURCES += ../../src/aboutbox.cpp
-HEADERS += ../../src/aboutbox.h
-FORMS += ../../src/aboutbox.ui

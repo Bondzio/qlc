@@ -1,21 +1,19 @@
 include(../../../variables.pri)
-include(../../../coverage.pri)
 
 TEMPLATE = app
 LANGUAGE = C++
 TARGET   = vcwidgetproperties_test
 
-QT += testlib
-QT += xml
+QT += testlib gui xml
 
 INCLUDEPATH += ../../../plugins/interfaces
 INCLUDEPATH += ../../src
 DEPENDPATH  += ../../src
 
+QMAKE_LIBDIR += ../../src
+QMAKE_LIBDIR += ../../../engine/src
+LIBS         += -lqlcui -lqlcengine
+
 # Test sources
 SOURCES += vcwidgetproperties_test.cpp
 HEADERS += vcwidgetproperties_test.h
-
-# Sources to test
-SOURCES += ../../src/vcwidgetproperties.cpp
-HEADERS += ../../src/vcwidgetproperties.h

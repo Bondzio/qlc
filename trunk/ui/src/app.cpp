@@ -273,6 +273,10 @@ void App::init()
     // Document
     initDoc();
 
+    // Virtual Console bottom frame
+    VirtualConsole::resetContents(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VirtualConsole::properties().contents()->hide();
+
     // Start up in non-modified state
     m_doc->resetModified();
 }

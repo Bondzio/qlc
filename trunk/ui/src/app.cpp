@@ -1461,7 +1461,7 @@ bool App::loadXML(const QDomDocument* doc)
         }
         else if (tag.tagName() == KXMLQLCVirtualConsole)
         {
-            VirtualConsole::loadXML(&tag);
+            VirtualConsole::loadXML(tag);
         }
         else if (tag.tagName() == KXMLFixture)
         {

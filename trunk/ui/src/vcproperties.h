@@ -74,9 +74,6 @@ class Doc;
 
 class VCProperties : public VCWidgetProperties
 {
-    friend class VCPropertiesEditor;
-    friend class VirtualConsole;
-
 public:
     VCProperties();
     VCProperties(const VCProperties& properties);
@@ -89,113 +86,68 @@ public:
      *********************************************************************/
 public:
     /** Get Virtual Console's bottom-most frame */
-    VCFrame* contents() const {
-        return m_contents;
-    }
+    VCFrame* contents() const;
 
     /** Reset Virtual Console's bottom-most frame to initial state */
     void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
                        InputMap* inputMap, MasterTimer* masterTimer);
 
-protected:
-    /** The bottom-most frame in Virtual Console containing all widgets */
+private:
     VCFrame* m_contents;
 
     /*********************************************************************
      * Grid
      *********************************************************************/
 public:
-    bool isGridEnabled() const {
-        return m_gridEnabled;
-    }
-    int gridX() const {
-        return m_gridX;
-    }
-    int gridY() const {
-        return m_gridY;
-    }
+    void setGridEnabled(bool enable);
+    bool isGridEnabled() const;
 
-protected:
-    void setGridEnabled(bool enable) {
-        m_gridEnabled = enable;
-    }
-    void setGridX(int x) {
-        m_gridX = x;
-    }
-    void setGridY(int y) {
-        m_gridY = y;
-    }
+    void setGridX(int x);
+    int gridX() const;
 
-protected:
-    /** Widget placement grid enabled? */
+    void setGridY(int y);
+    int gridY() const;
+
+private:
     bool m_gridEnabled;
-
-    /** Widget placement grid X resolution */
     int m_gridX;
-
-    /** Widget placement grid Y resolution */
     int m_gridY;
 
     /*********************************************************************
      * Keyboard state
      *********************************************************************/
 public:
-    bool isKeyRepeatOff() const {
-        return m_keyRepeatOff;
-    }
-    bool isGrabKeyboard() const {
-        return m_grabKeyboard;
-    }
+    /** Set key repeat off during operate mode or not. */
+    void setKeyRepeatOff(bool set);
 
-protected:
-    void setKeyRepeatOff(bool set) {
-        m_keyRepeatOff = set;
-    }
-    void setGrabKeyboard(bool grab) {
-        m_grabKeyboard = grab;
-    }
+    /** Check, if key repeat is off during operate mode. */
+    bool isKeyRepeatOff() const;
 
-protected:
-    /** Key repeat off during operate mode? */
+    /** Grab keyboard in operate mode or not. */
+    void setGrabKeyboard(bool grab);
+
+    /** Check, if keyboard is grabbed in operate mode. */
+    bool isGrabKeyboard() const;
+
+private:
     bool m_keyRepeatOff;
-
-    /** Grab keyboard in operate mode? */
     bool m_grabKeyboard;
 
     /*************************************************************************
      * Grand Master
      *************************************************************************/
 public:
-    UniverseArray::GMChannelMode grandMasterChannelMode() const {
-        return m_gmChannelMode;
-    }
+    void setGrandMasterChannelMode(UniverseArray::GMChannelMode mode);
+    UniverseArray::GMChannelMode grandMasterChannelMode() const;
 
-    void setGrandMasterChannelMode(UniverseArray::GMChannelMode mode) {
-        m_gmChannelMode = mode;
-    }
+    void setGrandMasterValueMode(UniverseArray::GMValueMode mode);
+    UniverseArray::GMValueMode grandMasterValueMode() const;
 
-    UniverseArray::GMValueMode grandMasterValueMode() const {
-        return m_gmValueMode;
-    }
+    void setGrandMasterInputSource(quint32 universe, quint32 channel);
+    quint32 grandMasterInputUniverse() const;
+    quint32 grandMasterInputChannel() const;
 
-    void setGrandMasterValueMode(UniverseArray::GMValueMode mode) {
-        m_gmValueMode = mode;
-    }
-
-    quint32 grandMasterInputUniverse() const {
-        return m_gmInputUniverse;
-    }
-
-    quint32 grandMasterInputChannel() const {
-        return m_gmInputChannel;
-    }
-
-    void setGrandMasterInputSource(quint32 universe, quint32 channel) {
-        m_gmInputUniverse = universe;
-        m_gmInputChannel = channel;
-    }
-
-protected:
+private:
     UniverseArray::GMChannelMode m_gmChannelMode;
     UniverseArray::GMValueMode m_gmValueMode;
     quint32 m_gmInputUniverse;
@@ -205,116 +157,78 @@ protected:
      * Blackout
      *************************************************************************/
 public:
-    quint32 blackoutInputUniverse() const {
-        return m_blackoutInputUniverse;
-    }
+    void setBlackoutInputSource(quint32 universe, quint32 channel);
+    quint32 blackoutInputUniverse() const;
+    quint32 blackoutInputChannel() const;
 
-    quint32 blackoutInputChannel() const {
-        return m_blackoutInputChannel;
-    }
-
-    void setBlackoutInputSource(quint32 universe, quint32 channel) {
-        m_blackoutInputUniverse = universe;
-        m_blackoutInputChannel = channel;
-    }
-
-protected:
+private:
     quint32 m_blackoutInputUniverse;
     quint32 m_blackoutInputChannel;
 
     /*********************************************************************
-     * Default sliders
+     * Default Fade Slider
      *********************************************************************/
 public:
-    bool slidersVisible() const {
-        return m_slidersVisible;
-    }
+    /** Set, whether default sliders are visible */
+    void setSlidersVisible(bool visible);
 
-    quint32 fadeLowLimit() const {
-        return m_fadeLowLimit;
-    }
-    quint32 fadeHighLimit() const {
-        return m_fadeHighLimit;
-    }
+    /** Check if default sliders are visible */
+    bool slidersVisible() const;
 
-    quint32 holdLowLimit() const {
-        return m_holdLowLimit;
-    }
-    quint32 holdHighLimit() const {
-        return m_holdHighLimit;
-    }
+    /** Set limits for fade slider */
+    void setFadeLimits(quint32 low, quint32 high);
+    quint32 fadeLowLimit() const;
+    quint32 fadeHighLimit() const;
 
-    quint32 fadeInputUniverse() const {
-        return m_fadeInputUniverse;
-    }
-    quint32 fadeInputChannel() const {
-        return m_fadeInputChannel;
-    }
+    /** Set input source for fade slider */
+    void setFadeInputSource(quint32 uni, quint32 ch);
+    quint32 fadeInputUniverse() const;
+    quint32 fadeInputChannel() const;
 
-    quint32 holdInputUniverse() const {
-        return m_holdInputUniverse;
-    }
-    quint32 holdInputChannel() const {
-        return m_holdInputChannel;
-    }
-
-protected:
-    void setSlidersVisible(bool visible) {
-        m_slidersVisible = visible;
-    }
-
-    void setFadeLimits(quint32 low, quint32 high)
-    {
-        m_fadeLowLimit = low;
-        m_fadeHighLimit = high;
-    }
-    void setHoldLimits(quint32 low, quint32 high)
-    {
-        m_holdLowLimit = low;
-        m_holdHighLimit = high;
-    }
-
-    void setFadeInputSource(quint32 uni, quint32 ch)
-    {
-        m_fadeInputUniverse = uni;
-        m_fadeInputChannel = ch;
-    }
-    void setHoldInputSource(quint32 uni, quint32 ch)
-    {
-        m_holdInputUniverse = uni;
-        m_holdInputChannel = ch;
-    }
-
-protected:
-    /** Default fade & hold sliders visible? */
+private:
     bool m_slidersVisible;
 
-    /** Input source for fade slider */
+    quint32 m_fadeLowLimit;
+    quint32 m_fadeHighLimit;
     quint32 m_fadeInputUniverse;
     quint32 m_fadeInputChannel;
 
-    /** Limits for fade slider */
-    quint32 m_fadeLowLimit;
-    quint32 m_fadeHighLimit;
+    /*********************************************************************
+     * Default Hold Slider
+     *********************************************************************/
+public:
+    /** Set limits for hold slider */
+    void setHoldLimits(quint32 low, quint32 high);
+    quint32 holdLowLimit() const;
+    quint32 holdHighLimit() const;
 
-    /** Input source for hold slider */
-    quint32 m_holdInputUniverse;
-    quint32 m_holdInputChannel;
+    /** Set input source for hold slider */
+    void setHoldInputSource(quint32 uni, quint32 ch);
+    quint32 holdInputUniverse() const;
+    quint32 holdInputChannel() const;
 
-    /** Limits for hold slider */
+private:
     quint32 m_holdLowLimit;
     quint32 m_holdHighLimit;
+    quint32 m_holdInputUniverse;
+    quint32 m_holdInputChannel;
 
     /*************************************************************************
      * Load & Save
      *************************************************************************/
 public:
-    bool loadXML(const QDomElement* vc_root);
+    /** Load VirtualConsole properties & contents from the given XML tag */
+    bool loadXML(const QDomElement& vc_root);
+
+    /** Save VirtualConsole properties & contents to the given XML document */
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 
-protected:
-    bool loadXMLInput(const QDomElement& tag, quint32* universe, quint32* channel);
-    bool loadProperties(const QDomElement* root);
+private:
+    /** Load VirtualConsole properties (not including contents) */
+    bool loadProperties(const QDomElement& root);
+
+    /** Load the properties of a default slider */
+    static bool loadXMLInput(const QDomElement& tag, quint32* universe, quint32* channel);
 };
 
 #endif

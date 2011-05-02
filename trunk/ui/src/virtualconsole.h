@@ -392,8 +392,8 @@ public slots:
      * Load & Save
      *********************************************************************/
 public:
-    /** Load properties and contents from an XML document */
-    static bool loadXML(const QDomElement* vc_root);
+    /** Load properties and contents from an XML tree */
+    static bool loadXML(const QDomElement& root);
 
     /** Save properties and contents to an XML document */
     static bool saveXML(QDomDocument* doc, QDomElement* wksp_root);

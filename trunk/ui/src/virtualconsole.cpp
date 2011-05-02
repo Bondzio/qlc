@@ -137,7 +137,7 @@ VirtualConsole::~VirtualConsole()
 {
     /* The layout takes ownership of the contents. Adopt them back to the
        main application object to prevent their destruction. */
-    s_properties.m_contents->setParent(NULL);
+    s_properties.contents()->setParent(NULL);
 
 #ifdef __APPLE__
     s_properties.store(this);
@@ -1417,13 +1417,6 @@ void VirtualConsole::initDockArea()
 void VirtualConsole::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
                                    InputMap* inputMap, MasterTimer* masterTimer)
 {
-    /* Destroy existing contents */
-    if (s_properties.m_contents != NULL)
-    {
-        delete s_properties.m_contents;
-        s_properties.m_contents = NULL;
-    }
-
     /* Create new contents */
     s_properties.resetContents(parent, doc, outputMap, inputMap, masterTimer);
 
@@ -1635,9 +1628,9 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
  * Load & Save
  *****************************************************************************/
 
-bool VirtualConsole::loadXML(const QDomElement* vc_root)
+bool VirtualConsole::loadXML(const QDomElement& root)
 {
-    return s_properties.loadXML(vc_root);
+    return s_properties.loadXML(root);
 }
 
 bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)

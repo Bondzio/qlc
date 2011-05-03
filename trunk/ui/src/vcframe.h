@@ -73,7 +73,7 @@ public:
      * Load & Save
      *********************************************************************/
 public:
-    bool loadXML(const QDomElement* vc_root);
+    bool loadXML(const QDomElement* root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 
 protected:

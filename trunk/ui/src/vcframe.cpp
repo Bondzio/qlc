@@ -98,16 +98,6 @@ bool VCFrame::copyFrom(VCWidget* widget)
 
 bool VCFrame::loadXML(const QDomElement* root)
 {
-    bool visible = false;
-    int x = 0;
-    int y = 0;
-    int w = 0;
-    int h = 0;
-
-    QDomNode node;
-    QDomElement tag;
-    QString str;
-
     Q_ASSERT(root != NULL);
 
     if (root->tagName() != xmlTagName())
@@ -120,17 +110,21 @@ bool VCFrame::loadXML(const QDomElement* root)
     setCaption(root->attribute(KXMLQLCVCCaption));
 
     /* Children */
-    node = root->firstChild();
+    QDomNode node = root->firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCWindowState)
         {
+            /* Frame geometry (visibility is ignored) */
+            int x = 0, y = 0, w = 0, h = 0;
+            bool visible = false;
             loadXMLWindowState(&tag, &x, &y, &w, &h, &visible);
             setGeometry(x, y, w, h);
         }
         else if (tag.tagName() == KXMLQLCVCAppearance)
         {
+            /* Frame appearance */
             loadXMLAppearance(&tag);
         }
         else if (tag.tagName() == KXMLQLCVCFrame)

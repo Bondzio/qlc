@@ -48,6 +48,36 @@ VCWidgetProperties::~VCWidgetProperties()
 {
 }
 
+QFlags <Qt::WindowState> VCWidgetProperties::state() const
+{
+    return m_state;
+}
+
+bool VCWidgetProperties::visible() const
+{
+    return m_visible;
+}
+
+int VCWidgetProperties::x() const
+{
+    return m_x;
+}
+
+int VCWidgetProperties::y() const
+{
+    return m_y;
+}
+
+int VCWidgetProperties::width() const
+{
+    return m_width;
+}
+
+int VCWidgetProperties::height() const
+{
+    return m_height;
+}
+
 void VCWidgetProperties::store(QWidget* widget)
 {
     Q_ASSERT(widget != NULL);
@@ -59,23 +89,18 @@ void VCWidgetProperties::store(QWidget* widget)
     m_height = widget->height();
 }
 
-bool VCWidgetProperties::loadXML(const QDomElement* root)
+bool VCWidgetProperties::loadXML(const QDomElement& root)
 {
-    QDomElement tag;
-    QDomNode node;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCWidgetProperties)
+    if (root.tagName() != KXMLQLCWidgetProperties)
     {
         qWarning() << Q_FUNC_INFO << "Widget Properties node not found";
         return false;
     }
 
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCWidgetX)
             m_x = tag.text().toInt();

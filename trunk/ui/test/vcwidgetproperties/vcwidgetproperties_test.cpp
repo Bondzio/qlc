@@ -136,7 +136,7 @@ void VCWidgetProperties_Test::load()
     root.appendChild(foo);
 
     VCWidgetProperties p;
-    p.loadXML(&root);
+    p.loadXML(root);
     QVERIFY(p.x() == 50);
     QVERIFY(p.y() == 70);
     QVERIFY(p.width() == 40);
@@ -153,7 +153,7 @@ void VCWidgetProperties_Test::loadWrongRoot()
     doc.appendChild(root);
 
     VCWidgetProperties p;
-    QVERIFY(p.loadXML(&root) == false);
+    QVERIFY(p.loadXML(root) == false);
     QVERIFY(p.x() == 100);
     QVERIFY(p.y() == 100);
     QVERIFY(p.width() == 0);

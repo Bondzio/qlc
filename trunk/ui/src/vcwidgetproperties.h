@@ -34,8 +34,7 @@ class QWidget;
 #define KXMLQLCWidgetState "State"
 #define KXMLQLCWidgetVisible "Visible"
 
-/** Simple class to store a widget's visible state (minimized, maximized,
-    visible or not visible and dimensions. */
+/** Simple class to store a widget's visibility, state and dimensions */
 class VCWidgetProperties
 {
 public:
@@ -43,27 +42,28 @@ public:
     VCWidgetProperties(const VCWidgetProperties& properties);
     virtual ~VCWidgetProperties();
 
-    QFlags <Qt::WindowState> state() const {
-        return m_state;
-    }
-    bool visible() const {
-        return m_visible;
-    }
-    int x() const {
-        return m_x;
-    }
-    int y() const {
-        return m_y;
-    }
-    int width() const {
-        return m_width;
-    }
-    int height() const {
-        return m_height;
-    }
+    /************************************************************************
+     * Properties
+     ************************************************************************/
+public:
+    QFlags <Qt::WindowState> state() const;
+    bool visible() const;
+    int x() const;
+    int y() const;
+    int width() const;
+    int height() const;
 
+    /** Get properties from the given widget and store them in memory. */
     virtual void store(QWidget* widget);
-    virtual bool loadXML(const QDomElement* root);
+
+    /************************************************************************
+     * Load & Save
+     ************************************************************************/
+public:
+    /** Load properties from an XML tag */
+    virtual bool loadXML(const QDomElement& root);
+
+    /** Save stored properties to the given XML document */
     virtual bool saveXML(QDomDocument* doc, QDomElement* root);
 
 protected:

@@ -649,7 +649,7 @@ bool VCProperties::loadProperties(const QDomElement& root)
         }
         else if (tag.tagName() == KXMLQLCWidgetProperties)
         {
-            VCWidgetProperties::loadXML(&tag);
+            VCWidgetProperties::loadXML(tag);
         }
         else
         {

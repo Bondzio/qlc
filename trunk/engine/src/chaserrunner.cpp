@@ -172,8 +172,9 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
     }
     else
     {
-        // Current step
-        m_elapsed++;
+        // Current step. UINT_MAX is the maximum hold time.
+        if (m_elapsed < UINT_MAX)
+            m_elapsed++;
     }
 
     QMutableMapIterator <quint32,FadeChannel> it(m_channelMap);

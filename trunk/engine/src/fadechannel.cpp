@@ -147,7 +147,8 @@ quint32 FadeChannel::fadeTime() const
 
 uchar FadeChannel::nextStep()
 {
-    setElapsed(elapsed() + 1);
+    if (elapsed() < UINT_MAX)
+        setElapsed(elapsed() + 1);
     return calculateCurrent(fadeTime(), elapsed());
 }
 

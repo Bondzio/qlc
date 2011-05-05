@@ -111,7 +111,9 @@ void Function_Test::elapsed()
 
     stub->m_elapsed = UINT_MAX;
     stub->incrementElapsed();
-    QCOMPARE(stub->elapsed(), quint32(1));
+    QCOMPARE(stub->elapsed(), quint32(UINT_MAX));
+    stub->incrementElapsed();
+    QCOMPARE(stub->elapsed(), quint32(UINT_MAX));
 }
 
 void Function_Test::preRunPostRun()

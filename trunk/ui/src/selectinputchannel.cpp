@@ -70,8 +70,8 @@ void SelectInputChannel::accept()
     item = m_tree->currentItem();
     if (item != NULL)
     {
-        m_universe = item->text(KColumnUniverse).toInt();
-        m_channel = item->text(KColumnChannel).toInt();
+        m_universe = item->text(KColumnUniverse).toUInt();
+        m_channel = item->text(KColumnChannel).toUInt();
     }
 
     QDialog::accept();
@@ -221,7 +221,7 @@ void SelectInputChannel::slotItemChanged(QTreeWidgetItem* item, int column)
         return;
 
     /* Extract only numbers from the input data */
-    channel = item->text(KColumnName).toInt();
+    channel = item->text(KColumnName).toUInt();
 
     /* Put the entered channel number also to the channel column */
     item->setText(KColumnChannel, QString("%1").arg(channel - 1));

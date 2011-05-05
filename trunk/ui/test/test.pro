@@ -5,3 +5,4 @@ SUBDIRS += vcframe
 SUBDIRS += vclabel
 SUBDIRS += vcproperties
 SUBDIRS += vcwidgetproperties
+SUBDIRS += vcxypadfixture

@@ -41,6 +41,8 @@
 VCXYPadFixture::VCXYPadFixture(Doc* doc)
     : m_doc(doc)
 {
+    Q_ASSERT(m_doc != NULL);
+
     m_fixture = Fixture::invalidId();
 
     m_xMin = 0;
@@ -60,38 +62,44 @@ VCXYPadFixture::VCXYPadFixture(Doc* doc)
 VCXYPadFixture::VCXYPadFixture(Doc* doc, const QVariant& variant)
     : m_doc(doc)
 {
+    Q_ASSERT(m_doc != NULL);
+
     if (variant.canConvert(QVariant::StringList) == true)
     {
         QStringList list(variant.toStringList());
-        if (list.count() == 7)
+        if (list.size() == 7)
         {
-            m_fixture = list.at(0).toInt();
+            m_fixture = list.takeFirst().toUInt();
 
-            m_xMin = list.at(1).toDouble();
-            m_xMax = list.at(2).toDouble();
-            m_xReverse = list.at(3).toInt();
+            m_xMin = qreal(list.takeFirst().toDouble());
+            m_xMin = CLAMP(m_xMin, qreal(0), qreal(1));
+            m_xMax = qreal(list.takeFirst().toDouble());
+            m_xMax = CLAMP(m_xMax, qreal(0), qreal(1));
+            m_xReverse = bool(list.takeFirst().toInt());
 
-            m_yMin = list.at(4).toDouble();
-            m_yMax = list.at(5).toDouble();
-            m_yReverse = list.at(6).toInt();
+            m_yMin = qreal(list.takeFirst().toDouble());
+            m_yMin = CLAMP(m_yMin, qreal(0), qreal(1));
+            m_yMax = qreal(list.takeFirst().toDouble());
+            m_yMax = CLAMP(m_yMax, qreal(0), qreal(1));
+            m_yReverse = bool(list.takeFirst().toInt());
+            Q_ASSERT(list.isEmpty() == true);
+
+            m_xMSB = QLCChannel::invalid();
+            m_xLSB = QLCChannel::invalid();
+            m_yMSB = QLCChannel::invalid();
+            m_yLSB = QLCChannel::invalid();
         }
         else
         {
-            /* Construct empty fixture */
+            /* Construct an empty fixture */
             *this = VCXYPadFixture(doc);
         }
     }
     else
     {
-        /* Construct empty fixture */
+        /* Construct an empty fixture */
         *this = VCXYPadFixture(doc);
     }
-
-    m_xMSB = QLCChannel::invalid();
-    m_xLSB = QLCChannel::invalid();
-
-    m_yMSB = QLCChannel::invalid();
-    m_yLSB = QLCChannel::invalid();
 }
 
 VCXYPadFixture::~VCXYPadFixture()
@@ -156,6 +164,11 @@ void VCXYPadFixture::setFixture(quint32 fxi_id)
     m_fixture = fxi_id;
 }
 
+quint32 VCXYPadFixture::fixture() const
+{
+    return m_fixture;
+}
+
 QString VCXYPadFixture::name() const
 {
     if (m_fixture == Fixture::invalidId())
@@ -168,106 +181,30 @@ QString VCXYPadFixture::name() const
         return QString();
 }
 
-void VCXYPadFixture::arm()
-{
-    Fixture* fxi = NULL;
-
-    fxi = m_doc->fixture(m_fixture);
-    if (fxi == NULL)
-    {
-        m_xLSB = QLCChannel::invalid();
-        m_xMSB = QLCChannel::invalid();
-        m_yLSB = QLCChannel::invalid();
-        m_yMSB = QLCChannel::invalid();
-    }
-    else
-    {
-        const QLCFixtureMode* mode = NULL;
-        QLCChannel* ch = NULL;
-
-        /* If this fixture has no mode, it's a generic dimmer that
-           can't do pan&tilt anyway. */
-        mode = fxi->fixtureMode();
-        if (mode == NULL)
-        {
-            m_xLSB = QLCChannel::invalid();
-            m_xMSB = QLCChannel::invalid();
-            m_yLSB = QLCChannel::invalid();
-            m_yMSB = QLCChannel::invalid();
-
-            return;
-        }
-
-        /* Find exact channel numbers for MSB/LSB pan and tilt */
-        for (quint32 i = 0; i < quint32(mode->channels().size()); i++)
-        {
-            ch = mode->channel(i);
-            Q_ASSERT(ch != NULL);
-
-            if (ch->group() == QLCChannel::Pan)
-            {
-                if (ch->controlByte() == QLCChannel::MSB)
-                    m_xMSB = fxi->universeAddress() + i;
-                else if (ch->controlByte() == QLCChannel::LSB)
-                    m_xLSB = fxi->universeAddress() + i;
-            }
-            else if (ch->group() == QLCChannel::Tilt)
-            {
-                if (ch->controlByte() == QLCChannel::MSB)
-                    m_yMSB = fxi->universeAddress() + i;
-                else if (ch->controlByte() == QLCChannel::LSB)
-                    m_yLSB = fxi->universeAddress() + i;
-            }
-        }
-    }
-}
-
-void VCXYPadFixture::disarm()
-{
-    m_xLSB = QLCChannel::invalid();
-    m_xMSB = QLCChannel::invalid();
-    m_yLSB = QLCChannel::invalid();
-    m_yMSB = QLCChannel::invalid();
-}
-
-void VCXYPadFixture::writeDMX(double xmul, double ymul, UniverseArray* universes)
-{
-    Q_ASSERT(universes != NULL);
-
-    if (m_xMSB == QLCChannel::invalid() || m_yMSB == QLCChannel::invalid())
-        return;
-
-    double xMSB = ((m_xMax - m_xMin) * xmul) + m_xMin;
-    double yMSB = ((m_yMax - m_yMin) * ymul) + m_yMin;
-
-    if (m_xReverse == true)
-        xMSB = m_xMax - xMSB;
-    if (m_yReverse == true)
-        yMSB = m_yMax - yMSB;
-
-    universes->write(m_xMSB, char(xMSB * UCHAR_MAX), QLCChannel::Pan);
-    universes->write(m_yMSB, char(yMSB * UCHAR_MAX), QLCChannel::Tilt);
-
-    if (m_xLSB != QLCChannel::invalid() && m_yLSB != QLCChannel::invalid())
-    {
-        /* Leave only the fraction part from the value */
-        double xLSB = (xMSB * double(UCHAR_MAX)) - floor(xMSB * double(UCHAR_MAX));
-        double yLSB = (yMSB * double(UCHAR_MAX)) - floor(yMSB * double(UCHAR_MAX));
-
-        universes->write(m_xLSB, char(xLSB * UCHAR_MAX), QLCChannel::Pan);
-        universes->write(m_yLSB, char(yLSB * UCHAR_MAX), QLCChannel::Tilt);
-    }
-}
-
 /****************************************************************************
  * X-Axis
  ****************************************************************************/
 
-void VCXYPadFixture::setX(double min, double max, bool reverse)
+void VCXYPadFixture::setX(qreal min, qreal max, bool reverse)
 {
     m_xMin = CLAMP(min, 0.0, 1.0);
     m_xMax = CLAMP(max, 0.0, 1.0);
     m_xReverse = reverse;
+}
+
+qreal VCXYPadFixture::xMin() const
+{
+    return m_xMin;
+}
+
+qreal VCXYPadFixture::xMax() const
+{
+    return m_xMax;
+}
+
+bool VCXYPadFixture::xReverse() const
+{
+    return m_xReverse;
 }
 
 QString VCXYPadFixture::xBrief() const
@@ -283,11 +220,26 @@ QString VCXYPadFixture::xBrief() const
  * Y-Axis
  ****************************************************************************/
 
-void VCXYPadFixture::setY(double min, double max, bool reverse)
+void VCXYPadFixture::setY(qreal min, qreal max, bool reverse)
 {
     m_yMin = CLAMP(min, 0.0, 1.0);
     m_yMax = CLAMP(max, 0.0, 1.0);
     m_yReverse = reverse;
+}
+
+qreal VCXYPadFixture::yMin() const
+{
+    return m_yMin;
+}
+
+qreal VCXYPadFixture::yMax() const
+{
+    return m_yMax;
+}
+
+bool VCXYPadFixture::yReverse() const
+{
+    return m_yReverse;
 }
 
 QString VCXYPadFixture::yBrief() const
@@ -303,37 +255,28 @@ QString VCXYPadFixture::yBrief() const
  * Load & Save
  ****************************************************************************/
 
-bool VCXYPadFixture::loadXML(const QDomElement* root)
+bool VCXYPadFixture::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-    QString axis;
-    QString min;
-    QString max;
-    QString rev;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCVCXYPadFixture)
+    if (root.tagName() != KXMLQLCVCXYPadFixture)
     {
         qWarning() << Q_FUNC_INFO << "XYPad Fixture node not found";
         return false;
     }
 
     /* Fixture ID */
-    setFixture(root->attribute(KXMLQLCVCXYPadFixtureID).toInt());
+    setFixture(root.attribute(KXMLQLCVCXYPadFixtureID).toInt());
 
     /* Children */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCVCXYPadFixtureAxis)
         {
-            axis = tag.attribute(KXMLQLCVCXYPadFixtureAxisID);
-            min = tag.attribute(KXMLQLCVCXYPadFixtureAxisLowLimit);
-            max = tag.attribute(KXMLQLCVCXYPadFixtureAxisHighLimit);
-            rev = tag.attribute(KXMLQLCVCXYPadFixtureAxisReverse);
+            QString axis = tag.attribute(KXMLQLCVCXYPadFixtureAxisID);
+            QString min = tag.attribute(KXMLQLCVCXYPadFixtureAxisLowLimit);
+            QString max = tag.attribute(KXMLQLCVCXYPadFixtureAxisHighLimit);
+            QString rev = tag.attribute(KXMLQLCVCXYPadFixtureAxisReverse);
 
             if (axis == KXMLQLCVCXYPadFixtureAxisX)
             {
@@ -365,7 +308,7 @@ bool VCXYPadFixture::loadXML(const QDomElement* root)
     return true;
 }
 
-bool VCXYPadFixture::saveXML(QDomDocument* doc, QDomElement* pad_root)
+bool VCXYPadFixture::saveXML(QDomDocument* doc, QDomElement* pad_root) const
 {
     QDomElement root;
     QDomElement tag;
@@ -376,50 +319,120 @@ bool VCXYPadFixture::saveXML(QDomDocument* doc, QDomElement* pad_root)
 
     /* VCXYPad Fixture */
     root = doc->createElement(KXMLQLCVCXYPadFixture);
-    root.setAttribute(KXMLQLCVCXYPadFixtureID,
-                      QString("%1").arg(m_fixture));
+    root.setAttribute(KXMLQLCVCXYPadFixtureID, QString("%1").arg(m_fixture));
     root.appendChild(text);
     pad_root->appendChild(root);
 
     /* X-Axis */
     tag = doc->createElement(KXMLQLCVCXYPadFixtureAxis);
     root.appendChild(tag);
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisID,
-                     KXMLQLCVCXYPadFixtureAxisX);
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisLowLimit,
-                     QString("%1").arg(m_xMin));
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisHighLimit,
-                     QString("%1").arg(m_xMax));
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisID, KXMLQLCVCXYPadFixtureAxisX);
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisLowLimit, QString("%1").arg(m_xMin));
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisHighLimit, QString("%1").arg(m_xMax));
     if (m_xReverse == true)
-    {
-        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse,
-                         KXMLQLCTrue);
-    }
+        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse, KXMLQLCTrue);
     else
-    {
-        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse,
-                         KXMLQLCFalse);
-    }
+        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse, KXMLQLCFalse);
 
     /* Y-Axis */
     tag = doc->createElement(KXMLQLCVCXYPadFixtureAxis);
     root.appendChild(tag);
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisID,
-                     KXMLQLCVCXYPadFixtureAxisY);
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisLowLimit,
-                     QString("%1").arg(m_yMin));
-    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisHighLimit,
-                     QString("%1").arg(m_yMax));
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisID, KXMLQLCVCXYPadFixtureAxisY);
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisLowLimit, QString("%1").arg(m_yMin));
+    tag.setAttribute(KXMLQLCVCXYPadFixtureAxisHighLimit, QString("%1").arg(m_yMax));
     if (m_yReverse == true)
+        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse, KXMLQLCTrue);
+    else
+        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse, KXMLQLCFalse);
+
+    return true;
+}
+
+/****************************************************************************
+ * Running
+ ****************************************************************************/
+
+void VCXYPadFixture::arm()
+{
+    Fixture* fxi = m_doc->fixture(m_fixture);
+    if (fxi == NULL)
     {
-        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse,
-                         KXMLQLCTrue);
+        m_xLSB = QLCChannel::invalid();
+        m_xMSB = QLCChannel::invalid();
+        m_yLSB = QLCChannel::invalid();
+        m_yMSB = QLCChannel::invalid();
     }
     else
     {
-        tag.setAttribute(KXMLQLCVCXYPadFixtureAxisReverse,
-                         KXMLQLCFalse);
-    }
+        /* If this fixture has no mode, it's a generic dimmer that
+           can't do pan&tilt anyway. */
+        const QLCFixtureMode* mode = fxi->fixtureMode();
+        if (mode == NULL)
+        {
+            m_xLSB = QLCChannel::invalid();
+            m_xMSB = QLCChannel::invalid();
+            m_yLSB = QLCChannel::invalid();
+            m_yMSB = QLCChannel::invalid();
 
-    return true;
+            return;
+        }
+
+        /* Find exact channel numbers for MSB/LSB pan and tilt */
+        for (quint32 i = 0; i < quint32(mode->channels().size()); i++)
+        {
+            const QLCChannel* ch = mode->channel(i);
+            Q_ASSERT(ch != NULL);
+
+            if (ch->group() == QLCChannel::Pan)
+            {
+                if (ch->controlByte() == QLCChannel::MSB)
+                    m_xMSB = fxi->universeAddress() + i;
+                else if (ch->controlByte() == QLCChannel::LSB)
+                    m_xLSB = fxi->universeAddress() + i;
+            }
+            else if (ch->group() == QLCChannel::Tilt)
+            {
+                if (ch->controlByte() == QLCChannel::MSB)
+                    m_yMSB = fxi->universeAddress() + i;
+                else if (ch->controlByte() == QLCChannel::LSB)
+                    m_yLSB = fxi->universeAddress() + i;
+            }
+        }
+    }
+}
+
+void VCXYPadFixture::disarm()
+{
+    m_xLSB = QLCChannel::invalid();
+    m_xMSB = QLCChannel::invalid();
+    m_yLSB = QLCChannel::invalid();
+    m_yMSB = QLCChannel::invalid();
+}
+
+void VCXYPadFixture::writeDMX(qreal xmul, qreal ymul, UniverseArray* universes)
+{
+    Q_ASSERT(universes != NULL);
+
+    if (m_xMSB == QLCChannel::invalid() || m_yMSB == QLCChannel::invalid())
+        return;
+
+    xmul = ((m_xMax - m_xMin) * xmul) + m_xMin;
+    ymul = ((m_yMax - m_yMin) * ymul) + m_yMin;
+
+    if (m_xReverse == true)
+        xmul = m_xMax - xmul;
+    if (m_yReverse == true)
+        ymul = m_yMax - ymul;
+
+    ushort x = floor((qreal(USHRT_MAX) * xmul) + 0.5);
+    ushort y = floor((qreal(USHRT_MAX) * ymul) + 0.5);
+
+    universes->write(m_xMSB, char(x >> 8), QLCChannel::Pan);
+    universes->write(m_yMSB, char(y >> 8), QLCChannel::Tilt);
+
+    if (m_xLSB != QLCChannel::invalid() && m_yLSB != QLCChannel::invalid())
+    {
+        universes->write(m_xLSB, char(x & 0xFF), QLCChannel::Pan);
+        universes->write(m_yLSB, char(y & 0xFF), QLCChannel::Tilt);
+    }
 }

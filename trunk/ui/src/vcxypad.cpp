@@ -266,7 +266,7 @@ bool VCXYPad::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCVCXYPadFixture)
         {
             VCXYPadFixture fxi(m_doc);
-            if (fxi.loadXML(&tag) == true)
+            if (fxi.loadXML(tag) == true)
                 appendFixture(fxi);
         }
         else

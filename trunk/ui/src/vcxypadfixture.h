@@ -70,43 +70,28 @@ private:
      ********************************************************************/
 public:
     void setFixture(quint32 fxi_id);
-    quint32 fixture() const {
-        return m_fixture;
-    }
+    quint32 fixture() const;
 
     QString name() const;
 
-    void arm();
-    void disarm();
-
-    /** Write the value using x & y multipliers for the actual range */
-    void writeDMX(double xmul, double ymul, UniverseArray* universes);
-
-protected:
+private:
     quint32 m_fixture;
 
     /********************************************************************
      * X-Axis
      ********************************************************************/
 public:
-    void setX(double min, double max, bool reverse);
-
-    double xMin() const {
-        return m_xMin;
-    }
-    double xMax() const {
-        return m_xMax;
-    }
-    bool xReverse() const {
-        return m_xReverse;
-    }
+    void setX(qreal min, qreal max, bool reverse);
+    qreal xMin() const;
+    qreal xMax() const;
+    bool xReverse() const;
 
     /** min% - max% for displaying X limits in tree widget */
     QString xBrief() const;
 
-protected:
-    double m_xMin;
-    double m_xMax;
+private:
+    qreal m_xMin;
+    qreal m_xMax;
     bool m_xReverse;
 
     quint32 m_xLSB;
@@ -116,24 +101,17 @@ protected:
      * Y-Axis
      ********************************************************************/
 public:
-    void setY(double min, double max, bool reverse);
-
-    double yMin() const {
-        return m_yMin;
-    }
-    double yMax() const {
-        return m_yMax;
-    }
-    bool yReverse() const {
-        return m_yReverse;
-    }
+    void setY(qreal min, qreal max, bool reverse);
+    qreal yMin() const;
+    qreal yMax() const;
+    bool yReverse() const;
 
     /** min% - max% for displaying Y limits in tree widget */
     QString yBrief() const;
 
-protected:
-    double m_yMin;
-    double m_yMax;
+private:
+    qreal m_yMin;
+    qreal m_yMax;
     bool m_yReverse;
 
     quint32 m_yLSB;
@@ -143,8 +121,18 @@ protected:
      * Load & Save
      ********************************************************************/
 public:
-    bool loadXML(const QDomElement* root);
-    bool saveXML(QDomDocument* doc, QDomElement* root);
+    bool loadXML(const QDomElement& root);
+    bool saveXML(QDomDocument* doc, QDomElement* root) const;
+
+    /********************************************************************
+     * Running
+     ********************************************************************/
+public:
+    void arm();
+    void disarm();
+
+    /** Write the value using x & y multipliers for the actual range */
+    void writeDMX(qreal xmul, qreal ymul, UniverseArray* universes);
 };
 
 #endif

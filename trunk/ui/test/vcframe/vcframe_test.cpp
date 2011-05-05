@@ -260,7 +260,7 @@ void VCFrame_Test::customMenu()
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
-    QWidget w;
+    QMdiArea w;
 
     VCFrame frame(&w, &doc, &om, &im, &mt);
     QVERIFY(frame.customMenu(NULL) == NULL);

@@ -63,44 +63,28 @@ public:
      *********************************************************************/
 public:
     /** Get the selected QLCFixtureDef */
-    const QLCFixtureDef* fixtureDef() const {
-        return m_fixtureDef;
-    }
+    const QLCFixtureDef* fixtureDef() const;
 
     /** Get the selected QLCFixtureMode */
-    const QLCFixtureMode* mode() const {
-        return m_mode;
-    }
+    const QLCFixtureMode* mode() const;
 
     /** Get the assigned friendly name */
-    QString name() const {
-        return m_nameValue;
-    }
+    QString name() const;
 
     /** Get the assigned DMX address */
-    quint32 address() const {
-        return m_addressValue;
-    }
+    quint32 address() const;
 
     /** Get the assigned DMX universe */
-    quint32 universe() const {
-        return m_universeValue;
-    }
+    quint32 universe() const;
 
     /** Get the number of similar fixtures to add */
-    int amount() const {
-        return m_amountValue;
-    }
+    int amount() const;
 
     /** Get the number of channels to leave between two fixtures */
-    quint32 gap() const {
-        return m_gapValue;
-    }
+    quint32 gap() const;
 
     /** Get the number of channels to use (ONLY for generic dimmers) */
-    quint32 channels() const {
-        return m_channelsValue;
-    }
+    quint32 channels() const;
 
 protected:
     const QLCFixtureDefCache& m_fixtureDefCache;

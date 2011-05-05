@@ -170,6 +170,50 @@ AddFixture::~AddFixture()
 }
 
 /*****************************************************************************
+ * Value getters
+ *****************************************************************************/
+
+const QLCFixtureDef* AddFixture::fixtureDef() const
+{
+    return m_fixtureDef;
+}
+
+const QLCFixtureMode* AddFixture::mode() const
+{
+    return m_mode;
+}
+
+QString AddFixture::name() const
+{
+    return m_nameValue;
+}
+
+quint32 AddFixture::address() const
+{
+    return m_addressValue;
+}
+
+quint32 AddFixture::universe() const
+{
+    return m_universeValue;
+}
+
+int AddFixture::amount() const
+{
+    return m_amountValue;
+}
+
+quint32 AddFixture::gap() const
+{
+    return m_gapValue;
+}
+
+quint32 AddFixture::channels() const
+{
+    return m_channelsValue;
+}
+
+/*****************************************************************************
  * Fillers
  *****************************************************************************/
 

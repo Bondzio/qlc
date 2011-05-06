@@ -27,12 +27,12 @@
 <context>
     <name>OLAOut</name>
     <message>
-        <location filename="olaout.cpp" line="194"/>
+        <location filename="olaout.cpp" line="188"/>
         <source>This plugin provides DMX output support for the Open Lighting Architecture (OLA).</source>
         <translation>Dieses Plugin bietet DMX-Output für die Open Lighting Architecture (OLA).</translation>
     </message>
     <message>
-        <location filename="olaout.cpp" line="201"/>
+        <location filename="olaout.cpp" line="195"/>
         <source>This is the output for OLA universe %1</source>
         <translation>Dies ist der Ausgang für OLA Universum %1</translation>
     </message>

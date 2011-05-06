@@ -2,7 +2,7 @@
 <FixtureDefinition>
  <Creator>
   <Name>Q Light Controller</Name>
-  <Version>3.1.0</Version>
+  <Version>3.2.0</Version>
   <Author>Heikki Junnila</Author>
  </Creator>
  <Manufacturer>Varytec</Manufacturer>
@@ -97,16 +97,16 @@
  </Channel>
  <Channel Name="Gobo">
   <Group Byte="0">Gobo</Group>
-  <Capability Min="0" Max="7">Gobo 1</Capability>
-  <Capability Min="8" Max="15">Gobo 2</Capability>
-  <Capability Min="16" Max="23">Gobo 3</Capability>
-  <Capability Min="24" Max="31">Gobo 4</Capability>
-  <Capability Min="32" Max="39">Gobo 5</Capability>
-  <Capability Min="40" Max="47">Gobo 6</Capability>
-  <Capability Min="48" Max="55">Gobo 7</Capability>
-  <Capability Min="56" Max="63">Gobo 8</Capability>
-  <Capability Min="64" Max="71">Gobo 9</Capability>
-  <Capability Min="72" Max="79">Gobo 10</Capability>
+  <Capability Min="0" Max="7">Open</Capability>
+  <Capability Min="8" Max="15">Gobo 1</Capability>
+  <Capability Min="16" Max="23">Gobo 2</Capability>
+  <Capability Min="24" Max="31">Gobo 3</Capability>
+  <Capability Min="32" Max="39">Gobo 4</Capability>
+  <Capability Min="40" Max="47">Gobo 5</Capability>
+  <Capability Min="48" Max="55">Gobo 6</Capability>
+  <Capability Min="56" Max="63">Gobo 7</Capability>
+  <Capability Min="64" Max="71">Gobo 8</Capability>
+  <Capability Min="72" Max="79">Gobo 9</Capability>
   <Capability Min="80" Max="94">Gobo 1 shake</Capability>
   <Capability Min="95" Max="109">Gobo 2 shake</Capability>
   <Capability Min="110" Max="124">Gobo 3 shake</Capability>

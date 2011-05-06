@@ -22,7 +22,6 @@ INCLUDEPATH += ../../plugins/interfaces
 
 # Resources
 RESOURCES    += qlcui.qrc
-win32:RC_FILE = qlcui.rc
 
 # Sources
 HEADERS += aboutbox.h \

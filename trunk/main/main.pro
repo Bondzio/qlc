@@ -13,6 +13,7 @@ LIBS         += -lqlcengine
 LIBS         += -lqlcui
 
 SOURCES      += main.cpp
+win32:RC_FILE = main.rc
 
 macx {
     # This must be after "TARGET = " and before target installation so that

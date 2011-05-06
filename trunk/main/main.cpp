@@ -148,6 +148,11 @@ int main(int argc, char** argv)
     QApplication qapp(argc, argv);
     qapp.setAttribute(Qt::AA_DontShowIconsInMenus, false);
 
+#ifdef __linux__
+    // Disabled because Ubuntu Unity freaks out
+    qapp.setAttribute(Qt::AA_DontUseNativeMenuBar);
+#endif
+
 #ifdef __APPLE__
     /* Load plugins from within the bundle ONLY */
     QDir dir(QApplication::applicationDirPath());

@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 SUBDIRS += aboutbox
 SUBDIRS += addfixture
+SUBDIRS += vcdockslider
 SUBDIRS += vcframe
 SUBDIRS += vclabel
 SUBDIRS += vcproperties

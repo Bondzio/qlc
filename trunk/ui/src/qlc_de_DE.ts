@@ -1110,22 +1110,22 @@ Changes will be lost if you don&apos;t save them.</source>
         <location filename="efxeditor.ui" line="90"/>
         <location filename="efxeditor.ui" line="248"/>
         <source>Intensity</source>
-        <translation type="unfinished">Intensität</translation>
+        <translation>Intensität</translation>
     </message>
     <message>
         <location filename="efxeditor.ui" line="215"/>
         <source>Each fixture starts moving immediately with an offset</source>
-        <translation type="unfinished"></translation>
+        <translation>Jedes Gerät fängt umgehend an sich zu bewegen mit einem Offset</translation>
     </message>
     <message>
         <location filename="efxeditor.ui" line="218"/>
         <source>Asymmetric</source>
-        <translation type="unfinished"></translation>
+        <translation>Asymmetrisch</translation>
     </message>
     <message>
         <location filename="efxeditor.ui" line="228"/>
         <source>Speed buses</source>
-        <translation type="unfinished"></translation>
+        <translation>Geschwindigkeitsbusse</translation>
     </message>
     <message>
         <location filename="efxeditor.ui" line="312"/>
@@ -1910,7 +1910,7 @@ Changes will be lost if you don&apos;t save them.</source>
     <message>
         <location filename="inputpatcheditor.ui" line="95"/>
         <source>Attempt to re-connect the current plugin</source>
-        <translation type="unfinished">Versuche das Plugin erneut zu verbinden</translation>
+        <translation>Versuche das aktuelle Plugin erneut zu verbinden</translation>
     </message>
     <message>
         <location filename="inputpatcheditor.ui" line="116"/>
@@ -1936,7 +1936,7 @@ Changes will be lost if you don&apos;t save them.</source>
     <message>
         <location filename="inputpatcheditor.ui" line="227"/>
         <source>Use this universe for e.g. scene channel value setting in scene editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwende dieses Universum zum Beispiel für Szenen Kanalwerte im Szeneneditor</translation>
     </message>
     <message>
         <location filename="inputpatcheditor.ui" line="230"/>
@@ -2926,7 +2926,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcproperties.ui" line="402"/>
         <source>Default fade slider</source>
-        <translation type="unfinished"></translation>
+        <translation>Standard Fade-Schieberegler</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="408"/>
@@ -2937,7 +2937,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcproperties.ui" line="415"/>
         <source>Lowest value that can be set to the &apos;fade&apos; bus with the default sliders</source>
-        <translation type="unfinished"></translation>
+        <translation>Niedrigster Wert, der dem Fade-Bus mit den Standardschiebereglern zugewiesen werden kann</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="418"/>
@@ -2956,7 +2956,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcproperties.ui" line="435"/>
         <source>Highest value that can be set to the &apos;fade&apos; bus with the default sliders</source>
-        <translation type="unfinished"></translation>
+        <translation>Höchster Wert, der dem Fade-Bus mit den Standardschiebereglern zugewiesen werden kann</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="461"/>
@@ -3122,67 +3122,67 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcproperties.ui" line="396"/>
         <source>Default Fade</source>
-        <translation type="unfinished"></translation>
+        <translation>Standard Fade</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="468"/>
         <source>Input universe for default fade.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eingangsuniversum für den Standard-Fade</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="485"/>
         <source>Input channel for default fade.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eingangskanal für den Standard-Fade</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="508"/>
         <source>When toggled, you can move an external slider/knob to assign it to the default fade slider.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wenn betätigt kann ein externer Regler/Schalter betätigt werden um diesen dem Standard-Fade zuzuweisen</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="521"/>
         <source>Choose an external input universe &amp; channel that the default fade slider should listen to.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle ein externes Eingangsuniversum &amp; einen Kanal auf den dieser Standard-Fade Regler hören soll</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="535"/>
         <source>Default Hold</source>
-        <translation type="unfinished"></translation>
+        <translation>Standard Hold</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="541"/>
         <source>Default hold slider</source>
-        <translation type="unfinished"></translation>
+        <translation>Standard Hold-Schieberegler</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="554"/>
         <source>Lowest value that can be set to the &apos;hold&apos; bus with the default sliders</source>
-        <translation type="unfinished"></translation>
+        <translation>Niedrigster Wert, der dem Hold-Bus mit den Standardschiebereglern zugewiesen werden kann</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="574"/>
         <source>Highest value that can be set to the &apos;hold&apos; bus with the default sliders</source>
-        <translation type="unfinished"></translation>
+        <translation>Höchster Wert, der dem Hold-Bus mit den Standardschiebereglern zugewiesen werden kann</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="607"/>
         <source>Input universe for default hold.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eingangsuniversum für den Standard-Hold</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="624"/>
         <source>Input channel for default hold.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eingangskanal für den Standard-Hold</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="647"/>
         <source>When toggled, you can move an external slider/knob to assign it to the default hold slider.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wenn betätigt kann ein externer Regler/Schalter betätigt werden um diesen dem Standard-Hold zuzuweisen</translation>
     </message>
     <message>
         <location filename="vcproperties.ui" line="660"/>
         <source>Choose an external input universe &amp; channel that the default hold slider should listen to.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle ein externes Eingangsuniversum &amp; einen Kanal auf den dieser Standard-Hold Regler hören soll</translation>
     </message>
     <message>
         <location filename="vcpropertieseditor.cpp" line="423"/>
@@ -3346,8 +3346,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcsliderproperties.ui" line="300"/>
         <source>Make the slider control a bus</source>
-        <translatorcomment>Noch nicht ganz so gut</translatorcomment>
-        <translation type="unfinished">Schieberegler kontrolliert einen Bus</translation>
+        <translation>Schieberegler einen Bus kontrollieren lassen</translation>
     </message>
     <message>
         <location filename="vcsliderproperties.ui" line="303"/>
@@ -3438,7 +3437,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcsliderproperties.ui" line="487"/>
         <source>Make the slider control the level of a set of channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Schieberegler den Level mehrer Kanäle kontrollieren lassen</translation>
     </message>
     <message>
         <location filename="vcsliderproperties.ui" line="490"/>
@@ -3458,7 +3457,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcsliderproperties.ui" line="510"/>
         <source>Function that is attached to the slider</source>
-        <translation type="unfinished"></translation>
+        <translation>Funktion die diesem Schieberegler zugewiesen ist</translation>
     </message>
     <message>
         <location filename="vcsliderproperties.ui" line="520"/>
@@ -3473,7 +3472,7 @@ Note that the wizard cannot tell the difference between a knob and a slider so y
     <message>
         <location filename="vcsliderproperties.ui" line="576"/>
         <source>Make the slider control a function</source>
-        <translation type="unfinished"></translation>
+        <translation>Schieberegler eine Funktiion kontrollieren lassen</translation>
     </message>
     <message>
         <location filename="vcsliderproperties.ui" line="579"/>

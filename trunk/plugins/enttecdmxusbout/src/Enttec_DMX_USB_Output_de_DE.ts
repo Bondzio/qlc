@@ -6,12 +6,12 @@
     <message>
         <location filename="enttecdmxusbopen.cpp" line="98"/>
         <source>DMX Frame Frequency</source>
-        <translation>Häufigkeit der DMX-Frames</translation>
+        <translation>Frequenz der DMX-Frames</translation>
     </message>
     <message>
         <location filename="enttecdmxusbopen.cpp" line="102"/>
         <source>Bad</source>
-        <translation>Faul</translation>
+        <translation>Schlecht</translation>
     </message>
     <message>
         <location filename="enttecdmxusbopen.cpp" line="104"/>
@@ -21,7 +21,7 @@
     <message>
         <location filename="enttecdmxusbopen.cpp" line="106"/>
         <source>Patch this widget to a universe to find out.</source>
-        <translation>Patch dieses Geräte zu einem Universum zu finden.</translation>
+        <translation>Dieses Geräte mit einem Universum verbinden um es herauszufinden.</translation>
     </message>
     <message>
         <location filename="enttecdmxusbopen.cpp" line="107"/>

@@ -27,7 +27,7 @@
         <location filename="../common/configuremididevice.ui" line="46"/>
         <source>MIDI control method used as DMX channels</source>
         <translatorcomment>Gefällt mir nicht</translatorcomment>
-        <translation type="unfinished">MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
+        <translation>MIDI-Kontrollmethode die als DMX-Kanäle verwendet wird</translation>
     </message>
 </context>
 <context>

@@ -61,7 +61,7 @@
     <message>
         <location filename="../common/src/configuremidiinput.cpp" line="117"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Keiner</translation>
     </message>
 </context>
 <context>
@@ -197,7 +197,7 @@
     <message>
         <location filename="mididevice.cpp" line="228"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Keiner</translation>
     </message>
     <message>
         <location filename="mididevice.cpp" line="235"/>

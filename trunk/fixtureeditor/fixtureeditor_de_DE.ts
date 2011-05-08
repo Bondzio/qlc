@@ -331,7 +331,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="editchannel.ui" line="47"/>
         <source>Primary colour level controlled by this channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Hauptfarblevel welches dieser Kanal kontrolliert</translation>
     </message>
     <message>
         <location filename="editchannel.ui" line="54"/>
@@ -682,7 +682,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="fixtureeditor.ui" line="163"/>
         <source>The author name of this fixture definition</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Name des Autors dieser Gerätedefinition</translation>
     </message>
     <message>
         <location filename="fixtureeditor.ui" line="184"/>

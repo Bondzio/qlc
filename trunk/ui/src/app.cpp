@@ -81,7 +81,10 @@
 #define KUniverseCount 4
 
 QStyle* App::s_saneStyle = NULL;
-QProgressDialog* _pd = NULL;
+
+#ifdef __APPLE__
+static QProgressDialog* _pd = NULL;
+#endif
 
 /*****************************************************************************
  * Initialization

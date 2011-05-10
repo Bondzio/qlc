@@ -238,8 +238,10 @@ void Chaser_Test::copyFrom()
 
     /* Verify that chaser contents are copied */
     Chaser c2(m_doc);
+    QSignalSpy spy(&c2, SIGNAL(changed(quint32)));
     QVERIFY(c2.copyFrom(&c1) == true);
-    QVERIFY(c2.name() == "First");
+    QCOMPARE(spy.size(), 1);
+    QVERIFY(c2.name() == c1.name());
     QVERIFY(c2.busID() == 15);
     QVERIFY(c2.direction() == Chaser::Backward);
     QVERIFY(c2.runOrder() == Chaser::PingPong);
@@ -266,7 +268,7 @@ void Chaser_Test::copyFrom()
     /* Verify that copying TO the same Chaser a second time succeeds and
        that steps are not appended but replaced completely. */
     QVERIFY(c2.copyFrom(&c3) == true);
-    QVERIFY(c2.name() == "Third");
+    QVERIFY(c2.name() == c3.name());
     QVERIFY(c2.busID() == 8);
     QVERIFY(c2.direction() == Chaser::Forward);
     QVERIFY(c2.runOrder() == Chaser::Loop);

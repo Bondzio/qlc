@@ -322,8 +322,10 @@ void Scene_Test::copyFrom()
 
     /* Verify that scene contents are copied */
     Scene s2(m_doc);
+    QSignalSpy spy(&s2, SIGNAL(changed(quint32)));
     QVERIFY(s2.copyFrom(&s1) == true);
-    QVERIFY(s2.name() == "First");
+    QCOMPARE(spy.size(), 1);
+    QVERIFY(s2.name() == s1.name());
     QVERIFY(s2.busID() == 15);
     QVERIFY(s2.value(1, 2) == 3);
     QVERIFY(s2.value(4, 5) == 6);
@@ -343,7 +345,7 @@ void Scene_Test::copyFrom()
 
     /* Verify that copying TO the same Scene a second time succeeds */
     QVERIFY(s2.copyFrom(&s3) == true);
-    QVERIFY(s2.name() == "Third");
+    QVERIFY(s2.name() == s3.name());
     QVERIFY(s2.busID() == 8);
     QVERIFY(s2.value(3, 1) == 2);
     QVERIFY(s2.value(6, 4) == 5);

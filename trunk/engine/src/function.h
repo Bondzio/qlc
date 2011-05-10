@@ -92,7 +92,14 @@ public:
      */
     virtual Function* createCopy(Doc* doc) = 0;
 
-    /** Copy this function's contents from the given function */
+    /**
+     * Copy this function's contents from the given function. Finally emits
+     * the changed() signal so don't emit it from subclasses' copyFrom()
+     * implementations, but call this one just before return.
+     *
+     * @param function The function to copy from
+     * @return true if successful, otherwise false
+     */
     virtual bool copyFrom(const Function* function);
 
     /*********************************************************************

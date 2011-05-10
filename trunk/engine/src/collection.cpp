@@ -69,20 +69,10 @@ Function* Collection::createCopy(Doc* doc)
     Q_ASSERT(doc != NULL);
 
     Function* copy = new Collection(doc);
-    Q_ASSERT(copy != NULL);
-    if (copy->copyFrom(this) == false)
+    if (copy->copyFrom(this) == false || doc->addFunction(copy) == false)
     {
         delete copy;
         copy = NULL;
-    }
-    else if (doc->addFunction(copy) == false)
-    {
-        delete copy;
-        copy = NULL;
-    }
-    else
-    {
-        copy->setName(tr("Copy of %1").arg(name()));
     }
 
     return copy;
@@ -97,11 +87,7 @@ bool Collection::copyFrom(const Function* function)
     m_functions.clear();
     m_functions = coll->m_functions;
 
-    bool result = Function::copyFrom(function);
-
-    emit changed(m_id);
-
-    return result;
+    return Function::copyFrom(function);
 }
 
 /*****************************************************************************

@@ -53,6 +53,37 @@ void Function_Test::initial()
     QCOMPARE(stub->stopped(), true);
 }
 
+void Function_Test::properties()
+{
+    QLCFixtureDefCache cache;
+    Doc doc(this, cache);
+
+    Function_Stub* stub = new Function_Stub(&doc);
+    doc.addFunction(stub);
+
+    QSignalSpy spy(stub, SIGNAL(changed(quint32)));
+
+    stub->setName("Test");
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0][0].toUInt(), stub->id());
+    QCOMPARE(stub->name(), QString("Test"));
+
+    stub->setRunOrder(Function::PingPong);
+    QCOMPARE(spy.size(), 2);
+    QCOMPARE(spy[1][0].toUInt(), stub->id());
+    QCOMPARE(stub->runOrder(), Function::PingPong);
+
+    stub->setDirection(Function::Backward);
+    QCOMPARE(spy.size(), 3);
+    QCOMPARE(spy[2][0].toUInt(), stub->id());
+    QCOMPARE(stub->direction(), Function::Backward);
+
+    stub->setBus(14);
+    QCOMPARE(spy.size(), 4);
+    QCOMPARE(spy[3][0].toUInt(), stub->id());
+    QCOMPARE(stub->busID(), quint32(14));
+}
+
 void Function_Test::copyFrom()
 {
     QLCFixtureDefCache cache;
@@ -66,11 +97,14 @@ void Function_Test::copyFrom()
     stub1->setBus(15);
 
     Function_Stub* stub2 = new Function_Stub(&doc);
+    QSignalSpy spy(stub2, SIGNAL(changed(quint32)));
     stub2->copyFrom(stub1);
-    QCOMPARE(stub1->name(), stub2->name());
-    QCOMPARE(stub1->runOrder(), stub2->runOrder());
-    QCOMPARE(stub1->direction(), stub2->direction());
-    QCOMPARE(stub1->busID(), stub2->busID());
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0][0].toUInt(), quint32(stub2->id()));
+    QCOMPARE(stub2->name(), stub1->name());
+    QCOMPARE(stub2->runOrder(), stub1->runOrder());
+    QCOMPARE(stub2->direction(), stub1->direction());
+    QCOMPARE(stub2->busID(), stub1->busID());
 }
 
 void Function_Test::flashUnflash()

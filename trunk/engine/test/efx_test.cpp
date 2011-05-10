@@ -1512,8 +1512,10 @@ void EFX_Test::copyFrom()
 
     /* Verify that EFX contents are copied */
     EFX e2(m_doc);
+    QSignalSpy spy(&e2, SIGNAL(changed(quint32)));
     QVERIFY(e2.copyFrom(&e1) == true);
-    QVERIFY(e2.name() == "First");
+    QCOMPARE(spy.size(), 1);
+    QVERIFY(e2.name() == e1.name());
     QVERIFY(e2.direction() == EFX::Backward);
     QVERIFY(e2.runOrder() == EFX::SingleShot);
     QVERIFY(e2.busID() == 15);
@@ -1564,7 +1566,7 @@ void EFX_Test::copyFrom()
 
     /* Verify that copying to the same EFX a second time succeeds */
     QVERIFY(e2.copyFrom(&e3) == true);
-    QVERIFY(e2.name() == "Third");
+    QVERIFY(e2.name() == e3.name());
     QVERIFY(e2.direction() == EFX::Forward);
     QVERIFY(e2.runOrder() == EFX::Loop);
     QVERIFY(e2.busID() == 3);
@@ -1625,7 +1627,7 @@ void EFX_Test::createCopy()
 
     EFX* copy = qobject_cast<EFX*> (f);
     QVERIFY(copy != NULL);
-    QVERIFY(copy->name() == "Copy of First");
+    QVERIFY(copy->name() == e1->name());
     QVERIFY(copy->direction() == EFX::Forward);
     QVERIFY(copy->runOrder() == EFX::PingPong);
     QVERIFY(copy->busID() == 15);

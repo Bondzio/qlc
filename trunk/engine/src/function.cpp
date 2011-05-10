@@ -76,15 +76,15 @@ Function::~Function()
 
 bool Function::copyFrom(const Function* function)
 {
-    /* Don't copy the function's parent */
-
     if (function == NULL)
         return false;
 
-    setName(function->name());
-    setRunOrder(function->runOrder());
-    setDirection(function->direction());
-    setBus(function->busID());
+    m_name = function->name();
+    m_runOrder = function->runOrder();
+    m_direction = function->direction();
+    m_busID = function->busID();
+
+    emit changed(m_id);
 
     return true;
 }
@@ -117,6 +117,7 @@ quint32 Function::invalidId()
 void Function::setName(const QString& name)
 {
     m_name = QString(name);
+    emit changed(m_id);
 }
 
 QString Function::name() const
@@ -175,6 +176,7 @@ void Function::setRunOrder(const Function::RunOrder& order)
         m_runOrder = order;
     else
         m_runOrder = Loop;
+    emit changed(m_id);
 }
 
 Function::RunOrder Function::runOrder() const
@@ -221,6 +223,7 @@ void Function::setDirection(const Function::Direction& dir)
         m_direction = dir;
     else
         m_direction = Forward;
+    emit changed(m_id);
 }
 
 Function::Direction Function::direction() const
@@ -258,7 +261,10 @@ Function::Direction Function::stringToDirection(const QString& str)
 void Function::setBus(quint32 id)
 {
     if (id < Bus::count() && type() != Collection)
+    {
         m_busID = id;
+        emit changed(m_id);
+    }
 }
 
 quint32 Function::busID() const

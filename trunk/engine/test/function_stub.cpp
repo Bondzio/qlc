@@ -36,10 +36,25 @@ Function_Stub::~Function_Stub()
 {
 }
 
-Function* Function_Stub::createCopy(Doc* parent)
+Function* Function_Stub::createCopy(Doc* doc)
 {
-    Q_UNUSED(parent);
-    return NULL;
+    Q_ASSERT(doc != NULL);
+
+    Function* copy = new Function_Stub(doc);
+    Q_ASSERT(copy != NULL);
+
+    if (copy->copyFrom(this) == false)
+    {
+        delete copy;
+        copy = NULL;
+    }
+    else if (doc->addFunction(copy) == false)
+    {
+        delete copy;
+        copy = NULL;
+    }
+
+    return copy;
 }
 
 Function::Type Function_Stub::type() const

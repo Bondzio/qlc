@@ -31,6 +31,7 @@ class Function_Test : public QObject
 private slots:
     void initTestCase();
     void initial();
+    void properties();
     void copyFrom();
     void flashUnflash();
     void elapsed();

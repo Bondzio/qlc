@@ -67,21 +67,10 @@ Function* Scene::createCopy(Doc* doc)
     Q_ASSERT(doc != NULL);
 
     Function* copy = new Scene(doc);
-    Q_ASSERT(copy != NULL);
-
-    if (copy->copyFrom(this) == false)
+    if (copy->copyFrom(this) == false || doc->addFunction(copy) == false)
     {
         delete copy;
         copy = NULL;
-    }
-    else if (doc->addFunction(copy) == false)
-    {
-        delete copy;
-        copy = NULL;
-    }
-    else
-    {
-        copy->setName(tr("Copy of %1").arg(name()));
     }
 
     return copy;
@@ -96,11 +85,7 @@ bool Scene::copyFrom(const Function* function)
     m_values.clear();
     m_values = scene->m_values;
 
-    bool result = Function::copyFrom(function);
-
-    emit changed(m_id);
-
-    return result;
+    return Function::copyFrom(function);
 }
 
 /*****************************************************************************

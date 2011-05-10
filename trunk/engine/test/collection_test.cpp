@@ -306,8 +306,10 @@ void Collection_Test::copyFrom()
 
     /* Verify that Collection contents are copied */
     Collection c2(m_doc);
+    QSignalSpy spy(&c2, SIGNAL(changed(quint32)));
     QVERIFY(c2.copyFrom(&c1) == true);
-    QVERIFY(c2.name() == "First");
+    QCOMPARE(spy.size(), 1);
+    QVERIFY(c2.name() == c1.name());
     QVERIFY(c2.functions().size() == 4);
     QVERIFY(c2.functions().at(0) == 2);
     QVERIFY(c2.functions().at(1) == 0);
@@ -328,7 +330,7 @@ void Collection_Test::copyFrom()
     /* Verify that copying TO the same Collection a second time succeeds and
        that steps are not appended but replaced completely. */
     QVERIFY(c2.copyFrom(&c3) == true);
-    QVERIFY(c2.name() == "Third");
+    QVERIFY(c2.name() == c3.name());
     QVERIFY(c2.functions().size() == 3);
     QVERIFY(c2.functions().at(0) == 15);
     QVERIFY(c2.functions().at(1) == 94);

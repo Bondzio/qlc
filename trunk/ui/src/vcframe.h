@@ -76,6 +76,13 @@ public:
     bool loadXML(const QDomElement* root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 
+    /**
+     * @reimp
+     *
+     * Propagates the postLoad() call to all children.
+     */
+    void postLoad();
+
 protected:
     /** Can be overridden by subclasses */
     virtual QString xmlTagName() const { return KXMLQLCVCFrame; }

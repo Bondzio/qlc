@@ -378,6 +378,11 @@ void VCWidget::slotKeyReleased(const QKeySequence& keySequence)
  * Load & Save
  *****************************************************************************/
 
+void VCWidget::postLoad()
+{
+    /* NOP */
+}
+
 bool VCWidget::loadXMLAppearance(const QDomElement* root)
 {
     QDomNode node;

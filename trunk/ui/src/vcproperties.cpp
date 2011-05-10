@@ -535,6 +535,12 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     return VCWidgetProperties::saveXML(doc, &prop_root);
 }
 
+void VCProperties::postLoad()
+{
+    Q_ASSERT(m_contents != NULL);
+    m_contents->postLoad();
+}
+
 bool VCProperties::loadProperties(const QDomElement& root)
 {
     if (root.tagName() != KXMLQLCVCProperties)

@@ -203,6 +203,9 @@ public:
 public:
     bool loadXML(const QDomElement* root);
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
+
+    /** @reimp */
+    void postLoad();
 };
 
 #endif

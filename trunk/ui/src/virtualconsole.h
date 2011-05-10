@@ -397,6 +397,9 @@ public:
 
     /** Save properties and contents to an XML document */
     static bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
+
+    /** Do post-load cleanup & checks */
+    static void postLoad();
 };
 
 #endif

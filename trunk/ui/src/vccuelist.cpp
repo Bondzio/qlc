@@ -255,6 +255,27 @@ void VCCueList::createRunner()
             this, SLOT(slotCurrentStepChanged(int)));
 }
 
+void VCCueList::postLoad()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QList <QTreeWidgetItem*> destroyList;
+
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+
+        quint32 fid = item->text(KColumnID).toUInt();
+        Function* function = m_doc->function(fid);
+        if (function == NULL || function->type() != Function::Scene)
+            destroyList << item;
+    }
+
+    foreach (QTreeWidgetItem* item, destroyList)
+        delete item;
+}
+
 /*****************************************************************************
  * DMX Source
  *****************************************************************************/

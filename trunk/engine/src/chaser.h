@@ -136,6 +136,9 @@ public:
     /** Load this function contents from an XML document */
     bool loadXML(const QDomElement* root);
 
+    /** @reimp */
+    void postLoad();
+
     /*********************************************************************
      * Running
      *********************************************************************/

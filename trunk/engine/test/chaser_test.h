@@ -48,6 +48,7 @@ private slots:
     void loadSuccess();
     void loadWrongType();
     void loadWrongRoot();
+    void postLoad();
     void save();
 
     void arm();

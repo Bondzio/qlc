@@ -23,17 +23,19 @@
 #include <QtXml>
 
 #include "mastertimer_stub.h"
-#include "chaser_test.h"
-
 #include "universearray.h"
+#include "chaser_test.h"
 #include "fixture.h"
+
 #define protected public
 #define private public
 #include "chaserrunner.h"
+#include "collection.h"
 #include "function.h"
 #include "chaser.h"
 #include "scene.h"
 #include "doc.h"
+#include "efx.h"
 #undef protected
 #undef private
 
@@ -483,6 +485,136 @@ void Chaser_Test::loadWrongRoot()
 
     Chaser c(m_doc);
     QVERIFY(c.loadXML(&root) == false);
+}
+
+void Chaser_Test::postLoad()
+{
+    Scene* sc1 = new Scene(m_doc);
+    m_doc->addFunction(sc1);
+
+    Scene* sc2 = new Scene(m_doc);
+    m_doc->addFunction(sc2);
+
+    Chaser* ch1 = new Chaser(m_doc);
+    m_doc->addFunction(ch1);
+
+    Chaser* ch2 = new Chaser(m_doc);
+    m_doc->addFunction(ch2);
+
+    Collection* co1 = new Collection(m_doc);
+    m_doc->addFunction(co1);
+
+    Collection* co2 = new Collection(m_doc);
+    m_doc->addFunction(co2);
+
+    EFX* ef1 = new EFX(m_doc);
+    m_doc->addFunction(ef1);
+
+    EFX* ef2 = new EFX(m_doc);
+    m_doc->addFunction(ef2);
+
+    QDomDocument doc;
+
+    QDomElement root = doc.createElement("Function");
+    root.setAttribute("Type", "Chaser");
+
+    QDomElement bus = doc.createElement("Bus");
+    bus.setAttribute("Role", "Hold");
+    QDomText busText = doc.createTextNode("16");
+    bus.appendChild(busText);
+    root.appendChild(bus);
+
+    QDomElement dir = doc.createElement("Direction");
+    QDomText dirText = doc.createTextNode("Backward");
+    dir.appendChild(dirText);
+    root.appendChild(dir);
+
+    QDomElement run = doc.createElement("RunOrder");
+    QDomText runText = doc.createTextNode("SingleShot");
+    run.appendChild(runText);
+    root.appendChild(run);
+
+    QDomElement step0 = doc.createElement("Step");
+    step0.setAttribute("Number", 0);
+    QDomText step0Text = doc.createTextNode(QString::number(sc1->id()));
+    step0.appendChild(step0Text);
+    root.appendChild(step0);
+
+    QDomElement step1 = doc.createElement("Step");
+    step1.setAttribute("Number", 1);
+    QDomText step1Text = doc.createTextNode(QString::number(sc2->id()));
+    step1.appendChild(step1Text);
+    root.appendChild(step1);
+
+    QDomElement step2 = doc.createElement("Step");
+    step2.setAttribute("Number", 2);
+    QDomText step2Text = doc.createTextNode(QString::number(ch1->id()));
+    step2.appendChild(step2Text);
+    root.appendChild(step2);
+
+    QDomElement step3 = doc.createElement("Step");
+    step3.setAttribute("Number", 3);
+    QDomText step3Text = doc.createTextNode(QString::number(ch2->id()));
+    step3.appendChild(step3Text);
+    root.appendChild(step3);
+
+    QDomElement step4 = doc.createElement("Step");
+    step4.setAttribute("Number", 4);
+    QDomText step4Text = doc.createTextNode(QString::number(co1->id()));
+    step4.appendChild(step4Text);
+    root.appendChild(step4);
+
+    QDomElement step5 = doc.createElement("Step");
+    step5.setAttribute("Number", 5);
+    QDomText step5Text = doc.createTextNode(QString::number(co2->id()));
+    step5.appendChild(step5Text);
+    root.appendChild(step5);
+
+    QDomElement step6 = doc.createElement("Step");
+    step6.setAttribute("Number", 6);
+    QDomText step6Text = doc.createTextNode(QString::number(ef1->id()));
+    step6.appendChild(step6Text);
+    root.appendChild(step6);
+
+    QDomElement step7 = doc.createElement("Step");
+    step7.setAttribute("Number", 7);
+    QDomText step7Text = doc.createTextNode(QString::number(ef2->id()));
+    step7.appendChild(step7Text);
+    root.appendChild(step7);
+
+    // Nonexistent function
+    QDomElement step8 = doc.createElement("Step");
+    step8.setAttribute("Number", 8);
+    QDomText step8Text = doc.createTextNode(QString::number(INT_MAX - 1));
+    step8.appendChild(step8Text);
+    root.appendChild(step8);
+
+    // Unknown tag
+    QDomElement foo = doc.createElement("Foo");
+    foo.setAttribute("Number", 3);
+    QDomText fooText = doc.createTextNode("1");
+    foo.appendChild(fooText);
+    root.appendChild(foo);
+
+    Chaser c(m_doc);
+    QCOMPARE(c.loadXML(&root), true);
+    QCOMPARE(c.direction(), Chaser::Backward);
+    QCOMPARE(c.runOrder(), Chaser::SingleShot);
+    QCOMPARE(c.steps().size(), 9);
+
+    c.postLoad();
+    QCOMPARE(c.steps().size(), 2);
+    QCOMPARE(c.steps().at(0), sc1->id());
+    QCOMPARE(c.steps().at(1), sc2->id());
+
+    m_doc->deleteFunction(sc1->id());
+    m_doc->deleteFunction(sc2->id());
+    m_doc->deleteFunction(ch1->id());
+    m_doc->deleteFunction(ch2->id());
+    m_doc->deleteFunction(co1->id());
+    m_doc->deleteFunction(co2->id());
+    m_doc->deleteFunction(ef1->id());
+    m_doc->deleteFunction(ef2->id());
 }
 
 void Chaser_Test::save()

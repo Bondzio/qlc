@@ -1497,6 +1497,9 @@ bool App::loadXML(const QDomDocument* doc)
         node = node.nextSibling();
     }
 
+    // Perform post-load operations
+    VirtualConsole::postLoad();
+
     /* Display VC if appropriate */
     if (VirtualConsole::properties().visible() == true)
         slotControlVC();

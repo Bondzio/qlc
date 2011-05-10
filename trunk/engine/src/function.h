@@ -309,6 +309,13 @@ public:
      */
     static bool loader(const QDomElement* root, Doc* doc);
 
+    /**
+     * Called for each Function-based object after everything has been loaded.
+     * Do any post-load cleanup, function mappings etc. if needed. Default
+     * implementation does nothing.
+     */
+    virtual void postLoad();
+
     /*********************************************************************
      * Flash
      *********************************************************************/

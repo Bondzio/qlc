@@ -1650,3 +1650,8 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     return s_properties.saveXML(doc, wksp_root);
 }
+
+void VirtualConsole::postLoad()
+{
+    s_properties.postLoad();
+}

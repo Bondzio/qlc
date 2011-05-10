@@ -243,6 +243,23 @@ bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
     return true;
 }
 
+void VCFrame::postLoad()
+{
+    QListIterator <VCWidget*> it(findChildren<VCWidget*>());
+    while (it.hasNext() == true)
+    {
+        VCWidget* widget = it.next();
+
+        /* findChildren() is recursive, so the list contains all
+           possible child widgets below this frame. Each frame must
+           save only its direct children to preserve hierarchy, so
+           save only such widgets that have this widget as their
+           direct parent. */
+        if (widget->parentWidget() == this)
+            widget->postLoad();
+    }
+}
+
 /*****************************************************************************
  * Custom menu
  *****************************************************************************/

@@ -394,6 +394,8 @@ bool Doc::loadXML(const QDomElement* root)
         node = node.nextSibling();
     }
 
+    postLoad();
+
     return true;
 }
 
@@ -430,4 +432,15 @@ bool Doc::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     Bus::instance()->saveXML(doc, &root);
 
     return true;
+}
+
+void Doc::postLoad()
+{
+    QListIterator <Function*> functionit(functions());
+    while (functionit.hasNext() == true)
+    {
+        Function* function(functionit.next());
+        Q_ASSERT(function != NULL);
+        function->postLoad();
+    }
 }

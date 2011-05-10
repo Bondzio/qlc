@@ -269,6 +269,13 @@ public:
     virtual bool loadXML(const QDomElement* vc_root) = 0;
     virtual bool saveXML(QDomDocument* doc, QDomElement* vc_root) = 0;
 
+    /**
+     * Called for every VCWidget-based object after everything has been loaded.
+     * Do any post-load cleanup, function mappings etc. if needed. Default
+     * implementation does nothing.
+     */
+    virtual void postLoad();
+
 protected:
     bool loadXMLAppearance(const QDomElement* appearance_root);
     bool loadXMLInput(const QDomElement* root);
@@ -369,7 +376,6 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* e);
     virtual void mouseDoubleClickEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
-
 };
 
 #endif

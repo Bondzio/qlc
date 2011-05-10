@@ -309,6 +309,22 @@ bool Chaser::loadXML(const QDomElement* root)
     return true;
 }
 
+void Chaser::postLoad()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    Doc* doc = qobject_cast<Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    QMutableListIterator <quint32> it(m_steps);
+    while (it.hasNext() == true)
+    {
+        Function* function = doc->function(it.next());
+        if (function == NULL || function->type() != Function::Scene)
+            it.remove();
+    }
+}
+
 /*****************************************************************************
  * Running
  *****************************************************************************/

@@ -223,6 +223,9 @@ public:
     /** Save VirtualConsole properties & contents to the given XML document */
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 
+    /** Perform post-load cleanup & checks */
+    void postLoad();
+
 private:
     /** Load VirtualConsole properties (not including contents) */
     bool loadProperties(const QDomElement& root);

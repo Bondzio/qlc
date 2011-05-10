@@ -295,6 +295,13 @@ public:
      * @return true if successful, otherwise false
      */
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
+
+private:
+    /**
+     * Calls postLoad() for each Function after everything has been loaded
+     * to do post-load cleanup & mappings.
+     */
+    void postLoad();
 };
 
 #endif

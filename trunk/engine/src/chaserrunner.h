@@ -39,7 +39,7 @@ class ChaserRunner : public QObject
 public:
     ChaserRunner(Doc* doc, QList <Function*> steps, quint32 holdBusId,
                  Function::Direction direction, Function::RunOrder runOrder,
-                 qreal intensity = 1.0, QObject* parent = NULL);
+                 qreal intensity = 1.0, QObject* parent = NULL, int startIndex = -1);
     ~ChaserRunner();
 
     /**

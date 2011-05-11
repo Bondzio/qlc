@@ -37,7 +37,8 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
                            Function::Direction direction,
                            Function::RunOrder runOrder,
                            qreal intensity,
-                           QObject* parent)
+                           QObject* parent,
+                           int startIndex)
     : QObject(parent)
     , m_doc(doc)
     , m_steps(steps)
@@ -55,6 +56,8 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
     , m_intensity(intensity)
 {
     reset();
+    if (startIndex != -1)
+        m_currentStep = startIndex;
 }
 
 ChaserRunner::~ChaserRunner()

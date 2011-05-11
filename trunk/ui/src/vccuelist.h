@@ -113,7 +113,7 @@ protected slots:
 
 protected:
     /** Create the runner that writes cue values to universes */
-    void createRunner();
+    void createRunner(int startIndex = -1);
 
 protected:
     QTreeWidget* m_list;
@@ -130,17 +130,17 @@ public:
      * Key sequences
      *************************************************************************/
 public:
-    /** Keyboard key combination for skipping to the next cue */
+    /** Set the keyboard key combination for skipping to the next cue */
     void setNextKeySequence(const QKeySequence& keySequence);
-    QKeySequence nextKeySequence() const {
-        return m_nextKeySequence;
-    }
 
-    /** Keyboard key combination for skipping to the previous cue */
+    /** Get the keyboard key combination for skipping to the next cue */
+    QKeySequence nextKeySequence() const;
+
+    /** Set the keyboard key combination for skipping to the previous cue */
     void setPreviousKeySequence(const QKeySequence& keySequence);
-    QKeySequence previousKeySequence() const {
-        return m_previousKeySequence;
-    }
+
+    /** Get the keyboard key combination for skipping to the previous cue */
+    QKeySequence previousKeySequence() const;
 
 protected slots:
     void slotKeyPressed(const QKeySequence& keySequence);
@@ -153,23 +153,23 @@ protected:
      * External Input
      *************************************************************************/
 public:
-    /** Input universe/channel for skipping to the next cue */
+    /** Set input universe & channel for skipping to the next cue */
     void setNextInputSource(quint32 universe, quint32 channel);
-    quint32 nextInputUniverse() const {
-        return m_nextInputUniverse;
-    }
-    quint32 nextInputChannel() const {
-        return m_nextInputChannel;
-    }
 
-    /** Input universe/channel for skipping to the previous cue */
+    /** Input universe for skipping to the next cue */
+    quint32 nextInputUniverse() const;
+
+    /** Input channel for skipping to the next cue */
+    quint32 nextInputChannel() const;
+
+    /** Set input universe & channel for skipping to the previous cue */
     void setPreviousInputSource(quint32 universe, quint32 channel);
-    quint32 previousInputUniverse() const {
-        return m_previousInputUniverse;
-    }
-    quint32 previousInputChannel() const {
-        return m_previousInputChannel;
-    }
+
+    /** Input universe for skipping to the previous cue */
+    quint32 previousInputUniverse() const;
+
+    /** Input channel for skipping to the previous cue */
+    quint32 previousInputChannel() const;
 
 protected slots:
     void slotNextInputValueChanged(quint32 universe, quint32 channel, uchar value);

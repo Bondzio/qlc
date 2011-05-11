@@ -150,11 +150,11 @@ void VCCueList::clear()
 void VCCueList::append(quint32 fid)
 {
     Function* function = m_doc->function(fid);
-    Q_ASSERT(function != NULL);
+    if (function == NULL)
+        return;
 
     QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-    item->setText(KColumnNumber,
-                  QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
+    item->setText(KColumnNumber, QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
     item->setText(KColumnName, function->name());
     item->setText(KColumnID, QString("%1").arg(fid));
 }
@@ -168,7 +168,11 @@ void VCCueList::slotFunctionRemoved(quint32 fid)
         Q_ASSERT(item != NULL);
 
         if (item->text(KColumnID).toUInt() == fid)
+        {
             delete item;
+            // Item count reduced by one, don't skip to the next item just yet
+            i--;
+        }
     }
 }
 
@@ -207,7 +211,7 @@ void VCCueList::slotPreviousCue()
 
     /* Create the runner only when the first/last cue is engaged. */
     if (m_runner == NULL)
-        createRunner();
+        createRunner(m_list->topLevelItemCount() - 1); // Start from end
     else
         m_runner->previous();
 }
@@ -227,11 +231,12 @@ void VCCueList::slotItemActivated(QTreeWidgetItem* item)
         return;
 
     if (m_runner == NULL)
-        createRunner();
-    m_runner->setCurrentStep(m_list->indexOfTopLevelItem(item));
+        createRunner(m_list->indexOfTopLevelItem(item));
+    else
+        m_runner->setCurrentStep(m_list->indexOfTopLevelItem(item));
 }
 
-void VCCueList::createRunner()
+void VCCueList::createRunner(int startIndex)
 {
     Q_ASSERT(m_runner == NULL);
 
@@ -249,31 +254,10 @@ void VCCueList::createRunner()
     }
 
     m_runner = new ChaserRunner(m_doc, cues, Bus::defaultHold(),
-                                Function::Forward, Function::Loop);
+                                Function::Forward, Function::Loop, 1.0, this, startIndex);
     m_runner->setAutoStep(false);
     connect(m_runner, SIGNAL(currentStepChanged(int)),
             this, SLOT(slotCurrentStepChanged(int)));
-}
-
-void VCCueList::postLoad()
-{
-    qDebug() << Q_FUNC_INFO;
-
-    QList <QTreeWidgetItem*> destroyList;
-
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-
-        quint32 fid = item->text(KColumnID).toUInt();
-        Function* function = m_doc->function(fid);
-        if (function == NULL || function->type() != Function::Scene)
-            destroyList << item;
-    }
-
-    foreach (QTreeWidgetItem* item, destroyList)
-        delete item;
 }
 
 /*****************************************************************************
@@ -295,9 +279,19 @@ void VCCueList::setNextKeySequence(const QKeySequence& keySequence)
     m_nextKeySequence = QKeySequence(keySequence);
 }
 
+QKeySequence VCCueList::nextKeySequence() const
+{
+    return m_nextKeySequence;
+}
+
 void VCCueList::setPreviousKeySequence(const QKeySequence& keySequence)
 {
     m_previousKeySequence = QKeySequence(keySequence);
+}
+
+QKeySequence VCCueList::previousKeySequence() const
+{
+    return m_previousKeySequence;
 }
 
 void VCCueList::slotKeyPressed(const QKeySequence& keySequence)
@@ -323,6 +317,16 @@ void VCCueList::setNextInputSource(quint32 uni, quint32 ch)
                 this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
 }
 
+quint32 VCCueList::nextInputUniverse() const
+{
+    return m_nextInputUniverse;
+}
+
+quint32 VCCueList::nextInputChannel() const
+{
+    return m_nextInputChannel;
+}
+
 void VCCueList::setPreviousInputSource(quint32 uni, quint32 ch)
 {
     disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
@@ -332,6 +336,16 @@ void VCCueList::setPreviousInputSource(quint32 uni, quint32 ch)
     if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
         connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
                 this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
+}
+
+quint32 VCCueList::previousInputUniverse() const
+{
+    return m_previousInputUniverse;
+}
+
+quint32 VCCueList::previousInputChannel() const
+{
+    return m_previousInputChannel;
 }
 
 void VCCueList::slotNextInputValueChanged(quint32 universe, quint32 channel, uchar value)
@@ -585,4 +599,25 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     saveXMLAppearance(doc, &root);
 
     return true;
+}
+
+void VCCueList::postLoad()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QList <QTreeWidgetItem*> destroyList;
+
+    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+
+        quint32 fid = item->text(KColumnID).toUInt();
+        Function* function = m_doc->function(fid);
+        if (function == NULL || function->type() != Function::Scene)
+            destroyList << item;
+    }
+
+    foreach (QTreeWidgetItem* item, destroyList)
+        delete item;
 }

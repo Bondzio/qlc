@@ -30,4 +30,4 @@ TRANSLATIONS += Velleman_Output_fr_FR.ts
 include(../../../i18n.pri)
 
 target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
-INSTALLS   += target
+win32:INSTALLS   += target

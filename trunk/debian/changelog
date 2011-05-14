@@ -1,3 +1,12 @@
+qlc (3.2.0-1) stable; urgency=high
+
+  * Fixed a crash that occurred when loading a workspace file with a cue list
+    that contains non-scene or nonexistent functions.
+  * Fixed a crash that occurred when loading a workspace file with a chaser
+    that contains non-scene or nonexistent functions.
+
+ -- Heikki Junnila <hjunnila@users.sf.net>  Sat, 14 May 2011 10:51:03 +0300
+
 qlc (3.2.0) stable; urgency=low
 
   * HTP (Highest Takes Precedence) for all intensity channels.

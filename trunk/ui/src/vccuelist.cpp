@@ -603,8 +603,6 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
 
 void VCCueList::postLoad()
 {
-    qDebug() << Q_FUNC_INFO;
-
     QList <QTreeWidgetItem*> destroyList;
 
     for (int i = 0; i < m_list->topLevelItemCount(); i++)

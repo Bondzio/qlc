@@ -297,8 +297,6 @@ bool Chaser::loadXML(const QDomElement* root)
 
 void Chaser::postLoad()
 {
-    qDebug() << Q_FUNC_INFO;
-
     Doc* doc = qobject_cast<Doc*> (parent());
     Q_ASSERT(doc != NULL);
 

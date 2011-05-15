@@ -51,27 +51,27 @@ private:
     /*********************************************************************
      * Bus
      *********************************************************************/
-protected slots:
+private slots:
     /** Catches bus name changes */
     void slotBusNameChanged(quint32 bus, const QString& name);
 
     /** Catches bus value changes */
     void slotBusValueChanged(quint32 bus, quint32 value);
 
-protected:
+private:
     quint32 m_bus;
 
     /*************************************************************************
      * UI Controls
      *************************************************************************/
-protected slots:
+private slots:
     /** Catches slider value changes */
     void slotSliderValueChanged(int value);
 
     /** Catches tap button clicks */
     void slotTapButtonClicked();
 
-protected:
+private:
     QLabel* m_valueLabel;
     QSlider* m_slider;
     QToolButton* m_tapButton;
@@ -81,7 +81,7 @@ protected:
     /*************************************************************************
      * External input
      *************************************************************************/
-protected slots:
+private slots:
     /** Slot for external input value change signals */
     void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 };

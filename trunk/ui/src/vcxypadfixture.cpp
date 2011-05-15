@@ -130,7 +130,7 @@ VCXYPadFixture& VCXYPadFixture::operator=(const VCXYPadFixture& fxi)
     return *this;
 }
 
-bool VCXYPadFixture::operator==(const VCXYPadFixture& fxi)
+bool VCXYPadFixture::operator==(const VCXYPadFixture& fxi) const
 {
     if (m_fixture == fxi.m_fixture)
         return true;

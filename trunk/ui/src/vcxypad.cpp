@@ -125,7 +125,7 @@ void VCXYPad::editProperties()
 
 void VCXYPad::appendFixture(const VCXYPadFixture& fxi)
 {
-    if (m_fixtures.indexOf(fxi) == -1)
+    if (fxi.fixture() != Fixture::invalidId() && m_fixtures.indexOf(fxi) == -1)
         m_fixtures.append(fxi);
 }
 
@@ -148,8 +148,12 @@ void VCXYPad::clearFixtures()
 
 void VCXYPad::setCurrentXYPosition(const QPoint& point)
 {
+    QPoint pt(point);
+    pt.setX(CLAMP(pt.x(), 0, size().width()));
+    pt.setY(CLAMP(pt.y(), 0, size().height()));
+
     m_currentXYPositionMutex.lock();
-    m_currentXYPosition = point;
+    m_currentXYPosition = pt;
     m_currentXYPositionChanged = true;
     m_currentXYPositionMutex.unlock();
 

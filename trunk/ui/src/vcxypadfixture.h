@@ -57,7 +57,7 @@ public:
     VCXYPadFixture& operator=(const VCXYPadFixture& fxi);
 
     /** Comparing operator */
-    bool operator==(const VCXYPadFixture& fxi);
+    bool operator==(const VCXYPadFixture& fxi) const;
 
     /* Serialization operator for VCXYPadFixtureEditor */
     operator QVariant() const;

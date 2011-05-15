@@ -34,6 +34,8 @@ private slots:
     void fixtures();
     void copy();
     void setPos();
+    void loadXML();
+    void saveXML();
 };
 
 #endif

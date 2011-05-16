@@ -25,29 +25,38 @@
 
 #define protected public
 #define private public
+#include "mastertimer.h"
 #include "vcwidget.h"
 #include "vcxypad.h"
 #undef private
 #undef protected
 
 #include "qlcfixturedefcache.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
+#include "universearray.h"
 #include "vcxypad_test.h"
-#include "mastertimer.h"
 #include "outputmap.h"
 #include "inputmap.h"
 #include "vcframe.h"
+#include "qlcfile.h"
 #include "doc.h"
 #include "bus.h"
+
+#define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void VCXYPad_Test::initTestCase()
 {
     Bus::init(this);
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_cache.load(dir) == true);
 }
 
 void VCXYPad_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -65,8 +74,7 @@ void VCXYPad_Test::initial()
 
 void VCXYPad_Test::fixtures()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -113,8 +121,7 @@ void VCXYPad_Test::fixtures()
 
 void VCXYPad_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -157,8 +164,7 @@ void VCXYPad_Test::copy()
 
 void VCXYPad_Test::setPos()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -170,29 +176,28 @@ void VCXYPad_Test::setPos()
 
     QPoint pt(50, 50);
     pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.m_currentXYPosition, QPoint(50, 50));
+    QCOMPARE(pad.currentXYPosition(), QPoint(50, 50));
     QCOMPARE(pad.m_currentXYPositionChanged, true);
 
     pt = QPoint(400, 400);
     pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.m_currentXYPosition, QPoint(size.width(), size.height()));
+    QCOMPARE(pad.currentXYPosition(), QPoint(size.width(), size.height()));
     QCOMPARE(pad.m_currentXYPositionChanged, true);
 
     pt = QPoint(0, 0);
     pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.m_currentXYPosition, QPoint(0, 0));
+    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
     QCOMPARE(pad.m_currentXYPositionChanged, true);
 
     pt = QPoint(-5, -5);
     pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.m_currentXYPosition, QPoint(0, 0));
+    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
     QCOMPARE(pad.m_currentXYPositionChanged, true);
 }
 
 void VCXYPad_Test::loadXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -282,8 +287,7 @@ void VCXYPad_Test::loadXML()
 
 void VCXYPad_Test::saveXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
+    Doc doc(this, m_cache);
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
@@ -350,6 +354,128 @@ void VCXYPad_Test::saveXML()
     QCOMPARE(position, 1);
     QCOMPARE(wstate, 1);
     QCOMPARE(appearance, 1);
+}
+
+void VCXYPad_Test::modeChange()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    UniverseArray ua(512);
+    QWidget w;
+
+    Fixture* fxi = new Fixture(&doc);
+    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+    fxi->setFixtureDefinition(def, mode);
+    doc.addFixture(fxi);
+
+    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    pad.resize(QSize(200, 200));
+
+    VCXYPadFixture xy(&doc);
+    xy.setFixture(fxi->id());
+    pad.appendFixture(xy);
+    QCOMPARE(pad.fixtures().size(), 1);
+    QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
+    QCOMPARE(pad.fixtures()[0].m_xLSB, QLCChannel::invalid());
+
+    pad.slotModeChanged(Doc::Operate);
+    QVERIFY(pad.fixtures()[0].m_xMSB != QLCChannel::invalid());
+    QVERIFY(pad.fixtures()[0].m_yMSB != QLCChannel::invalid());
+    QCOMPARE(mt.m_dmxSourceList.size(), 1);
+    QCOMPARE(mt.m_dmxSourceList[0], &pad);
+
+    pad.setCurrentXYPosition(QPoint(200, 200));
+    pad.writeDMX(&mt, &ua);
+    QCOMPARE(ua.preGMValues()[0], char(255));
+    QCOMPARE(ua.preGMValues()[1], char(255));
+
+    pad.setCurrentXYPosition(QPoint(100, 50));
+    pad.writeDMX(&mt, &ua);
+    QCOMPARE(ua.preGMValues()[0], char(128));
+    QCOMPARE(ua.preGMValues()[1], char(64));
+
+    pad.slotModeChanged(Doc::Design);
+    QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
+    QCOMPARE(pad.fixtures()[0].m_yMSB, QLCChannel::invalid());
+    QCOMPARE(mt.m_dmxSourceList.size(), 0);
+}
+
+void VCXYPad_Test::paint()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    UniverseArray ua(512);
+    QWidget w;
+
+    // Just a crash test, no point in checking individual pixels
+    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    pad.resize(QSize(200, 200));
+    QPaintEvent ev(QRect(pad.rect()));
+    pad.paintEvent(&ev);
+}
+
+void VCXYPad_Test::mouse()
+{
+    Doc doc(this, m_cache);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    UniverseArray ua(512);
+    QWidget w;
+
+    // Just a crash test, no point in checking individual pixels
+    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    pad.resize(QSize(200, 200));
+    pad.slotModeChanged(Doc::Operate);
+
+    QMouseEvent ev(QEvent::MouseButtonPress, QPoint(100, 100), Qt::LeftButton, 0, 0);
+    pad.mousePressEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(100, 100));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
+
+    ev = QMouseEvent(QEvent::MouseMove, QPoint(50, 50), Qt::NoButton, 0, 0);
+    pad.mouseMoveEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(50, 50));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
+
+    ev = QMouseEvent(QEvent::MouseMove, QPoint(250, 250), Qt::NoButton, 0, 0);
+    pad.mouseMoveEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(200, 200));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
+
+    ev = QMouseEvent(QEvent::MouseMove, QPoint(-5, -5), Qt::NoButton, 0, 0);
+    pad.mouseMoveEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
+
+    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(150, 150), Qt::LeftButton, 0, 0);
+    pad.mouseReleaseEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
+    QCOMPARE(pad.cursor().shape(), Qt::ArrowCursor);
+    QCOMPARE(pad.hasMouseTracking(), false);
+
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(250, 250), Qt::LeftButton, 0, 0);
+    pad.mousePressEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(200, 200));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
+
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(-5, -5), Qt::LeftButton, 0, 0);
+    pad.mousePressEvent(&ev);
+    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
+    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
+    QCOMPARE(pad.hasMouseTracking(), true);
 }
 
 QTEST_MAIN(VCXYPad_Test)

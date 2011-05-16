@@ -23,6 +23,7 @@
 #define VCXYPAD_TEST_H
 
 #include <QObject>
+#include "qlcfixturedefcache.h"
 
 class VCXYPad_Test : public QObject
 {
@@ -36,6 +37,12 @@ private slots:
     void setPos();
     void loadXML();
     void saveXML();
+    void modeChange();
+    void paint();
+    void mouse();
+
+private:
+    QLCFixtureDefCache m_cache;
 };
 
 #endif

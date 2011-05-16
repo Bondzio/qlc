@@ -142,15 +142,25 @@ void VCXYPad::clearFixtures()
     m_fixtures.clear();
 }
 
+QList <VCXYPadFixture> VCXYPad::fixtures() const
+{
+    return m_fixtures;
+}
+
 /*****************************************************************************
  * Current XY position
  *****************************************************************************/
 
+QPoint VCXYPad::currentXYPosition() const
+{
+    return m_currentXYPosition;
+}
+
 void VCXYPad::setCurrentXYPosition(const QPoint& point)
 {
     QPoint pt(point);
-    pt.setX(CLAMP(pt.x(), 0, size().width()));
-    pt.setY(CLAMP(pt.y(), 0, size().height()));
+    pt.setX(CLAMP(pt.x(), 0, width()));
+    pt.setY(CLAMP(pt.y(), 0, height()));
 
     m_currentXYPositionMutex.lock();
     m_currentXYPosition = pt;
@@ -170,10 +180,10 @@ void VCXYPad::writeDMX(MasterTimer* timer, UniverseArray* universes)
         m_currentXYPositionChanged = false;
 
         /* Scale XY coordinate values to 0.0 - 1.0 */
-        float x = SCALE(float(m_currentXYPosition.x()),
-                        float(0), float(width()), float(0), float(1));
-        float y = SCALE(float(m_currentXYPosition.y()),
-                        float(0), float(height()), float(0), float(1));
+        qreal x = SCALE(qreal(m_currentXYPosition.x()),
+                        qreal(0), qreal(width()), qreal(0), qreal(1));
+        qreal y = SCALE(qreal(m_currentXYPosition.y()),
+                        qreal(0), qreal(height()), qreal(0), qreal(1));
 
         /* Write values outside mutex lock to keep UI snappy */
         m_currentXYPositionMutex.unlock();

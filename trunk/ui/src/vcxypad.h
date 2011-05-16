@@ -50,53 +50,65 @@ class VCXYPad : public VCWidget, public DMXSource
     Q_OBJECT
     Q_DISABLE_COPY(VCXYPad)
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
     VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCXYPad();
 
-    /*********************************************************************
+    /*************************************************************************
      * Clipboard
-     *********************************************************************/
+     *************************************************************************/
 public:
-    /** Create a copy of this widget into the given parent */
+    /** @reimp */
     VCWidget* createCopy(VCWidget* parent);
 
-    /** Copy the contents for this widget from another widget */
+    /** @reimp */
     bool copyFrom(VCWidget* widget);
 
-    /*********************************************************************
+    /*************************************************************************
      * Properties
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Display a properties dialog */
     void editProperties();
 
-    /*********************************************************************
+    /*************************************************************************
      * Fixtures
-     *********************************************************************/
+     *************************************************************************/
 public:
+    /**
+     * Append a new fixture to the XY pad's list of controlled fixtures
+     *
+     * @param fxi The fixture to append
+     */
     void appendFixture(const VCXYPadFixture& fxi);
+
+    /**
+     * Remove a fixture by its ID from the XY pad's control list
+     */
     void removeFixture(quint32 fxi);
+
+    /**
+     * Remove all currently controlled fixtures from the XY pad
+     */
     void clearFixtures();
 
-    QList <VCXYPadFixture> fixtures() const {
-        return m_fixtures;
-    }
+    /**
+     * Get a list of the pad's currently controlled fixtures
+     */
+    QList <VCXYPadFixture> fixtures() const;
 
 protected:
     QList <VCXYPadFixture> m_fixtures;
 
-    /*********************************************************************
+    /*************************************************************************
      * Current position
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Get the pad's current position (i.e. where the point is) */
-    QPoint currentXYPosition() const {
-        return m_currentXYPosition;
-    }
+    QPoint currentXYPosition() const;
 
     /** Set the pad's current position (i.e. move the point) */
     void setCurrentXYPosition(const QPoint& point);
@@ -105,34 +117,45 @@ public:
     void writeDMX(MasterTimer* timer, UniverseArray* universes);
 
 protected:
-    QPixmap m_xyPosPixmap;
-
     QPoint m_currentXYPosition;
     bool m_currentXYPositionChanged;
     QMutex m_currentXYPositionMutex;
 
-    /*********************************************************************
+    /*************************************************************************
      * QLC mode
-     *********************************************************************/
+     *************************************************************************/
 protected slots:
+    /** @reimp */
     void slotModeChanged(Doc::Mode mode);
 
-    /*********************************************************************
+    /*************************************************************************
      * Load & Save
-     *********************************************************************/
+     *************************************************************************/
 public:
+    /** @reimp */
     bool loadXML(const QDomElement* root);
+
+    /** @reimp */
     bool saveXML(QDomDocument* doc, QDomElement* root);
 
-    /*********************************************************************
+    /*************************************************************************
      * Event handlers
-     *********************************************************************/
+     *************************************************************************/
 protected:
+    /** @reimp */
     void paintEvent(QPaintEvent* e);
 
+    /** @reimp */
     void mousePressEvent(QMouseEvent* e);
+
+    /** @reimp */
     void mouseReleaseEvent(QMouseEvent* e);
+
+    /** @reimp */
     void mouseMoveEvent(QMouseEvent* e);
+
+private:
+    QPixmap m_xyPosPixmap;
 };
 
 #endif

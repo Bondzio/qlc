@@ -37,6 +37,7 @@
 #include "qlcchannel.h"
 
 #include "fixtureselection.h"
+#include "efxpreviewarea.h"
 #include "efxeditor.h"
 #include "fixture.h"
 #include "apputil.h"
@@ -168,9 +169,10 @@ void EFXEditor::fillFadeBusCombo()
 
 void EFXEditor::initMovementPage()
 {
+    new QHBoxLayout(m_previewFrame);
     m_previewArea = new EFXPreviewArea(m_previewFrame);
-    m_previewArea->resize(m_previewFrame->width(),
-                          m_previewFrame->height());
+    m_previewFrame->layout()->setMargin(0);
+    m_previewFrame->layout()->addWidget(m_previewArea);
 
     /* Get supported algorithms and fill the algorithm combo with them */
     m_algorithmCombo->addItems(EFX::algorithmList());
@@ -732,90 +734,4 @@ void EFXEditor::redrawPreview()
     m_efx->preview(points);
     m_previewArea->setPoints(points);
     m_previewArea->draw();
-}
-
-/*****************************************************************************
- * EFX Preview Area implementation
- *****************************************************************************/
-
-EFXPreviewArea::EFXPreviewArea(QWidget* parent) : QFrame (parent), m_timer(this)
-{
-    QPalette p = palette();
-    m_reverse = false;
-
-    setAutoFillBackground(true);
-    p.setColor(QPalette::Window, p.color(QPalette::Base));
-    setPalette(p);
-
-    setFrameStyle(StyledPanel | Sunken);
-
-    m_iter = 0;
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
-}
-
-EFXPreviewArea::~EFXPreviewArea()
-{
-    setUpdatesEnabled(false);
-}
-
-void EFXPreviewArea::setPoints(const QVector <QPoint>& points)
-{
-    m_points = QPolygon(points);
-}
-
-void EFXPreviewArea::draw()
-{
-    m_timer.stop();
-
-    if (m_reverse == true)
-        m_iter = m_points.size() - 1;
-    else
-        m_iter = 0;
-    m_timer.start(20);
-}
-
-void EFXPreviewArea::slotTimeout()
-{
-    repaint();
-}
-
-void EFXPreviewArea::paintEvent(QPaintEvent* e)
-{
-    QFrame::paintEvent(e);
-
-    QPainter painter(this);
-    QPen pen;
-    QPoint point;
-    QColor color;
-
-    /* Crosshairs */
-    color = palette().color(QPalette::Mid);
-    painter.setPen(color);
-    painter.drawLine(127, 0, 127, 255);
-    painter.drawLine(0, 127, 255, 127);
-
-    if (m_reverse == true)
-        m_iter--;
-    else
-        m_iter++;
-
-    /* Plain points with highlight color */
-    color = palette().color(QPalette::Text);
-    pen.setColor(color);
-    painter.setPen(pen);
-    painter.drawPolygon(m_points);
-
-    // Draw the points from the point array
-    if (m_iter < m_points.size() && m_iter >= 0)
-    {
-        color = color.lighter(100 + (m_points.size() / 100));
-        pen.setColor(color);
-        painter.setPen(pen);
-        point = m_points.point(m_iter);
-        painter.drawEllipse(point.x() - 4, point.y() - 4, 8, 8);
-    }
-    else
-    {
-        m_timer.stop();
-    }
 }

@@ -37,6 +37,7 @@ HEADERS += aboutbox.h \
            consolechannel.h \
            docbrowser.h \
            efxeditor.h \
+           efxpreviewarea.h \
            fixtureconsole.h \
            fixturemanager.h \
            fixtureselection.h \
@@ -113,6 +114,7 @@ SOURCES += aboutbox.cpp \
            consolechannel.cpp \
            docbrowser.cpp \
            efxeditor.cpp \
+           efxpreviewarea.cpp \
            fixtureconsole.cpp \
            fixturemanager.cpp \
            fixtureselection.cpp \

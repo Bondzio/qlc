@@ -29,9 +29,8 @@
 #include "ui_efxeditor.h"
 #include "efx.h"
 
-class Doc;
-class QPaintEvent;
 class EFXPreviewArea;
+class Doc;
 
 class EFXEditor : public QDialog, public Ui_EFXEditor
 {
@@ -117,74 +116,5 @@ protected slots:
 protected:
     void redrawPreview();
 };
-
-/**
- * The area that is used to draw a preview of
- * the EFX function currently being edited.
- */
-class EFXPreviewArea : public QFrame
-{
-    Q_OBJECT
-
-public:
-    EFXPreviewArea(QWidget* parent);
-    ~EFXPreviewArea();
-
-    /**
-     * Set an an array of X-Y points that can be used for drawing a preview
-     *
-     * @param points The point array
-     */
-    void setPoints(const QVector<QPoint>& points);
-
-    /**
-     * Tell the preview area to draw the points
-     */
-    void draw();
-
-    /**
-     * Set the preview area to draw the pattern in reverse or normal
-     * order.
-     *
-     * @param reverse if true, the pattern is reversed
-     */
-    void setReverse(bool reverse) {
-        m_reverse = reverse;
-    }
-
-    /**
-     * Check, whether the preview are is drawing a reversed pattern
-     */
-    bool isReverse() const {
-        return m_reverse;
-    }
-
-protected:
-    /**
-     * QT Framework calls this when the widget needs
-     * to be repainted.
-     *
-     * @param e QPaintEvent
-     */
-    void paintEvent(QPaintEvent* e);
-
-protected slots:
-    /** Animation timeout */
-    void slotTimeout();
-
-protected:
-    /** Points that are drawn in the preview area */
-    QPolygon m_points;
-
-    /** Animation timer */
-    QTimer m_timer;
-
-    /** Animation position */
-    int m_iter;
-
-    /** Reverse or normal order */
-    bool m_reverse;
-};
-
 
 #endif

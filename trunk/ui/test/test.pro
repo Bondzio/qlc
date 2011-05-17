@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 SUBDIRS += aboutbox
 SUBDIRS += addfixture
 SUBDIRS += busmanager
+SUBDIRS += efxpreviewarea
 SUBDIRS += vccuelist
 SUBDIRS += vcdockslider
 SUBDIRS += vcframe

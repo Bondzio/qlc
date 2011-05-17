@@ -34,7 +34,7 @@
  * Initialization
  *****************************************************************************/
 AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
-        : QDialog(parent)
+    : QDialog(parent)
 {
     setupUi(this);
 
@@ -65,7 +65,7 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
     m_previewEdit->setAlignment(Qt::AlignCenter);
 
     m_keySequence = QKeySequence(keySequence);
-    m_previewEdit->setText(m_keySequence.toString());
+    m_previewEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
 
     QSettings settings;
     m_autoCloseCheckBox->setChecked(settings.value(SETTINGS_AUTOCLOSE).toBool());
@@ -75,6 +75,11 @@ AssignHotKey::~AssignHotKey()
 {
     QSettings settings;
     settings.setValue(SETTINGS_AUTOCLOSE, m_autoCloseCheckBox->isChecked());
+}
+
+QKeySequence AssignHotKey::keySequence() const
+{
+    return m_keySequence;
 }
 
 void AssignHotKey::keyPressEvent(QKeyEvent* event)

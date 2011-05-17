@@ -149,7 +149,7 @@ void VCSoloFrame::slotButtonFunctionStarting()
 }
 
 /*****************************************************************************
- * Load & Save
+ * Event handling
  *****************************************************************************/
 
 void VCSoloFrame::paintEvent(QPaintEvent* e)

@@ -38,23 +38,22 @@ class AssignHotKey : public QDialog, public Ui_AssignHotKey
      * Initialization
      *********************************************************************/
 public:
-    AssignHotKey(QWidget* parent, const QKeySequence& keySequence);
+    AssignHotKey(QWidget* parent, const QKeySequence& keySequence = QKeySequence());
     ~AssignHotKey();
-
-protected:
-    void keyPressEvent(QKeyEvent* event);
 
     /*********************************************************************
      * Key sequence
      *********************************************************************/
 public:
     /** Get the key sequence */
-    QKeySequence keySequence() const {
-        return m_keySequence;
-    }
+    QKeySequence keySequence() const;
+
+private:
+    QKeySequence m_keySequence;
 
 protected:
-    QKeySequence m_keySequence;
+    /** @reimp */
+    void keyPressEvent(QKeyEvent* event);
 };
 
 #endif

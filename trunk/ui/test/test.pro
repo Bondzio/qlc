@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 SUBDIRS += aboutbox
 SUBDIRS += addfixture
+SUBDIRS += busmanager
 SUBDIRS += vccuelist
 SUBDIRS += vcdockslider
 SUBDIRS += vcframe

@@ -39,9 +39,7 @@ class BusManager : public QWidget
      *********************************************************************/
 public:
     /** Get the BusManager singleton instance. Can be NULL. */
-    static BusManager* instance() {
-        return s_instance;
-    }
+    static BusManager* instance();
 
     /** Create a BusManager with parent. Fails if s_instance is not NULL. */
     static void createAndShow(QWidget* parent);
@@ -49,33 +47,33 @@ public:
     /** Normal public destructor */
     ~BusManager();
 
-protected:
-    /** Protected constructor to prevent multiple instances. */
+private:
+    /** Private constructor to prevent multiple instances. */
     BusManager(QWidget* parent, Qt::WindowFlags f = 0);
 
-protected:
+private:
     static BusManager* s_instance;
 
     /*********************************************************************
      * Toolbar
      *********************************************************************/
-protected slots:
+private slots:
     void slotEditClicked();
 
-protected:
+private:
     QToolBar* m_toolbar;
 
     /*********************************************************************
      * Tree widget
      *********************************************************************/
-protected:
+private:
     void fillTree();
 
-protected slots:
+private slots:
     void slotItemChanged(QTreeWidgetItem* item, int column);
     void slotBusValueChanged(quint32 bus, quint32 value);
 
-protected:
+private:
     QTreeWidget* m_tree;
 };
 

@@ -31,6 +31,7 @@
 #include <QToolBar>
 #include <QAction>
 #include <QString>
+#include <QDebug>
 #include <QIcon>
 
 #include "mastertimer.h"
@@ -49,6 +50,11 @@ BusManager* BusManager::s_instance = NULL;
 /****************************************************************************
  * Initialization
  ****************************************************************************/
+
+BusManager* BusManager::instance()
+{
+    return s_instance;
+}
 
 BusManager::BusManager(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
 {
@@ -196,7 +202,7 @@ void BusManager::fillTree()
     connect(m_tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
             this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 }
-#include <QDebug>
+
 void BusManager::slotItemChanged(QTreeWidgetItem* item, int column)
 {
     int index;

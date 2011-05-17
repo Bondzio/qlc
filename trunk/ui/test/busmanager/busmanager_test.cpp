@@ -77,8 +77,8 @@ void BusManager_Test::initial()
 
     // Ensure closing the window will also reset the singleton pointer
 #ifdef __APPLE__
-    bm->close();
-    //delete bm;
+    QVERIFY(bm->testAttribute(Qt::WA_DeleteOnClose));
+    delete bm;
 #else
     QMdiSubWindow* sub = qobject_cast<QMdiSubWindow*> (bm->parentWidget());
     QVERIFY(sub != NULL);

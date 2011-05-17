@@ -98,7 +98,7 @@ void EFXPreviewArea_Test::draw()
     QCOMPARE(area.m_timer.isActive(), true);
     QCOMPARE(area.m_timer.interval(), 20);
 
-    QTest::qWait(150);
+    QTest::qWait(200);
     QCOMPARE(area.m_iter, 5);
     QCOMPARE(area.m_timer.isActive(), false);
 
@@ -108,7 +108,7 @@ void EFXPreviewArea_Test::draw()
     QCOMPARE(area.m_timer.isActive(), true);
     QCOMPARE(area.m_timer.interval(), 10);
 
-    QTest::qWait(150);
+    QTest::qWait(200);
     QCOMPARE(area.m_iter, -1);
     QCOMPARE(area.m_timer.isActive(), false);
 }

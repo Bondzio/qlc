@@ -125,6 +125,7 @@ void VCFrame_Test::loadXML()
 
     VCFrame parent(&w, &doc, &om, &im, &mt);
     QVERIFY(parent.loadXML(&root) == true);
+    parent.postLoad();
     QCOMPARE(parent.geometry().width(), 42);
     QCOMPARE(parent.geometry().height(), 69);
     QCOMPARE(parent.geometry().x(), 3);

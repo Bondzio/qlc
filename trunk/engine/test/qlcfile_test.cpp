@@ -64,7 +64,8 @@ void QLCFile_Test::readXML()
 
 void QLCFile_Test::getXMLHeader()
 {
-    bool insideCreatorTag = false;
+    bool insideCreatorTag = false, author = false, appname = false,
+         appversion = false;
     QDomDocument doc;
 
     doc = QLCFile::getXMLHeader(QString());
@@ -86,17 +87,21 @@ void QLCFile_Test::getXMLHeader()
 
         QDomElement tag(node.toElement());
         if (tag.tagName() == KXMLQLCCreatorAuthor)
-            QVERIFY(tag.text().isEmpty() == false);
+            author = true; // User might not have a full name so don't check the contents
         else if (tag.tagName() == KXMLQLCCreatorName)
-            QCOMPARE(tag.text(), QString(APPNAME));
+            appname = true;
         else if (tag.tagName() == KXMLQLCCreatorVersion)
-            QCOMPARE(tag.text(), QString(APPVERSION));
+            appversion = true;
         else
-            QFAIL("Extra crap in XML header detected!");
+            QFAIL(QString("Unrecognized tag: %1").arg(tag.tagName()).toUtf8().constData());
+
         node = node.nextSibling();
     }
 
     QCOMPARE(insideCreatorTag, true);
+    QCOMPARE(author, true);
+    QCOMPARE(appname, true);
+    QCOMPARE(appversion, true);
 }
 
 void QLCFile_Test::errorString()

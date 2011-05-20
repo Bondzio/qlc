@@ -61,6 +61,7 @@ void VCWidget_Test::initial()
     QCOMPARE(stub.inputUniverse(), InputMap::invalidUniverse());
     QCOMPARE(stub.inputChannel(), InputMap::invalidChannel());
     QCOMPARE(stub.canHaveChildren(), false);
+    QCOMPARE(stub.customMenu(0), (QMenu*) 0);
 }
 
 void VCWidget_Test::bgImage()
@@ -171,7 +172,6 @@ void VCWidget_Test::resetBg()
     QCOMPARE(stub.backgroundImage(), QString());
     QCOMPARE(stub.backgroundColor(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
-    QCOMPARE(stub.palette().brush(QPalette::Window).texture().isNull(), true);
     QCOMPARE(stub.palette().brush(QPalette::Window).color(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.foregroundColor(), QColor(Qt::cyan));
     QCOMPARE(stub.hasCustomForegroundColor(), true);
@@ -186,7 +186,6 @@ void VCWidget_Test::resetBg()
     QCOMPARE(stub.backgroundImage(), QString());
     QCOMPARE(stub.backgroundColor(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
-    QCOMPARE(stub.palette().brush(QPalette::Window).texture().isNull(), true);
     QCOMPARE(stub.palette().brush(QPalette::Window).color(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.foregroundColor(), QColor(Qt::cyan));
     QCOMPARE(stub.hasCustomForegroundColor(), true);
@@ -242,7 +241,6 @@ void VCWidget_Test::resetFg()
     stub.resetForegroundColor();
     QCOMPARE(stub.backgroundImage(), QString());
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
-    QCOMPARE(stub.palette().brush(QPalette::Window).texture().isNull(), true);
     QCOMPARE(stub.foregroundColor(), w.palette().color(QPalette::WindowText));
     QCOMPARE(stub.hasCustomForegroundColor(), false);
     QCOMPARE(stub.palette().brush(QPalette::WindowText).texture().isNull(), true);
@@ -350,6 +348,69 @@ void VCWidget_Test::inputSource()
     stub.setInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
     QCOMPARE(stub.inputUniverse(), InputMap::invalidUniverse());
     QCOMPARE(stub.inputChannel(), InputMap::invalidChannel());
+
+    // Just for coverage - this method call does nothing
+    stub.slotInputValueChanged(0, 1, 2);
+}
+
+void VCWidget_Test::copy()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    stub.setCaption("Pertti Pasanen");
+    stub.setBackgroundColor(QColor(Qt::red));
+    stub.setForegroundColor(QColor(Qt::green));
+    QFont font(w.font());
+    font.setBold(!font.bold());
+    stub.setFont(font);
+    stub.setFrameStyle(KVCFrameStyleRaised);
+    stub.move(QPoint(10, 20));
+    stub.resize(QSize(20, 30));
+    stub.setInputSource(0, 12);
+
+    StubWidget copy(&w, &doc, &om, &im, &mt);
+    copy.copyFrom(&stub);
+    QCOMPARE(copy.caption(), QString("Pertti Pasanen"));
+    QCOMPARE(copy.hasCustomBackgroundColor(), true);
+    QCOMPARE(copy.backgroundColor(), QColor(Qt::red));
+    QCOMPARE(copy.hasCustomForegroundColor(), true);
+    QCOMPARE(copy.foregroundColor(), QColor(Qt::green));
+    QCOMPARE(copy.font(), font);
+    QCOMPARE(copy.frameStyle(), (int) KVCFrameStyleRaised);
+    QCOMPARE(copy.pos(), QPoint(10, 20));
+    QCOMPARE(copy.size(), QSize(20, 30));
+    QCOMPARE(copy.inputUniverse(), quint32(0));
+    QCOMPARE(copy.inputChannel(), quint32(12));
+}
+
+void VCWidget_Test::keyPress()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    QSignalSpy pspy(&stub, SIGNAL(keyPressed(QKeySequence)));
+    QSignalSpy rspy(&stub, SIGNAL(keyReleased(QKeySequence)));
+
+    stub.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    QCOMPARE(pspy.size(), 1);
+    QCOMPARE(pspy[0].size(), 1);
+    QCOMPARE(pspy[0][0].value<QKeySequence>(), QKeySequence(QKeySequence::Copy));
+
+    stub.slotKeyReleased(QKeySequence(QKeySequence::Copy));
+    QCOMPARE(rspy.size(), 1);
+    QCOMPARE(rspy[0].size(), 1);
+    QCOMPARE(rspy[0][0].value<QKeySequence>(), QKeySequence(QKeySequence::Copy));
 }
 
 QTEST_MAIN(VCWidget_Test)

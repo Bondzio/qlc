@@ -40,6 +40,8 @@ private slots:
     void caption();
     void frame();
     void inputSource();
+    void copy();
+    void keyPress();
 };
 
 #endif

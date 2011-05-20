@@ -9,6 +9,7 @@ SUBDIRS += vcdockslider
 SUBDIRS += vcframe
 SUBDIRS += vclabel
 SUBDIRS += vcproperties
+SUBDIRS += vcwidget
 SUBDIRS += vcwidgetproperties
 SUBDIRS += vcxypad
 SUBDIRS += vcxypadfixture

@@ -244,19 +244,19 @@ void VCWidget::resetForegroundColor()
     m_hasCustomForegroundColor = false;
 
     /* Store background color */
-    if (m_hasCustomBackgroundColor == true)
+    if (hasCustomBackgroundColor() == true)
         bg = palette().color(QPalette::Window);
 
     /* Reset the whole palette to application palette */
     setPalette(QApplication::palette());
 
-    /* Restore foreground color */
+    /* Restore foreground color (the first two emit Doc::modified() signal) */
     if (bg.isValid() == true)
         setBackgroundColor(bg);
-    else if (m_backgroundImage.isEmpty() == false)
-        setBackgroundImage(m_backgroundImage);
-
-    m_doc->setModified();
+    else if (backgroundImage().isEmpty() == false)
+        setBackgroundImage(backgroundImage());
+    else
+        m_doc->setModified();
 }
 
 /*****************************************************************************
@@ -282,8 +282,8 @@ bool VCWidget::hasCustomFont() const
 
 void VCWidget::resetFont()
 {
+    QWidget::setFont(QApplication::font());
     m_hasCustomFont = false;
-    setFont(QFont());
     m_doc->setModified();
 }
 

@@ -383,7 +383,7 @@ void VCXYPad_Test::modeChange()
     QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
     QCOMPARE(pad.fixtures()[0].m_xLSB, QLCChannel::invalid());
 
-    pad.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
     QVERIFY(pad.fixtures()[0].m_xMSB != QLCChannel::invalid());
     QVERIFY(pad.fixtures()[0].m_yMSB != QLCChannel::invalid());
     QCOMPARE(mt.m_dmxSourceList.size(), 1);
@@ -399,7 +399,7 @@ void VCXYPad_Test::modeChange()
     QCOMPARE(ua.preGMValues()[0], char(128));
     QCOMPARE(ua.preGMValues()[1], char(64));
 
-    pad.slotModeChanged(Doc::Design);
+    doc.setMode(Doc::Design);
     QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
     QCOMPARE(pad.fixtures()[0].m_yMSB, QLCChannel::invalid());
     QCOMPARE(mt.m_dmxSourceList.size(), 0);
@@ -433,7 +433,7 @@ void VCXYPad_Test::mouse()
     // Just a crash test, no point in checking individual pixels
     VCXYPad pad(&w, &doc, &om, &im, &mt);
     pad.resize(QSize(200, 200));
-    pad.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
 
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(100, 100), Qt::LeftButton, 0, 0);
     pad.mousePressEvent(&ev);

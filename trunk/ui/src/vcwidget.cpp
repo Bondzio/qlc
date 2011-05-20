@@ -85,7 +85,6 @@ VCWidget::VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* in
 
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
-    m_mode = Doc::Design;
 
     /* Listen to parent's (only VCWidget-kind) key signals */
     if (parent->inherits(metaObject()->className()) == true)
@@ -153,6 +152,12 @@ void VCWidget::setBackgroundImage(const QString& path)
     m_doc->setModified();
 }
 
+QString VCWidget::backgroundImage() const
+{
+    return m_backgroundImage;
+}
+
+
 /*****************************************************************************
  * Background color
  *****************************************************************************/
@@ -168,6 +173,16 @@ void VCWidget::setBackgroundColor(const QColor& color)
     setPalette(pal);
 
     m_doc->setModified();
+}
+
+QColor VCWidget::backgroundColor() const
+{
+    return palette().color(QPalette::Window);
+}
+
+bool VCWidget::hasCustomBackgroundColor() const
+{
+    return m_hasCustomBackgroundColor;
 }
 
 void VCWidget::resetBackgroundColor()
@@ -212,6 +227,16 @@ void VCWidget::setForegroundColor(const QColor& color)
     m_doc->setModified();
 }
 
+QColor VCWidget::foregroundColor() const
+{
+    return palette().color(QPalette::WindowText);
+}
+
+bool VCWidget::hasCustomForegroundColor() const
+{
+    return m_hasCustomForegroundColor;
+}
+
 void VCWidget::resetForegroundColor()
 {
     QColor bg;
@@ -245,6 +270,16 @@ void VCWidget::setFont(const QFont& font)
     m_doc->setModified();
 }
 
+QFont VCWidget::font() const
+{
+    return QWidget::font();
+}
+
+bool VCWidget::hasCustomFont() const
+{
+    return m_hasCustomFont;
+}
+
 void VCWidget::resetFont()
 {
     m_hasCustomFont = false;
@@ -263,6 +298,11 @@ void VCWidget::setCaption(const QString& text)
     m_doc->setModified();
 }
 
+QString VCWidget::caption() const
+{
+    return windowTitle();
+}
+
 /*****************************************************************************
  * Frame style
  *****************************************************************************/
@@ -272,6 +312,11 @@ void VCWidget::setFrameStyle(int style)
     m_frameStyle = style;
     update();
     m_doc->setModified();
+}
+
+int VCWidget::frameStyle() const
+{
+    return m_frameStyle;
 }
 
 void VCWidget::resetFrameStyle()
@@ -297,6 +342,15 @@ int VCWidget::stringToFrameStyle(const QString& style)
         return KVCFrameStyleRaised;
     else
         return KVCFrameStyleNone;
+}
+
+/*****************************************************************************
+ * Capability of having children
+ *****************************************************************************/
+
+bool VCWidget::canHaveChildren() const
+{
+    return false;
 }
 
 /*****************************************************************************
@@ -351,9 +405,17 @@ void VCWidget::setInputSource(quint32 uni, quint32 ch)
     }
 }
 
-void VCWidget::slotInputValueChanged(quint32 universe,
-                                     quint32 channel,
-                                     uchar value)
+quint32 VCWidget::inputUniverse() const
+{
+    return m_inputUniverse;
+}
+
+quint32 VCWidget::inputChannel() const
+{
+    return m_inputChannel;
+}
+
+void VCWidget::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
     Q_UNUSED(universe);
     Q_UNUSED(channel);
@@ -624,13 +686,19 @@ bool VCWidget::loadXMLWindowState(const QDomElement* tag, int* x, int* y,
 
 void VCWidget::slotModeChanged(Doc::Mode mode)
 {
-    m_mode = mode;
+    Q_UNUSED(mode);
 
     /* Reset mouse cursor */
     unsetCursor();
 
     /* Force an update to get rid of selection markers */
     update();
+}
+
+Doc::Mode VCWidget::mode() const
+{
+    Q_ASSERT(m_doc != NULL);
+    return m_doc->mode();
 }
 
 /*****************************************************************************
@@ -662,6 +730,7 @@ QMenu* VCWidget::customMenu(QMenu* parentMenu)
 /*****************************************************************************
  * Widget move & resize
  *****************************************************************************/
+
 void VCWidget::resize(const QSize& size)
 {
     QSize sz(size);
@@ -708,6 +777,10 @@ void VCWidget::move(const QPoint& point)
     QWidget::move(pt);
 }
 
+QPoint VCWidget::lastClickPoint() const
+{
+    return m_mousePressPoint;
+}
 
 /*****************************************************************************
  * Event handlers
@@ -727,7 +800,7 @@ void VCWidget::paintEvent(QPaintEvent* e)
     /* Draw frame according to style */
     QStyleOptionFrame option;
     option.initFrom(this);
-        
+
     if (frameStyle() == KVCFrameStyleSunken)
         option.state = QStyle::State_Sunken;
     else if (frameStyle() == KVCFrameStyleRaised)
@@ -737,10 +810,7 @@ void VCWidget::paintEvent(QPaintEvent* e)
 
     /* Draw a frame border if such is specified for this widget */
     if (option.state != QStyle::State_None)
-    {
-        style()->drawPrimitive(QStyle::PE_Frame, &option,
-                               &painter, this);
-    }
+        style()->drawPrimitive(QStyle::PE_Frame, &option, &painter, this);
 
     QWidget::paintEvent(e);
 

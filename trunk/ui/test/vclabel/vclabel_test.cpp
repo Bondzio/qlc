@@ -169,8 +169,7 @@ void VCLabel_Test::saveXML()
         }
         else
         {
-            qDebug() << xmldoc.toString();
-            QFAIL("Unexpected tag in XML output!");
+            QFAIL(QString("Unexpected XML tag: %1").arg(tag.tagName()).toUtf8().constData());
         }
         node = node.nextSibling();
     }
@@ -195,7 +194,7 @@ void VCLabel_Test::paintEvent()
     VCLabel label(&w, &doc, &om, &im, &mt);
     label.paintEvent(&ev);
 
-    label.m_mode = Doc::Operate;
+    doc.setMode(Doc::Operate);
     label.paintEvent(&ev);
 }
 

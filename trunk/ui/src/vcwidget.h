@@ -96,9 +96,7 @@ public:
     virtual void setBackgroundImage(const QString& path);
 
     /** Get the widget's background image */
-    virtual QString backgroundImage() {
-        return m_backgroundImage;
-    }
+    virtual QString backgroundImage() const;
 
 protected:
     QString m_backgroundImage;
@@ -112,14 +110,10 @@ public:
 
     /** Get the widget's background color. The color is invalid if the
         widget has a background image. */
-    virtual QColor backgroundColor() const {
-        return palette().color(QPalette::Window);
-    }
+    virtual QColor backgroundColor() const;
 
     /** Check, whether the widget has a custom background color */
-    virtual bool hasCustomBackgroundColor() const {
-        return m_hasCustomBackgroundColor;
-    }
+    virtual bool hasCustomBackgroundColor() const;
 
     /** Reset the widget's background color to whatever the platform uses */
     virtual void resetBackgroundColor();
@@ -135,14 +129,10 @@ public:
     virtual void setForegroundColor(const QColor& color);
 
     /** Get the widget's foreground color */
-    virtual QColor foregroundColor() const {
-        return palette().color(QPalette::WindowText);
-    }
+    virtual QColor foregroundColor() const;
 
     /** Check, whether the widget has a custom foreground color */
-    virtual bool hasCustomForegroundColor() const {
-        return m_hasCustomForegroundColor;
-    }
+    virtual bool hasCustomForegroundColor() const;
 
     /** Reset the widget's foreground color to whatever the platform uses */
     virtual void resetForegroundColor();
@@ -158,14 +148,10 @@ public:
     virtual void setFont(const QFont& font);
 
     /** Get the font used for the widget's caption */
-    virtual QFont font() const {
-        return QWidget::font();
-    }
+    virtual QFont font() const;
 
     /** Check, whether the widget has a custom font */
-    virtual bool hasCustomFont() const {
-        return m_hasCustomFont;
-    }
+    virtual bool hasCustomFont() const;
 
     /** Reset the font used for the widget's caption to whatever the
         platform uses */
@@ -182,22 +168,25 @@ public:
     virtual void setCaption(const QString& text);
 
     /** Get this widget's caption text */
-    virtual QString caption() const {
-        return windowTitle();
-    }
+    virtual QString caption() const;
 
     /*********************************************************************
      * Frame style
      *********************************************************************/
 public:
+    /** Set the widget's frame style (Using QFrame::Shape) */
     void setFrameStyle(int style);
-    int frameStyle() const {
-        return m_frameStyle;
-    }
+
+    /** Get the widget's frame style */
+    int frameStyle() const;
+
+    /** Reset frame style to QFrame::None */
     void resetFrameStyle();
 
-public:
+    /** Convert the given frame style to a string */
     static QString frameStyleToString(int style);
+
+    /** Convert the given string to frame style */
     static int stringToFrameStyle(const QString& style);
 
 protected:
@@ -208,9 +197,7 @@ protected:
      *********************************************************************/
 public:
     /** Return true if this widget can hold children. */
-    virtual bool canHaveChildren() const {
-        return false;
-    }
+    virtual bool canHaveChildren() const;
 
     /*********************************************************************
      * Properties
@@ -226,20 +213,14 @@ public:
     void setInputSource(quint32 uni, quint32 ch);
 
     /** Get the assigned external input universe */
-    quint32 inputUniverse() const {
-        return m_inputUniverse;
-    }
+    quint32 inputUniverse() const;
 
     /** Get the assigned external input channel within inputUniverse() */
-    quint32 inputChannel() const {
-        return m_inputChannel;
-    }
+    quint32 inputChannel() const;
 
 protected slots:
     /** Slot that receives external input data */
-    virtual void slotInputValueChanged(quint32 universe,
-                                       quint32 channel,
-                                       uchar value);
+    virtual void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
 protected:
     quint32 m_inputUniverse;
@@ -322,13 +303,7 @@ protected slots:
 
 protected:
     /** Shortcut for inheritors to check current mode */
-    Doc::Mode mode() const {
-        return m_mode;
-    }
-
-private:
-    /** Current operating mode, stored in slotModeChanged */
-    Doc::Mode m_mode;
+    Doc::Mode mode() const;
 
     /*********************************************************************
      * Widget menu
@@ -356,9 +331,7 @@ public:
     virtual void move(const QPoint& point);
 
     /** Get the point where the mouse was clicked last in this widget */
-    QPoint lastClickPoint() const {
-        return m_mousePressPoint;
-    }
+    QPoint lastClickPoint() const;
 
 protected:
     QPoint m_mousePressPoint;

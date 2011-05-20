@@ -374,7 +374,7 @@ void VCCueList_Test::modeChange()
     cl.append(s2->id());
     cl.append(s3->id());
 
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
     QCOMPARE(mt.m_dmxSourceList.size(), 1);
     QCOMPARE(mt.m_dmxSourceList[0], &cl);
     QVERIFY(cl.m_runner == NULL);
@@ -382,7 +382,7 @@ void VCCueList_Test::modeChange()
 
     cl.createRunner();
 
-    cl.slotModeChanged(Doc::Design);
+    doc.setMode(Doc::Design);
     QCOMPARE(mt.m_dmxSourceList.size(), 0);
     QVERIFY(cl.m_runner == NULL);
     QVERIFY(cl.m_list->isEnabled() == false);
@@ -702,7 +702,7 @@ void VCCueList_Test::operation()
     QVERIFY(cl.m_runner == NULL);
 
     // Create runner with a next action -> first item should be activated
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
     cl.slotNextCue();
     cl.writeDMX(&mt, &ua);
     QVERIFY(cl.m_runner != NULL);
@@ -764,9 +764,9 @@ void VCCueList_Test::operation()
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Create runner with a previous action -> last item should be activated
-    cl.slotModeChanged(Doc::Design);
+    doc.setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
 
     cl.slotPreviousCue();
     cl.writeDMX(&mt, &ua);
@@ -779,9 +779,9 @@ void VCCueList_Test::operation()
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Create runner thru direct item activation
-    cl.slotModeChanged(Doc::Design);
+    doc.setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
 
     cl.slotItemActivated(cl.m_list->topLevelItem(2));
     cl.writeDMX(&mt, &ua);
@@ -843,7 +843,7 @@ void VCCueList_Test::input()
     cl.setPreviousInputSource(2, 3);
 
     // Runner creation thru next input
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
     cl.slotNextInputValueChanged(5, 3, 255);
     QVERIFY(cl.m_runner == NULL);
 
@@ -866,9 +866,9 @@ void VCCueList_Test::input()
     QCOMPARE(cl.m_runner->currentStep(), 1);
 
     // Runner creation thru previous input
-    cl.slotModeChanged(Doc::Design);
+    doc.setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    cl.slotModeChanged(Doc::Operate);
+    doc.setMode(Doc::Operate);
 
     cl.slotPreviousInputValueChanged(0, 3, 255);
     QVERIFY(cl.m_runner == NULL);

@@ -99,3 +99,13 @@ void VCXYPadFixtureEditor::accept()
 
     QDialog::accept();
 }
+
+/****************************************************************************
+ * Fixtures
+ ****************************************************************************/
+
+QList <VCXYPadFixture> VCXYPadFixtureEditor::fixtures() const
+{
+    return m_fixtures;
+}
+

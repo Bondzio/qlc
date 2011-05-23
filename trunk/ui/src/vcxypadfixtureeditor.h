@@ -53,9 +53,7 @@ protected slots:
      * Fixtures
      ********************************************************************/
 public:
-    QList <VCXYPadFixture> fixtures() const {
-        return m_fixtures;
-    }
+    QList <VCXYPadFixture> fixtures() const;
 
 protected:
     QList <VCXYPadFixture> m_fixtures;

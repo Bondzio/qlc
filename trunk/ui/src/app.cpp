@@ -284,7 +284,7 @@ void App::closeEvent(QCloseEvent* e)
 {
     int result = 0;
 
-    if (doc()->mode() == Doc::Operate)
+    if (m_doc->mode() == Doc::Operate)
     {
         QMessageBox::warning(this,
                              tr("Cannot exit in Operate mode"),
@@ -294,7 +294,7 @@ void App::closeEvent(QCloseEvent* e)
         return;
     }
 
-    if (doc()->isModified() == true)
+    if (m_doc->isModified() == true)
     {
         result = QMessageBox::information(this, tr("Close"),
                                           tr("Do you wish to save the current workspace " \
@@ -452,7 +452,7 @@ void App::initDoc()
 {
     // Delete existing document object and create a new one
     Q_ASSERT(m_doc == NULL);
-    m_doc = new Doc(this, fixtureDefCache());
+    m_doc = new Doc(this, m_fixtureDefCache);
 
     connect(m_doc, SIGNAL(modified(bool)),
             this, SLOT(slotDocModified(bool)));
@@ -516,7 +516,7 @@ void App::loadFixtureDefinitions()
 
 void App::slotModeOperate()
 {
-    doc()->setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 }
 
 void App::slotModeDesign()
@@ -538,12 +538,12 @@ void App::slotModeDesign()
             m_masterTimer->stopAllFunctions();
     }
 
-    doc()->setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
 }
 
 void App::slotModeToggle()
 {
-    if (doc()->mode() == Doc::Design)
+    if (m_doc->mode() == Doc::Design)
         slotModeOperate();
     else
         slotModeDesign();
@@ -945,7 +945,7 @@ bool App::slotFileNew()
 {
     bool result = false;
 
-    if (doc()->isModified())
+    if (m_doc->isModified())
     {
         QString msg(tr("Do you wish to save the current workspace?\n" \
                        "Changes will be lost if you don't save them."));
@@ -981,11 +981,11 @@ bool App::slotFileNew()
 
 void App::clearDocument()
 {
-    doc()->clearContents();
+    m_doc->clearContents();
     VirtualConsole::resetContents(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
-    outputMap()->resetUniverses();
+    m_outputMap->resetUniverses();
     setFileName(QString());
-    doc()->resetModified();
+    m_doc->resetModified();
 }
 
 QFile::FileError App::slotFileOpen()
@@ -993,7 +993,7 @@ QFile::FileError App::slotFileOpen()
     QString fn;
 
     /* Check that the user is aware of losing previous changes */
-    if (doc()->isModified() == true)
+    if (m_doc->isModified() == true)
     {
         QString msg(tr("Do you wish to save the current workspace?\n" \
                        "Changes will be lost if you don't save them."));
@@ -1052,7 +1052,7 @@ QFile::FileError App::slotFileOpen()
     /* Load the file */
     QFile::FileError error = loadXML(fn);
     if (handleFileError(error) == true)
-        doc()->resetModified();
+        m_doc->resetModified();
 
     /* Update these in any case, since they are at least emptied now as
        a result of calling clearDocument() a few lines ago. */
@@ -1146,8 +1146,8 @@ void App::slotFixtureManager()
 #else
     parent = centralWidget();
 #endif
-    FixtureManager::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer(),
-                                  fixtureDefCache());
+    FixtureManager::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer,
+                                  m_fixtureDefCache);
 }
 
 void App::slotFunctionManager()
@@ -1158,7 +1158,7 @@ void App::slotFunctionManager()
 #else
     parent = centralWidget();
 #endif
-    FunctionManager::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer());
+    FunctionManager::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
 }
 
 void App::slotBusManager()
@@ -1180,7 +1180,7 @@ void App::slotOutputManager()
 #else
     parent = centralWidget();
 #endif
-    OutputManager::createAndShow(parent, outputMap());
+    OutputManager::createAndShow(parent, m_outputMap);
 }
 
 void App::slotInputManager()
@@ -1191,7 +1191,7 @@ void App::slotInputManager()
 #else
     parent = centralWidget();
 #endif
-    InputManager::createAndShow(parent, inputMap());
+    InputManager::createAndShow(parent, m_inputMap);
 }
 
 /*****************************************************************************
@@ -1206,7 +1206,7 @@ void App::slotControlVC()
 #else
     parent = centralWidget();
 #endif
-    VirtualConsole::createAndShow(parent, doc(), outputMap(), inputMap(), masterTimer());
+    VirtualConsole::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
 }
 
 void App::slotControlMonitor()
@@ -1217,7 +1217,7 @@ void App::slotControlMonitor()
 #else
     parent = centralWidget();
 #endif
-    Monitor::createAndShow(parent, doc(), outputMap());
+    Monitor::createAndShow(parent, m_doc, m_outputMap);
 }
 
 #ifndef __APPLE__

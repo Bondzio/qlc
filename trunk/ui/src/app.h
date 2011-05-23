@@ -89,11 +89,6 @@ protected:
     /*********************************************************************
      * Output mapping
      *********************************************************************/
-public:
-    OutputMap* outputMap() const {
-        return m_outputMap;
-    }
-
 protected:
     void initOutputMap();
 
@@ -107,11 +102,6 @@ protected:
     /*********************************************************************
      * Input mapping
      *********************************************************************/
-public:
-    InputMap* inputMap() {
-        return m_inputMap;
-    }
-
 protected:
     void initInputMap();
 
@@ -121,12 +111,6 @@ protected:
     /*********************************************************************
      * Master timer
      *********************************************************************/
-public:
-    /** Get a pointer to the master timer */
-    MasterTimer* masterTimer() {
-        return m_masterTimer;
-    }
-
 protected:
     /** The function runner object */
     MasterTimer* m_masterTimer;
@@ -135,9 +119,6 @@ protected:
      * Doc
      *********************************************************************/
 public:
-    Doc* doc() {
-        return m_doc;
-    }
     void clearDocument();
 
 protected slots:
@@ -152,12 +133,6 @@ protected:
     /*********************************************************************
      * Fixture definitions
      *********************************************************************/
-public:
-    const QLCFixtureDefCache& fixtureDefCache() const
-    {
-        return m_fixtureDefCache;
-    }
-
 protected:
     /** Load all fixture definitions */
     void loadFixtureDefinitions();
@@ -300,11 +275,6 @@ protected:
 public:
     /** Set workspace background image from the given path */
     void setBackgroundImage(QString path);
-
-    /** Get the current workspace background image path */
-    QString backgroundImage() const {
-        return m_backgroundImage;
-    }
 
 public slots:
     /** Open a file dialog to browse an image for workspace background */

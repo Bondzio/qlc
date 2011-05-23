@@ -100,6 +100,11 @@ OutputManager::~OutputManager()
     OutputManager::s_instance = NULL;
 }
 
+OutputManager* OutputManager::instance()
+{
+    return s_instance;
+}
+
 void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
 {
     QWidget* window = NULL;

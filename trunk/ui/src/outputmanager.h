@@ -42,9 +42,7 @@ class OutputManager : public QWidget
      *********************************************************************/
 public:
     /** Get the OutputManager singleton instance. Can be NULL. */
-    static OutputManager* instance() {
-        return s_instance;
-    }
+    static OutputManager* instance();
 
     /** Create or show OutputManager */
     static void createAndShow(QWidget* parent, OutputMap* outputMap);

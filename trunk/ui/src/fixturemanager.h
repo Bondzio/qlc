@@ -52,9 +52,7 @@ class FixtureManager : public QWidget
      ********************************************************************/
 public:
     /** Get the monitor singleton instance. Can be NULL. */
-    static FixtureManager* instance() {
-        return s_instance;
-    }
+    static FixtureManager* instance();
 
     /** Create or show the FixtureManager window. */
     static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,

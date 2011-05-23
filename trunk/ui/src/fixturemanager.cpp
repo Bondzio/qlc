@@ -127,6 +127,11 @@ FixtureManager::~FixtureManager()
     FixtureManager::s_instance = NULL;
 }
 
+FixtureManager* FixtureManager::instance()
+{
+    return s_instance;
+}
+
 void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
                                    InputMap* inputMap, MasterTimer* masterTimer,
                                    const QLCFixtureDefCache& fixtureDefCache)

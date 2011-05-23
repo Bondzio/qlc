@@ -67,7 +67,7 @@ protected slots:
      * Load & Save
      *************************************************************************/
 protected:
-    virtual QString xmlTagName() const { return KXMLQLCVCSoloFrame; }
+    virtual QString xmlTagName() const;
 
     /*************************************************************************
      * Event handlers

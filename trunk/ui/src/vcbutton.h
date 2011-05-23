@@ -94,9 +94,7 @@ public:
      *********************************************************************/
 public:
     /* Don't allow background image setting for buttons */
-    void setBackgroundImage(const QString& path) {
-        Q_UNUSED(path);
-    }
+    void setBackgroundImage(const QString& path);
 
     /*********************************************************************
      * Background color
@@ -106,10 +104,7 @@ public:
     void setBackgroundColor(const QColor& color);
 
     /** Get the button's background color */
-    QColor backgroundColor() const
-    {
-        return palette().color(QPalette::Button);
-    }
+    QColor backgroundColor() const;
 
     /** Reset the button's background color to whatever the platform uses */
     void resetBackgroundColor();
@@ -122,9 +117,7 @@ public:
     void setForegroundColor(const QColor& color);
 
     /** Get the button's foreground color */
-    QColor foregroundColor() const {
-        return palette().color(QPalette::ButtonText);
-    }
+    QColor foregroundColor() const;
 
     /** Reset the button's foreground color to whatever the platform uses */
     virtual void resetForegroundColor();
@@ -133,9 +126,7 @@ public:
      * Button icon
      *********************************************************************/
 public:
-    QString icon() const {
-        return m_icon;
-    }
+    QString icon() const;
     void setIcon(const QString& icon);
 
 public slots:
@@ -177,9 +168,7 @@ protected:
      *********************************************************************/
 public:
     void setOn(bool on);
-    bool isOn() const {
-        return m_on;
-    }
+    bool isOn() const;
 
 protected:
     bool isChildOfSoloFrame();
@@ -190,9 +179,7 @@ protected:
      *********************************************************************/
 public:
     void setKeySequence(const QKeySequence& keySequence);
-    QKeySequence keySequence() const {
-        return m_keySequence;
-    }
+    QKeySequence keySequence() const;
 
 protected slots:
     void slotKeyPressed(const QKeySequence& keySequence);
@@ -205,9 +192,7 @@ protected:
      * External input
      *********************************************************************/
 protected slots:
-    void slotInputValueChanged(quint32 universe,
-                               quint32 channel,
-                               uchar value);
+    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
     /*********************************************************************
      * Function attachment
@@ -227,9 +212,7 @@ public:
      * @return The ID of the attached function or Function::invalidId()
      *         if there isn't one
      */
-    quint32 function() const {
-        return m_function;
-    }
+    quint32 function() const;
 
 protected slots:
     /** Invalidates the button's function if the function is destroyed */
@@ -253,9 +236,7 @@ public:
     void setAction(Action action);
 
     /** Get this button's action */
-    Action action() const {
-        return m_action;
-    }
+    Action action() const;
 
     static QString actionToString(Action action);
     static Action stringToAction(const QString& str);

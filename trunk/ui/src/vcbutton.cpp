@@ -155,6 +155,11 @@ void VCButton::editProperties()
  * Background color
  *****************************************************************************/
 
+void VCButton::setBackgroundImage(const QString& path)
+{
+    Q_UNUSED(path);
+}
+
 void VCButton::setBackgroundColor(const QColor& color)
 {
     QPalette pal = palette();
@@ -190,6 +195,11 @@ void VCButton::resetBackgroundColor()
     }
 
     m_doc->setModified();
+}
+
+QColor VCButton::backgroundColor() const
+{
+    return palette().color(QPalette::Button);
 }
 
 /*****************************************************************************
@@ -231,9 +241,19 @@ void VCButton::resetForegroundColor()
     m_doc->setModified();
 }
 
+QColor VCButton::foregroundColor() const
+{
+    return palette().color(QPalette::ButtonText);
+}
+
 /*****************************************************************************
  * Button icon
  *****************************************************************************/
+
+QString VCButton::icon() const
+{
+    return m_icon;
+}
 
 void VCButton::setIcon(const QString& icon)
 {
@@ -466,6 +486,11 @@ bool VCButton::loadKeyBind(const QDomElement* key_root)
  * Button state
  *****************************************************************************/
 
+bool VCButton::isOn() const
+{
+    return m_on;
+}
+
 void VCButton::setOn(bool on)
 {
     m_on = on;
@@ -510,6 +535,11 @@ bool VCButton::isChildOfSoloFrame()
 void VCButton::setKeySequence(const QKeySequence& keySequence)
 {
     m_keySequence = QKeySequence(keySequence);
+}
+
+QKeySequence VCButton::keySequence() const
+{
+    return m_keySequence;
 }
 
 void VCButton::slotKeyPressed(const QKeySequence& keySequence)
@@ -599,6 +629,11 @@ void VCButton::setFunction(quint32 fid)
     }
 }
 
+quint32 VCButton::function() const
+{
+    return m_function;
+}
+
 void VCButton::slotFunctionRemoved(quint32 fid)
 {
     /* Invalidate the button's function if it's the one that was removed */
@@ -613,6 +648,11 @@ void VCButton::slotFunctionRemoved(quint32 fid)
 void VCButton::setAction(Action action)
 {
     m_action = action;
+}
+
+VCButton::Action VCButton::action() const
+{
+    return m_action;
 }
 
 QString VCButton::actionToString(VCButton::Action action)

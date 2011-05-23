@@ -100,6 +100,31 @@ AddVCButtonMatrix::~AddVCButtonMatrix()
     settings.setValue(BUTTON_SIZE, buttonSize());
 }
 
+QList <quint32> AddVCButtonMatrix::functions() const
+{
+    return m_functions;
+}
+
+quint32 AddVCButtonMatrix::horizontalCount() const
+{
+    return m_horizontalCount;
+}
+
+quint32 AddVCButtonMatrix::verticalCount() const
+{
+    return m_verticalCount;
+}
+
+quint32 AddVCButtonMatrix::buttonSize() const
+{
+    return m_buttonSize;
+}
+
+AddVCButtonMatrix::FrameStyle AddVCButtonMatrix::frameStyle() const
+{
+    return m_frameStyle;
+}
+
 void AddVCButtonMatrix::slotAddClicked()
 {
     FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true);

@@ -47,21 +47,20 @@ public:
         SoloFrame
     };
 
-    QList <quint32> functions() const {
-        return m_functions;
-    }
-    quint32 horizontalCount() const {
-        return m_horizontalCount;
-    }
-    quint32 verticalCount() const {
-        return m_verticalCount;
-    }
-    quint32 buttonSize() const {
-        return m_buttonSize;
-    }
-    FrameStyle frameStyle() const {
-        return m_frameStyle;
-    }
+    /** Functions to assign to buttons */
+    QList <quint32> functions() const;
+
+    /** Number of buttons horizontally */
+    quint32 horizontalCount() const;
+
+    /** Number of buttons vertically */
+    quint32 verticalCount() const;
+
+    /** Buttons' size (n x n) */
+    quint32 buttonSize() const;
+
+    /** Put buttons either in Normal or Solo VCVrame */
+    FrameStyle frameStyle() const;
 
 protected slots:
     void slotAddClicked();

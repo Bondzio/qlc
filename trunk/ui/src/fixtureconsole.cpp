@@ -98,6 +98,11 @@ void FixtureConsole::setFixture(quint32 id)
     layout()->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding));
 }
 
+quint32 FixtureConsole::fixture() const
+{
+    return m_fixture;
+}
+
 /*****************************************************************************
  * Channels
  *****************************************************************************/
@@ -164,7 +169,7 @@ QList <SceneValue> FixtureConsole::values() const
     while (it.hasNext() == true)
     {
         ConsoleChannel* cc = qobject_cast<ConsoleChannel*> (it.next());
-        if (cc != NULL && cc->isEnabled() == true)
+        if (cc != NULL && cc->isChecked() == true)
         {
             list.append(SceneValue(m_fixture, cc->channel(),
                                    cc->sliderValue()));

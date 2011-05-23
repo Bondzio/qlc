@@ -57,6 +57,9 @@ public:
                    MasterTimer* masterTimer, quint32 fixtureID, quint32 channel);
     ~ConsoleChannel();
 
+    /** The relative channel number that the ConsoleChannel instance controls */
+    quint32 channel() const;
+
 protected:
     /** Initialize the UI */
     void init();
@@ -65,6 +68,10 @@ private:
     Doc* m_doc;
     OutputMap* m_outputMap;
     MasterTimer* m_masterTimer;
+
+    quint32 m_channel;
+    quint32 m_fixtureID;
+    Fixture* m_fixture;
 
     /*********************************************************************
      * Menu
@@ -142,33 +149,12 @@ public:
     /** Enable/disable the channel */
     void enable(bool state);
 
-    /** Check, whether this channel has been enabled */
-    bool isEnabled() const {
-        return isChecked();
-    }
+    /** Set, whether the channel can be manually checked/enabled */
+    void setCheckable(bool checkable);
 
 protected slots:
     /** This channel was checked/unchecked */
     void slotToggled(bool state);
-
-    /*********************************************************************
-     * Checkable
-     *********************************************************************/
-public:
-    void setCheckable(bool checkable);
-
-    /*********************************************************************
-     * Fixture channel
-     *********************************************************************/
-public:
-    quint32 channel() const {
-        return m_channel;
-    }
-
-protected:
-    quint32 m_channel;
-    quint32 m_fixtureID;
-    Fixture* m_fixture;
 
     /*********************************************************************
      * Widgets

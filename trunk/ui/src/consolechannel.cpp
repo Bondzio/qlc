@@ -176,6 +176,11 @@ void ConsoleChannel::init()
     m_masterTimer->registerDMXSource(this);
 }
 
+quint32 ConsoleChannel::channel() const
+{
+    return m_channel;
+}
+
 /*****************************************************************************
  * Menu
  *****************************************************************************/
@@ -492,7 +497,7 @@ void ConsoleChannel::slotValueChange(int value)
     {
         m_value = value;
         m_valueEdit->setText(QString("%1").arg(m_value));
-        emit valueChanged(m_channel, m_value, isEnabled());
+        emit valueChanged(m_channel, m_value, isChecked());
 
         /* Use a mutex for m_valueChanged so that the latest value
            is really written. */
@@ -553,17 +558,8 @@ void ConsoleChannel::enable(bool state)
     const UniverseArray* unis(m_outputMap->peekUniverses());
     m_value = unis->preGMValues()[m_fixture->universeAddress() + m_channel];
 
-    emit valueChanged(m_channel, m_value, isEnabled());
+    emit valueChanged(m_channel, m_value, isChecked());
 }
-
-void ConsoleChannel::slotToggled(bool state)
-{
-    emit valueChanged(m_channel, m_value, state);
-}
-
-/*****************************************************************************
- * Checkable
- *****************************************************************************/
 
 void ConsoleChannel::setCheckable(bool checkable)
 {
@@ -586,4 +582,9 @@ void ConsoleChannel::setCheckable(bool checkable)
     }
 
     QGroupBox::setCheckable(checkable);
+}
+
+void ConsoleChannel::slotToggled(bool state)
+{
+    emit valueChanged(m_channel, m_value, state);
 }

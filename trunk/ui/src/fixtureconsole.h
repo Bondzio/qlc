@@ -64,9 +64,7 @@ public:
     void setFixture(quint32 id);
 
     /** Get the fixture that this console is controlling */
-    quint32 fixture() const {
-        return m_fixture;
-    }
+    quint32 fixture() const;
 
 protected:
     quint32 m_fixture;

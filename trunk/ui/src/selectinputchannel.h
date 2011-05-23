@@ -55,14 +55,10 @@ private:
      ********************************************************************/
 public:
     /** Get the selected universe */
-    quint32 universe() const {
-        return m_universe;
-    }
+    quint32 universe() const;
 
     /** Get the selected channel within the selected universe */
-    quint32 channel() const {
-        return m_channel;
-    }
+    quint32 channel() const;
 
 protected:
     quint32 m_universe;

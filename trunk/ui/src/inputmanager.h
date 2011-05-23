@@ -42,7 +42,7 @@ class InputManager : public QWidget
      *************************************************************************/
 public:
     /** Get the InputManager singleton instance. Can be NULL. */
-    static InputManager* instance() { return s_instance; }
+    static InputManager* instance();
 
     /** Create an instance with parent. Fails if s_instance is not NULL. */
     static void createAndShow(QWidget* parent, InputMap* inputMap);

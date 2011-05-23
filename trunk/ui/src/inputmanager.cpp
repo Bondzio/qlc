@@ -117,6 +117,11 @@ InputManager::~InputManager()
     InputManager::s_instance = NULL;
 }
 
+InputManager* InputManager::instance()
+{
+    return s_instance;
+}
+
 void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
 {
     QWidget* window = NULL;

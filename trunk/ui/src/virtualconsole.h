@@ -68,9 +68,7 @@ class VirtualConsole : public QWidget
      *********************************************************************/
 public:
     /** Get the VC singleton instance. Can be NULL. */
-    static VirtualConsole* instance() {
-        return s_instance;
-    }
+    static VirtualConsole* instance();
 
     /** Create or show a VirtualConsole */
     static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
@@ -97,9 +95,7 @@ protected:
      *********************************************************************/
 public:
     /** Get VC properties */
-    static VCProperties properties() {
-        return s_properties;
-    }
+    static VCProperties properties();
 
 protected:
     /** VC properties */
@@ -112,20 +108,13 @@ public:
     enum EditAction { EditNone, EditCut, EditCopy };
 
     /** Set the edit action for selected widgets */
-    void setEditAction(EditAction action) {
-        m_editAction = action;
-    }
+    void setEditAction(EditAction action);
 
     /** Get the edit action for selected widgets */
-    EditAction editAction() const {
-        return m_editAction;
-    }
+    EditAction editAction() const;
 
     /** Get a list of currently selected widgets */
-    const QList <VCWidget*> selectedWidgets() const
-    {
-        return m_selectedWidgets;
-    }
+    const QList <VCWidget*> selectedWidgets() const;
 
     /** Either select or unselect a widget */
     void setWidgetSelected(VCWidget* widget, bool selected);
@@ -150,18 +139,10 @@ protected:
      * Actions, menu- and toolbar
      *********************************************************************/
 public:
-    QMenu* customMenu() {
-        return m_customMenu;
-    }
-    QMenu* toolsMenu() {
-        return m_toolsMenu;
-    }
-    QMenu* editMenu() {
-        return m_editMenu;
-    }
-    QMenu* addMenu() {
-        return m_addMenu;
-    }
+    QMenu* customMenu() const;
+    QMenu* toolsMenu() const;
+    QMenu* editMenu() const;
+    QMenu* addMenu() const;
 
 protected:
     /** Initialize actions */
@@ -324,9 +305,7 @@ public slots:
      *********************************************************************/
 public:
     /** Get a pointer to the dock area that holds the default sliders */
-    VCDockArea* dockArea() {
-        return m_dockArea;
-    }
+    VCDockArea* dockArea() const;
 
 protected:
     /** Initialize default sliders */
@@ -341,9 +320,7 @@ protected:
      *********************************************************************/
 public:
     /** Get the VC's current contents */
-    VCFrame* contents() const {
-        return s_properties.contents();
-    }
+    VCFrame* contents() const;
 
     /** Reset the VC contents to an initial state */
     static void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,

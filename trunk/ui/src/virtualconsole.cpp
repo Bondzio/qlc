@@ -148,6 +148,11 @@ VirtualConsole::~VirtualConsole()
     s_instance = NULL;
 }
 
+VirtualConsole* VirtualConsole::instance()
+{
+    return s_instance;
+}
+
 void VirtualConsole::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
                                    InputMap* inputMap, MasterTimer* masterTimer)
 {
@@ -193,9 +198,33 @@ void VirtualConsole::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputM
     s_instance->dockArea()->refreshProperties();
 }
 
+/*********************************************************************
+ * Properties
+ *********************************************************************/
+
+VCProperties VirtualConsole::properties()
+{
+    return s_properties;
+}
+
 /*****************************************************************************
  * Selected widget
  *****************************************************************************/
+
+void VirtualConsole::setEditAction(VirtualConsole::EditAction action)
+{
+    m_editAction = action;
+}
+
+VirtualConsole::EditAction VirtualConsole::editAction() const
+{
+    return m_editAction;
+}
+
+const QList <VCWidget*> VirtualConsole::selectedWidgets() const
+{
+    return m_selectedWidgets;
+}
 
 void VirtualConsole::setWidgetSelected(VCWidget* widget, bool select)
 {
@@ -250,6 +279,26 @@ void VirtualConsole::clearWidgetSelection()
 /*****************************************************************************
  * Actions, menu- and toolbar
  *****************************************************************************/
+
+QMenu* VirtualConsole::customMenu() const
+{
+    return m_customMenu;
+}
+
+QMenu* VirtualConsole::toolsMenu() const
+{
+    return m_toolsMenu;
+}
+
+QMenu* VirtualConsole::editMenu() const
+{
+    return m_editMenu;
+}
+
+QMenu* VirtualConsole::addMenu() const
+{
+    return m_addMenu;
+}
 
 void VirtualConsole::initActions()
 {
@@ -1395,6 +1444,11 @@ void VirtualConsole::slotFrameNone()
  * Dock area
  *****************************************************************************/
 
+VCDockArea* VirtualConsole::dockArea() const
+{
+    return m_dockArea;
+}
+
 void VirtualConsole::initDockArea()
 {
     if (m_dockArea != NULL)
@@ -1413,6 +1467,11 @@ void VirtualConsole::initDockArea()
 /*****************************************************************************
  * Contents
  *****************************************************************************/
+
+VCFrame* VirtualConsole::contents() const
+{
+    return s_properties.contents();
+}
 
 void VirtualConsole::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
                                    InputMap* inputMap, MasterTimer* masterTimer)

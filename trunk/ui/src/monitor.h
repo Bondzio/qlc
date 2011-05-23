@@ -48,9 +48,7 @@ class Monitor : public QWidget
      *********************************************************************/
 public:
     /** Get the monitor singleton instance. Can be NULL. */
-    static Monitor* instance() {
-        return s_instance;
-    }
+    static Monitor* instance();
 
     /** Create or show Monitor */
     static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap);
@@ -79,14 +77,10 @@ public:
     enum ValueStyle { DMXValues, PercentageValues };
 
     /** Get the style used to draw DMX values in monitor fixtures */
-    ValueStyle valueStyle() const {
-        return m_valueStyle;
-    }
+    ValueStyle valueStyle() const;
 
     /** Get the style used to draw channel numbers in monitor fixtures */
-    ChannelStyle channelStyle() const {
-        return m_channelStyle;
-    }
+    ChannelStyle channelStyle() const;
 
 private:
     ValueStyle m_valueStyle;

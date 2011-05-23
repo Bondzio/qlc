@@ -126,6 +126,11 @@ Monitor::~Monitor()
     Monitor::s_instance = NULL;
 }
 
+Monitor* Monitor::instance()
+{
+    return s_instance;
+}
+
 void Monitor::loadSettings()
 {
     QSettings settings;
@@ -213,6 +218,20 @@ void Monitor::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap)
 
     window->show();
     window->raise();
+}
+
+/****************************************************************************
+ * Channel & Value styles
+ ****************************************************************************/
+
+Monitor::ValueStyle Monitor::valueStyle() const
+{
+    return m_valueStyle;
+}
+
+Monitor::ChannelStyle Monitor::channelStyle() const
+{
+    return m_channelStyle;
 }
 
 /****************************************************************************

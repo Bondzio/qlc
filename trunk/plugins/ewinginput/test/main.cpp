@@ -3,11 +3,17 @@
 #include "testeplaybackwing.h"
 #include "testeshortcutwing.h"
 #include "testeprogramwing.h"
+#include "testewing.h"
 
 int main(int argc, char** argv)
 {
     QApplication qapp(argc, argv);
     int r;
+
+    EWing_Test test0;
+    r = QTest::qExec(&test0, argc, argv);
+    if (r != 0)
+        return r;
 
     TestEPlaybackWing test1;
     r = QTest::qExec(&test1, argc, argv);

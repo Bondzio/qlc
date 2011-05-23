@@ -13,8 +13,10 @@ LIBS        += -L../src -lewinginput
 SOURCES += testeplaybackwing.cpp \
            testeprogramwing.cpp \
            testeshortcutwing.cpp \
+           testewing.cpp \
            main.cpp
 
 HEADERS += testeplaybackwing.h \
            testeprogramwing.h \
-           testeshortcutwing.h
+           testeshortcutwing.h \
+           testewing.h

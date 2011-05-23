@@ -102,6 +102,7 @@ done
 lcov ${mergeargs} -o coverage/coverage.info
 
 # Remove stuff that isn't part of QLC sources
+lcov -r coverage/coverage.info *.h -o coverage/coverage.info # Q_OBJECT etc.
 lcov -r coverage/coverage.info moc_* -o coverage/coverage.info
 lcov -r coverage/coverage.info *usr* -o coverage/coverage.info
 lcov -r coverage/coverage.info *_test* -o coverage/coverage.info

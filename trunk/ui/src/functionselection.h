@@ -82,15 +82,8 @@ private:
      * Disabled functions
      *********************************************************************/
 public:
-    void setDisabledFunctions(const QList <quint32>& ids)
-    {
-        m_disabledFunctions = ids;
-    }
-
-    QList <quint32> disabledFunctions() const
-    {
-        return m_disabledFunctions;
-    }
+    void setDisabledFunctions(const QList <quint32>& ids);
+    QList <quint32> disabledFunctions() const;
 
 protected:
     QList <quint32> m_disabledFunctions;
@@ -100,9 +93,7 @@ protected:
      *********************************************************************/
 public:
     /** Get a list of selected function IDs */
-    const QList <quint32> selection() const {
-        return m_selection;
-    }
+    const QList <quint32> selection() const;
 
 protected:
     /** The list of selected function IDs */

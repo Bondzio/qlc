@@ -137,6 +137,29 @@ FunctionSelection::~FunctionSelection()
 }
 
 /*****************************************************************************
+ * Disabled functions
+ *****************************************************************************/
+
+void FunctionSelection::setDisabledFunctions(const QList <quint32>& ids)
+{
+    m_disabledFunctions = ids;
+}
+
+QList <quint32> FunctionSelection::disabledFunctions() const
+{
+    return m_disabledFunctions;
+}
+
+/*****************************************************************************
+ * Selection
+ *****************************************************************************/
+
+const QList <quint32> FunctionSelection::selection() const
+{
+    return m_selection;
+}
+
+/*****************************************************************************
  * Toolbar
  *****************************************************************************/
 

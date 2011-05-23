@@ -93,6 +93,15 @@ bool VCFrame::copyFrom(VCWidget* widget)
 }
 
 /*****************************************************************************
+ * Capability to have children
+ *****************************************************************************/
+
+bool VCFrame::canHaveChildren() const
+{
+    return true;
+}
+
+/*****************************************************************************
  * Load & Save
  *****************************************************************************/
 
@@ -258,6 +267,11 @@ void VCFrame::postLoad()
         if (widget->parentWidget() == this)
             widget->postLoad();
     }
+}
+
+QString VCFrame::xmlTagName() const
+{
+    return KXMLQLCVCFrame;
 }
 
 /*****************************************************************************

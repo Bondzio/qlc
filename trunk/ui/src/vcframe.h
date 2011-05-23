@@ -65,9 +65,7 @@ protected:
      *********************************************************************/
 public:
     /** VCFrame can hold children */
-    bool canHaveChildren() const {
-        return true;
-    }
+    bool canHaveChildren() const;
 
     /*********************************************************************
      * Load & Save
@@ -85,7 +83,7 @@ public:
 
 protected:
     /** Can be overridden by subclasses */
-    virtual QString xmlTagName() const { return KXMLQLCVCFrame; }
+    virtual QString xmlTagName() const;
 
     /*********************************************************************
      * Custom menu

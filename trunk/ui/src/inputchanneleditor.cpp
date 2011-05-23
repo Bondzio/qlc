@@ -29,6 +29,10 @@
 #include "qlcinputchannel.h"
 #include "inputchanneleditor.h"
 
+/****************************************************************************
+ * Initialization
+ ****************************************************************************/
+
 InputChannelEditor::InputChannelEditor(QWidget* parent,
                                        const QLCInputProfile* profile,
                                        const QLCInputChannel* channel)
@@ -95,6 +99,25 @@ InputChannelEditor::InputChannelEditor(QWidget* parent,
 
 InputChannelEditor::~InputChannelEditor()
 {
+}
+
+/****************************************************************************
+ * Properties
+ ****************************************************************************/
+
+quint32 InputChannelEditor::channel() const
+{
+    return m_channel;
+}
+
+QString InputChannelEditor::name() const
+{
+    return m_name;
+}
+
+QLCInputChannel::Type InputChannelEditor::type() const
+{
+    return m_type;
 }
 
 void InputChannelEditor::slotNumberChanged(int number)

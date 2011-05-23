@@ -32,6 +32,7 @@ class QLCInputChannel;
 class InputChannelEditor : public QDialog, public Ui_InputChannelEditor
 {
     Q_OBJECT
+    Q_DISABLE_COPY(InputChannelEditor)
 
     /********************************************************************
      * Initialization
@@ -42,22 +43,13 @@ public:
                        const QLCInputChannel* channel);
     virtual ~InputChannelEditor();
 
-private:
-    Q_DISABLE_COPY(InputChannelEditor)
-
     /********************************************************************
      * Properties
      ********************************************************************/
 public:
-    quint32 channel() const {
-        return m_channel;
-    }
-    QString name() const {
-        return m_name;
-    }
-    QLCInputChannel::Type type() const {
-        return m_type;
-    }
+    quint32 channel() const;
+    QString name() const;
+    QLCInputChannel::Type type() const;
 
 protected slots:
     void slotNumberChanged(int number);

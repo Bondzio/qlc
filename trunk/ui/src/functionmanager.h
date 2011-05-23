@@ -48,9 +48,7 @@ class FunctionManager : public QWidget
      *********************************************************************/
 public:
     /** Get the FunctionManager singleton instance. Can be NULL. */
-    static FunctionManager* instance() {
-        return s_instance;
-    }
+    static FunctionManager* instance();
 
     /** Create or show FunctionManager */
     static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,

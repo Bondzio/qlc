@@ -109,6 +109,11 @@ FunctionManager::~FunctionManager()
     FunctionManager::s_instance = NULL;
 }
 
+FunctionManager* FunctionManager::instance()
+{
+    return s_instance;
+}
+
 void FunctionManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
                                     InputMap* inputMap, MasterTimer* masterTimer)
 {

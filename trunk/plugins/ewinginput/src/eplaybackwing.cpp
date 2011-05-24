@@ -261,7 +261,7 @@ void EPlaybackWing::sendPageData()
     QByteArray sendData(42, char(0));
     sendData.replace(0, sizeof(EWING_HEADER_INPUT), EWING_HEADER_INPUT);
     sendData[EWING_PLAYBACK_INPUT_BYTE_VERSION] = EWING_PLAYBACK_INPUT_VERSION;
-    sendData[EWING_PLAYBACK_INPUT_BYTE_PAGE] = toBCD(m_page);
+    sendData[EWING_PLAYBACK_INPUT_BYTE_PAGE] = toBCD(page());
 
     QUdpSocket sock(this);
     sock.writeDatagram(sendData, address(), EWing::UDPPort);

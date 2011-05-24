@@ -159,7 +159,7 @@ protected:
      * @param data The data packet to resolve
      * @return Firmware version (0-255)
      */
-    uchar resolveFirmware(const QByteArray& data);
+    static uchar resolveFirmware(const QByteArray& data);
 
 protected:
     QHostAddress m_address;
@@ -173,7 +173,9 @@ public:
     void nextPage();
     void previousPage();
 
-protected:
+    uchar page() const;
+
+private:
     uchar m_page;
 
     /********************************************************************

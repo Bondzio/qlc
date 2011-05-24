@@ -21,6 +21,12 @@ class EWing_Test : public QObject
 
 private slots:
     void resolveType();
+    void resolveFirmware();
+    void isOutputData();
+    void initial();
+    void page();
+    void bcd();
+    void cache();
 };
 
 #endif

@@ -42,6 +42,13 @@ private slots:
     void inputSource();
     void copy();
     void keyPress();
+    void loadInput();
+    void loadAppearance();
+    void saveInput();
+    void saveAppearance();
+    void saveAppearanceDefaultsImage();
+    void saveWindowState();
+    void loadWindowState();
 };
 
 #endif

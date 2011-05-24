@@ -413,4 +413,352 @@ void VCWidget_Test::keyPress()
     QCOMPARE(rspy[0][0].value<QKeySequence>(), QKeySequence(QKeySequence::Copy));
 }
 
+void VCWidget_Test::loadInput()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Input");
+    root.setAttribute("Universe", "12");
+    root.setAttribute("Channel", "34");
+    xmldoc.appendChild(root);
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    QCOMPARE(stub.loadXMLInput(&root), true);
+    QCOMPARE(stub.inputUniverse(), quint32(12));
+    QCOMPARE(stub.inputChannel(), quint32(34));
+
+    root.setTagName("Output");
+    QCOMPARE(stub.loadXMLInput(&root), false);
+    QCOMPARE(stub.inputUniverse(), quint32(12));
+    QCOMPARE(stub.inputChannel(), quint32(34));
+}
+
+void VCWidget_Test::loadAppearance()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Appearance");
+    xmldoc.appendChild(root);
+
+    QDomElement frame = xmldoc.createElement("FrameStyle");
+    QDomText frameText = xmldoc.createTextNode("Sunken");
+    frame.appendChild(frameText);
+    root.appendChild(frame);
+
+    QDomElement fg = xmldoc.createElement("ForegroundColor");
+    QDomText fgText = xmldoc.createTextNode(QString("%1").arg(QColor(Qt::red).rgb()));
+    fg.appendChild(fgText);
+    root.appendChild(fg);
+
+    QDomElement bg = xmldoc.createElement("BackgroundColor");
+    QDomText bgText = xmldoc.createTextNode(QString("%1").arg(QColor(Qt::blue).rgb()));
+    bg.appendChild(bgText);
+    root.appendChild(bg);
+
+    QDomElement bgImage = xmldoc.createElement("BackgroundImage");
+    QDomText bgImageText = xmldoc.createTextNode("None");
+    bgImage.appendChild(bgImageText);
+    root.appendChild(bgImage);
+
+    QDomElement foo = xmldoc.createElement("Foo");
+    root.appendChild(foo);
+
+    QFont font(w.font());
+    font.setItalic(true);
+    QDomElement fn = xmldoc.createElement("Font");
+    QDomText fnText = xmldoc.createTextNode(font.toString());
+    fn.appendChild(fnText);
+    root.appendChild(fn);
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    QVERIFY(stub.loadXMLAppearance(&root) == true);
+    QCOMPARE(stub.frameStyle(), (int) KVCFrameStyleSunken);
+    QCOMPARE(stub.hasCustomForegroundColor(), true);
+    QCOMPARE(stub.foregroundColor(), QColor(Qt::red));
+    QCOMPARE(stub.hasCustomBackgroundColor(), true);
+    QCOMPARE(stub.backgroundColor(), QColor(Qt::blue));
+    QCOMPARE(stub.font(), font);
+
+    fgText.setData("Default");
+    bgText.setData("Default");
+    bgImageText.setData("../../../gfx/qlc.png");
+    QVERIFY(stub.loadXMLAppearance(&root) == true);
+    QCOMPARE(stub.frameStyle(), (int) KVCFrameStyleSunken);
+    QCOMPARE(stub.hasCustomForegroundColor(), false);
+    QCOMPARE(stub.hasCustomBackgroundColor(), false);
+    QCOMPARE(stub.backgroundImage(), QString("../../../gfx/qlc.png"));
+    QCOMPARE(stub.font(), font);
+
+    root.setTagName("Appiarenz");
+    QVERIFY(stub.loadXMLAppearance(&root) == false);
+    QCOMPARE(stub.frameStyle(), (int) KVCFrameStyleSunken);
+    QCOMPARE(stub.hasCustomForegroundColor(), false);
+    QCOMPARE(stub.hasCustomBackgroundColor(), false);
+    QCOMPARE(stub.backgroundImage(), QString("../../../gfx/qlc.png"));
+    QCOMPARE(stub.font(), font);
+}
+
+void VCWidget_Test::saveInput()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Root");
+    xmldoc.appendChild(root);
+
+    QVERIFY(stub.saveXMLInput(&xmldoc, &root) == true);
+    QCOMPARE(root.childNodes().count(), 0);
+
+    stub.setInputSource(34, 56);
+    QVERIFY(stub.saveXMLInput(&xmldoc, &root) == true);
+    QCOMPARE(root.childNodes().count(), 1);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("Input"));
+    QCOMPARE(root.firstChild().toElement().attribute("Universe"), QString("34"));
+    QCOMPARE(root.firstChild().toElement().attribute("Channel"), QString("56"));
+}
+
+void VCWidget_Test::saveAppearance()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    stub.setBackgroundColor(QColor(Qt::red));
+    stub.setForegroundColor(QColor(Qt::green));
+    QFont fn(w.font());
+    fn.setBold(!fn.bold());
+    stub.setFont(fn);
+    stub.setFrameStyle(KVCFrameStyleRaised);
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Root");
+    xmldoc.appendChild(root);
+
+    int bgcolor = 0, bgimage = 0, fgcolor = 0, font = 0, frame = 0;
+
+    QCOMPARE(stub.saveXMLAppearance(&xmldoc, &root), true);
+    QDomNode node = root.firstChild();
+    QCOMPARE(node.toElement().tagName(), QString("Appearance"));
+    node = node.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == "BackgroundColor")
+        {
+            bgcolor++;
+            QCOMPARE(tag.text(), QString::number(QColor(Qt::red).rgb()));
+        }
+        else if (tag.tagName() == "BackgroundImage")
+        {
+            bgimage++;
+            QCOMPARE(tag.text(), QString("None"));
+        }
+        else if (tag.tagName() == "ForegroundColor")
+        {
+            fgcolor++;
+            QCOMPARE(tag.text(), QString::number(QColor(Qt::green).rgb()));
+        }
+        else if (tag.tagName() == "Font")
+        {
+            font++;
+            QCOMPARE(tag.text(), fn.toString());
+        }
+        else if (tag.tagName() == "FrameStyle")
+        {
+            frame++;
+            QCOMPARE(tag.text(), QString("Raised"));
+        }
+        else
+        {
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
+        }
+
+        node = node.nextSibling();
+    }
+
+    QCOMPARE(bgcolor, 1);
+    QCOMPARE(bgimage, 1);
+    QCOMPARE(fgcolor, 1);
+    QCOMPARE(font, 1);
+    QCOMPARE(frame, 1);
+}
+
+void VCWidget_Test::saveAppearanceDefaultsImage()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    stub.setBackgroundImage("../../../gfx/qlc.png");
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Root");
+    xmldoc.appendChild(root);
+
+    int bgcolor = 0, bgimage = 0, fgcolor = 0, font = 0, frame = 0;
+
+    QCOMPARE(stub.saveXMLAppearance(&xmldoc, &root), true);
+    QDomNode node = root.firstChild();
+    QCOMPARE(node.toElement().tagName(), QString("Appearance"));
+    node = node.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == "BackgroundColor")
+        {
+            bgcolor++;
+            QCOMPARE(tag.text(), QString("Default"));
+        }
+        else if (tag.tagName() == "BackgroundImage")
+        {
+            bgimage++;
+            QCOMPARE(tag.text(), QString("../../../gfx/qlc.png"));
+        }
+        else if (tag.tagName() == "ForegroundColor")
+        {
+            fgcolor++;
+            QCOMPARE(tag.text(), QString("Default"));
+        }
+        else if (tag.tagName() == "Font")
+        {
+            font++;
+            QCOMPARE(tag.text(), QString("Default"));
+        }
+        else if (tag.tagName() == "FrameStyle")
+        {
+            frame++;
+            QCOMPARE(tag.text(), QString("None"));
+        }
+        else
+        {
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
+        }
+
+        node = node.nextSibling();
+    }
+
+    QCOMPARE(bgcolor, 1);
+    QCOMPARE(bgimage, 1);
+    QCOMPARE(fgcolor, 1);
+    QCOMPARE(font, 1);
+    QCOMPARE(frame, 1);
+}
+
+void VCWidget_Test::saveWindowState()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    StubWidget stub(&w, &doc, &om, &im, &mt);
+    w.show();
+    w.resize(QSize(100, 100));
+    stub.resize(QSize(30, 40));
+    stub.move(QPoint(10, 20));
+    stub.show();
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Root");
+    xmldoc.appendChild(root);
+
+    QCOMPARE(stub.saveXMLWindowState(&xmldoc, &root), true);
+    QDomElement tag = root.firstChild().toElement();
+    QCOMPARE(tag.tagName(), QString("WindowState"));
+    QCOMPARE(tag.attribute("X"), QString("10"));
+    QCOMPARE(tag.attribute("Y"), QString("20"));
+    QCOMPARE(tag.attribute("Width"), QString("30"));
+    QCOMPARE(tag.attribute("Height"), QString("40"));
+    QCOMPARE(tag.attribute("Visible"), QString("True"));
+
+    root.removeChild(tag);
+
+    w.hide();
+    QCOMPARE(stub.saveXMLWindowState(&xmldoc, &root), true);
+    tag = root.firstChild().toElement();
+    QCOMPARE(tag.tagName(), QString("WindowState"));
+    QCOMPARE(tag.attribute("X"), QString("10"));
+    QCOMPARE(tag.attribute("Y"), QString("20"));
+    QCOMPARE(tag.attribute("Width"), QString("30"));
+    QCOMPARE(tag.attribute("Height"), QString("40"));
+    QCOMPARE(tag.attribute("Visible"), QString("False"));
+}
+
+void VCWidget_Test::loadWindowState()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget parent;
+
+    StubWidget stub(&parent, &doc, &om, &im, &mt);
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("WindowState");
+    root.setAttribute("X", "20");
+    root.setAttribute("Y", "10");
+    root.setAttribute("Width", "40");
+    root.setAttribute("Height", "30");
+    root.setAttribute("Visible", "True");
+    xmldoc.appendChild(root);
+
+    int x = 0, y = 0, w = 0, h = 0;
+    bool v = false;
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, &h, NULL), false);
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, NULL, &v), false);
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, NULL, &h, &v), false);
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, NULL, &w, &h, &v), false);
+    QCOMPARE(stub.loadXMLWindowState(&root, NULL, &y, &w, &h, &v), false);
+    QCOMPARE(stub.loadXMLWindowState(NULL, &x, &y, &w, &h, &v), false);
+
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, &h, &v), true);
+    QCOMPARE(x, 20);
+    QCOMPARE(y, 10);
+    QCOMPARE(w, 40);
+    QCOMPARE(h, 30);
+    QCOMPARE(v, true);
+
+    root.setAttribute("Visible", "False");
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, &h, &v), true);
+    QCOMPARE(x, 20);
+    QCOMPARE(y, 10);
+    QCOMPARE(w, 40);
+    QCOMPARE(h, 30);
+    QCOMPARE(v, false);
+
+    root.setTagName("WinduhState");
+    QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, &h, &v), false);
+}
+
 QTEST_MAIN(VCWidget_Test)

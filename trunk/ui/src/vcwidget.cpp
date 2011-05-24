@@ -472,6 +472,8 @@ bool VCWidget::loadXMLAppearance(const QDomElement* root)
         {
             if (tag.text() != KXMLQLCVCWidgetColorDefault)
                 setForegroundColor(QColor(tag.text().toUInt()));
+            else if (hasCustomForegroundColor() == true)
+                resetForegroundColor();
         }
         else if (tag.tagName() == KXMLQLCVCWidgetBackgroundColor)
         {

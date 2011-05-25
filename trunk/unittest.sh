@@ -52,11 +52,10 @@ done
 
 pushd .
 cd plugins/ewinginput/test
-DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./test_ewing
+sh test.sh
 RESULT=$?
 if [ $RESULT != 0 ]; then
-	echo "Enttec wing unit test failed ($RESULT). Please fix before commit."
+	echo "${RESULT} Enttec wing unit tests failed. Please fix before commit."
 	exit $RESULT
 fi
 popd

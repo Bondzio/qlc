@@ -25,7 +25,7 @@
 #include <QTest>
 
 #include "eprogramwing.h"
-#include "testeprogramwing.h"
+#include "eprogramwing_test.h"
 
 #define PRG_FIRMWARE 178
 #define PRG_FLAGS (1 << 7) /* Page Up */	\
@@ -35,7 +35,7 @@
 		| (1 << 1) /* Product (1=PLB, 2=SHC, 3=PGM) */	\
 		| (1 << 0) /* Product */
 
-QByteArray TestEProgramWing::data()
+QByteArray EProgramWing_Test::data()
 {
     QByteArray data(28, 0);
     data[0] = 'W'; /* HEADER */
@@ -75,24 +75,24 @@ QByteArray TestEProgramWing::data()
     return data;
 }
 
-void TestEProgramWing::initTestCase()
+void EProgramWing_Test::initTestCase()
 {
     m_ewing = new EProgramWing(this, QHostAddress::LocalHost, data());
     QVERIFY(m_ewing != NULL);
     QVERIFY(m_ewing->type() == EWing::Program);
 }
 
-void TestEProgramWing::firmware()
+void EProgramWing_Test::firmware()
 {
     QVERIFY(m_ewing->firmware() == PRG_FIRMWARE);
 }
 
-void TestEProgramWing::address()
+void EProgramWing_Test::address()
 {
     QVERIFY(m_ewing->address() == QHostAddress::LocalHost);
 }
 
-void TestEProgramWing::isOutputData()
+void EProgramWing_Test::isOutputData()
 {
     QByteArray ba(data());
 
@@ -102,13 +102,13 @@ void TestEProgramWing::isOutputData()
     QVERIFY(EWing::isOutputData(ba) == false);
 }
 
-void TestEProgramWing::name()
+void EProgramWing_Test::name()
 {
     QCOMPARE(m_ewing->name(), QString("Program ") + tr("at") + QString(" ")
              + QHostAddress(QHostAddress::LocalHost).toString());
 }
 
-void TestEProgramWing::infoText()
+void EProgramWing_Test::infoText()
 {
     QString str = QString("<B>%1</B>").arg(m_ewing->name());
     str += QString("<P>");
@@ -119,7 +119,7 @@ void TestEProgramWing::infoText()
     QCOMPARE(m_ewing->infoText(), str);
 }
 
-void TestEProgramWing::tooShortData()
+void EProgramWing_Test::tooShortData()
 {
     // Just a stability check; nothing should happen if data is too short
     QByteArray foo;
@@ -158,7 +158,7 @@ void TestEProgramWing::tooShortData()
     m_ewing->parseData(foo);
 }
 
-void TestEProgramWing::buttons_data()
+void EProgramWing_Test::buttons_data()
 {
     QByteArray ba(data());
 
@@ -454,7 +454,7 @@ void TestEProgramWing::buttons_data()
     QTest::newRow("Button 64: Encoder 2") << ba << 64 << 255;
 }
 
-void TestEProgramWing::buttons()
+void EProgramWing_Test::buttons()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
@@ -464,7 +464,7 @@ void TestEProgramWing::buttons()
     QCOMPARE(m_ewing->cacheValue(channel), (unsigned char) value);
 }
 
-void TestEProgramWing::encoders_data()
+void EProgramWing_Test::encoders_data()
 {
     QByteArray ba(data());
 
@@ -508,7 +508,7 @@ void TestEProgramWing::encoders_data()
         QTest::newRow("Encoder 2 CCW") << ba << 67 << i;
 }
 
-void TestEProgramWing::encoders()
+void EProgramWing_Test::encoders()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
@@ -518,7 +518,7 @@ void TestEProgramWing::encoders()
     QCOMPARE(int(m_ewing->cacheValue(channel)), value);
 }
 
-void TestEProgramWing::cleanupTestCase()
+void EProgramWing_Test::cleanupTestCase()
 {
     delete m_ewing;
     m_ewing = NULL;

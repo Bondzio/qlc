@@ -25,7 +25,7 @@
 #include "ewing.h"
 #undef protected
 
-#include "testewing.h"
+#include "ewing_test.h"
 
 EWingStub::EWingStub(QObject* parent, const QHostAddress& host, const QByteArray& ba)
     : EWing(parent, host, ba)

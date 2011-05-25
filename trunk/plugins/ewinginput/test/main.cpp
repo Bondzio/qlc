@@ -21,33 +21,33 @@
 
 #include <QtTest>
 
-#include "testeplaybackwing.h"
-#include "testeshortcutwing.h"
-#include "testeprogramwing.h"
-#include "testewing.h"
+#include "eplaybackwing_test.h"
+#include "eshortcutwing_test.h"
+#include "eprogramwing_test.h"
+#include "ewing_test.h"
 
 int main(int argc, char** argv)
 {
     QApplication qapp(argc, argv);
     int r;
 
-    EWing_Test test0;
-    r = QTest::qExec(&test0, argc, argv);
+    EWing_Test ewi;
+    r = QTest::qExec(&ewi, argc, argv);
     if (r != 0)
         return r;
 
-    TestEPlaybackWing test1;
-    r = QTest::qExec(&test1, argc, argv);
+    EPlaybackWing_Test epl;
+    r = QTest::qExec(&epl, argc, argv);
     if (r != 0)
         return r;
 
-    TestEShortcutWing test2;
-    r = QTest::qExec(&test2, argc, argv);
+    EShortcutWing_Test esh;
+    r = QTest::qExec(&esh, argc, argv);
     if (r != 0)
         return r;
 
-    TestEProgramWing test3;
-    r = QTest::qExec(&test3, argc, argv);
+    EProgramWing_Test epr;
+    r = QTest::qExec(&epr, argc, argv);
     if (r != 0)
         return r;
 

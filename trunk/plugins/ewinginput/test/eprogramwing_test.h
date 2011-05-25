@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeplaybackwing.h
+  testeprogramwing.
 
   Copyright (c) Heikki Junnila
 
@@ -19,15 +19,14 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TESTEPLAYBACKWING_H
-#define TESTEPLAYBACKWING_H
+#ifndef TESTEPROGRAMWING_H
+#define TESTEPROGRAMWING_H
 
 #include <QByteArray>
 #include <QObject>
 
-class EPlaybackWing;
-
-class TestEPlaybackWing : public QObject
+class EProgramWing;
+class EProgramWing_Test : public QObject
 {
     Q_OBJECT
 
@@ -47,13 +46,13 @@ private slots:
     void buttons_data();
     void buttons();
 
-    void faders_data();
-    void faders();
+    void encoders_data();
+    void encoders();
 
     void cleanupTestCase();
 
 private:
-    EPlaybackWing* m_ewing;
+    EProgramWing* m_ewing;
 };
 
 #endif

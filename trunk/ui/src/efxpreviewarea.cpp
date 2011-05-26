@@ -114,9 +114,9 @@ void EFXPreviewArea::paintEvent(QPaintEvent* e)
     painter.drawLine(width() >> 1, 0, width() >> 1, height());
     painter.drawLine(0, height() >> 1, width(), height() >> 1);
 
-    if (m_reverse == true)
+    if (m_reverse == true && m_iter >= 0)
         m_iter--;
-    else
+    else if (m_reverse == false && m_iter < m_points.size())
         m_iter++;
 
     /* Plain points with text color */

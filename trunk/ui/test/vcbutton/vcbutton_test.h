@@ -34,6 +34,10 @@ private slots:
     void function();
     void action();
     void intensity();
+    void bgcolor();
+    void fgcolor();
+    void resetColors();
+    void icon();
 };
 
 #endif

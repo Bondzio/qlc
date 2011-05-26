@@ -233,11 +233,9 @@ void VCButton::resetForegroundColor()
     /* Reset the whole palette to application palette */
     setPalette(QApplication::palette());
 
-    /* Restore foreground color */
+    /* Restore background color */
     if (bg.isValid() == true)
         setBackgroundColor(bg);
-    else if (m_backgroundImage.isEmpty() == false)
-        setBackgroundImage(m_backgroundImage);
 
     m_doc->setModified();
 }
@@ -259,6 +257,7 @@ QString VCButton::icon() const
 void VCButton::setIcon(const QString& icon)
 {
     m_icon = icon;
+    m_doc->setModified();
     update();
 }
 
@@ -291,7 +290,7 @@ void VCButton::slotChooseIcon()
 
 void VCButton::slotResetIcon()
 {
-    m_icon = QString();
+    setIcon(QString());
     update();
 }
 

@@ -63,8 +63,12 @@ void VCButton_Test::initial()
     QCOMPARE(btn.adjustIntensity(), false);
     QCOMPARE(btn.isOn(), false);
     QCOMPARE(btn.action(), VCButton::Toggle);
+    QCOMPARE(btn.icon(), QString());
     QVERIFY(btn.m_chooseIconAction != NULL);
     QVERIFY(btn.m_resetIconAction != NULL);
+
+    // Only for coverage
+    btn.setBackgroundImage(QString());
 }
 
 void VCButton_Test::function()
@@ -154,6 +158,100 @@ void VCButton_Test::intensity()
         btn.setIntensityAdjustment(i);
         QCOMPARE(btn.intensityAdjustment(), CLAMP(i, qreal(0.0), qreal(1.0)));
     }
+}
+
+void VCButton_Test::bgcolor()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    doc.resetModified();
+    btn.setBackgroundColor(QColor(Qt::red));
+    QCOMPARE(btn.backgroundColor(), QColor(Qt::red));
+    QCOMPARE(btn.palette().color(QPalette::Button), QColor(Qt::red));
+    QCOMPARE(doc.isModified(), true);
+    QVERIFY(btn.foregroundColor() != QColor(Qt::red));
+}
+
+void VCButton_Test::fgcolor()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    doc.resetModified();
+    btn.setForegroundColor(QColor(Qt::red));
+    QCOMPARE(btn.foregroundColor(), QColor(Qt::red));
+    QCOMPARE(btn.palette().color(QPalette::ButtonText), QColor(Qt::red));
+    QCOMPARE(btn.palette().color(QPalette::WindowText), QColor(Qt::red));
+    QCOMPARE(doc.isModified(), true);
+    QVERIFY(btn.backgroundColor() != QColor(Qt::red));
+}
+
+void VCButton_Test::resetColors()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+
+    btn.setForegroundColor(QColor(Qt::red));
+    btn.setBackgroundColor(QColor(Qt::blue));
+    doc.resetModified();
+    btn.resetForegroundColor();
+    QCOMPARE(btn.foregroundColor(), w.palette().color(QPalette::WindowText));
+    QCOMPARE(btn.backgroundColor(), QColor(Qt::blue));
+    QCOMPARE(doc.isModified(), true);
+
+    btn.resetForegroundColor();
+    QCOMPARE(btn.foregroundColor(), w.palette().color(QPalette::WindowText));
+    QCOMPARE(btn.backgroundColor(), QColor(Qt::blue));
+
+    btn.setForegroundColor(QColor(Qt::red));
+    btn.setBackgroundColor(QColor(Qt::blue));
+    doc.resetModified();
+    btn.resetBackgroundColor();
+    QCOMPARE(btn.backgroundColor(), w.palette().color(QPalette::Button));
+    QCOMPARE(btn.foregroundColor(), QColor(Qt::red));
+    QCOMPARE(doc.isModified(), true);
+
+    btn.resetBackgroundColor();
+    QCOMPARE(btn.backgroundColor(), w.palette().color(QPalette::Button));
+    QCOMPARE(btn.foregroundColor(), QColor(Qt::red));
+}
+
+void VCButton_Test::icon()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    doc.resetModified();
+    btn.setIcon("../../../gfx/qlc.png");
+    QCOMPARE(btn.icon(), QString("../../../gfx/qlc.png"));
+    QCOMPARE(doc.isModified(), true);
+
+    doc.resetModified();
+    btn.slotResetIcon();
+    QCOMPARE(btn.icon(), QString());
+    QCOMPARE(doc.isModified(), true);
 }
 
 QTEST_MAIN(VCButton_Test)

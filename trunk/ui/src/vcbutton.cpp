@@ -39,6 +39,7 @@
 #include <QSize>
 #include <QPen>
 
+#include "qlcmacros.h"
 #include "qlcfile.h"
 
 #include "vcbuttonproperties.h"
@@ -687,7 +688,7 @@ bool VCButton::adjustIntensity() const
 
 void VCButton::setIntensityAdjustment(qreal fraction)
 {
-    m_intensityAdjustment = fraction;
+    m_intensityAdjustment = CLAMP(fraction, qreal(0), qreal(1));
 }
 
 qreal VCButton::intensityAdjustment() const

@@ -287,7 +287,7 @@ void QLCInputProfile_Test::assign()
     /* Test the assignment operator */
     ip = ip2;
     QVERIFY(ip.channel(0) != NULL);
-    //QVERIFY((void*) ip.channel(0) != (void*) ich1); // WTF?! This fails on OSX?!
+    QVERIFY((void*) ip.channel(0) != (void*) ich1); // WTF?! This fails on OSX?!
     QVERIFY(ip.channel(0) != ip2.channel(0));
     QCOMPARE(ip.channel(0)->name(), QString("First channel"));
 

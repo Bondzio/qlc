@@ -64,11 +64,10 @@ QLCInputProfile& QLCInputProfile::operator=(const QLCInputProfile& profile)
         while (it.hasNext() == true)
         {
             it.next();
-
             quint32 number = it.key();
-            QLCInputChannel* ich = it.value();
-
-            insertChannel(number, new QLCInputChannel(*ich));
+            QLCInputChannel* ich = new QLCInputChannel(*(it.value()));
+            Q_ASSERT(ich != NULL);
+            insertChannel(number, ich);
         }
     }
 

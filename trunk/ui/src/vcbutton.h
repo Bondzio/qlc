@@ -307,10 +307,6 @@ public:
      */
     bool saveXML(QDomDocument* doc, QDomElement* frame_root);
 
-protected:
-    /** Load a legacy KeyBind node */
-    bool loadKeyBind(const QDomElement* key_root);
-
     /*********************************************************************
      * Event Handlers
      *********************************************************************/

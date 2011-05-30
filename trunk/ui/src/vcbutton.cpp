@@ -661,10 +661,6 @@ bool VCButton::loadXML(const QDomElement* root)
             setIntensityAdjustment(double(tag.text().toInt()) / double(100));
             setAdjustIntensity(adjust);
         }
-        else if (tag.tagName() == "KeyBind") /* Legacy */
-        {
-            loadKeyBind(&tag);
-        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown button tag:" << tag.tagName();
@@ -736,44 +732,6 @@ bool VCButton::saveXML(QDomDocument* doc, QDomElement* vc_root)
 
     /* Appearance */
     saveXMLAppearance(doc, &root);
-
-    return true;
-}
-
-bool VCButton::loadKeyBind(const QDomElement* key_root)
-{
-    QDomElement tag;
-    QDomNode node;
-
-    if (key_root->tagName() != "KeyBind")
-    {
-        qWarning() << Q_FUNC_INFO << "KeyBind node not found";
-        return false;
-    }
-
-    node = key_root->firstChild();
-    while (node.isNull() == false)
-    {
-        tag = node.toElement();
-        if (tag.tagName() == "Key")
-        {
-            int mod = tag.attribute("Modifier").toInt();
-            int key = tag.text().toInt();
-
-            if (key < Qt::Key_unknown)
-                setKeySequence(QKeySequence(key | mod));
-        }
-        else if (tag.tagName() == "Action")
-        {
-            setAction(stringToAction(tag.text()));
-        }
-        else
-        {
-            qWarning() << Q_FUNC_INFO << "Unknown key binding tag:" << tag.tagName();
-        }
-
-        node = node.nextSibling();
-    }
 
     return true;
 }

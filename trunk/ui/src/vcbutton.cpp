@@ -295,6 +295,302 @@ void VCButton::slotResetIcon()
 }
 
 /*****************************************************************************
+ * Function attachment
+ *****************************************************************************/
+
+void VCButton::setFunction(quint32 fid)
+{
+    Function* old = m_doc->function(m_function);
+    if (old != NULL)
+    {
+        /* Get rid of old function connections */
+        disconnect(old, SIGNAL(running(quint32)),
+                   this, SLOT(slotFunctionRunning(quint32)));
+        disconnect(old, SIGNAL(stopped(quint32)),
+                   this, SLOT(slotFunctionStopped(quint32)));
+        disconnect(old, SIGNAL(flashing(quint32,bool)),
+                   this, SLOT(slotFunctionFlashing(quint32,bool)));
+    }
+
+    Function* function = m_doc->function(fid);
+    if (function != NULL)
+    {
+        /* Connect to the new function */
+        connect(function, SIGNAL(running(quint32)),
+                this, SLOT(slotFunctionRunning(quint32)));
+        connect(function, SIGNAL(stopped(quint32)),
+                this, SLOT(slotFunctionStopped(quint32)));
+        connect(function, SIGNAL(flashing(quint32,bool)),
+                this, SLOT(slotFunctionFlashing(quint32,bool)));
+
+        m_function = fid;
+
+        setToolTip(function->name());
+    }
+    else
+    {
+        /* No function attachment */
+        m_function = Function::invalidId();
+        setToolTip(QString());
+    }
+}
+
+quint32 VCButton::function() const
+{
+    return m_function;
+}
+
+void VCButton::slotFunctionRemoved(quint32 fid)
+{
+    /* Invalidate the button's function if it's the one that was removed */
+    if (fid == m_function)
+        setFunction(Function::invalidId());
+}
+
+/*****************************************************************************
+ * Button state
+ *****************************************************************************/
+
+bool VCButton::isOn() const
+{
+    return m_on;
+}
+
+void VCButton::setOn(bool on)
+{
+    m_on = on;
+
+    /* Send input feedback */
+    if (m_inputUniverse != InputMap::invalidUniverse() &&
+        m_inputChannel != InputMap::invalidChannel())
+    {
+        if (on == true)
+            m_inputMap->feedBack(m_inputUniverse, m_inputChannel, UCHAR_MAX);
+        else
+            m_inputMap->feedBack(m_inputUniverse, m_inputChannel, 0);
+    }
+
+    update();
+}
+
+/*****************************************************************************
+ * Key sequence handler
+ *****************************************************************************/
+
+void VCButton::setKeySequence(const QKeySequence& keySequence)
+{
+    m_keySequence = QKeySequence(keySequence);
+}
+
+QKeySequence VCButton::keySequence() const
+{
+    return m_keySequence;
+}
+
+void VCButton::slotKeyPressed(const QKeySequence& keySequence)
+{
+    if (m_keySequence == keySequence)
+        pressFunction();
+}
+
+void VCButton::slotKeyReleased(const QKeySequence& keySequence)
+{
+    if (m_keySequence == keySequence)
+        releaseFunction();
+}
+
+/*****************************************************************************
+ * External input
+ *****************************************************************************/
+
+void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
+{
+    Q_UNUSED(value);
+
+    /* Don't allow operation during design mode */
+    if (mode() == Doc::Design)
+        return;
+
+    if (universe == m_inputUniverse && channel == m_inputChannel)
+    {
+        if (m_action == Toggle && value > 0)
+        {
+            // Only toggle when the external button is pressed.
+            // Releasing the button does nothing.
+            pressFunction();
+        }
+        else if (m_action == Flash)
+        {
+            // Keep the button depressed only while the external button is kept down.
+            // Raise the button when the external button is raised.
+            if (isOn() == false && value > 0)
+                pressFunction();
+            else if (isOn() == true && value == 0)
+                releaseFunction();
+        }
+    }
+}
+
+/*****************************************************************************
+ * Button action
+ *****************************************************************************/
+
+void VCButton::setAction(Action action)
+{
+    m_action = action;
+}
+
+VCButton::Action VCButton::action() const
+{
+    return m_action;
+}
+
+QString VCButton::actionToString(VCButton::Action action)
+{
+    if (action == Flash)
+        return QString(KXMLQLCVCButtonActionFlash);
+    else
+        return QString(KXMLQLCVCButtonActionToggle);
+}
+
+VCButton::Action VCButton::stringToAction(const QString& str)
+{
+    if (str == KXMLQLCVCButtonActionFlash)
+        return Flash;
+    else
+        return Toggle;
+}
+
+/*****************************************************************************
+ * Intensity adjustment
+ *****************************************************************************/
+
+void VCButton::setAdjustIntensity(bool adjust)
+{
+    m_adjustIntensity = adjust;
+}
+
+bool VCButton::adjustIntensity() const
+{
+    return m_adjustIntensity;
+}
+
+void VCButton::setIntensityAdjustment(qreal fraction)
+{
+    m_intensityAdjustment = CLAMP(fraction, qreal(0), qreal(1));
+}
+
+qreal VCButton::intensityAdjustment() const
+{
+    return m_intensityAdjustment;
+}
+
+/*****************************************************************************
+ * Button press / release handlers
+ *****************************************************************************/
+
+void VCButton::pressFunction()
+{
+    Function* f = NULL;
+    if (m_action == Toggle)
+    {
+        f = m_doc->function(m_function);
+        if (f != NULL)
+        {
+            /* if the button is in a SoloFrame and the function is running but was started by a different function (a chaser or collection), 
+             * turn of other functions and start it anyway.
+             */
+            if (isOn() == true && !(isChildOfSoloFrame() && f->initiatedByOtherFunction()))
+                f->stop();
+            else
+            {
+                emit functionStarting();
+                m_masterTimer->startFunction(f, false);
+                if (adjustIntensity() == true)
+                    f->adjustIntensity(intensityAdjustment());
+            }
+        }
+    }
+    else if (m_action == Flash && isOn() == false)
+    {
+        f = m_doc->function(m_function);
+        if (f != NULL)
+            f->flash(m_masterTimer);
+    }
+}
+
+void VCButton::releaseFunction()
+{
+    Function* f = NULL;
+
+    if (m_action == Flash && isOn() == true)
+    {
+        f = m_doc->function(m_function);
+        if (f != NULL)
+            f->unFlash(m_masterTimer);
+    }
+}
+
+void VCButton::slotFunctionRunning(quint32 fid)
+{
+    if (fid == m_function && m_action != Flash)
+        setOn(true);
+}
+
+void VCButton::slotFunctionStopped(quint32 fid)
+{
+    if (fid == m_function && m_action != Flash)
+    {
+        setOn(false);
+        slotBlinkReady();
+        QTimer::singleShot(200, this, SLOT(slotBlinkReady()));
+    }
+}
+
+void VCButton::slotFunctionFlashing(quint32 fid, bool state)
+{
+    if (fid == m_function)
+        setOn(state);
+}
+
+void VCButton::slotBlinkReady()
+{
+    // This function is called twice with same XOR mask,
+    // thus creating a brief opposite-color -- normal-color blink
+    QPalette pal = palette();
+    QColor color(pal.color(QPalette::Button));
+    color.setRgb(color.red()^0xff, color.green()^0xff, color.blue()^0xff);
+    pal.setColor(QPalette::Button, color);
+    setPalette(pal);
+}
+
+bool VCButton::isChildOfSoloFrame() const
+{
+    QWidget* parent = parentWidget();
+    while (parent != NULL)
+    {
+        if (qobject_cast<VCSoloFrame*>(parent) != NULL)
+            return true;
+        parent = parent->parentWidget();
+    }
+    return false;
+}
+
+/*****************************************************************************
+ * Custom menu
+ *****************************************************************************/
+
+QMenu* VCButton::customMenu(QMenu* parentMenu)
+{
+    QMenu* menu = new QMenu(parentMenu);
+    menu->setTitle(tr("Icon"));
+    menu->addAction(m_chooseIconAction);
+    menu->addAction(m_resetIconAction);
+
+    return menu;
+}
+
+/*****************************************************************************
  * Load & Save
  *****************************************************************************/
 
@@ -480,312 +776,6 @@ bool VCButton::loadKeyBind(const QDomElement* key_root)
     }
 
     return true;
-}
-
-/*****************************************************************************
- * Button state
- *****************************************************************************/
-
-bool VCButton::isOn() const
-{
-    return m_on;
-}
-
-void VCButton::setOn(bool on)
-{
-    m_on = on;
-
-    /* Send input feedback */
-    if (m_inputUniverse != InputMap::invalidUniverse() &&
-            m_inputChannel != InputMap::invalidChannel())
-    {
-        if (on == true)
-        {
-            m_inputMap->feedBack(m_inputUniverse,
-                                       m_inputChannel,
-                                       UCHAR_MAX);
-        }
-        else
-        {
-            m_inputMap->feedBack(m_inputUniverse,
-                                       m_inputChannel,
-                                       0);
-        }
-    }
-
-    update();
-}
-
-bool VCButton::isChildOfSoloFrame()
-{
-    QWidget* parent = parentWidget();
-    while (parent != NULL)
-    {
-        if (qobject_cast<VCSoloFrame*>(parent) != NULL)
-            return true;
-        parent = parent->parentWidget();
-    }
-    return false;
-}
-
-/*****************************************************************************
- * Key sequence handler
- *****************************************************************************/
-
-void VCButton::setKeySequence(const QKeySequence& keySequence)
-{
-    m_keySequence = QKeySequence(keySequence);
-}
-
-QKeySequence VCButton::keySequence() const
-{
-    return m_keySequence;
-}
-
-void VCButton::slotKeyPressed(const QKeySequence& keySequence)
-{
-    if (m_keySequence == keySequence)
-        pressFunction();
-}
-
-void VCButton::slotKeyReleased(const QKeySequence& keySequence)
-{
-    if (m_keySequence == keySequence)
-        releaseFunction();
-}
-
-/*****************************************************************************
- * External input
- *****************************************************************************/
-
-void VCButton::slotInputValueChanged(quint32 universe,
-                                     quint32 channel,
-                                     uchar value)
-{
-    Q_UNUSED(value);
-
-    /* Don't allow operation during design mode */
-    if (mode() == Doc::Design)
-        return;
-
-    if (universe == m_inputUniverse && channel == m_inputChannel)
-    {
-        if (m_action == Toggle && value > 0)
-        {
-            // Only toggle when the external button is pressed.
-            // Releasing the button does nothing.
-            pressFunction();
-        }
-        else if (m_action == Flash)
-        {
-            // Keep the button depressed only while the external button is kept down.
-            // Raise the button when the external button is raised.
-            if (isOn() == false && value > 0)
-                pressFunction();
-            else if (isOn() == true && value == 0)
-                releaseFunction();
-        }
-    }
-}
-
-/*****************************************************************************
- * Function attachment
- *****************************************************************************/
-
-void VCButton::setFunction(quint32 fid)
-{
-    Function* old = m_doc->function(m_function);
-    if (old != NULL)
-    {
-        /* Get rid of old function connections */
-        disconnect(old, SIGNAL(running(quint32)),
-                   this, SLOT(slotFunctionRunning(quint32)));
-        disconnect(old, SIGNAL(stopped(quint32)),
-                   this, SLOT(slotFunctionStopped(quint32)));
-        disconnect(old, SIGNAL(flashing(quint32,bool)),
-                   this, SLOT(slotFunctionFlashing(quint32,bool)));
-    }
-
-    Function* function = m_doc->function(fid);
-    if (function != NULL)
-    {
-        /* Connect to the new function */
-        connect(function, SIGNAL(running(quint32)),
-                this, SLOT(slotFunctionRunning(quint32)));
-        connect(function, SIGNAL(stopped(quint32)),
-                this, SLOT(slotFunctionStopped(quint32)));
-        connect(function, SIGNAL(flashing(quint32,bool)),
-                this, SLOT(slotFunctionFlashing(quint32,bool)));
-
-        m_function = fid;
-
-        setToolTip(function->name());
-    }
-    else
-    {
-        /* No function attachment */
-        m_function = Function::invalidId();
-        setToolTip(QString());
-    }
-}
-
-quint32 VCButton::function() const
-{
-    return m_function;
-}
-
-void VCButton::slotFunctionRemoved(quint32 fid)
-{
-    /* Invalidate the button's function if it's the one that was removed */
-    if (fid == m_function)
-        setFunction(Function::invalidId());
-}
-
-/*****************************************************************************
- * Button action
- *****************************************************************************/
-
-void VCButton::setAction(Action action)
-{
-    m_action = action;
-}
-
-VCButton::Action VCButton::action() const
-{
-    return m_action;
-}
-
-QString VCButton::actionToString(VCButton::Action action)
-{
-    if (action == Flash)
-        return QString(KXMLQLCVCButtonActionFlash);
-    else
-        return QString(KXMLQLCVCButtonActionToggle);
-}
-
-VCButton::Action VCButton::stringToAction(const QString& str)
-{
-    if (str == KXMLQLCVCButtonActionFlash)
-        return Flash;
-    else
-        return Toggle;
-}
-
-/*****************************************************************************
- * Intensity adjustment
- *****************************************************************************/
-
-void VCButton::setAdjustIntensity(bool adjust)
-{
-    m_adjustIntensity = adjust;
-}
-
-bool VCButton::adjustIntensity() const
-{
-    return m_adjustIntensity;
-}
-
-void VCButton::setIntensityAdjustment(qreal fraction)
-{
-    m_intensityAdjustment = CLAMP(fraction, qreal(0), qreal(1));
-}
-
-qreal VCButton::intensityAdjustment() const
-{
-    return m_intensityAdjustment;
-}
-
-/*****************************************************************************
- * Button press / release handlers
- *****************************************************************************/
-
-void VCButton::pressFunction()
-{
-    Function* f = NULL;
-    if (m_action == Toggle)
-    {
-        f = m_doc->function(m_function);
-        if (f != NULL)
-        {
-            /* if the button is in a SoloFrame and the function is running but was started by a different function (a chaser or collection), 
-             * turn of other functions and start it anyway.
-             */
-            if (isOn() == true && !(isChildOfSoloFrame() && f->initiatedByOtherFunction()))
-                f->stop();
-            else
-            {
-                emit functionStarting();
-                m_masterTimer->startFunction(f, false);
-                if (adjustIntensity() == true)
-                    f->adjustIntensity(intensityAdjustment());
-            }
-        }
-    }
-    else if (m_action == Flash && isOn() == false)
-    {
-        f = m_doc->function(m_function);
-        if (f != NULL)
-            f->flash(m_masterTimer);
-    }
-}
-
-void VCButton::releaseFunction()
-{
-    Function* f = NULL;
-
-    if (m_action == Flash && isOn() == true)
-    {
-        f = m_doc->function(m_function);
-        if (f != NULL)
-            f->unFlash(m_masterTimer);
-    }
-}
-
-void VCButton::slotFunctionRunning(quint32 fid)
-{
-    if (fid == m_function && m_action != Flash)
-        setOn(true);
-}
-
-void VCButton::slotFunctionStopped(quint32 fid)
-{
-    if (fid == m_function && m_action != Flash)
-    {
-        setOn(false);
-        slotBlinkReady();
-        QTimer::singleShot(200, this, SLOT(slotBlinkReady()));
-    }
-}
-
-void VCButton::slotFunctionFlashing(quint32 fid, bool state)
-{
-    if (fid == m_function)
-        setOn(state);
-}
-
-void VCButton::slotBlinkReady()
-{
-    // This function is called twice with same XOR mask,
-    // thus creating a brief opposite-color -- normal-color blink
-    QPalette pal = palette();
-    QColor color(pal.color(QPalette::Button));
-    color.setRgb(color.red()^0xff, color.green()^0xff, color.blue()^0xff);
-    pal.setColor(QPalette::Button, color);
-    setPalette(pal);
-}
-
-/*****************************************************************************
- * Custom menu
- *****************************************************************************/
-
-QMenu* VCButton::customMenu(QMenu* parentMenu)
-{
-    QMenu* menu = new QMenu(parentMenu);
-    menu->setTitle(tr("Icon"));
-    menu->addAction(m_chooseIconAction);
-    menu->addAction(m_resetIconAction);
-
-    return menu;
 }
 
 /*****************************************************************************

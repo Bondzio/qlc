@@ -139,62 +139,6 @@ protected:
     QAction* m_resetIconAction;
 
     /*********************************************************************
-     * Load & Save
-     *********************************************************************/
-public:
-    /**
-     * Load a VCButton's properties from an XML document node
-     *
-     * @param doc An XML document to load from
-     * @param btn_root A VCButton XML root node containing button properties
-     * @return true if successful; otherwise false
-     */
-    bool loadXML(const QDomElement* btn_root);
-
-    /**
-     * Save a VCButton's properties to an XML document node
-     *
-     * @param doc The master XML document to save to
-     * @param frame_root The button's VCFrame XML parent node to save to
-     */
-    bool saveXML(QDomDocument* doc, QDomElement* frame_root);
-
-protected:
-    /** Load a legacy KeyBind node */
-    bool loadKeyBind(const QDomElement* key_root);
-
-    /*********************************************************************
-     * Button state
-     *********************************************************************/
-public:
-    void setOn(bool on);
-    bool isOn() const;
-
-protected:
-    bool isChildOfSoloFrame();
-    bool m_on;
-
-    /*********************************************************************
-     * Key sequence handler
-     *********************************************************************/
-public:
-    void setKeySequence(const QKeySequence& keySequence);
-    QKeySequence keySequence() const;
-
-protected slots:
-    void slotKeyPressed(const QKeySequence& keySequence);
-    void slotKeyReleased(const QKeySequence& keySequence);
-
-protected:
-    QKeySequence m_keySequence;
-
-    /*********************************************************************
-     * External input
-     *********************************************************************/
-protected slots:
-    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
-
-    /*********************************************************************
      * Function attachment
      *********************************************************************/
 public:
@@ -221,6 +165,36 @@ protected slots:
 protected:
     /** The function that this button is controlling */
     quint32 m_function;
+
+    /*********************************************************************
+     * Button state
+     *********************************************************************/
+public:
+    void setOn(bool on);
+    bool isOn() const;
+
+protected:
+    bool m_on;
+
+    /*********************************************************************
+     * Key sequence handler
+     *********************************************************************/
+public:
+    void setKeySequence(const QKeySequence& keySequence);
+    QKeySequence keySequence() const;
+
+protected slots:
+    void slotKeyPressed(const QKeySequence& keySequence);
+    void slotKeyReleased(const QKeySequence& keySequence);
+
+protected:
+    QKeySequence m_keySequence;
+
+    /*********************************************************************
+     * External input
+     *********************************************************************/
+protected slots:
+    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
     /*********************************************************************
      * Button action
@@ -297,6 +271,10 @@ protected slots:
     /** Slot for brief widget blink when controlled function stops */
     void slotBlinkReady();
 
+protected:
+    /** Check if the button's parent is a VCSoloFrame */
+    bool isChildOfSoloFrame() const;
+
 signals:
     /** Signal telling the buttons function was started as a result of a toggle action */
     void functionStarting ();
@@ -307,6 +285,31 @@ signals:
 public:
     /** Get a custom menu specific to this widget. Must be deleted. */
     QMenu* customMenu(QMenu* parentMenu);
+
+    /*********************************************************************
+     * Load & Save
+     *********************************************************************/
+public:
+    /**
+     * Load a VCButton's properties from an XML document node
+     *
+     * @param doc An XML document to load from
+     * @param btn_root A VCButton XML root node containing button properties
+     * @return true if successful; otherwise false
+     */
+    bool loadXML(const QDomElement* btn_root);
+
+    /**
+     * Save a VCButton's properties to an XML document node
+     *
+     * @param doc The master XML document to save to
+     * @param frame_root The button's VCFrame XML parent node to save to
+     */
+    bool saveXML(QDomDocument* doc, QDomElement* frame_root);
+
+protected:
+    /** Load a legacy KeyBind node */
+    bool loadKeyBind(const QDomElement* key_root);
 
     /*********************************************************************
      * Event Handlers

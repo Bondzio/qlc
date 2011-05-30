@@ -254,4 +254,128 @@ void VCButton_Test::icon()
     QCOMPARE(doc.isModified(), true);
 }
 
+void VCButton_Test::on()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    btn.setInputSource(0, 1);
+
+    QCOMPARE(btn.isOn(), false);
+
+    btn.setOn(false);
+    QCOMPARE(btn.isOn(), false);
+
+    btn.setOn(true);
+    QCOMPARE(btn.isOn(), true);
+
+    btn.setOn(true);
+    QCOMPARE(btn.isOn(), true);
+
+    btn.setOn(false);
+    QCOMPARE(btn.isOn(), false);
+}
+
+void VCButton_Test::keySequence()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    QCOMPARE(btn.keySequence(), QKeySequence());
+
+    QKeySequence seq(QKeySequence::Copy);
+    btn.setKeySequence(seq);
+    QCOMPARE(btn.keySequence(), seq);
+
+    seq = QKeySequence(QKeySequence::Undo);
+    QVERIFY(btn.keySequence() != seq);
+    btn.setKeySequence(seq);
+    QCOMPARE(btn.keySequence(), seq);
+}
+
+void VCButton_Test::load()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    Scene* sc = new Scene(&doc);
+    doc.addFunction(sc);
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Button");
+    root.setAttribute("Caption", "Pertti");
+    root.setAttribute("Icon", "../../../gfx/qlc.png");
+    xmldoc.appendChild(root);
+
+    QDomElement wstate = xmldoc.createElement("WindowState");
+    wstate.setAttribute("X", "20");
+    wstate.setAttribute("Y", "20");
+    wstate.setAttribute("Width", "60");
+    wstate.setAttribute("Height", "60");
+    wstate.setAttribute("Visible", "True");
+    root.appendChild(wstate);
+
+    QDomElement appearance = xmldoc.createElement("Appearance");
+    root.appendChild(appearance);
+
+    QDomElement function = xmldoc.createElement("Function");
+    function.setAttribute("ID", QString::number(sc->id()));
+    root.appendChild(function);
+
+    QDomElement input = xmldoc.createElement("Input");
+    root.appendChild(input);
+
+    QDomElement action = xmldoc.createElement("Action");
+    QDomText actionText = xmldoc.createTextNode("Flash");
+    action.appendChild(actionText);
+    root.appendChild(action);
+
+    QDomElement key = xmldoc.createElement("Key");
+    QDomText keyText = xmldoc.createTextNode(QKeySequence(QKeySequence::Copy).toString());
+    key.appendChild(keyText);
+    root.appendChild(key);
+
+    QDomElement intensity = xmldoc.createElement("Intensity");
+    intensity.setAttribute("Adjust", "True");
+    QDomText intensityText = xmldoc.createTextNode("60");
+    intensity.appendChild(intensityText);
+    root.appendChild(intensity);
+
+    QDomElement foo = xmldoc.createElement("Foo");
+    root.appendChild(foo);
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    QCOMPARE(btn.loadXML(&root), true);
+    QCOMPARE(btn.function(), sc->id());
+    QCOMPARE(btn.action(), VCButton::Flash);
+    QCOMPARE(btn.keySequence(), QKeySequence(QKeySequence::Copy));
+    QCOMPARE(btn.adjustIntensity(), true);
+    QCOMPARE(btn.intensityAdjustment(), qreal(0.6));
+
+    intensity.setAttribute("Adjust", "False");
+    QCOMPARE(btn.loadXML(&root), true);
+    QCOMPARE(btn.function(), sc->id());
+    QCOMPARE(btn.action(), VCButton::Flash);
+    QCOMPARE(btn.keySequence(), QKeySequence(QKeySequence::Copy));
+    QCOMPARE(btn.adjustIntensity(), false);
+    QCOMPARE(btn.intensityAdjustment(), qreal(0.6));
+
+    root.setTagName("Buton");
+    QCOMPARE(btn.loadXML(&root), false);
+}
+
 QTEST_MAIN(VCButton_Test)

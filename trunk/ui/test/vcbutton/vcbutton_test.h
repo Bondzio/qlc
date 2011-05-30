@@ -38,6 +38,9 @@ private slots:
     void fgcolor();
     void resetColors();
     void icon();
+    void on();
+    void keySequence();
+    void load();
 };
 
 #endif

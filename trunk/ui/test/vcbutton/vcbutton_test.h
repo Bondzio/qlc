@@ -41,6 +41,7 @@ private slots:
     void on();
     void keySequence();
     void load();
+    void save();
 };
 
 #endif

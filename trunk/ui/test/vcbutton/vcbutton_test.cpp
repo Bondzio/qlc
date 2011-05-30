@@ -378,4 +378,84 @@ void VCButton_Test::load()
     QCOMPARE(btn.loadXML(&root), false);
 }
 
+void VCButton_Test::save()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    Scene* sc = new Scene(&doc);
+    doc.addFunction(sc);
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    btn.setCaption("Foobar");
+    btn.setIcon("../../../gfx/qlc.png");
+    btn.setFunction(sc->id());
+    btn.setAction(VCButton::Flash);
+    btn.setKeySequence(QKeySequence(QKeySequence::Undo));
+    btn.setAdjustIntensity(true);
+    btn.setIntensityAdjustment(0.2);
+
+    QDomDocument xmldoc;
+    QDomElement root = xmldoc.createElement("Root");
+    xmldoc.appendChild(root);
+
+    int function = 0, action = 0, key = 0, intensity = 0, wstate = 0, appearance = 0;
+    QCOMPARE(btn.saveXML(&xmldoc, &root), true);
+    QDomElement tag = root.firstChild().toElement();
+    QCOMPARE(tag.tagName(), QString("Button"));
+    QCOMPARE(tag.attribute("Icon"), QString("../../../gfx/qlc.png"));
+    QCOMPARE(tag.attribute("Caption"), QString("Foobar"));
+    QDomNode node = tag.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == "Function")
+        {
+            function++;
+            QCOMPARE(tag.attribute("ID"), QString::number(sc->id()));
+        }
+        else if (tag.tagName() == "Action")
+        {
+            action++;
+            QCOMPARE(tag.text(), QString("Flash"));
+        }
+        else if (tag.tagName() == "Key")
+        {
+            key++;
+            QCOMPARE(tag.text(), QKeySequence(QKeySequence::Undo).toString());
+        }
+        else if (tag.tagName() == "Intensity")
+        {
+            intensity++;
+            QCOMPARE(tag.attribute("Adjust"), QString("True"));
+            QCOMPARE(tag.text(), QString("20"));
+        }
+        else if (tag.tagName() == "WindowState")
+        {
+            wstate++;
+        }
+        else if (tag.tagName() == "Appearance")
+        {
+            appearance++;
+        }
+        else
+        {
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
+        }
+
+        node = node.nextSibling();
+    }
+
+    QCOMPARE(function, 1);
+    QCOMPARE(action, 1);
+    QCOMPARE(key, 1);
+    QCOMPARE(intensity, 1);
+    QCOMPARE(wstate, 1);
+    QCOMPARE(appearance, 1);
+}
+
 QTEST_MAIN(VCButton_Test)

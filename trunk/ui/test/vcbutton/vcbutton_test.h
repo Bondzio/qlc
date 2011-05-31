@@ -43,6 +43,11 @@ private slots:
     void copy();
     void load();
     void save();
+    void customMenu();
+    void toggle();
+    void flash();
+    void input();
+    void paint();
 };
 
 #endif

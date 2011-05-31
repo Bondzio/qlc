@@ -760,7 +760,7 @@ void VCButton::paintEvent(QPaintEvent* e)
         option.state |= QStyle::State_Enabled;
 
     /* Icon */
-    if (icon() != QString())
+    if (icon().isEmpty() == false)
     {
         option.icon = QIcon(icon());
         option.iconSize = QSize(26, 26);

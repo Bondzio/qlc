@@ -60,7 +60,8 @@ MasterTimer::MasterTimer(QObject* parent, OutputMap* outputMap)
 
 MasterTimer::~MasterTimer()
 {
-    stop();
+    if (m_running == true)
+        stop();
 
     delete m_fader;
     m_fader = NULL;

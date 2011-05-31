@@ -256,60 +256,50 @@ void QLCInputProfile_Test::assign()
     ip.setManufacturer("Behringer");
     ip.setModel("BCF2000");
 
-    QLCInputChannel* ich1 = new QLCInputChannel();
+    QLCInputChannel* ich1 = new QLCInputChannel;
     ich1->setName("Channel 1");
     ip.insertChannel(0, ich1);
 
-    QLCInputChannel* ich2 = new QLCInputChannel();
+    QLCInputChannel* ich2 = new QLCInputChannel;
     ich2->setName("Channel 2");
     ip.insertChannel(5, ich2);
 
-    QLCInputChannel* ich3 = new QLCInputChannel();
+    QLCInputChannel* ich3 = new QLCInputChannel;
     ich3->setName("Channel 3");
     ip.insertChannel(2, ich3);
 
-    QLCInputChannel* ich4 = new QLCInputChannel();
+    QLCInputChannel* ich4 = new QLCInputChannel;
     ich4->setName("Channel 4");
     ip.insertChannel(9000, ich4);
 
-    QLCInputProfile ip2(ip);
-    ip2.setManufacturer("Foo");
-    ip2.setModel("Board X");
-
-    ip2.channel(0)->setName("First channel");
-    ip2.channel(5)->setName("Second channel");
-    ip2.channel(2)->setName("Third channel");
-    ip2.channel(9000)->setName("Fourth channel");
-    QLCInputChannel* ich5 = new QLCInputChannel();
-    ich5->setName("Fifth channel");
-    ip2.insertChannel(10, ich5);
+    QLCInputProfile ip2;
+    QLCInputChannel* ich5 = new QLCInputChannel;
+    ich5->setName("First channel");
+    ip2.insertChannel(0, ich5);
+    QCOMPARE(ip2.channels().size(), 1);
 
     /* Test the assignment operator */
-    ip = ip2;
-    QVERIFY(ip.channel(0) != NULL);
-    QVERIFY((void*) ip.channel(0) != (void*) ich1); // WTF?! This fails on OSX?!
-    QVERIFY(ip.channel(0) != ip2.channel(0));
-    QCOMPARE(ip.channel(0)->name(), QString("First channel"));
+    ip2 = ip;
+    QCOMPARE(ip2.channels().size(), 4);
+    QVERIFY(ip2.channel(0) != NULL);
+    QVERIFY(ip2.channel(0) != ich1);
+    QVERIFY(ip2.channel(0) != ip.channel(0));
+    QCOMPARE(ip2.channel(0)->name(), QString("Channel 1"));
 
-    QVERIFY(ip.channel(5) != NULL);
-    QVERIFY(ip.channel(5) != ich2);
-    QVERIFY(ip.channel(5) != ip2.channel(5));
-    QCOMPARE(ip.channel(5)->name(), QString("Second channel"));
+    QVERIFY(ip2.channel(5) != NULL);
+    QVERIFY(ip2.channel(5) != ich2);
+    QVERIFY(ip2.channel(5) != ip.channel(5));
+    QCOMPARE(ip2.channel(5)->name(), QString("Channel 2"));
 
-    QVERIFY(ip.channel(2) != NULL);
-    QVERIFY(ip.channel(2) != ich3);
-    QVERIFY(ip.channel(2) != ip2.channel(2));
-    QCOMPARE(ip.channel(2)->name(), QString("Third channel"));
+    QVERIFY(ip2.channel(2) != NULL);
+    QVERIFY(ip2.channel(2) != ich3);
+    QVERIFY(ip2.channel(2) != ip.channel(2));
+    QCOMPARE(ip2.channel(2)->name(), QString("Channel 3"));
 
-    QVERIFY(ip.channel(9000) != NULL);
-    QVERIFY(ip.channel(9000) != ich4);
-    QVERIFY(ip.channel(9000) != ip2.channel(9000));
-    QCOMPARE(ip.channel(9000)->name(), QString("Fourth channel"));
-
-    QVERIFY(ip.channel(10) != NULL);
-    QVERIFY(ip.channel(10) != ich5);
-    QVERIFY(ip.channel(10) != ip2.channel(10));
-    QCOMPARE(ip.channel(10)->name(), QString("Fifth channel"));
+    QVERIFY(ip2.channel(9000) != NULL);
+    QVERIFY(ip2.channel(9000) != ich4);
+    QVERIFY(ip2.channel(9000) != ip.channel(9000));
+    QCOMPARE(ip2.channel(9000)->name(), QString("Channel 4"));
 }
 
 void QLCInputProfile_Test::load()

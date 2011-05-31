@@ -99,6 +99,16 @@ void VCFrame_Test::loadXML()
     wstate.setAttribute("Visible", "True");
     root.appendChild(wstate);
 
+    QDomElement allowChildren = xmldoc.createElement("AllowChildren");
+    QDomText allowChildrenText = xmldoc.createTextNode("False");
+    allowChildren.appendChild(allowChildrenText);
+    root.appendChild(allowChildren);
+
+    QDomElement allowResize = xmldoc.createElement("AllowResize");
+    QDomText allowResizeText = xmldoc.createTextNode("False");
+    allowResize.appendChild(allowResizeText);
+    root.appendChild(allowResize);
+
     QDomElement frame = xmldoc.createElement("Frame");
     root.appendChild(frame);
 
@@ -130,6 +140,8 @@ void VCFrame_Test::loadXML()
     QCOMPARE(parent.geometry().height(), 69);
     QCOMPARE(parent.geometry().x(), 3);
     QCOMPARE(parent.geometry().y(), 4);
+    QVERIFY(parent.allowChildren() == false);
+    QVERIFY(parent.allowResize() == false);
 
     QSet <QString> childSet;
     QCOMPARE(parent.children().size(), 7);
@@ -157,8 +169,13 @@ void VCFrame_Test::saveXML()
     QWidget w;
 
     VCFrame parent(&w, &doc, &om, &im, &mt);
+    parent.setCaption("Parent");
     VCFrame child(&parent, &doc, &om, &im, &mt);
-    VCFrame childOfChild(&child, &doc, &om, &im, &mt);
+    child.setCaption("Child");
+    VCFrame grandChild(&child, &doc, &om, &im, &mt);
+    grandChild.setCaption("Grandchild");
+    child.setAllowChildren(false);
+    child.setAllowResize(false);
 
     QDomDocument xmldoc;
     QDomElement root = xmldoc.createElement("TestRoot");
@@ -172,8 +189,9 @@ void VCFrame_Test::saveXML()
     QVERIFY(node.firstChild().isNull() == false);
 
     QDomNode subFrame;
-    int appearance = 0, windowstate = 0, frame = 0;
+    int appearance = 0, windowstate = 0, frame = 0, allowChildren = 0, allowResize = 0;
 
+    // Parent
     node = node.firstChild();
     while (node.isNull() == false)
     {
@@ -192,6 +210,10 @@ void VCFrame_Test::saveXML()
             QVERIFY(subFrame.isNull() == true);
             subFrame = node;
         }
+        else
+        {
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
+        }
         node = node.nextSibling();
     }
 
@@ -200,6 +222,7 @@ void VCFrame_Test::saveXML()
     QCOMPARE(frame, 1);
     QVERIFY(subFrame.isNull() == false);
 
+    // Child
     node = subFrame.firstChild();
     subFrame = QDomNode(); // Don't use .clear() since that would clear the whole tree
     while (node.isNull() == false)
@@ -212,6 +235,16 @@ void VCFrame_Test::saveXML()
         else if (tag.tagName() == QString("WindowState"))
         {
             windowstate++;
+        }
+        else if (tag.tagName() == QString("AllowChildren"))
+        {
+            allowChildren++;
+            QCOMPARE(tag.text(), QString("False"));
+        }
+        else if (tag.tagName() == QString("AllowResize"))
+        {
+            allowResize++;
+            QCOMPARE(tag.text(), QString("False"));
         }
         else if (tag.tagName() == QString("Frame"))
         {
@@ -224,9 +257,12 @@ void VCFrame_Test::saveXML()
 
     QCOMPARE(appearance, 2);
     QCOMPARE(windowstate, 1);
+    QCOMPARE(allowChildren, 1);
+    QCOMPARE(allowResize, 1);
     QCOMPARE(frame, 2);
     QVERIFY(subFrame.isNull() == false);
 
+    // Grandchild
     node = subFrame.firstChild();
     subFrame = QDomNode(); // Don't use .clear() since that would clear the whole tree
     while (node.isNull() == false)
@@ -240,10 +276,19 @@ void VCFrame_Test::saveXML()
         {
             windowstate++;
         }
-        else if (tag.tagName() == QString("Frame"))
+        else if (tag.tagName() == QString("AllowChildren"))
         {
-            qDebug() << xmldoc.toString();
-            QFAIL("Unexpected frame hierarchy in XML output");
+            allowChildren++;
+            QCOMPARE(tag.text(), QString("True"));
+        }
+        else if (tag.tagName() == QString("AllowResize"))
+        {
+            allowResize++;
+            QCOMPARE(tag.text(), QString("True"));
+        }
+        else
+        {
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
         }
         node = node.nextSibling();
     }

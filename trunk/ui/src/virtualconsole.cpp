@@ -276,6 +276,14 @@ void VirtualConsole::clearWidgetSelection()
     updateActions();
 }
 
+void VirtualConsole::reselectWidgets()
+{
+    QList <VCWidget*> widgets(m_selectedWidgets);
+    clearWidgetSelection();
+    foreach (VCWidget* w, widgets)
+        setWidgetSelected(w, true);
+}
+
 /*****************************************************************************
  * Actions, menu- and toolbar
  *****************************************************************************/
@@ -734,7 +742,7 @@ void VirtualConsole::updateActions()
         m_stackingActionGroup->setEnabled(true);
 
         /* Check, whether the last selected widget can hold children */
-        if (m_selectedWidgets.last()->canHaveChildren() == true)
+        if (m_selectedWidgets.last()->allowChildren() == true)
         {
             /* Enable paste for widgets that can hold children */
             if (m_clipboard.isEmpty() == true)
@@ -765,46 +773,28 @@ void VirtualConsole::slotRunningFunctionsChanged()
  * Add menu callbacks
  *****************************************************************************/
 
-VCFrame* VirtualConsole::closestParent() const
+VCWidget* VirtualConsole::closestParent() const
 {
-    /* Either add to the draw area or the latest selected widget or one of
-       its parents */
+    /* If nothing is selected, return the bottom-most contents frame */
     if (m_selectedWidgets.isEmpty() == true)
-    {
         return contents();
-    }
-    else
-    {
-        /* Traverse upwards in parent hierarchy and find the next
-           VCFrame */
-        VCFrame* parent = NULL;
-        VCWidget* widget = m_selectedWidgets.last();
-        while (parent == NULL && widget != NULL)
-        {
-            // Attempt to cast the VCWidget into VCFrame
-            parent = qobject_cast<VCFrame*> (widget);
-            if (parent != NULL)
-            {
-                // Found a VCFrame parent widget
-                break;
-            }
-            else
-            {
-                // Cast failed, so it's not a VCFrame.
-                // Try the widget's parent widget. If it has
-                // none or it's not a VCWidget, the loop
-                // should end on the next pass & parent == NULL
-                widget = qobject_cast<VCWidget*> (widget->parentWidget());
-            }
-        }
 
-        return parent;
+    /* Find the next VCWidget in the hierarchy that accepts children */
+    VCWidget* widget = m_selectedWidgets.last();
+    while (widget != NULL)
+    {
+        if (widget->allowChildren() == true)
+            return widget;
+        else
+            widget = qobject_cast<VCWidget*> (widget->parentWidget());
     }
+
+    return NULL;
 }
 
 void VirtualConsole::slotAddButton()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -817,7 +807,7 @@ void VirtualConsole::slotAddButton()
 
 void VirtualConsole::slotAddButtonMatrix()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -829,15 +819,16 @@ void VirtualConsole::slotAddButtonMatrix()
     int v = abm.verticalCount();
     int sz = abm.buttonSize();
 
-    VCWidget* frame = NULL;
+    VCFrame* frame = NULL;
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
         frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     else
         frame = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     Q_ASSERT(frame != NULL);
 
-    // Resize the parent frame to fit the buttons nicely
+    // Resize the parent frame to fit the buttons nicely and toggle resizing off
     frame->resize(QSize((h * sz) + 20, (v * sz) + 20));
+    frame->setAllowResize(false);
 
     for (int y = 0; y < v; y++)
     {
@@ -866,12 +857,13 @@ void VirtualConsole::slotAddButtonMatrix()
     // Show the frame after adding buttons to prevent flickering
     frame->show();
     frame->move(parent->lastClickPoint());
+    frame->setAllowChildren(false); // Don't allow more children
     m_doc->setModified();
 }
 
 void VirtualConsole::slotAddSlider()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -884,7 +876,7 @@ void VirtualConsole::slotAddSlider()
 
 void VirtualConsole::slotAddSliderMatrix()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -901,6 +893,7 @@ void VirtualConsole::slotAddSliderMatrix()
 
     // Resize the parent frame to fit the sliders nicely
     frame->resize(QSize((count * width) + 20, height + 20));
+    frame->setAllowResize(false);
 
     for (int i = 0; i < count; i++)
     {
@@ -914,12 +907,13 @@ void VirtualConsole::slotAddSliderMatrix()
     // Show the frame after adding buttons to prevent flickering
     frame->show();
     frame->move(parent->lastClickPoint());
+    frame->setAllowChildren(false); // Don't allow more children
     m_doc->setModified();
 }
 
 void VirtualConsole::slotAddXYPad()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -932,7 +926,7 @@ void VirtualConsole::slotAddXYPad()
 
 void VirtualConsole::slotAddCueList()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -945,7 +939,7 @@ void VirtualConsole::slotAddCueList()
 
 void VirtualConsole::slotAddFrame()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -958,7 +952,7 @@ void VirtualConsole::slotAddFrame()
 
 void VirtualConsole::slotAddSoloFrame()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 
@@ -971,7 +965,7 @@ void VirtualConsole::slotAddSoloFrame()
 
 void VirtualConsole::slotAddLabel()
 {
-    VCFrame* parent(closestParent());
+    VCWidget* parent(closestParent());
     if (parent == NULL)
         return;
 

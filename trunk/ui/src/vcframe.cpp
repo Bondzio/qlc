@@ -34,13 +34,14 @@
 
 #include "qlcfile.h"
 
+#include "vcframeproperties.h"
 #include "virtualconsole.h"
+#include "vcsoloframe.h"
 #include "vccuelist.h"
 #include "vcbutton.h"
 #include "vcslider.h"
 #include "vcframe.h"
 #include "vclabel.h"
-#include "vcsoloframe.h"
 #include "vcxypad.h"
 #include "doc.h"
 
@@ -49,8 +50,8 @@ VCFrame::VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inpu
 {
     /* Set the class name "VCFrame" as the object name as well */
     setObjectName(VCFrame::staticMetaObject.className());
-
-    m_frameStyle = KVCFrameStyleSunken;
+    setFrameStyle(KVCFrameStyleSunken);
+    setAllowChildren(true);
 }
 
 VCFrame::~VCFrame()
@@ -93,12 +94,20 @@ bool VCFrame::copyFrom(VCWidget* widget)
 }
 
 /*****************************************************************************
- * Capability to have children
+ * Properties
  *****************************************************************************/
 
-bool VCFrame::canHaveChildren() const
+void VCFrame::editProperties()
 {
-    return true;
+    VCFrameProperties prop(NULL, this);
+    if (prop.exec() == QDialog::Accepted)
+    {
+        setAllowChildren(prop.allowChildren());
+        setAllowResize(prop.allowResize());
+        VirtualConsole* vc = VirtualConsole::instance();
+        if (vc != NULL)
+            vc->reselectWidgets();
+    }
 }
 
 /*****************************************************************************
@@ -135,6 +144,22 @@ bool VCFrame::loadXML(const QDomElement* root)
         {
             /* Frame appearance */
             loadXMLAppearance(&tag);
+        }
+        else if (tag.tagName() == KXMLQLCVCFrameAllowChildren)
+        {
+            /* Allow children */
+            if (tag.text() == KXMLQLCTrue)
+                setAllowChildren(true);
+            else
+                setAllowChildren(false);
+        }
+        else if (tag.tagName() == KXMLQLCVCFrameAllowResize)
+        {
+            /* Allow resize */
+            if (tag.text() == KXMLQLCTrue)
+                setAllowResize(true);
+            else
+                setAllowResize(false);
         }
         else if (tag.tagName() == KXMLQLCVCFrame)
         {
@@ -230,9 +255,29 @@ bool VCFrame::saveXML(QDomDocument* doc, QDomElement* vc_root)
     /* Save appearance */
     saveXMLAppearance(doc, &root);
 
-    /* Save widget proportions only for child frames */
     if (isBottomFrame() == false)
+    {
+        /* Save widget proportions only for child frames */
         saveXMLWindowState(doc, &root);
+
+        /* Allow children */
+        tag = doc->createElement(KXMLQLCVCFrameAllowChildren);
+        if (allowChildren() == true)
+            text = doc->createTextNode(KXMLQLCTrue);
+        else
+            text = doc->createTextNode(KXMLQLCFalse);
+        tag.appendChild(text);
+        root.appendChild(tag);
+
+        /* Allow resize */
+        tag = doc->createElement(KXMLQLCVCFrameAllowResize);
+        if (allowResize() == true)
+            text = doc->createTextNode(KXMLQLCTrue);
+        else
+            text = doc->createTextNode(KXMLQLCFalse);
+        tag.appendChild(text);
+        root.appendChild(tag);
+    }
 
     /* Save children */
     QListIterator <VCWidget*> it(findChildren<VCWidget*>());
@@ -280,19 +325,21 @@ QString VCFrame::xmlTagName() const
 
 QMenu* VCFrame::customMenu(QMenu* parentMenu)
 {
-    /* No point coming here if there is no VC */
+    QMenu* menu = NULL;
     VirtualConsole* vc = VirtualConsole::instance();
-    if (vc == NULL)
-        return NULL;
 
-    /* Basically, just returning VC::addMenu() would suffice here, but
-       since the returned menu will be deleted when the current widget
-       changes, we have to copy the menu's contents into a new menu. */
-    QMenu* menu = new QMenu(parentMenu);
-    menu->setTitle(tr("Add"));
-    QListIterator <QAction*> it(vc->addMenu()->actions());
-    while (it.hasNext() == true)
-        menu->addAction(it.next());
+    if (allowChildren() == true && vc != NULL)
+    {
+        /* Basically, just returning VC::addMenu() would suffice here, but
+           since the returned menu will be deleted when the current widget
+           changes, we have to copy the menu's contents into a new menu. */
+        menu = new QMenu(parentMenu);
+        menu->setTitle(tr("Add"));
+        QListIterator <QAction*> it(vc->addMenu()->actions());
+        while (it.hasNext() == true)
+            menu->addAction(it.next());
+    }
+
     return menu;
 }
 

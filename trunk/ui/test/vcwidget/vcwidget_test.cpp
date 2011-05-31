@@ -60,7 +60,7 @@ void VCWidget_Test::initial()
     QCOMPARE(stub.frameStyle(), 0);
     QCOMPARE(stub.inputUniverse(), InputMap::invalidUniverse());
     QCOMPARE(stub.inputChannel(), InputMap::invalidChannel());
-    QCOMPARE(stub.canHaveChildren(), false);
+    QCOMPARE(stub.allowChildren(), false);
     QCOMPARE(stub.customMenu(0), (QMenu*) 0);
 }
 

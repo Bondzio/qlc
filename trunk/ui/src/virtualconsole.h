@@ -125,6 +125,9 @@ public:
     /** Clear the list of selected widgets */
     void clearWidgetSelection();
 
+    /** Reselect widgets (== clear selection and select) */
+    void reselectWidgets();
+
 protected:
     /** The widgets that are currently selected */
     QList <VCWidget*> m_selectedWidgets;
@@ -221,14 +224,11 @@ protected:
      *********************************************************************/
 private:
     /**
-     * Attempt to find the closest parent for new widget. It's either
-     * the bottom frame or a newly-added VCFrame or the parent of another
-     * newly-added (non-VCFrame) widget. If a parent cannot be found for
-     * some reason, NULL is returned.
+     * Attempt to find the closest parent for new widget that accepts children
      *
-     * @return Closest parent VCFrame*
+     * @return Closest parent VCWidget* that allows children
      */
-    VCFrame* closestParent() const;
+    VCWidget* closestParent() const;
 
 public slots:
     void slotAddButton();

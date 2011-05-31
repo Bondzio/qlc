@@ -30,7 +30,8 @@ class QMouseEvent;
 class QString;
 
 #define KXMLQLCVCFrame "Frame"
-#define KXMLQLCVCFrameButtonBehaviour "ButtonBehaviour"
+#define KXMLQLCVCFrameAllowChildren "AllowChildren"
+#define KXMLQLCVCFrameAllowResize "AllowResize"
 
 class VCFrame : public VCWidget
 {
@@ -61,11 +62,11 @@ protected:
     bool copyFrom(VCWidget* widget);
 
     /*********************************************************************
-     * Capability to have children
+     * Properties
      *********************************************************************/
 public:
-    /** VCFrame can hold children */
-    bool canHaveChildren() const;
+    /** @reimp */
+    void editProperties();
 
     /*********************************************************************
      * Load & Save

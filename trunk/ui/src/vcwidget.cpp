@@ -57,6 +57,8 @@ VCWidget::VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* in
     , m_outputMap(outputMap)
     , m_inputMap(inputMap)
     , m_masterTimer(masterTimer)
+    , m_allowChildren(false)
+    , m_allowResize(true)
 {
     Q_ASSERT(parent != NULL);
     Q_ASSERT(doc != NULL);
@@ -345,12 +347,31 @@ int VCWidget::stringToFrameStyle(const QString& style)
 }
 
 /*****************************************************************************
- * Capability of having children
+ * Allow adding children
  *****************************************************************************/
 
-bool VCWidget::canHaveChildren() const
+void VCWidget::setAllowChildren(bool allow)
 {
-    return false;
+    m_allowChildren = allow;
+}
+
+bool VCWidget::allowChildren() const
+{
+    return m_allowChildren;
+}
+
+/*********************************************************************
+ * Allow resizing
+ *********************************************************************/
+
+void VCWidget::setAllowResize(bool allow)
+{
+    m_allowResize = allow;
+}
+
+bool VCWidget::allowResize() const
+{
+    return m_allowResize;
 }
 
 /*****************************************************************************
@@ -827,9 +848,12 @@ void VCWidget::paintEvent(QPaintEvent* e)
         painter.drawRect(0, 0, rect().width() - 1, rect().height() - 1);
 
         /* Draw a resize handle */
-        QIcon icon(":/resize.png");
-        painter.drawPixmap(rect().width() - 16, rect().height() - 16,
-                           icon.pixmap(QSize(16, 16), QIcon::Normal, QIcon::On));
+        if (allowResize() == true)
+        {
+            QIcon icon(":/resize.png");
+            painter.drawPixmap(rect().width() - 16, rect().height() - 16,
+                               icon.pixmap(QSize(16, 16), QIcon::Normal, QIcon::On));
+        }
     }
 }
 
@@ -857,8 +881,7 @@ void VCWidget::mousePressEvent(QMouseEvent* e)
     if (e->button() & Qt::LeftButton || e->button() & Qt::MidButton)
     {
         /* Start moving or resizing based on where the click landed */
-        if (e->x() > rect().width() - 10 &&
-                e->y() > rect().height() - 10)
+        if (e->x() > rect().width() - 10 && e->y() > rect().height() - 10 && allowResize())
         {
             m_resizeMode = true;
             setMouseTracking(true);

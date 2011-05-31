@@ -193,11 +193,42 @@ protected:
     int m_frameStyle;
 
     /*********************************************************************
-     * Capability to have children
+     * Allow adding children
      *********************************************************************/
 public:
-    /** Return true if this widget can hold children. */
-    virtual bool canHaveChildren() const;
+    /** Set, whether the widget can contain children. */
+    void setAllowChildren(bool allow);
+
+    /**
+     * Check, if the widget can contain children. This property is not saved
+     * in XML by VCWidget because the default behaviour for all widgets is to
+     * not allow children. Widgets that make an exception to this can save the
+     * property if needed. Otherwise, if all widgets had this property in
+     * the workspace file, user could (hack it and) allow children under any
+     * widget, which is bad mmkay.
+     */
+    bool allowChildren() const;
+
+private:
+    bool m_allowChildren;
+
+    /*********************************************************************
+     * Allow resizing
+     *********************************************************************/
+public:
+    /**
+     * Set, whether the widget can be resized. This property is not saved
+     * in XML by VCWidget because the default behaviour for all widgets is to
+     * always allow resizing. Widgets that make an exception to this can save
+     * the property if needed.
+     */
+    void setAllowResize(bool allow);
+
+    /** Check if the widget can be resized */
+    bool allowResize() const;
+
+private:
+    bool m_allowResize;
 
     /*********************************************************************
      * Properties

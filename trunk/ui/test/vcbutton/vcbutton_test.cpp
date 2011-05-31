@@ -303,6 +303,40 @@ void VCButton_Test::keySequence()
     QCOMPARE(btn.keySequence(), seq);
 }
 
+void VCButton_Test::copy()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget w;
+
+    Scene* sc = new Scene(&doc);
+    doc.addFunction(sc);
+
+    VCButton btn(&w, &doc, &om, &im, &mt);
+    btn.setCaption("Foobar");
+    btn.setIcon("../../../gfx/qlc.png");
+    btn.setFunction(sc->id());
+    btn.setAction(VCButton::Flash);
+    btn.setKeySequence(QKeySequence(QKeySequence::Undo));
+    btn.setAdjustIntensity(true);
+    btn.setIntensityAdjustment(0.2);
+
+    VCFrame parent(&w, &doc, &om, &im, &mt);
+    VCButton* copy = qobject_cast<VCButton*> (btn.createCopy(&parent));
+    QVERIFY(copy != NULL);
+    QCOMPARE(copy->caption(), QString("Foobar"));
+    QCOMPARE(copy->icon(), QString("../../../gfx/qlc.png"));
+    QCOMPARE(copy->function(), sc->id());
+    QCOMPARE(copy->action(), VCButton::Flash);
+    QCOMPARE(copy->keySequence(), QKeySequence(QKeySequence::Undo));
+    QCOMPARE(copy->adjustIntensity(), true);
+    QCOMPARE(copy->intensityAdjustment(), qreal(0.2));
+    delete copy;
+}
+
 void VCButton_Test::load()
 {
     QLCFixtureDefCache fdc;
@@ -360,19 +394,27 @@ void VCButton_Test::load()
 
     VCButton btn(&w, &doc, &om, &im, &mt);
     QCOMPARE(btn.loadXML(&root), true);
+    QCOMPARE(btn.caption(), QString("Pertti"));
+    QCOMPARE(btn.icon(), QString("../../../gfx/qlc.png"));
     QCOMPARE(btn.function(), sc->id());
     QCOMPARE(btn.action(), VCButton::Flash);
     QCOMPARE(btn.keySequence(), QKeySequence(QKeySequence::Copy));
     QCOMPARE(btn.adjustIntensity(), true);
     QCOMPARE(btn.intensityAdjustment(), qreal(0.6));
+    QCOMPARE(btn.pos(), QPoint(20, 20));
+    QCOMPARE(btn.size(), QSize(60, 60));
 
     intensity.setAttribute("Adjust", "False");
     QCOMPARE(btn.loadXML(&root), true);
+    QCOMPARE(btn.caption(), QString("Pertti"));
+    QCOMPARE(btn.icon(), QString("../../../gfx/qlc.png"));
     QCOMPARE(btn.function(), sc->id());
     QCOMPARE(btn.action(), VCButton::Flash);
     QCOMPARE(btn.keySequence(), QKeySequence(QKeySequence::Copy));
     QCOMPARE(btn.adjustIntensity(), false);
     QCOMPARE(btn.intensityAdjustment(), qreal(0.6));
+    QCOMPARE(btn.pos(), QPoint(20, 20));
+    QCOMPARE(btn.size(), QSize(60, 60));
 
     root.setTagName("Buton");
     QCOMPARE(btn.loadXML(&root), false);

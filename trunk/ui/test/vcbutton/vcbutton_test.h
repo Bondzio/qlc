@@ -40,6 +40,7 @@ private slots:
     void icon();
     void on();
     void keySequence();
+    void copy();
     void load();
     void save();
 };

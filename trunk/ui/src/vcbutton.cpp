@@ -136,6 +136,7 @@ bool VCButton::copyFrom(VCWidget* widget)
     setFunction(button->function());
     setAdjustIntensity(button->adjustIntensity());
     setIntensityAdjustment(button->intensityAdjustment());
+    setAction(button->action());
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);

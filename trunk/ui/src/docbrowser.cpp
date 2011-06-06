@@ -36,11 +36,13 @@
 #include "apputil.h"
 
 #define SETTINGS_GEOMETRY "documentbrowser/geometry"
+#define HYSTERESIS_MS 100
 
 QLCTextBrowser::QLCTextBrowser(QWidget* parent)
     : QTextBrowser(parent)
 {
     grabGesture(Qt::SwipeGesture);
+    m_hysteresis.start();
 }
 
 QLCTextBrowser::~QLCTextBrowser()
@@ -60,13 +62,21 @@ bool QLCTextBrowser::event(QEvent* ev)
         }
         else if (swipe->horizontalDirection() == QSwipeGesture::Left)
         {
-            backward();
-            ev->accept();
+            if (m_hysteresis.elapsed() > HYSTERESIS_MS)
+            {
+                backward();
+                ev->accept();
+                m_hysteresis.start();
+            }
         }
         else if (swipe->horizontalDirection() == QSwipeGesture::Right)
         {
-            forward();
-            ev->accept();
+            if (m_hysteresis.elapsed() > HYSTERESIS_MS)
+            {
+                forward();
+                ev->accept();
+                m_hysteresis.start();
+            }
         }
     }
 

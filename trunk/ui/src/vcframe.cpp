@@ -99,6 +99,9 @@ bool VCFrame::copyFrom(VCWidget* widget)
 
 void VCFrame::editProperties()
 {
+    if (isBottomFrame() == true)
+        return;
+
     VCFrameProperties prop(NULL, this);
     if (prop.exec() == QDialog::Accepted)
     {

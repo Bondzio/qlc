@@ -136,7 +136,7 @@ VCSlider::VCSlider(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* in
     m_bottomLabel->setAlignment(Qt::AlignCenter);
     m_bottomLabel->hide();
 
-    setMinimumSize(VCSlider::defaultSize);
+    setMinimumSize(20, 20);
     resize(VCSlider::defaultSize);
 
     /* Initialize to bus mode by default */

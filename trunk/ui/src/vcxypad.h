@@ -37,7 +37,11 @@ class QDomElement;
 class QPaintEvent;
 class QMouseEvent;
 class MasterTimer;
+class VCXYPadArea;
+class QHBoxLayout;
+class QVBoxLayout;
 class QByteArray;
+class QSlider;
 class Doc;
 
 #define KXMLQLCVCXYPad "XYPad"
@@ -57,6 +61,14 @@ public:
     VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
     virtual ~VCXYPad();
 
+private:
+    QHBoxLayout* m_hbox;
+    QVBoxLayout* m_lvbox;
+    QVBoxLayout* m_rvbox;
+    QSlider* m_vSlider;
+    QSlider* m_hSlider;
+    VCXYPadArea* m_area;
+
     /*************************************************************************
      * Clipboard
      *************************************************************************/
@@ -68,10 +80,17 @@ public:
     bool copyFrom(VCWidget* widget);
 
     /*************************************************************************
+     * Caption
+     *************************************************************************/
+public:
+    /** @reimp */
+    void setCaption(const QString& text);
+
+    /*************************************************************************
      * Properties
      *************************************************************************/
 public:
-    /** Display a properties dialog */
+    /** @reimp */
     void editProperties();
 
     /*************************************************************************
@@ -100,26 +119,23 @@ public:
      */
     QList <VCXYPadFixture> fixtures() const;
 
-protected:
+private:
     QList <VCXYPadFixture> m_fixtures;
 
     /*************************************************************************
      * Current position
      *************************************************************************/
 public:
-    /** Get the pad's current position (i.e. where the point is) */
-    QPoint currentXYPosition() const;
-
-    /** Set the pad's current position (i.e. move the point) */
-    void setCurrentXYPosition(const QPoint& point);
-
-    /** @reimp from DMXSource */
+    /** @reimp */
     void writeDMX(MasterTimer* timer, UniverseArray* universes);
 
-protected:
-    QPoint m_currentXYPosition;
-    bool m_currentXYPositionChanged;
-    QMutex m_currentXYPositionMutex;
+public slots:
+    void slotPositionChanged(const QPoint& pt);
+    void slotSliderValueChanged();
+
+private:
+    bool m_padInteraction;
+    bool m_sliderInteraction;
 
     /*************************************************************************
      * QLC mode
@@ -137,25 +153,6 @@ public:
 
     /** @reimp */
     bool saveXML(QDomDocument* doc, QDomElement* root);
-
-    /*************************************************************************
-     * Event handlers
-     *************************************************************************/
-protected:
-    /** @reimp */
-    void paintEvent(QPaintEvent* e);
-
-    /** @reimp */
-    void mousePressEvent(QMouseEvent* e);
-
-    /** @reimp */
-    void mouseReleaseEvent(QMouseEvent* e);
-
-    /** @reimp */
-    void mouseMoveEvent(QMouseEvent* e);
-
-private:
-    QPixmap m_xyPosPixmap;
 };
 
 #endif

@@ -26,6 +26,7 @@
 #define protected public
 #define private public
 #include "mastertimer.h"
+#include "vcxypadarea.h"
 #include "vcwidget.h"
 #include "vcxypad.h"
 #undef private
@@ -66,10 +67,13 @@ void VCXYPad_Test::initial()
     QCOMPARE(pad.objectName(), QString("VCXYPad"));
     QCOMPARE(pad.caption(), QString("XY Pad"));
     QCOMPARE(pad.frameStyle(), QFrame::Panel | QFrame::Sunken);
-    QCOMPARE(pad.size(), QSize(120, 120));
-    QVERIFY(pad.m_xyPosPixmap.isNull() == false);
-    QCOMPARE(pad.m_currentXYPosition, QPoint(60, 60));
+    QCOMPARE(pad.size(), QSize(200, 200));
+    QVERIFY(pad.m_area != NULL);
+    QVERIFY(pad.m_area->m_pixmap.isNull() == false);
+    QCOMPARE(pad.m_area->position(), QPoint(0, 0));
     QCOMPARE(pad.m_fixtures.size(), 0);
+    QVERIFY(pad.m_vSlider != NULL);
+    QVERIFY(pad.m_hSlider != NULL);
 }
 
 void VCXYPad_Test::fixtures()
@@ -132,7 +136,7 @@ void VCXYPad_Test::copy()
     pad.setCaption("Dingdong");
     QSize size(80, 80);
     QPoint pt(50, 30);
-    pad.setCurrentXYPosition(pt);
+    pad.m_area->setPosition(pt);
 
     VCXYPadFixture xyf1(&doc);
     xyf1.setFixture(1);
@@ -157,42 +161,9 @@ void VCXYPad_Test::copy()
     QVERIFY(&copy->m_fixtures[1] != &xyf2);
     QVERIFY(&copy->m_fixtures[2] != &xyf3);
 
-    QCOMPARE(copy->currentXYPosition(), pt);
+    QCOMPARE(copy->m_area->position(), pt);
     QCOMPARE(copy->size(), pad.size());
     QCOMPARE(copy->caption(), QString("Dingdong"));
-}
-
-void VCXYPad_Test::setPos()
-{
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
-    QWidget w;
-
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
-    QSize size(100, 100);
-    pad.resize(size);
-
-    QPoint pt(50, 50);
-    pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.currentXYPosition(), QPoint(50, 50));
-    QCOMPARE(pad.m_currentXYPositionChanged, true);
-
-    pt = QPoint(400, 400);
-    pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.currentXYPosition(), QPoint(size.width(), size.height()));
-    QCOMPARE(pad.m_currentXYPositionChanged, true);
-
-    pt = QPoint(0, 0);
-    pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
-    QCOMPARE(pad.m_currentXYPositionChanged, true);
-
-    pt = QPoint(-5, -5);
-    pad.setCurrentXYPosition(pt);
-    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
-    QCOMPARE(pad.m_currentXYPositionChanged, true);
 }
 
 void VCXYPad_Test::loadXML()
@@ -271,9 +242,9 @@ void VCXYPad_Test::loadXML()
     VCXYPad pad(&w, &doc, &om, &im, &mt);
     QVERIFY(pad.loadXML(&root) == true);
     QCOMPARE(pad.m_fixtures.size(), 2);
-    QCOMPARE(pad.currentXYPosition(), QPoint(10, 20));
     QCOMPARE(pad.pos(), QPoint(3, 4));
     QCOMPARE(pad.size(), QSize(42, 69));
+    QCOMPARE(pad.m_area->position(), QPoint(10, 20));
 
     VCXYPadFixture fixture(&doc);
     fixture.setFixture(69);
@@ -294,10 +265,14 @@ void VCXYPad_Test::saveXML()
     QWidget w;
 
     VCXYPad pad(&w, &doc, &om, &im, &mt);
+    pad.show();
+    w.show();
     pad.setCaption("MyPad");
     pad.resize(QSize(150, 200));
     pad.move(QPoint(10, 20));
-    pad.setCurrentXYPosition(QPoint(23, 45));
+    pad.m_area->setPosition(QPoint(23, 45));
+    QCOMPARE(pad.m_area->position(), QPoint(23, 45));
+    QCOMPARE(pad.m_area->position(), QPoint(23, 45));
 
     VCXYPadFixture fixture1(&doc);
     fixture1.setFixture(11);
@@ -374,6 +349,8 @@ void VCXYPad_Test::modeChange()
     doc.addFixture(fxi);
 
     VCXYPad pad(&w, &doc, &om, &im, &mt);
+    pad.show();
+    w.show();
     pad.resize(QSize(200, 200));
 
     VCXYPadFixture xy(&doc);
@@ -389,12 +366,12 @@ void VCXYPad_Test::modeChange()
     QCOMPARE(mt.m_dmxSourceList.size(), 1);
     QCOMPARE(mt.m_dmxSourceList[0], &pad);
 
-    pad.setCurrentXYPosition(QPoint(200, 200));
+    pad.m_area->setPosition(QPoint(pad.m_area->width(), pad.m_area->height()));
     pad.writeDMX(&mt, &ua);
     QCOMPARE(ua.preGMValues()[0], char(255));
     QCOMPARE(ua.preGMValues()[1], char(255));
 
-    pad.setCurrentXYPosition(QPoint(100, 50));
+    pad.m_area->setPosition(QPoint(pad.m_area->width() / 2, pad.m_area->height() / 4));
     pad.writeDMX(&mt, &ua);
     QCOMPARE(ua.preGMValues()[0], char(128));
     QCOMPARE(ua.preGMValues()[1], char(64));
@@ -403,79 +380,6 @@ void VCXYPad_Test::modeChange()
     QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
     QCOMPARE(pad.fixtures()[0].m_yMSB, QLCChannel::invalid());
     QCOMPARE(mt.m_dmxSourceList.size(), 0);
-}
-
-void VCXYPad_Test::paint()
-{
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
-    UniverseArray ua(512);
-    QWidget w;
-
-    // Just a crash test, no point in checking individual pixels
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
-    pad.resize(QSize(200, 200));
-    QPaintEvent ev(QRect(pad.rect()));
-    pad.paintEvent(&ev);
-}
-
-void VCXYPad_Test::mouse()
-{
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
-    UniverseArray ua(512);
-    QWidget w;
-
-    // Just a crash test, no point in checking individual pixels
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
-    pad.resize(QSize(200, 200));
-    doc.setMode(Doc::Operate);
-
-    QMouseEvent ev(QEvent::MouseButtonPress, QPoint(100, 100), Qt::LeftButton, 0, 0);
-    pad.mousePressEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(100, 100));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
-
-    ev = QMouseEvent(QEvent::MouseMove, QPoint(50, 50), Qt::NoButton, 0, 0);
-    pad.mouseMoveEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(50, 50));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
-
-    ev = QMouseEvent(QEvent::MouseMove, QPoint(250, 250), Qt::NoButton, 0, 0);
-    pad.mouseMoveEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(200, 200));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
-
-    ev = QMouseEvent(QEvent::MouseMove, QPoint(-5, -5), Qt::NoButton, 0, 0);
-    pad.mouseMoveEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
-
-    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(150, 150), Qt::LeftButton, 0, 0);
-    pad.mouseReleaseEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
-    QCOMPARE(pad.cursor().shape(), Qt::ArrowCursor);
-    QCOMPARE(pad.hasMouseTracking(), false);
-
-    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(250, 250), Qt::LeftButton, 0, 0);
-    pad.mousePressEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(200, 200));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
-
-    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(-5, -5), Qt::LeftButton, 0, 0);
-    pad.mousePressEvent(&ev);
-    QCOMPARE(pad.currentXYPosition(), QPoint(0, 0));
-    QCOMPARE(pad.cursor().shape(), Qt::CrossCursor);
-    QCOMPARE(pad.hasMouseTracking(), true);
 }
 
 QTEST_MAIN(VCXYPad_Test)

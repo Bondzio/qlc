@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  vcxypad_test.h
+  vcxypadarea_test.h
 
   Copyright (C) Heikki Junnila
 
@@ -19,27 +19,22 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef VCXYPAD_TEST_H
-#define VCXYPAD_TEST_H
+#ifndef VCXYPADAREA_TEST_H
+#define VCXYPADAREA_TEST_H
 
 #include <QObject>
 #include "qlcfixturedefcache.h"
 
-class VCXYPad_Test : public QObject
+class VCXYPadArea_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
-    void initTestCase();
     void initial();
-    void fixtures();
-    void copy();
-    void loadXML();
-    void saveXML();
-    void modeChange();
-
-private:
-    QLCFixtureDefCache m_cache;
+    void mode();
+    void position();
+    void paint();
+    void mouseEvents();
 };
 
 #endif

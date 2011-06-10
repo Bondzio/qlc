@@ -73,6 +73,7 @@ HEADERS += aboutbox.h \
            vcwidget.h \
            vcwidgetproperties.h \
            vcxypad.h \
+           vcxypadarea.h \
            vcxypadfixture.h \
            vcxypadfixtureeditor.h \
            vcxypadproperties.h \
@@ -152,6 +153,7 @@ SOURCES += aboutbox.cpp \
            vcwidget.cpp \
            vcwidgetproperties.cpp \
            vcxypad.cpp \
+           vcxypadarea.cpp \
            vcxypadfixture.cpp \
            vcxypadfixtureeditor.cpp \
            vcxypadproperties.cpp \

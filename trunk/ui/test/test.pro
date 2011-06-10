@@ -13,4 +13,5 @@ SUBDIRS += vcproperties
 SUBDIRS += vcwidget
 SUBDIRS += vcwidgetproperties
 SUBDIRS += vcxypad
+SUBDIRS += vcxypadarea
 SUBDIRS += vcxypadfixture

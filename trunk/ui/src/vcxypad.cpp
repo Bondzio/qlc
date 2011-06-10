@@ -23,10 +23,12 @@
 #include <QTreeWidget>
 #include <QMouseEvent>
 #include <QMessageBox>
+#include <QGridLayout>
 #include <QByteArray>
 #include <QPainter>
 #include <QPixmap>
 #include <QCursor>
+#include <QSlider>
 #include <QDebug>
 #include <QPoint>
 #include <QMenu>
@@ -39,6 +41,7 @@
 #include "vcxypadproperties.h"
 #include "virtualconsole.h"
 #include "mastertimer.h"
+#include "vcxypadarea.h"
 #include "vcxypad.h"
 #include "fixture.h"
 #include "doc.h"
@@ -53,18 +56,48 @@ VCXYPad::VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inpu
     /* Set the class name "VCXYPad" as the object name as well */
     setObjectName(VCXYPad::staticMetaObject.className());
 
+    m_hbox = new QHBoxLayout(this);
+
+    m_lvbox = new QVBoxLayout;
+    m_vSlider = new QSlider(this);
+    m_lvbox->addWidget(m_vSlider);
+    m_hbox->addLayout(m_lvbox);
+
+    m_rvbox = new QVBoxLayout;
+    m_hbox->addLayout(m_rvbox);
+
+    m_area = new VCXYPadArea(this);
+    m_rvbox->addWidget(m_area);
+
+    m_hSlider = new QSlider(Qt::Horizontal, this);
+    m_rvbox->addWidget(m_hSlider);
+
+    m_lvbox->addSpacing(20);
+
+    m_vSlider->setRange(0, 255);
+    m_hSlider->setRange(0, 255);
+    m_vSlider->setInvertedAppearance(true);
+    m_vSlider->setTickPosition(QSlider::TicksRight);
+    m_vSlider->setTickInterval(16);
+    m_hSlider->setTickPosition(QSlider::TicksAbove);
+    m_hSlider->setTickInterval(16);
+    m_vSlider->setStyle(App::saneStyle());
+    m_hSlider->setStyle(App::saneStyle());
+    connect(m_area, SIGNAL(positionChanged(const QPoint&)),
+            this, SLOT(slotPositionChanged(const QPoint&)));
+    connect(m_vSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(slotSliderValueChanged()));
+    connect(m_hSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(slotSliderValueChanged()));
+
     setFrameStyle(KVCFrameStyleSunken);
     setCaption("XY Pad");
     setMinimumSize(20, 20);
+    resize(QSize(200, 200));
+    m_padInteraction = false;
+    m_sliderInteraction = false;
 
-    resize(QSize(120, 120));
-
-    m_xyPosPixmap = QPixmap(":/xypad-point.png");
-
-    /* Set initial position to center */
-    m_currentXYPosition.setX(width() / 2);
-    m_currentXYPosition.setY(height() / 2);
-    m_currentXYPositionChanged = false;
+    slotModeChanged(Doc::Design);
 }
 
 VCXYPad::~VCXYPad()
@@ -94,6 +127,7 @@ bool VCXYPad::copyFrom(VCWidget* widget)
     VCXYPad* xypad = qobject_cast <VCXYPad*> (widget);
     if (xypad == NULL)
         return false;
+    resize(xypad->size());
 
     /* Get rid of existing channels */
     m_fixtures.clear();
@@ -102,10 +136,22 @@ bool VCXYPad::copyFrom(VCWidget* widget)
     m_fixtures = xypad->fixtures();
 
     /* Copy the current position */
-    setCurrentXYPosition(xypad->currentXYPosition());
+    m_area->setPosition(xypad->m_area->position());
+    m_vSlider->setValue(xypad->m_vSlider->value());
+    m_hSlider->setValue(xypad->m_hSlider->value());
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);
+}
+
+/*****************************************************************************
+ * Caption
+ *****************************************************************************/
+
+void VCXYPad::setCaption(const QString& text)
+{
+    m_area->setWindowTitle(text);
+    VCWidget::setCaption(text);
 }
 
 /*****************************************************************************
@@ -151,50 +197,67 @@ QList <VCXYPadFixture> VCXYPad::fixtures() const
  * Current XY position
  *****************************************************************************/
 
-QPoint VCXYPad::currentXYPosition() const
-{
-    return m_currentXYPosition;
-}
-
-void VCXYPad::setCurrentXYPosition(const QPoint& point)
-{
-    QPoint pt(point);
-    pt.setX(CLAMP(pt.x(), 0, width()));
-    pt.setY(CLAMP(pt.y(), 0, height()));
-
-    m_currentXYPositionMutex.lock();
-    m_currentXYPosition = pt;
-    m_currentXYPositionChanged = true;
-    m_currentXYPositionMutex.unlock();
-
-    update();
-}
-
 void VCXYPad::writeDMX(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
 
-    m_currentXYPositionMutex.lock();
-    if (m_currentXYPositionChanged == true)
+    if (m_area->hasPositionChanged() == true)
     {
-        m_currentXYPositionChanged = false;
+        // This call also resets the m_changed flag in m_area
+        QPoint pt = m_area->position();
 
         /* Scale XY coordinate values to 0.0 - 1.0 */
-        qreal x = SCALE(qreal(m_currentXYPosition.x()),
-                        qreal(0), qreal(width()), qreal(0), qreal(1));
-        qreal y = SCALE(qreal(m_currentXYPosition.y()),
-                        qreal(0), qreal(height()), qreal(0), qreal(1));
+        qreal x = SCALE(qreal(pt.x()), qreal(0), qreal(m_area->width()), qreal(0), qreal(1));
+        qreal y = SCALE(qreal(pt.y()), qreal(0), qreal(m_area->height()), qreal(0), qreal(1));
 
-        /* Write values outside mutex lock to keep UI snappy */
-        m_currentXYPositionMutex.unlock();
+        /* Write values outside of mutex lock to keep UI snappy */
         foreach (VCXYPadFixture fixture, m_fixtures)
             fixture.writeDMX(x, y, universes);
     }
+}
+
+void VCXYPad::slotPositionChanged(const QPoint& pt)
+{
+    if (m_sliderInteraction == true)
+        return;
+
+    m_padInteraction = true;
+    qreal x = SCALE(qreal(pt.x()), qreal(0), qreal(m_area->width()),
+                    qreal(m_hSlider->minimum()), qreal(m_hSlider->maximum()));
+    qreal y = SCALE(qreal(pt.y()), qreal(0), qreal(m_area->height()),
+                    qreal(m_vSlider->minimum()), qreal(m_vSlider->maximum()));
+
+    m_hSlider->setValue(int(x));
+    m_vSlider->setValue(int(y));
+    m_padInteraction = false;
+}
+
+void VCXYPad::slotSliderValueChanged()
+{
+    if (m_padInteraction == true)
+        return;
+
+    int x = 0, y = 0;
+
+    m_sliderInteraction = true;
+    if (QObject::sender() == m_hSlider)
+    {
+        x = int(SCALE(qreal(m_hSlider->value()),
+                      qreal(m_hSlider->minimum()), qreal(m_hSlider->maximum()),
+                      qreal(0), qreal(m_area->width())));
+        y = m_area->position().y();
+    }
     else
     {
-        /* No changes in values, unlock and get out */
-        m_currentXYPositionMutex.unlock();
+        y = int(SCALE(qreal(m_vSlider->value()),
+                      qreal(m_vSlider->minimum()), qreal(m_vSlider->maximum()),
+                      qreal(0), qreal(m_area->height())));
+        x = m_area->position().x();
     }
+
+    m_area->setPosition(QPoint(x, y));
+    m_area->update();
+    m_sliderInteraction = false;
 }
 
 /*****************************************************************************
@@ -215,13 +278,23 @@ void VCXYPad::slotModeChanged(Doc::Mode mode)
     }
 
     if (mode == Doc::Operate)
+    {
         m_masterTimer->registerDMXSource(this);
+        m_vSlider->setEnabled(true);
+        m_hSlider->setEnabled(true);
+    }
     else
+    {
         m_masterTimer->unregisterDMXSource(this);
+        m_vSlider->setEnabled(false);
+        m_hSlider->setEnabled(false);
+    }
 
-    /* Reset this flag so that the pad won't immediately set a value
+    m_area->setMode(mode);
+
+    /* Reset the changed flag in m_area so that the pad won't immediately set a value
        when mode is changed */
-    m_currentXYPositionChanged = false;
+    m_area->position();
 
     VCWidget::slotModeChanged(mode);
 }
@@ -291,10 +364,9 @@ bool VCXYPad::loadXML(const QDomElement* root)
         node = node.nextSibling();
     }
 
-    /* First set window dimensions and AFTER that set the
-       pointer's XY position */
     setGeometry(x, y, w, h);
-    setCurrentXYPosition(QPoint(xpos, ypos));
+    show(); // Qt doesn't update the widget's geometry without this.
+    m_area->setPosition(QPoint(xpos, ypos));
 
     return true;
 }
@@ -321,11 +393,10 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
         fixture.saveXML(doc, &root);
 
     /* Current XY Position */
+    QPoint pt(m_area->position());
     tag = doc->createElement(KXMLQLCVCXYPadPosition);
-    tag.setAttribute(KXMLQLCVCXYPadPositionX,
-                     QString("%1").arg(currentXYPosition().x()));
-    tag.setAttribute(KXMLQLCVCXYPadPositionY,
-                     QString("%1").arg(currentXYPosition().y()));
+    tag.setAttribute(KXMLQLCVCXYPadPositionX, QString::number(pt.x()));
+    tag.setAttribute(KXMLQLCVCXYPadPositionY, QString::number(pt.y()));
     root.appendChild(tag);
 
     /* Window state */
@@ -335,81 +406,4 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
     saveXMLAppearance(doc, &root);
 
     return true;
-}
-
-/*****************************************************************************
- * Event handlers
- *****************************************************************************/
-
-void VCXYPad::paintEvent(QPaintEvent* e)
-{
-    /* Let the parent class draw its stuff first */
-    VCWidget::paintEvent(e);
-
-    QPainter p(this);
-    QPen pen;
-
-    /* Draw name (offset just a bit to avoid frame) */
-    p.drawText(1, 1, width() - 2, height() - 2,
-               Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, caption());
-
-    /* Draw crosshairs to indicate the center position */
-    pen.setStyle(Qt::DotLine);
-    pen.setColor(palette().color(QPalette::WindowText));
-    pen.setWidth(0);
-    p.setPen(pen);
-    p.drawLine(width() / 2, 0, width() / 2, height());
-    p.drawLine(0, height() / 2, width(), height() / 2);
-
-    /* Draw the current point pixmap */
-    p.drawPixmap(m_currentXYPosition.x() - (m_xyPosPixmap.width() / 2),
-                 m_currentXYPosition.y() - (m_xyPosPixmap.height() / 2),
-                 m_xyPosPixmap);
-}
-
-void VCXYPad::mousePressEvent(QMouseEvent* e)
-{
-    if (mode() == Doc::Operate)
-    {
-        /* Mouse moves the XY point in operate mode */
-        int x = CLAMP(e->x(), 0, width());
-        int y = CLAMP(e->y(), 0, height());
-        QPoint point(x, y);
-
-        setCurrentXYPosition(point);
-        setMouseTracking(true);
-        setCursor(Qt::CrossCursor);
-    }
-
-    VCWidget::mousePressEvent(e);
-}
-
-void VCXYPad::mouseReleaseEvent(QMouseEvent* e)
-{
-    if (mode() == Doc::Operate)
-    {
-        /* Mouse moves the XY point in operate mode */
-        setMouseTracking(false);
-        unsetCursor();
-
-        VCWidget::mouseReleaseEvent(e);
-    }
-
-    VCWidget::mouseReleaseEvent(e);
-}
-
-void VCXYPad::mouseMoveEvent(QMouseEvent* e)
-{
-    if (mode() == Doc::Operate)
-    {
-        /* Mouse moves the XY point in operate mode */
-        int x = CLAMP(e->x(), 0, width());
-        int y = CLAMP(e->y(), 0, height());
-        QPoint point(x, y);
-
-        setCurrentXYPosition(point);
-        update();
-    }
-
-    VCWidget::mouseMoveEvent(e);
 }

@@ -45,6 +45,8 @@
 #include "vcxypad.h"
 #include "doc.h"
 
+const QSize VCFrame::defaultSize(QSize(200, 200));
+
 VCFrame::VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
 {
@@ -52,6 +54,7 @@ VCFrame::VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inpu
     setObjectName(VCFrame::staticMetaObject.className());
     setFrameStyle(KVCFrameStyleSunken);
     setAllowChildren(true);
+    resize(defaultSize);
 }
 
 VCFrame::~VCFrame()

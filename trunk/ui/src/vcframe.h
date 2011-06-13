@@ -38,6 +38,10 @@ class VCFrame : public VCWidget
     Q_OBJECT
     Q_DISABLE_COPY(VCFrame)
 
+public:
+    /** Default size for newly-created frames */
+    static const QSize defaultSize;
+
     /*********************************************************************
      * Initialization
      *********************************************************************/

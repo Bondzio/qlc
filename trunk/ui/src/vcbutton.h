@@ -57,9 +57,6 @@ class VCButton : public VCWidget
     Q_DISABLE_COPY(VCButton)
 
 public:
-    /** Minimum size for a button */
-    static const QSize minimumSize;
-
     /** Default size for newly-created buttons */
     static const QSize defaultSize;
 

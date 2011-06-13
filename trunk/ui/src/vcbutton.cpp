@@ -54,7 +54,6 @@
 #include "fixture.h"
 #include "doc.h"
 
-const QSize VCButton::minimumSize(QSize(20, 20));
 const QSize VCButton::defaultSize(QSize(50, 50));
 
 /*****************************************************************************
@@ -92,8 +91,7 @@ VCButton::VCButton(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* in
             this, SLOT(slotResetIcon()));
 
     /* Initial size */
-    setMinimumSize(VCButton::minimumSize);
-    resize(VCButton::defaultSize);
+    resize(defaultSize);
 
     setStyle(App::saneStyle());
 

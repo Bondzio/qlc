@@ -37,6 +37,7 @@
 #include "vcsliderproperties.h"
 #include "qlcinputchannel.h"
 #include "virtualconsole.h"
+#include "qlcinputsource.h"
 #include "universearray.h"
 #include "mastertimer.h"
 #include "collection.h"
@@ -837,8 +838,8 @@ void VCSlider::slotSliderMoved(int value)
 void VCSlider::sendFeedBack(int value)
 {
     /* Send input feedback */
-    if (m_inputUniverse != InputMap::invalidUniverse() &&
-        m_inputChannel != InputMap::invalidChannel())
+    QLCInputSource src = inputSource();
+    if (src.isValid() == true)
     {
         if (invertedAppearance() == true)
             value = m_slider->maximum() - value;
@@ -847,7 +848,7 @@ void VCSlider::sendFeedBack(int value)
                          float(m_slider->maximum()), float(0),
                          float(UCHAR_MAX));
 
-        m_inputMap->feedBack(m_inputUniverse, m_inputChannel, int(fb));
+        m_inputMap->feedBack(src.universe(), src.channel(), int(fb));
     }
 }
 
@@ -920,7 +921,7 @@ void VCSlider::slotInputValueChanged(quint32 universe, quint32 channel,
     if (mode() == Doc::Design)
         return;
 
-    if (universe == m_inputUniverse && channel == m_inputChannel)
+    if (inputSource() == QLCInputSource(universe, channel))
     {
         if (m_sliderMode == Bus && isButton(universe, channel) == true)
         {

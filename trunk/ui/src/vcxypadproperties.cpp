@@ -25,11 +25,17 @@
 #include <QHeaderView>
 #include <QSettings>
 
+#include "qlcinputchannel.h"
+#include "qlcinplugin.h"
 #include "qlcchannel.h"
+
 #include "vcxypadfixtureeditor.h"
+#include "selectinputchannel.h"
 #include "vcxypadproperties.h"
 #include "fixtureselection.h"
 #include "vcxypadfixture.h"
+#include "inputpatch.h"
+#include "inputmap.h"
 #include "vcxypad.h"
 #include "apputil.h"
 #include "doc.h"
@@ -44,13 +50,15 @@
  * Initialization
  ****************************************************************************/
 
-VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc)
+VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc, InputMap* inputMap)
     : QDialog(xypad)
+    , m_xypad(xypad)
     , m_doc(doc)
+    , m_inputMap(inputMap)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(xypad != NULL);
-    m_xypad = xypad;
+    Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
 
@@ -69,6 +77,11 @@ VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc)
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
     AppUtil::ensureWidgetIsVisible(this);
+
+    m_panInputSource = xypad->inputSource(VCXYPad::panInputSourceId);
+    m_tiltInputSource = xypad->inputSource(VCXYPad::tiltInputSourceId);
+    updatePanInputSource();
+    updateTiltInputSource();
 }
 
 VCXYPadProperties::~VCXYPadProperties()
@@ -78,7 +91,7 @@ VCXYPadProperties::~VCXYPadProperties()
 }
 
 /****************************************************************************
- * Tree
+ * Fixtures page
  ****************************************************************************/
 
 void VCXYPadProperties::fillTree()
@@ -268,10 +281,118 @@ void VCXYPadProperties::slotSelectionChanged(QTreeWidgetItem* item)
     }
 }
 
+/****************************************************************************
+ * Input page
+ ****************************************************************************/
+
+void VCXYPadProperties::slotPanAutoDetectToggled(bool toggled)
+{
+    if (toggled == true)
+    {
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotPanInputValueChanged(quint32,quint32)));
+        m_tiltAutoDetectButton->setChecked(false);
+    }
+    else
+    {
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotPanInputValueChanged(quint32,quint32)));
+    }
+}
+
+void VCXYPadProperties::slotPanChooseClicked()
+{
+    m_panAutoDetectButton->setChecked(false);
+    m_tiltAutoDetectButton->setChecked(false);
+
+    SelectInputChannel sic(this, m_inputMap);
+    if (sic.exec() == QDialog::Accepted)
+    {
+        m_panInputSource = QLCInputSource(sic.universe(), sic.channel());
+        updatePanInputSource();
+    }
+}
+
+void VCXYPadProperties::slotPanInputValueChanged(quint32 uni, quint32 ch)
+{
+    m_panInputSource = QLCInputSource(uni, ch);
+    updatePanInputSource();
+}
+
+void VCXYPadProperties::slotTiltAutoDetectToggled(bool toggled)
+{
+    if (toggled == true)
+    {
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotTiltInputValueChanged(quint32,quint32)));
+        m_panAutoDetectButton->setChecked(false);
+    }
+    else
+    {
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotTiltInputValueChanged(quint32,quint32)));
+    }
+}
+
+void VCXYPadProperties::slotTiltChooseClicked()
+{
+    m_panAutoDetectButton->setChecked(false);
+    m_tiltAutoDetectButton->setChecked(false);
+
+    SelectInputChannel sic(this, m_inputMap);
+    if (sic.exec() == QDialog::Accepted)
+    {
+        m_tiltInputSource = QLCInputSource(sic.universe(), sic.channel());
+        updateTiltInputSource();
+    }
+}
+
+void VCXYPadProperties::slotTiltInputValueChanged(quint32 uni, quint32 ch)
+{
+    m_tiltInputSource = QLCInputSource(uni, ch);
+    updateTiltInputSource();
+}
+
+void VCXYPadProperties::updatePanInputSource()
+{
+    QString uniName;
+    QString chName;
+
+    if (m_inputMap->inputSourceNames(m_panInputSource, uniName, chName) == false)
+    {
+        uniName = KInputNone;
+        chName = KInputNone;
+    }
+
+    m_panUniverseEdit->setText(uniName);
+    m_panChannelEdit->setText(chName);
+}
+
+void VCXYPadProperties::updateTiltInputSource()
+{
+    QString uniName;
+    QString chName;
+
+    if (m_inputMap->inputSourceNames(m_tiltInputSource, uniName, chName) == false)
+    {
+        uniName = KInputNone;
+        chName = KInputNone;
+    }
+
+    m_tiltUniverseEdit->setText(uniName);
+    m_tiltChannelEdit->setText(chName);
+}
+
+/****************************************************************************
+ * OK/Cancel
+ ****************************************************************************/
+
 void VCXYPadProperties::accept()
 {
     m_xypad->clearFixtures();
     m_xypad->setCaption(m_nameEdit->text());
+    m_xypad->setInputSource(m_panInputSource, VCXYPad::panInputSourceId);
+    m_xypad->setInputSource(m_tiltInputSource, VCXYPad::tiltInputSourceId);
 
     QTreeWidgetItemIterator it(m_tree);
     while (*it != NULL)

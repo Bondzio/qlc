@@ -27,6 +27,7 @@
 #include <QList>
 
 #include "ui_vccuelistproperties.h"
+#include "qlcinputsource.h"
 
 class MasterTimer;
 class VCCueList;
@@ -97,8 +98,7 @@ protected:
 
 protected:
     QKeySequence m_nextKeySequence;
-    quint32 m_nextInputUniverse;
-    quint32 m_nextInputChannel;
+    QLCInputSource m_nextInputSource;
 
     /************************************************************************
      * Previous Cue
@@ -115,8 +115,7 @@ protected:
 
 protected:
     QKeySequence m_previousKeySequence;
-    quint32 m_previousInputUniverse;
-    quint32 m_previousInputChannel;
+    QLCInputSource m_previousInputSource;
 };
 
 #endif

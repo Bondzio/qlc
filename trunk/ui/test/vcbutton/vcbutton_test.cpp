@@ -32,6 +32,7 @@
 #undef protected
 
 #include "qlcfixturedefcache.h"
+#include "qlcinputsource.h"
 #include "vcbutton_test.h"
 #include "qlcmacros.h"
 #include "outputmap.h"
@@ -265,7 +266,7 @@ void VCButton_Test::on()
     QWidget w;
 
     VCButton btn(&w, &doc, &om, &im, &mt);
-    btn.setInputSource(0, 1);
+    btn.setInputSource(QLCInputSource(0, 1));
 
     QCOMPARE(btn.isOn(), false);
 
@@ -636,7 +637,7 @@ void VCButton_Test::input()
     btn.setAction(VCButton::Flash);
     btn.setAdjustIntensity(true);
     btn.setIntensityAdjustment(1.0);
-    btn.setInputSource(0, 0);
+    btn.setInputSource(QLCInputSource(0, 0));
 
     btn.slotInputValueChanged(0, 0, 255);
     QCOMPARE(btn.isOn(), false);

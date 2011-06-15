@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  vccuelist_test.h
+  qlcinputsource.h
 
   Copyright (C) Heikki Junnila
 
@@ -19,28 +19,37 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef VCCUELIST_TEST_H
-#define VCCUELIST_TEST_H
+#ifndef QLCINPUTSOURCE_H
+#define QLCINPUTSOURCE_H
 
-#include <QObject>
+#include <QtCore>
 
-class VCCueList_Test : public QObject
+class InputMap;
+
+class QLCInputSource
 {
-    Q_OBJECT
+public:
+    static quint32 invalidUniverse;
+    static quint32 invalidChannel;
 
-private slots:
-    void initTestCase();
-    void initial();
-    void appendClear();
-    void functionRemoved();
-    void functionChanged();
-    void keySequences();
-    void copy();
-    void modeChange();
-    void loadXML();
-    void saveXML();
-    void operation();
-    void input();
+public:
+    QLCInputSource();
+    QLCInputSource(quint32 universe, quint32 channel);
+
+    bool isValid() const;
+
+    QLCInputSource& operator=(const QLCInputSource& source);
+    bool operator==(const QLCInputSource& source) const;
+
+    void setUniverse(quint32 uni);
+    quint32 universe() const;
+
+    void setChannel(quint32 ch);
+    quint32 channel() const;
+
+private:
+    quint32 m_universe;
+    quint32 m_channel;
 };
 
 #endif

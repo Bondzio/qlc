@@ -29,6 +29,7 @@
 
 #include "qlcinputprofile.h"
 
+class QLCInputSource;
 class QLCInPlugin;
 class InputPatch;
 class InputMap;
@@ -275,16 +276,14 @@ public:
     /**
      * Get input source names for the given input universe and channel.
      *
-     * @param universe (IN) The input universe, whose name to get
-     * @param channel (IN) The channel in the given universe, whose name to get
+     * @param src (IN) The input source, whose universe & channel names to get
      * @param uniName (OUT) The name of the universe, if available
      * @param chName (OUT) The name of the channel, if available
      *
      * @return true if uniName & chName contain something, otherwise false
      */
-    bool inputSourceNames(quint32 universe, quint32 channel,
+    bool inputSourceNames(const QLCInputSource& src,
                           QString& uniName, QString& chName) const;
-
 
     /**
      * Get the default system input profile directory that contains installed

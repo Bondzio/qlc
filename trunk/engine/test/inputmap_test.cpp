@@ -24,6 +24,7 @@
 
 #include "inputpluginstub.h"
 #include "inputmap_test.h"
+#include "qlcinputsource.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
 
@@ -472,33 +473,32 @@ void InputMap_Test::inputSourceNames()
     im.loadProfiles(dir);
 
     QString uni, ch;
-    QVERIFY(im.inputSourceNames(0, 0, uni, ch) == false);
+    QVERIFY(im.inputSourceNames(QLCInputSource(0, 0), uni, ch) == false);
     QCOMPARE(uni, QString());
     QCOMPARE(ch, QString());
 
     QVERIFY(im.setPatch(0, stub->name(), 0, true, QString("Generic MIDI")) == true);
-    QVERIFY(im.inputSourceNames(0, 0, uni, ch) == true);
+    QVERIFY(im.inputSourceNames(QLCInputSource(0, 0), uni, ch) == true);
     QCOMPARE(uni, tr("%1: Generic MIDI").arg(1));
     QCOMPARE(ch, tr("%1: Bank select MSB").arg(1));
 
     uni.clear();
     ch.clear();
-    QVERIFY(im.inputSourceNames(0, 50000, uni, ch) == true);
+    QVERIFY(im.inputSourceNames(QLCInputSource(0, 50000), uni, ch) == true);
     QCOMPARE(uni, tr("%1: Generic MIDI").arg(1));
-    QCOMPARE(ch, tr("%1: Unknown").arg(50001));
+    QCOMPARE(ch, tr("%1: ?").arg(50001));
 
     QVERIFY(im.setPatch(0, stub->name(), 0, true, QString()) == true);
 
     uni.clear();
     ch.clear();
-    QVERIFY(im.inputSourceNames(0, 0, uni, ch) == true);
+    QVERIFY(im.inputSourceNames(QLCInputSource(0, 0), uni, ch) == true);
     QCOMPARE(uni, tr("%1: %2").arg(1).arg(stub->name()));
-    QCOMPARE(ch, tr("%1: Unknown").arg(1));
+    QCOMPARE(ch, tr("%1: ?").arg(1));
 
-    QVERIFY(im.inputSourceNames(0, InputMap::invalidChannel(), uni, ch) == false);
-    QVERIFY(im.inputSourceNames(InputMap::invalidUniverse(), 0, uni, ch) == false);
-    QVERIFY(im.inputSourceNames(InputMap::invalidUniverse(),
-                                InputMap::invalidChannel(), uni, ch) == false);
+    QVERIFY(im.inputSourceNames(QLCInputSource(0, InputMap::invalidChannel()), uni, ch) == false);
+    QVERIFY(im.inputSourceNames(QLCInputSource(InputMap::invalidUniverse(), 0), uni, ch) == false);
+    QVERIFY(im.inputSourceNames(QLCInputSource(), uni, ch) == false);
 }
 
 void InputMap_Test::profileDirectories()

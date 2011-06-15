@@ -39,6 +39,7 @@
 #include <QSize>
 #include <QPen>
 
+#include "qlcinputsource.h"
 #include "qlcmacros.h"
 #include "qlcfile.h"
 
@@ -360,13 +361,13 @@ void VCButton::setOn(bool on)
     m_on = on;
 
     /* Send input feedback */
-    if (m_inputUniverse != InputMap::invalidUniverse() &&
-        m_inputChannel != InputMap::invalidChannel())
+    QLCInputSource src(inputSource());
+    if (src.isValid() == true)
     {
         if (on == true)
-            m_inputMap->feedBack(m_inputUniverse, m_inputChannel, UCHAR_MAX);
+            m_inputMap->feedBack(src.universe(), src.channel(), UCHAR_MAX);
         else
-            m_inputMap->feedBack(m_inputUniverse, m_inputChannel, 0);
+            m_inputMap->feedBack(src.universe(), src.channel(), 0);
     }
 
     update();
@@ -410,7 +411,8 @@ void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
     if (mode() == Doc::Design)
         return;
 
-    if (universe == m_inputUniverse && channel == m_inputChannel)
+    QLCInputSource src(universe, channel);
+    if (src == inputSource())
     {
         if (m_action == Toggle && value > 0)
         {

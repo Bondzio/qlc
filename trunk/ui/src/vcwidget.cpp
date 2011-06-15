@@ -40,8 +40,9 @@
 #include <QMenu>
 #include <QList>
 #include <QtXml>
-
 #include <cmath>
+
+#include "qlcinputsource.h"
 #include "qlcfile.h"
 
 #include "virtualconsole.h"
@@ -81,9 +82,6 @@ VCWidget::VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* in
     setBackgroundRole(QPalette::Window);
     setAutoFillBackground(true);
     setEnabled(true);
-
-    m_inputUniverse = InputMap::invalidUniverse();
-    m_inputChannel = InputMap::invalidChannel();
 
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
@@ -130,8 +128,7 @@ bool VCWidget::copyFrom(const VCWidget* widget)
     setGeometry(widget->geometry());
     setCaption(widget->caption());
 
-    m_inputUniverse = widget->m_inputUniverse;
-    m_inputChannel = widget->m_inputChannel;
+    m_inputs = widget->m_inputs;
 
     return true;
 }
@@ -388,52 +385,31 @@ void VCWidget::editProperties()
  * External input
  *****************************************************************************/
 
-void VCWidget::setInputSource(quint32 uni, quint32 ch)
+void VCWidget::setInputSource(const QLCInputSource& source, quint8 id)
 {
-    if (uni == InputMap::invalidUniverse() || ch == InputMap::invalidChannel())
-    {
-        /* If either one of the new values is invalid we end up here
-           to disconnect from inputmap and setting both of the values
-           invalid. */
-        m_inputUniverse = InputMap::invalidUniverse();
-        m_inputChannel = InputMap::invalidChannel();
-
-        /* Even though we might not be connected, it is safe to do a
-           disconnect in any case. */
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
-                   this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
-    }
-    else if (m_inputUniverse == InputMap::invalidUniverse() ||
-             m_inputChannel == InputMap::invalidChannel())
-    {
-        /* Execution comes here only if both of the new values
-           are valid and the existing values are invalid, in which
-           case a new connection must be made. */
-        m_inputUniverse = uni;
-        m_inputChannel = ch;
-
+    // Connect when the first valid input source is set
+    if (m_inputs.isEmpty() == true && source.isValid() == true)
         connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
-    }
+
+    // Assign or clear
+    if (source.isValid() == true)
+        m_inputs[id] = source;
     else
-    {
-        /* Execution comes here only if the current uni & channel are
-         * valid and the new ones are valid as well. So we don't do a
-         * new connection, which would end up in duplicate values.
-         * Just update the new values and get it over with. */
-        m_inputUniverse = uni;
-        m_inputChannel = ch;
-    }
+        m_inputs.remove(id);
+
+    // Disconnect when there are no more input sources present
+    if (m_inputs.isEmpty() == true)
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 }
 
-quint32 VCWidget::inputUniverse() const
+QLCInputSource VCWidget::inputSource(quint8 id) const
 {
-    return m_inputUniverse;
-}
-
-quint32 VCWidget::inputChannel() const
-{
-    return m_inputChannel;
+    if (m_inputs.contains(id) == false)
+        return QLCInputSource();
+    else
+        return m_inputs[id];
 }
 
 void VCWidget::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
@@ -534,7 +510,7 @@ bool VCWidget::loadXMLInput(const QDomElement* root)
     quint32 ch = 0;
     if (loadXMLInput(*root, &uni, &ch) == true)
     {
-        setInputSource(uni, ch);
+        setInputSource(QLCInputSource(uni, ch));
         return true;
     }
     else
@@ -543,8 +519,7 @@ bool VCWidget::loadXMLInput(const QDomElement* root)
     }
 }
 
-bool VCWidget::loadXMLInput(const QDomElement& root,
-                            quint32* uni, quint32* ch) const
+bool VCWidget::loadXMLInput(const QDomElement& root, quint32* uni, quint32* ch) const
 {
     if (root.tagName() != KXMLQLCVCWidgetInput)
     {
@@ -625,24 +600,21 @@ bool VCWidget::saveXMLAppearance(QDomDocument* doc, QDomElement* frame_root)
 
 bool VCWidget::saveXMLInput(QDomDocument* doc, QDomElement* root)
 {
-    return saveXMLInput(doc, root, inputUniverse(), inputChannel());
+    return saveXMLInput(doc, root, inputSource());
 }
 
 bool VCWidget::saveXMLInput(QDomDocument* doc, QDomElement* root,
-                            quint32 uni, quint32 ch) const
+                            const QLCInputSource& src) const
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(root != NULL);
 
-    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
+    if (src.isValid() == true)
     {
-        QDomElement tag;
-        QDomText text;
-
-        tag = doc->createElement(KXMLQLCVCWidgetInput);
+        QDomElement tag = doc->createElement(KXMLQLCVCWidgetInput);
+        tag.setAttribute(KXMLQLCVCWidgetInputUniverse, QString("%1").arg(src.universe()));
+        tag.setAttribute(KXMLQLCVCWidgetInputChannel, QString("%1").arg(src.channel()));
         root->appendChild(tag);
-        tag.setAttribute(KXMLQLCVCWidgetInputUniverse, QString("%1").arg(uni));
-        tag.setAttribute(KXMLQLCVCWidgetInputChannel, QString("%1").arg(ch));
     }
 
     return true;

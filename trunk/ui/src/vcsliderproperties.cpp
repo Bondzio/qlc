@@ -151,8 +151,7 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc, OutputMap* ou
     /********************************************************************
      * External input
      ********************************************************************/
-    m_inputUniverse = m_slider->inputUniverse();
-    m_inputChannel = m_slider->inputChannel();
+    m_inputSource = m_slider->inputSource();
     updateInputSource();
 
     connect(m_autoDetectInputButton, SIGNAL(toggled(bool)),
@@ -300,11 +299,9 @@ void VCSliderProperties::slotAutoDetectInputToggled(bool checked)
     }
 }
 
-void VCSliderProperties::slotInputValueChanged(quint32 universe,
-                                               quint32 channel)
+void VCSliderProperties::slotInputValueChanged(quint32 universe, quint32 channel)
 {
-    m_inputUniverse = universe;
-    m_inputChannel = channel;
+    m_inputSource = QLCInputSource(universe, channel);
     updateInputSource();
 }
 
@@ -313,74 +310,22 @@ void VCSliderProperties::slotChooseInputClicked()
     SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
-        m_inputUniverse = sic.universe();
-        m_inputChannel = sic.channel();
-
+        m_inputSource = QLCInputSource(sic.universe(), sic.channel());
         updateInputSource();
     }
 }
 
 void VCSliderProperties::updateInputSource()
 {
-    QLCInputProfile* profile;
-    InputPatch* patch;
     QString uniName;
     QString chName;
 
-    if (m_inputUniverse == InputMap::invalidUniverse() ||
-            m_inputChannel == InputMap::invalidChannel())
+    if (m_inputMap->inputSourceNames(m_inputSource, uniName, chName) == false)
     {
-        /* Nothing selected for input universe and/or channel */
         uniName = KInputNone;
         chName = KInputNone;
     }
-    else
-    {
-        patch = m_inputMap->patch(m_inputUniverse);
-        if (patch == NULL || patch->plugin() == NULL)
-        {
-            /* There is no patch for the given universe */
-            uniName = KInputNone;
-            chName = KInputNone;
-        }
-        else
-        {
-            profile = patch->profile();
-            if (profile == NULL)
-            {
-                /* There is no profile. Display plugin
-                   name and channel number. Boring. */
-                uniName = patch->plugin()->name();
-                chName = tr("%1: Unknown")
-                         .arg(m_inputChannel + 1);
-            }
-            else
-            {
-                QLCInputChannel* ich;
-                QString name;
 
-                /* Display profile name for universe */
-                uniName = QString("%1: %2")
-                          .arg(m_inputUniverse + 1)
-                          .arg(profile->name());
-
-                /* User can input the channel number by hand,
-                   so put something rational to the channel
-                   name in those cases as well. */
-                ich = profile->channel(m_inputChannel);
-                if (ich != NULL)
-                    name = ich->name();
-                else
-                    name = tr("Unknown");
-
-                /* Display channel name */
-                chName = QString("%1: %2")
-                         .arg(m_inputChannel + 1).arg(name);
-            }
-        }
-    }
-
-    /* Display the gathered information */
     m_inputUniverseEdit->setText(uniName);
     m_inputChannelEdit->setText(chName);
 }
@@ -824,7 +769,7 @@ void VCSliderProperties::accept()
         m_slider->setInvertedAppearance(true);
 
     /* External input */
-    m_slider->setInputSource(m_inputUniverse, m_inputChannel);
+    m_slider->setInputSource(m_inputSource);
 
     /* Close dialog */
     QDialog::accept();

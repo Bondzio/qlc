@@ -39,6 +39,7 @@ HEADERS += qlccapability.h \
            qlci18n.h \
            qlcinputchannel.h \
            qlcinputprofile.h \
+           qlcinputsource.h \
            qlcphysical.h \
            qlccapability.h
 
@@ -75,6 +76,7 @@ SOURCES += qlccapability.cpp \
            qlci18n.cpp \
            qlcinputchannel.cpp \
            qlcinputprofile.cpp \
+           qlcinputsource.cpp \
            qlcphysical.cpp
 
 # Engine

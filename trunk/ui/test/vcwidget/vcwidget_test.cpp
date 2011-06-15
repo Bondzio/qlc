@@ -30,6 +30,7 @@
 #undef protected
 
 #include "qlcfixturedefcache.h"
+#include "qlcinputsource.h"
 #include "vcwidget_test.h"
 #include "mastertimer.h"
 #include "stubwidget.h"
@@ -58,10 +59,11 @@ void VCWidget_Test::initial()
     QCOMPARE(stub.hasCustomForegroundColor(), false);
     QCOMPARE(stub.hasCustomFont(), false);
     QCOMPARE(stub.frameStyle(), 0);
-    QCOMPARE(stub.inputUniverse(), InputMap::invalidUniverse());
-    QCOMPARE(stub.inputChannel(), InputMap::invalidChannel());
     QCOMPARE(stub.allowChildren(), false);
     QCOMPARE(stub.customMenu(0), (QMenu*) 0);
+
+    for (quint8 i = 0; i < 255; i++)
+        QVERIFY(stub.inputSource(i).isValid() == false);
 }
 
 void VCWidget_Test::bgImage()
@@ -334,22 +336,39 @@ void VCWidget_Test::inputSource()
     OutputMap om(this, 4);
     InputMap im(this, 4);
     MasterTimer mt(this, &om);
+    QLCInputSource src;
     QWidget w;
 
     StubWidget stub(&w, &doc, &om, &im, &mt);
-    stub.setInputSource(1, 2);
-    QCOMPARE(stub.inputUniverse(), quint32(1));
-    QCOMPARE(stub.inputChannel(), quint32(2));
+    stub.setInputSource(QLCInputSource(1, 2));
+    src = stub.inputSource();
+    QVERIFY(src.isValid() == true);
+    QCOMPARE(src.universe(), quint32(1));
+    QCOMPARE(src.channel(), quint32(2));
 
-    stub.setInputSource(4, 5);
-    QCOMPARE(stub.inputUniverse(), quint32(4));
-    QCOMPARE(stub.inputChannel(), quint32(5));
+    src = stub.inputSource(0);
+    QVERIFY(src.isValid() == true);
+    QCOMPARE(src.universe(), quint32(1));
+    QCOMPARE(src.channel(), quint32(2));
 
-    stub.setInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
-    QCOMPARE(stub.inputUniverse(), InputMap::invalidUniverse());
-    QCOMPARE(stub.inputChannel(), InputMap::invalidChannel());
+    src = stub.inputSource(1);
+    QVERIFY(src.isValid() == false);
+    src = stub.inputSource(2);
+    QVERIFY(src.isValid() == false);
+    src = stub.inputSource(42);
+    QVERIFY(src.isValid() == false);
 
-    // Just for coverage - this method call does nothing
+    stub.setInputSource(QLCInputSource(4, 5), 0);
+    src = stub.inputSource();
+    QVERIFY(src.isValid() == true);
+    QCOMPARE(src.universe(), quint32(4));
+    QCOMPARE(src.channel(), quint32(5));
+
+    stub.setInputSource(QLCInputSource());
+    src = stub.inputSource();
+    QVERIFY(src.isValid() == false);
+
+    // Just for coverage - the implementation does nothing
     stub.slotInputValueChanged(0, 1, 2);
 }
 
@@ -372,7 +391,9 @@ void VCWidget_Test::copy()
     stub.setFrameStyle(KVCFrameStyleRaised);
     stub.move(QPoint(10, 20));
     stub.resize(QSize(20, 30));
-    stub.setInputSource(0, 12);
+    stub.setInputSource(QLCInputSource(0, 12));
+    stub.setInputSource(QLCInputSource(1, 2), 15);
+    stub.setInputSource(QLCInputSource(3, 4), 1);
 
     StubWidget copy(&w, &doc, &om, &im, &mt);
     copy.copyFrom(&stub);
@@ -385,8 +406,10 @@ void VCWidget_Test::copy()
     QCOMPARE(copy.frameStyle(), (int) KVCFrameStyleRaised);
     QCOMPARE(copy.pos(), QPoint(10, 20));
     QCOMPARE(copy.size(), QSize(20, 30));
-    QCOMPARE(copy.inputUniverse(), quint32(0));
-    QCOMPARE(copy.inputChannel(), quint32(12));
+    QCOMPARE(copy.inputSource(), QLCInputSource(0, 12));
+    QCOMPARE(copy.inputSource(15), QLCInputSource(1, 2));
+    QCOMPARE(copy.inputSource(1), QLCInputSource(3, 4));
+    QVERIFY(copy.inputSource(2).isValid() == false);
 }
 
 void VCWidget_Test::keyPress()
@@ -430,13 +453,11 @@ void VCWidget_Test::loadInput()
 
     StubWidget stub(&w, &doc, &om, &im, &mt);
     QCOMPARE(stub.loadXMLInput(&root), true);
-    QCOMPARE(stub.inputUniverse(), quint32(12));
-    QCOMPARE(stub.inputChannel(), quint32(34));
+    QCOMPARE(stub.inputSource(), QLCInputSource(12, 34));
 
     root.setTagName("Output");
     QCOMPARE(stub.loadXMLInput(&root), false);
-    QCOMPARE(stub.inputUniverse(), quint32(12));
-    QCOMPARE(stub.inputChannel(), quint32(34));
+    QCOMPARE(stub.inputSource(), QLCInputSource(12, 34));
 }
 
 void VCWidget_Test::loadAppearance()
@@ -528,12 +549,18 @@ void VCWidget_Test::saveInput()
     QVERIFY(stub.saveXMLInput(&xmldoc, &root) == true);
     QCOMPARE(root.childNodes().count(), 0);
 
-    stub.setInputSource(34, 56);
+    stub.setInputSource(QLCInputSource(34, 56));
     QVERIFY(stub.saveXMLInput(&xmldoc, &root) == true);
     QCOMPARE(root.childNodes().count(), 1);
     QCOMPARE(root.firstChild().toElement().tagName(), QString("Input"));
     QCOMPARE(root.firstChild().toElement().attribute("Universe"), QString("34"));
     QCOMPARE(root.firstChild().toElement().attribute("Channel"), QString("56"));
+
+    root.clear();
+
+    stub.setInputSource(QLCInputSource(34, 56), 1);
+    QVERIFY(stub.saveXMLInput(&xmldoc, &root) == true);
+    QCOMPARE(root.childNodes().count(), 0);
 }
 
 void VCWidget_Test::saveAppearance()

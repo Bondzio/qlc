@@ -27,6 +27,7 @@
 
 #include "app.h"
 
+class QLCInputSource;
 class QDomDocument;
 class QDomElement;
 class QPaintEvent;
@@ -240,22 +241,37 @@ public:
      * External input
      *********************************************************************/
 public:
-    /** Set external input universe & channel number to listen to */
-    void setInputSource(quint32 uni, quint32 ch);
+    /**
+     * Set external input $source to listen to. If a widget supports more
+     * than one input source, specify an $id for each input source. Setting
+     * multiple sources under the same id overwrites the previous ones.
+     *
+     * @param source The input source to set
+     * @param id The id of the source (default: 0)
+     */
+    void setInputSource(const QLCInputSource& source, quint8 id = 0);
 
-    /** Get the assigned external input universe */
-    quint32 inputUniverse() const;
-
-    /** Get the assigned external input channel within inputUniverse() */
-    quint32 inputChannel() const;
+    /**
+     * Get an assigned external input source. Without parameters the
+     * method returns the first input source (if any).
+     *
+     * @param id The id of the source to get
+     */
+    QLCInputSource inputSource(quint8 id = 0) const;
 
 protected slots:
-    /** Slot that receives external input data */
+    /**
+     * Slot that receives external input data. Overwrite in subclasses to
+     * get input data to your widget.
+     *
+     * @param universe Input universe
+     * @param channel Input channel
+     * @param value New value for universe & value
+     */
     virtual void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
 protected:
-    quint32 m_inputUniverse;
-    quint32 m_inputChannel;
+    QHash <quint8,QLCInputSource> m_inputs;
 
     /*********************************************************************
      * Key sequence handler
@@ -298,7 +314,7 @@ protected:
     bool saveXMLInput(QDomDocument* doc, QDomElement* root);
     /** Save input source from $uni and $ch to $root */
     bool saveXMLInput(QDomDocument* doc, QDomElement* root,
-                      quint32 uni, quint32 ch) const;
+                      const QLCInputSource& src) const;
 
     /**
      * Write this widget's geometry and visibility to an XML document.

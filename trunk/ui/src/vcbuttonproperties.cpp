@@ -77,8 +77,7 @@ VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* ou
     m_keyEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
 
     /* External input */
-    m_inputUniverse = m_button->inputUniverse();
-    m_inputChannel = m_button->inputChannel();
+    m_inputSource = m_button->inputSource();
     updateInputSource();
 
     /* Press action */
@@ -173,11 +172,9 @@ void VCButtonProperties::slotAutoDetectInputToggled(bool checked)
     }
 }
 
-void VCButtonProperties::slotInputValueChanged(quint32 universe,
-                                               quint32 channel)
+void VCButtonProperties::slotInputValueChanged(quint32 universe, quint32 channel)
 {
-    m_inputUniverse = universe;
-    m_inputChannel = channel;
+    m_inputSource = QLCInputSource(universe, channel);
     updateInputSource();
 }
 
@@ -186,73 +183,22 @@ void VCButtonProperties::slotChooseInputClicked()
     SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
-        m_inputUniverse = sic.universe();
-        m_inputChannel = sic.channel();
-
+        m_inputSource = QLCInputSource(sic.universe(), sic.channel());
         updateInputSource();
     }
 }
 
 void VCButtonProperties::updateInputSource()
 {
-    QLCInputProfile* profile;
-    InputPatch* patch;
     QString uniName;
     QString chName;
 
-    if (m_inputUniverse == InputMap::invalidUniverse() ||
-            m_inputChannel == InputMap::invalidChannel())
+    if (m_inputMap->inputSourceNames(m_inputSource, uniName, chName) == false)
     {
-        /* Nothing selected for input universe and/or channel */
         uniName = KInputNone;
         chName = KInputNone;
     }
-    else
-    {
-        patch = m_inputMap->patch(m_inputUniverse);
-        if (patch == NULL || patch->plugin() == NULL)
-        {
-            /* There is no patch for the given universe */
-            uniName = KInputNone;
-            chName = KInputNone;
-        }
-        else
-        {
-            profile = patch->profile();
-            if (profile == NULL)
-            {
-                /* There is no profile. Display plugin
-                   name and channel number. Boring. */
-                uniName = patch->plugin()->name();
-                chName = tr("%1: Unknown").arg(m_inputChannel);
-            }
-            else
-            {
-                QLCInputChannel* ich;
-                QString name;
 
-                /* Display profile name for universe */
-                uniName = QString("%1: %2")
-                          .arg(m_inputUniverse + 1)
-                          .arg(profile->name());
-
-                /* User can input the channel number by hand,
-                   so put something rational to the channel
-                   name in those cases as well. */
-                ich = profile->channel(m_inputChannel);
-                if (ich != NULL)
-                    name = ich->name();
-                else
-                    name = tr("Unknown");
-
-                /* Display channel name */
-                chName = QString("%1: %2")
-                         .arg(m_inputChannel + 1).arg(name);
-            }
-        }
-    }
-
-    /* Display the gathered information */
     m_inputUniverseEdit->setText(uniName);
     m_inputChannelEdit->setText(chName);
 }
@@ -272,7 +218,7 @@ void VCButtonProperties::accept()
     m_button->setCaption(m_nameEdit->text());
     m_button->setFunction(m_function);
     m_button->setKeySequence(m_keySequence);
-    m_button->setInputSource(m_inputUniverse, m_inputChannel);
+    m_button->setInputSource(m_inputSource);
     m_button->setAdjustIntensity(m_intensityGroup->isChecked());
     m_button->setIntensityAdjustment(double(m_intensitySlider->value()) / double(100));
 

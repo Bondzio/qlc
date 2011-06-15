@@ -25,8 +25,10 @@
 #include <QDialog>
 
 #include "ui_vcxypadproperties.h"
+#include "qlcinputsource.h"
 #include "vcxypadfixture.h"
 
+class InputMap;
 class VCXYPad;
 class Doc;
 
@@ -39,13 +41,18 @@ class VCXYPadProperties : public QDialog, public Ui_VCXYPadProperties
      * Initialization
      ********************************************************************/
 public:
-    VCXYPadProperties(VCXYPad* xypad, Doc* doc);
+    VCXYPadProperties(VCXYPad* xypad, Doc* doc, InputMap* inputMap);
     ~VCXYPadProperties();
 
+private:
+    VCXYPad* m_xypad;
+    Doc* m_doc;
+    InputMap* m_inputMap;
+
     /********************************************************************
-     * Tree
+     * Fixtures page
      ********************************************************************/
-protected:
+private:
     void fillTree();
     QList <quint32> selectedFixtureIDs() const;
     QList <VCXYPadFixture> selectedFixtures() const;
@@ -54,17 +61,37 @@ protected:
     void updateFixtureItem(QTreeWidgetItem* item, const VCXYPadFixture& fxi);
     void removeFixtureItem(quint32 fxi_id);
 
-protected slots:
+private slots:
     void slotAddClicked();
     void slotRemoveClicked();
     void slotEditClicked();
     void slotSelectionChanged(QTreeWidgetItem* item);
 
-    void accept();
+    /********************************************************************
+     * Fixtures page
+     ********************************************************************/
+private slots:
+    void slotPanAutoDetectToggled(bool toggled);
+    void slotPanChooseClicked();
+    void slotPanInputValueChanged(quint32 uni, quint32 ch);
+
+    void slotTiltAutoDetectToggled(bool toggled);
+    void slotTiltChooseClicked();
+    void slotTiltInputValueChanged(quint32 uni, quint32 ch);
 
 private:
-    VCXYPad* m_xypad;
-    Doc* m_doc;
+    void updatePanInputSource();
+    void updateTiltInputSource();
+
+private:
+    QLCInputSource m_panInputSource;
+    QLCInputSource m_tiltInputSource;
+
+    /********************************************************************
+     * OK/Cancel
+     ********************************************************************/
+public slots:
+    void accept();
 };
 
 #endif

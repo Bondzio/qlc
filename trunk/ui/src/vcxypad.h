@@ -45,14 +45,20 @@ class QSlider;
 class Doc;
 
 #define KXMLQLCVCXYPad "XYPad"
+#define KXMLQLCVCXYPadPan "Pan"
+#define KXMLQLCVCXYPadTilt "Tilt"
 #define KXMLQLCVCXYPadPosition "Position"
-#define KXMLQLCVCXYPadPositionX "X"
-#define KXMLQLCVCXYPadPositionY "Y"
+#define KXMLQLCVCXYPadPositionX "X" // Legacy
+#define KXMLQLCVCXYPadPositionY "Y" // Legacy
 
 class VCXYPad : public VCWidget, public DMXSource
 {
     Q_OBJECT
     Q_DISABLE_COPY(VCXYPad)
+
+public:
+    static const quint8 panInputSourceId;
+    static const quint8 tiltInputSourceId;
 
     /*************************************************************************
      * Initialization

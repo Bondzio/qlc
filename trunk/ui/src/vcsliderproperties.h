@@ -25,6 +25,7 @@
 #include <QDialog>
 
 #include "ui_vcsliderproperties.h"
+#include "qlcinputsource.h"
 
 class QTreeWidgetItem;
 class QLCCapability;
@@ -68,8 +69,7 @@ protected:
     void updateInputSource();
 
 protected:
-    quint32 m_inputUniverse;
-    quint32 m_inputChannel;
+    QLCInputSource m_inputSource;
     int m_sliderMode;
 
     /*********************************************************************

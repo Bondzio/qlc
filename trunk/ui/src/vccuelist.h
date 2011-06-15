@@ -60,6 +60,10 @@ class VCCueList : public VCWidget, public DMXSource
 
     friend class VCCueListProperties;
 
+public:
+    static const quint8 nextInputSourceId;
+    static const quint8 previousInputSourceId;
+
     /*************************************************************************
      * Initialization
      *************************************************************************/
@@ -152,36 +156,11 @@ protected:
     /*************************************************************************
      * External Input
      *************************************************************************/
-public:
-    /** Set input universe & channel for skipping to the next cue */
-    void setNextInputSource(quint32 universe, quint32 channel);
-
-    /** Input universe for skipping to the next cue */
-    quint32 nextInputUniverse() const;
-
-    /** Input channel for skipping to the next cue */
-    quint32 nextInputChannel() const;
-
-    /** Set input universe & channel for skipping to the previous cue */
-    void setPreviousInputSource(quint32 universe, quint32 channel);
-
-    /** Input universe for skipping to the previous cue */
-    quint32 previousInputUniverse() const;
-
-    /** Input channel for skipping to the previous cue */
-    quint32 previousInputChannel() const;
-
 protected slots:
-    void slotNextInputValueChanged(quint32 universe, quint32 channel, uchar value);
-    void slotPreviousInputValueChanged(quint32 universe, quint32 channel, uchar value);
+    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
 private:
-    quint32 m_nextInputUniverse;
-    quint32 m_nextInputChannel;
     quint32 m_nextLatestValue;
-
-    quint32 m_previousInputUniverse;
-    quint32 m_previousInputChannel;
     quint32 m_previousLatestValue;
 
     /*************************************************************************
@@ -209,4 +188,3 @@ public:
 };
 
 #endif
-

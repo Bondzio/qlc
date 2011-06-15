@@ -125,8 +125,7 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
     m_nextKeyEdit->setText(m_nextKeySequence.toString(QKeySequence::NativeText));
 
     /* External input */
-    m_nextInputUniverse = cueList->nextInputUniverse();
-    m_nextInputChannel = cueList->nextInputChannel();
+    m_nextInputSource = cueList->inputSource(VCCueList::nextInputSourceId);
     updateNextInputSource();
 
     /************************************************************************
@@ -148,8 +147,7 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
     m_previousKeyEdit->setText(m_previousKeySequence.toString(QKeySequence::NativeText));
 
     /* External input */
-    m_previousInputUniverse = cueList->previousInputUniverse();
-    m_previousInputChannel = cueList->previousInputChannel();
+    m_previousInputSource = cueList->inputSource(VCCueList::previousInputSourceId);
     updatePreviousInputSource();
 }
 
@@ -176,8 +174,8 @@ void VCCueListProperties::accept()
     m_cueList->setPreviousKeySequence(m_previousKeySequence);
 
     /* Input sources */
-    m_cueList->setNextInputSource(m_nextInputUniverse, m_nextInputChannel);
-    m_cueList->setPreviousInputSource(m_previousInputUniverse, m_previousInputChannel);
+    m_cueList->setInputSource(m_nextInputSource, VCCueList::nextInputSourceId);
+    m_cueList->setInputSource(m_previousInputSource, VCCueList::previousInputSourceId);
 
     QDialog::accept();
 }
@@ -397,8 +395,7 @@ void VCCueListProperties::slotNextChooseInputClicked()
     SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
-        m_nextInputUniverse = sic.universe();
-        m_nextInputChannel = sic.channel();
+        m_nextInputSource = QLCInputSource(sic.universe(), sic.channel());
         updateNextInputSource();
     }
 }
@@ -419,8 +416,7 @@ void VCCueListProperties::slotNextAutoDetectInputToggled(bool checked)
 
 void VCCueListProperties::slotNextInputValueChanged(quint32 uni, quint32 ch)
 {
-    m_nextInputUniverse = uni;
-    m_nextInputChannel = ch;
+    m_nextInputSource = QLCInputSource(uni, ch);
     updateNextInputSource();
 }
 
@@ -429,8 +425,7 @@ void VCCueListProperties::updateNextInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_nextInputUniverse, m_nextInputChannel,
-                                     uniName, chName) == true)
+    if (m_inputMap->inputSourceNames(m_nextInputSource, uniName, chName) == true)
     {
         /* Display the gathered information */
         m_nextInputUniverseEdit->setText(uniName);
@@ -468,8 +463,7 @@ void VCCueListProperties::slotPreviousChooseInputClicked()
     SelectInputChannel sic(this, m_inputMap);
     if (sic.exec() == QDialog::Accepted)
     {
-        m_previousInputUniverse = sic.universe();
-        m_previousInputChannel = sic.channel();
+        m_previousInputSource = QLCInputSource(sic.universe(), sic.channel());
         updatePreviousInputSource();
     }
 }
@@ -493,8 +487,7 @@ void VCCueListProperties::slotPreviousAutoDetectInputToggled(bool checked)
 
 void VCCueListProperties::slotPreviousInputValueChanged(quint32 uni, quint32 ch)
 {
-    m_previousInputUniverse = uni;
-    m_previousInputChannel = ch;
+    m_previousInputSource = QLCInputSource(uni, ch);
     updatePreviousInputSource();
 }
 
@@ -503,8 +496,7 @@ void VCCueListProperties::updatePreviousInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_previousInputUniverse, m_previousInputChannel,
-                                     uniName, chName) == true)
+    if (m_inputMap->inputSourceNames(m_previousInputSource, uniName, chName) == true)
     {
         /* Display the gathered information */
         m_previousInputUniverseEdit->setText(uniName);

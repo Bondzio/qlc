@@ -26,6 +26,7 @@
 #include <QDialog>
 
 #include "ui_vcbuttonproperties.h"
+#include "qlcinputsource.h"
 #include "vcbutton.h"
 #include "function.h"
 
@@ -70,8 +71,7 @@ protected:
 
     QKeySequence m_keySequence;
     quint32 m_function;
-    quint32 m_inputUniverse;
-    quint32 m_inputChannel;
+    QLCInputSource m_inputSource;
 };
 
 #endif

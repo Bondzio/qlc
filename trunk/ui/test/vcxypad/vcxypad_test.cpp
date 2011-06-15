@@ -34,6 +34,7 @@
 
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
+#include "qlcinputsource.h"
 #include "qlcfixturedef.h"
 #include "universearray.h"
 #include "vcxypad_test.h"
@@ -271,6 +272,8 @@ void VCXYPad_Test::saveXML()
     pad.resize(QSize(150, 200));
     pad.move(QPoint(10, 20));
     pad.m_area->setPosition(QPoint(23, 45));
+    pad.setInputSource(QLCInputSource(0, 1), VCXYPad::panInputSourceId);
+    pad.setInputSource(QLCInputSource(2, 3), VCXYPad::tiltInputSourceId);
     QCOMPARE(pad.m_area->position(), QPoint(23, 45));
     QCOMPARE(pad.m_area->position(), QPoint(23, 45));
 
@@ -286,7 +289,7 @@ void VCXYPad_Test::saveXML()
     QDomElement root = xmldoc.createElement("Root");
     xmldoc.appendChild(root);
 
-    int fixture = 0, position = 0, wstate = 0, appearance = 0;
+    int fixture = 0, position = 0, wstate = 0, appearance = 0, pan = 0, tilt = 0;
 
     QVERIFY(pad.saveXML(&xmldoc, &root) == true);
     QDomNode node = root.firstChild();
@@ -306,8 +309,21 @@ void VCXYPad_Test::saveXML()
         else if (tag.tagName() == "Position")
         {
             position++;
-            QCOMPARE(tag.attribute("X"), QString("23"));
-            QCOMPARE(tag.attribute("Y"), QString("45"));
+            QFAIL("Legacy tag found in saved XML!");
+        }
+        else if (tag.tagName() == "Pan")
+        {
+            pan++;
+            QCOMPARE(tag.attribute("Position"), QString("23"));
+            QCOMPARE(tag.firstChild().toElement().attribute("Universe"), QString("0"));
+            QCOMPARE(tag.firstChild().toElement().attribute("Channel"), QString("1"));
+        }
+        else if (tag.tagName() == "Tilt")
+        {
+            tilt++;
+            QCOMPARE(tag.attribute("Position"), QString("45"));
+            QCOMPARE(tag.firstChild().toElement().attribute("Universe"), QString("2"));
+            QCOMPARE(tag.firstChild().toElement().attribute("Channel"), QString("3"));
         }
         else if (tag.tagName() == "WindowState")
         {
@@ -326,7 +342,9 @@ void VCXYPad_Test::saveXML()
     }
 
     QCOMPARE(fixture, 2);
-    QCOMPARE(position, 1);
+    QCOMPARE(position, 0);
+    QCOMPARE(pan, 1);
+    QCOMPARE(tilt, 1);
     QCOMPARE(wstate, 1);
     QCOMPARE(appearance, 1);
 }

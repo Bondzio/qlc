@@ -41,8 +41,10 @@
 #define KColumnNumber 0
 #define KColumnName   1
 #define KColumnID     2
-
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
+
+const quint8 VCCueList::nextInputSourceId = 0;
+const quint8 VCCueList::previousInputSourceId = 1;
 
 VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
@@ -81,8 +83,6 @@ VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* 
     connect(m_doc, SIGNAL(functionChanged(quint32)),
             this, SLOT(slotFunctionChanged(quint32)));
 
-    setNextInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
-    setPreviousInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
     m_nextLatestValue = 0;
     m_previousLatestValue = 0;
 }
@@ -127,12 +127,6 @@ bool VCCueList::copyFrom(VCWidget* widget)
     /* Key sequence */
     setNextKeySequence(cuelist->nextKeySequence());
     setPreviousKeySequence(cuelist->previousKeySequence());
-
-    /* Input source */
-    setNextInputSource(cuelist->nextInputUniverse(),
-                       cuelist->nextInputChannel());
-    setPreviousInputSource(cuelist->previousInputUniverse(),
-                           cuelist->previousInputChannel());
 
     /* Common stuff */
     return VCWidget::copyFrom(widget);
@@ -306,51 +300,11 @@ void VCCueList::slotKeyPressed(const QKeySequence& keySequence)
  * External Input
  *****************************************************************************/
 
-void VCCueList::setNextInputSource(quint32 uni, quint32 ch)
+void VCCueList::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
-    disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
-               this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
-    m_nextInputUniverse = uni;
-    m_nextInputChannel = ch;
-    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
-                this, SLOT(slotNextInputValueChanged(quint32, quint32, uchar)));
-}
+    QLCInputSource src(universe, channel);
 
-quint32 VCCueList::nextInputUniverse() const
-{
-    return m_nextInputUniverse;
-}
-
-quint32 VCCueList::nextInputChannel() const
-{
-    return m_nextInputChannel;
-}
-
-void VCCueList::setPreviousInputSource(quint32 uni, quint32 ch)
-{
-    disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
-               this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
-    m_previousInputUniverse = uni;
-    m_previousInputChannel = ch;
-    if (uni != InputMap::invalidUniverse() && ch != InputMap::invalidChannel())
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
-                this, SLOT(slotPreviousInputValueChanged(quint32, quint32, uchar)));
-}
-
-quint32 VCCueList::previousInputUniverse() const
-{
-    return m_previousInputUniverse;
-}
-
-quint32 VCCueList::previousInputChannel() const
-{
-    return m_previousInputChannel;
-}
-
-void VCCueList::slotNextInputValueChanged(quint32 universe, quint32 channel, uchar value)
-{
-    if (universe == m_nextInputUniverse && channel == m_nextInputChannel)
+    if (src == inputSource(nextInputSourceId))
     {
         // Use hysteresis for values, in case the cue list is being controlled
         // by a slider. The value has to go to zero before the next non-zero
@@ -369,11 +323,7 @@ void VCCueList::slotNextInputValueChanged(quint32 universe, quint32 channel, uch
         if (value > HYSTERESIS)
             m_nextLatestValue = value;
     }
-}
-
-void VCCueList::slotPreviousInputValueChanged(quint32 universe, quint32 channel, uchar value)
-{
-    if (universe == m_previousInputUniverse && channel == m_previousInputChannel)
+    else if (src == inputSource(previousInputSourceId))
     {
         // Use hysteresis for values, in case the cue list is being controlled
         // by a slider. The value has to go to zero before the next non-zero
@@ -485,7 +435,7 @@ bool VCCueList::loadXML(const QDomElement* root)
                     quint32 uni = 0;
                     quint32 ch = 0;
                     if (loadXMLInput(subTag, &uni, &ch) == true)
-                        setNextInputSource(uni, ch);
+                        setInputSource(QLCInputSource(uni, ch), nextInputSourceId);
                 }
                 else if (subTag.tagName() == KXMLQLCVCCueListKey)
                 {
@@ -510,7 +460,7 @@ bool VCCueList::loadXML(const QDomElement* root)
                     quint32 uni = 0;
                     quint32 ch = 0;
                     if (loadXMLInput(subTag, &uni, &ch) == true)
-                        setPreviousInputSource(uni, ch);
+                        setInputSource(QLCInputSource(uni, ch), previousInputSourceId);
                 }
                 else if (subTag.tagName() == KXMLQLCVCCueListKey)
                 {
@@ -581,7 +531,7 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     tag.appendChild(subtag);
     text = doc->createTextNode(m_nextKeySequence.toString());
     subtag.appendChild(text);
-    saveXMLInput(doc, &tag, nextInputUniverse(), nextInputChannel());
+    saveXMLInput(doc, &tag, inputSource(nextInputSourceId));
 
     /* Previous cue */
     tag = doc->createElement(KXMLQLCVCCueListPrevious);
@@ -590,7 +540,7 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     tag.appendChild(subtag);
     text = doc->createTextNode(m_previousKeySequence.toString());
     subtag.appendChild(text);
-    saveXMLInput(doc, &tag, previousInputUniverse(), previousInputChannel());
+    saveXMLInput(doc, &tag, inputSource(previousInputSourceId));
 
     /* Window state */
     saveXMLWindowState(doc, &root);

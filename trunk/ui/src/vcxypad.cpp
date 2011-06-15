@@ -46,6 +46,9 @@
 #include "fixture.h"
 #include "doc.h"
 
+const quint8 VCXYPad::panInputSourceId = 0;
+const quint8 VCXYPad::tiltInputSourceId = 1;
+
 /*****************************************************************************
  * VCXYPad Initialization
  *****************************************************************************/
@@ -160,7 +163,7 @@ void VCXYPad::setCaption(const QString& text)
 
 void VCXYPad::editProperties()
 {
-    VCXYPadProperties prop(this, m_doc);
+    VCXYPadProperties prop(this, m_doc, m_inputMap);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }
@@ -342,7 +345,21 @@ bool VCXYPad::loadXML(const QDomElement* root)
         {
             loadXMLAppearance(&tag);
         }
-        else if (tag.tagName() == KXMLQLCVCXYPadPosition)
+        else if (tag.tagName() == KXMLQLCVCXYPadPan)
+        {
+            quint32 uni = 0, ch = 0;
+            xpos = tag.attribute(KXMLQLCVCXYPadPosition).toInt();
+            if (loadXMLInput(tag.firstChild().toElement(), &uni, &ch) == true)
+                setInputSource(QLCInputSource(uni, ch), panInputSourceId);
+        }
+        else if (tag.tagName() == KXMLQLCVCXYPadTilt)
+        {
+            quint32 uni = 0, ch = 0;
+            ypos = tag.attribute(KXMLQLCVCXYPadPosition).toInt();
+            if (loadXMLInput(tag.firstChild().toElement(), &uni, &ch) == true)
+                setInputSource(QLCInputSource(uni, ch), tiltInputSourceId);
+        }
+        else if (tag.tagName() == KXMLQLCVCXYPadPosition) // Legacy
         {
             str = tag.attribute(KXMLQLCVCXYPadPositionX);
             xpos = str.toInt();
@@ -392,11 +409,19 @@ bool VCXYPad::saveXML(QDomDocument* doc, QDomElement* vc_root)
     foreach (VCXYPadFixture fixture, m_fixtures)
         fixture.saveXML(doc, &root);
 
-    /* Current XY Position */
+    /* Current XY position */
     QPoint pt(m_area->position());
-    tag = doc->createElement(KXMLQLCVCXYPadPosition);
-    tag.setAttribute(KXMLQLCVCXYPadPositionX, QString::number(pt.x()));
-    tag.setAttribute(KXMLQLCVCXYPadPositionY, QString::number(pt.y()));
+
+    /* Pan */
+    tag = doc->createElement(KXMLQLCVCXYPadPan);
+    tag.setAttribute(KXMLQLCVCXYPadPosition, QString::number(pt.x()));
+    saveXMLInput(doc, &tag, inputSource(panInputSourceId));
+    root.appendChild(tag);
+
+    /* Tilt */
+    tag = doc->createElement(KXMLQLCVCXYPadTilt);
+    tag.setAttribute(KXMLQLCVCXYPadPosition, QString::number(pt.y()));
+    saveXMLInput(doc, &tag, inputSource(tiltInputSourceId));
     root.appendChild(tag);
 
     /* Window state */

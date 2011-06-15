@@ -35,6 +35,7 @@
 #undef protected
 
 #include "qlcfixturedefcache.h"
+#include "qlcinputsource.h"
 #include "vccuelist_test.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -75,10 +76,8 @@ void VCCueList_Test::initial()
     QCOMPARE(cl.m_nextKeySequence, QKeySequence());
     QCOMPARE(cl.m_previousKeySequence, QKeySequence());
 
-    QCOMPARE(cl.nextInputUniverse(), InputMap::invalidUniverse());
-    QCOMPARE(cl.nextInputChannel(), InputMap::invalidChannel());
-    QCOMPARE(cl.previousInputUniverse(), InputMap::invalidUniverse());
-    QCOMPARE(cl.previousInputChannel(), InputMap::invalidChannel());
+    QVERIFY(cl.inputSource(VCCueList::nextInputSourceId).isValid() == false);
+    QVERIFY(cl.inputSource(VCCueList::previousInputSourceId).isValid() == false);
 }
 
 void VCCueList_Test::appendClear()
@@ -258,25 +257,6 @@ void VCCueList_Test::keySequences()
     QCOMPARE(cl.previousKeySequence(), QKeySequence(QKeySequence::Cut));
 }
 
-void VCCueList_Test::inputSources()
-{
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
-    QWidget w;
-
-    VCCueList cl(&w, &doc, &om, &im, &mt);
-    cl.setNextInputSource(0, 1);
-    QCOMPARE(cl.nextInputUniverse(), quint32(0));
-    QCOMPARE(cl.nextInputChannel(), quint32(1));
-
-    cl.setPreviousInputSource(2, 3);
-    QCOMPARE(cl.previousInputUniverse(), quint32(2));
-    QCOMPARE(cl.previousInputChannel(), quint32(3));
-}
-
 void VCCueList_Test::copy()
 {
     QLCFixtureDefCache fdc;
@@ -302,8 +282,6 @@ void VCCueList_Test::copy()
 
     VCCueList cl(&parent, &doc, &om, &im, &mt);
     cl.setCaption("Wheeee");
-    cl.setNextInputSource(0, 1);
-    cl.setPreviousInputSource(2, 3);
     cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
     cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
     cl.append(s1->id());
@@ -316,10 +294,6 @@ void VCCueList_Test::copy()
     VCCueList* cl2 = qobject_cast<VCCueList*> (cl.createCopy(&parent));
     QVERIFY(cl2 != NULL);
     QCOMPARE(cl2->caption(), QString("Wheeee"));
-    QCOMPARE(cl2->nextInputUniverse(), quint32(0));
-    QCOMPARE(cl2->nextInputChannel(), quint32(1));
-    QCOMPARE(cl2->previousInputUniverse(), quint32(2));
-    QCOMPARE(cl2->previousInputChannel(), quint32(3));
     QCOMPARE(cl2->nextKeySequence(), QKeySequence(QKeySequence::Copy));
     QCOMPARE(cl2->previousKeySequence(), QKeySequence(QKeySequence::Cut));
     QCOMPARE(cl2->m_list->topLevelItemCount(), 5);
@@ -337,10 +311,6 @@ void VCCueList_Test::copy()
     cl.copyFrom(&cl3);
     QCOMPARE(cl.caption(), cl3.caption());
     QCOMPARE(cl.m_list->topLevelItemCount(), 0);
-    QCOMPARE(cl.nextInputUniverse(), quint32(InputMap::invalidUniverse()));
-    QCOMPARE(cl.nextInputChannel(), quint32(InputMap::invalidChannel()));
-    QCOMPARE(cl.previousInputUniverse(), quint32(InputMap::invalidUniverse()));
-    QCOMPARE(cl.previousInputChannel(), quint32(InputMap::invalidChannel()));
     QCOMPARE(cl.nextKeySequence(), QKeySequence());
     QCOMPARE(cl.previousKeySequence(), QKeySequence());
 
@@ -505,11 +475,9 @@ void VCCueList_Test::loadXML()
     QCOMPARE(cl.m_list->topLevelItem(1)->text(2).toUInt(), s2->id());
     QCOMPARE(cl.m_list->topLevelItem(2)->text(2).toUInt(), s3->id());
     QCOMPARE(cl.m_list->topLevelItem(3)->text(2).toUInt(), c4->id());
-    QCOMPARE(cl.nextInputUniverse(), quint32(0));
-    QCOMPARE(cl.nextInputChannel(), quint32(1));
+    QCOMPARE(cl.inputSource(VCCueList::nextInputSourceId), QLCInputSource(0, 1));
     QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Undo));
-    QCOMPARE(cl.previousInputUniverse(), quint32(2));
-    QCOMPARE(cl.previousInputChannel(), quint32(3));
+    QCOMPARE(cl.inputSource(VCCueList::previousInputSourceId), QLCInputSource(2, 3));
     QCOMPARE(cl.previousKeySequence(), QKeySequence(QKeySequence::Paste));
 
     QCOMPARE(cl.pos(), QPoint(3, 4));
@@ -558,8 +526,8 @@ void VCCueList_Test::saveXML()
     cl.append(s2->id());
     cl.append(s3->id());
     cl.setCaption("Testing");
-    cl.setNextInputSource(0, 1);
-    cl.setPreviousInputSource(2, 3);
+    cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
+    cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
     cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
     cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
 
@@ -839,28 +807,28 @@ void VCCueList_Test::input()
     cl.append(s2->id());
     cl.append(s3->id());
     cl.append(s2->id());
-    cl.setNextInputSource(0, 1);
-    cl.setPreviousInputSource(2, 3);
+    cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
+    cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
 
     // Runner creation thru next input
     doc.setMode(Doc::Operate);
-    cl.slotNextInputValueChanged(5, 3, 255);
+    cl.slotInputValueChanged(5, 3, 255);
     QVERIFY(cl.m_runner == NULL);
 
-    cl.slotNextInputValueChanged(2, 15, 255);
+    cl.slotInputValueChanged(2, 15, 255);
     QVERIFY(cl.m_runner == NULL);
 
-    cl.slotNextInputValueChanged(0, 1, 255);
+    cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
-    cl.slotNextInputValueChanged(0, 1, 0);
+    cl.slotInputValueChanged(0, 1, 0);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
-    cl.slotNextInputValueChanged(0, 1, 255);
+    cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 1);
@@ -870,23 +838,23 @@ void VCCueList_Test::input()
     QVERIFY(cl.m_runner == NULL);
     doc.setMode(Doc::Operate);
 
-    cl.slotPreviousInputValueChanged(0, 3, 255);
+    cl.slotInputValueChanged(0, 3, 255);
     QVERIFY(cl.m_runner == NULL);
 
-    cl.slotPreviousInputValueChanged(2, 1, 255);
+    cl.slotInputValueChanged(2, 1, 255);
     QVERIFY(cl.m_runner == NULL);
 
-    cl.slotPreviousInputValueChanged(2, 3, 255);
+    cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
-    cl.slotPreviousInputValueChanged(2, 3, 0);
+    cl.slotInputValueChanged(2, 3, 0);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
-    cl.slotPreviousInputValueChanged(2, 3, 255);
+    cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
     cl.writeDMX(&mt, &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);

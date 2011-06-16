@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>342</height>
+    <width>424</width>
+    <height>334</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Virtual Console properties</string>
+   <string>Virtual Console Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -395,13 +395,13 @@
       <attribute name="title">
        <string>Default Fade</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QGroupBox" name="m_defaultFadeGroup">
          <property name="title">
-          <string>Default fade slider</string>
+          <string>Limits</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
+         <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
            <widget class="QLabel" name="m_lowFadeLabel">
             <property name="text">
@@ -409,7 +409,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="2">
+          <item row="0" column="1">
            <widget class="QSpinBox" name="m_fadeLowSpin">
             <property name="toolTip">
              <string>Lowest value that can be set to the 'fade' bus with the default sliders</string>
@@ -429,7 +429,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
+          <item row="1" column="1">
            <widget class="QSpinBox" name="m_fadeHighSpin">
             <property name="toolTip">
              <string>Highest value that can be set to the 'fade' bus with the default sliders</string>
@@ -448,21 +448,23 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>External Input</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>Input universe</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
+          <item row="0" column="2" colspan="2">
            <widget class="QLineEdit" name="m_fadeInputUniverseEdit">
             <property name="toolTip">
              <string>Input universe for default fade.</string>
@@ -472,14 +474,14 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>Input channel</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1" colspan="2">
+          <item row="1" column="2" colspan="2">
            <widget class="QLineEdit" name="m_fadeInputChannelEdit">
             <property name="toolTip">
              <string>Input channel for default fade.</string>
@@ -489,20 +491,20 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="2" column="0" colspan="2">
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>117</width>
-              <height>20</height>
+              <width>168</width>
+              <height>17</height>
              </size>
             </property>
            </spacer>
           </item>
-          <item row="6" column="1">
+          <item row="2" column="2">
            <widget class="QPushButton" name="m_autoDetectFadeInputButton">
             <property name="toolTip">
              <string>When toggled, you can move an external slider/knob to assign it to the default fade slider.</string>
@@ -515,7 +517,7 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
+          <item row="2" column="3">
            <widget class="QPushButton" name="m_chooseFadeInputButton">
             <property name="toolTip">
              <string>Choose an external input universe &amp; channel that the default fade slider should listen to.</string>
@@ -534,11 +536,11 @@
       <attribute name="title">
        <string>Default Hold</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QGroupBox" name="m_defaultHoldGroup">
          <property name="title">
-          <string>Default hold slider</string>
+          <string>Limits</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
@@ -548,7 +550,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="2">
+          <item row="0" column="1">
            <widget class="QSpinBox" name="m_holdLowSpin">
             <property name="toolTip">
              <string>Lowest value that can be set to the 'hold' bus with the default sliders</string>
@@ -568,7 +570,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
+          <item row="1" column="1">
            <widget class="QSpinBox" name="m_holdHighSpin">
             <property name="toolTip">
              <string>Highest value that can be set to the 'hold' bus with the default sliders</string>
@@ -587,21 +589,23 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>External Input</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>Input universe</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
+          <item row="0" column="2" colspan="2">
            <widget class="QLineEdit" name="m_holdInputUniverseEdit">
             <property name="toolTip">
              <string>Input universe for default hold.</string>
@@ -611,14 +615,14 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
              <string>Input channel</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1" colspan="2">
+          <item row="1" column="2" colspan="2">
            <widget class="QLineEdit" name="m_holdInputChannelEdit">
             <property name="toolTip">
              <string>Input channel for default hold.</string>
@@ -628,20 +632,20 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="2" column="0" colspan="2">
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>117</width>
+              <width>168</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-          <item row="6" column="1">
+          <item row="2" column="2">
            <widget class="QPushButton" name="m_autoDetectHoldInputButton">
             <property name="toolTip">
              <string>When toggled, you can move an external slider/knob to assign it to the default hold slider.</string>
@@ -654,7 +658,7 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
+          <item row="2" column="3">
            <widget class="QPushButton" name="m_chooseHoldInputButton">
             <property name="toolTip">
              <string>Choose an external input universe &amp; channel that the default hold slider should listen to.</string>

@@ -938,14 +938,13 @@ void VCWidget::mouseMoveEvent(QMouseEvent* e)
     {
         if (m_resizeMode == true)
         {
-            QPoint p(mapFromGlobal(QCursor::pos()));
+            QPoint p = mapToParent(e->pos());
             resize(QSize(p.x(), p.y()));
             m_doc->setModified();
         }
-        else if (e->buttons() & Qt::LeftButton ||
-                 e->buttons() & Qt::MidButton)
+        else if (e->buttons() & Qt::LeftButton || e->buttons() & Qt::MidButton)
         {
-            QPoint p(parentWidget()->mapFromGlobal(QCursor::pos()));
+            QPoint p = mapToParent(e->pos());
             p.setX(p.x() - m_mousePressPoint.x());
             p.setY(p.y() - m_mousePressPoint.y());
 

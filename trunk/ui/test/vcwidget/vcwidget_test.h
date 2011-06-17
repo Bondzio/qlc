@@ -49,6 +49,10 @@ private slots:
     void saveAppearanceDefaultsImage();
     void saveWindowState();
     void loadWindowState();
+    void resize();
+    void move();
+    void paint();
+    void mousePress();
 };
 
 #endif

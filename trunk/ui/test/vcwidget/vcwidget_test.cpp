@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 
@@ -36,6 +37,7 @@
 #include "stubwidget.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "vcframe.h"
 #include "doc.h"
 #include "bus.h"
 
@@ -61,6 +63,7 @@ void VCWidget_Test::initial()
     QCOMPARE(stub.frameStyle(), 0);
     QCOMPARE(stub.allowChildren(), false);
     QCOMPARE(stub.customMenu(0), (QMenu*) 0);
+    QCOMPARE(stub.lastClickPoint(), QPoint(0, 0));
 
     for (quint8 i = 0; i < 255; i++)
         QVERIFY(stub.inputSource(i).isValid() == false);
@@ -738,6 +741,10 @@ void VCWidget_Test::saveWindowState()
     QCOMPARE(tag.attribute("Width"), QString("30"));
     QCOMPARE(tag.attribute("Height"), QString("40"));
     QCOMPARE(tag.attribute("Visible"), QString("False"));
+
+    QCOMPARE(stub.saveXMLWindowState(&xmldoc, NULL), false);
+    QCOMPARE(stub.saveXMLWindowState(NULL, &root), false);
+    QCOMPARE(stub.saveXMLWindowState(NULL, NULL), false);
 }
 
 void VCWidget_Test::loadWindowState()
@@ -786,6 +793,176 @@ void VCWidget_Test::loadWindowState()
 
     root.setTagName("WinduhState");
     QCOMPARE(stub.loadXMLWindowState(&root, &x, &y, &w, &h, &v), false);
+}
+
+void VCWidget_Test::resize()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget parent;
+
+    StubWidget stub(&parent, &doc, &om, &im, &mt);
+    parent.show();
+    stub.show();
+    parent.resize(QSize(200, 200));
+
+    VCProperties prop = VirtualConsole::properties();
+    prop.setGridEnabled(false);
+    VirtualConsole::s_properties = prop;
+
+    stub.resize(QSize(25, 25));
+    QCOMPARE(stub.size(), QSize(25, 25));
+
+    stub.resize(QSize(26, 26));
+    QCOMPARE(stub.size(), QSize(26, 26));
+
+    stub.resize(QSize(31, 30));
+    QCOMPARE(stub.size(), QSize(31, 30));
+
+    // Allow resizing beyond parent's area
+    stub.resize(QSize(250, 250));
+    QCOMPARE(stub.size(), QSize(250, 250));
+
+    prop.setGridEnabled(true);
+    VirtualConsole::s_properties = prop;
+
+    stub.resize(QSize(25, 25));
+    QCOMPARE(stub.size(), QSize(20, 20));
+
+    stub.resize(QSize(26, 26));
+    QCOMPARE(stub.size(), QSize(20, 20));
+
+    stub.resize(QSize(31, 30));
+    QCOMPARE(stub.size(), QSize(30, 30));
+
+    // Allow resizing beyond parent's area
+    stub.resize(QSize(251, 252));
+    QCOMPARE(stub.size(), QSize(250, 250));
+}
+
+void VCWidget_Test::move()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QWidget parent;
+
+    StubWidget stub(&parent, &doc, &om, &im, &mt);
+    parent.show();
+    stub.show();
+    parent.resize(QSize(200, 200));
+    stub.resize(QSize(50, 50));
+
+    VCProperties prop = VirtualConsole::properties();
+    prop.setGridEnabled(false);
+    VirtualConsole::s_properties = prop;
+
+    stub.move(QPoint(25, 25));
+    QCOMPARE(stub.geometry(), QRect(25, 25, 50, 50));
+
+    stub.move(QPoint(-5, -5));
+    QCOMPARE(stub.geometry(), QRect(0, 0, 50, 50));
+
+    stub.move(QPoint(190, 190));
+    QCOMPARE(stub.geometry(), QRect(150, 150, 50, 50));
+
+    prop.setGridEnabled(true);
+    VirtualConsole::s_properties = prop;
+
+    stub.move(QPoint(25, 25));
+    QCOMPARE(stub.geometry(), QRect(20, 20, 50, 50));
+
+    stub.move(QPoint(26, 26));
+    QCOMPARE(stub.geometry(), QRect(20, 20, 50, 50));
+
+    stub.move(QPoint(30, 30));
+    QCOMPARE(stub.geometry(), QRect(30, 30, 50, 50));
+
+    stub.move(QPoint(31, 31));
+    QCOMPARE(stub.geometry(), QRect(30, 30, 50, 50));
+}
+
+void VCWidget_Test::paint()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QMdiArea area;
+
+    VirtualConsole::resetContents(&area, &doc, &om, &im, &mt);
+    VirtualConsole::createAndShow(&area, &doc, &om, &im, &mt);
+    VirtualConsole* vc = VirtualConsole::instance();
+    QVERIFY(vc != NULL);
+
+    // Just try to cover all local branches with this test
+    StubWidget* stub = new StubWidget(vc->properties().contents(), &doc, &om, &im, &mt);
+    area.show();
+    stub->show();
+    QTest::qWait(10);
+
+    stub->setFrameStyle(KVCFrameStyleSunken);
+    stub->update();
+    QTest::qWait(10);
+
+    stub->setFrameStyle(KVCFrameStyleRaised);
+    stub->update();
+    QTest::qWait(10);
+
+    vc->setWidgetSelected(stub, true);
+    stub->update();
+    QTest::qWait(10);
+
+    stub->setAllowResize(false);
+    stub->update();
+    QTest::qWait(10);
+
+    doc.setMode(Doc::Operate);
+    stub->update();
+    QTest::qWait(10);
+}
+
+void VCWidget_Test::mousePress()
+{
+    QLCFixtureDefCache fdc;
+    Doc doc(this, fdc);
+    OutputMap om(this, 4);
+    InputMap im(this, 4);
+    MasterTimer mt(this, &om);
+    QMdiArea area;
+
+    QCOMPARE(doc.mode(), Doc::Design);
+
+    VirtualConsole::resetContents(&area, &doc, &om, &im, &mt);
+    VirtualConsole::createAndShow(&area, &doc, &om, &im, &mt);
+    VirtualConsole* vc = VirtualConsole::instance();
+    QVERIFY(vc != NULL);
+
+    area.show();
+
+    StubWidget* stub = new StubWidget(vc->properties().contents(), &doc, &om, &im, &mt);
+    stub->show();
+    stub->resize(QSize(20, 20));
+    QCOMPARE(stub->pos(), QPoint(0, 0));
+
+    QMouseEvent e(QEvent::MouseButtonPress, QPoint(10, 10), Qt::LeftButton, 0, 0);
+
+    stub->mousePressEvent(&e);
+    QCOMPARE(vc->selectedWidgets().size(), 1);
+    QCOMPARE(vc->selectedWidgets()[0], stub);
+    QCOMPARE(stub->lastClickPoint(), QPoint(10, 10));
+    QTest::qWait(10);
+
+    e = QMouseEvent(QEvent::MouseMove, QPoint(20, 20), Qt::NoButton, Qt::LeftButton, 0);
+    stub->mouseMoveEvent(&e);
+    QTest::qWait(10);
+    QCOMPARE(stub->pos(), QPoint(10, 10));
 }
 
 QTEST_MAIN(VCWidget_Test)

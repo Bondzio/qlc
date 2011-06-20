@@ -4,6 +4,7 @@ SUBDIRS += assignhotkey
 SUBDIRS += addfixture
 SUBDIRS += busmanager
 SUBDIRS += efxpreviewarea
+SUBDIRS += monitorfixture
 SUBDIRS += vcbutton
 SUBDIRS += vccuelist
 SUBDIRS += vcdockslider

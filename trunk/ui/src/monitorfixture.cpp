@@ -223,10 +223,9 @@ void MonitorFixture::updateValues(const QByteArray* universes)
         }
         else
         {
-            label->setText(str.sprintf("%.3d", int(
-                                           ceil(SCALE(double(value),
-                                                      double(0), double(UCHAR_MAX),
-                                                      double(0), double(100))))));
+            label->setText(str.sprintf("%.3d", int(ceil(SCALE(qreal(value),
+                                                              qreal(0), qreal(UCHAR_MAX),
+                                                              qreal(0), qreal(100))))));
         }
     }
 }
@@ -249,15 +248,15 @@ void MonitorFixture::slotValueStyleChanged(Monitor::ValueStyle style)
 
         if (style == Monitor::DMXValues)
         {
-            value = int(ceil(SCALE(double(value),
-                                   double(0), double(100),
-                                   double(0), double(UCHAR_MAX))));
+            value = int(ceil(SCALE(qreal(value),
+                                   qreal(0), qreal(100),
+                                   qreal(0), qreal(UCHAR_MAX))));
         }
         else
         {
-            value = int(ceil(SCALE(double(value),
-                                   double(0), double(UCHAR_MAX),
-                                   double(0), double(100))));
+            value = int(ceil(SCALE(qreal(value),
+                                   qreal(0), qreal(UCHAR_MAX),
+                                   qreal(0), qreal(100))));
         }
 
         label->setText(str.sprintf("%.3d", value));

@@ -17,3 +17,4 @@ SUBDIRS += vcwidgetproperties
 SUBDIRS += vcxypad
 SUBDIRS += vcxypadarea
 SUBDIRS += vcxypadfixture
+SUBDIRS += vcxypadfixtureeditor

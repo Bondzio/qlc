@@ -23,6 +23,7 @@
 #include <QSpinBox>
 #include <QDialog>
 #include <QString>
+#include <cmath>
 
 #include "vcxypadfixtureeditor.h"
 #include "vcxypadfixture.h"
@@ -43,12 +44,12 @@ VCXYPadFixtureEditor::VCXYPadFixtureEditor(QWidget* parent,
     {
         VCXYPadFixture fxi = fixtures.first();
 
-        m_xMin->setValue(int(fxi.xMin() * 100));
-        m_xMax->setValue(int(fxi.xMax() * 100));
+        m_xMin->setValue(int(floor((fxi.xMin() * qreal(100)) + qreal(0.5))));
+        m_xMax->setValue(int(floor((fxi.xMax() * qreal(100)) + qreal(0.5))));
         m_xReverse->setChecked(fxi.xReverse());
 
-        m_yMin->setValue(int(fxi.yMin() * 100));
-        m_yMax->setValue(int(fxi.yMax() * 100));
+        m_yMin->setValue(int(floor((fxi.yMin() * qreal(100)) + qreal(0.5))));
+        m_yMax->setValue(int(floor((fxi.yMax() * qreal(100)) + qreal(0.5))));
         m_yReverse->setChecked(fxi.yReverse());
     }
 }
@@ -89,9 +90,9 @@ void VCXYPadFixtureEditor::accept()
     {
         VCXYPadFixture fxi(it.next());
 
-        fxi.setX(m_xMin->value() / 100.0, m_xMax->value() / 100.0,
+        fxi.setX(qreal(m_xMin->value()) / qreal(100), qreal(m_xMax->value()) / qreal(100),
                  m_xReverse->isChecked());
-        fxi.setY(m_yMin->value() / 100.0, m_yMax->value() / 100.0,
+        fxi.setY(qreal(m_yMin->value()) / qreal(100), qreal(m_yMax->value()) / qreal(100),
                  m_yReverse->isChecked());
 
         it.setValue(fxi);

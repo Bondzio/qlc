@@ -9,6 +9,7 @@ SUBDIRS += vcbutton
 SUBDIRS += vccuelist
 SUBDIRS += vcdockslider
 SUBDIRS += vcframe
+SUBDIRS += vcframeproperties
 SUBDIRS += vclabel
 SUBDIRS += vcproperties
 SUBDIRS += vcwidget

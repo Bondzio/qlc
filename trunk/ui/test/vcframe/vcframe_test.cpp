@@ -35,6 +35,7 @@
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "vcbutton.h"
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "doc.h"
@@ -70,10 +71,17 @@ void VCFrame_Test::copy()
 
     VCFrame parent(&w, &doc, &om, &im, &mt);
     VCFrame frame(&parent, &doc, &om, &im, &mt);
+    VCButton* btn = new VCButton(&frame, &doc, &om, &im, &mt);
+    btn->setCaption("Foobar");
     VCWidget* frame2 = frame.createCopy(&parent);
     QVERIFY(frame2 != NULL && frame2 != &frame);
     QCOMPARE(frame2->objectName(), QString("VCFrame"));
     QCOMPARE(frame2->parentWidget(), &parent);
+
+    // Also children should get copied
+    QList <VCButton*> list = frame2->findChildren<VCButton*>();
+    QCOMPARE(list.size(), 1);
+    QCOMPARE(list[0]->caption(), QString("Foobar"));
 
     QVERIFY(frame.copyFrom(NULL) == false);
 }

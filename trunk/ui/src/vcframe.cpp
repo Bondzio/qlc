@@ -90,7 +90,19 @@ bool VCFrame::copyFrom(VCWidget* widget)
     if (frame == NULL)
         return false;
 
-    /* TODO: Copy children? */
+    QListIterator <VCWidget*> it(widget->findChildren<VCWidget*>());
+    while (it.hasNext() == true)
+    {
+        VCWidget* child = it.next();
+
+        /* findChildren() is recursive, so the list contains all
+           possible child widgets below this frame. Each frame must
+           save only its direct children to preserve hierarchy, so
+           save only such widgets that have this widget as their
+           direct parent. */
+        if (child->parentWidget() == widget)
+            child->createCopy(this);
+    }
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);

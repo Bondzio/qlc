@@ -741,19 +741,8 @@ void QLCFixtureEditor::slotRemoveMode()
                               tr("Are you sure you wish to remove mode: %1").arg(mode->name()),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        QTreeWidgetItem* item;
-        QTreeWidgetItem* next;
-
-        item = m_modeList->currentItem();
-        if (m_modeList->itemBelow(item) != NULL)
-            next = m_modeList->itemBelow(item);
-        else if (m_modeList->itemAbove(item) != NULL)
-            next = m_modeList->itemAbove(item);
-        else
-            next = NULL;
-
         m_fixtureDef->removeMode(mode);
-        delete item;
+        delete m_modeList->currentItem();
         setModified();
     }
 }

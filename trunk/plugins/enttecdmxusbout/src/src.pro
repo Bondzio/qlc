@@ -13,11 +13,11 @@ INCLUDEPATH += ../../interfaces
 # the latest driver package from http://www.ftdichip.com/Drivers/D2XX.htm and
 # extract its contents under FTD2XXDIR below to compile this plugin.
 #
-# Use normal slashes "/" instead of Windows' backslashes "\" for paths !!!!
+# Use forward slashes "/" instead of Windows backslashes "\" for paths here!
 #
 win32 {
     # Windows target
-    FTD2XXDIR    = C:/CDM20812
+    FTD2XXDIR    = C:/CDM20814
     LIBS        += -L$$FTD2XXDIR/i386 -lftd2xx
     INCLUDEPATH += $$FTD2XXDIR
     DEFINES     += FTD2XX

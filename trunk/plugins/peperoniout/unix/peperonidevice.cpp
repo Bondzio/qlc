@@ -60,14 +60,15 @@
  ****************************************************************************/
 
 PeperoniDevice::PeperoniDevice(QObject* parent, struct usb_device* device)
-        : QObject(parent)
+    : QObject(parent)
+    , m_device(device)
+    , m_handle(NULL)
+    , m_bulkBuffer(512 + PEPERONI_OLD_BULK_HEADER_SIZE, 0)
 {
     Q_ASSERT(device != NULL);
 
-    m_device = device;
-    m_handle = NULL;
-    m_firmwareVersion = 0;
-    m_bulkBuffer = QByteArray(512 + PEPERONI_OLD_BULK_HEADER_SIZE, 0);
+    /* Store fw version so we don't need to rely on libusb's volatile data */
+    m_firmwareVersion = m_device->descriptor.bcdDevice;
 
     extractName();
 }
@@ -134,9 +135,6 @@ void PeperoniDevice::extractName()
         m_name = QString(name);
     else
         m_name = tr("Unknown");
-
-    /* Store fw version so we don't need to rely on libusb's volatile data */
-    m_firmwareVersion = m_device->descriptor.bcdDevice;
 
     /* Close the device if it was opened for this function only. */
     if (needToClose == true)

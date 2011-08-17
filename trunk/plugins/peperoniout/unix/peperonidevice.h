@@ -71,6 +71,7 @@ protected:
     struct usb_device* m_device;
     usb_dev_handle* m_handle;
     int m_firmwareVersion;
+    int m_blockingControlWrite;
     QByteArray m_bulkBuffer;
 
     /********************************************************************

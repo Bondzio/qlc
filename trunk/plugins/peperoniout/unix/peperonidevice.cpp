@@ -37,12 +37,18 @@
 /** Common interface */
 #define PEPERONI_IFACE_EP0      0x00
 
+#define PEPERONI_CONF_TXONLY    0x01
+#define PEPERONI_CONF_TXRX      0x02
+#define PEPERONI_CONF_RXONLY    0x03
+
 /** CONTROL MSG: Control the internal DMX buffer */
 #define PEPERONI_TX_MEM_REQUEST  0x04
 /** CONTROL MSG: Block until the DMX frame has been completely transmitted */
 #define PEPERONI_TX_MEM_BLOCK    0x01
 /** CONTROL MSG: Do not block during DMX frame send */
 #define PEPERONI_TX_MEM_NONBLOCK 0x00
+/** CONTROL MSG: Oldest firmware version with blocking write support */
+#define PEPERONI_FW_BLOCKING_WRITE_SUPPORT 0x101
 
 /** BULK WRITE: Bulk out endpoint */
 #define PEPERONI_BULK_OUT_ENDPOINT 0x02
@@ -68,6 +74,11 @@ PeperoniDevice::PeperoniDevice(QObject* parent, struct usb_device* device)
 
     /* Store fw version so we don't need to rely on libusb's volatile data */
     m_firmwareVersion = m_device->descriptor.bcdDevice;
+
+    if (m_firmwareVersion < PEPERONI_FW_BLOCKING_WRITE_SUPPORT)
+        m_blockingControlWrite = PEPERONI_TX_MEM_NONBLOCK;
+    else
+        m_blockingControlWrite = PEPERONI_TX_MEM_BLOCK;
 
     extractName();
 }
@@ -179,6 +190,9 @@ void PeperoniDevice::open()
 {
     if (m_device != NULL && m_handle == NULL)
     {
+        int r = -1;
+        int configuration = PEPERONI_CONF_TXONLY;
+
         m_handle = usb_open(m_device);
         if (m_handle == NULL)
         {
@@ -186,14 +200,32 @@ void PeperoniDevice::open()
             return;
         }
 
+        /* Use configuration #2 on X-Switch */
+        if (m_device->descriptor.idProduct == PEPERONI_PID_XSWITCH)
+            configuration = PEPERONI_CONF_TXRX;
+        else
+            configuration = PEPERONI_CONF_TXONLY;
+
+        /* Set selected configuration */
+        r = usb_set_configuration(m_handle, configuration);
+        if (r < 0)
+            qWarning() << "PeperoniDevice is unable to set configuration #" << configuration;
+
         /* We must claim the interface before doing anything */
-        int r = usb_claim_interface(m_handle, PEPERONI_IFACE_EP0);
+        r = usb_claim_interface(m_handle, PEPERONI_IFACE_EP0);
         if (r < 0)
             qWarning() << "PeperoniDevice is unable to claim interface EP0!";
 
-        /* Allocate space for bulk buffer if appropriate */
         if (m_firmwareVersion >= PEPERONI_FW_BULK_SUPPORT)
+        {
+            /* Allocate space for bulk buffer */
             m_bulkBuffer = QByteArray(512 + PEPERONI_OLD_BULK_HEADER_SIZE, 0);
+
+            /* Sometimes you need a little jolt to get the device on its feet. */
+            r = usb_clear_halt(m_handle, PEPERONI_BULK_OUT_ENDPOINT);
+            if (r < 0)
+                qWarning() << "PeperoniDevice" << name() << "is unable to reset bulk endpoint.";
+        }
     }
 }
 
@@ -243,10 +275,10 @@ void PeperoniDevice::outputDMX(const QByteArray& universe)
     if (m_firmwareVersion < PEPERONI_FW_BULK_SUPPORT)
     {
 #endif
-        r = usb_control_msg(m_handle, USB_TYPE_VENDOR |
-                            USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
-                            PEPERONI_TX_MEM_REQUEST, // We are WRITING data
-                            PEPERONI_TX_MEM_BLOCK,   // Block during frame send?
+        r = usb_control_msg(m_handle,
+                            USB_TYPE_VENDOR | USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
+                            PEPERONI_TX_MEM_REQUEST, // We are WRITING DMX data
+                            m_blockingControlWrite,  // Block during frame send?
                             0,                       // Start at DMX address 0
                             (char*) universe.data(), // The DMX universe data
                             universe.size(),         // Size of DMX universe
@@ -264,7 +296,7 @@ void PeperoniDevice::outputDMX(const QByteArray& universe)
         m_bulkBuffer[2] = char(universe.size() & 0xFF);
         m_bulkBuffer[3] = char((universe.size() >> 8) & 0xFF);
 
-        /* Append universe data to the buffer */
+        /* Append universe data to the bulk buffer */
         m_bulkBuffer.replace(PEPERONI_OLD_BULK_HEADER_SIZE,
                              universe.size(), universe);
 

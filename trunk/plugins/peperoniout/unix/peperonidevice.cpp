@@ -43,6 +43,8 @@
 
 /** CONTROL MSG: Control the internal DMX buffer */
 #define PEPERONI_TX_MEM_REQUEST  0x04
+/** CONTROL MSG: Set DMX startcode */
+#define PEPERONI_TX_STARTCODE    0x09
 /** CONTROL MSG: Block until the DMX frame has been completely transmitted */
 #define PEPERONI_TX_MEM_BLOCK    0x01
 /** CONTROL MSG: Do not block during DMX frame send */
@@ -215,6 +217,18 @@ void PeperoniDevice::open()
         r = usb_claim_interface(m_handle, PEPERONI_IFACE_EP0);
         if (r < 0)
             qWarning() << "PeperoniDevice is unable to claim interface EP0!";
+
+        /* Set DMX startcode */
+        r = usb_control_msg(m_handle,
+                            USB_TYPE_VENDOR | USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
+                            PEPERONI_TX_STARTCODE,   // Set DMX startcode
+                            0,                       // Standard startcode is 0
+                            0,                       // No index
+                            NULL,                    // No data
+                            0,                       // Zero data length
+                            50);                     // Timeout (ms)
+        if (r < 0)
+            qWarning() << "PeperoniDevice is unable to set 0 as the DMX startcode!";
 
         if (m_firmwareVersion >= PEPERONI_FW_BULK_SUPPORT)
         {

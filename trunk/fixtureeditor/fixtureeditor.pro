@@ -55,6 +55,7 @@ TRANSLATIONS += fixtureeditor_fi_FI.ts
 TRANSLATIONS += fixtureeditor_fr_FR.ts
 TRANSLATIONS += fixtureeditor_de_DE.ts
 TRANSLATIONS += fixtureeditor_es_ES.ts
+TRANSLATIONS += fixtureeditor_it_IT.ts
 include(../i18n.pri)
 
 macx {

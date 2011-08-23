@@ -27,6 +27,7 @@ TRANSLATIONS += uDMX_Output_fi_FI.ts
 TRANSLATIONS += uDMX_Output_de_DE.ts
 TRANSLATIONS += uDMX_Output_es_ES.ts
 TRANSLATIONS += uDMX_Output_fr_FR.ts
+TRANSLATIONS += uDMX_Output_it_IT.ts
 include(../../../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that

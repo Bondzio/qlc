@@ -26,6 +26,7 @@ TRANSLATIONS += Peperoni_Output_fi_FI.ts
 TRANSLATIONS += Peperoni_Output_de_DE.ts
 TRANSLATIONS += Peperoni_Output_es_ES.ts
 TRANSLATIONS += Peperoni_Output_fr_FR.ts
+TRANSLATIONS += Peperoni_Output_it_IT.ts
 include(../../../i18n.pri)
 
 # Installation

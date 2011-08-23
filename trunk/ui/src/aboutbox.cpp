@@ -37,7 +37,7 @@ AboutBox::AboutBox(QWidget* parent) : QDialog (parent)
 
     m_titleLabel->setText(APPNAME);
     m_versionLabel->setText(APPVERSION);
-    m_copyrightLabel->setText(QString("Copyright &copy; Heikki Junnila %1")
+    m_copyrightLabel->setText(QString("Copyright &copy; <B>Heikki Junnila</B> %1")
                               .arg(tr("and contributors:")));
     m_websiteLabel->setText(tr("Website: %1").arg("<A HREF=\"http://qlc.sourceforge.net\">http://qlc.sourceforge.net</A>"));
 
@@ -53,6 +53,7 @@ AboutBox::AboutBox(QWidget* parent) : QDialog (parent)
     m_contributors->addItem("Matthew Jaggard");
     m_contributors->addItem("Ptit Vachon");
     m_contributors->addItem("NiKoyes");
+    m_contributors->addItem("Tolmino");
 
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotTimeout()));

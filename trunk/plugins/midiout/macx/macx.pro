@@ -30,6 +30,7 @@ TRANSLATIONS += MIDI_Output_fi_FI.ts
 TRANSLATIONS += MIDI_Output_de_DE.ts
 TRANSLATIONS += MIDI_Output_es_ES.ts
 TRANSLATIONS += MIDI_Output_fr_FR.ts
+TRANSLATIONS += MIDI_Output_it_IT.ts
 include(../../../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that

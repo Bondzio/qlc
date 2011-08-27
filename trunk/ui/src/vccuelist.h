@@ -32,6 +32,7 @@ class QTreeWidgetItem;
 class QDomDocument;
 class QDomElement;
 class QTreeWidget;
+class QPushButton;
 
 class VCCueListProperties;
 class ChaserRunner;
@@ -108,6 +109,9 @@ protected slots:
     /** Skip to the previous cue */
     void slotPreviousCue();
 
+    /** Stop the cue list and return to start */
+    void slotStop();
+
     /** Called when m_runner skips to another step */
     void slotCurrentStepChanged(int stepNumber);
 
@@ -121,7 +125,10 @@ protected:
 
 protected:
     QTreeWidget* m_list;
+    QPushButton* m_stopButton;
+
     ChaserRunner* m_runner;
+    QMutex m_mutex; // Guards m_runner
 
     /*************************************************************************
      * DMX Source
@@ -129,6 +136,10 @@ protected:
 public:
     /** @reimp */
     void writeDMX(MasterTimer* timer, UniverseArray* universes);
+
+private:
+    /** Flag indicating, whether stop button has been pressed */
+    bool m_stop;
 
     /*************************************************************************
      * Key sequences

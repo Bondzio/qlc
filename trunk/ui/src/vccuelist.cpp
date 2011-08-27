@@ -49,12 +49,14 @@ const quint8 VCCueList::previousInputSourceId = 1;
 VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
     , m_runner(NULL)
+    , m_stop(false)
 {
     /* Set the class name "VCCueList" as the object name as well */
     setObjectName(VCCueList::staticMetaObject.className());
 
     /* Create a layout for this widget */
     new QVBoxLayout(this);
+    layout()->setSpacing(2);
 
     /* Create a list for scenes (cues) */
     m_list = new QTreeWidget(this);
@@ -68,9 +70,14 @@ VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* 
     m_list->header()->setClickable(false);
     m_list->header()->setMovable(false);
     m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
-
     connect(m_list, SIGNAL(itemActivated(QTreeWidgetItem*,int)),
             this, SLOT(slotItemActivated(QTreeWidgetItem*)));
+
+    /* Create a stop button */
+    m_stopButton = new QPushButton(this);
+    m_stopButton->setText(tr("Stop"));
+    layout()->addWidget(m_stopButton);
+    connect(m_stopButton, SIGNAL(clicked()), this, SLOT(slotStop()));
 
     setFrameStyle(KVCFrameStyleSunken);
     setCaption(tr("Cue list"));
@@ -192,10 +199,12 @@ void VCCueList::slotNextCue()
         return;
 
     /* Create the runner only when the first/last cue is engaged. */
+    m_mutex.lock();
     if (m_runner == NULL)
         createRunner();
     else
         m_runner->next();
+    m_mutex.unlock();
 }
 
 void VCCueList::slotPreviousCue()
@@ -204,10 +213,26 @@ void VCCueList::slotPreviousCue()
         return;
 
     /* Create the runner only when the first/last cue is engaged. */
+    m_mutex.lock();
     if (m_runner == NULL)
         createRunner(m_list->topLevelItemCount() - 1); // Start from end
     else
         m_runner->previous();
+    m_mutex.unlock();
+}
+
+void VCCueList::slotStop()
+{
+    if (mode() != Doc::Operate)
+        return;
+
+    m_mutex.lock();
+    if (m_runner != NULL)
+        m_stop = true;
+    m_mutex.unlock();
+
+    /* Start from the beginning */
+    m_list->setCurrentItem(NULL);
 }
 
 void VCCueList::slotCurrentStepChanged(int stepNumber)
@@ -224,10 +249,12 @@ void VCCueList::slotItemActivated(QTreeWidgetItem* item)
     if (mode() != Doc::Operate)
         return;
 
+    m_mutex.lock();
     if (m_runner == NULL)
         createRunner(m_list->indexOfTopLevelItem(item));
     else
         m_runner->setCurrentStep(m_list->indexOfTopLevelItem(item));
+    m_mutex.unlock();
 }
 
 void VCCueList::createRunner(int startIndex)
@@ -260,8 +287,22 @@ void VCCueList::createRunner(int startIndex)
 
 void VCCueList::writeDMX(MasterTimer* timer, UniverseArray* universes)
 {
+    m_mutex.lock();
     if (m_runner != NULL)
-        m_runner->write(timer, universes);
+    {
+        if (m_stop == false)
+        {
+            m_runner->write(timer, universes);
+        }
+        else
+        {
+            m_runner->postRun(timer, universes);
+            delete m_runner;
+            m_runner = NULL;
+            m_stop = false;
+        }
+    }
+    m_mutex.unlock();
 }
 
 /*****************************************************************************
@@ -368,9 +409,11 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
     else
     {
         m_masterTimer->unregisterDMXSource(this);
+        m_mutex.lock();
         if (m_runner != NULL)
             delete m_runner;
         m_runner = NULL;
+        m_mutex.unlock();
         m_list->setEnabled(false);
     }
 

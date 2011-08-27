@@ -27,7 +27,7 @@
 #include "aboutbox.h"
 #undef protected
 
-#define CONTRIBCOUNT 9
+#define CONTRIBCOUNT 10
 
 void AboutBox_Test::initial()
 {
@@ -42,7 +42,7 @@ void AboutBox_Test::initial()
     QCOMPARE(ab.m_versionLabel->text(), QString(APPVERSION));
 
     QVERIFY(ab.m_copyrightLabel != NULL);
-    QVERIFY(ab.m_copyrightLabel->text().contains("Copyright &copy; Heikki Junnila"));
+    QVERIFY(ab.m_copyrightLabel->text().contains("Copyright &copy; <B>Heikki Junnila</B>"));
 
     QVERIFY(ab.m_websiteLabel != NULL);
     QVERIFY(ab.m_websiteLabel->text().contains("<A HREF=\"http://qlc.sourceforge.net\">http://qlc.sourceforge.net</A>"));

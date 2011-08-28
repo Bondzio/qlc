@@ -45,6 +45,7 @@
 
 const quint8 VCCueList::nextInputSourceId = 0;
 const quint8 VCCueList::previousInputSourceId = 1;
+const quint8 VCCueList::stopInputSourceId = 2;
 
 VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
     : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
@@ -92,6 +93,7 @@ VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* 
 
     m_nextLatestValue = 0;
     m_previousLatestValue = 0;
+    m_stopLatestValue = 0;
 }
 
 VCCueList::~VCCueList()
@@ -134,6 +136,7 @@ bool VCCueList::copyFrom(VCWidget* widget)
     /* Key sequence */
     setNextKeySequence(cuelist->nextKeySequence());
     setPreviousKeySequence(cuelist->previousKeySequence());
+    setStopKeySequence(cuelist->stopKeySequence());
 
     /* Common stuff */
     return VCWidget::copyFrom(widget);
@@ -329,12 +332,24 @@ QKeySequence VCCueList::previousKeySequence() const
     return m_previousKeySequence;
 }
 
+void VCCueList::setStopKeySequence(const QKeySequence& keySequence)
+{
+    m_stopKeySequence = QKeySequence(keySequence);
+}
+
+QKeySequence VCCueList::stopKeySequence() const
+{
+    return m_stopKeySequence;
+}
+
 void VCCueList::slotKeyPressed(const QKeySequence& keySequence)
 {
     if (m_nextKeySequence == keySequence)
         slotNextCue();
     else if (m_previousKeySequence == keySequence)
         slotPreviousCue();
+    else if (m_stopKeySequence == keySequence)
+        slotStop();
 }
 
 /*****************************************************************************
@@ -382,6 +397,25 @@ void VCCueList::slotInputValueChanged(quint32 universe, quint32 channel, uchar v
 
         if (value > HYSTERESIS)
             m_previousLatestValue = value;
+    }
+    else if (src == inputSource(stopInputSourceId))
+    {
+        // Use hysteresis for values, in case the cue list is being controlled
+        // by a slider. The value has to go to zero before the next non-zero
+        // value is accepted as input. And the non-zero values have to visit
+        // above $HYSTERESIS before a zero is accepted again.
+        if (m_stopLatestValue == 0 && value > 0)
+        {
+            slotStop();
+            m_stopLatestValue = value;
+        }
+        else if (m_stopLatestValue > HYSTERESIS && value == 0)
+        {
+            m_stopLatestValue = 0;
+        }
+
+        if (value > HYSTERESIS)
+            m_stopLatestValue = value;
     }
 }
 
@@ -517,6 +551,31 @@ bool VCCueList::loadXML(const QDomElement* root)
                 subNode = subNode.nextSibling();
             }
         }
+        else if (tag.tagName() == KXMLQLCVCCueListStop)
+        {
+            QDomNode subNode = tag.firstChild();
+            while (subNode.isNull() == false)
+            {
+                QDomElement subTag = subNode.toElement();
+                if (subTag.tagName() == KXMLQLCVCWidgetInput)
+                {
+                    quint32 uni = 0;
+                    quint32 ch = 0;
+                    if (loadXMLInput(subTag, &uni, &ch) == true)
+                        setInputSource(QLCInputSource(uni, ch), stopInputSourceId);
+                }
+                else if (subTag.tagName() == KXMLQLCVCCueListKey)
+                {
+                    m_stopKeySequence = QKeySequence(subTag.text());
+                }
+                else
+                {
+                    qWarning() << Q_FUNC_INFO << "Unknown CueList Stop tag" << subTag.tagName();
+                }
+
+                subNode = subNode.nextSibling();
+            }
+        }
         else if (tag.tagName() == KXMLQLCVCCueListKey) /* Legacy */
         {
             setNextKeySequence(QKeySequence(tag.text()));
@@ -584,6 +643,15 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     text = doc->createTextNode(m_previousKeySequence.toString());
     subtag.appendChild(text);
     saveXMLInput(doc, &tag, inputSource(previousInputSourceId));
+
+    /* Stop cue list */
+    tag = doc->createElement(KXMLQLCVCCueListStop);
+    root.appendChild(tag);
+    subtag = doc->createElement(KXMLQLCVCCueListKey);
+    tag.appendChild(subtag);
+    text = doc->createTextNode(m_stopKeySequence.toString());
+    subtag.appendChild(text);
+    saveXMLInput(doc, &tag, inputSource(stopInputSourceId));
 
     /* Window state */
     saveXMLWindowState(doc, &root);

@@ -116,6 +116,23 @@ protected:
 protected:
     QKeySequence m_previousKeySequence;
     QLCInputSource m_previousInputSource;
+
+    /************************************************************************
+     * Stop Cue List
+     ************************************************************************/
+protected slots:
+    void slotStopAttachClicked();
+    void slotStopDetachClicked();
+    void slotStopChooseInputClicked();
+    void slotStopAutoDetectInputToggled(bool state);
+    void slotStopInputValueChanged(quint32 uni, quint32 ch);
+
+protected:
+    void updateStopInputSource();
+
+protected:
+    QKeySequence m_stopKeySequence;
+    QLCInputSource m_stopInputSource;
 };
 
 #endif

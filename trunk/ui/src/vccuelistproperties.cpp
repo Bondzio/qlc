@@ -149,6 +149,28 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc, OutputMap
     /* External input */
     m_previousInputSource = cueList->inputSource(VCCueList::previousInputSourceId);
     updatePreviousInputSource();
+
+    /************************************************************************
+     * Stop Cue List page
+     ************************************************************************/
+
+    /* Connections */
+    connect(m_stopAttachButton, SIGNAL(clicked()),
+            this, SLOT(slotStopAttachClicked()));
+    connect(m_stopDetachButton, SIGNAL(clicked()),
+            this, SLOT(slotStopDetachClicked()));
+    connect(m_stopAutoDetectInputButton, SIGNAL(toggled(bool)),
+            this, SLOT(slotStopAutoDetectInputToggled(bool)));
+    connect(m_stopChooseInputButton, SIGNAL(clicked()),
+            this, SLOT(slotStopChooseInputClicked()));
+
+    /* Key binding */
+    m_stopKeySequence = QKeySequence(cueList->stopKeySequence());
+    m_stopKeyEdit->setText(m_stopKeySequence.toString(QKeySequence::NativeText));
+
+    /* External input */
+    m_stopInputSource = cueList->inputSource(VCCueList::stopInputSourceId);
+    updateStopInputSource();
 }
 
 VCCueListProperties::~VCCueListProperties()
@@ -172,21 +194,25 @@ void VCCueListProperties::accept()
     /* Key sequences */
     m_cueList->setNextKeySequence(m_nextKeySequence);
     m_cueList->setPreviousKeySequence(m_previousKeySequence);
+    m_cueList->setStopKeySequence(m_stopKeySequence);
 
     /* Input sources */
     m_cueList->setInputSource(m_nextInputSource, VCCueList::nextInputSourceId);
     m_cueList->setInputSource(m_previousInputSource, VCCueList::previousInputSourceId);
+    m_cueList->setInputSource(m_stopInputSource, VCCueList::stopInputSourceId);
 
     QDialog::accept();
 }
 
 void VCCueListProperties::slotTabChanged()
 {
-    // Disengage both auto-detect buttons
+    // Disengage auto-detect buttons
     if (m_nextAutoDetectInputButton->isChecked() == true)
         m_nextAutoDetectInputButton->toggle();
     if (m_previousAutoDetectInputButton->isChecked() == true)
         m_previousAutoDetectInputButton->toggle();
+    if (m_stopAutoDetectInputButton->isChecked() == true)
+        m_stopAutoDetectInputButton->toggle();
 }
 
 /****************************************************************************
@@ -472,9 +498,6 @@ void VCCueListProperties::slotPreviousAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        if (m_nextAutoDetectInputButton->isChecked() == true)
-            m_nextAutoDetectInputButton->toggle();
-
         connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotPreviousInputValueChanged(quint32,quint32)));
     }
@@ -506,5 +529,73 @@ void VCCueListProperties::updatePreviousInputSource()
     {
         m_previousInputUniverseEdit->setText(KInputNone);
         m_previousInputChannelEdit->setText(KInputNone);
+    }
+}
+
+/****************************************************************************
+ * Stop Cue List
+ ****************************************************************************/
+
+void VCCueListProperties::slotStopAttachClicked()
+{
+    AssignHotKey ahk(this, m_stopKeySequence);
+    if (ahk.exec() == QDialog::Accepted)
+    {
+        m_stopKeySequence = QKeySequence(ahk.keySequence());
+        m_stopKeyEdit->setText(m_stopKeySequence.toString(QKeySequence::NativeText));
+    }
+}
+
+void VCCueListProperties::slotStopDetachClicked()
+{
+    m_stopKeySequence = QKeySequence();
+    m_stopKeyEdit->setText(m_stopKeySequence.toString(QKeySequence::NativeText));
+}
+
+void VCCueListProperties::slotStopChooseInputClicked()
+{
+    SelectInputChannel sic(this, m_inputMap);
+    if (sic.exec() == QDialog::Accepted)
+    {
+        m_stopInputSource = QLCInputSource(sic.universe(), sic.channel());
+        updateStopInputSource();
+    }
+}
+
+void VCCueListProperties::slotStopAutoDetectInputToggled(bool checked)
+{
+    if (checked == true)
+    {
+        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotStopInputValueChanged(quint32,quint32)));
+    }
+    else
+    {
+        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotStopInputValueChanged(quint32,quint32)));
+    }
+}
+
+void VCCueListProperties::slotStopInputValueChanged(quint32 uni, quint32 ch)
+{
+    m_stopInputSource = QLCInputSource(uni, ch);
+    updateStopInputSource();
+}
+
+void VCCueListProperties::updateStopInputSource()
+{
+    QString uniName;
+    QString chName;
+
+    if (m_inputMap->inputSourceNames(m_stopInputSource, uniName, chName) == true)
+    {
+        /* Display the gathered information */
+        m_stopInputUniverseEdit->setText(uniName);
+        m_stopInputChannelEdit->setText(chName);
+    }
+    else
+    {
+        m_stopInputUniverseEdit->setText(KInputNone);
+        m_stopInputChannelEdit->setText(KInputNone);
     }
 }

@@ -47,6 +47,7 @@ class Doc;
 #define KXMLQLCVCCueListKey "Key"
 #define KXMLQLCVCCueListNext "Next"
 #define KXMLQLCVCCueListPrevious "Previous"
+#define KXMLQLCVCCueListStop "Stop"
 
 /**
  * VCCueList provides a \ref VirtualConsole widget to control cue lists.
@@ -64,6 +65,7 @@ class VCCueList : public VCWidget, public DMXSource
 public:
     static const quint8 nextInputSourceId;
     static const quint8 previousInputSourceId;
+    static const quint8 stopInputSourceId;
 
     /*************************************************************************
      * Initialization
@@ -157,12 +159,19 @@ public:
     /** Get the keyboard key combination for skipping to the previous cue */
     QKeySequence previousKeySequence() const;
 
+    /** Set the keyboard key combination for stopping the cue list */
+    void setStopKeySequence(const QKeySequence& keySequence);
+
+    /** Get the keyboard key combination for stopping the cue list */
+    QKeySequence stopKeySequence() const;
+
 protected slots:
     void slotKeyPressed(const QKeySequence& keySequence);
 
 protected:
     QKeySequence m_nextKeySequence;
     QKeySequence m_previousKeySequence;
+    QKeySequence m_stopKeySequence;
 
     /*************************************************************************
      * External Input
@@ -173,6 +182,7 @@ protected slots:
 private:
     quint32 m_nextLatestValue;
     quint32 m_previousLatestValue;
+    quint32 m_stopLatestValue;
 
     /*************************************************************************
      * VCWidget-inherited

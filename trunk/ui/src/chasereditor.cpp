@@ -194,8 +194,10 @@ void ChaserEditor::slotNameEdited(const QString& text)
 
 void ChaserEditor::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
-                         true, m_chaser->id(), Function::Scene, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setDisabledFunctions(QList <quint32>() << m_chaser->id());
+    fs.setFilter(Function::Scene, true); // Allow only scenes
+
     if (fs.exec() == QDialog::Accepted)
     {
         int insertionPoint = m_list->topLevelItemCount();

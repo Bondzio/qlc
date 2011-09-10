@@ -51,16 +51,15 @@
  *****************************************************************************/
 
 FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                     InputMap* inputMap, MasterTimer* masterTimer,
-                                     bool multiple,
-                                     quint32 disableFunction,
-                                     int filter,
-                                     bool constFilter)
+                                     InputMap* inputMap, MasterTimer* masterTimer)
     : QDialog(parent)
     , m_doc(doc)
     , m_outputMap(outputMap)
     , m_inputMap(inputMap)
     , m_masterTimer(masterTimer)
+    , m_multiSelection(true)
+    , m_filter(Function::Scene | Function::Chaser | Function::Collection | Function::EFX)
+    , m_constFilter(false)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(outputMap != NULL);
@@ -83,33 +82,34 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outpu
     /* Create toolbar */
     initToolBar();
 
-    /* Disable function */
-    m_disabledFunctions << disableFunction;
-
-    /* Filter */
-    m_filter = filter;
-
-    m_sceneCheck->setChecked(m_filter & Function::Scene);
-    m_addSceneAction->setEnabled(m_filter & Function::Scene);
     connect(m_sceneCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotSceneChecked(bool)));
 
-    m_chaserCheck->setChecked(m_filter & Function::Chaser);
-    m_addChaserAction->setEnabled(m_filter & Function::Chaser);
     connect(m_chaserCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotChaserChecked(bool)));
 
-    m_efxCheck->setChecked(m_filter & Function::EFX);
-    m_addEFXAction->setEnabled(m_filter & Function::EFX);
     connect(m_efxCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotEFXChecked(bool)));
 
-    m_collectionCheck->setChecked(m_filter & Function::Collection);
-    m_addCollectionAction->setEnabled(m_filter & Function::Collection);
     connect(m_collectionCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotCollectionChecked(bool)));
+}
 
-    if (constFilter == true)
+int FunctionSelection::exec()
+{
+    m_sceneCheck->setChecked(m_filter & Function::Scene);
+    m_addSceneAction->setEnabled(m_filter & Function::Scene);
+
+    m_chaserCheck->setChecked(m_filter & Function::Chaser);
+    m_addChaserAction->setEnabled(m_filter & Function::Chaser);
+
+    m_efxCheck->setChecked(m_filter & Function::EFX);
+    m_addEFXAction->setEnabled(m_filter & Function::EFX);
+
+    m_collectionCheck->setChecked(m_filter & Function::Collection);
+    m_addCollectionAction->setEnabled(m_filter & Function::Collection);
+
+    if (m_constFilter == true)
     {
         m_sceneCheck->setEnabled(false);
         m_chaserCheck->setEnabled(false);
@@ -118,7 +118,7 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outpu
     }
 
     /* Multiple/single selection */
-    if (multiple == true)
+    if (m_multiSelection == true)
         m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
     else
         m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -130,10 +130,31 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outpu
 
     refillTree();
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+
+    return QDialog::exec();
 }
 
 FunctionSelection::~FunctionSelection()
 {
+}
+
+/*****************************************************************************
+ * Multi-selection
+ *****************************************************************************/
+
+void FunctionSelection::setMultiSelection(bool multi)
+{
+    m_multiSelection = multi;
+}
+
+/*****************************************************************************
+ * Filter
+ *****************************************************************************/
+
+void FunctionSelection::setFilter(int types, bool constFilter)
+{
+    m_filter = types;
+    m_constFilter = constFilter;
 }
 
 /*****************************************************************************

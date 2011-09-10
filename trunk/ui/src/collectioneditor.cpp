@@ -104,12 +104,14 @@ void CollectionEditor::slotNameEdited(const QString& text)
 
 void CollectionEditor::slotAdd()
 {
-    FunctionSelection sel(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true, m_original->id());
-    if (sel.exec() == QDialog::Accepted)
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setDisabledFunctions(QList <quint32>() << m_original->id());
+
+    if (fs.exec() == QDialog::Accepted)
     {
         quint32 fid;
 
-        QListIterator <quint32> it(sel.selection());
+        QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
         {
             fid = it.next();

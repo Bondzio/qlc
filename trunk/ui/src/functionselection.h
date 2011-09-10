@@ -60,23 +60,47 @@ public:
      * @param constFilter If true, don't allow user filter selection
      */
     FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                      InputMap* inputMap, MasterTimer* masterTimer,
-                      bool multiple,
-                      quint32 disableFunction = Function::invalidId(),
-                      int filter = Function::Scene | Function::Chaser |
-                                   Function::EFX | Function::Collection,
-                      bool constFilter = false);
-
-    /**
-     * Destructor
-     */
+                      InputMap* inputMap, MasterTimer* masterTimer);
     ~FunctionSelection();
+
+public slots:
+    int exec();
 
 private:
     Doc* m_doc;
     OutputMap* m_outputMap;
     InputMap* m_inputMap;
     MasterTimer* m_masterTimer;
+
+    /*********************************************************************
+     * Multi-selection
+     *********************************************************************/
+public:
+    /**
+     * Allow multiple selection.
+     *
+     * @param multi true for multiple selection, false for single selection
+     */
+    void setMultiSelection(bool multi = true);
+
+private:
+    bool m_multiSelection;
+
+    /*********************************************************************
+     * Type filter
+     *********************************************************************/
+public:
+    /**
+     * Set a filter to display only the given function types
+     *
+     * @param filter An OR'ed combination of Function::Type to show
+     * @param constFilter true to disable user changes to filter settings
+     */
+    void setFilter(int types, bool constFilter = false);
+
+private:
+    int m_filter;
+    bool m_constFilter;
 
     /*********************************************************************
      * Disabled functions
@@ -162,10 +186,6 @@ protected slots:
      * OK button click
      */
     void accept();
-
-protected:
-    int m_filter;
-    quint32 m_disable;
 };
 
 #endif

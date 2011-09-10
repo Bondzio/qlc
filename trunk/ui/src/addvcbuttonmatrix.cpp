@@ -127,7 +127,7 @@ AddVCButtonMatrix::FrameStyle AddVCButtonMatrix::frameStyle() const
 
 void AddVCButtonMatrix::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
     fs.setDisabledFunctions(functions());
     if (fs.exec() == true)
     {

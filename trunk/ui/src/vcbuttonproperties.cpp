@@ -116,12 +116,10 @@ VCButtonProperties::~VCButtonProperties()
 
 void VCButtonProperties::slotAttachFunction()
 {
-    FunctionSelection sel(this, m_doc, m_outputMap, m_inputMap, m_masterTimer, false);
-    if (sel.exec() == QDialog::Accepted)
-    {
-        /* Get the first selected function */
-        slotSetFunction(sel.selection().at(0));
-    }
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setMultiSelection(false);
+    if (fs.exec() == QDialog::Accepted)
+        slotSetFunction(fs.selection().first());
 }
 
 void VCButtonProperties::slotSetFunction(quint32 fid)

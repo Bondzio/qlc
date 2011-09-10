@@ -670,9 +670,10 @@ void VCSliderProperties::slotLevelByGroupClicked()
 
 void VCSliderProperties::slotAttachPlaybackFunctionClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer,
-                         false, Function::invalidId(),
-                         Function::Scene | Function::Chaser | Function::EFX, true);
+    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setMultiSelection(false);
+    fs.setFilter(Function::Scene | Function::Chaser | Function::EFX, true);
+
     if (fs.exec() != QDialog::Accepted)
         return;
 

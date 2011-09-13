@@ -53,6 +53,7 @@
 #include "function_test.h"
 #include "fixture_test.h"
 #include "chaser_test.h"
+#include "script_test.h"
 #include "scene_test.h"
 #include "bus_test.h"
 #include "efx_test.h"
@@ -65,6 +66,12 @@ int main(int argc, char** argv)
     QCoreApplication qapp(argc, argv);
     int r;
 
+    Script_Test scr;
+    r = QTest::qExec(&scr, argc, argv);
+    if (r != 0)
+        return r;
+
+#if 0
     /********************************************************************
      * Fixture metadata
      ********************************************************************/
@@ -232,7 +239,7 @@ int main(int argc, char** argv)
     r = QTest::qExec(&gf, argc, argv);
     if (r != 0)
         return r;
-
+#endif
     return 0;
 }
 

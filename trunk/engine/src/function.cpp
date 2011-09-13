@@ -30,6 +30,7 @@
 #include "collection.h"
 #include "function.h"
 #include "chaser.h"
+#include "script.h"
 #include "scene.h"
 #include "efx.h"
 #include "bus.h"
@@ -39,6 +40,7 @@ const QString KSceneString      (      "Scene" );
 const QString KChaserString     (     "Chaser" );
 const QString KEFXString        (        "EFX" );
 const QString KCollectionString ( "Collection" );
+const QString KScriptString     (     "Script" );
 const QString KUndefinedString  (  "Undefined" );
 
 const QString KLoopString       (       "Loop" );
@@ -146,6 +148,8 @@ QString Function::typeToString(const Type& type)
         return KEFXString;
     case Collection:
         return KCollectionString;
+    case Script:
+        return KScriptString;
     case Undefined:
     default:
         return KUndefinedString;
@@ -162,6 +166,8 @@ Function::Type Function::stringToType(const QString& string)
         return EFX;
     else if (string == KCollectionString)
         return Collection;
+    else if (string == KScriptString)
+        return Script;
     else
         return Undefined;
 }
@@ -318,6 +324,8 @@ bool Function::loader(const QDomElement* root, Doc* doc)
         function = new class Collection(doc);
     else if (type == Function::EFX)
         function = new class EFX(doc);
+    else if (type == Function::Script)
+        function = new class Script(doc);
     else
         return false;
 

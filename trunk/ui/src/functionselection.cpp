@@ -29,6 +29,7 @@
 #include "functionselection.h"
 #include "collectioneditor.h"
 #include "chasereditor.h"
+#include "scripteditor.h"
 #include "sceneeditor.h"
 #include "mastertimer.h"
 #include "collection.h"
@@ -38,6 +39,7 @@
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
+#include "script.h"
 #include "scene.h"
 #include "efx.h"
 #include "doc.h"
@@ -58,7 +60,7 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outpu
     , m_inputMap(inputMap)
     , m_masterTimer(masterTimer)
     , m_multiSelection(true)
-    , m_filter(Function::Scene | Function::Chaser | Function::Collection | Function::EFX)
+    , m_filter(Function::Scene | Function::Chaser | Function::Collection | Function::EFX | Function::Script)
     , m_constFilter(false)
 {
     Q_ASSERT(doc != NULL);
@@ -93,6 +95,9 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outpu
 
     connect(m_collectionCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotCollectionChecked(bool)));
+
+    connect(m_scriptCheck, SIGNAL(toggled(bool)),
+            this, SLOT(slotScriptChecked(bool)));
 }
 
 int FunctionSelection::exec()
@@ -109,12 +114,16 @@ int FunctionSelection::exec()
     m_collectionCheck->setChecked(m_filter & Function::Collection);
     m_addCollectionAction->setEnabled(m_filter & Function::Collection);
 
+    m_scriptCheck->setChecked(m_filter & Function::Script);
+    m_addScriptAction->setEnabled(m_filter & Function::Script);
+
     if (m_constFilter == true)
     {
         m_sceneCheck->setEnabled(false);
         m_chaserCheck->setEnabled(false);
         m_efxCheck->setEnabled(false);
         m_collectionCheck->setEnabled(false);
+        m_scriptCheck->setEnabled(false);
     }
 
     /* Multiple/single selection */
@@ -197,13 +206,13 @@ void FunctionSelection::initToolBar()
                                           tr("New EFX"), this, SLOT(slotNewEFX()));
     m_addCollectionAction = m_toolbar->addAction(QIcon(":/collection.png"),
                             tr("New Collection"), this, SLOT(slotNewCollection()));
+    m_addScriptAction = m_toolbar->addAction(QIcon(":/script.png"),
+                            tr("New Script"), this, SLOT(slotNewScript()));
 }
 
 void FunctionSelection::slotNewScene()
 {
     Function* function = new Scene(m_doc);
-    function->setName(tr("New Scene"));
-
     if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
@@ -213,8 +222,6 @@ void FunctionSelection::slotNewScene()
 void FunctionSelection::slotNewChaser()
 {
     Function* function = new Chaser(m_doc);
-    function->setName(tr("New Chaser"));
-
     if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
@@ -224,8 +231,6 @@ void FunctionSelection::slotNewChaser()
 void FunctionSelection::slotNewEFX()
 {
     Function* function = new EFX(m_doc);
-    function->setName(tr("New EFX"));
-
     if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
@@ -235,8 +240,15 @@ void FunctionSelection::slotNewEFX()
 void FunctionSelection::slotNewCollection()
 {
     Function* function = new Collection(m_doc);
-    function->setName(tr("New Collection"));
+    if (m_doc->addFunction(function) == true)
+        addFunction(function);
+    else
+        addFunctionErrorMessage();
+}
 
+void FunctionSelection::slotNewScript()
+{
+    Function* function = new Script(m_doc);
     if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
@@ -280,14 +292,11 @@ void FunctionSelection::addFunctionErrorMessage()
                           tr("Unable to create new function."));
 }
 
-void FunctionSelection::updateFunctionItem(QTreeWidgetItem* item,
-        Function* function)
+void FunctionSelection::updateFunctionItem(QTreeWidgetItem* item, Function* function)
 {
-    QString str;
-
     item->setText(KColumnName, function->name());
     item->setText(KColumnType, function->typeString());
-    item->setText(KColumnID, str.setNum(function->id()));
+    item->setText(KColumnID, QString::number(function->id()));
 }
 
 void FunctionSelection::refillTree()
@@ -374,9 +383,14 @@ void FunctionSelection::slotCollectionChecked(bool state)
     refillTree();
 }
 
-void FunctionSelection::accept()
+void FunctionSelection::slotScriptChecked(bool state)
 {
-    QDialog::accept();
+    if (state == true)
+        m_filter = (m_filter | Function::Script);
+    else
+        m_filter = (m_filter & ~Function::Script);
+    m_addScriptAction->setEnabled(state);
+    refillTree();
 }
 
 /*****************************************************************************
@@ -410,6 +424,12 @@ int FunctionSelection::editFunction(Function* function)
     else if (function->type() == Function::EFX)
     {
         EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
+        result = editor.exec();
+    }
+    else if (function->type() == Function::Script)
+    {
+        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc, m_outputMap,
+                            m_inputMap, m_masterTimer);
         result = editor.exec();
     }
     else

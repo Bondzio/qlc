@@ -65,6 +65,7 @@
         <file alias="rainbow.png">../../gfx/rainbow.png</file>
         <file alias="resize.png">../../gfx/resize.png</file>
         <file alias="scene.png">../../gfx/scene.png</file>
+        <file alias="script.png">../../gfx/script.png</file>
         <file alias="shutter.png">../../gfx/shutter.png</file>
         <file alias="slider.png">../../gfx/slider.png</file>
         <file alias="slidermatrix.png">../../gfx/slidermatrix.png</file>

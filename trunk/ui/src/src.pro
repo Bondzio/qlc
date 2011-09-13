@@ -55,6 +55,7 @@ HEADERS += aboutbox.h \
            outputmanager.h \
            outputpatcheditor.h \
            sceneeditor.h \
+           scripteditor.h \
            selectinputchannel.h \
            vcbutton.h \
            vcbuttonproperties.h \
@@ -95,6 +96,7 @@ FORMS += aboutbox.ui \
          inputpatcheditor.ui \
          outputpatcheditor.ui \
          sceneeditor.ui \
+         scripteditor.ui \
          selectinputchannel.ui \
          vcbuttonproperties.ui \
          vccuelistproperties.ui \
@@ -135,6 +137,7 @@ SOURCES += aboutbox.cpp \
            outputmanager.cpp \
            outputpatcheditor.cpp \
            sceneeditor.cpp \
+           scripteditor.cpp \
            selectinputchannel.cpp \
            vcbutton.cpp \
            vcbuttonproperties.cpp \

@@ -131,6 +131,7 @@ protected slots:
     void slotNewChaser();
     void slotNewEFX();
     void slotNewCollection();
+    void slotNewScript();
 
 protected:
     /** Create toolbar */
@@ -142,6 +143,7 @@ protected:
     QAction* m_addChaserAction;
     QAction* m_addEFXAction;
     QAction* m_addCollectionAction;
+    QAction* m_addScriptAction;
 
     /*********************************************************************
      * Internal
@@ -181,11 +183,7 @@ protected slots:
     void slotEFXChecked(bool state);
     void slotChaserChecked(bool state);
     void slotSceneChecked(bool state);
-
-    /**
-     * OK button click
-     */
-    void accept();
+    void slotScriptChecked(bool state);
 };
 
 #endif

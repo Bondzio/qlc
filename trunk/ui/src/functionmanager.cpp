@@ -42,12 +42,14 @@
 #include "functionmanager.h"
 #include "functionwizard.h"
 #include "chasereditor.h"
+#include "scripteditor.h"
 #include "sceneeditor.h"
 #include "collection.h"
 #include "efxeditor.h"
 #include "function.h"
 #include "apputil.h"
 #include "chaser.h"
+#include "script.h"
 #include "scene.h"
 #include "doc.h"
 #include "efx.h"
@@ -220,6 +222,12 @@ void FunctionManager::initActions()
     connect(m_addEFXAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddEFX()));
 
+    m_addScriptAction = new QAction(QIcon(":/script.png"),
+                                 tr("New sc&ript"), this);
+    m_addScriptAction->setShortcut(QKeySequence("CTRL+R"));
+    connect(m_addScriptAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotAddScript()));
+
     m_wizardAction = new QAction(QIcon(":/wizard.png"),
                                  tr("Function Wizard"), this);
     m_wizardAction->setShortcut(QKeySequence("CTRL+A"));
@@ -268,6 +276,7 @@ void FunctionManager::initMenu()
     m_addMenu->addAction(m_addChaserAction);
     m_addMenu->addAction(m_addEFXAction);
     m_addMenu->addAction(m_addCollectionAction);
+    m_addMenu->addAction(m_addScriptAction);
     m_addMenu->addSeparator();
     m_addMenu->addAction(m_wizardAction);
 
@@ -322,6 +331,7 @@ void FunctionManager::initToolbar()
     m_toolbar->addAction(m_addChaserAction);
     m_toolbar->addAction(m_addEFXAction);
     m_toolbar->addAction(m_addCollectionAction);
+    m_toolbar->addAction(m_addScriptAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_wizardAction);
     m_toolbar->addSeparator();
@@ -430,6 +440,20 @@ void FunctionManager::slotAddCollection()
 void FunctionManager::slotAddEFX()
 {
     Function* f = new EFX(m_doc);
+    if (m_doc->addFunction(f) == true)
+    {
+        addFunction(f);
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Function creation failed"),
+                              tr("Unable to create new function."));
+    }
+}
+
+void FunctionManager::slotAddScript()
+{
+    Function* f = new Script(m_doc);
     if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
@@ -735,6 +759,12 @@ int FunctionManager::editFunction(Function* function)
     else if (function->type() == Function::EFX)
     {
         EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
+        result = editor.exec();
+    }
+    else if (function->type() == Function::Script)
+    {
+        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc, m_outputMap,
+                            m_inputMap, m_masterTimer);
         result = editor.exec();
     }
     else

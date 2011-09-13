@@ -160,7 +160,8 @@ public:
         Scene      = 1 << 0,
         Chaser     = 1 << 1,
         EFX        = 1 << 2,
-        Collection = 1 << 3
+        Collection = 1 << 3,
+        Script     = 1 << 4
     };
 
     /**

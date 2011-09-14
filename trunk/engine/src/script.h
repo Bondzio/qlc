@@ -24,6 +24,7 @@
 
 #include <QStringList>
 #include <QObject>
+#include <QMap>
 #include "function.h"
 
 class UniverseArray;
@@ -44,8 +45,12 @@ private:
     static const QString waitCmd;
     static const QString waitKeyCmd;
 
-    static const QString setDMXCmd;
+    static const QString setHtpCmd;
+    static const QString setLtpCmd;
     static const QString setFixtureCmd;
+
+    static const QString labelCmd;
+    static const QString jumpCmd;
 
     /************************************************************************
      * Initialization
@@ -67,22 +72,21 @@ public:
      * Script data
      ************************************************************************/
 public:
+    /** Set the raw script data */
     bool setData(const QString& str);
+
+    /** Get the raw script data */
     QString data() const;
 
-private:
-    /**
-     * Parse one line of script data into a list of token strings (keyword:value)
-     *
-     * @param line The script line to parse
-     * @param ok Tells if the line was parsed OK or not
-     * @return A list of tokens parsed from the line
-     */
-    QStringList tokenizeLine(const QString& line, bool* ok = NULL);
+    /** Set, whether to stop started functions when the script itself is stopped. */
+    void setStopOwnFunctionsAtEnd(bool stop);
+
+    /** Check, whether to stop started functions when the script itself is stopped. */
+    bool stopOwnFunctionsAtEnd() const;
 
 private:
-    QString m_data; //! Raw data
-    QList <QStringList> m_lines; //! Raw data parsed into lines of tokens
+    QString m_data;
+    bool m_stopOwnfunctionsAtEnd;
 
     /************************************************************************
      * Load & Save
@@ -110,6 +114,10 @@ public:
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
 
+    /** @reimpl */
+    void postRun(MasterTimer* timer, UniverseArray* universes);
+
+private:
     /**
      * Execute one command from the given line number.
      *
@@ -119,9 +127,21 @@ public:
      */
     void executeCommand(int index, MasterTimer* timer, UniverseArray* universes);
 
+    /**
+     * Parse one line of script data into a list of token strings (keyword:value)
+     *
+     * @param line The script line to parse
+     * @param ok Tells if the line was parsed OK or not
+     * @return A list of tokens parsed from the line
+     */
+    static QStringList tokenizeLine(const QString& line, bool* ok = NULL);
+
 private:
-    int m_currentCommand;
-    quint32 m_waitCount;
+    int m_currentCommand;        //! Current command line being handled
+    quint32 m_waitCount;         //! Timer ticks to wait before executing the next line
+    QList <QStringList> m_lines; //! Raw data parsed into lines of tokens
+    QMap <QString,int> m_labels; //! Labels and their line numbers
+    QList <Function*> m_startedFunctions; //! Functions started by this script
 };
 
 #endif

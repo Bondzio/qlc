@@ -35,6 +35,7 @@
 #include "inputmap.h"
 #include "script.h"
 #include "doc.h"
+#include "bus.h"
 
 ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc, OutputMap* outputMap,
                            InputMap* inputMap, MasterTimer* masterTimer)
@@ -48,9 +49,15 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc, OutputMap*
     setupUi(this);
     initAddMenu();
 
+    /* Name */
     m_nameEdit->setText(m_script->name());
+
+    /* Document */
     m_document = new QTextDocument(m_script->data(), this);
     m_editor->setDocument(m_document);
+
+    /* Stop own functions */
+    m_stopOwnFunctionsAtEndCheck->setChecked(m_script->stopOwnFunctionsAtEnd());
 }
 
 ScriptEditor::~ScriptEditor()
@@ -61,8 +68,9 @@ ScriptEditor::~ScriptEditor()
 
 void ScriptEditor::accept()
 {
-    m_script->setData(m_document->toPlainText());
     m_script->setName(m_nameEdit->text());
+    m_script->setData(m_document->toPlainText());
+    m_script->setStopOwnFunctionsAtEnd(m_stopOwnFunctionsAtEndCheck->isChecked());
     QDialog::accept();
 }
 

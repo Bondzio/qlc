@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
-    <height>536</height>
+    <width>382</width>
+    <height>365</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="2">
+   <item row="0" column="1" colspan="3">
     <widget class="QLineEdit" name="m_nameEdit"/>
    </item>
    <item row="1" column="0" rowspan="8" colspan="3">
@@ -31,6 +31,12 @@
        <horstretch>0</horstretch>
        <verstretch>1</verstretch>
       </sizepolicy>
+     </property>
+     <property name="lineWrapMode">
+      <enum>QTextEdit::NoWrap</enum>
+     </property>
+     <property name="tabStopWidth">
+      <number>20</number>
      </property>
     </widget>
    </item>
@@ -164,128 +170,6 @@
      </property>
     </spacer>
    </item>
-   <item row="9" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Run Order</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QRadioButton" name="m_loop">
-        <property name="toolTip">
-         <string>Run through over and over again</string>
-        </property>
-        <property name="text">
-         <string>Loop</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="m_singleShot">
-        <property name="toolTip">
-         <string>Run through once and stop</string>
-        </property>
-        <property name="text">
-         <string>Single Shot</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="m_pingPong">
-        <property name="toolTip">
-         <string>First run forwards, then backwards, again forwards, etc.</string>
-        </property>
-        <property name="text">
-         <string>Ping Pong</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="9" column="1">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Direction</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QRadioButton" name="m_forward">
-        <property name="toolTip">
-         <string>Start from the first step</string>
-        </property>
-        <property name="text">
-         <string>Forward</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="m_backward">
-        <property name="toolTip">
-         <string>Start from the last step</string>
-        </property>
-        <property name="text">
-         <string>Backward</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Minimum</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="9" column="2" colspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Speed bus</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QComboBox" name="m_busCombo">
-        <property name="toolTip">
-         <string>Bus for fade speed</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item row="10" column="0" colspan="4">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
@@ -293,6 +177,16 @@
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QCheckBox" name="m_stopOwnFunctionsAtEndCheck">
+     <property name="toolTip">
+      <string>Functions that were started by this script are stopped when the script itself is stopped</string>
+     </property>
+     <property name="text">
+      <string>Stop own functions at the end</string>
      </property>
     </widget>
    </item>

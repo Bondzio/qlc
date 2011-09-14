@@ -39,15 +39,20 @@ const QString Script::stopFunctionCmd = QString("stopfunction");
 const QString Script::waitCmd = QString("wait");
 const QString Script::waitKeyCmd = QString("waitkey");
 
-const QString Script::setDMXCmd = QString("setdmx");
+const QString Script::setHtpCmd = QString("sethtp");
+const QString Script::setLtpCmd = QString("setltp");
 const QString Script::setFixtureCmd = QString("setfixture");
+
+const QString Script::labelCmd = QString("label");
+const QString Script::jumpCmd = QString("jump");
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
 Script::Script(Doc* doc) : Function(doc)
-    , m_currentCommand(-1)
+    , m_stopOwnfunctionsAtEnd(false)
+    , m_currentCommand(0)
     , m_waitCount(0)
 {
     setName(tr("New Script"));
@@ -94,15 +99,6 @@ bool Script::copyFrom(const Function* function)
 bool Script::setData(const QString& str)
 {
     m_data = str;
-    m_lines.clear();
-
-    if (m_data.isEmpty() == false)
-    {
-        QStringList lines = m_data.split(QRegExp("(\r\n|\n\r|\r|\n)"), QString::KeepEmptyParts);
-        foreach (QString line, lines)
-            m_lines << tokenizeLine(line + QString("\n"));
-    }
-
     return true;
 }
 
@@ -111,69 +107,14 @@ QString Script::data() const
     return m_data;
 }
 
-QStringList Script::tokenizeLine(const QString& str, bool* ok)
+void Script::setStopOwnFunctionsAtEnd(bool stop)
 {
-    QStringList tokens;
-    int left = 0;
-    int right = 0;
-    QString keyword;
-    QString value;
+    m_stopOwnfunctionsAtEnd = stop;
+}
 
-    if (str.simplified().startsWith("//") == true || str.simplified().isEmpty() == true)
-    {
-        tokens = QStringList(); // Return an empty string list for commented lines
-    }
-    else
-    {
-        // Truncate everything after the first comment sign
-        QString line = str;
-        left = line.indexOf("//");
-        if (left != -1)
-            line.truncate(left);
-
-        left = 0;
-        while (left < line.length())
-        {
-            // Find the next colon to get the keyword
-            right = line.indexOf(":", left);
-            if (right == -1)
-            {
-                qDebug() << "Syntax error:" << line.mid(left);
-                if (ok != NULL)
-                    *ok = false;
-                break;
-            }
-            else
-            {
-                // Keyword found
-                keyword = line.mid(left, right - left);
-                left = right + 1;
-            }
-
-            // Find the next whitespace to get the value
-            right = line.indexOf(QRegExp("\\s"), left);
-            if (right == -1)
-            {
-                qDebug() << "Syntax error:" << line.mid(left);
-                if (ok != NULL)
-                    *ok = false;
-                break;
-            }
-            else
-            {
-                // Value found
-                value = line.mid(left, right - left);
-                left = right + 1;
-            }
-
-            tokens << QString(keyword + ":" + value);
-        }
-    }
-
-    if (ok != NULL)
-        *ok = true;
-
-    return tokens;
+bool Script::stopOwnFunctionsAtEnd() const
+{
+    return m_stopOwnfunctionsAtEnd;
 }
 
 /****************************************************************************
@@ -287,16 +228,43 @@ bool Script::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 void Script::arm()
 {
+    m_labels.clear();
+    m_lines.clear();
+
+    // Construct individual code lines from the data
+    if (m_data.isEmpty() == false)
+    {
+        QStringList lines = m_data.split(QRegExp("(\r\n|\n\r|\r|\n)"), QString::KeepEmptyParts);
+        foreach (QString line, lines)
+            m_lines << tokenizeLine(line + QString("\n"));
+    }
+
+    // Map all labels to their individual line numbers for fast jumps
+    for (int i = 0; i < m_lines.size(); i++)
+    {
+        QStringList tokens = m_lines[i];
+        if (tokens.isEmpty() == false &&
+            tokens[0].simplified().startsWith(Script::labelCmd) == true)
+        {
+            QStringList command = tokens[0].split(":");
+            if (command.size() == 2)
+                m_labels[command[1]] = i;
+        }
+    }
 }
 
 void Script::disarm()
 {
+    // Waste not
+    m_lines.clear();
+    m_labels.clear();
 }
 
 void Script::preRun(MasterTimer* timer)
 {
     m_waitCount = 0;
-    m_currentCommand = -1;
+    m_currentCommand = 0;
+    m_startedFunctions.clear();
 
     Function::preRun(timer);
 }
@@ -305,27 +273,42 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
 {
     incrementElapsed();
 
-    if (m_waitCount != 0)
+    if (stopped() == false)
     {
-        m_waitCount--;
-        // TODO: HTP write
-    }
-    else
-    {
-        while (m_currentCommand < m_lines.size())
+        if (m_waitCount != 0)
         {
-            m_currentCommand++;
-            executeCommand(m_currentCommand, timer, universes);
-            if (m_waitCount > 0)
-                break;
+            m_waitCount--;
+            // TODO: HTP write
         }
-    }
+        else
+        {
+            while (m_currentCommand < m_lines.size() && stopped() == false)
+            {
+                executeCommand(m_currentCommand, timer, universes);
+                m_currentCommand++;
+            }
+        }
 
-    if (m_currentCommand >= m_lines.size())
-        stop();
+        // In case wait() is the last command, don't stop the script prematurely
+        if (m_currentCommand >= m_lines.size() && m_waitCount == 0)
+            stop();
+    }
 }
 
-void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*universes*/)
+void Script::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    if (m_stopOwnfunctionsAtEnd == true)
+    {
+        // Stop all functions started by this script
+        foreach (Function* function, m_startedFunctions)
+            function->stop();
+        m_startedFunctions.clear();
+    }
+
+    Function::postRun(timer, universes);
+}
+
+void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* universes)
 {
     QString errorString;
     QStringList tokens;
@@ -365,6 +348,7 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
                 timer->startFunction(function, true);
             else
                 qWarning() << "Function" << function->name() << "is already running";
+            m_startedFunctions << function;
         }
         else
         {
@@ -388,6 +372,7 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
                 function->stop();
             else
                 qWarning() << "Function" << function->name() << "is not running";
+            m_startedFunctions.removeAll(function);
         }
         else
         {
@@ -416,11 +401,11 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
         qDebug() << index << "WAIT KEY" << command[1];
         goto success;
     }
-    else if (command[0] == Script::setDMXCmd)
+    else if (command[0] == Script::setHtpCmd || command[0] == Script::setLtpCmd)
     {
         bool ok = false;
-        quint32 addr = 0;
-        quint32 uni = 0;
+        int addr = 0;
+        int uni = 1;
         uchar value = 0;
 
         addr = command[1].toUInt(&ok);
@@ -446,17 +431,34 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
             }
         }
 
-        qDebug() << index << "SETDMX" << "A:" << addr << "V:" << value << "U:" << uni;
-        goto success;
+        QLCChannel::Group group;
+        if (command[0] == Script::setHtpCmd)
+            group = QLCChannel::Intensity;
+        else
+            group = QLCChannel::NoGroup;
+
+        int channel = (uni - 1) * 512;
+        channel += addr - 1;
+        if (channel >= 0 && channel < universes->size())
+        {
+            universes->write(channel, value, group);
+            qDebug() << index << "SET(H/L)TP" << "A:" << addr << "V:" << value << "U:" << uni;
+            goto success;
+        }
+        else
+        {
+            errorString = QString("Invalid address: %1 or universe: %2").arg(addr).arg(uni);
+            goto error;
+        }
     }
     else if (command[0] == Script::setFixtureCmd)
     {
         bool ok = false;
-        quint32 fxi = 0;
+        quint32 id = 0;
         quint32 ch = 0;
         uchar value = 0;
 
-        fxi = command[1].toUInt(&ok);
+        id = command[1].toUInt(&ok);
         if (ok == false)
             goto error;
 
@@ -470,7 +472,7 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
                 if (list[0] == "val" || list[0] == "value")
                     value = uchar(list[1].toUInt(&ok));
                 else if (list[0] == "ch" || list[0] == "channel")
-                    ch = list[1].toUInt(&ok);
+                    ch = list[1].toUInt(&ok) - 1;
                 else
                     goto error;
 
@@ -479,8 +481,51 @@ void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* /*univ
             }
         }
 
-        qDebug() << index << "SETFXI" << "FXI:" << fxi << "CH:" << ch << "VAL:" << value;
-        goto success;
+        Fixture* fxi = doc->fixture(id);
+        if (fxi != NULL)
+        {
+            if (ch < fxi->channels())
+            {
+                const QLCChannel* channel = fxi->channel(ch);
+                Q_ASSERT(channel != NULL);
+
+                int address = fxi->universeAddress() + ch;
+                if (address < universes->size())
+                {
+                    universes->write(address, value, channel->group());
+                    qDebug() << index << "SETFXI" << "FXI:" << fxi << "CH:" << ch << "VAL:" << value;
+                    goto success;
+                }
+                else
+                {
+                    errorString = QString("Invalid address: %1").arg(address);
+                    goto error;
+                }
+                goto success;
+            }
+            else
+            {
+                errorString = QString("Fixture %1 has no channel number %2").arg(fxi->name()).arg(ch);
+                goto error;
+            }
+        }
+    }
+    else if (command[0] == Script::labelCmd)
+    {
+        qDebug() << "LABEL:" << command[1];
+    }
+    else if (command[0] == Script::jumpCmd)
+    {
+        int lineNumber = m_labels[command[1]];
+        if (lineNumber >= 0 && lineNumber < m_lines.size())
+        {
+            m_currentCommand = lineNumber;
+            goto success;
+        }
+        else
+        {
+            errorString = QString("No such label: %1").arg(command[1]);
+        }
     }
     else
     {
@@ -492,4 +537,69 @@ error:
 
 success:
     return;
+}
+
+QStringList Script::tokenizeLine(const QString& str, bool* ok)
+{
+    QStringList tokens;
+    int left = 0;
+    int right = 0;
+    QString keyword;
+    QString value;
+
+    if (str.simplified().startsWith("//") == true || str.simplified().isEmpty() == true)
+    {
+        tokens = QStringList(); // Return an empty string list for commented lines
+    }
+    else
+    {
+        // Truncate everything after the first comment sign
+        QString line = str;
+        left = line.indexOf("//");
+        if (left != -1)
+            line.truncate(left);
+
+        left = 0;
+        while (left < line.length())
+        {
+            // Find the next colon to get the keyword
+            right = line.indexOf(":", left);
+            if (right == -1)
+            {
+                qDebug() << "Syntax error:" << line.mid(left);
+                if (ok != NULL)
+                    *ok = false;
+                break;
+            }
+            else
+            {
+                // Keyword found
+                keyword = line.mid(left, right - left);
+                left = right + 1;
+            }
+
+            // Find the next whitespace to get the value
+            right = line.indexOf(QRegExp("\\s"), left);
+            if (right == -1)
+            {
+                qDebug() << "Syntax error:" << line.mid(left);
+                if (ok != NULL)
+                    *ok = false;
+                break;
+            }
+            else
+            {
+                // Value found
+                value = line.mid(left, right - left);
+                left = right + 1;
+            }
+
+            tokens << QString(keyword + ":" + value);
+        }
+    }
+
+    if (ok != NULL)
+        *ok = true;
+
+    return tokens;
 }

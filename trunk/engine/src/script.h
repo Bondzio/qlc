@@ -124,8 +124,89 @@ private:
      * @param index Line number to execute
      * @param timer The MasterTimer that runs the house
      * @param universes The universe array that governs DMX data
+     * @return true to continue loop immediately, false to return control back
+     *         to MasterTimer.
      */
-    void executeCommand(int index, MasterTimer* timer, UniverseArray* universes);
+    bool executeCommand(int index, MasterTimer* timer, UniverseArray* universes);
+
+    /**
+     * Check, if the script should still wait or if it should proceed to executing
+     * the next command.
+     *
+     * @return true if no longer waiting, false if script is waiting
+     */
+    bool waiting();
+
+    /**
+     * Handle "startfunction" command.
+     *
+     * @param command The first keyword:value pair
+     * @param timer The MasterTimer that should run the function
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleStartFunction(const QStringList& command, MasterTimer* timer);
+
+    /**
+     * Handle "stopfunction" command.
+     *
+     * @param command The first keyword:value pair
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleStopFunction(const QStringList& command);
+
+    /**
+     * Handle "wait" command.
+     *
+     * @param command The first keyword:value pair
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleWait(const QStringList& command);
+
+    /**
+     * Handle "waitkey" command.
+     *
+     * @param command The first keyword:value pair
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleWaitKey(const QStringList& command);
+
+    /**
+     * Handle "sethtp" and "setltp" commands.
+     *
+     * @param command The first keyword:value pair
+     * @param tokens All keyword:value pairs (including the first one)
+     * @param universes The universe array to write DMX data
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleSetHtpLtp(const QStringList& command, const QStringList& tokens,
+                            UniverseArray* universes);
+
+    /**
+     * Handle "setfixture" command.
+     *
+     * @param command The first keyword:value pair
+     * @param tokens All keyword:value pairs (including the first one)
+     * @param universes The universe array to write DMX data
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleSetFixture(const QStringList& command, const QStringList& tokens,
+                             UniverseArray* universes);
+
+    /**
+     * Handle "label" command.
+     *
+     * @param command The first keyword:value pair
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleLabel(const QStringList& command);
+
+    /**
+     * Handle "jump" command.
+     *
+     * @param command The first keyword:value pair
+     * @return An empty string if successful. Otherwise an error string.
+     */
+    QString handleJump(const QStringList& command);
 
     /**
      * Parse one line of script data into a list of token strings (keyword:value)

@@ -273,20 +273,14 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
 {
     incrementElapsed();
 
-    if (stopped() == false)
+    if (stopped() == false && waiting() == false)
     {
-        if (m_waitCount != 0)
+        while (m_currentCommand < m_lines.size() && stopped() == false)
         {
-            m_waitCount--;
-            // TODO: HTP write
-        }
-        else
-        {
-            while (m_currentCommand < m_lines.size() && stopped() == false)
-            {
-                executeCommand(m_currentCommand, timer, universes);
-                m_currentCommand++;
-            }
+            bool continueLoop = executeCommand(m_currentCommand, timer, universes);
+            m_currentCommand++;
+            if (continueLoop == false)
+                break;
         }
 
         // In case wait() is the last command, don't stop the script prematurely
@@ -308,235 +302,310 @@ void Script::postRun(MasterTimer* timer, UniverseArray* universes)
     Function::postRun(timer, universes);
 }
 
-void Script::executeCommand(int index, MasterTimer* timer, UniverseArray* universes)
+bool Script::waiting()
 {
-    QString errorString;
-    QStringList tokens;
-    QStringList command;
+    if (m_waitCount > 0)
+    {
+        m_waitCount--;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Script::executeCommand(int index, MasterTimer* timer, UniverseArray* universes)
+{
+    if (index < 0 || index >= m_lines.size())
+    {
+        qWarning() << "Invalid command index:" << index;
+        return false;
+    }
+
+    QStringList tokens = m_lines[index];
+    if (tokens.isEmpty() == true)
+        return true;
+
+    bool continueLoop = true;
+    QString error;
+    QStringList command = tokens[0].split(":");
+    if (command.size() < 2)
+    {
+        error = QString("Syntax error");
+    }
+    else if (command[0] == Script::startFunctionCmd)
+    {
+        error = handleStartFunction(command, timer);
+    }
+    else if (command[0] == Script::stopFunctionCmd)
+    {
+        error = handleStopFunction(command);
+    }
+    else if (command[0] == Script::waitCmd)
+    {
+        error = handleWait(command);
+    }
+    else if (command[0] == Script::waitKeyCmd)
+    {
+        error = handleWaitKey(command);
+    }
+    else if (command[0] == Script::setHtpCmd || command[0] == Script::setLtpCmd)
+    {
+        error = handleSetHtpLtp(command, tokens, universes);
+    }
+    else if (command[0] == Script::setFixtureCmd)
+    {
+        error = handleSetFixture(command, tokens, universes);
+    }
+    else if (command[0] == Script::labelCmd)
+    {
+        error = handleLabel(command);
+    }
+    else if (command[0] == Script::jumpCmd)
+    {
+        // Jumping can cause an infinite non-waiting loop, causing starvation
+        // among other functions. Therefore, the script must relinquish its
+        // time slot after each jump. If there is no error in jumping, the jump
+        // must have happened.
+        error = handleJump(command);
+        if (error.isEmpty() == true)
+            continueLoop = false;
+    }
+    else
+    {
+        error = QString("Unknown command: %1").arg(command[0]);
+    }
+
+    if (error.isEmpty() == false)
+        qWarning() << QString("%1: %2: %3").arg(name()).arg(index).arg(error);
+
+    return continueLoop;
+}
+
+QString Script::handleStartFunction(const QStringList& command, MasterTimer* timer)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    bool ok = false;
+    quint32 id = command[1].toUInt(&ok);
+    if (ok == false)
+        return QString("Invalid function ID: %1").arg(command[1]);
 
     Doc* doc = qobject_cast<Doc*> (parent());
     Q_ASSERT(doc != NULL);
 
-    if (index < 0 || index >= m_lines.size())
+    Function* function = doc->function(id);
+    if (function != NULL)
     {
-        qWarning() << "Invalid command index:" << index;
-        return;
+        if (function->stopped() == true)
+            timer->startFunction(function, true);
+        else
+            qWarning() << "Function (" << function->name() << ") is already running.";
+
+        m_startedFunctions << function;
+        return QString();
     }
-
-    tokens = m_lines[index];
-    if (tokens.isEmpty() == true)
-        goto success;
-
-    command = tokens[0].split(":");
-    if (command.size() < 2)
+    else
     {
-        errorString = QString("Line %1 has an invalid command").arg(index);
-        goto error;
+        return QString("No such function (ID %1)").arg(id);
     }
+}
 
-    if (command[0] == Script::startFunctionCmd)
+QString Script::handleStopFunction(const QStringList& command)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    bool ok = false;
+    quint32 id = command[1].toUInt(&ok);
+    if (ok == false)
+        return QString("Invalid function ID: %1").arg(command[1]);
+
+    Doc* doc = qobject_cast<Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    Function* function = doc->function(id);
+    if (function != NULL)
     {
-        bool ok = false;
-        quint32 id = command[1].toUInt(&ok);
-        if (ok == false)
-            goto error;
+        if (function->stopped() == false)
+            function->stop();
+        else
+            qWarning() << "Function (" << function->name() << ") is not running.";
 
-        Function* function = doc->function(id);
-        if (function != NULL)
+        m_startedFunctions.removeAll(function);
+        return QString();
+    }
+    else
+    {
+        return QString("No such function (ID %1)").arg(id);
+    }
+}
+
+QString Script::handleWait(const QStringList& command)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    double time = 0;
+    bool ok = false;
+
+    time = command[1].toDouble(&ok);
+    if (ok == false)
+        return QString("Invalid wait time: %1").arg(command[1]);
+
+    m_waitCount = time * MasterTimer::frequency();
+
+    return QString();
+}
+
+QString Script::handleWaitKey(const QStringList& command)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    Q_UNUSED(command);
+    return QString("Not implemented yet");
+}
+
+QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& tokens,
+                                UniverseArray* universes)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    bool ok = false;
+    int addr = 0;
+    int uni = 1;
+    uchar value = 0;
+
+    addr = command[1].toUInt(&ok);
+    if (ok == false)
+        return QString("Invalid address: %1").arg(command[1]);
+
+    for (int tok = 1; tok < tokens.size(); tok++)
+    {
+        QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
+        list[0] = list[0].toLower().trimmed();
+        if (list.size() == 2)
         {
-            if (function->stopped() == true)
-                timer->startFunction(function, true);
+            ok = false;
+            if (list[0] == "val" || list[0] == "value")
+                value = uchar(list[1].toUInt(&ok));
+            else if (list[0] == "uni" || list[0] == "universe")
+                uni = list[1].toUInt(&ok);
             else
-                qWarning() << "Function" << function->name() << "is already running";
-            m_startedFunctions << function;
-        }
-        else
-        {
-            errorString = QString("No function with ID %1").arg(id);
-            goto error;
-        }
+                return QString("Unrecognized keyword: %1").arg(list[0]);
 
-        goto success;
+            if (ok == false)
+                return QString("Invalid value (%1) for keyword: %2").arg(list[1]).arg(list[0]);
+        }
     }
-    else if (command[0] == Script::stopFunctionCmd)
-    {
-        bool ok = false;
-        quint32 id = command[1].toUInt(&ok);
-        if (ok == false)
-            goto error;
 
-        Function* function = doc->function(id);
-        if (function != NULL)
+    // So is this LTP or HTP?
+    QLCChannel::Group group;
+    if (command[0] == Script::setHtpCmd)
+        group = QLCChannel::Intensity;
+    else
+        group = QLCChannel::NoGroup;
+
+    int channel = (uni - 1) * 512;
+    channel += addr - 1;
+    if (channel >= 0 && channel < universes->size())
+    {
+        universes->write(channel, value, group);
+        return QString();
+    }
+    else
+    {
+        return QString("Invalid address: %1 or universe: %2").arg(addr).arg(uni);
+    }
+}
+
+QString Script::handleSetFixture(const QStringList& command, const QStringList& tokens,
+                                 UniverseArray* universes)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    bool ok = false;
+    quint32 id = 0;
+    quint32 ch = 0;
+    uchar value = 0;
+
+    id = command[1].toUInt(&ok);
+    if (ok == false)
+        return QString("Invalid fixture (ID: %1)").arg(command[1]);
+
+    for (int tok = 1; tok < tokens.size(); tok++)
+    {
+        QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
+        list[0] = list[0].toLower().trimmed();
+        if (list.size() == 2)
         {
-            if (function->stopped() == false)
-                function->stop();
+            ok = false;
+            if (list[0] == "val" || list[0] == "value")
+                value = uchar(list[1].toUInt(&ok));
+            else if (list[0] == "ch" || list[0] == "channel")
+                ch = list[1].toUInt(&ok) - 1;
             else
-                qWarning() << "Function" << function->name() << "is not running";
-            m_startedFunctions.removeAll(function);
+                return QString("Unrecognized keyword: %1").arg(list[0]);
+
+            if (ok == false)
+                return QString("Invalid value (%1) for keyword: %2").arg(list[1]).arg(list[0]);
         }
-        else
+    }
+
+    Doc* doc = qobject_cast<Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    Fixture* fxi = doc->fixture(id);
+    if (fxi != NULL)
+    {
+        if (ch < fxi->channels())
         {
-            errorString = QString("No function with ID %1").arg(id);
-            goto error;
-        }
+            const QLCChannel* channel = fxi->channel(ch);
+            Q_ASSERT(channel != NULL);
 
-        goto success;
-    }
-    else if (command[0] == Script::waitCmd)
-    {
-        double time = 0;
-        bool ok = false;
-
-        time = command[1].toDouble(&ok);
-        if (ok == false)
-            goto error;
-
-        m_waitCount = time * MasterTimer::frequency();
-
-        qDebug() << index << "WAIT" << m_waitCount << "ticks";
-        goto success;
-    }
-    else if (command[0] == Script::waitKeyCmd)
-    {
-        qDebug() << index << "WAIT KEY" << command[1];
-        goto success;
-    }
-    else if (command[0] == Script::setHtpCmd || command[0] == Script::setLtpCmd)
-    {
-        bool ok = false;
-        int addr = 0;
-        int uni = 1;
-        uchar value = 0;
-
-        addr = command[1].toUInt(&ok);
-        if (ok == false)
-            goto error;
-
-        for (int tok = 1; tok < tokens.size(); tok++)
-        {
-            QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
-            list[0] = list[0].toLower().trimmed();
-            if (list.size() == 2)
+            int address = fxi->universeAddress() + ch;
+            if (address < universes->size())
             {
-                ok = false;
-                if (list[0] == "val" || list[0] == "value")
-                    value = uchar(list[1].toUInt(&ok));
-                else if (list[0] == "uni" || list[0] == "universe")
-                    uni = list[1].toUInt(&ok);
-                else
-                    goto error;
-
-                if (ok == false)
-                    goto error;
-            }
-        }
-
-        QLCChannel::Group group;
-        if (command[0] == Script::setHtpCmd)
-            group = QLCChannel::Intensity;
-        else
-            group = QLCChannel::NoGroup;
-
-        int channel = (uni - 1) * 512;
-        channel += addr - 1;
-        if (channel >= 0 && channel < universes->size())
-        {
-            universes->write(channel, value, group);
-            qDebug() << index << "SET(H/L)TP" << "A:" << addr << "V:" << value << "U:" << uni;
-            goto success;
-        }
-        else
-        {
-            errorString = QString("Invalid address: %1 or universe: %2").arg(addr).arg(uni);
-            goto error;
-        }
-    }
-    else if (command[0] == Script::setFixtureCmd)
-    {
-        bool ok = false;
-        quint32 id = 0;
-        quint32 ch = 0;
-        uchar value = 0;
-
-        id = command[1].toUInt(&ok);
-        if (ok == false)
-            goto error;
-
-        for (int tok = 1; tok < tokens.size(); tok++)
-        {
-            QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
-            list[0] = list[0].toLower().trimmed();
-            if (list.size() == 2)
-            {
-                ok = false;
-                if (list[0] == "val" || list[0] == "value")
-                    value = uchar(list[1].toUInt(&ok));
-                else if (list[0] == "ch" || list[0] == "channel")
-                    ch = list[1].toUInt(&ok) - 1;
-                else
-                    goto error;
-
-                if (ok == false)
-                    goto error;
-            }
-        }
-
-        Fixture* fxi = doc->fixture(id);
-        if (fxi != NULL)
-        {
-            if (ch < fxi->channels())
-            {
-                const QLCChannel* channel = fxi->channel(ch);
-                Q_ASSERT(channel != NULL);
-
-                int address = fxi->universeAddress() + ch;
-                if (address < universes->size())
-                {
-                    universes->write(address, value, channel->group());
-                    qDebug() << index << "SETFXI" << "FXI:" << fxi << "CH:" << ch << "VAL:" << value;
-                    goto success;
-                }
-                else
-                {
-                    errorString = QString("Invalid address: %1").arg(address);
-                    goto error;
-                }
-                goto success;
+                universes->write(address, value, channel->group());
+                return QString();
             }
             else
             {
-                errorString = QString("Fixture %1 has no channel number %2").arg(fxi->name()).arg(ch);
-                goto error;
+                return QString("Invalid address: %1").arg(address);
             }
-        }
-    }
-    else if (command[0] == Script::labelCmd)
-    {
-        qDebug() << "LABEL:" << command[1];
-    }
-    else if (command[0] == Script::jumpCmd)
-    {
-        int lineNumber = m_labels[command[1]];
-        if (lineNumber >= 0 && lineNumber < m_lines.size())
-        {
-            m_currentCommand = lineNumber;
-            goto success;
         }
         else
         {
-            errorString = QString("No such label: %1").arg(command[1]);
+            return QString("Fixture (%1) has no channel number %2").arg(fxi->name()).arg(ch);
         }
     }
     else
     {
-        errorString = QString("Unknown command:") + command[0];
+        return QString("No such fixture (ID: %1)").arg(id);
     }
+}
 
-error:
-    qWarning() << index << "error:" << errorString;
+QString Script::handleLabel(const QStringList& command)
+{
+    qDebug() << Q_FUNC_INFO;
+    Q_UNUSED(command);
+    return QString();
+}
 
-success:
-    return;
+QString Script::handleJump(const QStringList& command)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    if (m_labels.contains(command[1]) == true)
+    {
+        int lineNumber = m_labels[command[1]];
+        Q_ASSERT(lineNumber >= 0 && lineNumber < m_lines.size());
+        m_currentCommand = lineNumber;
+        return QString();
+    }
+    else
+    {
+        return QString("No such label: %1").arg(command[1]);
+    }
 }
 
 QStringList Script::tokenizeLine(const QString& str, bool* ok)

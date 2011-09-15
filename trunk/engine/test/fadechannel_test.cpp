@@ -114,9 +114,27 @@ void FadeChannel_Test::ready()
 void FadeChannel_Test::bus()
 {
     FadeChannel ch;
-    QVERIFY(ch.bus() == Bus::defaultFade());
+    QVERIFY(ch.bus() == Bus::invalid());
     ch.setBus(19);
     QVERIFY(ch.bus() == quint32(19));
+}
+
+void FadeChannel_Test::fixedTime()
+{
+    FadeChannel ch;
+    QVERIFY(ch.fixedTime() == 0);
+    ch.setFixedTime(50);
+    QVERIFY(ch.fixedTime() == quint32(50));
+}
+
+void FadeChannel_Test::fadeTime()
+{
+    FadeChannel ch;
+    ch.setFixedTime(15);
+    Bus::instance()->setValue(Bus::defaultFade(), 8);
+    QCOMPARE(ch.fadeTime(), quint32(15));
+    ch.setBus(Bus::defaultFade());
+    QCOMPARE(ch.fadeTime(), quint32(8));
 }
 
 void FadeChannel_Test::calculateCurrent()

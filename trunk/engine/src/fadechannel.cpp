@@ -24,15 +24,15 @@
 #include "fadechannel.h"
 #include "bus.h"
 
-FadeChannel::FadeChannel(quint32 address, QLCChannel::Group grp,
-                         uchar start, uchar target, uchar current)
-    : m_address(address)
-    , m_group(grp)
-    , m_start(start)
-    , m_target(target)
-    , m_current(current)
+FadeChannel::FadeChannel()
+    : m_address(0)
+    , m_group(QLCChannel::NoGroup)
+    , m_start(0)
+    , m_target(0)
+    , m_current(0)
     , m_ready(false)
-    , m_bus(Bus::defaultFade())
+    , m_bus(Bus::invalid())
+    , m_fixedTime(0)
     , m_elapsed(0)
     , m_removeWhenTargetReached(false)
 {
@@ -46,6 +46,7 @@ FadeChannel::FadeChannel(const FadeChannel& ch)
     , m_current(ch.m_current)
     , m_ready(ch.m_ready)
     , m_bus(ch.m_bus)
+    , m_fixedTime(ch.m_fixedTime)
     , m_elapsed(ch.m_elapsed)
     , m_removeWhenTargetReached(ch.m_removeWhenTargetReached)
 {
@@ -130,6 +131,16 @@ quint32 FadeChannel::bus() const
     return m_bus;
 }
 
+void FadeChannel::setFixedTime(quint32 ticks)
+{
+    m_fixedTime = ticks;
+}
+
+quint32 FadeChannel::fixedTime() const
+{
+    return m_fixedTime;
+}
+
 void FadeChannel::setElapsed(quint32 time)
 {
     m_elapsed = time;
@@ -142,7 +153,10 @@ quint32 FadeChannel::elapsed() const
 
 quint32 FadeChannel::fadeTime() const
 {
-    return Bus::instance()->value(m_bus);
+    if (bus() != Bus::invalid())
+        return Bus::instance()->value(m_bus);
+    else
+        return m_fixedTime;
 }
 
 uchar FadeChannel::nextStep()

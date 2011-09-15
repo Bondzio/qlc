@@ -37,6 +37,8 @@ private slots:
     void current();
     void ready();
     void bus();
+    void fixedTime();
+    void fadeTime();
     void calculateCurrent();
 };
 

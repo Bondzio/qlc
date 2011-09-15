@@ -106,6 +106,11 @@ public:
     static quint32 defaultPalette();
 
     /**
+     * Get the invalid bus ID (indicating no bus)
+     */
+    static quint32 invalid();
+
+    /**
      * Destructor
      */
     ~Bus();

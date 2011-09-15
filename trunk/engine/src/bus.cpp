@@ -28,6 +28,7 @@
 #define KBusIDDefaultFade 0
 #define KBusIDDefaultHold 1
 #define KBusIDDefaultPalette KBusCount - 1
+#define KBusIDInvalid UINT_MAX
 
 /****************************************************************************
  * BusEntry
@@ -113,6 +114,11 @@ quint32 Bus::defaultHold()
 quint32 Bus::defaultPalette()
 {
     return KBusIDDefaultPalette;
+}
+
+quint32 Bus::invalid()
+{
+    return KBusIDInvalid;
 }
 
 Bus::~Bus()

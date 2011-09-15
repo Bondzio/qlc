@@ -56,9 +56,8 @@ class FadeChannel
      * Initialization
      ************************************************************************/
 public:
-    /** Create a new FadeChannel with the given values */
-    FadeChannel(quint32 address = 0, QLCChannel::Group grp = QLCChannel::NoGroup,
-                uchar start = 0, uchar target = 0, uchar current = 0);
+    /** Create a new FadeChannel with empty/invalid values */
+    FadeChannel();
 
     /** Copy constructor */
     FadeChannel(const FadeChannel& ch);
@@ -109,13 +108,17 @@ public:
     /** Check if this channel is ready. Default is false. */
     bool isReady() const;
 
-
-
     /** Set the speed bus for this channel */
     void setBus(quint32 busId);
 
     /** Get the speed bus for this channel */
     quint32 bus() const;
+
+    /** Set the fixed fade time */
+    void setFixedTime(quint32 ticks);
+
+    /** Get the fixed fade time */
+    quint32 fixedTime() const;
 
     /** Set the time elapsed for this channel */
     void setElapsed(quint32 time);
@@ -123,7 +126,10 @@ public:
     /** Get the time elapsed for this channel */
     quint32 elapsed() const;
 
-    /** Helper for getting the value from the channel's bus */
+    /**
+     * Get the total fade time for the fade operation. If bus() == Bus::invalid(),
+     * this returns fixedTime(). Otherwise the current bus value is returned.
+     */
     quint32 fadeTime() const;
 
     /** Increment elapsed() and calculate the next step, returning new value */
@@ -152,6 +158,7 @@ private:
     bool m_ready;
 
     quint32 m_bus;
+    quint32 m_fixedTime;
     quint32 m_elapsed;
     bool m_removeWhenTargetReached;
 };

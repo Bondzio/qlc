@@ -53,6 +53,9 @@ public:
      */
     void removeAll();
 
+    /** Get all channels in a non-modifiable hashmap */
+    const QHash <quint32,FadeChannel>& channels() const;
+
     /**
      * Run the channels forward by one step and write their current values to
      * the given UniverseArray.

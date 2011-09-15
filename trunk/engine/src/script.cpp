@@ -26,6 +26,8 @@
 #include <QUrl>
 
 #include "universearray.h"
+#include "genericfader.h"
+#include "fadechannel.h"
 #include "mastertimer.h"
 #include "qlcmacros.h"
 #include "script.h"
@@ -54,12 +56,16 @@ Script::Script(Doc* doc) : Function(doc)
     , m_stopOwnfunctionsAtEnd(false)
     , m_currentCommand(0)
     , m_waitCount(0)
+    , m_fader(NULL)
 {
     setName(tr("New Script"));
 }
 
 Script::~Script()
 {
+    if (m_fader != NULL)
+        delete m_fader;
+    m_fader = NULL;
 }
 
 Function::Type Script::type() const
@@ -255,9 +261,12 @@ void Script::arm()
 
 void Script::disarm()
 {
-    // Waste not
     m_lines.clear();
     m_labels.clear();
+
+    if (m_fader != NULL)
+        delete m_fader;
+    m_fader = NULL;
 }
 
 void Script::preRun(MasterTimer* timer)
@@ -273,19 +282,25 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
 {
     incrementElapsed();
 
-    if (stopped() == false && waiting() == false)
+    if (stopped() == false)
     {
-        while (m_currentCommand < m_lines.size() && stopped() == false)
+        if (waiting() == false)
         {
-            bool continueLoop = executeCommand(m_currentCommand, timer, universes);
-            m_currentCommand++;
-            if (continueLoop == false)
-                break;
+            while (m_currentCommand < m_lines.size() && stopped() == false)
+            {
+                bool continueLoop = executeCommand(m_currentCommand, timer, universes);
+                m_currentCommand++;
+                if (continueLoop == false)
+                    break;
+            }
+
+            // In case wait() is the last command, don't stop the script prematurely
+            if (m_currentCommand >= m_lines.size() && m_waitCount == 0)
+                stop();
         }
 
-        // In case wait() is the last command, don't stop the script prematurely
-        if (m_currentCommand >= m_lines.size() && m_waitCount == 0)
-            stop();
+        if (m_fader != NULL)
+            m_fader->write(universes);
     }
 }
 
@@ -344,7 +359,12 @@ bool Script::executeCommand(int index, MasterTimer* timer, UniverseArray* univer
     }
     else if (command[0] == Script::waitCmd)
     {
+        // Waiting should break out of the execution loop to prevent skipping
+        // straight to the next command. If there is no error in wait parsing,
+        // We must wait at least one cycle.
         error = handleWait(command);
+        if (error.isEmpty() == true)
+            continueLoop = false;
     }
     else if (command[0] == Script::waitKeyCmd)
     {
@@ -471,13 +491,15 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
     qDebug() << Q_FUNC_INFO;
 
     bool ok = false;
-    int addr = 0;
+    int channel = 0;
     int uni = 1;
+    double time = 0;
     uchar value = 0;
+    quint32 bus = Bus::invalid();
 
-    addr = command[1].toUInt(&ok);
+    channel = command[1].toUInt(&ok);
     if (ok == false)
-        return QString("Invalid address: %1").arg(command[1]);
+        return QString("Invalid channel: %1").arg(command[1]);
 
     for (int tok = 1; tok < tokens.size(); tok++)
     {
@@ -490,6 +512,10 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
                 value = uchar(list[1].toUInt(&ok));
             else if (list[0] == "uni" || list[0] == "universe")
                 uni = list[1].toUInt(&ok);
+            else if (list[0] == "time")
+                time = list[1].toDouble(&ok);
+            else if (list[0] == "bus")
+                bus = list[1].toUInt(&ok);
             else
                 return QString("Unrecognized keyword: %1").arg(list[0]);
 
@@ -505,16 +531,36 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
     else
         group = QLCChannel::NoGroup;
 
-    int channel = (uni - 1) * 512;
-    channel += addr - 1;
-    if (channel >= 0 && channel < universes->size())
+    int address = uni * 512;
+    address += channel;
+    if (address >= 0 && address < universes->size())
     {
-        universes->write(channel, value, group);
+        GenericFader* gf = fader();
+        Q_ASSERT(gf != NULL);
+
+        FadeChannel fch;
+        fch.setAddress(address);
+        fch.setTarget(value);
+        fch.setGroup(group);
+        fch.setFixedTime(time * MasterTimer::frequency());
+        fch.setBus(bus);
+
+        // If the script has used the channel previously, it might still be in
+        // the bowels of GenericFader so get the starting value from there.
+        // Otherwise get it from universes (HTP channels are always 0 then).
+        if (gf->channels().contains(address) == true)
+            fch.setStart(gf->channels()[address].current());
+        else
+            fch.setStart(universes->preGMValues()[address]);
+        fch.setCurrent(fch.start());
+
+        gf->add(fch);
+
         return QString();
     }
     else
     {
-        return QString("Invalid address: %1 or universe: %2").arg(addr).arg(uni);
+        return QString("Invalid channel: %1 or universe: %2").arg(channel).arg(uni);
     }
 }
 
@@ -527,6 +573,8 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
     quint32 id = 0;
     quint32 ch = 0;
     uchar value = 0;
+    double time = 0;
+    quint32 bus = Bus::invalid();
 
     id = command[1].toUInt(&ok);
     if (ok == false)
@@ -542,7 +590,11 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
             if (list[0] == "val" || list[0] == "value")
                 value = uchar(list[1].toUInt(&ok));
             else if (list[0] == "ch" || list[0] == "channel")
-                ch = list[1].toUInt(&ok) - 1;
+                ch = list[1].toUInt(&ok);
+            else if (list[0] == "time")
+                time = list[1].toDouble(&ok);
+            else if (list[0] == "bus")
+                bus = list[1].toUInt(&ok);
             else
                 return QString("Unrecognized keyword: %1").arg(list[0]);
 
@@ -565,7 +617,27 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
             int address = fxi->universeAddress() + ch;
             if (address < universes->size())
             {
-                universes->write(address, value, channel->group());
+                GenericFader* gf = fader();
+                Q_ASSERT(gf != NULL);
+
+                FadeChannel fch;
+                fch.setAddress(address);
+                fch.setTarget(value);
+                fch.setGroup(channel->group());
+                fch.setFixedTime(time * MasterTimer::frequency());
+                fch.setBus(bus);
+
+                // If the script has used the channel previously, it might still be in
+                // the bowels of GenericFader so get the starting value from there.
+                // Otherwise get it from universes (HTP channels are always 0 then).
+                if (gf->channels().contains(address) == true)
+                    fch.setStart(gf->channels()[address].current());
+                else
+                    fch.setStart(universes->preGMValues()[address]);
+                fch.setCurrent(fch.start());
+
+                gf->add(fch);
+
                 return QString();
             }
             else
@@ -671,4 +743,11 @@ QStringList Script::tokenizeLine(const QString& str, bool* ok)
         *ok = true;
 
     return tokens;
+}
+
+GenericFader* Script::fader()
+{
+    if (m_fader == NULL)
+        m_fader = new GenericFader;
+    return m_fader;
 }

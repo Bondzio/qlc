@@ -54,6 +54,11 @@ void GenericFader::removeAll()
     m_channels.clear();
 }
 
+const QHash<quint32,FadeChannel>& GenericFader::channels() const
+{
+    return m_channels;
+}
+
 void GenericFader::write(UniverseArray* ua)
 {
     QMutableHashIterator <quint32,FadeChannel> it(m_channels);

@@ -28,6 +28,7 @@
 #include "function.h"
 
 class UniverseArray;
+class GenericFader;
 class MasterTimer;
 class Doc;
 
@@ -217,12 +218,17 @@ private:
      */
     static QStringList tokenizeLine(const QString& line, bool* ok = NULL);
 
+    /** Get the script's GenericFader (and create it if necessary) */
+    GenericFader* fader();
+
 private:
     int m_currentCommand;        //! Current command line being handled
     quint32 m_waitCount;         //! Timer ticks to wait before executing the next line
     QList <QStringList> m_lines; //! Raw data parsed into lines of tokens
     QMap <QString,int> m_labels; //! Labels and their line numbers
     QList <Function*> m_startedFunctions; //! Functions started by this script
+
+    GenericFader* m_fader;
 };
 
 #endif

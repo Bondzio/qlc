@@ -66,12 +66,6 @@ int main(int argc, char** argv)
     QCoreApplication qapp(argc, argv);
     int r;
 
-    Script_Test scr;
-    r = QTest::qExec(&scr, argc, argv);
-    if (r != 0)
-        return r;
-
-#if 0
     /********************************************************************
      * Fixture metadata
      ********************************************************************/
@@ -215,6 +209,11 @@ int main(int argc, char** argv)
     if (r != 0)
         return r;
 
+    Script_Test scr;
+    r = QTest::qExec(&scr, argc, argv);
+    if (r != 0)
+        return r;
+
     MasterTimer_Test mt;
     r = QTest::qExec(&mt, argc, argv);
     if (r != 0)
@@ -239,7 +238,7 @@ int main(int argc, char** argv)
     r = QTest::qExec(&gf, argc, argv);
     if (r != 0)
         return r;
-#endif
+
     return 0;
 }
 

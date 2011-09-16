@@ -28,6 +28,7 @@
 #include <cmath>
 
 #include "functionselection.h"
+#include "fixtureselection.h"
 #include "assignhotkey.h"
 #include "scripteditor.h"
 #include "mastertimer.h"
@@ -55,6 +56,8 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc, OutputMap*
     /* Document */
     m_document = new QTextDocument(m_script->data(), this);
     m_editor->setDocument(m_document);
+    connect(m_document, SIGNAL(undoAvailable(bool)), m_undoButton, SLOT(setEnabled(bool)));
+    m_document->clearUndoRedoStacks();
 }
 
 ScriptEditor::~ScriptEditor()
@@ -88,9 +91,13 @@ void ScriptEditor::initAddMenu()
     connect(m_addWaitKeyAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddWaitKey()));
 
-    m_addSetDmxAction = new QAction(QIcon(":/fixture.png"), tr("Set DMX"), this);
-    connect(m_addSetDmxAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddSetDmx()));
+    m_addSetHtpAction = new QAction(QIcon(":/fixture.png"), tr("Set HTP"), this);
+    connect(m_addSetHtpAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotAddSetHtp()));
+
+    m_addSetLtpAction = new QAction(QIcon(":/fixture.png"), tr("Set LTP"), this);
+    connect(m_addSetLtpAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotAddSetLtp()));
 
     m_addSetFixtureAction = new QAction(QIcon(":/movinghead.png"), tr("Set Fixture"), this);
     connect(m_addSetFixtureAction, SIGNAL(triggered(bool)),
@@ -107,7 +114,8 @@ void ScriptEditor::initAddMenu()
     m_addMenu->addAction(m_addWaitAction);
     m_addMenu->addAction(m_addWaitKeyAction);
     m_addMenu->addSeparator();
-    m_addMenu->addAction(m_addSetDmxAction);
+    m_addMenu->addAction(m_addSetHtpAction);
+    m_addMenu->addAction(m_addSetLtpAction);
     m_addMenu->addAction(m_addSetFixtureAction);
     m_addMenu->addSeparator();
     m_addMenu->addAction(m_addCommentAction);
@@ -118,6 +126,7 @@ void ScriptEditor::initAddMenu()
 void ScriptEditor::slotAddStartFunction()
 {
     FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setDisabledFunctions(QList <quint32> () << m_script->id());
     if (fs.exec() == QDialog::Accepted)
     {
         m_editor->moveCursor(QTextCursor::StartOfLine);
@@ -125,7 +134,9 @@ void ScriptEditor::slotAddStartFunction()
 
         foreach (quint32 id, fs.selection())
         {
-            QString cmd = QString("startfunction:%1\n").arg(id);
+            Function* function = m_doc->function(id);
+            Q_ASSERT(function != NULL);
+            QString cmd = QString("startfunction:%1 // %2\n").arg(id).arg(function->name());
             cursor.insertText(cmd);
             m_editor->moveCursor(QTextCursor::Down);
         }
@@ -135,6 +146,7 @@ void ScriptEditor::slotAddStartFunction()
 void ScriptEditor::slotAddStopFunction()
 {
     FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    fs.setDisabledFunctions(QList <quint32> () << m_script->id());
     if (fs.exec() == QDialog::Accepted)
     {
         m_editor->moveCursor(QTextCursor::StartOfLine);
@@ -142,7 +154,9 @@ void ScriptEditor::slotAddStopFunction()
 
         foreach (quint32 id, fs.selection())
         {
-            QString cmd = QString("stopfunction:%1\n").arg(id);
+            Function* function = m_doc->function(id);
+            Q_ASSERT(function != NULL);
+            QString cmd = QString("stopfunction:%1 // %2\n").arg(id).arg(function->name());
             cursor.insertText(cmd);
             m_editor->moveCursor(QTextCursor::Down);
         }
@@ -171,18 +185,40 @@ void ScriptEditor::slotAddWaitKey()
     if (ahk.exec() == QDialog::Accepted)
     {
         m_editor->moveCursor(QTextCursor::StartOfLine);
-        m_editor->textCursor().insertText(QString("waitkey:%1\n").arg(ahk.keySequence().toString()));
+        m_editor->textCursor().insertText(QString("waitkey:%1 // Not supported yet\n").arg(ahk.keySequence().toString()));
     }
 }
 
-void ScriptEditor::slotAddSetDmx()
+void ScriptEditor::slotAddSetHtp()
 {
     m_editor->moveCursor(QTextCursor::StartOfLine);
-    m_editor->textCursor().insertText(QString("setdmx:0 uni:1 val:0\n"));
+    m_editor->textCursor().insertText(QString("sethtp:0 val:0 uni:1\n"));
+    m_editor->moveCursor(QTextCursor::EndOfLine);
+}
+
+void ScriptEditor::slotAddSetLtp()
+{
+    m_editor->moveCursor(QTextCursor::StartOfLine);
+    m_editor->textCursor().insertText(QString("setltp:0 val:0 uni:1\n"));
+    m_editor->moveCursor(QTextCursor::EndOfLine);
 }
 
 void ScriptEditor::slotAddSetFixture()
 {
+    FixtureSelection fs(this, m_doc, true);
+    if (fs.exec() == QDialog::Accepted)
+    {
+        foreach (quint32 id, fs.selection)
+        {
+            Fixture* fxi = m_doc->fixture(id);
+            if (fxi != NULL)
+            {
+                m_editor->moveCursor(QTextCursor::StartOfLine);
+                m_editor->textCursor().insertText(QString("setfixture:%1 ch:0 val:0 // %2\n").arg(fxi->id()).arg(fxi->name()));
+                m_editor->moveCursor(QTextCursor::Down);
+            }
+        }
+    }
 }
 
 void ScriptEditor::slotAddComment()
@@ -191,5 +227,9 @@ void ScriptEditor::slotAddComment()
     QString str = QInputDialog::getText(this, tr("Add Comment"), "",
                                         QLineEdit::Normal, QString(), &ok);
     if (ok == true)
+    {
+        m_editor->moveCursor(QTextCursor::StartOfLine);
         m_editor->textCursor().insertText(QString("// %1\n").arg(str));
+        m_editor->moveCursor(QTextCursor::EndOfLine);
+    }
 }

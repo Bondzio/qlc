@@ -29,13 +29,14 @@
 
 class QTreeWidgetItem;
 class QWidget;
-
 class Fixture;
 class Doc;
 
 class FixtureSelection : public QDialog, public Ui_FixtureSelection
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FixtureSelection)
+
 public:
     /**
      * Constructor
@@ -47,30 +48,19 @@ public:
      *                 fixtures etc...)
      */
     FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
-                     QList <quint32> disabled);
+                     QList <quint32> disabled = QList <quint32> ());
 
-    /**
-     * Destructor
-     */
+    /** Destructor */
     ~FixtureSelection();
 
-    /**
-     * List of selected fixture IDs
-     */
+    /** List of selected fixture IDs */
     QList <quint32> selection;
 
-private:
-    Q_DISABLE_COPY(FixtureSelection)
-
-protected slots:
-    /**
-     * Item double clicks
-     */
+private slots:
+    /** Item double clicks */
     void slotItemDoubleClicked(QTreeWidgetItem* item);
 
-    /**
-     * OK button click
-     */
+    /** OK button click */
     void accept();
 };
 

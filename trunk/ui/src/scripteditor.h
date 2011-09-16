@@ -69,7 +69,8 @@ private slots:
     void slotAddStopFunction();
     void slotAddWait();
     void slotAddWaitKey();
-    void slotAddSetDmx();
+    void slotAddSetHtp();
+    void slotAddSetLtp();
     void slotAddSetFixture();
     void slotAddComment();
 
@@ -78,7 +79,8 @@ private:
     QAction* m_addStopFunctionAction;
     QAction* m_addWaitAction;
     QAction* m_addWaitKeyAction;
-    QAction* m_addSetDmxAction;
+    QAction* m_addSetHtpAction;
+    QAction* m_addSetLtpAction;
     QAction* m_addSetFixtureAction;
     QAction* m_addCommentAction;
     QMenu* m_addMenu;

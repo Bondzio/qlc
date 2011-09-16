@@ -38,7 +38,7 @@
 
 FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
                                    QList <quint32> disabled)
-        : QDialog(parent)
+    : QDialog(parent)
 {
     Q_ASSERT(doc != NULL);
 
@@ -62,13 +62,9 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
     foreach (Fixture* fixture, doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
-
-        QTreeWidgetItem* item;
-        QString str;
-
-        item = new QTreeWidgetItem(m_tree);
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
         item->setText(KColumnName, fixture->name());
-        item->setText(KColumnID, str.setNum(fixture->id()));
+        item->setText(KColumnID, QString::number(fixture->id()));
 
         if (fixture->fixtureDef() == NULL)
         {
@@ -77,10 +73,8 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
         }
         else
         {
-            item->setText(KColumnManufacturer,
-                          fixture->fixtureDef()->manufacturer());
-            item->setText(KColumnModel,
-                          fixture->fixtureDef()->model());
+            item->setText(KColumnManufacturer, fixture->fixtureDef()->manufacturer());
+            item->setText(KColumnModel, fixture->fixtureDef()->model());
         }
 
         if (disabled.contains(fixture->id()) == true)
@@ -120,11 +114,11 @@ void FixtureSelection::accept()
 {
     selection.clear();
 
-    /* TODO: Check, whether some items are fixture items. If they are,
+    /* TODO: Check, whether some items are disabled items. If they are,
        don't put them into selection list. See above Qt::ItemIsEnabled. */
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
-        selection.append(it.next()->text(KColumnID).toInt());
+        selection.append(it.next()->text(KColumnID).toUInt());
 
     QDialog::accept();
 }

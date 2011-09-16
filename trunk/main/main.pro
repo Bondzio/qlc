@@ -15,6 +15,8 @@ LIBS         += -lqlcui
 SOURCES      += main.cpp
 win32:RC_FILE = main.rc
 
+QT += xml gui core
+
 macx {
     # This must be after "TARGET = " and before target installation so that
     # install_name_tool can be run before target installation

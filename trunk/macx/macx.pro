@@ -40,7 +40,8 @@ qtnametool.commands += && $$LIBUSB1_INSTALL_NAME_TOOL \
 qtnametool.commands += && $$LIBUSB1_INSTALL_NAME_TOOL \
     $$INSTALLROOT/$$LIBSDIR/$$LIBUSB0_FILE
 
-include(imageformats-nametool.pri)
-INSTALLS += imageformats
+# These never had any difference anyway...
+# include(imageformats-nametool.pri)
+# INSTALLS += imageformats
 
 INSTALLS += qtnametool

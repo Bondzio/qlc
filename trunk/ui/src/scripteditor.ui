@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>382</width>
-    <height>365</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -170,23 +170,13 @@
      </property>
     </spacer>
    </item>
-   <item row="10" column="0" colspan="4">
+   <item row="9" column="0" colspan="4">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QCheckBox" name="m_stopOwnFunctionsAtEndCheck">
-     <property name="toolTip">
-      <string>Functions that were started by this script are stopped when the script itself is stopped</string>
-     </property>
-     <property name="text">
-      <string>Stop own functions at the end</string>
      </property>
     </widget>
    </item>

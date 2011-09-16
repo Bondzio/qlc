@@ -79,15 +79,8 @@ public:
     /** Get the raw script data */
     QString data() const;
 
-    /** Set, whether to stop started functions when the script itself is stopped. */
-    void setStopOwnFunctionsAtEnd(bool stop);
-
-    /** Check, whether to stop started functions when the script itself is stopped. */
-    bool stopOwnFunctionsAtEnd() const;
-
 private:
     QString m_data;
-    bool m_stopOwnfunctionsAtEnd;
 
     /************************************************************************
      * Load & Save

@@ -53,7 +53,6 @@ const QString Script::jumpCmd = QString("jump");
  ****************************************************************************/
 
 Script::Script(Doc* doc) : Function(doc)
-    , m_stopOwnfunctionsAtEnd(false)
     , m_currentCommand(0)
     , m_waitCount(0)
     , m_fader(NULL)
@@ -111,16 +110,6 @@ bool Script::setData(const QString& str)
 QString Script::data() const
 {
     return m_data;
-}
-
-void Script::setStopOwnFunctionsAtEnd(bool stop)
-{
-    m_stopOwnfunctionsAtEnd = stop;
-}
-
-bool Script::stopOwnFunctionsAtEnd() const
-{
-    return m_stopOwnfunctionsAtEnd;
 }
 
 /****************************************************************************
@@ -271,6 +260,7 @@ void Script::disarm()
 
 void Script::preRun(MasterTimer* timer)
 {
+    // Reset
     m_waitCount = 0;
     m_currentCommand = 0;
     m_startedFunctions.clear();
@@ -286,12 +276,13 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
     {
         if (waiting() == false)
         {
+            // Not currently waiting for anything. Free to proceed to next command.
             while (m_currentCommand < m_lines.size() && stopped() == false)
             {
                 bool continueLoop = executeCommand(m_currentCommand, timer, universes);
                 m_currentCommand++;
                 if (continueLoop == false)
-                    break;
+                    break; // Executed command told to skip to the next cycle
             }
 
             // In case wait() is the last command, don't stop the script prematurely
@@ -299,6 +290,7 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
                 stop();
         }
 
+        // Handle GenericFader tasks (setltp/sethtp/setfixture)
         if (m_fader != NULL)
             m_fader->write(universes);
     }
@@ -306,13 +298,15 @@ void Script::write(MasterTimer* timer, UniverseArray* universes)
 
 void Script::postRun(MasterTimer* timer, UniverseArray* universes)
 {
-    if (m_stopOwnfunctionsAtEnd == true)
-    {
-        // Stop all functions started by this script
-        foreach (Function* function, m_startedFunctions)
-            function->stop();
-        m_startedFunctions.clear();
-    }
+    // Stop all functions started by this script
+    foreach (Function* function, m_startedFunctions)
+        function->stop();
+    m_startedFunctions.clear();
+
+    // Stops keeping HTP channels up
+    if (m_fader != NULL)
+        delete m_fader;
+    m_fader = NULL;
 
     Function::postRun(timer, universes);
 }
@@ -321,11 +315,13 @@ bool Script::waiting()
 {
     if (m_waitCount > 0)
     {
+        // Still waiting for at least one cycle.
         m_waitCount--;
         return true;
     }
     else
     {
+        // Not waiting.
         return false;
     }
 }
@@ -361,14 +357,19 @@ bool Script::executeCommand(int index, MasterTimer* timer, UniverseArray* univer
     {
         // Waiting should break out of the execution loop to prevent skipping
         // straight to the next command. If there is no error in wait parsing,
-        // We must wait at least one cycle.
+        // we must wait at least one cycle.
         error = handleWait(command);
         if (error.isEmpty() == true)
             continueLoop = false;
     }
     else if (command[0] == Script::waitKeyCmd)
     {
+        // Waiting for a key should break out of the execution loop to prevent
+        // skipping straight to the next command. If there is no error in waitkey
+        // parsing,we must wait at least one cycle.
         error = handleWaitKey(command);
+        if (error.isEmpty() == true)
+            continueLoop = false;
     }
     else if (command[0] == Script::setHtpCmd || command[0] == Script::setLtpCmd)
     {
@@ -658,6 +659,7 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
 
 QString Script::handleLabel(const QStringList& command)
 {
+    // A label just exists. Not much to do here.
     qDebug() << Q_FUNC_INFO;
     Q_UNUSED(command);
     return QString();
@@ -747,6 +749,7 @@ QStringList Script::tokenizeLine(const QString& str, bool* ok)
 
 GenericFader* Script::fader()
 {
+    // Create a fader if it doesn't exist yet
     if (m_fader == NULL)
         m_fader = new GenericFader;
     return m_fader;

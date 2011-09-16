@@ -43,7 +43,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     new QVBoxLayout(this);
-    layout()->setMargin(0);
+    layout()->setMargin(2);
 
     m_valueLabel = new QLabel(this);
     m_valueLabel->setAlignment(Qt::AlignHCenter);

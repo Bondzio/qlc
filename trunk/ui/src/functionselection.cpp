@@ -140,6 +140,8 @@ int FunctionSelection::exec()
     refillTree();
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
+    slotItemSelectionChanged();
+
     return QDialog::exec();
 }
 
@@ -333,6 +335,11 @@ void FunctionSelection::slotItemSelectionChanged()
 
     while (removeList.isEmpty() == false)
         m_selection.removeAll(removeList.takeFirst());
+
+    if (m_selection.isEmpty() == true)
+        m_buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+    else
+        m_buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
 void FunctionSelection::slotItemDoubleClicked(QTreeWidgetItem* item)

@@ -438,7 +438,17 @@ void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
 
 void VCButton::setAction(Action action)
 {
+    if (m_action == Blackout && action != Blackout)
+        disconnect(m_outputMap, SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
+    else if (m_action != Blackout && action == Blackout)
+        connect(m_outputMap, SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
+
     m_action = action;
+
+    if (m_action == Blackout)
+        setToolTip(tr("Toggle Blackout"));
+    else if (m_action == StopAll)
+        setToolTip(tr("Stop ALL functions!"));
 }
 
 VCButton::Action VCButton::action() const
@@ -450,6 +460,10 @@ QString VCButton::actionToString(VCButton::Action action)
 {
     if (action == Flash)
         return QString(KXMLQLCVCButtonActionFlash);
+    else if (action == Blackout)
+        return QString(KXMLQLCVCButtonActionBlackout);
+    else if (action == StopAll)
+        return QString(KXMLQLCVCButtonActionStopAll);
     else
         return QString(KXMLQLCVCButtonActionToggle);
 }
@@ -458,6 +472,10 @@ VCButton::Action VCButton::stringToAction(const QString& str)
 {
     if (str == KXMLQLCVCButtonActionFlash)
         return Flash;
+    else if (str == KXMLQLCVCButtonActionBlackout)
+        return Blackout;
+    else if (str == KXMLQLCVCButtonActionStopAll)
+        return StopAll;
     else
         return Toggle;
 }
@@ -518,6 +536,14 @@ void VCButton::pressFunction()
         if (f != NULL)
             f->flash(m_masterTimer);
     }
+    else if (m_action == Blackout)
+    {
+        m_outputMap->toggleBlackout();
+    }
+    else if (m_action == StopAll)
+    {
+        m_masterTimer->stopAllFunctions();
+    }
 }
 
 void VCButton::releaseFunction()
@@ -563,6 +589,11 @@ void VCButton::slotBlinkReady()
     color.setRgb(color.red()^0xff, color.green()^0xff, color.blue()^0xff);
     pal.setColor(QPalette::Button, color);
     setPalette(pal);
+}
+
+void VCButton::slotBlackoutChanged(bool state)
+{
+    setOn(state);
 }
 
 bool VCButton::isChildOfSoloFrame() const
@@ -760,7 +791,17 @@ void VCButton::paintEvent(QPaintEvent* e)
         option.state |= QStyle::State_Enabled;
 
     /* Icon */
-    if (icon().isEmpty() == false)
+    if (m_action == Blackout)
+    {
+        option.icon = QIcon(":/blackout.png");
+        option.iconSize = QSize(26, 26);
+    }
+    else if (m_action == StopAll)
+    {
+        option.icon = QIcon(":/panic.png");
+        option.iconSize = QSize(26, 26);
+    }
+    else if (icon().isEmpty() == false)
     {
         option.icon = QIcon(icon());
         option.iconSize = QSize(26, 26);

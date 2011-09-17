@@ -54,6 +54,8 @@ protected slots:
     void slotInputValueChanged(quint32 universe, quint32 channel);
     void slotChooseInputClicked();
 
+    void slotActionToggled();
+
     void slotIntensitySliderMoved(int value);
     void slotIntensityEdited(const QString& text);
 

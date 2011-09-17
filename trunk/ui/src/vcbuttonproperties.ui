@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>396</width>
-    <height>544</height>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="m_generalGroup">
      <property name="title">
       <string>General</string>
      </property>
@@ -270,6 +270,20 @@
         </property>
         <property name="text">
          <string>Flash function (only for scenes)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="m_blackout">
+        <property name="text">
+         <string>Toggle Blackout</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="m_stopAll">
+        <property name="text">
+         <string>Stop All Functions</string>
         </property>
        </widget>
       </item>

@@ -81,10 +81,15 @@ VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* ou
     updateInputSource();
 
     /* Press action */
-    if (button->action() == VCButton::Toggle)
-        m_toggle->setChecked(true);
-    else
+    if (button->action() == VCButton::Flash)
         m_flash->setChecked(true);
+    else if (button->action() == VCButton::Blackout)
+        m_blackout->setChecked(true);
+    else if (button->action() == VCButton::StopAll)
+        m_stopAll->setChecked(true);
+    else
+        m_toggle->setChecked(true);
+    slotActionToggled();
 
     /* Intensity adjustment */
     m_intensityEdit->setValidator(new QIntValidator(0, 100, this));
@@ -94,16 +99,22 @@ VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* ou
     m_intensitySlider->setValue(intensity);
 
     /* Button connections */
-    connect(m_attachFunction, SIGNAL(clicked()),
-            this, SLOT(slotAttachFunction()));
-    connect(m_detachFunction, SIGNAL(clicked()),
-            this, SLOT(slotSetFunction()));
+    connect(m_attachFunction, SIGNAL(clicked()), this, SLOT(slotAttachFunction()));
+    connect(m_detachFunction, SIGNAL(clicked()), this, SLOT(slotSetFunction()));
+
     connect(m_attachKey, SIGNAL(clicked()), this, SLOT(slotAttachKey()));
     connect(m_detachKey, SIGNAL(clicked()), this, SLOT(slotDetachKey()));
+
+    connect(m_toggle, SIGNAL(toggled(bool)), this, SLOT(slotActionToggled()));
+    connect(m_blackout, SIGNAL(toggled(bool)), this, SLOT(slotActionToggled()));
+    connect(m_stopAll, SIGNAL(toggled(bool)), this, SLOT(slotActionToggled()));
+    connect(m_flash, SIGNAL(toggled(bool)), this, SLOT(slotActionToggled()));
+
     connect(m_autoDetectInputButton, SIGNAL(toggled(bool)),
             this, SLOT(slotAutoDetectInputToggled(bool)));
     connect(m_chooseInputButton, SIGNAL(clicked()),
             this, SLOT(slotChooseInputClicked()));
+
     connect(m_intensitySlider, SIGNAL(valueChanged(int)),
             this, SLOT(slotIntensitySliderMoved(int)));
     connect(m_intensityEdit, SIGNAL(textEdited(QString)),
@@ -201,6 +212,20 @@ void VCButtonProperties::updateInputSource()
     m_inputChannelEdit->setText(chName);
 }
 
+void VCButtonProperties::slotActionToggled()
+{
+    if (m_blackout->isChecked() == true || m_stopAll->isChecked() == true)
+    {
+        m_generalGroup->setEnabled(false);
+        m_intensityGroup->setEnabled(false);
+    }
+    else
+    {
+        m_generalGroup->setEnabled(true);
+        m_intensityGroup->setEnabled(true);
+    }
+}
+
 void VCButtonProperties::slotIntensitySliderMoved(int value)
 {
     m_intensityEdit->setText(QString::number(value));
@@ -222,6 +247,10 @@ void VCButtonProperties::accept()
 
     if (m_toggle->isChecked() == true)
         m_button->setAction(VCButton::Toggle);
+    else if (m_blackout->isChecked() == true)
+        m_button->setAction(VCButton::Blackout);
+    else if (m_stopAll->isChecked() == true)
+        m_button->setAction(VCButton::StopAll);
     else
         m_button->setAction(VCButton::Flash);
 

@@ -45,6 +45,8 @@ class QEvent;
 #define KXMLQLCVCButtonAction "Action"
 #define KXMLQLCVCButtonActionFlash "Flash"
 #define KXMLQLCVCButtonActionToggle "Toggle"
+#define KXMLQLCVCButtonActionBlackout "Blackout"
+#define KXMLQLCVCButtonActionStopAll "StopAll"
 
 #define KXMLQLCVCButtonKey "Key"
 
@@ -200,8 +202,10 @@ public:
     /**
      * Toggle: Start/stop the assigned function.
      * Flash: Keep the function running as long as the button is kept down.
+     * Blackout: Toggle blackout on/off.
+     * StopAll: Stop all functions (panic button).
      */
-    enum Action { Toggle, Flash };
+    enum Action { Toggle, Flash, Blackout, StopAll };
 
     /** Set this button's action */
     void setAction(Action action);
@@ -267,6 +271,9 @@ protected slots:
 
     /** Slot for brief widget blink when controlled function stops */
     void slotBlinkReady();
+
+    /** Listent to OutputMap::blackoutChanged() signals in Blackout mode */
+    void slotBlackoutChanged(bool state);
 
 protected:
     /** Check if the button's parent is a VCSoloFrame */

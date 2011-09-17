@@ -540,7 +540,6 @@ void VirtualConsole::initActions()
 void VirtualConsole::initMenuBar()
 {
     QMenuBar* menuBar;
-    QToolBar* toolBar;
     QVBoxLayout* vbox;
     QWidget* widget;
 
@@ -641,34 +640,31 @@ void VirtualConsole::initMenuBar()
     m_editMenu->addSeparator();
 
     /* Toolbar */
-    toolBar = new QToolBar(widget);
-    vbox->addWidget(toolBar);
+    m_toolbar = new QToolBar(widget);
+    vbox->addWidget(m_toolbar);
 
-    toolBar->addAction(m_addButtonAction);
-    toolBar->addAction(m_addButtonMatrixAction);
-    toolBar->addAction(m_addSliderAction);
-    toolBar->addAction(m_addSliderMatrixAction);
-    toolBar->addAction(m_addXYPadAction);
-    toolBar->addAction(m_addCueListAction);
-    toolBar->addAction(m_addFrameAction);
-    toolBar->addAction(m_addSoloFrameAction);
-    toolBar->addAction(m_addLabelAction);
-    toolBar->addSeparator();
-    toolBar->addAction(m_editCutAction);
-    toolBar->addAction(m_editCopyAction);
-    toolBar->addAction(m_editPasteAction);
-    toolBar->addSeparator();
-    toolBar->addAction(m_editDeleteAction);
-    toolBar->addSeparator();
-    toolBar->addAction(m_editPropertiesAction);
-    toolBar->addAction(m_editRenameAction);
+    m_toolbar->addAction(m_addButtonAction);
+    m_toolbar->addAction(m_addButtonMatrixAction);
+    m_toolbar->addAction(m_addSliderAction);
+    m_toolbar->addAction(m_addSliderMatrixAction);
+    m_toolbar->addAction(m_addXYPadAction);
+    m_toolbar->addAction(m_addCueListAction);
+    m_toolbar->addAction(m_addFrameAction);
+    m_toolbar->addAction(m_addSoloFrameAction);
+    m_toolbar->addAction(m_addLabelAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_editCutAction);
+    m_toolbar->addAction(m_editCopyAction);
+    m_toolbar->addAction(m_editPasteAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_editDeleteAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_editPropertiesAction);
+    m_toolbar->addAction(m_editRenameAction);
 
     QWidget* spacerWidget = new QWidget(this);
     spacerWidget->setSizePolicy(QSizePolicy::Expanding,
                                 QSizePolicy::Preferred);
-    toolBar->addWidget(spacerWidget);
-    toolBar->addAction(m_toolsBlackoutAction);
-    toolBar->addAction(m_toolsPanicAction);
 }
 
 void VirtualConsole::updateCustomMenu()
@@ -1631,6 +1627,9 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
 
         m_stackingRaiseAction->setShortcut(QKeySequence());
         m_stackingLowerAction->setShortcut(QKeySequence());
+
+        // Hide toolbar; there's nothing usable there in operate mode
+        m_toolbar->hide();
     }
     else
     {
@@ -1674,6 +1673,9 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
 
         m_stackingRaiseAction->setShortcut(QKeySequence("SHIFT+UP"));
         m_stackingLowerAction->setShortcut(QKeySequence("SHIFT+DOWN"));
+
+        // Show toolbar
+        m_toolbar->show();
     }
 }
 

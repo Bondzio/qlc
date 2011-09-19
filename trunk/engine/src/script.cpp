@@ -237,13 +237,11 @@ void Script::arm()
     // Map all labels to their individual line numbers for fast jumps
     for (int i = 0; i < m_lines.size(); i++)
     {
-        QStringList tokens = m_lines[i];
-        if (tokens.isEmpty() == false &&
-            tokens[0].simplified().startsWith(Script::labelCmd) == true)
+        QList <QStringList> line = m_lines[i];
+        if (line.isEmpty() == false &&
+            line.first().size() == 2 && line.first()[0] == Script::labelCmd)
         {
-            QStringList command = tokens[0].split(":");
-            if (command.size() == 2)
-                m_labels[command[1]] = i;
+            m_labels[line.first()[1]] = i;
         }
     }
 }
@@ -334,84 +332,86 @@ bool Script::executeCommand(int index, MasterTimer* timer, UniverseArray* univer
         return false;
     }
 
-    QStringList tokens = m_lines[index];
+    QList <QStringList> tokens = m_lines[index];
     if (tokens.isEmpty() == true)
-        return true;
+        return true; // Empty line
 
     bool continueLoop = true;
     QString error;
-    QStringList command = tokens[0].split(":");
-    if (command.size() < 2)
+    if (tokens[0].size() < 2)
     {
         error = QString("Syntax error");
     }
-    else if (command[0] == Script::startFunctionCmd)
+    else if (tokens[0][0] == Script::startFunctionCmd)
     {
-        error = handleStartFunction(command, timer);
+        error = handleStartFunction(tokens, timer);
     }
-    else if (command[0] == Script::stopFunctionCmd)
+    else if (tokens[0][0] == Script::stopFunctionCmd)
     {
-        error = handleStopFunction(command);
+        error = handleStopFunction(tokens);
     }
-    else if (command[0] == Script::waitCmd)
+    else if (tokens[0][0] == Script::waitCmd)
     {
         // Waiting should break out of the execution loop to prevent skipping
         // straight to the next command. If there is no error in wait parsing,
         // we must wait at least one cycle.
-        error = handleWait(command);
+        error = handleWait(tokens);
         if (error.isEmpty() == true)
             continueLoop = false;
     }
-    else if (command[0] == Script::waitKeyCmd)
+    else if (tokens[0][0] == Script::waitKeyCmd)
     {
         // Waiting for a key should break out of the execution loop to prevent
         // skipping straight to the next command. If there is no error in waitkey
         // parsing,we must wait at least one cycle.
-        error = handleWaitKey(command);
+        error = handleWaitKey(tokens);
         if (error.isEmpty() == true)
             continueLoop = false;
     }
-    else if (command[0] == Script::setHtpCmd || command[0] == Script::setLtpCmd)
+    else if (tokens[0][0] == Script::setHtpCmd || tokens[0][0] == Script::setLtpCmd)
     {
-        error = handleSetHtpLtp(command, tokens, universes);
+        error = handleSetHtpLtp(tokens, universes);
     }
-    else if (command[0] == Script::setFixtureCmd)
+    else if (tokens[0][0] == Script::setFixtureCmd)
     {
-        error = handleSetFixture(command, tokens, universes);
+        error = handleSetFixture(tokens, universes);
     }
-    else if (command[0] == Script::labelCmd)
+    else if (tokens[0][0] == Script::labelCmd)
     {
-        error = handleLabel(command);
+        error = handleLabel(tokens);
     }
-    else if (command[0] == Script::jumpCmd)
+    else if (tokens[0][0] == Script::jumpCmd)
     {
         // Jumping can cause an infinite non-waiting loop, causing starvation
         // among other functions. Therefore, the script must relinquish its
         // time slot after each jump. If there is no error in jumping, the jump
         // must have happened.
-        error = handleJump(command);
+        error = handleJump(tokens);
         if (error.isEmpty() == true)
             continueLoop = false;
     }
     else
     {
-        error = QString("Unknown command: %1").arg(command[0]);
+        error = QString("Unknown command: %1").arg(tokens[0][0]);
     }
 
     if (error.isEmpty() == false)
-        qWarning() << QString("%1: %2: %3").arg(name()).arg(index).arg(error);
+        qWarning() << QString("Script:%1, line:%2, error:%3").arg(name()).arg(index).arg(error);
 
     return continueLoop;
 }
 
-QString Script::handleStartFunction(const QStringList& command, MasterTimer* timer)
+QString Script::handleStartFunction(const QList<QStringList>& tokens, MasterTimer* timer)
 {
     qDebug() << Q_FUNC_INFO;
 
+    if (tokens.size() > 1)
+        return QString("Too many arguments");
+
     bool ok = false;
-    quint32 id = command[1].toUInt(&ok);
+    quint32 id = tokens[0][1].toUInt(&ok);
     if (ok == false)
-        return QString("Invalid function ID: %1").arg(command[1]);
+        return QString("Invalid function ID: %1").arg(tokens[0][1]);
 
     Doc* doc = qobject_cast<Doc*> (parent());
     Q_ASSERT(doc != NULL);
@@ -433,14 +433,17 @@ QString Script::handleStartFunction(const QStringList& command, MasterTimer* tim
     }
 }
 
-QString Script::handleStopFunction(const QStringList& command)
+QString Script::handleStopFunction(const QList <QStringList>& tokens)
 {
     qDebug() << Q_FUNC_INFO;
 
+    if (tokens.size() > 1)
+        return QString("Too many arguments");
+
     bool ok = false;
-    quint32 id = command[1].toUInt(&ok);
+    quint32 id = tokens[0][1].toUInt(&ok);
     if (ok == false)
-        return QString("Invalid function ID: %1").arg(command[1]);
+        return QString("Invalid function ID: %1").arg(tokens[0][1]);
 
     Doc* doc = qobject_cast<Doc*> (parent());
     Q_ASSERT(doc != NULL);
@@ -462,34 +465,44 @@ QString Script::handleStopFunction(const QStringList& command)
     }
 }
 
-QString Script::handleWait(const QStringList& command)
+QString Script::handleWait(const QList<QStringList>& tokens)
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (tokens.size() > 2)
+        return QString("Too many arguments");
 
     double time = 0;
     bool ok = false;
 
-    time = command[1].toDouble(&ok);
+    time = tokens[0][1].toDouble(&ok);
     if (ok == false)
-        return QString("Invalid wait time: %1").arg(command[1]);
+        return QString("Invalid wait time: %1").arg(tokens[0][1]);
 
     m_waitCount = time * MasterTimer::frequency();
 
     return QString();
 }
 
-QString Script::handleWaitKey(const QStringList& command)
+QString Script::handleWaitKey(const QList<QStringList>& tokens)
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO << tokens;
 
-    Q_UNUSED(command);
-    return QString("Not implemented yet");
+    if (tokens.size() > 1)
+        return QString("Too many arguments");
+
+    QString key = QString(tokens[0][1]).remove("\"");
+    qDebug() << "Ought to wait for" << key;
+
+    return QString();
 }
 
-QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& tokens,
-                                UniverseArray* universes)
+QString Script::handleSetHtpLtp(const QList<QStringList>& tokens, UniverseArray* universes)
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (tokens.size() > 4)
+        return QString("Too many arguments");
 
     bool ok = false;
     int channel = 0;
@@ -498,13 +511,13 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
     uchar value = 0;
     quint32 bus = Bus::invalid();
 
-    channel = command[1].toUInt(&ok);
+    channel = tokens[0][1].toUInt(&ok);
     if (ok == false)
-        return QString("Invalid channel: %1").arg(command[1]);
+        return QString("Invalid channel: %1").arg(tokens[0][1]);
 
-    for (int tok = 1; tok < tokens.size(); tok++)
+    for (int i = 1; i < tokens.size(); i++)
     {
-        QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
+        QStringList list = tokens[i];
         list[0] = list[0].toLower().trimmed();
         if (list.size() == 2)
         {
@@ -527,7 +540,7 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
 
     // So is this LTP or HTP?
     QLCChannel::Group group;
-    if (command[0] == Script::setHtpCmd)
+    if (tokens[0][0] == Script::setHtpCmd)
         group = QLCChannel::Intensity;
     else
         group = QLCChannel::NoGroup;
@@ -565,10 +578,12 @@ QString Script::handleSetHtpLtp(const QStringList& command, const QStringList& t
     }
 }
 
-QString Script::handleSetFixture(const QStringList& command, const QStringList& tokens,
-                                 UniverseArray* universes)
+QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray* universes)
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (tokens.size() > 4)
+        return QString("Too many arguments");
 
     bool ok = false;
     quint32 id = 0;
@@ -577,13 +592,13 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
     double time = 0;
     quint32 bus = Bus::invalid();
 
-    id = command[1].toUInt(&ok);
+    id = tokens[0][1].toUInt(&ok);
     if (ok == false)
-        return QString("Invalid fixture (ID: %1)").arg(command[1]);
+        return QString("Invalid fixture (ID: %1)").arg(tokens[0][1]);
 
-    for (int tok = 1; tok < tokens.size(); tok++)
+    for (int i = 1; i < tokens.size(); i++)
     {
-        QStringList list = tokens[tok].split(":", QString::SkipEmptyParts);
+        QStringList list = tokens[i];
         list[0] = list[0].toLower().trimmed();
         if (list.size() == 2)
         {
@@ -657,34 +672,40 @@ QString Script::handleSetFixture(const QStringList& command, const QStringList& 
     }
 }
 
-QString Script::handleLabel(const QStringList& command)
+QString Script::handleLabel(const QList<QStringList>& tokens)
 {
     // A label just exists. Not much to do here.
     qDebug() << Q_FUNC_INFO;
-    Q_UNUSED(command);
+
+    if (tokens.size() > 1)
+        return QString("Too many arguments");
+
     return QString();
 }
 
-QString Script::handleJump(const QStringList& command)
+QString Script::handleJump(const QList<QStringList>& tokens)
 {
     qDebug() << Q_FUNC_INFO;
 
-    if (m_labels.contains(command[1]) == true)
+    if (tokens.size() > 1)
+        return QString("Too many arguments");
+
+    if (m_labels.contains(tokens[0][1]) == true)
     {
-        int lineNumber = m_labels[command[1]];
+        int lineNumber = m_labels[tokens[0][1]];
         Q_ASSERT(lineNumber >= 0 && lineNumber < m_lines.size());
         m_currentCommand = lineNumber;
         return QString();
     }
     else
     {
-        return QString("No such label: %1").arg(command[1]);
+        return QString("No such label: %1").arg(tokens[0][1]);
     }
 }
 
-QStringList Script::tokenizeLine(const QString& str, bool* ok)
+QList <QStringList> Script::tokenizeLine(const QString& str, bool* ok)
 {
-    QStringList tokens;
+    QList<QStringList> tokens;
     int left = 0;
     int right = 0;
     QString keyword;
@@ -692,7 +713,7 @@ QStringList Script::tokenizeLine(const QString& str, bool* ok)
 
     if (str.simplified().startsWith("//") == true || str.simplified().isEmpty() == true)
     {
-        tokens = QStringList(); // Return an empty string list for commented lines
+        tokens << QStringList(); // Return an empty string list for commented lines
     }
     else
     {
@@ -721,23 +742,45 @@ QStringList Script::tokenizeLine(const QString& str, bool* ok)
                 left = right + 1;
             }
 
-            // Find the next whitespace to get the value
-            right = line.indexOf(QRegExp("\\s"), left);
-            if (right == -1)
+            // Try to see if there is something inside quotes
+            int quoteleft = line.indexOf("\"", left);
+            if (quoteleft != -1)
             {
-                qDebug() << "Syntax error:" << line.mid(left);
-                if (ok != NULL)
-                    *ok = false;
-                break;
+                int quoteright = line.indexOf("\"", quoteleft + 1);
+                if (quoteright != -1)
+                {
+                    // Don't include the "" in the string
+                    value = line.mid(quoteleft, quoteright - quoteleft);
+                    left = quoteright + 1;
+                }
+                else
+                {
+                    qDebug() << "Syntax error:" << line.mid(quoteleft);
+                    if (ok != NULL)
+                        *ok = false;
+                    break;
+                }
             }
             else
             {
-                // Value found
-                value = line.mid(left, right - left);
-                left = right + 1;
+                // No quotes. Find the next whitespace.
+                right = line.indexOf(QRegExp("\\s"), left);
+                if (right == -1)
+                {
+                    qDebug() << "Syntax error:" << line.mid(left);
+                    if (ok != NULL)
+                        *ok = false;
+                    break;
+                }
+                else
+                {
+                    // Value found
+                    value = line.mid(left, right - left);
+                    left = right + 1;
+                }
             }
 
-            tokens << QString(keyword + ":" + value);
+            tokens << (QStringList() << keyword.trimmed() << value.trimmed());
         }
     }
 

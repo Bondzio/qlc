@@ -38,8 +38,8 @@ static QString script0(
 "startfunction:12\r"
 "stopscript:5 // Comment in here\n"
 "stopfunction:33 paska\n"
-"\n"
-"startfunction 54\r\n"
+"waitkey:\"SHIFT+K\"\n"
+"startfunction:\"54\"\r\n"
 "wait:1.05\n"
 "setdmx:12 uni:2 val:127\n"
 "setfixture:99 value:255 channel:1\n"
@@ -61,7 +61,10 @@ void Script_Test::initial()
 
     Script scr(&doc);
     scr.setData(script0);
+    scr.arm();
 
     for (int i = 0; i < 9; i++)
         scr.executeCommand(i, &mt, &ua);
+
+    scr.disarm();
 }

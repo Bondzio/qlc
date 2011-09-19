@@ -138,7 +138,7 @@ private:
      * @param timer The MasterTimer that should run the function
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleStartFunction(const QStringList& command, MasterTimer* timer);
+    QString handleStartFunction(const QList<QStringList>& tokens, MasterTimer* timer);
 
     /**
      * Handle "stopfunction" command.
@@ -146,7 +146,7 @@ private:
      * @param command The first keyword:value pair
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleStopFunction(const QStringList& command);
+    QString handleStopFunction(const QList<QStringList>& tokens);
 
     /**
      * Handle "wait" command.
@@ -154,7 +154,7 @@ private:
      * @param command The first keyword:value pair
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleWait(const QStringList& command);
+    QString handleWait(const QList<QStringList>& tokens);
 
     /**
      * Handle "waitkey" command.
@@ -162,7 +162,7 @@ private:
      * @param command The first keyword:value pair
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleWaitKey(const QStringList& command);
+    QString handleWaitKey(const QList<QStringList>& tokens);
 
     /**
      * Handle "sethtp" and "setltp" commands.
@@ -172,8 +172,7 @@ private:
      * @param universes The universe array to write DMX data
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleSetHtpLtp(const QStringList& command, const QStringList& tokens,
-                            UniverseArray* universes);
+    QString handleSetHtpLtp(const QList<QStringList>& tokens, UniverseArray* universes);
 
     /**
      * Handle "setfixture" command.
@@ -183,8 +182,7 @@ private:
      * @param universes The universe array to write DMX data
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleSetFixture(const QStringList& command, const QStringList& tokens,
-                             UniverseArray* universes);
+    QString handleSetFixture(const QList<QStringList>& tokens, UniverseArray* universes);
 
     /**
      * Handle "label" command.
@@ -192,7 +190,7 @@ private:
      * @param command The first keyword:value pair
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleLabel(const QStringList& command);
+    QString handleLabel(const QList<QStringList>& tokens);
 
     /**
      * Handle "jump" command.
@@ -200,16 +198,17 @@ private:
      * @param command The first keyword:value pair
      * @return An empty string if successful. Otherwise an error string.
      */
-    QString handleJump(const QStringList& command);
+    QString handleJump(const QList<QStringList>& tokens);
 
     /**
-     * Parse one line of script data into a list of token strings (keyword:value)
+     * Parse one line of script data into a list of token string lists
+     * QList(QStringList(keyword,value),QStringList(keyword,value),...)
      *
      * @param line The script line to parse
      * @param ok Tells if the line was parsed OK or not
      * @return A list of tokens parsed from the line
      */
-    static QStringList tokenizeLine(const QString& line, bool* ok = NULL);
+    static QList <QStringList> tokenizeLine(const QString& line, bool* ok = NULL);
 
     /** Get the script's GenericFader (and create it if necessary) */
     GenericFader* fader();
@@ -217,7 +216,7 @@ private:
 private:
     int m_currentCommand;        //! Current command line being handled
     quint32 m_waitCount;         //! Timer ticks to wait before executing the next line
-    QList <QStringList> m_lines; //! Raw data parsed into lines of tokens
+    QList <QList<QStringList> > m_lines; //! Raw data parsed into lines of tokens
     QMap <QString,int> m_labels; //! Labels and their line numbers
     QList <Function*> m_startedFunctions; //! Functions started by this script
 

@@ -47,15 +47,9 @@
 
 #define KColumnName 0
 
-AddFixture::AddFixture(QWidget* parent,
-                       const QLCFixtureDefCache& fixtureDefCache,
-                       const Doc* doc,
-                       const OutputMap* outputMap,
-                       const Fixture* fxi)
+AddFixture::AddFixture(QWidget* parent, const Doc* doc, const Fixture* fxi)
     : QDialog(parent)
-    , m_fixtureDefCache(fixtureDefCache)
     , m_doc(doc)
-    , m_outputMap(outputMap)
 {
     m_addressValue = 0;
     m_universeValue = 0;
@@ -100,7 +94,7 @@ AddFixture::AddFixture(QWidget* parent,
         fillTree(KXMLFixtureGeneric, KXMLFixtureGeneric);
 
     /* Fill universe combo with available universes */
-    m_universeCombo->addItems(m_outputMap->universeNames());
+    m_universeCombo->addItems(m_doc->outputMap()->universeNames());
 
     /* Simulate first selection and find the next free address */
     slotSelectionChanged();
@@ -111,7 +105,7 @@ AddFixture::AddFixture(QWidget* parent,
         m_universeCombo->setCurrentIndex(fxi->universe());
         slotUniverseActivated(fxi->universe());
 
-        OutputPatch* op = m_outputMap->patch(fxi->universe());
+        OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(fxi->address());
         else
@@ -229,14 +223,14 @@ void AddFixture::fillTree(const QString& selectManufacturer,
     m_tree->clear();
 
     /* Add all known fixture definitions to the tree */
-    QStringListIterator it(m_fixtureDefCache.manufacturers());
+    QStringListIterator it(m_doc->fixtureDefCache()->manufacturers());
     while (it.hasNext() == true)
     {
         manuf = it.next();
         parent = new QTreeWidgetItem(m_tree);
         parent->setText(KColumnName, manuf);
 
-        QStringListIterator modit(m_fixtureDefCache.models(manuf));
+        QStringListIterator modit(m_doc->fixtureDefCache()->models(manuf));
         while (modit.hasNext() == true)
         {
             model = modit.next();
@@ -301,14 +295,14 @@ void AddFixture::findAddress()
        channels, leaving z channels gap in-between. */
     quint32 address = findAddress((m_channelsValue + m_gapValue) * m_amountValue,
                                   m_doc->fixtures(),
-                                  m_outputMap->universes());
+                                  m_doc->outputMap()->universes());
 
     /* Set the address only if the channel space was really found */
     if (address != QLCChannel::invalid())
     {
         m_universeCombo->setCurrentIndex(address >> 9);
 
-        OutputPatch* op = m_outputMap->patch(m_universeValue);
+        OutputPatch* op = m_doc->outputMap()->patch(m_universeValue);
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(address & 0x01FF);
         else
@@ -412,8 +406,8 @@ void AddFixture::slotUniverseActivated(int universe)
     int value = m_addressSpin->value();
     bool zeroBaseChanged = true;
 
-    OutputPatch* op1 = m_outputMap->patch(m_universeValue);
-    OutputPatch* op2 = m_outputMap->patch(universe);
+    OutputPatch* op1 = m_doc->outputMap()->patch(m_universeValue);
+    OutputPatch* op2 = m_doc->outputMap()->patch(universe);
     if (op1 != NULL && op2 != NULL &&
         op1->isDMXZeroBased() == op2->isDMXZeroBased())
     {
@@ -429,7 +423,7 @@ void AddFixture::slotUniverseActivated(int universe)
        setting accordingly (e.g. x in 0-511 is x+1 in 1-512 & vice versa) */
     if (zeroBaseChanged == true)
     {
-        OutputPatch* op = m_outputMap->patch(universe);
+        OutputPatch* op = m_doc->outputMap()->patch(universe);
         if (op != NULL && op->isDMXZeroBased() == true)
             m_addressSpin->setValue(value - 1);
         else
@@ -439,7 +433,7 @@ void AddFixture::slotUniverseActivated(int universe)
 
 void AddFixture::slotAddressChanged(int value)
 {
-    OutputPatch* op = m_outputMap->patch(m_universeCombo->currentIndex());
+    OutputPatch* op = m_doc->outputMap()->patch(m_universeCombo->currentIndex());
     if (op != NULL && op->isDMXZeroBased() == true)
         m_addressValue = value;
     else
@@ -455,7 +449,7 @@ void AddFixture::slotChannelsChanged(int value)
 
     /* Set the maximum possible address so that channels cannot overflow
        beyond DMX's range of 512 channels */
-    OutputPatch* op = m_outputMap->patch(m_universeValue);
+    OutputPatch* op = m_doc->outputMap()->patch(m_universeValue);
     if (op != NULL && op->isDMXZeroBased() == true)
         m_addressSpin->setRange(0, 512 - value);
     else
@@ -551,7 +545,7 @@ void AddFixture::slotSelectionChanged()
     else
     {
         /* Specific fixture definition selected. */
-        m_fixtureDef = m_fixtureDefCache.fixtureDef(manuf, model);
+        m_fixtureDef = m_doc->fixtureDefCache()->fixtureDef(manuf, model);
         Q_ASSERT(m_fixtureDef != NULL);
 
         /* Put fixture def's modes to the mode combo */

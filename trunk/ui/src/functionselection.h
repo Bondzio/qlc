@@ -50,17 +50,10 @@ public:
     /**
      * Constructor
      *
-     * @param parent The parent widget
-     * @param doc The Doc object, whose functions to select from
-     * @param multiple Set true to enable multiple selection
-     * @param disableID A function ID to disable (when adding steps to
-     *                  a chaser, disable the chaser itself)
-     * @param filter Show only functions of the given types OR'd. All
-     *               functions are shown by default.
-     * @param constFilter If true, don't allow user filter selection
+     * @param parent The parent widget for the dialog
+     * @param doc The QLC engine instance
      */
-    FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                      InputMap* inputMap, MasterTimer* masterTimer);
+    FunctionSelection(QWidget* parent, Doc* doc);
     ~FunctionSelection();
 
 public slots:

@@ -50,15 +50,13 @@
  * Initialization
  ****************************************************************************/
 
-VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc, InputMap* inputMap)
+VCXYPadProperties::VCXYPadProperties(VCXYPad* xypad, Doc* doc)
     : QDialog(xypad)
     , m_xypad(xypad)
     , m_doc(doc)
-    , m_inputMap(inputMap)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(xypad != NULL);
-    Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
 
@@ -289,13 +287,13 @@ void VCXYPadProperties::slotPanAutoDetectToggled(bool toggled)
 {
     if (toggled == true)
     {
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotPanInputValueChanged(quint32,quint32)));
         m_tiltAutoDetectButton->setChecked(false);
     }
     else
     {
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotPanInputValueChanged(quint32,quint32)));
     }
 }
@@ -305,7 +303,7 @@ void VCXYPadProperties::slotPanChooseClicked()
     m_panAutoDetectButton->setChecked(false);
     m_tiltAutoDetectButton->setChecked(false);
 
-    SelectInputChannel sic(this, m_inputMap);
+    SelectInputChannel sic(this, m_doc->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_panInputSource = QLCInputSource(sic.universe(), sic.channel());
@@ -323,13 +321,13 @@ void VCXYPadProperties::slotTiltAutoDetectToggled(bool toggled)
 {
     if (toggled == true)
     {
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotTiltInputValueChanged(quint32,quint32)));
         m_panAutoDetectButton->setChecked(false);
     }
     else
     {
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotTiltInputValueChanged(quint32,quint32)));
     }
 }
@@ -339,7 +337,7 @@ void VCXYPadProperties::slotTiltChooseClicked()
     m_panAutoDetectButton->setChecked(false);
     m_tiltAutoDetectButton->setChecked(false);
 
-    SelectInputChannel sic(this, m_inputMap);
+    SelectInputChannel sic(this, m_doc->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_tiltInputSource = QLCInputSource(sic.universe(), sic.channel());
@@ -358,7 +356,7 @@ void VCXYPadProperties::updatePanInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_panInputSource, uniName, chName) == false)
+    if (m_doc->inputMap()->inputSourceNames(m_panInputSource, uniName, chName) == false)
     {
         uniName = KInputNone;
         chName = KInputNone;
@@ -373,7 +371,7 @@ void VCXYPadProperties::updateTiltInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_tiltInputSource, uniName, chName) == false)
+    if (m_doc->inputMap()->inputSourceNames(m_tiltInputSource, uniName, chName) == false)
     {
         uniName = KInputNone;
         chName = KInputNone;

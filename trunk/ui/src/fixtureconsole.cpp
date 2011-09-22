@@ -37,18 +37,11 @@
  * Initialization
  *****************************************************************************/
 
-FixtureConsole::FixtureConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                               InputMap* inputMap, MasterTimer* masterTimer)
+FixtureConsole::FixtureConsole(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     m_fixture = Fixture::invalidId();
     m_channelsCheckable = false;
@@ -84,7 +77,7 @@ void FixtureConsole::setFixture(quint32 id)
         if (ch->group() == QLCChannel::NoGroup)
             continue;
 
-        ConsoleChannel* cc = new ConsoleChannel(this, m_doc, m_outputMap, m_masterTimer, m_fixture, i);
+        ConsoleChannel* cc = new ConsoleChannel(this, m_doc, m_fixture, i);
         cc->setCheckable(m_channelsCheckable);
         layout()->addWidget(cc);
 
@@ -221,13 +214,13 @@ void FixtureConsole::enableExternalInput(bool enable)
 {
     if (enable == true && m_externalInputEnabled == false)
     {
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
         m_externalInputEnabled = true;
     }
     else if (enable == false && m_externalInputEnabled == true)
     {
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
         m_externalInputEnabled = false;
     }
@@ -235,7 +228,7 @@ void FixtureConsole::enableExternalInput(bool enable)
 
 void FixtureConsole::slotInputValueChanged(quint32 uni, quint32 ch, uchar value)
 {
-    if (uni == m_inputMap->editorUniverse())
+    if (uni == m_doc->inputMap()->editorUniverse())
     {
         ConsoleChannel* cc;
 

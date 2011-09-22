@@ -71,24 +71,19 @@ public:
     static VirtualConsole* instance();
 
     /** Create or show a VirtualConsole */
-    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                              InputMap* inputMap, MasterTimer* masterTimer);
+    static void createAndShow(QWidget* parent, Doc* doc);
 
     /** Public destructor */
     ~VirtualConsole();
 
 protected:
     /** Protected constructor to prevent multiple instances */
-    VirtualConsole(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-                   MasterTimer* masterTimer, Qt::WindowFlags flags = 0);
+    VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
 protected:
     /** The singleton instance */
     static VirtualConsole* s_instance;
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Properties
@@ -323,8 +318,7 @@ public:
     VCFrame* contents() const;
 
     /** Reset the VC contents to an initial state */
-    static void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                              InputMap* inputMap, MasterTimer* masterTimer);
+    static void resetContents(QWidget* parent, Doc* doc);
 
 protected:
     /** Place the contents area to the VC view */

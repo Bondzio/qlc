@@ -29,8 +29,7 @@ class StubWidget : public VCWidget
     Q_OBJECT
 
 public:
-    StubWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-               MasterTimer* masterTimer);
+    StubWidget(QWidget* parent, Doc* doc);
     ~StubWidget();
 
     VCWidget* createCopy(VCWidget* parent);

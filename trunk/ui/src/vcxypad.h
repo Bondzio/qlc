@@ -64,7 +64,7 @@ public:
      * Initialization
      *************************************************************************/
 public:
-    VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
+    VCXYPad(QWidget* parent, Doc* doc);
     virtual ~VCXYPad();
 
 private:

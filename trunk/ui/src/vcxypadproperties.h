@@ -41,13 +41,12 @@ class VCXYPadProperties : public QDialog, public Ui_VCXYPadProperties
      * Initialization
      ********************************************************************/
 public:
-    VCXYPadProperties(VCXYPad* xypad, Doc* doc, InputMap* inputMap);
+    VCXYPadProperties(VCXYPad* xypad, Doc* doc);
     ~VCXYPadProperties();
 
 private:
     VCXYPad* m_xypad;
     Doc* m_doc;
-    InputMap* m_inputMap;
 
     /********************************************************************
      * Fixtures page

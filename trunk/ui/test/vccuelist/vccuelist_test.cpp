@@ -32,8 +32,6 @@
 #include "vccuelist.h"
 #include "vcwidget.h"
 #include "vcframe.h"
-#undef private
-#undef protected
 
 #include "qlcfixturedefcache.h"
 #include "qlcinputsource.h"
@@ -45,21 +43,30 @@
 #include "doc.h"
 #include "bus.h"
 
+#undef private
+#undef protected
+
 void VCCueList_Test::initTestCase()
 {
     Bus::init(this);
 }
 
+void VCCueList_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCCueList_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
+}
+
 void VCCueList_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
     QCOMPARE(cl.objectName(), QString("VCCueList"));
     QCOMPARE(cl.frameStyle(), QFrame::Panel | QFrame::Sunken);
     QCOMPARE(cl.caption(), tr("Cue list"));
@@ -86,22 +93,17 @@ void VCCueList_Test::initial()
 
 void VCCueList_Test::appendClear()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
 
     cl.append(INT_MAX - 1);
     QCOMPARE(cl.m_list->topLevelItemCount(), 0);
@@ -136,32 +138,27 @@ void VCCueList_Test::appendClear()
 
     cl.clear();
     QCOMPARE(cl.m_list->topLevelItemCount(), 0);
-    QVERIFY(doc.function(s1->id()) == s1); // Function must not be deleted
-    QVERIFY(doc.function(s2->id()) == s2); // Function must not be deleted
+    QVERIFY(m_doc->function(s1->id()) == s1); // Function must not be deleted
+    QVERIFY(m_doc->function(s2->id()) == s2); // Function must not be deleted
 }
 
 void VCCueList_Test::functionRemoved()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
 
     cl.append(s1->id());
     cl.append(s2->id());
@@ -169,7 +166,7 @@ void VCCueList_Test::functionRemoved()
     cl.append(s2->id());
     QCOMPARE(cl.m_list->topLevelItemCount(), 4);
 
-    doc.deleteFunction(s1->id());
+    m_doc->deleteFunction(s1->id());
     s1 = NULL;
     QCOMPARE(cl.m_list->topLevelItemCount(), 2);
     QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(2));
@@ -179,7 +176,7 @@ void VCCueList_Test::functionRemoved()
     QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
     QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
 
-    doc.deleteFunction(s3->id());
+    m_doc->deleteFunction(s3->id());
     QCOMPARE(cl.m_list->topLevelItemCount(), 2);
     QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(2));
     QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s2->name());
@@ -188,32 +185,27 @@ void VCCueList_Test::functionRemoved()
     QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
     QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
 
-    doc.deleteFunction(s2->id());
+    m_doc->deleteFunction(s2->id());
     QCOMPARE(cl.m_list->topLevelItemCount(), 0);
 }
 
 void VCCueList_Test::functionChanged()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
 
     cl.append(s1->id());
     cl.append(s2->id());
@@ -244,14 +236,9 @@ void VCCueList_Test::functionChanged()
 
 void VCCueList_Test::keySequences()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
     cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
     QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Copy));
     QCOMPARE(cl.previousKeySequence(), QKeySequence());
@@ -270,30 +257,25 @@ void VCCueList_Test::keySequences()
 
 void VCCueList_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     // Input sources are tested by VCWidget tests. No point testing here.
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
 
-    VCCueList cl(&parent, &doc, &om, &im, &mt);
+    VCCueList cl(&parent, m_doc);
     cl.setCaption("Wheeee");
     cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
     cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
@@ -318,7 +300,7 @@ void VCCueList_Test::copy()
     QCOMPARE(cl2->m_list->topLevelItem(3)->text(1), s2->name());
     QCOMPARE(cl2->m_list->topLevelItem(4)->text(1), s3->name());
 
-    VCCueList cl3(&parent, &doc, &om, &im, &mt);
+    VCCueList cl3(&parent, m_doc);
     cl3.copyFrom(NULL);
     QCOMPARE(cl3.m_list->topLevelItemCount(), 0);
     QCOMPARE(cl3.caption(), tr("Cue list"));
@@ -335,69 +317,59 @@ void VCCueList_Test::copy()
 
 void VCCueList_Test::modeChange()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
-    VCCueList cl(&parent, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
+    VCCueList cl(&parent, m_doc);
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s3->id());
 
-    doc.setMode(Doc::Operate);
-    QCOMPARE(mt.m_dmxSourceList.size(), 1);
-    QCOMPARE(mt.m_dmxSourceList[0], &cl);
+    m_doc->setMode(Doc::Operate);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 1);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList[0], &cl);
     QVERIFY(cl.m_runner == NULL);
     QVERIFY(cl.m_list->isEnabled() == true);
 
     cl.createRunner();
 
-    doc.setMode(Doc::Design);
-    QCOMPARE(mt.m_dmxSourceList.size(), 0);
+    m_doc->setMode(Doc::Design);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
     QVERIFY(cl.m_runner == NULL);
     QVERIFY(cl.m_list->isEnabled() == false);
 }
 
 void VCCueList_Test::loadXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    Chaser* c4 = new Chaser(&doc);
+    Chaser* c4 = new Chaser(m_doc);
     c4->setName("The defiant one");
-    doc.addFunction(c4);
+    m_doc->addFunction(c4);
 
     QDomDocument xmldoc;
 
@@ -489,7 +461,7 @@ void VCCueList_Test::loadXML()
     QDomElement foo = xmldoc.createElement("Foobar");
     root.appendChild(foo);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
     QVERIFY(cl.loadXML(&root) == true);
     QCOMPARE(cl.m_list->topLevelItemCount(), 4);
     QCOMPARE(cl.m_list->topLevelItem(0)->text(0).toInt(), 1);
@@ -533,25 +505,20 @@ void VCCueList_Test::loadXML()
 
 void VCCueList_Test::saveXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
-    Scene* s1 = new Scene(&doc);
+    VCCueList cl(&w, m_doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
     cl.append(s1->id());
     cl.append(s2->id());
@@ -696,34 +663,29 @@ void VCCueList_Test::saveXML()
 
 void VCCueList_Test::operation()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     UniverseArray ua(512);
     QWidget w;
 
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(1);
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
     s1->setValue(fxi->id(), 0, 255);
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
     s2->setValue(fxi->id(), 0, 127);
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
     s3->setValue(fxi->id(), 0, 64);
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s3->id());
@@ -739,9 +701,9 @@ void VCCueList_Test::operation()
     QVERIFY(cl.m_runner == NULL);
 
     // Create runner with a next action -> first item should be activated
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner != NULL);
     QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
     QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
@@ -751,62 +713,62 @@ void VCCueList_Test::operation()
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 1);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
 
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
 
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     cl.slotPreviousCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
 
     cl.slotPreviousCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 1);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
 
     cl.slotPreviousCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     cl.slotPreviousCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     cl.slotNextCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 1);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
 
     cl.slotItemActivated(cl.m_list->topLevelItem(3));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Create runner with a previous action -> last item should be activated
-    doc.setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 
     cl.slotPreviousCue();
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner != NULL);
     QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
     QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
@@ -816,12 +778,12 @@ void VCCueList_Test::operation()
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Create runner thru direct item activation
-    doc.setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 
     cl.slotItemActivated(cl.m_list->topLevelItem(2));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner != NULL);
     QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
     QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
@@ -832,53 +794,48 @@ void VCCueList_Test::operation()
 
     // Unrecognized keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::SelectAll));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
 
     // Next keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Previous keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::Cut));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
 
     // Stop
     cl.slotKeyPressed(QKeySequence(QKeySequence::Undo));
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner == NULL);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), -1);
-    QVERIFY(mt.fader()->m_channels.contains(0));
+    QVERIFY(m_doc->masterTimer()->fader()->m_channels.contains(0));
 }
 
 void VCCueList_Test::input()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     UniverseArray ua(512);
     QWidget w;
 
-    Scene* s1 = new Scene(&doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("The first");
-    doc.addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Another one");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
 
-    Scene* s3 = new Scene(&doc);
+    Scene* s3 = new Scene(m_doc);
     s3->setName("The third one");
-    doc.addFunction(s3);
+    m_doc->addFunction(s3);
 
-    VCCueList cl(&w, &doc, &om, &im, &mt);
+    VCCueList cl(&w, m_doc);
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s3->id());
@@ -888,7 +845,7 @@ void VCCueList_Test::input()
     cl.setInputSource(QLCInputSource(4, 5), VCCueList::stopInputSourceId);
 
     // Runner creation thru next input
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     cl.slotInputValueChanged(5, 3, 255);
     QVERIFY(cl.m_runner == NULL);
 
@@ -897,23 +854,23 @@ void VCCueList_Test::input()
 
     cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
     cl.slotInputValueChanged(0, 1, 0);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
     cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 1);
 
     // Runner creation thru previous input
-    doc.setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 
     cl.slotInputValueChanged(0, 3, 255);
     QVERIFY(cl.m_runner == NULL);
@@ -923,27 +880,27 @@ void VCCueList_Test::input()
 
     cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
     cl.slotInputValueChanged(2, 3, 0);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
     cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(cl.m_runner->currentStep(), 2);
 
     cl.slotInputValueChanged(4, 5, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner == NULL);
 
     cl.slotInputValueChanged(4, 5, 0);
     QVERIFY(cl.m_runner == NULL);
-    cl.writeDMX(&mt, &ua);
+    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner == NULL);
 }
 

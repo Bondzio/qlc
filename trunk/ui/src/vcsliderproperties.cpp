@@ -53,18 +53,11 @@
 #define KColumnRange 2
 #define KColumnID    3
 
-VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc, OutputMap* outputMap,
-                                       InputMap* inputMap, MasterTimer* masterTimer)
+VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
     : QDialog(slider)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(slider != NULL);
     m_slider = slider;
 
@@ -289,12 +282,12 @@ void VCSliderProperties::slotAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
 }
@@ -307,7 +300,7 @@ void VCSliderProperties::slotInputValueChanged(quint32 universe, quint32 channel
 
 void VCSliderProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this, m_inputMap);
+    SelectInputChannel sic(this, m_doc->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputSource = QLCInputSource(sic.universe(), sic.channel());
@@ -320,7 +313,7 @@ void VCSliderProperties::updateInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_inputSource, uniName, chName) == false)
+    if (m_doc->inputMap()->inputSourceNames(m_inputSource, uniName, chName) == false)
     {
         uniName = KInputNone;
         chName = KInputNone;
@@ -670,7 +663,7 @@ void VCSliderProperties::slotLevelByGroupClicked()
 
 void VCSliderProperties::slotAttachPlaybackFunctionClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setMultiSelection(false);
     fs.setFilter(Function::Scene | Function::Chaser | Function::EFX, true);
 

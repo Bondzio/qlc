@@ -186,10 +186,6 @@ void MasterTimer::run()
                    << strerror(errno) << "- Stopping MasterTimer";
         m_running = false;
     }
-    else
-    {
-        m_running = true;
-    }
 
     while (m_running == true)
     {

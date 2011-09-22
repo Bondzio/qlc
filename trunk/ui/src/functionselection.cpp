@@ -52,21 +52,14 @@
  * Initialization
  *****************************************************************************/
 
-FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                     InputMap* inputMap, MasterTimer* masterTimer)
+FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
     , m_multiSelection(true)
     , m_filter(Function::Scene | Function::Chaser | Function::Collection | Function::EFX | Function::Script)
     , m_constFilter(false)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     m_toolbar = NULL;
     m_addSceneAction = NULL;
@@ -412,20 +405,17 @@ int FunctionSelection::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc, m_outputMap,
-                           m_inputMap, m_masterTimer);
+        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc, m_outputMap,
-                            m_inputMap, m_masterTimer);
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc,
-                                m_outputMap, m_inputMap, m_masterTimer);
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)
@@ -435,8 +425,7 @@ int FunctionSelection::editFunction(Function* function)
     }
     else if (function->type() == Function::Script)
     {
-        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc, m_outputMap,
-                            m_inputMap, m_masterTimer);
+        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc);
         result = editor.exec();
     }
     else

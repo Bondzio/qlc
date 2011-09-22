@@ -23,10 +23,8 @@
 #define CHASER_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
 
 class Doc;
-
 class Chaser_Test : public QObject
 {
     Q_OBJECT
@@ -60,7 +58,6 @@ private slots:
 
 private:
     Doc* m_doc;
-    QLCFixtureDefCache m_cache;
 };
 
 #endif

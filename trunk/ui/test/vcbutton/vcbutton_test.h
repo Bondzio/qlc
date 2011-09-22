@@ -24,12 +24,17 @@
 
 #include <QObject>
 
+class Doc;
 class VCButton_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+
+    void init();
+    void cleanup();
+
     void initial();
     void function();
     void action();
@@ -48,6 +53,9 @@ private slots:
     void flash();
     void input();
     void paint();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

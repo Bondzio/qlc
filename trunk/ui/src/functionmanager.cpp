@@ -67,19 +67,11 @@ FunctionManager* FunctionManager::s_instance = NULL;
  * Initialization
  *****************************************************************************/
 
-FunctionManager::FunctionManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                 InputMap* inputMap, MasterTimer* masterTimer,
-                                 Qt::WindowFlags flags)
+FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     new QVBoxLayout(this);
 
@@ -116,8 +108,7 @@ FunctionManager* FunctionManager::instance()
     return s_instance;
 }
 
-void FunctionManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                    InputMap* inputMap, MasterTimer* masterTimer)
+void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
 {
     QWidget* window = NULL;
 
@@ -126,14 +117,14 @@ void FunctionManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* output
     {
     #ifdef __APPLE__
         /* Create a separate window for OSX */
-        s_instance = new FunctionManager(parent, doc, outputMap, inputMap, masterTimer, Qt::Window);
+        s_instance = new FunctionManager(parent, doc, Qt::Window);
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
         QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new FunctionManager(sub, doc, outputMap, inputMap, masterTimer);
+        s_instance = new FunctionManager(sub, doc);
         sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
@@ -740,20 +731,17 @@ int FunctionManager::editFunction(Function* function)
 
     if (function->type() == Function::Scene)
     {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc, m_outputMap,
-                           m_inputMap, m_masterTimer);
+        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Chaser)
     {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc, m_outputMap,
-                            m_inputMap, m_masterTimer);
+        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Collection)
     {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc, m_outputMap,
-                                m_inputMap, m_masterTimer);
+        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::EFX)
@@ -763,8 +751,7 @@ int FunctionManager::editFunction(Function* function)
     }
     else if (function->type() == Function::Script)
     {
-        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc, m_outputMap,
-                            m_inputMap, m_masterTimer);
+        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc);
         result = editor.exec();
     }
     else

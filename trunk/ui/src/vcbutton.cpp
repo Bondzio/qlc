@@ -61,9 +61,7 @@ const QSize VCButton::defaultSize(QSize(50, 50));
  * Initialization
  *****************************************************************************/
 
-VCButton::VCButton(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-                   MasterTimer* masterTimer)
-    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
+VCButton::VCButton(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     , m_adjustIntensity(false)
     , m_intensityAdjustment(1.0)
 {
@@ -113,7 +111,7 @@ VCWidget* VCButton::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCButton* button = new VCButton(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCButton* button = new VCButton(parent, m_doc);
     if (button->copyFrom(this) == false)
     {
         delete button;
@@ -147,7 +145,7 @@ bool VCButton::copyFrom(VCWidget* widget)
 
 void VCButton::editProperties()
 {
-    VCButtonProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCButtonProperties prop(this, m_doc);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }
@@ -365,9 +363,9 @@ void VCButton::setOn(bool on)
     if (src.isValid() == true)
     {
         if (on == true)
-            m_inputMap->feedBack(src.universe(), src.channel(), UCHAR_MAX);
+            m_doc->inputMap()->feedBack(src.universe(), src.channel(), UCHAR_MAX);
         else
-            m_inputMap->feedBack(src.universe(), src.channel(), 0);
+            m_doc->inputMap()->feedBack(src.universe(), src.channel(), 0);
     }
 
     update();
@@ -439,9 +437,11 @@ void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
 void VCButton::setAction(Action action)
 {
     if (m_action == Blackout && action != Blackout)
-        disconnect(m_outputMap, SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
+        disconnect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
+                   this, SLOT(slotBlackoutChanged(bool)));
     else if (m_action != Blackout && action == Blackout)
-        connect(m_outputMap, SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
+        connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
+                this, SLOT(slotBlackoutChanged(bool)));
 
     m_action = action;
 
@@ -524,7 +524,7 @@ void VCButton::pressFunction()
             else
             {
                 emit functionStarting();
-                m_masterTimer->startFunction(f, false);
+                m_doc->masterTimer()->startFunction(f, false);
                 if (adjustIntensity() == true)
                     f->adjustIntensity(intensityAdjustment());
             }
@@ -534,15 +534,15 @@ void VCButton::pressFunction()
     {
         f = m_doc->function(m_function);
         if (f != NULL)
-            f->flash(m_masterTimer);
+            f->flash(m_doc->masterTimer());
     }
     else if (m_action == Blackout)
     {
-        m_outputMap->toggleBlackout();
+        m_doc->outputMap()->toggleBlackout();
     }
     else if (m_action == StopAll)
     {
-        m_masterTimer->stopAllFunctions();
+        m_doc->masterTimer()->stopAllFunctions();
     }
 }
 
@@ -554,7 +554,7 @@ void VCButton::releaseFunction()
     {
         f = m_doc->function(m_function);
         if (f != NULL)
-            f->unFlash(m_masterTimer);
+            f->unFlash(m_doc->masterTimer());
     }
 }
 

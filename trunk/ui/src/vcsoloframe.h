@@ -43,7 +43,7 @@ class VCSoloFrame : public VCFrame
      * Initialization
      *************************************************************************/
 public:
-    VCSoloFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
+    VCSoloFrame(QWidget* parent, Doc* doc);
     virtual ~VCSoloFrame();
 
     /*************************************************************************

@@ -23,10 +23,8 @@
 #define COLLECTION_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
 
 class Doc;
-
 class Collection_Test : public QObject
 {
     Q_OBJECT
@@ -56,7 +54,6 @@ private slots:
 
 private:
     Doc* m_doc;
-    QLCFixtureDefCache m_cache;
 };
 
 #endif

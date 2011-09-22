@@ -71,8 +71,8 @@ public:
      * Initialization
      *************************************************************************/
 public:
-    /** Normal constructor */
-    VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
+    /** Constructor */
+    VCCueList(QWidget* parent, Doc* doc);
 
     /** Destructor */
     ~VCCueList();

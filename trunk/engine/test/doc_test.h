@@ -25,14 +25,15 @@
 #include <QObject>
 #include <QtXml>
 
-#include "qlcfixturedefcache.h"
-
+class Doc;
 class Doc_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
 
     void defaults();
 
@@ -56,7 +57,7 @@ private:
     QDomElement createBusNode(QDomDocument& doc, quint32 id, quint32 value);
 
 private:
-    QLCFixtureDefCache m_fixtureDefCache;
+    Doc* m_doc;
 };
 
 #endif

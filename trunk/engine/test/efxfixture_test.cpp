@@ -23,41 +23,38 @@
 #include <QtXml>
 #include <QList>
 
-#include "mastertimer_stub.h"
-#include "efxfixture_test.h"
-#include "scene_stub.h"
-
-#include "universearray.h"
-#include "function.h"
-#include "fixture.h"
-#include "doc.h"
-
-/* Expose protected members to the unit test */
 #define protected public
 #define private public
+#include "mastertimer_stub.h"
+#include "efxfixture_test.h"
+#include "universearray.h"
 #include "genericfader.h"
 #include "efxfixture.h"
+#include "qlcchannel.h"
+#include "scene_stub.h"
+#include "function.h"
+#include "fixture.h"
+#include "qlcfile.h"
 #include "efx.h"
+#include "doc.h"
 #undef private
 #undef protected
-
-#include "qlcchannel.h"
-#include "qlcfile.h"
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
 void EFXFixture_Test::initTestCase()
 {
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void EFXFixture_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void EFXFixture_Test::cleanup()

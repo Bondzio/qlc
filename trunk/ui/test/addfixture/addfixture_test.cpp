@@ -41,15 +41,22 @@
 void AddFixture_Test::initTestCase()
 {
     Bus::init(this);
+
+    m_doc = new Doc(this);
+
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
+}
+
+void AddFixture_Test::cleanupTestCase()
+{
+    delete m_doc;
 }
 
 void AddFixture_Test::findAddress()
 {
-    Doc doc(this, m_cache);
     QList <Fixture*> fixtures;
 
     /* All addresses are available (except for fixtures taking more than
@@ -59,7 +66,7 @@ void AddFixture_Test::findAddress()
     QVERIFY(AddFixture::findAddress(512, fixtures, 4) == 0);
     QVERIFY(AddFixture::findAddress(513, fixtures, 4) == QLCChannel::invalid());
 
-    Fixture* f1 = new Fixture(&doc);
+    Fixture* f1 = new Fixture(m_doc);
     f1->setChannels(15);
     f1->setAddress(10);
     fixtures << f1;
@@ -68,7 +75,7 @@ void AddFixture_Test::findAddress()
     QVERIFY(AddFixture::findAddress(10, fixtures, 4) == 0);
     QVERIFY(AddFixture::findAddress(11, fixtures, 4) == 25);
 
-    Fixture* f2 = new Fixture(&doc);
+    Fixture* f2 = new Fixture(m_doc);
     f2->setChannels(15);
     f2->setAddress(10);
     fixtures << f2;
@@ -84,7 +91,7 @@ void AddFixture_Test::findAddress()
     QVERIFY(AddFixture::findAddress(10, fixtures, 4) == 25);
     QVERIFY(AddFixture::findAddress(11, fixtures, 4) == 25);
 
-    Fixture* f3 = new Fixture(&doc);
+    Fixture* f3 = new Fixture(m_doc);
     f3->setChannels(5);
     f3->setAddress(30);
     fixtures << f3;
@@ -104,12 +111,8 @@ void AddFixture_Test::findAddress()
 
 void AddFixture_Test::initialNoFixture()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-
-    AddFixture af(NULL, m_cache, &doc, &om);
-    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
-    QVERIFY(&doc == af.m_doc);
+    AddFixture af(NULL, m_doc);
+    QVERIFY(m_doc == af.m_doc);
     QVERIFY(af.fixtureDef() == NULL);
     QVERIFY(af.mode() == NULL);
     QCOMPARE(af.name(), tr("Dimmers"));
@@ -121,7 +124,7 @@ void AddFixture_Test::initialNoFixture()
     QVERIFY(af.m_tree->columnCount() == 1);
 
     // Check that all makes & models are put to the tree
-    QStringList makers(m_cache.manufacturers());
+    QStringList makers(m_doc->fixtureDefCache()->manufacturers());
     QVERIFY(makers.isEmpty() == false);
     for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
     {
@@ -129,7 +132,7 @@ void AddFixture_Test::initialNoFixture()
 
         if (top->text(0) != KXMLFixtureGeneric)
         {
-            QStringList models(m_cache.models(top->text(0)));
+            QStringList models(m_doc->fixtureDefCache()->models(top->text(0)));
             for (int j = 0; j < top->childCount(); j++)
             {
                 QTreeWidgetItem* child = top->child(j);
@@ -163,7 +166,7 @@ void AddFixture_Test::initialNoFixture()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (om.patch(0)->isDMXZeroBased() == true)
+    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
     {
         QCOMPARE(af.m_addressSpin->value(), 0);
         QCOMPARE(af.m_addressSpin->minimum(), 0);
@@ -192,18 +195,15 @@ void AddFixture_Test::initialNoFixture()
 
 void AddFixture_Test::initialDimmer()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(6);
     fxi->setName("My dimmer");
     fxi->setUniverse(2);
     fxi->setAddress(484);
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
 
-    AddFixture af(NULL, m_cache, &doc, &om, fxi);
-    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
-    QVERIFY(&doc == af.m_doc);
+    AddFixture af(NULL, m_doc, fxi);
+    QVERIFY(m_doc == af.m_doc);
     QVERIFY(af.fixtureDef() == NULL);
     QVERIFY(af.mode() == NULL);
     QVERIFY(af.name() == QString("My dimmer"));
@@ -214,7 +214,7 @@ void AddFixture_Test::initialDimmer()
     QVERIFY(af.channels() == 6);
 
     // Check that all makes & models are put to the tree
-    QStringList makers(m_cache.manufacturers());
+    QStringList makers(m_doc->fixtureDefCache()->manufacturers());
     QVERIFY(makers.isEmpty() == false);
     for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
     {
@@ -222,7 +222,7 @@ void AddFixture_Test::initialDimmer()
 
         if (top->text(0) != KXMLFixtureGeneric)
         {
-            QStringList models(m_cache.models(top->text(0)));
+            QStringList models(m_doc->fixtureDefCache()->models(top->text(0)));
             for (int j = 0; j < top->childCount(); j++)
             {
                 QTreeWidgetItem* child = top->child(j);
@@ -256,7 +256,7 @@ void AddFixture_Test::initialDimmer()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (om.patch(0)->isDMXZeroBased() == true)
+    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
     {
         QCOMPARE(af.m_addressSpin->value(), 484);
         QCOMPARE(af.m_addressSpin->minimum(), 0);
@@ -286,12 +286,10 @@ void AddFixture_Test::initialDimmer()
 
 void AddFixture_Test::initialScanner()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setName("My scanner");
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC300");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC300");
     Q_ASSERT(def != NULL);
     Q_ASSERT(def != NULL);
     Q_ASSERT(def->channels().size() > 0);
@@ -301,11 +299,10 @@ void AddFixture_Test::initialScanner()
     fxi->setFixtureDefinition(def, mode);
     fxi->setUniverse(2);
     fxi->setAddress(484);
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
 
-    AddFixture af(NULL, m_cache, &doc, &om, fxi);
-    QVERIFY(&m_cache == &(af.m_fixtureDefCache));
-    QVERIFY(&doc == af.m_doc);
+    AddFixture af(NULL, m_doc, fxi);
+    QVERIFY(m_doc == af.m_doc);
     QVERIFY(af.fixtureDef() == def);
     QVERIFY(af.mode() == mode);
     QVERIFY(af.name() == QString("My scanner"));
@@ -316,7 +313,7 @@ void AddFixture_Test::initialScanner()
     QVERIFY(af.channels() == fxi->channels());
 
     // Check that all makes & models are put to the tree
-    QStringList makers(m_cache.manufacturers());
+    QStringList makers(m_doc->fixtureDefCache()->manufacturers());
     QVERIFY(makers.isEmpty() == false);
     for (int i = 0; i < af.m_tree->topLevelItemCount(); i++)
     {
@@ -324,7 +321,7 @@ void AddFixture_Test::initialScanner()
 
         if (top->text(0) != KXMLFixtureGeneric)
         {
-            QStringList models(m_cache.models(top->text(0)));
+            QStringList models(m_doc->fixtureDefCache()->models(top->text(0)));
             for (int j = 0; j < top->childCount(); j++)
             {
                 QTreeWidgetItem* child = top->child(j);
@@ -358,7 +355,7 @@ void AddFixture_Test::initialScanner()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (om.patch(0)->isDMXZeroBased() == true)
+    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
     {
         QCOMPARE(af.m_addressSpin->value(), 484);
     }
@@ -384,10 +381,7 @@ void AddFixture_Test::initialScanner()
 
 void AddFixture_Test::selectionNothing()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-
-    AddFixture af(NULL, m_cache, &doc, &om);
+    AddFixture af(NULL, m_doc);
 
     af.m_tree->setCurrentItem(NULL);
     QVERIFY(af.m_tree->currentItem() == NULL);
@@ -410,7 +404,7 @@ void AddFixture_Test::selectionNothing()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == false);
-    if (om.patch(0)->isDMXZeroBased() == true)
+    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
     {
         QCOMPARE(af.m_addressSpin->value(), 0);
         QCOMPARE(af.m_addressSpin->minimum(), 0);
@@ -436,10 +430,7 @@ void AddFixture_Test::selectionNothing()
 
 void AddFixture_Test::selectionGeneric()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-
-    AddFixture af(NULL, m_cache, &doc, &om);
+    AddFixture af(NULL, m_doc);
 
     // Select the last item which should be Generic - Generic
     QTreeWidgetItem* item = af.m_tree->topLevelItem(af.m_tree->topLevelItemCount() - 1);
@@ -465,7 +456,7 @@ void AddFixture_Test::selectionGeneric()
     QVERIFY(af.universe() == 0);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (om.patch(0)->isDMXZeroBased() == true)
+    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
     {
         QCOMPARE(af.m_addressSpin->value(), 0);
         QCOMPARE(af.m_addressSpin->minimum(), 0);

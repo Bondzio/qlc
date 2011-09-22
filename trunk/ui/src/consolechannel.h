@@ -53,8 +53,7 @@ class ConsoleChannel : public QGroupBox, public DMXSource
      * Initialization
      *********************************************************************/
 public:
-    ConsoleChannel(QWidget *parent, Doc* doc, OutputMap* outputMap,
-                   MasterTimer* masterTimer, quint32 fixtureID, quint32 channel);
+    ConsoleChannel(QWidget *parent, Doc* doc, quint32 fixtureID, quint32 channel);
     ~ConsoleChannel();
 
     /** The relative channel number that the ConsoleChannel instance controls */
@@ -66,8 +65,6 @@ protected:
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    MasterTimer* m_masterTimer;
 
     quint32 m_channel;
     quint32 m_fixtureID;

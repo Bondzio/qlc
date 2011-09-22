@@ -23,7 +23,8 @@
 #define FIXTURE_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
+
+class Doc;
 
 class Fixture_Test : public QObject
 {
@@ -31,6 +32,8 @@ class Fixture_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
+
     void id();
     void name();
     void address();
@@ -51,7 +54,7 @@ private slots:
     void status();
 
 private:
-    QLCFixtureDefCache m_fixtureDefCache;
+    Doc* m_doc;
 };
 
 #endif

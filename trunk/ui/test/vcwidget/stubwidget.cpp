@@ -24,9 +24,7 @@
 
 #include "stubwidget.h"
 
-StubWidget::StubWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-                       MasterTimer* masterTimer)
-    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
+StubWidget::StubWidget(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 {
 }
 

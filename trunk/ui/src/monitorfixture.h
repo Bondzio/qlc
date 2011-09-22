@@ -39,7 +39,7 @@ class MonitorFixture : public QFrame
     Q_OBJECT
 
 public:
-    MonitorFixture(QWidget* parent, Doc* doc, OutputMap* outputMap);
+    MonitorFixture(QWidget* parent, Doc* doc);
     virtual ~MonitorFixture();
 
     /** Less-than operator for qSort() */
@@ -50,7 +50,6 @@ public:
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
 
     /********************************************************************
      * Fixture

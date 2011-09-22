@@ -47,20 +47,13 @@
 #define KColumnName   1
 #define KColumnID     2
 
-ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap* outputMap,
-                           InputMap* inputMap, MasterTimer* masterTimer)
+ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
     , m_chaser(chaser)
 {
     Q_ASSERT(chaser != NULL);
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     setupUi(this);
 
@@ -194,7 +187,7 @@ void ChaserEditor::slotNameEdited(const QString& text)
 
 void ChaserEditor::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setDisabledFunctions(QList <quint32>() << m_chaser->id());
     fs.setFilter(Function::Scene, true); // Allow only scenes
 

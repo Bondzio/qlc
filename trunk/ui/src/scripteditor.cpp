@@ -38,14 +38,10 @@
 #include "doc.h"
 #include "bus.h"
 
-ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc, OutputMap* outputMap,
-                           InputMap* inputMap, MasterTimer* masterTimer)
+ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
     : QDialog(parent)
     , m_script(script)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     setupUi(this);
     initAddMenu();
@@ -125,7 +121,7 @@ void ScriptEditor::initAddMenu()
 
 void ScriptEditor::slotAddStartFunction()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setDisabledFunctions(QList <quint32> () << m_script->id());
     if (fs.exec() == QDialog::Accepted)
     {
@@ -145,7 +141,7 @@ void ScriptEditor::slotAddStartFunction()
 
 void ScriptEditor::slotAddStopFunction()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setDisabledFunctions(QList <quint32> () << m_script->id());
     if (fs.exec() == QDialog::Accepted)
     {

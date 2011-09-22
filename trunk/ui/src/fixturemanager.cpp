@@ -79,21 +79,11 @@ FixtureManager* FixtureManager::s_instance = NULL;
  * Initialization
  *****************************************************************************/
 
-FixtureManager::FixtureManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                               InputMap* inputMap, MasterTimer* masterTimer,
-                               const QLCFixtureDefCache& fixtureDefCache,
-                               Qt::WindowFlags flags)
+FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
-    , m_fixtureDefCache(fixtureDefCache)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     new QVBoxLayout(this);
 
@@ -132,9 +122,7 @@ FixtureManager* FixtureManager::instance()
     return s_instance;
 }
 
-void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                   InputMap* inputMap, MasterTimer* masterTimer,
-                                   const QLCFixtureDefCache& fixtureDefCache)
+void FixtureManager::createAndShow(QWidget* parent, Doc* doc)
 {
     QWidget* window = NULL;
 
@@ -143,15 +131,14 @@ void FixtureManager::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputM
     {
     #ifdef __APPLE__
         /* Create a separate window for OSX */
-        s_instance = new FixtureManager(parent, doc, outputMap, inputMap, masterTimer,
-                                        fixtureDefCache, Qt::Window);
+        s_instance = new FixtureManager(parent, doc, Qt::Window);
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
         QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new FixtureManager(sub, doc, outputMap, inputMap, masterTimer, fixtureDefCache);
+        s_instance = new FixtureManager(sub, doc);
         sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
@@ -335,7 +322,7 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
     item->setText(KColumnUniverse, QString("%1").arg(fxi->universe() + 1));
 
     // Address column, show 0-based or 1-based DMX addresses
-    OutputPatch* op = m_outputMap->patch(fxi->universe());
+    OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
     if (op != NULL && op->isDMXZeroBased() == true)
         s.sprintf("%.3d - %.3d", fxi->address(),
                   fxi->address() + fxi->channels() - 1);
@@ -381,7 +368,7 @@ void FixtureManager::slotSelectionChanged()
         delete m_tab->widget(KTabConsole);
 
         /* Create a new console for the selected fixture */
-        m_console = new FixtureConsole(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+        m_console = new FixtureConsole(this, m_doc);
         m_console->setFixture(id);
         m_console->setChannelsCheckable(false);
 
@@ -543,7 +530,7 @@ void FixtureManager::initToolBar()
 
 void FixtureManager::slotAdd()
 {
-    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap);
+    AddFixture af(this, m_doc);
     if (af.exec() == QDialog::Rejected)
         return;
 
@@ -682,9 +669,9 @@ void FixtureManager::slotRemove()
             so it's rather safe to reset the fixture's address space here. */
         Fixture* fxi = m_doc->fixture(id);
         Q_ASSERT(fxi != NULL);
-        UniverseArray* ua = m_outputMap->claimUniverses();
+        UniverseArray* ua = m_doc->outputMap()->claimUniverses();
         ua->reset(fxi->address(), fxi->channels());
-        m_outputMap->releaseUniverses();
+        m_doc->outputMap()->releaseUniverses();
 
         m_doc->deleteFixture(id);
     }
@@ -717,7 +704,7 @@ void FixtureManager::slotProperties()
         model = KXMLFixtureGeneric;
     }
 
-    AddFixture af(this, m_fixtureDefCache, m_doc, m_outputMap, fxi);
+    AddFixture af(this, m_doc, fxi);
     af.setWindowTitle(tr("Change fixture properties"));
     if (af.exec() == QDialog::Accepted)
     {

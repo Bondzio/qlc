@@ -89,9 +89,6 @@ QStyle* App::s_saneStyle = NULL;
 App::App() : QMainWindow()
 {
     m_progressDialog = NULL;
-    m_masterTimer = NULL;
-    m_outputMap = NULL;
-    m_inputMap = NULL;
     m_doc = NULL;
 
     m_modeIndicator = NULL;
@@ -149,24 +146,6 @@ App::~App()
     if (VirtualConsole::properties().contents())
         delete VirtualConsole::properties().contents();
 
-    // Store outputmap defaults
-    if (m_outputMap != NULL)
-        m_outputMap->saveDefaults();
-
-    // Store inputmap defaults
-    if (m_inputMap != NULL)
-        m_inputMap->saveDefaults();
-
-    // Delete master timer
-    if (m_masterTimer != NULL)
-        delete m_masterTimer;
-    m_masterTimer = NULL;
-
-    // Delete doc
-    if (m_doc != NULL)
-        delete m_doc;
-    m_doc = NULL;
-
     // Delete mode indicator
     if (m_modeIndicator != NULL)
         delete m_modeIndicator;
@@ -181,6 +160,11 @@ App::~App()
     if (m_blackoutIndicator != NULL)
         delete m_blackoutIndicator;
     m_blackoutIndicator = NULL;
+
+    // Delete doc
+    if (m_doc != NULL)
+        delete m_doc;
+    m_doc = NULL;
 }
 
 QString App::longName()
@@ -249,19 +233,11 @@ void App::init()
     }
 #endif
 
-    /* Input & output mappers and their plugins */
-    initOutputMap();
-    initInputMap();
-
-    /* Function running engine/master timer */
-    m_masterTimer = new MasterTimer(this, m_outputMap);
-    m_masterTimer->start();
-
-    /* Buses */
+    // Initialize buses
     Bus::init(this);
 
-    /* Fixture definitions */
-    loadFixtureDefinitions();
+    // The main engine object
+    initDoc();
 
     // The main view
     initStatusBar();
@@ -269,11 +245,8 @@ void App::init()
     initMenuBar();
     initToolBar();
 
-    // Document
-    initDoc();
-
     // Virtual Console bottom frame
-    VirtualConsole::resetContents(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VirtualConsole::resetContents(this, m_doc);
     VirtualConsole::properties().contents()->hide();
 
     // Start up in non-modified state
@@ -361,26 +334,6 @@ void App::slotSetProgressText(const QString& text)
  * Output mapping
  *****************************************************************************/
 
-void App::initOutputMap()
-{
-    m_outputMap = new OutputMap(this, KUniverseCount);
-    Q_ASSERT(m_outputMap != NULL);
-
-    /* Get progress information from output map */
-    connect(m_outputMap, SIGNAL(pluginAdded(const QString&)),
-            this, SLOT(slotSetProgressText(const QString&)));
-
-    /* Load output plugins */
-    m_outputMap->loadPlugins(OutputMap::systemPluginDirectory());
-
-    /* Load settings */
-    m_outputMap->loadDefaults();
-
-    /* Monitor OutputMap's blackout state */
-    connect(m_outputMap, SIGNAL(blackoutChanged(bool)),
-            this, SLOT(slotOutputMapBlackoutChanged(bool)));
-}
-
 void App::slotOutputMapBlackoutChanged(bool state)
 {
     if (state == true)
@@ -420,45 +373,38 @@ void App::slotFlashBlackoutIndicator()
 }
 
 /*****************************************************************************
- * Input mapping
- *****************************************************************************/
-
-void App::initInputMap()
-{
-    m_inputMap = new InputMap(this, KInputUniverseCount);
-    Q_ASSERT(m_inputMap != NULL);
-
-    /* Get progress information from input map */
-    connect(m_inputMap, SIGNAL(pluginAdded(const QString&)),
-            this, SLOT(slotSetProgressText(const QString&)));
-
-    /* Load input plugins */
-    m_inputMap->loadPlugins(InputMap::systemPluginDirectory());
-
-    /* Load user profiles first; They override system profiles, since
-       duplicates from system profiles are ignored. */
-    m_inputMap->loadProfiles(InputMap::userProfileDirectory());
-    m_inputMap->loadProfiles(InputMap::systemProfileDirectory());
-
-    /* Load settings */
-    m_inputMap->loadDefaults();
-}
-
-/*****************************************************************************
  * Doc
  *****************************************************************************/
 
 void App::initDoc()
 {
-    // Delete existing document object and create a new one
     Q_ASSERT(m_doc == NULL);
-    m_doc = new Doc(this, m_fixtureDefCache);
+    m_doc = new Doc(this);
 
-    connect(m_doc, SIGNAL(modified(bool)),
-            this, SLOT(slotDocModified(bool)));
+    connect(m_doc, SIGNAL(modified(bool)), this, SLOT(slotDocModified(bool)));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
 
-    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
+    /* Load user fixtures first so that they override system fixtures */
+    m_doc->fixtureDefCache()->load(QLCFixtureDefCache::userDefinitionDirectory());
+    m_doc->fixtureDefCache()->load(QLCFixtureDefCache::systemDefinitionDirectory());
+
+    /* Load output plugins */
+    Q_ASSERT(m_doc->outputMap() != NULL);
+    connect(m_doc->outputMap(), SIGNAL(pluginAdded(const QString&)),
+            this, SLOT(slotSetProgressText(const QString&)));
+    m_doc->outputMap()->loadPlugins(OutputMap::systemPluginDirectory());
+    m_doc->outputMap()->loadDefaults();
+    connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
+            this, SLOT(slotOutputMapBlackoutChanged(bool)));
+
+    /* Load input plugins */
+    Q_ASSERT(m_doc->inputMap() != NULL);
+    connect(m_doc->inputMap(), SIGNAL(pluginAdded(const QString&)),
+            this, SLOT(slotSetProgressText(const QString&)));
+    m_doc->inputMap()->loadPlugins(InputMap::systemPluginDirectory());
+    m_doc->inputMap()->loadDefaults();
+
+    m_doc->masterTimer()->start();
 }
 
 void App::slotDocModified(bool state)
@@ -500,17 +446,6 @@ void App::slotDocModified(bool state)
 }
 
 /*****************************************************************************
- * Fixture definitions
- *****************************************************************************/
-
-void App::loadFixtureDefinitions()
-{
-    /* Load user fixtures first so they override system fixtures */
-    m_fixtureDefCache.load(QLCFixtureDefCache::userDefinitionDirectory());
-    m_fixtureDefCache.load(QLCFixtureDefCache::systemDefinitionDirectory());
-}
-
-/*****************************************************************************
  * Main application Mode
  *****************************************************************************/
 
@@ -521,7 +456,7 @@ void App::slotModeOperate()
 
 void App::slotModeDesign()
 {
-    if (m_masterTimer->runningFunctions() > 0)
+    if (m_doc->masterTimer()->runningFunctions() > 0)
     {
         int result = QMessageBox::warning(
                          this,
@@ -535,7 +470,7 @@ void App::slotModeDesign()
         if (result == QMessageBox::No)
             return;
         else
-            m_masterTimer->stopAllFunctions();
+            m_doc->masterTimer()->stopAllFunctions();
     }
 
     m_doc->setMode(Doc::Design);
@@ -982,8 +917,8 @@ bool App::slotFileNew()
 void App::clearDocument()
 {
     m_doc->clearContents();
-    VirtualConsole::resetContents(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
-    m_outputMap->resetUniverses();
+    VirtualConsole::resetContents(this, m_doc);
+    m_doc->outputMap()->resetUniverses();
     setFileName(QString());
     m_doc->resetModified();
 }
@@ -1146,8 +1081,7 @@ void App::slotFixtureManager()
 #else
     parent = centralWidget();
 #endif
-    FixtureManager::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer,
-                                  m_fixtureDefCache);
+    FixtureManager::createAndShow(parent, m_doc);
 }
 
 void App::slotFunctionManager()
@@ -1158,7 +1092,7 @@ void App::slotFunctionManager()
 #else
     parent = centralWidget();
 #endif
-    FunctionManager::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionManager::createAndShow(parent, m_doc);
 }
 
 void App::slotBusManager()
@@ -1180,7 +1114,7 @@ void App::slotOutputManager()
 #else
     parent = centralWidget();
 #endif
-    OutputManager::createAndShow(parent, m_outputMap);
+    OutputManager::createAndShow(parent, m_doc->outputMap());
 }
 
 void App::slotInputManager()
@@ -1191,7 +1125,7 @@ void App::slotInputManager()
 #else
     parent = centralWidget();
 #endif
-    InputManager::createAndShow(parent, m_inputMap);
+    InputManager::createAndShow(parent, m_doc->inputMap());
 }
 
 /*****************************************************************************
@@ -1206,7 +1140,7 @@ void App::slotControlVC()
 #else
     parent = centralWidget();
 #endif
-    VirtualConsole::createAndShow(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VirtualConsole::createAndShow(parent, m_doc);
 }
 
 void App::slotControlMonitor()
@@ -1217,7 +1151,7 @@ void App::slotControlMonitor()
 #else
     parent = centralWidget();
 #endif
-    Monitor::createAndShow(parent, m_doc, m_outputMap);
+    Monitor::createAndShow(parent, m_doc);
 }
 
 #ifndef __APPLE__

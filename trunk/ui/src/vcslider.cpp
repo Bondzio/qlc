@@ -60,8 +60,7 @@ const QSize VCSlider::defaultSize(QSize(60, 200));
  * Initialization
  *****************************************************************************/
 
-VCSlider::VCSlider(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
+VCSlider::VCSlider(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 {
     /* Set the class name "VCSlider" as the object name as well */
     setObjectName(VCSlider::staticMetaObject.className());
@@ -163,7 +162,7 @@ VCSlider::~VCSlider()
     /* When application exits these are already NULL and unregistration
        is no longer necessary. But a normal deletion of a VCSlider in
        design mode must unregister the slider. */
-    m_masterTimer->unregisterDMXSource(this);
+    m_doc->masterTimer()->unregisterDMXSource(this);
 }
 
 /*****************************************************************************
@@ -174,7 +173,7 @@ VCWidget* VCSlider::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCSlider* slider = new VCSlider(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCSlider* slider = new VCSlider(parent, m_doc);
     if (slider->copyFrom(this) == false)
     {
         delete slider;
@@ -233,7 +232,7 @@ void VCSlider::setCaption(const QString& text)
 
 void VCSlider::editProperties()
 {
-    VCSliderProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCSliderProperties prop(this, m_doc);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }
@@ -405,7 +404,7 @@ void VCSlider::setSliderMode(SliderMode mode)
     if ((m_sliderMode == Level && mode != Level) ||
         (m_sliderMode == Playback && mode != Playback))
     {
-        m_masterTimer->unregisterDMXSource(this);
+        m_doc->masterTimer()->unregisterDMXSource(this);
     }
 
     m_sliderMode = mode;
@@ -440,7 +439,7 @@ void VCSlider::setSliderMode(SliderMode mode)
         m_bottomLabel->show();
         m_tapButton->hide();
 
-        m_masterTimer->registerDMXSource(this);
+        m_doc->masterTimer()->registerDMXSource(this);
     }
     else if (mode == Playback)
     {
@@ -452,7 +451,7 @@ void VCSlider::setSliderMode(SliderMode mode)
         m_slider->setValue(level);
         slotSliderMoved(level);
 
-        m_masterTimer->registerDMXSource(this);
+        m_doc->masterTimer()->registerDMXSource(this);
     }
 }
 
@@ -848,7 +847,7 @@ void VCSlider::sendFeedBack(int value)
                          float(m_slider->maximum()), float(0),
                          float(UCHAR_MAX));
 
-        m_inputMap->feedBack(src.universe(), src.channel(), int(fb));
+        m_doc->inputMap()->feedBack(src.universe(), src.channel(), int(fb));
     }
 }
 
@@ -897,7 +896,7 @@ bool VCSlider::isButton(quint32 universe, quint32 channel)
     QLCInputProfile* profile = NULL;
     QLCInputChannel* ch = NULL;
 
-    patch = m_inputMap->patch(universe);
+    patch = m_doc->inputMap()->patch(universe);
     if (patch != NULL)
     {
         profile = patch->profile();

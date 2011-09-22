@@ -22,38 +22,37 @@
 #include <QtTest>
 #include <QtXml>
 
-#include "mastertimer_stub.h"
-#include "scene_test.h"
-
-#include "universearray.h"
-#include "function.h"
-#include "fixture.h"
-#include "chaser.h"
-#include "doc.h"
-
 #define protected public
-#include "scene.h"
-#undef protected
-
+#include "mastertimer_stub.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
+#include "universearray.h"
+#include "scene_test.h"
 #include "qlcchannel.h"
+#include "function.h"
+#include "fixture.h"
 #include "qlcfile.h"
+#include "scene.h"
+#include "chaser.h"
+#include "doc.h"
+#undef protected
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
 void Scene_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void Scene_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void Scene_Test::cleanup()
@@ -354,7 +353,7 @@ void Scene_Test::copyFrom()
 
 void Scene_Test::createCopy()
 {
-    Doc doc(this, m_cache);
+    Doc doc(this);
 
     Scene* s1 = new Scene(m_doc);
     s1->setName("First");
@@ -382,7 +381,7 @@ void Scene_Test::createCopy()
 
 void Scene_Test::arm()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -430,7 +429,7 @@ void Scene_Test::arm()
 
 void Scene_Test::armMissingFixture()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -475,7 +474,7 @@ void Scene_Test::armMissingFixture()
 
 void Scene_Test::armTooManyChannels()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -520,7 +519,7 @@ void Scene_Test::armTooManyChannels()
 
 void Scene_Test::flashUnflash()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setAddress(0);
@@ -586,7 +585,7 @@ void Scene_Test::flashUnflash()
 /** Test scene running with bus value 0 (takes one cycle) */
 void Scene_Test::writeHTPBusZero()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 0);
 
@@ -632,7 +631,7 @@ void Scene_Test::writeHTPBusZero()
 /** Test scene running with bus value 1 (takes two cycles) */
 void Scene_Test::writeHTPBusOne()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -694,11 +693,11 @@ void Scene_Test::writeHTPBusOne()
 
 void Scene_Test::writeLTPHTPBusZero()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 1");
@@ -763,11 +762,11 @@ void Scene_Test::writeLTPHTPBusZero()
 
 void Scene_Test::writeLTPBusOne()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 1");
@@ -834,11 +833,11 @@ void Scene_Test::writeLTPBusOne()
 
 void Scene_Test::writeLTPReady()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 1");
@@ -909,12 +908,12 @@ void Scene_Test::writeLTPReady()
 
 void Scene_Test::writeValues()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
     UniverseArray uni(4 * 512);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 1");

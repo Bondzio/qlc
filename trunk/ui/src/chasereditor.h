@@ -39,15 +39,11 @@ class ChaserEditor : public QDialog, public Ui_ChaserEditor
     Q_DISABLE_COPY(ChaserEditor)
 
 public:
-    ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc, OutputMap* outputMap,
-                 InputMap* inputMap, MasterTimer* masterTimer);
+    ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc);
     ~ChaserEditor();
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
 protected:
     void updateFunctionItem(QTreeWidgetItem* item, const Function* function);

@@ -23,16 +23,16 @@
 #define VCXYPADFIXTURE_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
 
 class Doc;
-
 class VCXYPadFixture_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
 
     void initial();
     void params();
@@ -67,7 +67,6 @@ private slots:
     void cleanupTestCase();
 
 private:
-    QLCFixtureDefCache m_cache;
     Doc* m_doc;
 };
 

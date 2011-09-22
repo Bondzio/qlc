@@ -43,20 +43,12 @@
 #define KColumnFunction 0
 #define KColumnFunctionID 1
 
-CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc,
-                                   OutputMap* outputMap, InputMap* inputMap,
-                                   MasterTimer* masterTimer)
+CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
     , m_original(fc)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(fc != NULL);
 
     setupUi(this);
@@ -104,7 +96,7 @@ void CollectionEditor::slotNameEdited(const QString& text)
 
 void CollectionEditor::slotAdd()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setDisabledFunctions(QList <quint32>() << m_original->id());
 
     if (fs.exec() == QDialog::Accepted)

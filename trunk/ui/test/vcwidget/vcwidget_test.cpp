@@ -25,37 +25,42 @@
 
 #define protected public
 #define private public
-#include "virtualconsole.h"
-#include "vcwidget.h"
-#undef private
-#undef protected
-
 #include "qlcfixturedefcache.h"
+#include "virtualconsole.h"
 #include "qlcinputsource.h"
 #include "vcwidget_test.h"
 #include "mastertimer.h"
 #include "stubwidget.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "vcwidget.h"
 #include "vcframe.h"
 #include "doc.h"
 #include "bus.h"
+#undef private
+#undef protected
 
 void VCWidget_Test::initTestCase()
 {
     Bus::init(this);
 }
 
+void VCWidget_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCWidget_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
+}
+
 void VCWidget_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QCOMPARE(stub.objectName(), QString("VCWidget"));
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
     QCOMPARE(stub.hasCustomForegroundColor(), false);
@@ -71,16 +76,11 @@ void VCWidget_Test::initial()
 
 void VCWidget_Test::bgImage()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QCOMPARE(stub.backgroundImage(), QString());
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
 
@@ -102,16 +102,11 @@ void VCWidget_Test::bgImage()
 
 void VCWidget_Test::bgColor()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QCOMPARE(stub.backgroundColor(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
 
@@ -136,16 +131,11 @@ void VCWidget_Test::bgColor()
 
 void VCWidget_Test::fgColor()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QCOMPARE(stub.backgroundColor(), w.palette().color(QPalette::Window));
     QCOMPARE(stub.hasCustomBackgroundColor(), false);
 
@@ -159,16 +149,11 @@ void VCWidget_Test::fgColor()
 
 void VCWidget_Test::resetBg()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setBackgroundColor(QColor(Qt::red));
     stub.setForegroundColor(QColor(Qt::cyan));
     QCOMPARE(spy.size(), 2);
@@ -201,16 +186,11 @@ void VCWidget_Test::resetBg()
 
 void VCWidget_Test::resetFg()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setBackgroundColor(QColor(Qt::red));
     stub.setForegroundColor(QColor(Qt::cyan));
     QCOMPARE(spy.size(), 2);
@@ -255,20 +235,15 @@ void VCWidget_Test::resetFg()
 
 void VCWidget_Test::font()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
     QFont font(w.font());
     font.setBold(!font.bold());
     QVERIFY(font != w.font());
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setFont(font);
     QCOMPARE(stub.font(), font);
     QCOMPARE(stub.hasCustomFont(), true);
@@ -282,16 +257,11 @@ void VCWidget_Test::font()
 
 void VCWidget_Test::caption()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setCaption("Foobar");
     QCOMPARE(stub.caption(), QString("Foobar"));
     QCOMPARE(spy.size(), 1);
@@ -299,16 +269,11 @@ void VCWidget_Test::caption()
 
 void VCWidget_Test::frame()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    QSignalSpy spy(&doc, SIGNAL(modified(bool)));
+    QSignalSpy spy(m_doc, SIGNAL(modified(bool)));
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setFrameStyle(KVCFrameStyleSunken);
     QCOMPARE(stub.frameStyle(), (int) KVCFrameStyleSunken);
     QCOMPARE(spy.size(), 1);
@@ -334,15 +299,10 @@ void VCWidget_Test::frame()
 
 void VCWidget_Test::inputSource()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QLCInputSource src;
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setInputSource(QLCInputSource(1, 2));
     src = stub.inputSource();
     QVERIFY(src.isValid() == true);
@@ -377,14 +337,9 @@ void VCWidget_Test::inputSource()
 
 void VCWidget_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setCaption("Pertti Pasanen");
     stub.setBackgroundColor(QColor(Qt::red));
     stub.setForegroundColor(QColor(Qt::green));
@@ -398,7 +353,7 @@ void VCWidget_Test::copy()
     stub.setInputSource(QLCInputSource(1, 2), 15);
     stub.setInputSource(QLCInputSource(3, 4), 1);
 
-    StubWidget copy(&w, &doc, &om, &im, &mt);
+    StubWidget copy(&w, m_doc);
     copy.copyFrom(&stub);
     QCOMPARE(copy.caption(), QString("Pertti Pasanen"));
     QCOMPARE(copy.hasCustomBackgroundColor(), true);
@@ -417,14 +372,9 @@ void VCWidget_Test::copy()
 
 void VCWidget_Test::keyPress()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QSignalSpy pspy(&stub, SIGNAL(keyPressed(QKeySequence)));
     QSignalSpy rspy(&stub, SIGNAL(keyReleased(QKeySequence)));
 
@@ -441,11 +391,6 @@ void VCWidget_Test::keyPress()
 
 void VCWidget_Test::loadInput()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     QDomDocument xmldoc;
@@ -454,7 +399,7 @@ void VCWidget_Test::loadInput()
     root.setAttribute("Channel", "34");
     xmldoc.appendChild(root);
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QCOMPARE(stub.loadXMLInput(&root), true);
     QCOMPARE(stub.inputSource(), QLCInputSource(12, 34));
 
@@ -465,11 +410,6 @@ void VCWidget_Test::loadInput()
 
 void VCWidget_Test::loadAppearance()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     QDomDocument xmldoc;
@@ -506,7 +446,7 @@ void VCWidget_Test::loadAppearance()
     fn.appendChild(fnText);
     root.appendChild(fn);
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     QVERIFY(stub.loadXMLAppearance(&root) == true);
     QCOMPARE(stub.frameStyle(), (int) KVCFrameStyleSunken);
     QCOMPARE(stub.hasCustomForegroundColor(), true);
@@ -536,14 +476,9 @@ void VCWidget_Test::loadAppearance()
 
 void VCWidget_Test::saveInput()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
 
     QDomDocument xmldoc;
     QDomElement root = xmldoc.createElement("Root");
@@ -568,14 +503,9 @@ void VCWidget_Test::saveInput()
 
 void VCWidget_Test::saveAppearance()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setBackgroundColor(QColor(Qt::red));
     stub.setForegroundColor(QColor(Qt::green));
     QFont fn(w.font());
@@ -638,14 +568,9 @@ void VCWidget_Test::saveAppearance()
 
 void VCWidget_Test::saveAppearanceDefaultsImage()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     stub.setBackgroundImage("../../../gfx/qlc.png");
 
     QDomDocument xmldoc;
@@ -703,14 +628,9 @@ void VCWidget_Test::saveAppearanceDefaultsImage()
 
 void VCWidget_Test::saveWindowState()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    StubWidget stub(&w, &doc, &om, &im, &mt);
+    StubWidget stub(&w, m_doc);
     w.show();
     w.resize(QSize(100, 100));
     stub.resize(QSize(30, 40));
@@ -749,14 +669,9 @@ void VCWidget_Test::saveWindowState()
 
 void VCWidget_Test::loadWindowState()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget parent;
 
-    StubWidget stub(&parent, &doc, &om, &im, &mt);
+    StubWidget stub(&parent, m_doc);
 
     QDomDocument xmldoc;
     QDomElement root = xmldoc.createElement("WindowState");
@@ -797,14 +712,9 @@ void VCWidget_Test::loadWindowState()
 
 void VCWidget_Test::resize()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget parent;
 
-    StubWidget stub(&parent, &doc, &om, &im, &mt);
+    StubWidget stub(&parent, m_doc);
     parent.show();
     stub.show();
     parent.resize(QSize(200, 200));
@@ -845,14 +755,9 @@ void VCWidget_Test::resize()
 
 void VCWidget_Test::move()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget parent;
 
-    StubWidget stub(&parent, &doc, &om, &im, &mt);
+    StubWidget stub(&parent, m_doc);
     parent.show();
     stub.show();
     parent.resize(QSize(200, 200));
@@ -889,20 +794,15 @@ void VCWidget_Test::move()
 
 void VCWidget_Test::paint()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea area;
 
-    VirtualConsole::resetContents(&area, &doc, &om, &im, &mt);
-    VirtualConsole::createAndShow(&area, &doc, &om, &im, &mt);
+    VirtualConsole::resetContents(&area, m_doc);
+    VirtualConsole::createAndShow(&area, m_doc);
     VirtualConsole* vc = VirtualConsole::instance();
     QVERIFY(vc != NULL);
 
     // Just try to cover all local branches with this test
-    StubWidget* stub = new StubWidget(vc->properties().contents(), &doc, &om, &im, &mt);
+    StubWidget* stub = new StubWidget(vc->properties().contents(), m_doc);
     area.show();
     stub->show();
     QTest::qWait(10);
@@ -923,30 +823,25 @@ void VCWidget_Test::paint()
     stub->update();
     QTest::qWait(10);
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     stub->update();
     QTest::qWait(10);
 }
 
 void VCWidget_Test::mousePress()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea area;
 
-    QCOMPARE(doc.mode(), Doc::Design);
+    QCOMPARE(m_doc->mode(), Doc::Design);
 
-    VirtualConsole::resetContents(&area, &doc, &om, &im, &mt);
-    VirtualConsole::createAndShow(&area, &doc, &om, &im, &mt);
+    VirtualConsole::resetContents(&area, m_doc);
+    VirtualConsole::createAndShow(&area, m_doc);
     VirtualConsole* vc = VirtualConsole::instance();
     QVERIFY(vc != NULL);
 
     area.show();
 
-    StubWidget* stub = new StubWidget(vc->properties().contents(), &doc, &om, &im, &mt);
+    StubWidget* stub = new StubWidget(vc->properties().contents(), m_doc);
     stub->show();
     stub->resize(QSize(20, 20));
     QCOMPARE(stub->pos(), QPoint(0, 0));

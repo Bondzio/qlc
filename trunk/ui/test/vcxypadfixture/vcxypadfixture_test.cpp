@@ -38,13 +38,24 @@
 
 void VCXYPadFixture_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
-    m_doc = new Doc(this, m_cache);
+}
+
+void VCXYPadFixture_Test::init()
+{
+    m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
+}
+
+void VCXYPadFixture_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCXYPadFixture_Test::initial()
@@ -549,7 +560,7 @@ void VCXYPadFixture_Test::armDimmer()
 void VCXYPadFixture_Test::arm8bit()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
@@ -570,7 +581,7 @@ void VCXYPadFixture_Test::arm8bit()
 void VCXYPadFixture_Test::arm16bit()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Varytec", "Easy Move LED XS Spot");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Varytec", "Easy Move LED XS Spot");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
@@ -624,7 +635,7 @@ void VCXYPadFixture_Test::writeDimmer()
 void VCXYPadFixture_Test::write8bitNoReverse()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
@@ -655,7 +666,7 @@ void VCXYPadFixture_Test::write8bitNoReverse()
 void VCXYPadFixture_Test::write8bitReverse()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
@@ -686,7 +697,7 @@ void VCXYPadFixture_Test::write8bitReverse()
 void VCXYPadFixture_Test::write16bitNoReverse()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Varytec", "Easy Move LED XS Spot");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Varytec", "Easy Move LED XS Spot");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
@@ -717,7 +728,7 @@ void VCXYPadFixture_Test::write16bitNoReverse()
 void VCXYPadFixture_Test::write16bitReverse()
 {
     Fixture* fxi = new Fixture(m_doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Varytec", "Easy Move LED XS Spot");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Varytec", "Easy Move LED XS Spot");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);

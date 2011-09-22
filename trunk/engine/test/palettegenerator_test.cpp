@@ -22,6 +22,9 @@
 #include <QtTest>
 #include <QList>
 
+#define protected public
+#define private public
+
 #include "palettegenerator_test.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
@@ -30,14 +33,12 @@
 #include "doc.h"
 #include "bus.h"
 
-#define protected public
-#define private public
 #include "palettegenerator.h"
-#undef private
-#undef protected
-
 #include "qlcchannel.h"
 #include "qlcfile.h"
+
+#undef private
+#undef protected
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
@@ -52,7 +53,7 @@ void PaletteGenerator_Test::initTestCase()
 
 void PaletteGenerator_Test::initial()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
     QList <Fixture*> list;
     list << new Fixture(&doc);
     list << new Fixture(&doc);
@@ -66,7 +67,7 @@ void PaletteGenerator_Test::initial()
 
 void PaletteGenerator_Test::findChannels()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     const QLCFixtureDef* fixtureDef;
     fixtureDef = m_fixtureDefCache.fixtureDef("Showtec", "MiniMax 250");
@@ -99,7 +100,7 @@ void PaletteGenerator_Test::findChannels()
 
 void PaletteGenerator_Test::createColours()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     const QLCFixtureDef* fixtureDef;
     fixtureDef = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
@@ -137,7 +138,7 @@ void PaletteGenerator_Test::createColours()
 
 void PaletteGenerator_Test::createGobos()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     const QLCFixtureDef* fixtureDef;
     fixtureDef = m_fixtureDefCache.fixtureDef("Futurelight", "DJScan250");
@@ -175,7 +176,7 @@ void PaletteGenerator_Test::createGobos()
 
 void PaletteGenerator_Test::createShutters()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     const QLCFixtureDef* fixtureDef;
     fixtureDef = m_fixtureDefCache.fixtureDef("Martin", "MAC300");

@@ -24,17 +24,23 @@
 
 #include <QObject>
 
+class Doc;
 class MonitorFixture_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
+
     void initial();
     void fixture();
     void lessThan();
     void channelValueStyles();
     void updateValues();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

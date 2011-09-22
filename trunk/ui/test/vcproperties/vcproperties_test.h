@@ -24,11 +24,15 @@
 
 #include <QObject>
 
+class Doc;
 class VCProperties_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
+    void init();
+    void cleanup();
+
     void initial();
     void copy();
     void reset();
@@ -38,6 +42,9 @@ private slots:
     void loadXMLInput();
     void saveXMLHappy();
     void saveXMLSad();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

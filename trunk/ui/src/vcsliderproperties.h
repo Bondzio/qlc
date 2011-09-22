@@ -43,8 +43,7 @@ class VCSliderProperties : public QDialog, public Ui_VCSliderProperties
     Q_DISABLE_COPY(VCSliderProperties)
 
 public:
-    VCSliderProperties(VCSlider* slider, Doc* doc, OutputMap* outputMap,
-                       InputMap* inputMap, MasterTimer* masterTimer);
+    VCSliderProperties(VCSlider* slider, Doc* doc);
     ~VCSliderProperties();
 
 private:

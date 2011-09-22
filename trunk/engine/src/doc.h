@@ -27,6 +27,10 @@
 #include <QFile>
 #include <QMap>
 
+#include "qlcfixturedefcache.h"
+#include "mastertimer.h"
+#include "outputmap.h"
+#include "inputmap.h"
 #include "function.h"
 #include "fixture.h"
 #include "bus.h"
@@ -49,20 +53,38 @@ public:
      * Create a new Doc instance for the given parent.
      *
      * @param parent The parent object who owns the Doc instance
-     * @param fixtureDefCache A fixture definition cache instance that
-     *                        owns all available fixture definitions.
+     * @param outputUniverses Number of output (DMX) universes
+     * @param inputUniverses Number of input universes
      */
-    Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache);
+    Doc(QObject* parent, int outputUniverses = 4, int inputUniverses = 4);
 
-    /**
-     * Destructor.
-     */
+    /** Destructor */
     ~Doc();
 
-    /**
-     * Remove all functions and fixtures from the doc, signalling each removal.
-     */
+    /** Remove all functions and fixtures from the doc, signalling each removal. */
     void clearContents();
+
+    /*********************************************************************
+     * Engine components
+     *********************************************************************/
+public:
+    /** Get the fixture definition cache object */
+    QLCFixtureDefCache* fixtureDefCache() const;
+
+    /** Get the DMX output map object */
+    OutputMap* outputMap() const;
+
+    /** Get the MasterTimer object that runs the show */
+    MasterTimer* masterTimer() const;
+
+    /** Get the input map object */
+    InputMap* inputMap() const;
+
+private:
+    QLCFixtureDefCache* m_fixtureDefCache;
+    OutputMap* m_outputMap;
+    MasterTimer* m_masterTimer;
+    InputMap* m_inputMap;
 
     /*********************************************************************
      * Main operating mode
@@ -82,16 +104,6 @@ signals:
 
 protected:
     Mode m_mode;
-
-    /*********************************************************************
-     * Fixture definition cache
-     *********************************************************************/
-public:
-    /** Get the fixture definition cache */
-    const QLCFixtureDefCache& fixtureDefCache() const;
-
-protected:
-    const QLCFixtureDefCache& m_fixtureDefCache;
 
     /*********************************************************************
      * Modified status

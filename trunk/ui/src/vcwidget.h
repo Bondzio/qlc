@@ -68,15 +68,11 @@ class VCWidget : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-             MasterTimer* masterTimer);
+    VCWidget(QWidget* parent, Doc* doc);
     virtual ~VCWidget();
 
 protected:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Clipboard

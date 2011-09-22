@@ -43,17 +43,13 @@ class ScriptEditor : public QDialog, public Ui_ScriptEditor
      * Initialization
      ************************************************************************/
 public:
-    ScriptEditor(QWidget* parent, Script* script, Doc* doc, OutputMap* outputMap,
-                 InputMap* inputMap, MasterTimer* masterTimer);
+    ScriptEditor(QWidget* parent, Script* script, Doc* doc);
     ~ScriptEditor();
 
 private:
     QTextDocument* m_document;
     Script* m_script;
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
 public slots:
     void accept();

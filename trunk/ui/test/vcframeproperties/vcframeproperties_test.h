@@ -24,13 +24,20 @@
 
 #include <QObject>
 
+class Doc;
 class VCFrameProperties_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

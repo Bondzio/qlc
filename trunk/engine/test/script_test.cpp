@@ -22,16 +22,17 @@
 #include <QtTest>
 
 #define private public
-#include "script.h"
-#undef private
 
 #include "qlcfixturedefcache.h"
 #include "outputmap_stub.h"
 #include "universearray.h"
 #include "mastertimer.h"
 #include "script_test.h"
+#include "script.h"
 #include "doc.h"
 #include "bus.h"
+
+#undef private
 
 static QString script0(
 "// Comment over there\n"
@@ -52,19 +53,15 @@ void Script_Test::initTestCase()
 
 void Script_Test::initial()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
-    OutputMapStub oms(this);
-    UniverseArray ua(4 * 512);
-    oms.setUniverses(&ua);
-    MasterTimer mt(this, &oms);
+    Doc doc(this);
+    UniverseArray ua(512 * 4);
 
     Script scr(&doc);
     scr.setData(script0);
     scr.arm();
 
     for (int i = 0; i < 9; i++)
-        scr.executeCommand(i, &mt, &ua);
+        scr.executeCommand(i, doc.masterTimer(), &ua);
 
     scr.disarm();
 }

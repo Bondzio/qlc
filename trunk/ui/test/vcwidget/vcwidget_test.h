@@ -24,12 +24,16 @@
 
 #include <QObject>
 
+class Doc;
 class VCWidget_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
     void bgImage();
     void bgColor();
@@ -53,6 +57,9 @@ private slots:
     void move();
     void paint();
     void mousePress();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

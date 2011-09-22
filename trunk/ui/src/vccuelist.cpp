@@ -47,8 +47,7 @@ const quint8 VCCueList::nextInputSourceId = 0;
 const quint8 VCCueList::previousInputSourceId = 1;
 const quint8 VCCueList::stopInputSourceId = 2;
 
-VCCueList::VCCueList(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
+VCCueList::VCCueList(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     , m_runner(NULL)
     , m_stop(false)
 {
@@ -108,7 +107,7 @@ VCWidget* VCCueList::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCCueList* cuelist = new VCCueList(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCCueList* cuelist = new VCCueList(parent, m_doc);
     if (cuelist->copyFrom(this) == false)
     {
         delete cuelist;
@@ -437,12 +436,12 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
     if (mode == Doc::Operate)
     {
         Q_ASSERT(m_runner == NULL);
-        m_masterTimer->registerDMXSource(this);
+        m_doc->masterTimer()->registerDMXSource(this);
         m_list->setEnabled(true);
     }
     else
     {
-        m_masterTimer->unregisterDMXSource(this);
+        m_doc->masterTimer()->unregisterDMXSource(this);
         m_mutex.lock();
         if (m_runner != NULL)
             delete m_runner;
@@ -459,7 +458,7 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
 
 void VCCueList::editProperties()
 {
-    VCCueListProperties prop(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCCueListProperties prop(this, m_doc);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }

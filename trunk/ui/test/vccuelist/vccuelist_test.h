@@ -24,12 +24,16 @@
 
 #include <QObject>
 
+class Doc;
 class VCCueList_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
     void appendClear();
     void functionRemoved();
@@ -41,6 +45,9 @@ private slots:
     void saveXML();
     void operation();
     void input();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

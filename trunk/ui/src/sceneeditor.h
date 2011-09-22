@@ -45,15 +45,11 @@ class SceneEditor : public QDialog, public Ui_SceneEditor
      * Initialization
      *********************************************************************/
 public:
-    SceneEditor(QWidget* parent, Scene* scene, Doc* doc, OutputMap* outputMap,
-                InputMap* inputMap, MasterTimer* masterTimer);
+    SceneEditor(QWidget* parent, Scene* scene, Doc* doc);
     ~SceneEditor();
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
 protected:
     void init();

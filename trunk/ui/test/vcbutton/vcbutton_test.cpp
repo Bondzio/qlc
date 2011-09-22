@@ -19,43 +19,53 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QObject>
 #include <QtTest>
 #include <QMenu>
 
 #define protected public
 #define private public
-#include "virtualconsole.h"
-#include "mastertimer.h"
-#include "vcbutton.h"
-#include "vcframe.h"
-#undef private
-#undef protected
 
 #include "qlcfixturedefcache.h"
 #include "qlcinputsource.h"
+#include "virtualconsole.h"
 #include "vcbutton_test.h"
+#include "mastertimer.h"
 #include "qlcmacros.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "vcbutton.h"
+#include "vcframe.h"
 #include "scene.h"
 #include "doc.h"
 #include "bus.h"
 
+#undef private
+#undef protected
+
 void VCButton_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
+}
+
+void VCButton_Test::init()
+{
+    m_doc = new Doc(this);
+    m_doc->masterTimer()->start();
+}
+
+void VCButton_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCButton_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     QCOMPARE(btn.objectName(), QString("VCButton"));
     QCOMPARE(btn.frameStyle(), (int) KVCFrameStyleNone);
     QCOMPARE(btn.caption(), QString());
@@ -75,27 +85,22 @@ void VCButton_Test::initial()
 
 void VCButton_Test::function()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setFunction(42);
     QCOMPARE(btn.function(), Function::invalidId());
 
-    Scene* s = new Scene(&doc);
+    Scene* s = new Scene(m_doc);
     s->setName("Test1");
-    doc.addFunction(s);
+    m_doc->addFunction(s);
     btn.setFunction(s->id());
     QCOMPARE(btn.function(), s->id());
     QCOMPARE(btn.toolTip(), QString("Test1"));
 
-    Scene* s2 = new Scene(&doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("Test2");
-    doc.addFunction(s2);
+    m_doc->addFunction(s2);
     btn.setFunction(s2->id());
     QCOMPARE(btn.function(), s2->id());
     QCOMPARE(btn.toolTip(), QString("Test2"));
@@ -108,25 +113,20 @@ void VCButton_Test::function()
     QCOMPARE(btn.function(), s2->id());
     QCOMPARE(btn.toolTip(), QString("Test2"));
 
-    doc.deleteFunction(s2->id());
+    m_doc->deleteFunction(s2->id());
     QCOMPARE(btn.function(), Function::invalidId());
     QCOMPARE(btn.toolTip(), QString());
 
-    doc.deleteFunction(s->id());
+    m_doc->deleteFunction(s->id());
     QCOMPARE(btn.function(), Function::invalidId());
     QCOMPARE(btn.toolTip(), QString());
 }
 
 void VCButton_Test::action()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setAction(VCButton::Flash);
     QCOMPARE(btn.action(), VCButton::Flash);
     btn.setAction(VCButton::Toggle);
@@ -142,14 +142,9 @@ void VCButton_Test::action()
 
 void VCButton_Test::intensity()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setAdjustIntensity(true);
     QCOMPARE(btn.adjustIntensity(), true);
     btn.setAdjustIntensity(false);
@@ -164,59 +159,44 @@ void VCButton_Test::intensity()
 
 void VCButton_Test::bgcolor()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
-    doc.resetModified();
+    VCButton btn(&w, m_doc);
+    m_doc->resetModified();
     btn.setBackgroundColor(QColor(Qt::red));
     QCOMPARE(btn.backgroundColor(), QColor(Qt::red));
     QCOMPARE(btn.palette().color(QPalette::Button), QColor(Qt::red));
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
     QVERIFY(btn.foregroundColor() != QColor(Qt::red));
 }
 
 void VCButton_Test::fgcolor()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
-    doc.resetModified();
+    VCButton btn(&w, m_doc);
+    m_doc->resetModified();
     btn.setForegroundColor(QColor(Qt::red));
     QCOMPARE(btn.foregroundColor(), QColor(Qt::red));
     QCOMPARE(btn.palette().color(QPalette::ButtonText), QColor(Qt::red));
     QCOMPARE(btn.palette().color(QPalette::WindowText), QColor(Qt::red));
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
     QVERIFY(btn.backgroundColor() != QColor(Qt::red));
 }
 
 void VCButton_Test::resetColors()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
 
     btn.setForegroundColor(QColor(Qt::red));
     btn.setBackgroundColor(QColor(Qt::blue));
-    doc.resetModified();
+    m_doc->resetModified();
     btn.resetForegroundColor();
     QCOMPARE(btn.foregroundColor(), w.palette().color(QPalette::WindowText));
     QCOMPARE(btn.backgroundColor(), QColor(Qt::blue));
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
 
     btn.resetForegroundColor();
     QCOMPARE(btn.foregroundColor(), w.palette().color(QPalette::WindowText));
@@ -224,11 +204,11 @@ void VCButton_Test::resetColors()
 
     btn.setForegroundColor(QColor(Qt::red));
     btn.setBackgroundColor(QColor(Qt::blue));
-    doc.resetModified();
+    m_doc->resetModified();
     btn.resetBackgroundColor();
     QCOMPARE(btn.backgroundColor(), w.palette().color(QPalette::Button));
     QCOMPARE(btn.foregroundColor(), QColor(Qt::red));
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
 
     btn.resetBackgroundColor();
     QCOMPARE(btn.backgroundColor(), w.palette().color(QPalette::Button));
@@ -237,35 +217,25 @@ void VCButton_Test::resetColors()
 
 void VCButton_Test::icon()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
-    doc.resetModified();
+    VCButton btn(&w, m_doc);
+    m_doc->resetModified();
     btn.setIcon("../../../gfx/qlc.png");
     QCOMPARE(btn.icon(), QString("../../../gfx/qlc.png"));
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
 
-    doc.resetModified();
+    m_doc->resetModified();
     btn.slotResetIcon();
     QCOMPARE(btn.icon(), QString());
-    QCOMPARE(doc.isModified(), true);
+    QCOMPARE(m_doc->isModified(), true);
 }
 
 void VCButton_Test::on()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setInputSource(QLCInputSource(0, 1));
 
     QCOMPARE(btn.isOn(), false);
@@ -285,14 +255,9 @@ void VCButton_Test::on()
 
 void VCButton_Test::keySequence()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     QCOMPARE(btn.keySequence(), QKeySequence());
 
     QKeySequence seq(QKeySequence::Copy);
@@ -307,17 +272,12 @@ void VCButton_Test::keySequence()
 
 void VCButton_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setCaption("Foobar");
     btn.setIcon("../../../gfx/qlc.png");
     btn.setFunction(sc->id());
@@ -326,7 +286,7 @@ void VCButton_Test::copy()
     btn.setAdjustIntensity(true);
     btn.setIntensityAdjustment(0.2);
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
     VCButton* copy = qobject_cast<VCButton*> (btn.createCopy(&parent));
     QVERIFY(copy != NULL);
     QCOMPARE(copy->caption(), QString("Foobar"));
@@ -341,15 +301,10 @@ void VCButton_Test::copy()
 
 void VCButton_Test::load()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
     QDomDocument xmldoc;
     QDomElement root = xmldoc.createElement("Button");
@@ -394,7 +349,7 @@ void VCButton_Test::load()
     QDomElement foo = xmldoc.createElement("Foo");
     root.appendChild(foo);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     QCOMPARE(btn.loadXML(&root), true);
     QCOMPARE(btn.caption(), QString("Pertti"));
     QCOMPARE(btn.icon(), QString("../../../gfx/qlc.png"));
@@ -424,17 +379,12 @@ void VCButton_Test::load()
 
 void VCButton_Test::save()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setCaption("Foobar");
     btn.setIcon("../../../gfx/qlc.png");
     btn.setFunction(sc->id());
@@ -504,14 +454,9 @@ void VCButton_Test::save()
 
 void VCButton_Test::customMenu()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     QMenu* menu = btn.customMenu(NULL);
     QVERIFY(menu != NULL);
     QCOMPARE(menu->title(), tr("Icon"));
@@ -523,17 +468,12 @@ void VCButton_Test::customMenu()
 
 void VCButton_Test::toggle()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setCaption("Foobar");
     btn.setFunction(sc->id());
     btn.setAction(VCButton::Toggle);
@@ -543,18 +483,18 @@ void VCButton_Test::toggle()
 
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
     btn.mousePressEvent(&ev);
-    QCOMPARE(mt.m_functionList.size(), 0);
+    QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
 
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
     btn.mouseReleaseEvent(&ev);
-    QCOMPARE(mt.m_functionList.size(), 0);
+    QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     btn.slotKeyPressed(QKeySequence(QKeySequence::Undo));
-    QCOMPARE(mt.m_functionList.size(), 1);
-    QCOMPARE(mt.m_functionList[0], sc);
+    QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 1);
+    QCOMPARE(m_doc->masterTimer()->m_functionList[0], sc);
     QCOMPARE(btn.isOn(), false);
-    sc->preRun(&mt);
+    sc->preRun(m_doc->masterTimer());
     QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
 
@@ -569,7 +509,7 @@ void VCButton_Test::toggle()
 
     btn.slotFunctionStopped(sc->id());
     QCOMPARE(btn.isOn(), false);
-    VCButton another(&w, &doc, &om, &im, &mt);
+    VCButton another(&w, m_doc);
     QVERIFY(btn.palette().color(QPalette::Button) != another.palette().color(QPalette::Button));
     QTest::qWait(500);
     QVERIFY(btn.palette().color(QPalette::Button) == another.palette().color(QPalette::Button));
@@ -580,17 +520,12 @@ void VCButton_Test::toggle()
 
 void VCButton_Test::flash()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setCaption("Foobar");
     btn.setFunction(sc->id());
     btn.setAction(VCButton::Flash);
@@ -600,9 +535,9 @@ void VCButton_Test::flash()
 
     QSignalSpy spy(sc, SIGNAL(flashing(quint32,bool)));
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     btn.slotKeyPressed(QKeySequence(QKeySequence::Undo));
-    QCOMPARE(mt.m_functionList.size(), 0);
+    QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
     QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), qreal(1.0));
     QCOMPARE(spy.size(), 1);
@@ -621,17 +556,12 @@ void VCButton_Test::flash()
 
 void VCButton_Test::input()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    Scene* sc = new Scene(&doc);
-    doc.addFunction(sc);
+    Scene* sc = new Scene(m_doc);
+    m_doc->addFunction(sc);
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
     btn.setCaption("Foobar");
     btn.setFunction(sc->id());
     btn.setAction(VCButton::Flash);
@@ -642,7 +572,7 @@ void VCButton_Test::input()
     btn.slotInputValueChanged(0, 0, 255);
     QCOMPARE(btn.isOn(), false);
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 
     btn.slotInputValueChanged(0, 0, 255);
     QCOMPARE(btn.isOn(), true);
@@ -662,13 +592,13 @@ void VCButton_Test::input()
     btn.slotInputValueChanged(0, 0, 0);
     QCOMPARE(btn.isOn(), false);
 
-    doc.setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
     btn.setAction(VCButton::Toggle);
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
 
     btn.slotInputValueChanged(0, 0, 255);
     QCOMPARE(btn.isOn(), false);
-    sc->preRun(&mt);
+    sc->preRun(m_doc->masterTimer());
     QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
 
@@ -681,14 +611,9 @@ void VCButton_Test::input()
 
 void VCButton_Test::paint()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCButton btn(&w, &doc, &om, &im, &mt);
+    VCButton btn(&w, m_doc);
 
     w.show();
     btn.show();
@@ -710,7 +635,7 @@ void VCButton_Test::paint()
     btn.setAction(VCButton::Flash);
     btn.update();
     QTest::qWait(1);
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     btn.update();
     QTest::qWait(1);
 }

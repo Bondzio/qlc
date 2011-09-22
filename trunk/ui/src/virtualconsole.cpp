@@ -71,19 +71,11 @@ VirtualConsole* VirtualConsole::s_instance = NULL;
  * Initialization
  ****************************************************************************/
 
-VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                               InputMap* inputMap, MasterTimer* masterTimer,
-                               Qt::WindowFlags flags)
+VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     m_editActionGroup = NULL;
     m_addActionGroup = NULL;
@@ -115,14 +107,14 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
     initDockArea();
     initContents();
 
-    connect(m_masterTimer, SIGNAL(functionListChanged()),
+    connect(m_doc->masterTimer(), SIGNAL(functionListChanged()),
             this, SLOT(slotRunningFunctionsChanged()));
     slotRunningFunctionsChanged();
 
-    connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+    connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
             this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 
-    connect(m_outputMap, SIGNAL(blackoutChanged(bool)),
+    connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
             this, SLOT(slotBlackoutChanged(bool)));
 
     /* Listen to mode changes */
@@ -153,8 +145,7 @@ VirtualConsole* VirtualConsole::instance()
     return s_instance;
 }
 
-void VirtualConsole::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                   InputMap* inputMap, MasterTimer* masterTimer)
+void VirtualConsole::createAndShow(QWidget* parent, Doc* doc)
 {
     QWidget* window = NULL;
 
@@ -163,14 +154,14 @@ void VirtualConsole::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputM
     {
     #ifdef __APPLE__
         /* Create a separate window for OSX */
-        s_instance = new VirtualConsole(parent, doc, outputMap, inputMap, masterTimer, Qt::Window);
+        s_instance = new VirtualConsole(parent, doc, Qt::Window);
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
         QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new VirtualConsole(sub, doc, outputMap, inputMap, masterTimer);
+        s_instance = new VirtualConsole(sub, doc);
         sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
@@ -388,8 +379,7 @@ void VirtualConsole::initActions()
     m_toolsBlackoutAction->setCheckable(true);
     connect(m_toolsBlackoutAction, SIGNAL(triggered(bool)),
             this, SLOT(slotToolsBlackout()));
-    Q_ASSERT(m_outputMap);
-    m_toolsBlackoutAction->setChecked(m_outputMap->blackout());
+    m_toolsBlackoutAction->setChecked(m_doc->outputMap()->blackout());
 
     m_toolsPanicAction = new QAction(QIcon(":/panic.png"),
                                      tr("Stop ALL functions!"), this);
@@ -759,7 +749,7 @@ void VirtualConsole::updateActions()
 
 void VirtualConsole::slotRunningFunctionsChanged()
 {
-    if (m_masterTimer->runningFunctions() > 0)
+    if (m_doc->masterTimer()->runningFunctions() > 0)
         m_toolsPanicAction->setEnabled(true);
     else
         m_toolsPanicAction->setEnabled(false);
@@ -794,7 +784,7 @@ void VirtualConsole::slotAddButton()
     if (parent == NULL)
         return;
 
-    VCButton* button = new VCButton(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCButton* button = new VCButton(parent, m_doc);
     Q_ASSERT(button != NULL);
     button->show();
     button->move(parent->lastClickPoint());
@@ -807,7 +797,7 @@ void VirtualConsole::slotAddButtonMatrix()
     if (parent == NULL)
         return;
 
-    AddVCButtonMatrix abm(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    AddVCButtonMatrix abm(this, m_doc);
     if (abm.exec() == QDialog::Rejected)
         return;
 
@@ -817,9 +807,9 @@ void VirtualConsole::slotAddButtonMatrix()
 
     VCFrame* frame = NULL;
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
-        frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+        frame = new VCFrame(parent, m_doc);
     else
-        frame = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+        frame = new VCSoloFrame(parent, m_doc);
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the buttons nicely and toggle resizing off
@@ -830,7 +820,7 @@ void VirtualConsole::slotAddButtonMatrix()
     {
         for (int x = 0; x < h; x++)
         {
-            VCButton* button = new VCButton(frame, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+            VCButton* button = new VCButton(frame, m_doc);
             Q_ASSERT(button != NULL);
             button->move(QPoint(10 + (x * sz), 10 + (y * sz)));
             button->resize(QSize(sz, sz));
@@ -863,7 +853,7 @@ void VirtualConsole::slotAddSlider()
     if (parent == NULL)
         return;
 
-    VCSlider* slider = new VCSlider(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCSlider* slider = new VCSlider(parent, m_doc);
     Q_ASSERT(slider != NULL);
     slider->show();
     slider->move(parent->lastClickPoint());
@@ -884,7 +874,7 @@ void VirtualConsole::slotAddSliderMatrix()
     int height = avsm.height();
     int count = avsm.amount();
 
-    VCFrame* frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCFrame* frame = new VCFrame(parent, m_doc);
     Q_ASSERT(frame != NULL);
 
     // Resize the parent frame to fit the sliders nicely
@@ -893,7 +883,7 @@ void VirtualConsole::slotAddSliderMatrix()
 
     for (int i = 0; i < count; i++)
     {
-        VCSlider* slider = new VCSlider(frame, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+        VCSlider* slider = new VCSlider(frame, m_doc);
         Q_ASSERT(slider != NULL);
         slider->move(QPoint(10 + (width * i), 10));
         slider->resize(QSize(width, height));
@@ -913,7 +903,7 @@ void VirtualConsole::slotAddXYPad()
     if (parent == NULL)
         return;
 
-    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCXYPad* xypad = new VCXYPad(parent, m_doc);
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());
@@ -926,7 +916,7 @@ void VirtualConsole::slotAddCueList()
     if (parent == NULL)
         return;
 
-    VCCueList* cuelist = new VCCueList(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCCueList* cuelist = new VCCueList(parent, m_doc);
     Q_ASSERT(cuelist != NULL);
     cuelist->show();
     cuelist->move(parent->lastClickPoint());
@@ -939,7 +929,7 @@ void VirtualConsole::slotAddFrame()
     if (parent == NULL)
         return;
 
-    VCFrame* frame = new VCFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCFrame* frame = new VCFrame(parent, m_doc);
     Q_ASSERT(frame != NULL);
     frame->show();
     frame->move(parent->lastClickPoint());
@@ -952,7 +942,7 @@ void VirtualConsole::slotAddSoloFrame()
     if (parent == NULL)
         return;
 
-    VCSoloFrame* soloframe = new VCSoloFrame(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCSoloFrame* soloframe = new VCSoloFrame(parent, m_doc);
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());
@@ -965,7 +955,7 @@ void VirtualConsole::slotAddLabel()
     if (parent == NULL)
         return;
 
-    VCLabel* label = new VCLabel(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCLabel* label = new VCLabel(parent, m_doc);
     Q_ASSERT(label != NULL);
     label->show();
     label->move(parent->lastClickPoint());
@@ -978,7 +968,7 @@ void VirtualConsole::slotAddLabel()
 
 void VirtualConsole::slotToolsSettings()
 {
-    VCPropertiesEditor vcpe(this, s_properties, m_inputMap);
+    VCPropertiesEditor vcpe(this, s_properties, m_doc->inputMap());
     if (vcpe.exec() == QDialog::Accepted)
     {
         s_properties = vcpe.properties();
@@ -1005,13 +995,12 @@ void VirtualConsole::slotToolsSliders()
 
 void VirtualConsole::slotToolsBlackout()
 {
-    Q_ASSERT(m_outputMap != NULL);
-    m_outputMap->setBlackout(!m_outputMap->blackout());
+    m_doc->outputMap()->setBlackout(!m_doc->outputMap()->blackout());
     if (s_properties.blackoutInputUniverse() != InputMap::invalidUniverse() &&
         s_properties.blackoutInputChannel() != InputMap::invalidChannel())
     {
-        uchar value = (m_outputMap->blackout()) ? 255 : 0;
-        m_inputMap->feedBack(s_properties.blackoutInputUniverse(),
+        uchar value = (m_doc->outputMap()->blackout()) ? 255 : 0;
+        m_doc->inputMap()->feedBack(s_properties.blackoutInputUniverse(),
                                    s_properties.blackoutInputChannel(),
                                    value);
     }
@@ -1019,8 +1008,7 @@ void VirtualConsole::slotToolsBlackout()
 
 void VirtualConsole::slotToolsPanic()
 {
-    Q_ASSERT(m_masterTimer != NULL);
-    m_masterTimer->stopAllFunctions();
+    m_doc->masterTimer()->stopAllFunctions();
 }
 
 void VirtualConsole::slotBlackoutChanged(bool state)
@@ -1444,7 +1432,7 @@ void VirtualConsole::initDockArea()
     if (m_dockArea != NULL)
         delete m_dockArea;
 
-    m_dockArea = new VCDockArea(this, m_outputMap, m_inputMap);
+    m_dockArea = new VCDockArea(this, m_doc->outputMap(), m_doc->inputMap());
     m_dockArea->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
 
     // Add the dock area into the master horizontal layout
@@ -1463,11 +1451,10 @@ VCFrame* VirtualConsole::contents() const
     return s_properties.contents();
 }
 
-void VirtualConsole::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                   InputMap* inputMap, MasterTimer* masterTimer)
+void VirtualConsole::resetContents(QWidget* parent, Doc* doc)
 {
     /* Create new contents */
-    s_properties.resetContents(parent, doc, outputMap, inputMap, masterTimer);
+    s_properties.resetContents(parent, doc);
 
     /* If there is an instance of the VC, make it re-read the contents */
     if (s_instance != NULL)

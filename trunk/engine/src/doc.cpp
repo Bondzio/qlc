@@ -39,10 +39,13 @@
 #include "efx.h"
 #include "doc.h"
 
-Doc::Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache)
+Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     : QObject(parent)
+    , m_fixtureDefCache(new QLCFixtureDefCache)
+    , m_outputMap(new OutputMap(this, outputUniverses))
+    , m_masterTimer(new MasterTimer(this, m_outputMap))
+    , m_inputMap(new InputMap(this, inputUniverses))
     , m_mode(Design)
-    , m_fixtureDefCache(fixtureDefCache)
     , m_latestFixtureId(0)
     , m_latestFunctionId(0)
 {
@@ -56,6 +59,21 @@ Doc::Doc(QObject* parent, const QLCFixtureDefCache& fixtureDefCache)
 
 Doc::~Doc()
 {
+    m_masterTimer->stop();
+    delete m_masterTimer;
+    m_masterTimer = NULL;
+
+    m_outputMap->saveDefaults();
+    delete m_outputMap;
+    m_outputMap = NULL;
+
+    m_inputMap->saveDefaults();
+    delete m_inputMap;
+    m_inputMap = NULL;
+
+    delete m_fixtureDefCache;
+    m_fixtureDefCache = NULL;
+
     clearContents();
 }
 
@@ -78,6 +96,30 @@ void Doc::clearContents()
         emit fixtureRemoved(fxi->id());
         delete fxi;
     }
+}
+
+/*****************************************************************************
+ * Engine components
+ *****************************************************************************/
+
+QLCFixtureDefCache* Doc::fixtureDefCache() const
+{
+    return m_fixtureDefCache;
+}
+
+OutputMap* Doc::outputMap() const
+{
+    return m_outputMap;
+}
+
+MasterTimer* Doc::masterTimer() const
+{
+    return m_masterTimer;
+}
+
+InputMap* Doc::inputMap() const
+{
+    return m_inputMap;
 }
 
 /*****************************************************************************
@@ -127,15 +169,6 @@ void Doc::setMode(Doc::Mode mode)
 Doc::Mode Doc::mode() const
 {
     return m_mode;
-}
-
-/*****************************************************************************
- * Fixture definition cache
- *****************************************************************************/
-
-const QLCFixtureDefCache& Doc::fixtureDefCache() const
-{
-    return m_fixtureDefCache;
 }
 
 /*****************************************************************************

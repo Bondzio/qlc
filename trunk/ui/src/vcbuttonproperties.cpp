@@ -46,19 +46,12 @@
 #include "app.h"
 #include "doc.h"
 
-VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc, OutputMap* outputMap,
-                                       InputMap* inputMap, MasterTimer* masterTimer)
+VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc)
     : QDialog(button)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(button != NULL);
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     setupUi(this);
 
@@ -127,7 +120,7 @@ VCButtonProperties::~VCButtonProperties()
 
 void VCButtonProperties::slotAttachFunction()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setMultiSelection(false);
     if (fs.exec() == QDialog::Accepted)
         slotSetFunction(fs.selection().first());
@@ -169,13 +162,13 @@ void VCButtonProperties::slotAutoDetectInputToggled(bool checked)
 {
     if (checked == true)
     {
-        connect(m_inputMap,
+        connect(m_doc->inputMap(),
                 SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
     else
     {
-        disconnect(m_inputMap,
+        disconnect(m_doc->inputMap(),
                    SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32)));
     }
@@ -189,7 +182,7 @@ void VCButtonProperties::slotInputValueChanged(quint32 universe, quint32 channel
 
 void VCButtonProperties::slotChooseInputClicked()
 {
-    SelectInputChannel sic(this, m_inputMap);
+    SelectInputChannel sic(this, m_doc->inputMap());
     if (sic.exec() == QDialog::Accepted)
     {
         m_inputSource = QLCInputSource(sic.universe(), sic.channel());
@@ -202,7 +195,7 @@ void VCButtonProperties::updateInputSource()
     QString uniName;
     QString chName;
 
-    if (m_inputMap->inputSourceNames(m_inputSource, uniName, chName) == false)
+    if (m_doc->inputMap()->inputSourceNames(m_inputSource, uniName, chName) == false)
     {
         uniName = KInputNone;
         chName = KInputNone;

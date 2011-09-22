@@ -350,7 +350,7 @@ bool Fixture::loader(const QDomElement* root, Doc* doc)
 }
 
 bool Fixture::loadXML(const QDomElement* root,
-                      const QLCFixtureDefCache& fixtureDefCache)
+                      const QLCFixtureDefCache* fixtureDefCache)
 {
     const QLCFixtureDef* fixtureDef = NULL;
     const QLCFixtureMode* fixtureMode = NULL;
@@ -422,7 +422,7 @@ bool Fixture::loadXML(const QDomElement* root,
     /* Find the given fixture definition, unless its a generic dimmer */
     if (manufacturer != KXMLFixtureGeneric && model != KXMLFixtureGeneric)
     {
-        fixtureDef = fixtureDefCache.fixtureDef(manufacturer, model);
+        fixtureDef = fixtureDefCache->fixtureDef(manufacturer, model);
         if (fixtureDef == NULL)
         {
             qWarning() << Q_FUNC_INFO << "No fixture definition for"

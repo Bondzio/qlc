@@ -77,7 +77,7 @@ public:
      *********************************************************************/
 public:
     /** Normal constructor */
-    VCSlider(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
+    VCSlider(QWidget* parent, Doc* doc);
 
     /** Destructor */
     ~VCSlider();

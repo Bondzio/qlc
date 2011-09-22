@@ -35,13 +35,11 @@
 #include "fixture.h"
 #include "doc.h"
 
-MonitorFixture::MonitorFixture(QWidget* parent, Doc* doc, OutputMap* outputMap)
+MonitorFixture::MonitorFixture(QWidget* parent, Doc* doc)
     : QFrame(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
 
     m_fixtureLabel = NULL;
     m_fixture = Fixture::invalidId();
@@ -173,7 +171,7 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
         i = 1;
 
     /* +1 if addresses should be shown 1-based */
-    OutputPatch* op = m_outputMap->patch(fxi->universe());
+    OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
     if (op != NULL && op->isDMXZeroBased() == false &&
         style == Monitor::DMXChannels)
     {

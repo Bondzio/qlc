@@ -51,17 +51,12 @@
  * Initialization
  *****************************************************************************/
 
-ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                               MasterTimer* masterTimer, quint32 fixtureID,
+ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, quint32 fixtureID,
                                quint32 channel)
     : QGroupBox(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     /* Set the class name as the object name */
     setObjectName(ConsoleChannel::staticMetaObject.className());
@@ -103,7 +98,7 @@ ConsoleChannel::~ConsoleChannel()
 {
     m_valueChangedMutex.lock();
     m_outputDMX = false;
-    m_masterTimer->unregisterDMXSource(this);
+    m_doc->masterTimer()->unregisterDMXSource(this);
     m_valueChangedMutex.unlock();
 }
 
@@ -173,7 +168,7 @@ void ConsoleChannel::init()
     slotFixtureChanged(m_fixtureID);
 
     /* Register this object as a source of DMX data */
-    m_masterTimer->registerDMXSource(this);
+    m_doc->masterTimer()->registerDMXSource(this);
 }
 
 quint32 ConsoleChannel::channel() const
@@ -555,7 +550,7 @@ void ConsoleChannel::enable(bool state)
 {
     setChecked(state);
 
-    const UniverseArray* unis(m_outputMap->peekUniverses());
+    const UniverseArray* unis(m_doc->outputMap()->peekUniverses());
     m_value = unis->preGMValues()[m_fixture->universeAddress() + m_channel];
 
     emit valueChanged(m_channel, m_value, isChecked());

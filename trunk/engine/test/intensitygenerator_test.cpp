@@ -44,7 +44,7 @@ void IntensityGenerator_Test::initTestCase()
 
 void IntensityGenerator_Test::randomScenes()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
     QList <Fixture*> fixtures;
 
     Fixture* fxi = new Fixture(&doc);
@@ -69,7 +69,7 @@ void IntensityGenerator_Test::randomScenes()
 
 void IntensityGenerator_Test::sequenceScenes()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
     QList <Fixture*> fixtures;
 
     Fixture* fxi = new Fixture(&doc);
@@ -115,7 +115,7 @@ void IntensityGenerator_Test::sequenceScenes()
 
 void IntensityGenerator_Test::fullZeroScenes()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     QList <Fixture*> fixtures;
 
@@ -159,7 +159,7 @@ void IntensityGenerator_Test::fullZeroScenes()
 
 void IntensityGenerator_Test::evenOddScenes()
 {
-    Doc doc(this, m_fixtureDefCache);
+    Doc doc(this);
 
     QList <Fixture*> fixtures;
 

@@ -23,12 +23,9 @@
 #include <QtTest>
 
 #define protected public
-#include "vcframeproperties.h"
-#include "vcframe.h"
-#undef protected
-
 #include "vcframeproperties_test.h"
 #include "qlcfixturedefcache.h"
+#include "vcframeproperties.h"
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -36,22 +33,30 @@
 #include "vcframe.h"
 #include "doc.h"
 #include "bus.h"
+#undef protected
 
 void VCFrameProperties_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
+}
+
+void VCFrameProperties_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCFrameProperties_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCFrameProperties_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame frame(&w, &doc, &om, &im, &mt);
+    VCFrame frame(&w, m_doc);
     frame.setAllowChildren(false);
     frame.setAllowResize(true);
 

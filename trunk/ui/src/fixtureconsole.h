@@ -46,15 +46,11 @@ class FixtureConsole : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    FixtureConsole(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                   InputMap* inputMap, MasterTimer* masterTimer);
+    FixtureConsole(QWidget* parent, Doc* doc);
     ~FixtureConsole();
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Fixture

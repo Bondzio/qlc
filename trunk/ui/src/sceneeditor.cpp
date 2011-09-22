@@ -58,19 +58,12 @@
 #define GREEN "green"
 #define BLUE "blue"
 
-SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc, OutputMap* outputMap,
-                         InputMap* inputMap, MasterTimer* masterTimer)
+SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
     , m_original(scene)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
     Q_ASSERT(scene != NULL);
 
     m_currentTab = KTabGeneral;
@@ -620,7 +613,7 @@ void SceneEditor::addFixtureTab(Fixture* fixture)
     /* Put the console inside a scroll area */
     QScrollArea* scrollArea = new QScrollArea(m_tab);
 
-    FixtureConsole* console = new FixtureConsole(scrollArea, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FixtureConsole* console = new FixtureConsole(scrollArea, m_doc);
     console->setChannelsCheckable(true);
     console->setFixture(fixture->id());
     scrollArea->setWidget(console);

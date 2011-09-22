@@ -55,17 +55,12 @@ public:
     static FixtureManager* instance();
 
     /** Create or show the FixtureManager window. */
-    static void createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                              InputMap* inputMap, MasterTimer* masterTimer,
-                              const QLCFixtureDefCache& fixtureDefCache);
+    static void createAndShow(QWidget* parent, Doc* doc);
     ~FixtureManager();
 
 protected:
     /** Protected constructor to prevent multiple instances. */
-    FixtureManager(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                   InputMap* inputMap, MasterTimer* masterTimer,
-                   const QLCFixtureDefCache& fixtureDefCache,
-                   Qt::WindowFlags flags = 0);
+    FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
 protected:
     /** The singleton FixtureManager instance */
@@ -86,10 +81,6 @@ public slots:
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
-    const QLCFixtureDefCache& m_fixtureDefCache;
 
     /********************************************************************
      * Data view

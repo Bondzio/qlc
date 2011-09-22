@@ -23,45 +23,42 @@
 #include <QtXml>
 #include <QList>
 
+#define protected public
+#define private public
+#include "mastertimer_stub.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
-
-#include "mastertimer_stub.h"
 #include "outputmap_stub.h"
-#include "efx_test.h"
-
 #include "universearray.h"
 #include "genericfader.h"
+#include "efxfixture.h"
+#include "qlcchannel.h"
+#include "efx_test.h"
 #include "function.h"
+#include "qlcfile.h"
 #include "fixture.h"
 #include "scene.h"
 #include "doc.h"
-
-/* Expose protected members to the unit test */
-#define protected public
-#define private public
-#include "efxfixture.h"
 #include "efx.h"
 #undef private
 #undef protected
-
-#include "qlcchannel.h"
-#include "qlcfile.h"
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
 void EFX_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void EFX_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void EFX_Test::cleanup()
@@ -1592,7 +1589,7 @@ void EFX_Test::copyFrom()
 
 void EFX_Test::createCopy()
 {
-    Doc doc(this, m_cache);
+    Doc doc(this);
 
     EFX* e1 = new EFX(m_doc);
     e1->setName("First");
@@ -2220,44 +2217,42 @@ void EFX_Test::save()
 
 void EFX_Test::armSuccess()
 {
-    Doc* doc = new Doc(this, m_cache);
-
     /* Basically any fixture with 16bit pan & tilt channels will do, but
        then the exact channel numbers and mode name has to be changed
        below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC250+");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 4");
     QVERIFY(mode != NULL);
 
-    Fixture* fxi1 = new Fixture(doc);
+    Fixture* fxi1 = new Fixture(m_doc);
     fxi1->setFixtureDefinition(def, mode);
     fxi1->setName("Test Scanner");
     fxi1->setAddress(0);
     fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
+    m_doc->addFixture(fxi1);
 
-    Fixture* fxi2 = new Fixture(doc);
+    Fixture* fxi2 = new Fixture(m_doc);
     fxi2->setFixtureDefinition(def, mode);
     fxi2->setName("Test Scanner");
     fxi2->setAddress(0);
     fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
+    m_doc->addFixture(fxi2);
 
-    Scene* s1 = new Scene(doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("INIT");
     s1->setValue(fxi1->id(), 0, 205);// Shutter open
     s1->setValue(fxi2->id(), 0, 205);// Shutter open
-    doc->addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("DEINIT");
     s2->setValue(fxi1->id(), 0, 0);// Shutter closed
     s2->setValue(fxi2->id(), 0, 0);// Shutter closed
-    doc->addFunction(s2);
+    m_doc->addFunction(s2);
 
-    EFX* e = new EFX(doc);
+    EFX* e = new EFX(m_doc);
     e->setName("Test EFX");
 
     EFXFixture* ef1 = new EFXFixture(e);
@@ -2286,50 +2281,46 @@ void EFX_Test::armSuccess()
     QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == 512 + 9);
     QVERIFY(e->m_fixtures.at(1)->m_lsbPanChannel == 512 + 8);
     QVERIFY(e->m_fixtures.at(1)->m_lsbTiltChannel == 512 + 10);
-
-    delete doc;
 }
 
 void EFX_Test::armMissingFixture()
 {
-    Doc* doc = new Doc(this, m_cache);
-
     /* Basically any fixture with 16bit pan & tilt channels will do, but
        then the exact channel numbers and mode name has to be changed
        below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC250+");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 4");
     QVERIFY(mode != NULL);
 
-    Fixture* fxi1 = new Fixture(doc);
+    Fixture* fxi1 = new Fixture(m_doc);
     fxi1->setFixtureDefinition(def, mode);
     fxi1->setName("Test Scanner");
     fxi1->setAddress(0);
     fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
+    m_doc->addFixture(fxi1);
 
-    Fixture* fxi2 = new Fixture(doc);
+    Fixture* fxi2 = new Fixture(m_doc);
     fxi2->setFixtureDefinition(def, mode);
     fxi2->setName("Test Scanner");
     fxi2->setAddress(0);
     fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
+    m_doc->addFixture(fxi2);
 
-    Scene* s1 = new Scene(doc);
+    Scene* s1 = new Scene(m_doc);
     s1->setName("INIT");
     s1->setValue(fxi1->id(), 0, 205);// Shutter open
     s1->setValue(fxi2->id(), 0, 205);// Shutter open
-    doc->addFunction(s1);
+    m_doc->addFunction(s1);
 
-    Scene* s2 = new Scene(doc);
+    Scene* s2 = new Scene(m_doc);
     s2->setName("DEINIT");
     s2->setValue(fxi1->id(), 0, 0);// Shutter closed
     s2->setValue(fxi2->id(), 0, 0);// Shutter closed
-    doc->addFunction(s2);
+    m_doc->addFunction(s2);
 
-    EFX* e = new EFX(doc);
+    EFX* e = new EFX(m_doc);
     e->setName("Test EFX");
 
     EFXFixture* ef1 = new EFXFixture(e);
@@ -2360,15 +2351,11 @@ void EFX_Test::armMissingFixture()
     QVERIFY(e->m_fixtures.at(1)->m_msbTiltChannel == QLCChannel::invalid());
     QVERIFY(e->m_fixtures.at(1)->m_lsbPanChannel == QLCChannel::invalid());
     QVERIFY(e->m_fixtures.at(1)->m_lsbTiltChannel == QLCChannel::invalid());
-
-    delete doc;
 }
 
 void EFX_Test::disarm()
 {
-    Doc* doc = new Doc(this, m_cache);
-
-    EFX* e = new EFX(doc);
+    EFX* e = new EFX(m_doc);
     e->setName("Test EFX");
 
     e->arm();
@@ -2376,17 +2363,14 @@ void EFX_Test::disarm()
 
     e->disarm();
     QVERIFY(e->m_fader == NULL);
-
-    delete doc;
 }
 
 void EFX_Test::preRun()
 {
-    Doc* doc = new Doc(this, m_cache);
     UniverseArray ua(512);
     MasterTimerStub timer(this, NULL, ua);
 
-    EFX* e = new EFX(doc);
+    EFX* e = new EFX(m_doc);
     e->setName("Test EFX");
     e->arm();
 
@@ -2397,37 +2381,34 @@ void EFX_Test::preRun()
     QCOMPARE(spy[0][0].toUInt(), e->id());
 
     e->disarm();
-    delete doc;
 }
 
 void EFX_Test::adjustIntensity()
 {
-    Doc* doc = new Doc(this, m_cache);
-
     /* Basically any fixture with 16bit pan & tilt channels will do, but
        then the exact channel numbers and mode name has to be changed
        below. */
-    const QLCFixtureDef* def = m_cache.fixtureDef("Martin", "MAC250+");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC250+");
     QVERIFY(def != NULL);
 
     const QLCFixtureMode* mode = def->mode("Mode 4");
     QVERIFY(mode != NULL);
 
-    Fixture* fxi1 = new Fixture(doc);
+    Fixture* fxi1 = new Fixture(m_doc);
     fxi1->setFixtureDefinition(def, mode);
     fxi1->setName("Test Scanner");
     fxi1->setAddress(0);
     fxi1->setUniverse(0);
-    doc->addFixture(fxi1);
+    m_doc->addFixture(fxi1);
 
-    Fixture* fxi2 = new Fixture(doc);
+    Fixture* fxi2 = new Fixture(m_doc);
     fxi2->setFixtureDefinition(def, mode);
     fxi2->setName("Test Scanner");
     fxi2->setAddress(0);
     fxi2->setUniverse(1);
-    doc->addFixture(fxi2);
+    m_doc->addFixture(fxi2);
 
-    EFX* e = new EFX(doc);
+    EFX* e = new EFX(m_doc);
     e->setName("Test EFX");
 
     EFXFixture* ef1 = new EFXFixture(e);
@@ -2451,5 +2432,4 @@ void EFX_Test::adjustIntensity()
     QCOMPARE(ef2->intensity(), 0.5);
 
     e->disarm();
-    delete doc;
 }

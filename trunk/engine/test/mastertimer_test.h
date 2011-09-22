@@ -23,7 +23,6 @@
 #define MASTERTIMER_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
 
 class OutputMapStub;
 class UniverseArray;
@@ -49,13 +48,10 @@ private slots:
     void stop();
     void restart();
 
-    void cleanupTestCase();
-
 protected:
     OutputMapStub* m_oms;
     UniverseArray* m_ua;
     Doc* m_doc;
-    QLCFixtureDefCache m_cache;
 };
 
 #endif

@@ -55,13 +55,11 @@ Monitor* Monitor::s_instance = NULL;
  * Initialization
  *****************************************************************************/
 
-Monitor::Monitor(QWidget* parent, Doc* doc, OutputMap* outputMap, Qt::WindowFlags f)
+Monitor::Monitor(QWidget* parent, Doc* doc, Qt::WindowFlags f)
     : QWidget(parent, f)
     , m_doc(doc)
-    , m_outputMap(outputMap)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
 
     /* Master layout for toolbar and scroll area */
     new QVBoxLayout(this);
@@ -174,7 +172,7 @@ void Monitor::saveSettings()
     settings.setValue(SETTINGS_CHANNELSTYLE, channelStyle());
 }
 
-void Monitor::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap)
+void Monitor::createAndShow(QWidget* parent, Doc* doc)
 {
     QWidget* window = NULL;
 
@@ -183,14 +181,14 @@ void Monitor::createAndShow(QWidget* parent, Doc* doc, OutputMap* outputMap)
     {
     #ifdef __APPLE__
         /* Create a separate window for OSX */
-        s_instance = new Monitor(parent, doc, outputMap, Qt::Window);
+        s_instance = new Monitor(parent, doc, Qt::Window);
         window = s_instance;
     #else
         /* Create an MDI window for X11 & Win32 */
         QMdiArea* area = qobject_cast<QMdiArea*> (parent);
         Q_ASSERT(area != NULL);
         QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new Monitor(sub, doc, outputMap);
+        s_instance = new Monitor(sub, doc);
         sub->setWidget(s_instance);
         window = area->addSubWindow(sub);
     #endif
@@ -351,7 +349,7 @@ void Monitor::updateFixtureLabelStyles()
 
 void Monitor::createMonitorFixture(Fixture* fxi)
 {
-    MonitorFixture* mof = new MonitorFixture(m_monitorWidget, m_doc, m_outputMap);
+    MonitorFixture* mof = new MonitorFixture(m_monitorWidget, m_doc);
     mof->setFixture(fxi->id());
     mof->slotChannelStyleChanged(channelStyle());
     mof->slotValueStyleChanged(valueStyle());
@@ -410,7 +408,7 @@ void Monitor::slotFixtureRemoved(quint32 fxi_id)
 
 void Monitor::slotTimeout()
 {
-    const UniverseArray* universes = m_outputMap->peekUniverses();
+    const UniverseArray* universes = m_doc->outputMap()->peekUniverses();
     QList <MonitorFixture*> list = findChildren <MonitorFixture*>();
     QListIterator <MonitorFixture*> it(list);
     while (it.hasNext() == true)

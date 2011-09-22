@@ -25,43 +25,51 @@
 #   include <winbase.h>
 #endif
 
+#define protected public
 #include "mastertimer_test.h"
 #include "outputmap_stub.h"
 #include "dmxsource_stub.h"
 #include "function_stub.h"
-
 #include "universearray.h"
-#include "doc.h"
-
-#define protected public
 #include "mastertimer.h"
-#undef protected
-
 #include "qlcchannel.h"
 #include "qlcfile.h"
+#include "doc.h"
+#undef protected
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
 void MasterTimer_Test::initTestCase()
 {
-    m_oms = new OutputMapStub(this);
-    m_ua = new UniverseArray(4 * 512);
-    m_oms->setUniverses(m_ua);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
+    m_doc = NULL;
+    Bus::init(this);
 }
 
 void MasterTimer_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
+
+    m_oms = new OutputMapStub(this);
+    m_ua = new UniverseArray(4 * 512);
+    m_oms->setUniverses(m_ua);
 }
 
 void MasterTimer_Test::cleanup()
 {
     delete m_doc;
     m_doc = NULL;
+
+    m_oms->setUniverses(NULL);
+    delete m_oms;
+    m_oms = NULL;
+
+    delete m_ua;
+    m_ua = NULL;
 }
 
 void MasterTimer_Test::initial()
@@ -406,14 +414,4 @@ void MasterTimer_Test::restart()
     QVERIFY(mt.runningFunctions() == 3);
 
     mt.stopAllFunctions();
-}
-
-void MasterTimer_Test::cleanupTestCase()
-{
-    m_oms->setUniverses(NULL);
-    delete m_oms;
-    m_oms = NULL;
-
-    delete m_ua;
-    m_ua = NULL;
 }

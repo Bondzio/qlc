@@ -30,6 +30,7 @@
 class VCXYPadFixtureEditor : public QDialog, public Ui_VCXYPadFixtureEditor
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VCXYPadFixtureEditor)
 
     /********************************************************************
      * Initialization
@@ -37,9 +38,6 @@ class VCXYPadFixtureEditor : public QDialog, public Ui_VCXYPadFixtureEditor
 public:
     VCXYPadFixtureEditor(QWidget* parent, QList <VCXYPadFixture> fixtures);
     ~VCXYPadFixtureEditor();
-
-private:
-    Q_DISABLE_COPY(VCXYPadFixtureEditor)
 
 protected slots:
     void accept();

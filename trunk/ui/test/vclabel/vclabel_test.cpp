@@ -27,13 +27,11 @@
 
 #define protected public
 #define private public
+
 #include "virtualconsole.h"
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "vclabel.h"
-#undef private
-#undef protected
-
 #include "qlcfixturedefcache.h"
 #include "vclabel_test.h"
 #include "mastertimer.h"
@@ -42,21 +40,31 @@
 #include "doc.h"
 #include "bus.h"
 
+#undef private
+#undef protected
+
 void VCLabel_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
+}
+
+void VCLabel_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCLabel_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCLabel_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCLabel label(&w, &doc, &om, &im, &mt);
+    VCLabel label(&w, m_doc);
     QCOMPARE(label.objectName(), QString("VCLabel"));
     QCOMPARE(label.frameStyle(), 0);
     QCOMPARE(label.caption(), tr("Label"));
@@ -65,15 +73,10 @@ void VCLabel_Test::initial()
 
 void VCLabel_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
-    VCLabel label(&parent, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
+    VCLabel label(&parent, m_doc);
     label.setCaption("Foobar");
     VCLabel* label2 = qobject_cast<VCLabel*> (label.createCopy(&parent));
     QVERIFY(label2 != NULL && label2 != &label);
@@ -86,11 +89,6 @@ void VCLabel_Test::copy()
 
 void VCLabel_Test::loadXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     QDomDocument xmldoc;
@@ -117,7 +115,7 @@ void VCLabel_Test::loadXML()
     QDomElement foobar = xmldoc.createElement("Foobar");
     root.appendChild(foobar);
 
-    VCLabel label(&w, &doc, &om, &im, &mt);
+    VCLabel label(&w, m_doc);
     QVERIFY(label.loadXML(&root) == true);
     QCOMPARE(label.geometry().width(), 42);
     QCOMPARE(label.geometry().height(), 69);
@@ -131,14 +129,9 @@ void VCLabel_Test::loadXML()
 
 void VCLabel_Test::saveXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCLabel label(&w, &doc, &om, &im, &mt);
+    VCLabel label(&w, m_doc);
     label.setCaption("Simo Kuassimo");
 
     QDomDocument xmldoc;
@@ -180,21 +173,16 @@ void VCLabel_Test::saveXML()
 
 void VCLabel_Test::paintEvent()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea w;
 
     QPaintEvent ev(QRect(0, 0, 5, 5));
 
     // Checking the result of a paint event would have to compare individual pixels, which
     // I'm not gonna do. Just call all branches to try to find any crashes and that's it...
-    VCLabel label(&w, &doc, &om, &im, &mt);
+    VCLabel label(&w, m_doc);
     label.paintEvent(&ev);
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     label.paintEvent(&ev);
 }
 

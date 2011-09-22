@@ -46,7 +46,7 @@ public:
      * Initialization
      *********************************************************************/
 public:
-    VCFrame(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer);
+    VCFrame(QWidget* parent, Doc* doc);
     virtual ~VCFrame();
 
     void init(bool bottomFrame = false);

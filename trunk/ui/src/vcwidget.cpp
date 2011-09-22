@@ -51,21 +51,14 @@
 #include "vcwidget.h"
 #include "doc.h"
 
-VCWidget::VCWidget(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap,
-                   MasterTimer* masterTimer)
+VCWidget::VCWidget(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
     , m_allowChildren(false)
     , m_allowResize(true)
 {
     Q_ASSERT(parent != NULL);
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     /* Set the class name "VCWidget" as the object name as well */
     setObjectName(VCWidget::staticMetaObject.className());
@@ -389,7 +382,7 @@ void VCWidget::setInputSource(const QLCInputSource& source, quint8 id)
 {
     // Connect when the first valid input source is set
     if (m_inputs.isEmpty() == true && source.isValid() == true)
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 
     // Assign or clear
@@ -400,7 +393,7 @@ void VCWidget::setInputSource(const QLCInputSource& source, quint8 id)
 
     // Disconnect when there are no more input sources present
     if (m_inputs.isEmpty() == true)
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+        disconnect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 }
 

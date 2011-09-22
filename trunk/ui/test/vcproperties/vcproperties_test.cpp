@@ -22,13 +22,9 @@
 #include <QtTest>
 
 #define protected public
-#include "vcwidgetproperties.h"
-#undef protected
-
 #define private public
+#include "vcwidgetproperties.h"
 #include "vcproperties.h"
-#undef private
-
 #include "qlcfixturedefcache.h"
 #include "vcproperties_test.h"
 #include "mastertimer.h"
@@ -37,6 +33,19 @@
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "doc.h"
+#undef private
+#undef protected
+
+void VCProperties_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCProperties_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
+}
 
 void VCProperties_Test::initial()
 {
@@ -159,19 +168,14 @@ void VCProperties_Test::copy()
 
 void VCProperties_Test::reset()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
     QVERIFY(p.m_contents != NULL);
     QVERIFY(qobject_cast<VCWidget*> (p.m_contents) != NULL);
 
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
     QVERIFY(p.m_contents != NULL);
     QVERIFY(qobject_cast<VCWidget*> (p.m_contents) != NULL);
 }
@@ -191,15 +195,10 @@ void VCProperties_Test::loadXML()
     QDomElement foo = xmldoc.createElement("Foo");
     root.appendChild(foo);
 
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
     QVERIFY(p.loadXML(root) == true);
 
     root.setTagName("VirtualCosnole");
@@ -274,15 +273,10 @@ void VCProperties_Test::loadPropertiesHappy()
     QDomElement foo = xmldoc.createElement("Foo");
     root.appendChild(foo);
 
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
     QVERIFY(p.loadProperties(root) == true);
     QCOMPARE(p.isGridEnabled(), true);
     QCOMPARE(p.gridX(), 1);
@@ -371,15 +365,10 @@ void VCProperties_Test::loadPropertiesSad()
     QDomElement foo = xmldoc.createElement("Foo");
     root.appendChild(foo);
 
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
     QVERIFY(p.loadProperties(root) == true);
     QCOMPARE(p.isGridEnabled(), false);
     QCOMPARE(p.gridX(), 1);
@@ -445,15 +434,10 @@ void VCProperties_Test::loadXMLInput()
 
 void VCProperties_Test::saveXMLHappy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
 
     p.m_gridEnabled = true;
     p.m_gridX = 11;
@@ -488,7 +472,7 @@ void VCProperties_Test::saveXMLHappy()
     QVERIFY(p.saveXML(&xmldoc, &root) == true);
 
     VCProperties p2;
-    p2.resetContents(&w, &doc, &om, &im, &mt);
+    p2.resetContents(&w, m_doc);
     QVERIFY(p2.loadXML(root.firstChild().toElement()) == true);
     QCOMPARE(p2.isGridEnabled(), true);
     QCOMPARE(p2.gridX(), 11);
@@ -520,15 +504,10 @@ void VCProperties_Test::saveXMLHappy()
 
 void VCProperties_Test::saveXMLSad()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, &doc, &om, &im, &mt);
+    p.resetContents(&w, m_doc);
 
     p.m_gridEnabled = false;
     p.m_gridX = 11;
@@ -563,7 +542,7 @@ void VCProperties_Test::saveXMLSad()
     QVERIFY(p.saveXML(&xmldoc, &root) == true);
 
     VCProperties p2;
-    p2.resetContents(&w, &doc, &om, &im, &mt);
+    p2.resetContents(&w, m_doc);
     QVERIFY(p2.loadXML(root.firstChild().toElement()) == true);
     QCOMPARE(p2.isGridEnabled(), false);
     QCOMPARE(p2.gridX(), 11);

@@ -39,18 +39,11 @@
 #define BUTTON_SIZE "addvcbuttonmatrix/buttonsize"
 #define FRAME_STYLE "addvcbuttonmatrix/framestyle"
 
-AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                     InputMap* inputMap, MasterTimer* masterTimer)
+AddVCButtonMatrix::AddVCButtonMatrix(QWidget* parent, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
-    , m_outputMap(outputMap)
-    , m_inputMap(inputMap)
-    , m_masterTimer(masterTimer)
 {
     Q_ASSERT(doc != NULL);
-    Q_ASSERT(outputMap != NULL);
-    Q_ASSERT(inputMap != NULL);
-    Q_ASSERT(masterTimer != NULL);
 
     QSettings settings;
     QVariant var;
@@ -127,7 +120,7 @@ AddVCButtonMatrix::FrameStyle AddVCButtonMatrix::frameStyle() const
 
 void AddVCButtonMatrix::slotAddClicked()
 {
-    FunctionSelection fs(this, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    FunctionSelection fs(this, m_doc);
     fs.setDisabledFunctions(functions());
     if (fs.exec() == true)
     {

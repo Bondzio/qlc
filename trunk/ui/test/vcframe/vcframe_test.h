@@ -24,12 +24,16 @@
 
 #include <QObject>
 
+class Doc;
 class VCFrame_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
     void copy();
     void loadXML();
@@ -37,6 +41,9 @@ private slots:
     void customMenu();
     void handleWidgetSelection();
     void mouseMoveEvent();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

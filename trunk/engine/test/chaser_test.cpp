@@ -22,16 +22,15 @@
 #include <QtTest>
 #include <QtXml>
 
-#include "mastertimer_stub.h"
-#include "universearray.h"
-#include "chaser_test.h"
-#include "fixture.h"
-
 #define protected public
 #define private public
+#include "mastertimer_stub.h"
+#include "universearray.h"
 #include "chaserrunner.h"
+#include "chaser_test.h"
 #include "collection.h"
 #include "function.h"
+#include "fixture.h"
 #include "chaser.h"
 #include "scene.h"
 #include "doc.h"
@@ -46,16 +45,18 @@
 
 void Chaser_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void Chaser_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    //QDir dir(INTERNAL_FIXTUREDIR);
+    //dir.setFilter(QDir::Files);
+    //dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    //QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void Chaser_Test::cleanup()
@@ -280,7 +281,7 @@ void Chaser_Test::copyFrom()
 
 void Chaser_Test::createCopy()
 {
-    Doc doc(this, m_cache);
+    Doc doc(this);
 
     Chaser* c1 = new Chaser(m_doc);
     c1->setName("First");

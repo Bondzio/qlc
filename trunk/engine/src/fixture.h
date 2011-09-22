@@ -49,6 +49,7 @@ class Doc;
 class Fixture : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Fixture)
 
     /*********************************************************************
      * Initialization
@@ -66,9 +67,6 @@ public:
 
     /** Less-than operator for qSort() */
     bool operator<(const Fixture& fxi);
-
-private:
-    Q_DISABLE_COPY(Fixture)
 
     /*********************************************************************
      * Fixture ID
@@ -319,7 +317,7 @@ public:
      * @return true if the fixture was loaded successfully, otherwise false
      */
     bool loadXML(const QDomElement* root,
-                 const QLCFixtureDefCache& fixtureDefCache);
+                 const QLCFixtureDefCache* fixtureDefCache);
 
     /**
      * Save the fixture instance into an XML document, under the given

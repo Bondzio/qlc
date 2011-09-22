@@ -44,12 +44,6 @@ class QAction;
 class QLabel;
 class QTimer;
 class QMenu;
-
-class DummyOutPlugin;
-class QLCFixtureDef;
-class MasterTimer;
-class OutputMap;
-class InputMap;
 class App;
 
 #define KXMLQLCWorkspace "Workspace"
@@ -89,31 +83,9 @@ protected:
     /*********************************************************************
      * Output mapping
      *********************************************************************/
-protected:
-    void initOutputMap();
-
 protected slots:
     void slotOutputMapBlackoutChanged(bool state);
     void slotFlashBlackoutIndicator();
-
-protected:
-    OutputMap* m_outputMap;
-
-    /*********************************************************************
-     * Input mapping
-     *********************************************************************/
-protected:
-    void initInputMap();
-
-protected:
-    InputMap* m_inputMap;
-
-    /*********************************************************************
-     * Master timer
-     *********************************************************************/
-protected:
-    /** The function runner object */
-    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Doc
@@ -129,17 +101,6 @@ protected:
 
 protected:
     Doc* m_doc;
-
-    /*********************************************************************
-     * Fixture definitions
-     *********************************************************************/
-protected:
-    /** Load all fixture definitions */
-    void loadFixtureDefinitions();
-
-protected:
-    /** Available fixture definitions */
-    QLCFixtureDefCache m_fixtureDefCache;
 
     /*********************************************************************
      * Main operating mode

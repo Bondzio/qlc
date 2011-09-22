@@ -48,12 +48,10 @@ public:
      * dialog selects "Generic Dimmer".
      *
      * @param parent The parent object that owns the dialog
-     * @param fixtureDefCache A cache that holds available fixture defs
-     * @param doc QLC Doc used to resolve a free address automatically
+     * @param doc QLC engine instance
      * @param fxi Fixture to edit (optional)
      */
-    AddFixture(QWidget* parent, const QLCFixtureDefCache& fixtureDefCache,
-               const Doc* doc, const OutputMap* outputMap, const Fixture* fxi = NULL);
+    AddFixture(QWidget* parent, const Doc* doc, const Fixture* fxi = NULL);
 
     /** Destructor */
     ~AddFixture();
@@ -87,10 +85,7 @@ public:
     quint32 channels() const;
 
 protected:
-    const QLCFixtureDefCache& m_fixtureDefCache;
     const Doc* m_doc;
-    const OutputMap* m_outputMap;
-
     const QLCFixtureDef* m_fixtureDef;
     const QLCFixtureMode* m_mode;
 

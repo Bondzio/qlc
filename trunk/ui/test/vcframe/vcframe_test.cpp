@@ -26,11 +26,9 @@
 #include <QSet>
 
 #define protected public
-#include "virtualconsole.h"
-#include "vcframe.h"
-#undef protected
 
 #include "qlcfixturedefcache.h"
+#include "virtualconsole.h"
 #include "vcframe_test.h"
 #include "mastertimer.h"
 #include "outputmap.h"
@@ -38,40 +36,45 @@
 #include "vcbutton.h"
 #include "vcwidget.h"
 #include "vcframe.h"
+#include "vcframe.h"
 #include "doc.h"
 #include "bus.h"
 
+#undef protected
+
 void VCFrame_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
+}
+
+void VCFrame_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void VCFrame_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCFrame_Test::initial()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame frame(&w, &doc, &om, &im, &mt);
+    VCFrame frame(&w, m_doc);
     QCOMPARE(frame.objectName(), QString("VCFrame"));
     QCOMPARE(frame.frameStyle(), QFrame::Panel | QFrame::Sunken);
 }
 
 void VCFrame_Test::copy()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
-    VCFrame frame(&parent, &doc, &om, &im, &mt);
-    VCButton* btn = new VCButton(&frame, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
+    VCFrame frame(&parent, m_doc);
+    VCButton* btn = new VCButton(&frame, m_doc);
     btn->setCaption("Foobar");
     VCWidget* frame2 = frame.createCopy(&parent);
     QVERIFY(frame2 != NULL && frame2 != &frame);
@@ -88,11 +91,6 @@ void VCFrame_Test::copy()
 
 void VCFrame_Test::loadXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     QDomDocument xmldoc;
@@ -141,7 +139,7 @@ void VCFrame_Test::loadXML()
     QDomElement foobar = xmldoc.createElement("Foobar");
     root.appendChild(foobar);
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
     QVERIFY(parent.loadXML(&root) == true);
     parent.postLoad();
     QCOMPARE(parent.geometry().width(), 42);
@@ -169,18 +167,13 @@ void VCFrame_Test::loadXML()
 
 void VCFrame_Test::saveXML()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
     parent.setCaption("Parent");
-    VCFrame child(&parent, &doc, &om, &im, &mt);
+    VCFrame child(&parent, m_doc);
     child.setCaption("Child");
-    VCFrame grandChild(&child, &doc, &om, &im, &mt);
+    VCFrame grandChild(&child, m_doc);
     grandChild.setCaption("Grandchild");
     child.setAllowChildren(false);
     child.setAllowResize(false);
@@ -309,19 +302,14 @@ void VCFrame_Test::saveXML()
 
 void VCFrame_Test::customMenu()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea w;
 
-    VCFrame frame(&w, &doc, &om, &im, &mt);
+    VCFrame frame(&w, m_doc);
     QVERIFY(frame.customMenu(NULL) == NULL);
 
     QMenu menu;
-    VirtualConsole::resetContents(&w, &doc, &om, &im, &mt);
-    VirtualConsole::createAndShow(&w, &doc, &om, &im, &mt);
+    VirtualConsole::resetContents(&w, m_doc);
+    VirtualConsole::createAndShow(&w, m_doc);
     QMenu* customMenu = frame.customMenu(&menu);
     QVERIFY(customMenu != NULL);
     QCOMPARE(customMenu->title(), tr("Add"));
@@ -331,22 +319,17 @@ void VCFrame_Test::customMenu()
 
 void VCFrame_Test::handleWidgetSelection()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea w;
 
-    VCFrame frame(&w, &doc, &om, &im, &mt);
+    VCFrame frame(&w, m_doc);
     QVERIFY(frame.isBottomFrame() == true);
 
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton,
                    Qt::LeftButton, Qt::NoModifier);
     frame.handleWidgetSelection(&ev);
 
-    VirtualConsole::resetContents(&w, &doc, &om, &im, &mt);
-    VirtualConsole::createAndShow(&w, &doc, &om, &im, &mt);
+    VirtualConsole::resetContents(&w, m_doc);
+    VirtualConsole::createAndShow(&w, m_doc);
     VirtualConsole::instance()->hide();
 
     // Select bottom frame
@@ -354,7 +337,7 @@ void VCFrame_Test::handleWidgetSelection()
     QCOMPARE(VirtualConsole::instance()->selectedWidgets().size(), 0);
 
     // Select a child frame
-    VCFrame child(&frame, &doc, &om, &im, &mt);
+    VCFrame child(&frame, m_doc);
     QVERIFY(child.isBottomFrame() == false);
     child.handleWidgetSelection(&ev);
     QCOMPARE(VirtualConsole::instance()->selectedWidgets().size(), 1);
@@ -368,24 +351,19 @@ void VCFrame_Test::handleWidgetSelection()
 
 void VCFrame_Test::mouseMoveEvent()
 {
-    QLCFixtureDefCache fdc;
-    Doc doc(this, fdc);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QMdiArea w;
 
     // Well, there isn't much that can be checked here... Actual moving happens in VCWidget.
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton,
                    Qt::LeftButton, Qt::NoModifier);
 
-    VCFrame frame(&w, &doc, &om, &im, &mt);
+    VCFrame frame(&w, m_doc);
     QVERIFY(frame.isBottomFrame() == true);
     frame.move(QPoint(0, 0));
     frame.mouseMoveEvent(&ev);
     QCOMPARE(frame.pos(), QPoint(0, 0));
 
-    VCFrame child(&frame, &doc, &om, &im, &mt);
+    VCFrame child(&frame, m_doc);
     QVERIFY(child.isBottomFrame() == false);
     child.mouseMoveEvent(&ev);
     QCOMPARE(child.pos(), QPoint(0, 0));

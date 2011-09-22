@@ -65,7 +65,6 @@ private slots:
 
 private:
     Doc* m_doc;
-    QLCFixtureDefCache m_cache;
     Scene* m_scene1;
     Scene* m_scene2;
     Scene* m_scene3;

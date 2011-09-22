@@ -36,17 +36,21 @@
 
 void MonitorFixture_Test::initTestCase()
 {
+    m_doc = new Doc(this);
     Bus::init(this);
+}
+
+void MonitorFixture_Test::cleanupTestCase()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void MonitorFixture_Test::initial()
 {
-    QLCFixtureDefCache cache;
-    OutputMap om(this, 4);
-    Doc doc(this, cache);
     QWidget w;
 
-    MonitorFixture mof(&w, &doc, &om);
+    MonitorFixture mof(&w, m_doc);
     QCOMPARE(mof.fixture(), Fixture::invalidId());
     QVERIFY(mof.m_fixtureLabel == NULL);
     QCOMPARE(mof.m_channelStyle, Monitor::DMXChannels);
@@ -61,19 +65,16 @@ void MonitorFixture_Test::initial()
 
 void MonitorFixture_Test::fixture()
 {
-    QLCFixtureDefCache cache;
-    OutputMap om(this, 4);
-    Doc doc(this, cache);
     QWidget w;
 
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(6);
     fxi->setAddress(10);
     fxi->setName("Foobar");
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
     QVERIFY(fxi->id() != Fixture::invalidId());
 
-    MonitorFixture mof(&w, &doc, &om);
+    MonitorFixture mof(&w, m_doc);
     mof.setFixture(fxi->id());
     QCOMPARE(mof.fixture(), fxi->id());
     QVERIFY(mof.m_fixtureLabel != NULL);
@@ -92,29 +93,26 @@ void MonitorFixture_Test::fixture()
 
 void MonitorFixture_Test::lessThan()
 {
-    QLCFixtureDefCache cache;
-    OutputMap om(this, 4);
-    Doc doc(this, cache);
     QWidget w;
 
-    Fixture* fxi1 = new Fixture(&doc);
+    Fixture* fxi1 = new Fixture(m_doc);
     fxi1->setChannels(6);
     fxi1->setName("Foo");
     fxi1->setAddress(0);
-    doc.addFixture(fxi1);
+    m_doc->addFixture(fxi1);
     QVERIFY(fxi1->id() != Fixture::invalidId());
 
-    MonitorFixture mof1(&w, &doc, &om);
+    MonitorFixture mof1(&w, m_doc);
     mof1.setFixture(fxi1->id());
 
-    Fixture* fxi2 = new Fixture(&doc);
+    Fixture* fxi2 = new Fixture(m_doc);
     fxi2->setChannels(4);
     fxi2->setName("Bar");
     fxi2->setAddress(10);
-    doc.addFixture(fxi2);
+    m_doc->addFixture(fxi2);
     QVERIFY(fxi2->id() != Fixture::invalidId());
 
-    MonitorFixture mof2(&w, &doc, &om);
+    MonitorFixture mof2(&w, m_doc);
     mof2.setFixture(fxi2->id());
 
     QVERIFY(mof1 < mof2);
@@ -135,19 +133,16 @@ void MonitorFixture_Test::lessThan()
 
 void MonitorFixture_Test::channelValueStyles()
 {
-    QLCFixtureDefCache cache;
-    OutputMap om(this, 4);
-    Doc doc(this, cache);
     QWidget w;
 
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(6);
     fxi->setAddress(10);
     fxi->setName("Foobar");
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
     QVERIFY(fxi->id() != Fixture::invalidId());
 
-    MonitorFixture mof(&w, &doc, &om);
+    MonitorFixture mof(&w, m_doc);
     mof.setFixture(fxi->id());
 
     mof.updateLabelStyles();
@@ -206,19 +201,16 @@ void MonitorFixture_Test::channelValueStyles()
 
 void MonitorFixture_Test::updateValues()
 {
-    QLCFixtureDefCache cache;
-    OutputMap om(this, 4);
-    Doc doc(this, cache);
     QWidget w;
 
-    Fixture* fxi = new Fixture(&doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(6);
     fxi->setAddress(0);
     fxi->setName("Foobar");
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
     QVERIFY(fxi->id() != Fixture::invalidId());
 
-    MonitorFixture mof(&w, &doc, &om);
+    MonitorFixture mof(&w, m_doc);
     mof.setFixture(fxi->id());
 
     QByteArray ba(10, 0);

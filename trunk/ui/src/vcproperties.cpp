@@ -129,15 +129,14 @@ VCFrame* VCProperties::contents() const
     return m_contents;
 }
 
-void VCProperties::resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                                 InputMap* inputMap, MasterTimer* masterTimer)
+void VCProperties::resetContents(QWidget* parent, Doc* doc)
 {
     /* Get rid of any existing contents */
     if (m_contents != NULL)
         delete m_contents;
 
     /* Create new contents */
-    m_contents = new VCFrame(parent, doc, outputMap, inputMap, masterTimer);
+    m_contents = new VCFrame(parent, doc);
 }
 
 /*****************************************************************************

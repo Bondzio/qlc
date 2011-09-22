@@ -44,17 +44,18 @@
 void ChaserRunner_Test::initTestCase()
 {
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void ChaserRunner_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
 
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    m_doc->fixtureDefCache()->load(dir);
+
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->mode("Mode 1");
     QVERIFY(mode != NULL);
@@ -568,7 +569,7 @@ void ChaserRunner_Test::createFadeChannels()
 
 void ChaserRunner_Test::createFadeChannelsAutoHTPZero()
 {
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->mode("Mode 1");
     QVERIFY(mode != NULL);

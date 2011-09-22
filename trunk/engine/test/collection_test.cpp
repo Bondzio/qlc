@@ -22,36 +22,35 @@
 #include <QtTest>
 #include <QtXml>
 
+#define protected public
 #include "mastertimer_stub.h"
 #include "collection_test.h"
-
-#define protected public
-#include "collection.h"
-#undef protected
-
 #include "universearray.h"
+#include "collection.h"
+#include "qlcchannel.h"
 #include "function.h"
 #include "fixture.h"
+#include "qlcfile.h"
 #include "scene.h"
 #include "doc.h"
-
-#include "qlcchannel.h"
-#include "qlcfile.h"
+#undef protected
 
 #define INTERNAL_FIXTUREDIR "../../fixtures/"
 
 void Collection_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
-    QDir dir(INTERNAL_FIXTUREDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
 }
 
 void Collection_Test::init()
 {
-    m_doc = new Doc(this, m_cache);
+    m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void Collection_Test::cleanup()
@@ -339,7 +338,7 @@ void Collection_Test::copyFrom()
 
 void Collection_Test::createCopy()
 {
-    Doc doc(this, m_cache);
+    Doc doc(this);
 
     Collection* c1 = new Collection(m_doc);
     c1->setName("First");
@@ -365,7 +364,7 @@ void Collection_Test::createCopy()
 
 void Collection_Test::armSuccess()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -402,7 +401,7 @@ void Collection_Test::armSuccess()
 
 void Collection_Test::armMissingFunction()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -439,7 +438,7 @@ void Collection_Test::armMissingFunction()
 
 void Collection_Test::write()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 0);
     Bus::instance()->setValue(Bus::defaultHold(), 0);
@@ -530,7 +529,7 @@ void Collection_Test::write()
 
 void Collection_Test::stopNotOwnChildren()
 {
-    Doc* doc = new Doc(this, m_cache);
+    Doc* doc = new Doc(this);
 
     Bus::instance()->setValue(Bus::defaultFade(), 0);
     Bus::instance()->setValue(Bus::defaultHold(), 0);

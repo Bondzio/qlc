@@ -53,8 +53,7 @@ const quint8 VCXYPad::tiltInputSourceId = 1;
  * VCXYPad Initialization
  *****************************************************************************/
 
-VCXYPad::VCXYPad(QWidget* parent, Doc* doc, OutputMap* outputMap, InputMap* inputMap, MasterTimer* masterTimer)
-    : VCWidget(parent, doc, outputMap, inputMap, masterTimer)
+VCXYPad::VCXYPad(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 {
     /* Set the class name "VCXYPad" as the object name as well */
     setObjectName(VCXYPad::staticMetaObject.className());
@@ -115,7 +114,7 @@ VCWidget* VCXYPad::createCopy(VCWidget* parent)
 {
     Q_ASSERT(parent != NULL);
 
-    VCXYPad* xypad = new VCXYPad(parent, m_doc, m_outputMap, m_inputMap, m_masterTimer);
+    VCXYPad* xypad = new VCXYPad(parent, m_doc);
     if (xypad->copyFrom(this) == false)
     {
         delete xypad;
@@ -163,7 +162,7 @@ void VCXYPad::setCaption(const QString& text)
 
 void VCXYPad::editProperties()
 {
-    VCXYPadProperties prop(this, m_doc, m_inputMap);
+    VCXYPadProperties prop(this, m_doc);
     if (prop.exec() == QDialog::Accepted)
         m_doc->setModified();
 }
@@ -282,13 +281,13 @@ void VCXYPad::slotModeChanged(Doc::Mode mode)
 
     if (mode == Doc::Operate)
     {
-        m_masterTimer->registerDMXSource(this);
+        m_doc->masterTimer()->registerDMXSource(this);
         m_vSlider->setEnabled(true);
         m_hSlider->setEnabled(true);
     }
     else
     {
-        m_masterTimer->unregisterDMXSource(this);
+        m_doc->masterTimer()->unregisterDMXSource(this);
         m_vSlider->setEnabled(false);
         m_hSlider->setEnabled(false);
     }

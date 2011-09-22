@@ -36,8 +36,7 @@ class AddVCButtonMatrix : public QDialog, public Ui_AddVCButtonMatrix
     Q_OBJECT
 
 public:
-    AddVCButtonMatrix(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                      InputMap* inputMap, MasterTimer* masterTimer);
+    AddVCButtonMatrix(QWidget* parent, Doc* doc);
     ~AddVCButtonMatrix();
 
 public:

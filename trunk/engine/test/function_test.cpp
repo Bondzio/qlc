@@ -22,7 +22,6 @@
 #include <QtTest>
 #include <QtXml>
 
-#include "qlcfixturedefcache.h"
 #include "function_test.h"
 
 #define protected public
@@ -36,13 +35,11 @@
 
 void Function_Test::initTestCase()
 {
-    Bus::init(this);
 }
 
 void Function_Test::initial()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QCOMPARE(stub->name(), QString());
@@ -55,8 +52,7 @@ void Function_Test::initial()
 
 void Function_Test::properties()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     doc.addFunction(stub);
@@ -86,8 +82,7 @@ void Function_Test::properties()
 
 void Function_Test::copyFrom()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub1 = new Function_Stub(&doc);
     QVERIFY(stub1->copyFrom(NULL) == false);
@@ -109,8 +104,7 @@ void Function_Test::copyFrom()
 
 void Function_Test::flashUnflash()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QSignalSpy spy(stub, SIGNAL(flashing(quint32,bool)));
@@ -129,8 +123,7 @@ void Function_Test::flashUnflash()
 
 void Function_Test::elapsed()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QCOMPARE(stub->elapsed(), quint32(0));
@@ -152,8 +145,7 @@ void Function_Test::elapsed()
 
 void Function_Test::preRunPostRun()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QSignalSpy spyRunning(stub, SIGNAL(running(quint32)));
@@ -175,8 +167,7 @@ void Function_Test::preRunPostRun()
 
 void Function_Test::stopAndWait()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     stub->preRun(NULL);
@@ -189,8 +180,7 @@ void Function_Test::stopAndWait()
 
 void Function_Test::stopAndWaitFail()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     stub->preRun(NULL);
@@ -202,8 +192,7 @@ void Function_Test::stopAndWaitFail()
 
 void Function_Test::adjustIntensity()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QCOMPARE(stub->intensity(), qreal(1.0));
@@ -223,8 +212,7 @@ void Function_Test::adjustIntensity()
 
 void Function_Test::slotFixtureRemoved()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     Fixture* fxi = new Fixture(&doc);
@@ -244,8 +232,7 @@ void Function_Test::invalidId()
 
 void Function_Test::typeString()
 {
-    QLCFixtureDefCache cache;
-    Doc doc(this, cache);
+    Doc doc(this);
 
     Function_Stub* stub = new Function_Stub(&doc);
     QCOMPARE(stub->typeString(), Function::typeToString(Function::Type(31337)));
@@ -319,8 +306,7 @@ void Function_Test::stringToDirection()
 
 void Function_Test::loaderWrongRoot()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Scene");
@@ -331,8 +317,7 @@ void Function_Test::loaderWrongRoot()
 
 void Function_Test::loaderWrongID()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Function");
@@ -348,8 +333,7 @@ void Function_Test::loaderWrongID()
 
 void Function_Test::loaderScene()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Function");
@@ -381,8 +365,7 @@ void Function_Test::loaderScene()
 
 void Function_Test::loaderChaser()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
 
@@ -436,8 +419,7 @@ void Function_Test::loaderChaser()
 
 void Function_Test::loaderCollection()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Function");
@@ -461,8 +443,7 @@ void Function_Test::loaderCollection()
 
 void Function_Test::loaderEFX()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
 
@@ -617,8 +598,7 @@ void Function_Test::loaderEFX()
 
 void Function_Test::loaderUnknownType()
 {
-    QLCFixtureDefCache cache;
-    Doc d(this, cache);
+    Doc d(this);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Function");

@@ -24,17 +24,24 @@
 
 #include <QObject>
 
+class Doc;
 class VCLabel_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
     void copy();
     void loadXML();
     void saveXML();
     void paintEvent();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

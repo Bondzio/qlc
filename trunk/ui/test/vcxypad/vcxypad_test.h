@@ -23,14 +23,17 @@
 #define VCXYPAD_TEST_H
 
 #include <QObject>
-#include "qlcfixturedefcache.h"
 
+class Doc;
 class VCXYPad_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void initial();
     void fixtures();
     void copy();
@@ -39,7 +42,7 @@ private slots:
     void modeChange();
 
 private:
-    QLCFixtureDefCache m_cache;
+    Doc* m_doc;
 };
 
 #endif

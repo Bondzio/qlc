@@ -89,8 +89,7 @@ public:
     VCFrame* contents() const;
 
     /** Reset Virtual Console's bottom-most frame to initial state */
-    void resetContents(QWidget* parent, Doc* doc, OutputMap* outputMap,
-                       InputMap* inputMap, MasterTimer* masterTimer);
+    void resetContents(QWidget* parent, Doc* doc);
 
 private:
     VCFrame* m_contents;

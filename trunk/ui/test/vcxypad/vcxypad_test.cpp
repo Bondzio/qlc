@@ -29,9 +29,6 @@
 #include "vcxypadarea.h"
 #include "vcwidget.h"
 #include "vcxypad.h"
-#undef private
-#undef protected
-
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
 #include "qlcinputsource.h"
@@ -44,27 +41,37 @@
 #include "qlcfile.h"
 #include "doc.h"
 #include "bus.h"
+#undef private
+#undef protected
 
 #define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void VCXYPad_Test::initTestCase()
 {
     Bus::init(this);
+}
+
+void VCXYPad_Test::init()
+{
+    m_doc = new Doc(this);
+
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    QVERIFY(m_cache.load(dir) == true);
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
+}
+
+void VCXYPad_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void VCXYPad_Test::initial()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    VCXYPad pad(&w, m_doc);
     QCOMPARE(pad.objectName(), QString("VCXYPad"));
     QCOMPARE(pad.caption(), QString("XY Pad"));
     QCOMPARE(pad.frameStyle(), QFrame::Panel | QFrame::Sunken);
@@ -79,15 +86,11 @@ void VCXYPad_Test::initial()
 
 void VCXYPad_Test::fixtures()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    VCXYPad pad(&w, m_doc);
 
-    VCXYPadFixture xyf1(&doc);
+    VCXYPadFixture xyf1(m_doc);
     xyf1.setFixture(1);
 
     pad.appendFixture(xyf1);
@@ -95,7 +98,7 @@ void VCXYPad_Test::fixtures()
     pad.appendFixture(xyf1);
     QCOMPARE(pad.m_fixtures.size(), 1);
 
-    VCXYPadFixture xyf2(&doc);
+    VCXYPadFixture xyf2(m_doc);
     xyf2.setFixture(2);
 
     pad.appendFixture(xyf2);
@@ -119,35 +122,31 @@ void VCXYPad_Test::fixtures()
     QCOMPARE(pad.m_fixtures.size(), 0);
 
     // Invalid fixture
-    VCXYPadFixture xyf3(&doc);
+    VCXYPadFixture xyf3(m_doc);
     pad.appendFixture(xyf3);
     QCOMPARE(pad.m_fixtures.size(), 0);
 }
 
 void VCXYPad_Test::copy()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCFrame parent(&w, &doc, &om, &im, &mt);
-    VCXYPad pad(&parent, &doc, &om, &im, &mt);
+    VCFrame parent(&w, m_doc);
+    VCXYPad pad(&parent, m_doc);
     pad.setCaption("Dingdong");
     QSize size(80, 80);
     QPoint pt(50, 30);
     pad.m_area->setPosition(pt);
 
-    VCXYPadFixture xyf1(&doc);
+    VCXYPadFixture xyf1(m_doc);
     xyf1.setFixture(1);
     pad.appendFixture(xyf1);
 
-    VCXYPadFixture xyf2(&doc);
+    VCXYPadFixture xyf2(m_doc);
     xyf2.setFixture(2);
     pad.appendFixture(xyf2);
 
-    VCXYPadFixture xyf3(&doc);
+    VCXYPadFixture xyf3(m_doc);
     xyf3.setFixture(3);
     pad.appendFixture(xyf3);
 
@@ -169,10 +168,6 @@ void VCXYPad_Test::copy()
 
 void VCXYPad_Test::loadXML()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
     QDomDocument xmldoc;
@@ -240,14 +235,14 @@ void VCXYPad_Test::loadXML()
     QDomElement foobar = xmldoc.createElement("Foobar");
     root.appendChild(foobar);
 
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    VCXYPad pad(&w, m_doc);
     QVERIFY(pad.loadXML(&root) == true);
     QCOMPARE(pad.m_fixtures.size(), 2);
     QCOMPARE(pad.pos(), QPoint(3, 4));
     QCOMPARE(pad.size(), QSize(42, 69));
     QCOMPARE(pad.m_area->position(), QPoint(10, 20));
 
-    VCXYPadFixture fixture(&doc);
+    VCXYPadFixture fixture(m_doc);
     fixture.setFixture(69);
     QVERIFY(pad.m_fixtures.contains(fixture) == true);
     fixture.setFixture(50);
@@ -259,13 +254,9 @@ void VCXYPad_Test::loadXML()
 
 void VCXYPad_Test::saveXML()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     QWidget w;
 
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    VCXYPad pad(&w, m_doc);
     pad.show();
     w.show();
     pad.setCaption("MyPad");
@@ -277,11 +268,11 @@ void VCXYPad_Test::saveXML()
     QCOMPARE(pad.m_area->position(), QPoint(23, 45));
     QCOMPARE(pad.m_area->position(), QPoint(23, 45));
 
-    VCXYPadFixture fixture1(&doc);
+    VCXYPadFixture fixture1(m_doc);
     fixture1.setFixture(11);
     pad.appendFixture(fixture1);
 
-    VCXYPadFixture fixture2(&doc);
+    VCXYPadFixture fixture2(m_doc);
     fixture2.setFixture(22);
     pad.appendFixture(fixture2);
 
@@ -351,53 +342,49 @@ void VCXYPad_Test::saveXML()
 
 void VCXYPad_Test::modeChange()
 {
-    Doc doc(this, m_cache);
-    OutputMap om(this, 4);
-    InputMap im(this, 4);
-    MasterTimer mt(this, &om);
     UniverseArray ua(512);
     QWidget w;
 
-    Fixture* fxi = new Fixture(&doc);
-    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    Fixture* fxi = new Fixture(m_doc);
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->modes().first();
     QVERIFY(mode != NULL);
     fxi->setFixtureDefinition(def, mode);
-    doc.addFixture(fxi);
+    m_doc->addFixture(fxi);
 
-    VCXYPad pad(&w, &doc, &om, &im, &mt);
+    VCXYPad pad(&w, m_doc);
     pad.show();
     w.show();
     pad.resize(QSize(200, 200));
 
-    VCXYPadFixture xy(&doc);
+    VCXYPadFixture xy(m_doc);
     xy.setFixture(fxi->id());
     pad.appendFixture(xy);
     QCOMPARE(pad.fixtures().size(), 1);
     QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
     QCOMPARE(pad.fixtures()[0].m_xLSB, QLCChannel::invalid());
 
-    doc.setMode(Doc::Operate);
+    m_doc->setMode(Doc::Operate);
     QVERIFY(pad.fixtures()[0].m_xMSB != QLCChannel::invalid());
     QVERIFY(pad.fixtures()[0].m_yMSB != QLCChannel::invalid());
-    QCOMPARE(mt.m_dmxSourceList.size(), 1);
-    QCOMPARE(mt.m_dmxSourceList[0], &pad);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 1);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList[0], &pad);
 
     pad.m_area->setPosition(QPoint(pad.m_area->width(), pad.m_area->height()));
-    pad.writeDMX(&mt, &ua);
+    pad.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(ua.preGMValues()[0], char(255));
     QCOMPARE(ua.preGMValues()[1], char(255));
 
     pad.m_area->setPosition(QPoint(pad.m_area->width() / 2, pad.m_area->height() / 4));
-    pad.writeDMX(&mt, &ua);
+    pad.writeDMX(m_doc->masterTimer(), &ua);
     QCOMPARE(ua.preGMValues()[0], char(128));
     QCOMPARE(ua.preGMValues()[1], char(64));
 
-    doc.setMode(Doc::Design);
+    m_doc->setMode(Doc::Design);
     QCOMPARE(pad.fixtures()[0].m_xMSB, QLCChannel::invalid());
     QCOMPARE(pad.fixtures()[0].m_yMSB, QLCChannel::invalid());
-    QCOMPARE(mt.m_dmxSourceList.size(), 0);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
 }
 
 QTEST_MAIN(VCXYPad_Test)

@@ -91,15 +91,6 @@ public:
         always number zero, so these are not DMX channels) */
     ConsoleChannel* channel(quint32 ch);
 
-protected slots:
-    /** Slot that captures individual channel value changes */
-    void slotValueChanged(quint32 channel, uchar value, bool enabled);
-
-signals:
-    /** Signal telling one of this console's channels has changed value */
-    void valueChanged(quint32 fxi, quint32 channel, uchar value,
-                      bool enabled);
-
 protected:
     bool m_channelsCheckable;
     QList<ConsoleChannel*> m_channels;

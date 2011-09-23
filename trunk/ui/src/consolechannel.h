@@ -115,10 +115,6 @@ public slots:
     /** Slider value was changed */
     void slotValueChange(int value);
 
-signals:
-    /** Slider value has changed */
-    void valueChanged(quint32 channel, uchar value, bool enabled);
-
 protected:
     uchar m_value;
     bool m_valueChanged;
@@ -148,10 +144,6 @@ public:
 
     /** Set, whether the channel can be manually checked/enabled */
     void setCheckable(bool checkable);
-
-protected slots:
-    /** This channel was checked/unchecked */
-    void slotToggled(bool state);
 
     /*********************************************************************
      * Widgets

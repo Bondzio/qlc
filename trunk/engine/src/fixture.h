@@ -55,18 +55,18 @@ class Fixture : public QObject
      * Initialization
      *********************************************************************/
 public:
-    /**
-     * Create a new fixture instance with the given QObject parent.
-     */
+    /** Create a new fixture instance with the given QObject parent. */
     Fixture(QObject* parent);
 
-    /**
-     * Destructor
-     */
+    /** Destructor */
     ~Fixture();
 
     /** Less-than operator for qSort() */
     bool operator<(const Fixture& fxi);
+
+signals:
+    /** Emitted whenever a Fixture property is changed */
+    void changed(quint32);
 
     /*********************************************************************
      * Fixture ID
@@ -326,7 +326,7 @@ public:
      * @param doc The master XML document to save to.
      * @param wksp_root The workspace root element
      */
-    bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
+    bool saveXML(QDomDocument* doc, QDomElement* wksp_root) const;
 
     /*********************************************************************
      * Status
@@ -337,13 +337,7 @@ public:
      *
      * @return A sort-of HTML-RTF-gibberish for Fixture Manager
      */
-    QString status();
-
-    /*********************************************************************
-     * Signals
-     *********************************************************************/
-signals:
-    void changed(quint32);
+    QString status() const;
 };
 
 #endif

@@ -486,7 +486,7 @@ bool Fixture::loadXML(const QDomElement* root,
     return true;
 }
 
-bool Fixture::saveXML(QDomDocument* doc, QDomElement* wksp_root)
+bool Fixture::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
 {
     QDomElement root;
     QDomElement tag;
@@ -573,7 +573,7 @@ bool Fixture::saveXML(QDomDocument* doc, QDomElement* wksp_root)
  * Status
  *****************************************************************************/
 
-QString Fixture::status()
+QString Fixture::status() const
 {
     QString info;
     QString t;

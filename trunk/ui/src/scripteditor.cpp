@@ -53,7 +53,9 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
     m_document = new QTextDocument(m_script->data(), this);
     m_editor->setDocument(m_document);
     connect(m_document, SIGNAL(undoAvailable(bool)), m_undoButton, SLOT(setEnabled(bool)));
-    m_document->clearUndoRedoStacks();
+    m_document->setUndoRedoEnabled(false);
+    m_document->setUndoRedoEnabled(true);
+    // m_document->clearUndoRedoStacks(); // Not present in Qt 4.6
 }
 
 ScriptEditor::~ScriptEditor()

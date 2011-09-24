@@ -537,7 +537,7 @@ void Scene_Test::flashUnflash()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
     QVERIFY(mts->m_dmxSourceList.size() == 0);
 
     s1->flash(mts);
@@ -605,7 +605,7 @@ void Scene_Test::writeHTPBusZero()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     mts->startFunction(s1, false);
     s1->write(mts, &uni);
@@ -651,7 +651,7 @@ void Scene_Test::writeHTPBusOne()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -720,7 +720,7 @@ void Scene_Test::writeLTPHTPBusZero()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -789,7 +789,7 @@ void Scene_Test::writeLTPBusOne()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -860,7 +860,7 @@ void Scene_Test::writeLTPReady()
     s1->arm();
 
     UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);

@@ -794,6 +794,10 @@ GenericFader* Script::fader()
 {
     // Create a fader if it doesn't exist yet
     if (m_fader == NULL)
-        m_fader = new GenericFader;
+    {
+        Doc* doc = qobject_cast<Doc*> (parent());
+        Q_ASSERT(doc != NULL);
+        m_fader = new GenericFader(doc);
+    }
     return m_fader;
 }

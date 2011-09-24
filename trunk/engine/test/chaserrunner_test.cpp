@@ -628,7 +628,7 @@ void ChaserRunner_Test::writeNoSteps()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     QVERIFY(cr.write(&timer, &ua) == false);
 }
@@ -641,7 +641,7 @@ void ChaserRunner_Test::writeMissingFixture()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultFade(), 5);
     Bus::instance()->setValue(Bus::defaultHold(), 5);
@@ -657,7 +657,7 @@ void ChaserRunner_Test::writeHoldZero()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 0);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -720,7 +720,7 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -841,7 +841,7 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Backward,
                     Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -962,7 +962,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1027,7 +1027,7 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
                     Function::Loop);
     cr.setAutoStep(false);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1111,7 +1111,7 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
                     Function::Loop);
     cr.setAutoStep(false);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1218,7 +1218,7 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward,
                     Function::SingleShot);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
     Bus::instance()->setValue(Bus::defaultFade(), 0);
@@ -1315,7 +1315,7 @@ void ChaserRunner_Test::postRun()
 
     ChaserRunner cr(m_doc, steps, Bus::defaultHold(), Function::Forward, Function::Loop);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 0);
     Bus::instance()->setValue(Bus::defaultFade(), 0);

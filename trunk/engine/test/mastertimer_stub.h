@@ -37,8 +37,7 @@ class MasterTimerStub : public MasterTimer
     Q_OBJECT
 
 public:
-    MasterTimerStub(QObject* parent, OutputMap* outputMap,
-                    UniverseArray& universes);
+    MasterTimerStub(Doc* doc, UniverseArray& universes);
     ~MasterTimerStub();
 
     void startFunction(Function* function, bool initiatedByOtherFunction);

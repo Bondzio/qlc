@@ -24,14 +24,21 @@
 
 #include <QObject>
 
+class Doc;
 class GenericFader_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase();
+    void init();
+    void cleanup();
+
     void addRemove();
     void write();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

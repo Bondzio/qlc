@@ -31,6 +31,7 @@ class GenericFader;
 class OutputMap;
 class DMXSource;
 class Function;
+class Doc;
 
 class MasterTimer : public QThread
 {
@@ -45,10 +46,9 @@ public:
      * Create a new MasterTimer instance. MasterTimer takes care of running
      * functions and driving internal DMX universe dumping to output plugins.
      *
-     * @param parent The parent that owns this instance
-     * @param outputMap An OutputMap instance used to write function values
+     * @param parent The parent Doc that owns the instance
      */
-    MasterTimer(QObject* parent, OutputMap* outputMap);
+    MasterTimer(Doc* doc);
 
     /** Destroy a MasterTimer instance */
     virtual ~MasterTimer();
@@ -56,12 +56,8 @@ public:
     /** Get the timer tick frequency in Hertz */
     static quint32 frequency();
 
-    /** Get the output map object that MasterTimer uses for DMX output */
-    OutputMap* outputMap() const;
-
 protected:
     /** An OutputMap instance that routes all values to correct plugins. */
-    OutputMap* m_outputMap;
     static const quint32 s_frequency;
 
     /*********************************************************************

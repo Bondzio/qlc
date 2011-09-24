@@ -758,7 +758,7 @@ void Chaser_Test::preRun()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     c->arm();
     c->m_runner->m_elapsed = 31337;
@@ -780,7 +780,7 @@ void Chaser_Test::write()
     c->addStep(s1->id());
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     c->arm();
     c->preRun(&timer);
@@ -804,7 +804,7 @@ void Chaser_Test::postRun()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     c->arm();
     c->preRun(&timer);
@@ -823,7 +823,7 @@ void Chaser_Test::adjustIntensity()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     c->arm();
     c->adjustIntensity(0.5);

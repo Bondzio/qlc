@@ -933,7 +933,7 @@ void EFX::arm()
     }
 
     Q_ASSERT(m_fader == NULL);
-    m_fader = new GenericFader;
+    m_fader = new GenericFader(doc);
 
     resetElapsed();
 }

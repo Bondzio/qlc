@@ -25,10 +25,13 @@
 #include "universearray.h"
 #include "genericfader.h"
 #include "fadechannel.h"
+#include "doc.h"
 
-GenericFader::GenericFader()
+GenericFader::GenericFader(Doc* doc)
     : m_intensity(1)
+    , m_doc(doc)
 {
+    Q_ASSERT(doc != NULL);
 }
 
 GenericFader::~GenericFader()

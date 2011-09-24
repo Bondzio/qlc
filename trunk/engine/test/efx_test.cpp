@@ -2368,7 +2368,7 @@ void EFX_Test::disarm()
 void EFX_Test::preRun()
 {
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    MasterTimerStub timer(m_doc, ua);
 
     EFX* e = new EFX(m_doc);
     e->setName("Test EFX");

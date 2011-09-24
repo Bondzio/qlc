@@ -26,9 +26,8 @@
  * MasterTimer Stub
  ****************************************************************************/
 
-MasterTimerStub::MasterTimerStub(QObject* parent, OutputMap* outputMap,
-                                 UniverseArray& universes)
-    : MasterTimer(parent, outputMap)
+MasterTimerStub::MasterTimerStub(Doc* doc, UniverseArray& universes)
+    : MasterTimer(doc)
     , m_universes(universes)
 {
 }

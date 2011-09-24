@@ -26,11 +26,12 @@
 
 class UniverseArray;
 class FadeChannel;
+class Doc;
 
 class GenericFader
 {
 public:
-    GenericFader();
+    GenericFader(Doc* doc);
     ~GenericFader();
 
     /**
@@ -81,6 +82,7 @@ public:
 private:
     QHash <quint32,FadeChannel> m_channels;
     qreal m_intensity;
+    Doc* m_doc;
 };
 
 #endif

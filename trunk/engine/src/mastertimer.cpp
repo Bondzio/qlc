@@ -41,6 +41,7 @@
 #include "outputmap.h"
 #include "dmxsource.h"
 #include "function.h"
+#include "doc.h"
 
 /** The timer tick frequency in Hertz */
 const quint32 MasterTimer::s_frequency = 50;
@@ -49,13 +50,12 @@ const quint32 MasterTimer::s_frequency = 50;
  * Initialization
  *****************************************************************************/
 
-MasterTimer::MasterTimer(QObject* parent, OutputMap* outputMap)
-    : QThread(parent)
-    , m_outputMap(outputMap)
+MasterTimer::MasterTimer(Doc* doc) : QThread(doc)
     , m_stopAllFunctions(false)
-    , m_fader(new GenericFader)
+    , m_fader(new GenericFader(doc))
     , m_running(false)
 {
+    Q_ASSERT(doc != NULL);
 }
 
 MasterTimer::~MasterTimer()
@@ -70,11 +70,6 @@ MasterTimer::~MasterTimer()
 quint32 MasterTimer::frequency()
 {
     return s_frequency;
-}
-
-OutputMap* MasterTimer::outputMap() const
-{
-    return m_outputMap;
 }
 
 /*****************************************************************************
@@ -280,15 +275,18 @@ void MasterTimer::run()
 
 void MasterTimer::timerTick()
 {
-    UniverseArray* universes = m_outputMap->claimUniverses();
+    Doc* doc = qobject_cast<Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    UniverseArray* universes = doc->outputMap()->claimUniverses();
     universes->zeroIntensityChannels();
 
     runFunctions(universes);
     runDMXSources(universes);
     runFader(universes);
 
-    m_outputMap->releaseUniverses();
-    m_outputMap->dumpUniverses();
+    doc->outputMap()->releaseUniverses();
+    doc->outputMap()->dumpUniverses();
 }
 
 void MasterTimer::runFunctions(UniverseArray* universes)

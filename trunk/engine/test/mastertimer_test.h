@@ -24,10 +24,7 @@
 
 #include <QObject>
 
-class OutputMapStub;
-class UniverseArray;
 class Doc;
-
 class MasterTimer_Test : public QObject
 {
     Q_OBJECT
@@ -48,9 +45,7 @@ private slots:
     void stop();
     void restart();
 
-protected:
-    OutputMapStub* m_oms;
-    UniverseArray* m_ua;
+private:
     Doc* m_doc;
 };
 

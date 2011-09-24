@@ -26,6 +26,7 @@
 #include "fadechannel.h"
 #include "qlcchannel.h"
 #include "bus.h"
+#include "doc.h"
 
 #define private public
 #include "genericfader.h"
@@ -33,12 +34,24 @@
 
 void GenericFader_Test::initTestCase()
 {
+    m_doc = NULL;
     Bus::init(this);
+}
+
+void GenericFader_Test::init()
+{
+    m_doc = new Doc(this);
+}
+
+void GenericFader_Test::cleanup()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void GenericFader_Test::addRemove()
 {
-    GenericFader fader;
+    GenericFader fader(m_doc);
 
     QCOMPARE(fader.m_channels.count(), 0);
     QVERIFY(fader.m_channels.contains(15) == false);
@@ -94,7 +107,7 @@ void GenericFader_Test::addRemove()
 void GenericFader_Test::write()
 {
     UniverseArray ua(512);
-    GenericFader fader;
+    GenericFader fader(m_doc);
 
     Bus::instance()->setValue(Bus::defaultFade(), 255);
 

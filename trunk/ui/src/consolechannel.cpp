@@ -105,7 +105,6 @@ ConsoleChannel::~ConsoleChannel()
 void ConsoleChannel::init()
 {
     setCheckable(true);
-    connect(this, SIGNAL(toggled(bool)), this, SLOT(slotToggled(bool)));
 
     new QVBoxLayout(this);
     layout()->setAlignment(Qt::AlignHCenter);

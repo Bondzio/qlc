@@ -95,6 +95,8 @@ QString EnttecDMXUSBOpen::additionalInfo() const
     QString gran;
 
     info += QString("<P>");
+    info += QString("<B>%1:</B> %2").arg(tr("Protocol")).arg("Enttec Open DMX USB");
+    info += QString("<BR>");
     info += QString("<B>%1:</B> %2Hz").arg(tr("DMX Frame Frequency"))
                                       .arg(m_frequency);
     info += QString("<BR>");

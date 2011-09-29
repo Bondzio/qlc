@@ -70,6 +70,9 @@ public:
     /** @reimp */
     QString uniqueName() const;
 
+    /** @reimp */
+    QString additionalInfo() const;
+
 protected:
     /** Extract the widget's unique serial number (printed on the bottom) */
     bool extractSerial();

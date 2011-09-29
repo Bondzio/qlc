@@ -73,6 +73,17 @@ QString EnttecDMXUSBPro::uniqueName() const
         return QString("%1 (S/N: %2)").arg(name()).arg(m_proSerial);
 }
 
+QString EnttecDMXUSBPro::additionalInfo() const
+{
+    QString info;
+
+    info += QString("<P>");
+    info += QString("<B>%1:</B> %2").arg(tr("Protocol")).arg("Enttec DMX USB Pro");
+    info += QString("</P>");
+
+    return info;
+}
+
 bool EnttecDMXUSBPro::extractSerial()
 {
     QByteArray request;

@@ -66,17 +66,15 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
                              name, sizeof(name),
                              serial, sizeof(serial));
 
-        /* Yes, this is hard-coding... */
-        if (QString(name).toLower().contains("pro") == true ||
-            QString(name).toLower().contains("dmxking") == true)
+        if (QString(vendor).toUpper().contains("FTDI") == true)
         {
-            /* This is a DMX USB Pro widget */
-            widgetList << new EnttecDMXUSBPro(serial, name, i);
+            /* This is probably an Open DMX USB widget */
+            widgetList << new EnttecDMXUSBOpen(serial, name, i);
         }
         else
         {
-            /* This is an Open DMX USB widget */
-            widgetList << new EnttecDMXUSBOpen(serial, name, i);
+            /* This is probably a DMX USB Pro widget */
+            widgetList << new EnttecDMXUSBPro(serial, name, i);
         }
 
         list = list->next;

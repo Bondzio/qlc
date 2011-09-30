@@ -78,14 +78,14 @@ public:
     void pipe_closed();
 
 protected:
-    bool setup_client(ola::network::ConnectedSocket *socket);
+    bool setup_client(ola::network::ConnectedDescriptor *descriptor);
     bool m_init_run;
     ola::network::SelectServer *m_ss; // the select server
 
 private:
     virtual bool init() = 0;
     virtual void cleanup() {};
-    ola::network::LoopbackSocket *m_pipe; // the pipe to get new dmx data on
+    ola::network::LoopbackDescriptor *m_pipe; // the pipe to get new dmx data on
     ola::OlaClient *m_client;
     dmx_data m_data;
     ola::DmxBuffer m_buffer;
@@ -124,7 +124,7 @@ private:
     bool init();
     void cleanup();
     ola::OlaDaemon *m_daemon;
-    ola::network::PipeSocket *m_pipe_socket;
+    ola::network::PipeDescriptor *m_pipe_socket;
 };
 
 #endif

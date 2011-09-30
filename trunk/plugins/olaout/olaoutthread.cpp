@@ -21,7 +21,6 @@
 */
 
 #include <QDebug>
-//#include <ola/Closure.h>
 #include <ola/Callback.h>
 #include "olaoutthread.h"
 
@@ -58,12 +57,12 @@ bool OlaOutThread::start(Priority priority)
     if (!m_pipe)
     {
         // setup the pipe to recv dmx data on
-        m_pipe = new ola::network::LoopbackSocket();
+        m_pipe = new ola::network::LoopbackDescriptor();
         m_pipe->Init();
 
         m_pipe->SetOnData(ola::NewCallback(this, &OlaOutThread::new_pipe_data));
         m_pipe->SetOnClose(ola::NewSingleCallback(this, &OlaOutThread::pipe_closed));
-        m_ss->AddSocket(m_pipe);
+        m_ss->AddReadDescriptor(m_pipe);
     }
 
     QThread::start(priority);
@@ -140,10 +139,10 @@ void OlaOutThread::new_pipe_data() {
  * Setup the OlaClient to communicate with the server.
  * @return true if the setup worked corectly.
  */
-bool OlaOutThread::setup_client(ola::network::ConnectedSocket *socket) {
+bool OlaOutThread::setup_client(ola::network::ConnectedDescriptor *descriptor) {
     if (!m_client)
     {
-        m_client = new ola::OlaClient(socket);
+        m_client = new ola::OlaClient(descriptor);
         if (!m_client->Setup())
         {
             qWarning() << "olaout: client setup failed";
@@ -151,7 +150,7 @@ bool OlaOutThread::setup_client(ola::network::ConnectedSocket *socket) {
             m_client = NULL;
             return false;
         }
-        m_ss->AddSocket(socket);
+        m_ss->AddReadDescriptor(descriptor);
     }
     return true;
 }
@@ -164,7 +163,7 @@ void OlaStandaloneClient::cleanup() {
     if (m_tcp_socket)
     {
         if (m_ss)
-            m_ss->RemoveSocket(m_tcp_socket);
+            m_ss->RemoveReadDescriptor(m_tcp_socket);
         delete m_tcp_socket;
         m_tcp_socket = NULL;
     }
@@ -253,7 +252,7 @@ bool OlaEmbeddedServer::init()
     // setup the pipe socket used to communicate with the OlaServer
     if (!m_pipe_socket)
     {
-        m_pipe_socket = new ola::network::PipeSocket();
+        m_pipe_socket = new ola::network::PipeDescriptor();
         if (!m_pipe_socket->Init())
         {
             qWarning() << "olaout: pipe failed";

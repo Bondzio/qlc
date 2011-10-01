@@ -211,11 +211,7 @@ bool Collection::loadXML(const QDomElement* root)
     return true;
 }
 
-/*****************************************************************************
- * Running
- *****************************************************************************/
-
-void Collection::arm()
+void Collection::postLoad()
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
@@ -233,9 +229,9 @@ void Collection::arm()
     resetElapsed();
 }
 
-void Collection::disarm()
-{
-}
+/*****************************************************************************
+ * Running
+ *****************************************************************************/
 
 void Collection::preRun(MasterTimer* timer)
 {

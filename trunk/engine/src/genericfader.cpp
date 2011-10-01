@@ -40,14 +40,16 @@ GenericFader::~GenericFader()
 
 void GenericFader::add(const FadeChannel& ch)
 {
-    if (m_channels.contains(ch.address()) == true)
+    quint32 addr = ch.address(m_doc);
+
+    if (m_channels.contains(addr) == true)
     {
-        if (m_channels[ch.address()].current() < ch.current())
-            m_channels[ch.address()] = ch;
+        if (m_channels[addr].current() < ch.current())
+            m_channels[addr] = ch;
     }
     else
     {
-        m_channels[ch.address()] = ch;
+        m_channels[addr] = ch;
     }
 }
 
@@ -55,6 +57,11 @@ void GenericFader::remove(quint32 address)
 {
     if (m_channels.contains(address) == true)
         m_channels.remove(address);
+}
+
+void GenericFader::remove(const FadeChannel& fc)
+{
+    remove(fc.address(m_doc));
 }
 
 void GenericFader::removeAll()
@@ -75,27 +82,27 @@ void GenericFader::write(UniverseArray* ua)
         FadeChannel& fc(it.next().value());
         if (fc.elapsed() >= fc.fadeTime())
         {
-            if (fc.group() == QLCChannel::Intensity || fc.isReady() == false)
+            if (fc.group(m_doc) == QLCChannel::Intensity || fc.isReady() == false)
             {
                 fc.setReady(true);
                 uchar value = uchar(floor((qreal(fc.target()) * intensity()) + 0.5));
-                ua->write(fc.address(), value, fc.group());
+                ua->write(fc.address(m_doc), value, fc.group(m_doc));
 
                 // Remove all channels that reach zero
                 if (fc.target() == 0 && fc.current() == 0)
-                    remove(fc.address());
+                    remove(fc.address(m_doc));
             }
             else
             {
                 // After an LTP channel becomes ready, its value is no longer written.
                 // Remove it from the fader.
-                remove(fc.address());
+                remove(fc.address(m_doc));
             }
         }
         else
         {
             uchar value = uchar(floor((qreal(fc.current()) * intensity()) + 0.5));
-            ua->write(fc.address(), value, fc.group());
+            ua->write(fc.address(m_doc), value, fc.group(m_doc));
             fc.nextStep();
         }
     }

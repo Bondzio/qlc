@@ -215,6 +215,11 @@ void Fixture_Test::fixtureDef()
     QVERIFY(fxi.fixtureMode() == NULL);
     QVERIFY(fxi.channels() == 0);
     QVERIFY(fxi.channel(0) == NULL);
+    QCOMPARE(fxi.panMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(fxi.tiltMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(fxi.panLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(fxi.tiltLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(fxi.masterIntensityChannel(), QLCChannel::invalid());
 
     const QLCFixtureDef* fixtureDef;
     fixtureDef = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC250+");
@@ -225,7 +230,7 @@ void Fixture_Test::fixtureDef()
     QVERIFY(fxi.fixtureMode() == NULL);
 
     const QLCFixtureMode* fixtureMode;
-    fixtureMode = fixtureDef->modes().at(0);
+    fixtureMode = fixtureDef->modes().last();
     Q_ASSERT(fixtureMode != NULL);
 
     fxi.setFixtureDefinition(NULL, fixtureMode);
@@ -254,6 +259,12 @@ void Fixture_Test::fixtureDef()
     ch = fxi.channel(fxi.channel("otati"));
     QVERIFY(ch != NULL);
     QVERIFY(ch->name().toLower() == "gobo rotation");
+
+    QCOMPARE(fxi.panMsbChannel(), quint32(7));
+    QCOMPARE(fxi.tiltMsbChannel(), quint32(9));
+    QCOMPARE(fxi.panLsbChannel(), quint32(8));
+    QCOMPARE(fxi.tiltLsbChannel(), quint32(10));
+    QCOMPARE(fxi.masterIntensityChannel(), quint32(1));
 }
 
 void Fixture_Test::channels()

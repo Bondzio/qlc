@@ -22,11 +22,13 @@
 #include <QDebug>
 
 #include "fadechannel.h"
+#include "qlcchannel.h"
+#include "fixture.h"
 #include "bus.h"
 
 FadeChannel::FadeChannel()
-    : m_address(0)
-    , m_group(QLCChannel::NoGroup)
+    : m_fixture(Fixture::invalidId())
+    , m_channel(QLCChannel::invalid())
     , m_start(0)
     , m_target(0)
     , m_current(0)
@@ -39,8 +41,8 @@ FadeChannel::FadeChannel()
 }
 
 FadeChannel::FadeChannel(const FadeChannel& ch)
-    : m_address(ch.m_address)
-    , m_group(ch.m_group)
+    : m_fixture(ch.m_fixture)
+    , m_channel(ch.m_channel)
     , m_start(ch.m_start)
     , m_target(ch.m_target)
     , m_current(ch.m_current)
@@ -58,27 +60,46 @@ FadeChannel::~FadeChannel()
 
 bool FadeChannel::operator==(const FadeChannel& ch)
 {
-    return (m_address == ch.m_address);
+    return (m_fixture == ch.m_fixture && m_channel == ch.m_channel);
 }
 
-void FadeChannel::setAddress(quint32 addr)
+void FadeChannel::setFixture(quint32 id)
 {
-    m_address = addr;
+    m_fixture = id;
 }
 
-quint32 FadeChannel::address() const
+quint32 FadeChannel::fixture() const
 {
-    return m_address;
+    return m_fixture;
 }
 
-void FadeChannel::setGroup(QLCChannel::Group grp)
+void FadeChannel::setChannel(quint32 num)
 {
-    m_group = grp;
+    m_channel = num;
 }
 
-QLCChannel::Group FadeChannel::group() const
+quint32 FadeChannel::channel() const
 {
-    return m_group;
+    return m_channel;
+}
+
+quint32 FadeChannel::address(const Doc* doc) const
+{
+    Fixture* fxi = doc->fixture(fixture());
+    if (fxi == NULL)
+        return QLCChannel::invalid();
+    return (fxi->universeAddress() + channel());
+}
+
+QLCChannel::Group FadeChannel::group(const Doc* doc) const
+{
+    Fixture* fxi = doc->fixture(fixture());
+    if (fxi == NULL)
+        return QLCChannel::Intensity;
+    const QLCChannel* ch = fxi->channel(channel());
+    if (ch == NULL)
+        return QLCChannel::Intensity;
+    return ch->group();
 }
 
 void FadeChannel::setStart(uchar value)

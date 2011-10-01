@@ -34,6 +34,7 @@ class ChaserRunner_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
     void cleanup();
 

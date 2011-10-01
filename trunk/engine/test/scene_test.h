@@ -31,6 +31,7 @@ class Scene_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
     void cleanup();
 
@@ -44,9 +45,7 @@ private slots:
     void copyFrom();
     void createCopy();
 
-    void arm();
-    void armMissingFixture();
-    void armTooManyChannels();
+    void preRunPostRun();
 
     void flashUnflash();
 

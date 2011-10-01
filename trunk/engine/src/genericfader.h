@@ -53,6 +53,9 @@ public:
      */
     void remove(quint32 address);
 
+    /** Remove a channel whose fixture & channel match with $fc's */
+    void remove(const FadeChannel& fc);
+
     /**
      * Remove all channels.
      */

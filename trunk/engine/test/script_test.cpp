@@ -58,10 +58,7 @@ void Script_Test::initial()
 
     Script scr(&doc);
     scr.setData(script0);
-    scr.arm();
 
     for (int i = 0; i < 9; i++)
         scr.executeCommand(i, doc.masterTimer(), &ua);
-
-    scr.disarm();
 }

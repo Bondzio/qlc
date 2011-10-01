@@ -31,18 +31,21 @@ class EFXFixture_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
     void cleanup();
 
     void initial();
     void copyFrom();
     void publicProperties();
+
     void loadSuccess();
     void loadWrongRoot();
     void loadWrongDirection();
     void loadExtraTag();
     void save();
-    void protectedProperties();
+
+    void serialNumber();
     void updateSkipThreshold();
     void isValid();
     void reset();

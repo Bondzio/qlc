@@ -41,12 +41,8 @@
 
 void Scene_Test::initTestCase()
 {
-    m_doc = NULL;
     Bus::init(this);
-}
 
-void Scene_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -55,10 +51,18 @@ void Scene_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
-void Scene_Test::cleanup()
+void Scene_Test::cleanupTestCase()
 {
     delete m_doc;
-    m_doc = NULL;
+}
+
+void Scene_Test::init()
+{
+}
+
+void Scene_Test::cleanup()
+{
+    m_doc->clearContents();
 }
 
 void Scene_Test::initial()
@@ -379,9 +383,11 @@ void Scene_Test::createCopy()
     QVERIFY(copy->value(7, 8) == 9);
 }
 
-void Scene_Test::arm()
+void Scene_Test::preRunPostRun()
 {
     Doc* doc = new Doc(this);
+    UniverseArray ua(512);
+    MasterTimerStub timer(m_doc, ua);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setName("Test Fixture");
@@ -398,121 +404,31 @@ void Scene_Test::arm()
     doc->addFunction(s1);
 
     QVERIFY(s1->m_armedChannels.size() == 0);
-    s1->arm();
+    s1->preRun(&timer);
     QVERIFY(s1->m_armedChannels.size() == 3);
 
     FadeChannel ch;
     ch = s1->m_armedChannels.at(0);
-    QVERIFY(ch.address() == fxi->universeAddress());
+    QCOMPARE(ch.address(doc), fxi->universeAddress());
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 123);
 
     ch = s1->m_armedChannels.at(1);
-    QVERIFY(ch.address() == fxi->universeAddress() + 3);
+    QCOMPARE(ch.address(doc), fxi->universeAddress() + 3);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 67);
 
     ch = s1->m_armedChannels.at(2);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
+    QCOMPARE(ch.address(doc), fxi->universeAddress() + 7);
     QVERIFY(ch.start() == 0);
     QVERIFY(ch.current() == 0);
     QVERIFY(ch.target() == 45);
 
-    s1->disarm();
+    s1->postRun(&timer, &ua);
     QVERIFY(s1->m_armedChannels.size() == 0);
     QVERIFY(s1->values().size() == 3);
-
-    delete doc;
-}
-
-void Scene_Test::armMissingFixture()
-{
-    Doc* doc = new Doc(this);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setName("Test Fixture");
-    fxi->setAddress(15);
-    fxi->setUniverse(3);
-    fxi->setChannels(10);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("First");
-    s1->setValue(fxi->id(), 7, 45);
-    s1->setValue(fxi->id() + 5, 9, 123); // Missing fixture
-    s1->setValue(fxi->id(), 3, 67);
-    doc->addFunction(s1);
-
-    QVERIFY(s1->m_armedChannels.size() == 0);
-    QVERIFY(s1->values().size() == 3);
-    s1->arm();
-    QVERIFY(s1->m_armedChannels.size() == 2);
-    QVERIFY(s1->values().size() == 2); // The channel is removed
-
-    FadeChannel ch;
-
-    ch = s1->m_armedChannels.at(0);
-    QVERIFY(ch.address() == fxi->universeAddress() + 3);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 67);
-
-    ch = s1->m_armedChannels.at(1);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 45);
-
-    s1->disarm();
-    QVERIFY(s1->m_armedChannels.size() == 0);
-    QVERIFY(s1->values().size() == 2);
-
-    delete doc;
-}
-
-void Scene_Test::armTooManyChannels()
-{
-    Doc* doc = new Doc(this);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setName("Test Fixture");
-    fxi->setAddress(15);
-    fxi->setUniverse(3);
-    fxi->setChannels(10);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("First");
-    s1->setValue(fxi->id(), 10, 123); // Channels 0 - 9 are valid
-    s1->setValue(fxi->id(), 7, 45);
-    s1->setValue(fxi->id(), 3, 67);
-    doc->addFunction(s1);
-
-    QVERIFY(s1->m_armedChannels.size() == 0);
-    QVERIFY(s1->values().size() == 3);
-    s1->arm();
-    QVERIFY(s1->m_armedChannels.size() == 2);
-    QVERIFY(s1->values().size() == 2); // The channel is removed
-
-    FadeChannel ch;
-
-    ch = s1->m_armedChannels.at(0);
-    QVERIFY(ch.address() == fxi->universeAddress() + 3);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 67);
-
-    ch = s1->m_armedChannels.at(1);
-    QVERIFY(ch.address() == fxi->universeAddress() + 7);
-    QVERIFY(ch.start() == 0);
-    QVERIFY(ch.current() == 0);
-    QVERIFY(ch.target() == 45);
-
-    s1->disarm();
-    QVERIFY(s1->m_armedChannels.size() == 0);
-    QVERIFY(s1->values().size() == 2);
 
     delete doc;
 }
@@ -520,6 +436,8 @@ void Scene_Test::armTooManyChannels()
 void Scene_Test::flashUnflash()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Fixture* fxi = new Fixture(doc);
     fxi->setAddress(0);
@@ -534,10 +452,6 @@ void Scene_Test::flashUnflash()
     s1->setValue(fxi->id(), 2, 67);
     doc->addFunction(s1);
 
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
     QVERIFY(mts->m_dmxSourceList.size() == 0);
 
     s1->flash(mts);
@@ -577,8 +491,6 @@ void Scene_Test::flashUnflash()
     QVERIFY(uni.preGMValues()[1] == char(0));
     QVERIFY(uni.preGMValues()[2] == char(0));
 
-    s1->disarm();
-
     delete doc;
 }
 
@@ -586,6 +498,8 @@ void Scene_Test::flashUnflash()
 void Scene_Test::writeHTPBusZero()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 0);
 
@@ -602,10 +516,7 @@ void Scene_Test::writeHTPBusZero()
     s1->setValue(fxi->id(), 2, 0);
     doc->addFunction(s1);
 
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
+    s1->preRun(mts);
 
     mts->startFunction(s1, false);
     s1->write(mts, &uni);
@@ -622,7 +533,7 @@ void Scene_Test::writeHTPBusZero()
     QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
-    s1->disarm();
+    s1->postRun(mts, &uni);
 
     delete mts;
     delete doc;
@@ -632,6 +543,8 @@ void Scene_Test::writeHTPBusZero()
 void Scene_Test::writeHTPBusOne()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -647,11 +560,6 @@ void Scene_Test::writeHTPBusOne()
     s1->setValue(fxi->id(), 1, 127);
     s1->setValue(fxi->id(), 2, 0);
     doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -685,8 +593,6 @@ void Scene_Test::writeHTPBusOne()
     QVERIFY(uni.preGMValues()[1] == (char) 0);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
-    s1->disarm();
-
     delete mts;
     delete doc;
 }
@@ -694,6 +600,8 @@ void Scene_Test::writeHTPBusOne()
 void Scene_Test::writeLTPHTPBusZero()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -717,11 +625,6 @@ void Scene_Test::writeLTPHTPBusZero()
     s1->setValue(fxi->id(), 5, 0);
     doc->addFunction(s1);
 
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
-
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
     QVERIFY(s1->stopped() == false);
@@ -754,8 +657,6 @@ void Scene_Test::writeLTPHTPBusZero()
     QVERIFY(uni.preGMValues()[1] == (char) 127);
     QVERIFY(uni.preGMValues()[2] == (char) 0);
 
-    s1->disarm();
-
     delete mts;
     delete doc;
 }
@@ -763,6 +664,8 @@ void Scene_Test::writeLTPHTPBusZero()
 void Scene_Test::writeLTPBusOne()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -785,11 +688,6 @@ void Scene_Test::writeLTPBusOne()
     s1->setValue(fxi->id(), 1, UCHAR_MAX);
     s1->setValue(fxi->id(), 2, UCHAR_MAX);
     doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -825,8 +723,6 @@ void Scene_Test::writeLTPBusOne()
 
     uni.zeroIntensityChannels();
 
-    s1->disarm();
-
     delete mts;
     delete doc;
 }
@@ -834,6 +730,8 @@ void Scene_Test::writeLTPBusOne()
 void Scene_Test::writeLTPReady()
 {
     Doc* doc = new Doc(this);
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -856,11 +754,6 @@ void Scene_Test::writeLTPReady()
     s1->setValue(fxi->id(), 1, UCHAR_MAX);
     s1->setValue(fxi->id(), 2, UCHAR_MAX);
     doc->addFunction(s1);
-
-    s1->arm();
-
-    UniverseArray uni(4 * 512);
-    MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(s1->stopped() == true);
     mts->startFunction(s1, false);
@@ -900,8 +793,6 @@ void Scene_Test::writeLTPReady()
 
     uni.zeroIntensityChannels();
 
-    s1->disarm();
-
     delete mts;
     delete doc;
 }
@@ -910,6 +801,7 @@ void Scene_Test::writeValues()
 {
     Doc* doc = new Doc(this);
     UniverseArray uni(4 * 512);
+    MasterTimerStub timer(m_doc, uni);
 
     Bus::instance()->setValue(Bus::defaultFade(), 1);
 
@@ -931,7 +823,6 @@ void Scene_Test::writeValues()
     s1->setValue(fxi->id(), 0, UCHAR_MAX); // Non-HTP
     s1->setValue(fxi->id(), 5, UCHAR_MAX); // HTP channel
     doc->addFunction(s1);
-    s1->arm();
 
     // Request only intensity channels to be written
     uni.zeroIntensityChannels();
@@ -976,6 +867,5 @@ void Scene_Test::writeValues()
         QCOMPARE(uni.preGMValues()[5], char(floor((qreal(UCHAR_MAX) * i) + 0.5)));
     }
 
-    s1->disarm();
     delete doc;
 }

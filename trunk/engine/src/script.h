@@ -46,8 +46,6 @@ private:
     static const QString waitCmd;
     static const QString waitKeyCmd;
 
-    static const QString setHtpCmd;
-    static const QString setLtpCmd;
     static const QString setFixtureCmd;
 
     static const QString labelCmd;
@@ -96,12 +94,6 @@ public:
      * Running
      ************************************************************************/
 public:
-    /** @reimpl */
-    void arm();
-
-    /** @reimpl */
-    void disarm();
-
     /** @reimpl */
     void preRun(MasterTimer* timer);
 
@@ -163,16 +155,6 @@ private:
      * @return An empty string if successful. Otherwise an error string.
      */
     QString handleWaitKey(const QList<QStringList>& tokens);
-
-    /**
-     * Handle "sethtp" and "setltp" commands.
-     *
-     * @param command The first keyword:value pair
-     * @param tokens All keyword:value pairs (including the first one)
-     * @param universes The universe array to write DMX data
-     * @return An empty string if successful. Otherwise an error string.
-     */
-    QString handleSetHtpLtp(const QList<QStringList>& tokens, UniverseArray* universes);
 
     /**
      * Handle "setfixture" command.

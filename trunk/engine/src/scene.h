@@ -133,6 +133,9 @@ public:
     /** @reimpl */
     bool loadXML(const QDomElement* root);
 
+    /** @reimpl */
+    void postLoad();
+
     /*********************************************************************
      * Flash
      *********************************************************************/
@@ -151,10 +154,7 @@ public:
      *********************************************************************/
 public:
     /** @reimpl */
-    void arm();
-
-    /** @reimpl */
-    void disarm();
+    void preRun(MasterTimer* timer);
 
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);

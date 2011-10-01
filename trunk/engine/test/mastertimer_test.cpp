@@ -41,12 +41,8 @@
 
 void MasterTimer_Test::initTestCase()
 {
-    m_doc = NULL;
     Bus::init(this);
-}
 
-void MasterTimer_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -55,10 +51,18 @@ void MasterTimer_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
-void MasterTimer_Test::cleanup()
+void MasterTimer_Test::cleanupTestCase()
 {
     delete m_doc;
-    m_doc = NULL;
+}
+
+void MasterTimer_Test::init()
+{
+}
+
+void MasterTimer_Test::cleanup()
+{
+    m_doc->clearContents();
 }
 
 void MasterTimer_Test::initial()

@@ -453,16 +453,13 @@ private:
      *********************************************************************/
 public:
     /** @reimpl */
-    void arm();
-
-    /** @reimpl */
-    void disarm();
-
-    /** @reimpl */
-    void postRun(MasterTimer* timer, UniverseArray* universes);
+    void preRun(MasterTimer* timer);
 
     /** @reimpl */
     void write(MasterTimer* timer, UniverseArray* universes);
+
+    /** @reimpl */
+    void postRun(MasterTimer* timer, UniverseArray* universes);
 
     /*********************************************************************
      * Intensity

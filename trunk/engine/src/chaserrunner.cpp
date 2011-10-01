@@ -187,17 +187,18 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         if (scene == NULL)
             continue;
 
+        // Why the fsck isn't fc.bus() used below????
         quint32 fadeTime = Bus::instance()->value(scene->busID());
 
-        FadeChannel& channel(it.next().value());
-        if (channel.current() == channel.target() && channel.group() != QLCChannel::Intensity)
+        FadeChannel& fc(it.next().value());
+        if (fc.current() == fc.target() && fc.group(m_doc) != QLCChannel::Intensity)
         {
-            /* Write the final value to LTP channels only once */
+            /* Write the final value to LTP channels only once in the else branch */
         }
         else
         {
-            uchar value = uchar(floor((qreal(channel.calculateCurrent(fadeTime, m_elapsed)) * m_intensity) + 0.5));
-            universes->write(channel.address(), value, channel.group());
+            uchar value = uchar(floor((qreal(fc.calculateCurrent(fadeTime, m_elapsed)) * m_intensity) + 0.5));
+            universes->write(fc.address(m_doc), value, fc.group(m_doc));
         }
     }
 
@@ -223,11 +224,11 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
     while (it.hasNext() == true)
     {
         FadeChannel ch(it.next().value());
-        if (ch.group() == QLCChannel::Intensity)
+        if (ch.group(m_doc) == QLCChannel::Intensity)
         {
             ch.setStart(ch.current());
             ch.setTarget(0);
-            ch.setBus(bus);
+            ch.setBus(bus); //! @todo: Set remaining time as the channel's zero-fade time
             ch.setReady(false);
             timer->fader()->add(ch);
         }
@@ -339,26 +340,28 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
         if (fxi == NULL || fxi->channel(value.channel) == NULL)
             continue;
 
-        FadeChannel channel;
-        channel.setAddress(fxi->universeAddress() + value.channel);
-        channel.setGroup(fxi->channel(value.channel)->group());
-        channel.setTarget(value.value);
-        channel.setBus(scene->busID());
+        FadeChannel fc;
+        fc.setFixture(value.fxi);
+        fc.setChannel(value.channel);
+        fc.setTarget(value.value);
+        fc.setBus(scene->busID());
+
+        quint32 addr = fc.address(m_doc);
 
         // Get starting value from universes. For HTP channels it's always 0.
-        channel.setStart(uchar(universes->preGMValues()[channel.address()]));
+        fc.setStart(uchar(universes->preGMValues()[addr]));
 
         // Transfer last step's current value to current step's starting value.
-        if (m_channelMap.contains(channel.address()) == true)
-            channel.setStart(m_channelMap[channel.address()].current());
-        channel.setCurrent(channel.start());
+        if (m_channelMap.contains(addr) == true)
+            fc.setStart(m_channelMap[addr].current());
+        fc.setCurrent(fc.start());
 
         // Append the channel to the channel map
-        map[channel.address()] = channel;
+        map[addr] = fc;
 
         // Remove the channel from a map of to-be-zeroed channels since now it
         // has a new value to fade to.
-        zeroChannels.remove(channel.address());
+        zeroChannels.remove(addr);
     }
 
     // All channels that were present in the previous step but are not present
@@ -367,8 +370,8 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
     while (zit.hasNext() == true)
     {
         zit.next();
-        FadeChannel& channel(zit.value());
-        if (channel.current() == 0 || channel.group() != QLCChannel::Intensity)
+        FadeChannel& fc(zit.value());
+        if (fc.current() == 0 || fc.group(m_doc) != QLCChannel::Intensity)
         {
             // Remove all non-HTP channels and such HTP channels that are
             // already at zero. There's nothing to do for them.
@@ -379,8 +382,8 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
             // This HTP channel was present in the previous step, but is absent
             // in the current. It's nicer that we fade it back to zero, rather
             // than just let it drop straight to zero.
-            channel.setStart(channel.current());
-            channel.setTarget(0);
+            fc.setStart(fc.current());
+            fc.setTarget(0);
         }
     }
 

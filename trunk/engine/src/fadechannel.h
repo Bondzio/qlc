@@ -23,8 +23,11 @@
 #define FADECHANNEL_H
 
 #include <QtGlobal>
+
 #include "qlcchannel.h"
+#include "fixture.h"
 #include "bus.h"
+#include "doc.h"
 
 /**
  * FadeChannel is a helper class used to store individual RUNTIME values for
@@ -65,24 +68,30 @@ public:
     /** Destructor */
     virtual ~FadeChannel();
 
-    /** Comparison operator */
+    /** Comparison operator (true if fixture & channel match) */
     bool operator==(const FadeChannel& fc);
 
     /************************************************************************
      * Values
      ************************************************************************/
 public:
-    /** Set the absolute DMX address */
-    void setAddress(quint32 addr);
+    /** Set the Fixture that is being controlled */
+    void setFixture(quint32 id);
 
-    /** Get the absolute DMX address */
-    quint32 address() const;
+    /** Get the Fixture that is being controlled */
+    quint32 fixture() const;
 
-    /** Set channel group */
-    void setGroup(QLCChannel::Group grp);
+    /** Set channel within the Fixture */
+    void setChannel(quint32 num);
 
-    /** Get channel group */
-    QLCChannel::Group group() const;
+    /** Get channel within the Fixture */
+    quint32 channel() const;
+
+    /** Get the absolute address for this channel */
+    quint32 address(const Doc* doc) const;
+
+    /** Get the channel group */
+    QLCChannel::Group group(const Doc* doc) const;
 
     /** Set starting value */
     void setStart(uchar value);
@@ -150,8 +159,9 @@ public:
     uchar calculateCurrent(quint32 fadeTime, quint32 elapsedTime);
 
 private:
-    quint32 m_address;
-    QLCChannel::Group m_group;
+    quint32 m_fixture;
+    quint32 m_channel;
+
     qint32 m_start;
     qint32 m_target;
     qint32 m_current;

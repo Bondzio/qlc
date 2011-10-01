@@ -31,6 +31,7 @@ class EFX_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
     void cleanup();
 
@@ -71,11 +72,7 @@ private slots:
     void loadDuplicateFixture();
     void save();
 
-    void armSuccess();
-    void armMissingFixture();
-    void disarm();
-    void preRun();
-
+    void preRunPostRun();
     void adjustIntensity();
 
 private:

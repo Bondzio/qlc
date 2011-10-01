@@ -25,9 +25,11 @@
 #include "function.h"
 
 class MasterTimer;
+class FadeChannel;
 class EFXFixture;
 class Scene;
 class EFX;
+class Doc;
 
 #define KXMLQLCEFXFixture "Fixture"
 #define KXMLQLCEFXFixtureID "ID"
@@ -50,6 +52,10 @@ public:
 
     /** Copy contents from another EFXFixture */
     void copyFrom(const EFXFixture* ef);
+
+private:
+    /** Get the master engine instance */
+    Doc* doc() const;
 
 protected:
     /** The EFX function that this fixture belongs to */
@@ -106,24 +112,6 @@ protected:
 
     /** Get the order number in serial propagation mode */
     int serialNumber() const;
-
-    /** Set the low byte channel for pan movement */
-    void setLsbPanChannel(quint32 ch);
-
-    /** Set the high byte channel for pan movement */
-    void setMsbPanChannel(quint32 ch);
-
-    /** Set the low byte channel for tilt movement */
-    void setLsbTiltChannel(quint32 ch);
-
-    /** Set the high byte channel for pan movement */
-    void setMsbTiltChannel(quint32 ch);
-
-    /** Set the channels that control intensity */
-    void setIntensityChannels(QList <quint32> channels);
-
-    /** Set the fade bus for intensity adjustment speed */
-    void setFadeBus(quint32 id);
 
     /** Update the waiting threshold value for serial operation */
     void updateSkipThreshold();
@@ -187,36 +175,6 @@ protected:
      * The current tilt value
      */
     qreal m_tiltValue;
-
-    /**
-     * Universe channel for LSB pan data
-     */
-    quint32 m_lsbPanChannel;
-
-    /**
-     * Universe channel for MSB pan data
-     */
-    quint32 m_msbPanChannel;
-
-    /**
-     * Universe channel for LSB tilt data
-     */
-    quint32 m_lsbTiltChannel;
-
-    /**
-     * Universe channel for MSB tilt data
-     */
-    quint32 m_msbTiltChannel;
-
-    /**
-     * Universe channels for controlling intensity
-     */
-    QList <quint32> m_intensityChannels;
-
-    /**
-     * Bus used for intensity adjustment speed
-     */
-    quint32 m_fadeBus;
 
     /*********************************************************************
      * Running

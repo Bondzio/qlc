@@ -319,27 +319,12 @@ void Chaser::slotBusTapped(quint32 id)
         m_runner->next();
 }
 
-void Chaser::arm()
+void Chaser::preRun(MasterTimer* timer)
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
     m_runner = new ChaserRunner(doc, stepFunctions(), busID(), direction(),
                                 runOrder(), intensity());
-    resetElapsed();
-}
-
-void Chaser::disarm()
-{
-    delete m_runner;
-    m_runner = NULL;
-}
-
-void Chaser::preRun(MasterTimer* timer)
-{
-    Q_UNUSED(timer);
-    Q_ASSERT(m_runner != NULL);
-    m_runner->reset();
-
     Function::preRun(timer);
 }
 
@@ -355,6 +340,10 @@ void Chaser::write(MasterTimer* timer, UniverseArray* universes)
 void Chaser::postRun(MasterTimer* timer, UniverseArray* universes)
 {
     m_runner->postRun(timer, universes);
+
+    delete m_runner;
+    m_runner = NULL;
+
     Function::postRun(timer, universes);
 }
 

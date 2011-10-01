@@ -27,6 +27,8 @@
 #define private public
 #include "mastertimer_stub.h"
 #include "efxfixture_test.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
 #include "universearray.h"
 #include "genericfader.h"
 #include "efxfixture.h"
@@ -45,10 +47,6 @@
 void EFXFixture_Test::initTestCase()
 {
     Bus::init(this);
-}
-
-void EFXFixture_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -57,10 +55,26 @@ void EFXFixture_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
-void EFXFixture_Test::cleanup()
+void EFXFixture_Test::init()
+{
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "MH-440");
+    QVERIFY(def != NULL);
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setFixtureDefinition(def, mode);
+    m_doc->addFixture(fxi);
+}
+
+void EFXFixture_Test::cleanupTestCase()
 {
     delete m_doc;
-    m_doc = NULL;
+}
+
+void EFXFixture_Test::cleanup()
+{
+    m_doc->clearContents();
 }
 
 void EFXFixture_Test::initial()
@@ -84,13 +98,8 @@ void EFXFixture_Test::initial()
     QVERIFY(ef.m_skipThreshold == 0);
     QVERIFY(ef.m_panValue == 0);
     QVERIFY(ef.m_tiltValue == 0);
-    QVERIFY(ef.m_lsbPanChannel == QLCChannel::invalid());
-    QVERIFY(ef.m_msbPanChannel == QLCChannel::invalid());
-    QVERIFY(ef.m_lsbTiltChannel == QLCChannel::invalid());
-    QVERIFY(ef.m_msbTiltChannel == QLCChannel::invalid());
 
     QVERIFY(ef.m_intensity == 1.0);
-    QVERIFY(ef.m_fadeBus == Bus::defaultFade());
     QVERIFY(ef.m_fadeIntensity == uchar(255));
 }
 
@@ -109,12 +118,8 @@ void EFXFixture_Test::copyFrom()
     ef.m_skipThreshold = 6.9;
     ef.m_panValue = 127.15;
     ef.m_tiltValue = 240.99;
-    ef.m_lsbPanChannel = 1;
-    ef.m_msbPanChannel = 5;
-    ef.m_lsbTiltChannel = 2;
-    ef.m_msbTiltChannel = 6;
+
     ef.m_intensity = 0.314159;
-    ef.m_fadeBus = 9;
     ef.m_fadeIntensity = 125;
 
     EFXFixture copy(&e);
@@ -129,12 +134,8 @@ void EFXFixture_Test::copyFrom()
     QVERIFY(copy.m_skipThreshold == 6.9);
     QVERIFY(copy.m_panValue == 127.15);
     QVERIFY(copy.m_tiltValue == 240.99);
-    QVERIFY(copy.m_lsbPanChannel == 1);
-    QVERIFY(copy.m_msbPanChannel == 5);
-    QVERIFY(copy.m_lsbTiltChannel == 2);
-    QVERIFY(copy.m_msbTiltChannel == 6);
+
     QVERIFY(copy.m_intensity == 0.314159);
-    QVERIFY(copy.m_fadeBus == 9);
     QVERIFY(copy.m_fadeIntensity == 125);
 }
 
@@ -288,33 +289,13 @@ void EFXFixture_Test::save()
     QVERIFY(tag.text() == "Backward");
 }
 
-void EFXFixture_Test::protectedProperties()
+void EFXFixture_Test::serialNumber()
 {
     EFX e(m_doc);
     EFXFixture ef(&e);
 
     ef.setSerialNumber(15);
     QVERIFY(ef.serialNumber() == 15);
-
-    ef.setLsbPanChannel(56);
-    QVERIFY(ef.m_lsbPanChannel == 56);
-
-    ef.setMsbPanChannel(3);
-    QVERIFY(ef.m_msbPanChannel == 3);
-
-    ef.setLsbTiltChannel(19);
-    QVERIFY(ef.m_lsbTiltChannel == 19);
-
-    ef.setMsbTiltChannel(102);
-    QVERIFY(ef.m_msbTiltChannel == 102);
-
-    QList <quint32> chans;
-    chans << 1 << 412 << 1500 << 3 << 9000;
-    ef.setIntensityChannels(chans);
-    QVERIFY(ef.m_intensityChannels == chans);
-
-    ef.setFadeBus(26);
-    QVERIFY(ef.m_fadeBus == 26);
 }
 
 void EFXFixture_Test::updateSkipThreshold()
@@ -361,13 +342,7 @@ void EFXFixture_Test::isValid()
 
     QVERIFY(ef.isValid() == false);
 
-    ef.m_msbPanChannel = 5;
-    QVERIFY(ef.isValid() == false);
-
-    ef.m_msbTiltChannel = 9;
-    QVERIFY(ef.isValid() == false);
-
-    ef.m_fixture = 72;
+    ef.setFixture(0);
     QVERIFY(ef.isValid() == true);
 }
 
@@ -391,7 +366,7 @@ void EFXFixture_Test::reset()
     e.addFixture(ef3);
 
     EFXFixture* ef4 = new EFXFixture(&e);
-    ef4->m_fixture = 15;
+    ef4->m_fixture = 4;
     ef4->m_direction = EFX::Forward;
     ef4->m_serialNumber = 3;
     ef4->m_runTimeDirection = EFX::Backward;
@@ -401,14 +376,46 @@ void EFXFixture_Test::reset()
     ef4->m_skipThreshold = 6.9;
     ef4->m_panValue = 127.15;
     ef4->m_tiltValue = 240.99;
-    ef4->m_lsbPanChannel = 1;
-    ef4->m_msbPanChannel = 5;
-    ef4->m_lsbTiltChannel = 2;
-    ef4->m_msbTiltChannel = 6;
     e.addFixture(ef4);
 
+    ef1->reset();
+    QVERIFY(ef1->m_fixture == 1);
+    QVERIFY(ef1->m_direction == EFX::Forward);
+    QVERIFY(ef1->m_serialNumber == 0);
+    QVERIFY(ef1->m_runTimeDirection == EFX::Forward);
+    QVERIFY(ef1->m_ready == false);
+    QVERIFY(ef1->m_iterator == 0);
+    QVERIFY(ef1->m_skipIterator == 0);
+    QVERIFY(ef1->m_skipThreshold == (M_PI * 2.0) * 0);
+    QVERIFY(ef1->m_panValue == 0);
+    QVERIFY(ef1->m_tiltValue == 0);
+
+    ef2->reset();
+    QVERIFY(ef2->m_fixture == 2);
+    QVERIFY(ef2->m_direction == EFX::Forward);
+    QVERIFY(ef2->m_serialNumber == 1);
+    QVERIFY(ef2->m_runTimeDirection == EFX::Forward);
+    QVERIFY(ef2->m_ready == false);
+    QVERIFY(ef2->m_iterator == 0);
+    QVERIFY(ef2->m_skipIterator == 0);
+    QVERIFY(ef2->m_skipThreshold == (M_PI * 2.0) * 0.25);
+    QVERIFY(ef2->m_panValue == 0);
+    QVERIFY(ef2->m_tiltValue == 0);
+
+    ef3->reset();
+    QVERIFY(ef3->m_fixture == 3);
+    QVERIFY(ef3->m_direction == EFX::Forward);
+    QVERIFY(ef3->m_serialNumber == 2);
+    QVERIFY(ef3->m_runTimeDirection == EFX::Forward);
+    QVERIFY(ef3->m_ready == false);
+    QVERIFY(ef3->m_iterator == 0);
+    QVERIFY(ef3->m_skipIterator == 0);
+    QVERIFY(ef3->m_skipThreshold == (M_PI * 2.0) * 0.5);
+    QVERIFY(ef3->m_panValue == 0);
+    QVERIFY(ef3->m_tiltValue == 0);
+
     ef4->reset();
-    QVERIFY(ef4->m_fixture == 15);
+    QVERIFY(ef4->m_fixture == 4);
     QVERIFY(ef4->m_direction == EFX::Forward);
     QVERIFY(ef4->m_serialNumber == 3);
     QVERIFY(ef4->m_runTimeDirection == EFX::Forward);
@@ -418,22 +425,16 @@ void EFXFixture_Test::reset()
     QVERIFY(ef4->m_skipThreshold == (M_PI * 2.0) * 0.75);
     QVERIFY(ef4->m_panValue == 0);
     QVERIFY(ef4->m_tiltValue == 0);
-    QVERIFY(ef4->m_lsbPanChannel == 1);
-    QVERIFY(ef4->m_msbPanChannel == 5);
-    QVERIFY(ef4->m_lsbTiltChannel == 2);
-    QVERIFY(ef4->m_msbTiltChannel == 6);
 }
 
 void EFXFixture_Test::setPoint8bit()
 {
     EFX e(m_doc);
     EFXFixture ef(&e);
+    ef.setFixture(0);
 
-    ef.m_msbPanChannel = 0;
-    ef.m_msbTiltChannel = 1;
-
-    ef.m_panValue = 5.4;
-    ef.m_tiltValue = 1.5;
+    ef.m_panValue = 5.4; /* MSB: 5, LSB: 0.4 (102) */
+    ef.m_tiltValue = 1.5; /* MSB: 1, LSB: 0.5 (127) */
 
     UniverseArray array(512 * 4);
     ef.setPoint(&array);
@@ -445,11 +446,7 @@ void EFXFixture_Test::setPoint16bit()
 {
     EFX e(m_doc);
     EFXFixture ef(&e);
-
-    ef.m_msbPanChannel = 0;
-    ef.m_msbTiltChannel = 1;
-    ef.m_lsbPanChannel = 2;
-    ef.m_lsbTiltChannel = 3;
+    ef.setFixture(0);
 
     ef.m_panValue = 5.4; /* MSB: 5, LSB: 0.4 (102) */
     ef.m_tiltValue = 1.5; /* MSB: 1, LSB: 0.5 (127) */
@@ -474,20 +471,13 @@ void EFXFixture_Test::nextStepLoop()
     ef->setFixture(0);
     e.addFixture(ef);
 
-    /* Nothing should happen since isValid() == false */
-    ef->nextStep(&mts, &array);
-    for (int i = 0; i < 512 * 4; i++)
-        QVERIFY(array.preGMValues()[i] == 0);
-
     /* Initialize the EFXFixture so that it can do math */
     ef->setSerialNumber(0);
-    ef->setMsbPanChannel(0);
-    ef->setMsbTiltChannel(1);
-    ef->setLsbPanChannel(2);
-    ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
     QVERIFY(ef->isReady() == false);
     QVERIFY(ef->m_iterator == 0);
+
+    e.preRun(&mts);
 
     /* Run two cycles (2 * 50 = 100) and reset the checking iterator in
        the middle to expect correct iterator values. */
@@ -506,6 +496,8 @@ void EFXFixture_Test::nextStepLoop()
         QCOMPARE(ef->m_iterator, checkIter);
         QVERIFY(ef->isReady() == false); // Loop is never ready
     }
+
+    e.postRun(&mts, &array);
 }
 
 void EFXFixture_Test::nextStepSingleShot()
@@ -521,20 +513,13 @@ void EFXFixture_Test::nextStepSingleShot()
     ef->setFixture(0);
     e.addFixture(ef);
 
-    /* Nothing should happen since isValid() == false */
-    ef->nextStep(&mts, &array);
-    for (int i = 0; i < 512 * 4; i++)
-        QVERIFY(array.preGMValues()[i] == 0);
-
     /* Initialize the EFXFixture so that it can do math */
     ef->setSerialNumber(0);
-    ef->setMsbPanChannel(0);
-    ef->setMsbTiltChannel(1);
-    ef->setLsbPanChannel(2);
-    ef->setLsbTiltChannel(3);
     QVERIFY(ef->isValid() == true);
     QVERIFY(ef->isReady() == false);
     QVERIFY(ef->m_iterator == 0);
+
+    e.preRun(&mts);
 
     ef->reset();
 
@@ -556,6 +541,8 @@ void EFXFixture_Test::nextStepSingleShot()
 
     /* Single-shot EFX should now be ready */
     QVERIFY(ef->isReady() == true);
+
+    e.postRun(&mts, &array);
 }
 
 void EFXFixture_Test::start()
@@ -568,11 +555,10 @@ void EFXFixture_Test::start()
     ef->setFixture(0);
     e.addFixture(ef);
 
-    QList <quint32> chans;
-    chans << 1 << 2 << 15;
-    ef->setIntensityChannels(chans);
+    Fixture* fxi = m_doc->fixture(0);
+    QVERIFY(fxi != NULL);
 
-    e.arm();
+    e.preRun(&mts);
 
     // Fade intensity == 0, no need to do fade-in
     ef->setFadeIntensity(0);
@@ -583,12 +569,10 @@ void EFXFixture_Test::start()
     // Fade intensity > 0, need to do fade-in
     ef->setFadeIntensity(1);
     ef->start(&mts, &array);
-    QCOMPARE(e.m_fader->m_channels.size(), 3);
-    QVERIFY(e.m_fader->m_channels.contains(1));
-    QVERIFY(e.m_fader->m_channels.contains(2));
-    QVERIFY(e.m_fader->m_channels.contains(15));
+    QCOMPARE(e.m_fader->m_channels.size(), 1);
+    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
 
-    e.disarm();
+    e.postRun(&mts, &array);
 }
 
 void EFXFixture_Test::stop()
@@ -601,11 +585,10 @@ void EFXFixture_Test::stop()
     ef->setFixture(0);
     e.addFixture(ef);
 
-    QList <quint32> chans;
-    chans << 1 << 2 << 15;
-    ef->setIntensityChannels(chans);
+    Fixture* fxi = m_doc->fixture(0);
+    QVERIFY(fxi != NULL);
 
-    e.arm();
+    e.preRun(&mts);
 
     // Not started yet
     ef->stop(&mts, &array);
@@ -614,17 +597,17 @@ void EFXFixture_Test::stop()
 
     // Start
     ef->start(&mts, &array);
-    QCOMPARE(e.m_fader->m_channels.size(), 3);
+    QCOMPARE(e.m_fader->m_channels.size(), 1);
+    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
 
     // Then stop
     ef->stop(&mts, &array);
     QCOMPARE(e.m_fader->m_channels.size(), 0);
 
     // FadeChannels are handed over to MasterTimer's GenericFader
-    QCOMPARE(mts.fader()->m_channels.size(), 3);
-    QVERIFY(mts.fader()->m_channels.contains(1));
-    QVERIFY(mts.fader()->m_channels.contains(2));
-    QVERIFY(mts.fader()->m_channels.contains(15));
+    QCOMPARE(mts.fader()->m_channels.size(), 1);
+    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == false);
+    QVERIFY(mts.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
 
-    e.disarm();
+    e.postRun(&mts, &array);
 }

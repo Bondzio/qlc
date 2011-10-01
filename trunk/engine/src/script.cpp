@@ -41,8 +41,6 @@ const QString Script::stopFunctionCmd = QString("stopfunction");
 const QString Script::waitCmd = QString("wait");
 const QString Script::waitKeyCmd = QString("waitkey");
 
-const QString Script::setHtpCmd = QString("sethtp");
-const QString Script::setLtpCmd = QString("setltp");
 const QString Script::setFixtureCmd = QString("setfixture");
 
 const QString Script::labelCmd = QString("label");
@@ -104,6 +102,28 @@ bool Script::copyFrom(const Function* function)
 bool Script::setData(const QString& str)
 {
     m_data = str;
+
+    // Construct individual code lines from the data
+    m_lines.clear();
+    if (m_data.isEmpty() == false)
+    {
+        QStringList lines = m_data.split(QRegExp("(\r\n|\n\r|\r|\n)"), QString::KeepEmptyParts);
+        foreach (QString line, lines)
+            m_lines << tokenizeLine(line + QString("\n"));
+    }
+
+    // Map all labels to their individual line numbers for fast jumps
+    m_labels.clear();
+    for (int i = 0; i < m_lines.size(); i++)
+    {
+        QList <QStringList> line = m_lines[i];
+        if (line.isEmpty() == false &&
+            line.first().size() == 2 && line.first()[0] == Script::labelCmd)
+        {
+            m_labels[line.first()[1]] = i;
+        }
+    }
+
     return true;
 }
 
@@ -221,41 +241,6 @@ bool Script::saveXML(QDomDocument* doc, QDomElement* wksp_root)
  * Running
  ****************************************************************************/
 
-void Script::arm()
-{
-    m_labels.clear();
-    m_lines.clear();
-
-    // Construct individual code lines from the data
-    if (m_data.isEmpty() == false)
-    {
-        QStringList lines = m_data.split(QRegExp("(\r\n|\n\r|\r|\n)"), QString::KeepEmptyParts);
-        foreach (QString line, lines)
-            m_lines << tokenizeLine(line + QString("\n"));
-    }
-
-    // Map all labels to their individual line numbers for fast jumps
-    for (int i = 0; i < m_lines.size(); i++)
-    {
-        QList <QStringList> line = m_lines[i];
-        if (line.isEmpty() == false &&
-            line.first().size() == 2 && line.first()[0] == Script::labelCmd)
-        {
-            m_labels[line.first()[1]] = i;
-        }
-    }
-}
-
-void Script::disarm()
-{
-    m_lines.clear();
-    m_labels.clear();
-
-    if (m_fader != NULL)
-        delete m_fader;
-    m_fader = NULL;
-}
-
 void Script::preRun(MasterTimer* timer)
 {
     // Reset
@@ -367,10 +352,6 @@ bool Script::executeCommand(int index, MasterTimer* timer, UniverseArray* univer
         error = handleWaitKey(tokens);
         if (error.isEmpty() == true)
             continueLoop = false;
-    }
-    else if (tokens[0][0] == Script::setHtpCmd || tokens[0][0] == Script::setLtpCmd)
-    {
-        error = handleSetHtpLtp(tokens, universes);
     }
     else if (tokens[0][0] == Script::setFixtureCmd)
     {
@@ -497,87 +478,6 @@ QString Script::handleWaitKey(const QList<QStringList>& tokens)
     return QString();
 }
 
-QString Script::handleSetHtpLtp(const QList<QStringList>& tokens, UniverseArray* universes)
-{
-    qDebug() << Q_FUNC_INFO;
-
-    if (tokens.size() > 4)
-        return QString("Too many arguments");
-
-    bool ok = false;
-    int channel = 0;
-    int uni = 1;
-    double time = 0;
-    uchar value = 0;
-    quint32 bus = Bus::invalid();
-
-    channel = tokens[0][1].toUInt(&ok);
-    if (ok == false)
-        return QString("Invalid channel: %1").arg(tokens[0][1]);
-
-    for (int i = 1; i < tokens.size(); i++)
-    {
-        QStringList list = tokens[i];
-        list[0] = list[0].toLower().trimmed();
-        if (list.size() == 2)
-        {
-            ok = false;
-            if (list[0] == "val" || list[0] == "value")
-                value = uchar(list[1].toUInt(&ok));
-            else if (list[0] == "uni" || list[0] == "universe")
-                uni = list[1].toUInt(&ok);
-            else if (list[0] == "time")
-                time = list[1].toDouble(&ok);
-            else if (list[0] == "bus")
-                bus = list[1].toUInt(&ok);
-            else
-                return QString("Unrecognized keyword: %1").arg(list[0]);
-
-            if (ok == false)
-                return QString("Invalid value (%1) for keyword: %2").arg(list[1]).arg(list[0]);
-        }
-    }
-
-    // So is this LTP or HTP?
-    QLCChannel::Group group;
-    if (tokens[0][0] == Script::setHtpCmd)
-        group = QLCChannel::Intensity;
-    else
-        group = QLCChannel::NoGroup;
-
-    int address = uni * 512;
-    address += channel;
-    if (address >= 0 && address < universes->size())
-    {
-        GenericFader* gf = fader();
-        Q_ASSERT(gf != NULL);
-
-        FadeChannel fch;
-        fch.setAddress(address);
-        fch.setTarget(value);
-        fch.setGroup(group);
-        fch.setFixedTime(time * MasterTimer::frequency());
-        fch.setBus(bus);
-
-        // If the script has used the channel previously, it might still be in
-        // the bowels of GenericFader so get the starting value from there.
-        // Otherwise get it from universes (HTP channels are always 0 then).
-        if (gf->channels().contains(address) == true)
-            fch.setStart(gf->channels()[address].current());
-        else
-            fch.setStart(universes->preGMValues()[address]);
-        fch.setCurrent(fch.start());
-
-        gf->add(fch);
-
-        return QString();
-    }
-    else
-    {
-        return QString("Invalid channel: %1 or universe: %2").arg(channel).arg(uni);
-    }
-}
-
 QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray* universes)
 {
     qDebug() << Q_FUNC_INFO;
@@ -636,23 +536,23 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
                 GenericFader* gf = fader();
                 Q_ASSERT(gf != NULL);
 
-                FadeChannel fch;
-                fch.setAddress(address);
-                fch.setTarget(value);
-                fch.setGroup(channel->group());
-                fch.setFixedTime(time * MasterTimer::frequency());
-                fch.setBus(bus);
+                FadeChannel fc;
+                fc.setFixture(fxi->id());
+                fc.setChannel(ch);
+                fc.setTarget(value);
+                fc.setFixedTime(time * MasterTimer::frequency());
+                fc.setBus(bus);
 
                 // If the script has used the channel previously, it might still be in
                 // the bowels of GenericFader so get the starting value from there.
                 // Otherwise get it from universes (HTP channels are always 0 then).
                 if (gf->channels().contains(address) == true)
-                    fch.setStart(gf->channels()[address].current());
+                    fc.setStart(gf->channels()[address].current());
                 else
-                    fch.setStart(universes->preGMValues()[address]);
-                fch.setCurrent(fch.start());
+                    fc.setStart(universes->preGMValues()[address]);
+                fc.setCurrent(fc.start());
 
-                gf->add(fch);
+                gf->add(fc);
 
                 return QString();
             }

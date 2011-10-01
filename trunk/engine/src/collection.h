@@ -106,16 +106,13 @@ public:
     /** Load function's contents from an XML document */
     bool loadXML(const QDomElement* root);
 
+    /** @reimp */
+    void postLoad();
+
     /*********************************************************************
      * Running
      *********************************************************************/
 public:
-    /** @reimpl */
-    void arm();
-
-    /** @reimpl */
-    void disarm();
-
     /** @reimpl */
     void preRun(MasterTimer* timer);
 

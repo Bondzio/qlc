@@ -240,6 +240,19 @@ bool Scene::loadXML(const QDomElement* root)
     return true;
 }
 
+void Scene::postLoad()
+{
+    // Remove such fixtures and channels that don't exist
+    QMutableListIterator <SceneValue> it(m_values);
+    while (it.hasNext() == true)
+    {
+        SceneValue value(it.next());
+        Fixture* fxi = doc()->fixture(value.fxi);
+        if (fxi == NULL || fxi->channel(value.channel) == NULL)
+            it.remove();
+    }
+}
+
 /****************************************************************************
  * Flashing
  ****************************************************************************/
@@ -278,41 +291,21 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
  * Running
  ****************************************************************************/
 
-void Scene::arm()
+void Scene::preRun(MasterTimer* timer)
 {
-    /* Scenes cannot run unless they are children of Doc */
-    Doc* doc = qobject_cast <Doc*> (parent());
-    Q_ASSERT(doc != NULL);
-
-    m_armedChannels.clear();
-
-    /* Fixate exact DMX addresses */
-    QMutableListIterator <SceneValue> it(m_values);
+    QListIterator <SceneValue> it(m_values);
     while (it.hasNext() == true)
     {
         SceneValue value(it.next());
 
-        Fixture* fxi = doc->fixture(value.fxi);
-        if (fxi == NULL || fxi->channel(value.channel) == NULL)
-        {
-            // Remove such fixtures and channels that don't exist
-            it.remove();
-            continue;
-        }
-
         FadeChannel fc;
-        fc.setAddress(fxi->universeAddress() + value.channel);
-        fc.setGroup(fxi->channel(value.channel)->group());
+        fc.setFixture(value.fxi);
+        fc.setChannel(value.channel);
         fc.setTarget(value.value);
         m_armedChannels << fc;
     }
 
-    resetElapsed();
-}
-
-void Scene::disarm()
-{
-    m_armedChannels.clear();
+    Function::preRun(timer);
 }
 
 void Scene::write(MasterTimer* timer, UniverseArray* universes)
@@ -337,14 +330,14 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
                to cast to uchar, since UniverseArray handles signed
                char, whereas uchar is unsigned. Without cast,
                this will result in negative values when x > 127 */
-            fc.setStart(uchar(universes->preGMValues()[fc.address()]));
+            fc.setStart(uchar(universes->preGMValues()[fc.address(doc())]));
             fc.setCurrent(fc.start());
 
             // Don't touch the value at all if it's already on target
             if (fc.start() == fc.target())
             {
                 fc.setReady(true);
-                if (fc.group() != QLCChannel::Intensity)
+                if (fc.group(doc()) != QLCChannel::Intensity)
                     ready--;
             }
             else
@@ -365,12 +358,12 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
         FadeChannel& fc(it.next());
         if (elapsed() >= fadeTime)
         {
-            if (fc.group() == QLCChannel::Intensity)
+            if (fc.group(doc()) == QLCChannel::Intensity)
             {
                 // Don't do "ready--" for intensity channels to keep the
                 // scene on as long as its manually stopped.
                 fc.setReady(true);
-                universes->write(fc.address(), fc.target(), fc.group());
+                universes->write(fc.address(doc()), fc.target(), fc.group(doc()));
             }
             else if (fc.isReady() == false)
             {
@@ -379,7 +372,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
                 // be written anymore (otherwise it would not be LTP anymore).
                 ready--;
                 fc.setReady(true);
-                universes->write(fc.address(), fc.target(), fc.group());
+                universes->write(fc.address(doc()), fc.target(), fc.group(doc()));
             }
             else
             {
@@ -390,9 +383,9 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
         else
         {
             /* Write the next value to the universe buffer */
-            universes->write(fc.address(),
+            universes->write(fc.address(doc()),
                              fc.calculateCurrent(fadeTime, elapsed()),
-                             fc.group());
+                             fc.group(doc()));
         }
     }
 
@@ -408,12 +401,11 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
 
 void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
 {
-    QList <FadeChannel> channels(m_armedChannels);
-    QMutableListIterator <FadeChannel> it(channels);
+    QListIterator <FadeChannel> it(m_armedChannels);
     while (it.hasNext() == true)
     {
-        FadeChannel& fc(it.next());
-        if (fc.group() == QLCChannel::Intensity)
+        FadeChannel fc(it.next());
+        if (fc.group(doc()) == QLCChannel::Intensity)
         {
             fc.setTarget(0);
             fc.setStart(fc.current());
@@ -424,6 +416,8 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
         }
     }
 
+    m_armedChannels.clear();
+
     Function::postRun(timer, universes);
 }
 
@@ -431,16 +425,22 @@ void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
                         QLCChannel::Group grp, qreal percentage)
 {
     Q_ASSERT(universes != NULL);
-    for (int i = 0; i < m_armedChannels.size(); i++)
+
+    for (int i = 0; i < m_values.size(); i++)
     {
-        if (fxi_id == Fixture::invalidId() || m_values[i].fxi == fxi_id)
+        const SceneValue& sv(m_values[i]);
+        FadeChannel fc;
+        fc.setFixture(sv.fxi);
+        fc.setChannel(sv.channel);
+        fc.setTarget(sv.value);
+
+        if (fxi_id == Fixture::invalidId() || fxi_id == sv.fxi)
         {
-            const FadeChannel& fc(m_armedChannels[i]);
-            if (grp == QLCChannel::NoGroup || fc.group() == grp)
+            if (grp == QLCChannel::NoGroup || grp == fc.group(doc()))
             {
                 qreal value = CLAMP(percentage, 0.0, 1.0) * qreal(fc.target());
                 value = uchar(floor(value + 0.5));
-                universes->write(fc.address(), uchar(value), fc.group());
+                universes->write(fc.address(doc()), uchar(value), fc.group(doc()));
             }
         }
     }

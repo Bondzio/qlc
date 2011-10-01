@@ -147,12 +147,6 @@ protected slots:
 
 public:
     /** @reimpl */
-    void arm();
-
-    /** @reimpl */
-    void disarm();
-
-    /** @reimpl */
     void preRun(MasterTimer* timer);
 
     /** @reimpl */

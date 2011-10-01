@@ -44,17 +44,22 @@
 void ChaserRunner_Test::initTestCase()
 {
     Bus::init(this);
-}
 
-void ChaserRunner_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
     m_doc->fixtureDefCache()->load(dir);
+}
 
+void ChaserRunner_Test::cleanupTestCase()
+{
+    delete m_doc;
+}
+
+void ChaserRunner_Test::init()
+{
     const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
     QVERIFY(def != NULL);
     const QLCFixtureMode* mode = def->mode("Mode 1");
@@ -92,8 +97,7 @@ void ChaserRunner_Test::init()
 
 void ChaserRunner_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void ChaserRunner_Test::initial()
@@ -415,42 +419,42 @@ void ChaserRunner_Test::createFadeChannels()
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
-    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.address(m_doc), quint32(0));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(255));
     QCOMPARE(ch.current(), uchar(0));
 
     QVERIFY(map.contains(1) == true);
     ch = map[1];
-    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.address(m_doc), quint32(1));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(254));
     QCOMPARE(ch.current(), uchar(0));
 
     QVERIFY(map.contains(2) == true);
     ch = map[2];
-    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.address(m_doc), quint32(2));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(253));
     QCOMPARE(ch.current(), uchar(0));
 
     QVERIFY(map.contains(3) == true);
     ch = map[3];
-    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.address(m_doc), quint32(3));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(252));
     QCOMPARE(ch.current(), uchar(0));
 
     QVERIFY(map.contains(4) == true);
     ch = map[4];
-    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.address(m_doc), quint32(4));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(251));
     QCOMPARE(ch.current(), uchar(0));
 
     QVERIFY(map.contains(5) == true);
     ch = map[5];
-    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.address(m_doc), quint32(5));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(250));
     QCOMPARE(ch.current(), uchar(0));
@@ -468,42 +472,42 @@ void ChaserRunner_Test::createFadeChannels()
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
-    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.address(m_doc), quint32(0));
     QCOMPARE(ch.start(), uchar(255));
     QCOMPARE(ch.target(), uchar(127));
     QCOMPARE(ch.current(), uchar(255));
 
     QVERIFY(map.contains(1) == true);
     ch = map[1];
-    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.address(m_doc), quint32(1));
     QCOMPARE(ch.start(), uchar(254));
     QCOMPARE(ch.target(), uchar(126));
     QCOMPARE(ch.current(), uchar(254));
 
     QVERIFY(map.contains(2) == true);
     ch = map[2];
-    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.address(m_doc), quint32(2));
     QCOMPARE(ch.start(), uchar(253));
     QCOMPARE(ch.target(), uchar(125));
     QCOMPARE(ch.current(), uchar(253));
 
     QVERIFY(map.contains(3) == true);
     ch = map[3];
-    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.address(m_doc), quint32(3));
     QCOMPARE(ch.start(), uchar(252));
     QCOMPARE(ch.target(), uchar(124));
     QCOMPARE(ch.current(), uchar(252));
 
     QVERIFY(map.contains(4) == true);
     ch = map[4];
-    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.address(m_doc), quint32(4));
     QCOMPARE(ch.start(), uchar(251));
     QCOMPARE(ch.target(), uchar(123));
     QCOMPARE(ch.current(), uchar(251));
 
     QVERIFY(map.contains(5) == true);
     ch = map[5];
-    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.address(m_doc), quint32(5));
     QCOMPARE(ch.start(), uchar(250));
     QCOMPARE(ch.target(), uchar(122));
     QCOMPARE(ch.current(), uchar(250));
@@ -521,42 +525,42 @@ void ChaserRunner_Test::createFadeChannels()
 
     QVERIFY(map.contains(0) == true);
     ch = map[0];
-    QCOMPARE(ch.address(), quint32(0));
+    QCOMPARE(ch.address(m_doc), quint32(0));
     QCOMPARE(ch.start(), uchar(1));
     QCOMPARE(ch.target(), uchar(0));
     QCOMPARE(ch.current(), uchar(1));
 
     QVERIFY(map.contains(1) == true);
     ch = map[1];
-    QCOMPARE(ch.address(), quint32(1));
+    QCOMPARE(ch.address(m_doc), quint32(1));
     QCOMPARE(ch.start(), uchar(2));
     QCOMPARE(ch.target(), uchar(1));
     QCOMPARE(ch.current(), uchar(2));
 
     QVERIFY(map.contains(2) == true);
     ch = map[2];
-    QCOMPARE(ch.address(), quint32(2));
+    QCOMPARE(ch.address(m_doc), quint32(2));
     QCOMPARE(ch.start(), uchar(3));
     QCOMPARE(ch.target(), uchar(2));
     QCOMPARE(ch.current(), uchar(3));
 
     QVERIFY(map.contains(3) == true);
     ch = map[3];
-    QCOMPARE(ch.address(), quint32(3));
+    QCOMPARE(ch.address(m_doc), quint32(3));
     QCOMPARE(ch.start(), uchar(4));
     QCOMPARE(ch.target(), uchar(3));
     QCOMPARE(ch.current(), uchar(4));
 
     QVERIFY(map.contains(4) == true);
     ch = map[4];
-    QCOMPARE(ch.address(), quint32(4));
+    QCOMPARE(ch.address(m_doc), quint32(4));
     QCOMPARE(ch.start(), uchar(5));
     QCOMPARE(ch.target(), uchar(4));
     QCOMPARE(ch.current(), uchar(5));
 
     QVERIFY(map.contains(5) == true);
     ch = map[5];
-    QCOMPARE(ch.address(), quint32(5));
+    QCOMPARE(ch.address(m_doc), quint32(5));
     QCOMPARE(ch.start(), uchar(6));
     QCOMPARE(ch.target(), uchar(5));
     QCOMPARE(ch.current(), uchar(6));
@@ -603,7 +607,7 @@ void ChaserRunner_Test::createFadeChannelsAutoHTPZero()
 
     QVERIFY(map.contains(15) == true);
     FadeChannel& ch = map[15];
-    QCOMPARE(ch.address(), quint32(15));
+    QCOMPARE(ch.address(m_doc), quint32(15));
     QCOMPARE(ch.start(), uchar(0));
     QCOMPARE(ch.target(), uchar(255));
     QCOMPARE(ch.current(), uchar(0));
@@ -619,7 +623,7 @@ void ChaserRunner_Test::createFadeChannelsAutoHTPZero()
 
     QVERIFY(zero.contains(15) == true);
     ch = zero[15];
-    QCOMPARE(ch.address(), quint32(15));
+    QCOMPARE(ch.address(m_doc), quint32(15));
     QCOMPARE(ch.start(), uchar(142));
     QCOMPARE(ch.target(), uchar(0));
     QCOMPARE(ch.current(), uchar(142));

@@ -34,19 +34,21 @@
 
 void GenericFader_Test::initTestCase()
 {
-    m_doc = NULL;
     Bus::init(this);
+    m_doc = new Doc(this);
 }
 
 void GenericFader_Test::init()
 {
-    m_doc = new Doc(this);
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(4);
+    fxi->setAddress(10);
+    m_doc->addFixture(fxi);
 }
 
 void GenericFader_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void GenericFader_Test::addRemove()
@@ -56,58 +58,55 @@ void GenericFader_Test::addRemove()
     QCOMPARE(fader.m_channels.count(), 0);
     QVERIFY(fader.m_channels.contains(15) == false);
 
-    FadeChannel ch;
-    ch.setAddress(15);
-    fader.add(ch);
-    QVERIFY(fader.m_channels.contains(15) == true);
+    FadeChannel fc;
+    fc.setFixture(0);
+    fc.setChannel(0);
+    fader.add(fc);
+    QVERIFY(fader.m_channels.contains(10) == true);
     QCOMPARE(fader.m_channels.count(), 1);
 
-    fader.remove(14);
-    QVERIFY(fader.m_channels.contains(15) == true);
+    fader.remove(1); // No such channel
+    QVERIFY(fader.m_channels.contains(10) == true);
     QCOMPARE(fader.m_channels.count(), 1);
 
-    fader.remove(0);
-    QVERIFY(fader.m_channels.contains(15) == true);
+    fader.remove(2);
+    QVERIFY(fader.m_channels.contains(10) == true);
     QCOMPARE(fader.m_channels.count(), 1);
 
-    fader.remove(15);
-    QVERIFY(fader.m_channels.contains(15) == false);
+    fader.remove(10);
+    QVERIFY(fader.m_channels.contains(10) == false);
     QCOMPARE(fader.m_channels.count(), 0);
 
-    ch.setAddress(0);
-    fader.add(ch);
-    ch.setAddress(1);
-    fader.add(ch);
-    ch.setAddress(2);
-    fader.add(ch);
-    QVERIFY(fader.m_channels.contains(0) == true);
-    QVERIFY(fader.m_channels.contains(1) == true);
-    QVERIFY(fader.m_channels.contains(2) == true);
+    fc.setChannel(0);
+    fader.add(fc);
+    fc.setChannel(1);
+    fader.add(fc);
+    fc.setChannel(2);
+    fader.add(fc);
+    QVERIFY(fader.m_channels.contains(10) == true);
+    QVERIFY(fader.m_channels.contains(11) == true);
+    QVERIFY(fader.m_channels.contains(12) == true);
     QCOMPARE(fader.m_channels.count(), 3);
 
     fader.removeAll();
-    QVERIFY(fader.m_channels.contains(0) == false);
-    QVERIFY(fader.m_channels.contains(1) == false);
-    QVERIFY(fader.m_channels.contains(2) == false);
     QCOMPARE(fader.m_channels.count(), 0);
 
-    ch.setAddress(0);
-    ch.setTarget(127);
-    fader.add(ch);
-    QCOMPARE(fader.m_channels[0].target(), uchar(127));
-    QCOMPARE(fader.m_channels.count(), 1);
+    fc.setFixture(0);
+    fc.setChannel(0);
+    fc.setTarget(127);
+    fader.add(fc);
+    QCOMPARE(fader.m_channels.size(), 1);
+    QCOMPARE(fader.m_channels[10].target(), uchar(127));
 
-    ch.setAddress(0);
-    ch.setTarget(63);
-    fader.add(ch);
-    QCOMPARE(fader.m_channels[0].target(), uchar(127));
-    QCOMPARE(fader.m_channels.count(), 1);
+    fc.setTarget(63);
+    fader.add(fc);
+    QCOMPARE(fader.m_channels.size(), 1);
+    QCOMPARE(fader.m_channels[10].target(), uchar(127));
 
-    ch.setAddress(0);
-    ch.setCurrent(63);
-    fader.add(ch);
-    QCOMPARE(fader.m_channels[0].target(), uchar(63));
-    QCOMPARE(fader.m_channels.count(), 1);
+    fc.setCurrent(63);
+    fader.add(fc);
+    QCOMPARE(fader.m_channels.size(), 1);
+    QCOMPARE(fader.m_channels[10].target(), uchar(63));
 }
 
 void GenericFader_Test::write()
@@ -117,19 +116,19 @@ void GenericFader_Test::write()
 
     Bus::instance()->setValue(Bus::defaultFade(), 255);
 
-    FadeChannel ch;
-    ch.setAddress(400);
-    ch.setGroup(QLCChannel::Intensity);
-    ch.setStart(255);
-    ch.setTarget(0);
-    ch.setCurrent(255);
-    ch.setBus(Bus::defaultFade());
-    fader.add(ch);
+    FadeChannel fc;
+    fc.setFixture(0);
+    fc.setChannel(0);
+    fc.setStart(255);
+    fc.setTarget(0);
+    fc.setCurrent(255);
+    fc.setBus(Bus::defaultFade());
+    fader.add(fc);
 
     for (int i = 255; i >= 0; i--)
     {
         ua.zeroIntensityChannels();
         fader.write(&ua);
-        QCOMPARE(uchar(ua.preGMValues()[400]), uchar(i));
+        QCOMPARE(uchar(ua.preGMValues()[10]), uchar(i));
     }
 }

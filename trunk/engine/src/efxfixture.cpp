@@ -29,6 +29,7 @@
 #include "function.h"
 #include "scene.h"
 #include "efx.h"
+#include "doc.h"
 
 /*****************************************************************************
  * Initialization
@@ -52,14 +53,8 @@ EFXFixture::EFXFixture(EFX* parent)
     m_panValue = 0;
     m_tiltValue = 0;
 
-    m_lsbPanChannel = QLCChannel::invalid();
-    m_msbPanChannel = QLCChannel::invalid();
-    m_lsbTiltChannel = QLCChannel::invalid();
-    m_msbTiltChannel = QLCChannel::invalid();
-
     m_intensity = 1.0;
 
-    m_fadeBus = Bus::defaultFade();
     m_fadeIntensity = 255;
 }
 
@@ -80,19 +75,19 @@ void EFXFixture::copyFrom(const EFXFixture* ef)
     m_panValue = ef->m_panValue;
     m_tiltValue = ef->m_tiltValue;
 
-    m_lsbPanChannel = ef->m_lsbPanChannel;
-    m_msbPanChannel = ef->m_msbPanChannel;
-    m_lsbTiltChannel = ef->m_lsbTiltChannel;
-    m_msbTiltChannel = ef->m_msbTiltChannel;
-
     m_intensity = ef->m_intensity;
 
     m_fadeIntensity = ef->m_fadeIntensity;
-    m_fadeBus = ef->m_fadeBus;
 }
 
 EFXFixture::~EFXFixture()
 {
+}
+
+Doc* EFXFixture::doc() const
+{
+    Q_ASSERT(m_parent != NULL);
+    return m_parent->doc();
 }
 
 /****************************************************************************
@@ -228,36 +223,6 @@ int EFXFixture::serialNumber() const
     return m_serialNumber;
 }
 
-void EFXFixture::setLsbPanChannel(quint32 ch)
-{
-    m_lsbPanChannel = ch;
-}
-
-void EFXFixture::setMsbPanChannel(quint32 ch)
-{
-    m_msbPanChannel = ch;
-}
-
-void EFXFixture::setLsbTiltChannel(quint32 ch)
-{
-    m_lsbTiltChannel = ch;
-}
-
-void EFXFixture::setMsbTiltChannel(quint32 ch)
-{
-    m_msbTiltChannel = ch;
-}
-
-void EFXFixture::setIntensityChannels(QList <quint32> channels)
-{
-    m_intensityChannels = channels;
-}
-
-void EFXFixture::setFadeBus(quint32 id)
-{
-    m_fadeBus = id;
-}
-
 void EFXFixture::updateSkipThreshold()
 {
     Q_ASSERT(m_parent != NULL);
@@ -275,16 +240,14 @@ void EFXFixture::updateSkipThreshold()
 
 bool EFXFixture::isValid()
 {
-    if (m_msbPanChannel != QLCChannel::invalid() &&
-        m_msbTiltChannel != QLCChannel::invalid() &&
-        m_fixture != Fixture::invalidId())
-    {
-        return true;
-    }
-    else
-    {
+    Fixture* fxi = doc()->fixture(fixture());
+    if (fxi == NULL)
         return false;
-    }
+    else if (fxi->panMsbChannel() == QLCChannel::invalid() && // Maybe a device can pan OR tilt
+             fxi->tiltMsbChannel() == QLCChannel::invalid())   // but not both. Teh sux0r.
+        return false;
+    else
+        return true;
 }
 
 void EFXFixture::reset()
@@ -398,18 +361,22 @@ void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
 
     if (fadeIntensity() > 0 && m_started == false)
     {
-        foreach (quint32 ich, m_intensityChannels)
+        Fixture* fxi = doc()->fixture(fixture());
+        Q_ASSERT(fxi != NULL);
+
+        if (fxi->masterIntensityChannel() != QLCChannel::invalid())
         {
-            FadeChannel ch;
-            ch.setAddress(ich);
-            ch.setStart(0);
-            ch.setCurrent(ch.start());
+            FadeChannel fc;
+            fc.setFixture(fixture());
+            fc.setChannel(fxi->masterIntensityChannel());
+            fc.setBus(m_parent->fadeBusID());
+
+            fc.setStart(0);
+            fc.setCurrent(fc.start());
             // Don't use intensity() multiplier because EFX's GenericFader takes care of that
-            ch.setTarget(fadeIntensity());
-            ch.setGroup(QLCChannel::Intensity);
-            ch.setBus(m_fadeBus);
+            fc.setTarget(fadeIntensity());
             // Fade channel up with EFX's own GenericFader to allow manual intensity control
-            m_parent->m_fader->add(ch);
+            m_parent->m_fader->add(fc);
         }
     }
 
@@ -422,20 +389,24 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
 
     if (fadeIntensity() > 0 && m_started == true)
     {
-        foreach (quint32 ich, m_intensityChannels)
+        Fixture* fxi = doc()->fixture(fixture());
+        Q_ASSERT(fxi != NULL);
+
+        if (fxi->masterIntensityChannel() != QLCChannel::invalid())
         {
-            FadeChannel ch;
-            ch.setAddress(ich);
-            ch.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
-            ch.setCurrent(ch.start());
-            ch.setTarget(0);
-            ch.setGroup(QLCChannel::Intensity);
-            ch.setBus(m_fadeBus);
+            FadeChannel fc;
+            fc.setFixture(fixture());
+            fc.setChannel(fxi->masterIntensityChannel());
+            fc.setBus(m_parent->fadeBusID());
+
+            fc.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
+            fc.setCurrent(fc.start());
+            fc.setTarget(0);
             // Give zero-fading to MasterTimer because EFX will stop after this call
-            timer->fader()->add(ch);
+            timer->fader()->add(fc);
             // Remove the previously up-faded channel from EFX's internal fader to allow
             // MasterTimer's fader take HTP precedence.
-            m_parent->m_fader->remove(ich);
+            m_parent->m_fader->remove(fc);
         }
     }
 
@@ -446,27 +417,34 @@ void EFXFixture::setPoint(UniverseArray* universes)
 {
     Q_ASSERT(universes != NULL);
 
+    Fixture* fxi = doc()->fixture(fixture());
+    Q_ASSERT(fxi != NULL);
+
     /* Write coarse point data to universes */
-    universes->write(m_msbPanChannel, static_cast<char> (m_panValue),
-                     QLCChannel::Pan);
-    universes->write(m_msbTiltChannel, static_cast<char> (m_tiltValue),
-                     QLCChannel::Tilt);
+    if (fxi->panMsbChannel() != QLCChannel::invalid())
+        universes->write(fxi->universeAddress() + fxi->panMsbChannel(),
+                         static_cast<char>(m_panValue), QLCChannel::Pan);
+    if (fxi->tiltMsbChannel() != QLCChannel::invalid())
+        universes->write(fxi->universeAddress() + fxi->tiltMsbChannel(),
+                         static_cast<char> (m_tiltValue), QLCChannel::Tilt);
 
     /* Write fine point data to universes if applicable */
-    if (m_lsbPanChannel != QLCChannel::invalid())
+    if (fxi->panLsbChannel() != QLCChannel::invalid())
     {
         /* Leave only the fraction */
         char value = static_cast<char> ((m_panValue - floor(m_panValue))
                                         * double(UCHAR_MAX));
-        universes->write(m_lsbPanChannel, value, QLCChannel::Pan);
+        universes->write(fxi->universeAddress() + fxi->panLsbChannel(),
+                         value, QLCChannel::Pan);
     }
 
-    if (m_lsbTiltChannel != QLCChannel::invalid())
+    if (fxi->tiltLsbChannel() != QLCChannel::invalid())
     {
         /* Leave only the fraction */
         char value = static_cast<char> ((m_tiltValue - floor(m_tiltValue))
                                         * double(UCHAR_MAX));
-        universes->write(m_lsbTiltChannel, value, QLCChannel::Tilt);
+        universes->write(fxi->universeAddress() + fxi->tiltLsbChannel(),
+                         value, QLCChannel::Tilt);
     }
 }
 

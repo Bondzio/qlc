@@ -96,6 +96,9 @@ void Doc::clearContents()
         emit fixtureRemoved(fxi->id());
         delete fxi;
     }
+
+    m_latestFunctionId = 0;
+    m_latestFixtureId = 0;
 }
 
 /*****************************************************************************
@@ -153,15 +156,6 @@ void Doc::setMode(Doc::Mode mode)
     if (m_mode == mode)
         return;
     m_mode = mode;
-
-    foreach(Function* func, m_functions.values())
-    {
-        Q_ASSERT(func != NULL);
-        if (mode == Operate)
-            func->arm();
-        else if (mode == Design)
-            func->disarm();
-    }
 
     emit modeChanged(m_mode);
 }

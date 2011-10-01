@@ -31,6 +31,7 @@ class Collection_Test : public QObject
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
     void cleanup();
 
@@ -42,12 +43,11 @@ private slots:
     void loadWrongType();
     void loadWrongRoot();
     void loadWrongMemberTag();
+    void loadPostLoad();
     void save();
     void copyFrom();
     void createCopy();
 
-    void armSuccess();
-    void armMissingFunction();
     void write();
 
     void stopNotOwnChildren();

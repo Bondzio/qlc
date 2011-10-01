@@ -869,99 +869,22 @@ quint32 EFX::fadeBusID() const
  * Running
  *****************************************************************************/
 
-void EFX::arm()
+void EFX::preRun(MasterTimer* timer)
 {
     int serialNumber = 0;
-
-    Doc* doc = qobject_cast <Doc*> (parent());
-    Q_ASSERT(doc != NULL);
 
     QListIterator <EFXFixture*> it(m_fixtures);
     while (it.hasNext() == true)
     {
         EFXFixture* ef = it.next();
         Q_ASSERT(ef != NULL);
-
         ef->setSerialNumber(serialNumber++);
-
-        /* If fxi == NULL, the fixture has been destroyed */
-        Fixture* fxi = doc->fixture(ef->fixture());
-        if (fxi == NULL)
-            continue;
-
-        /* If this fixture has no mode, it's a generic dimmer that
-           can't do pan&tilt anyway. */
-        const QLCFixtureMode* mode = fxi->fixtureMode();
-        if (mode == NULL)
-            continue;
-
-        QList <quint32> intensityChannels;
-
-        /* Find exact channel numbers for MSB/LSB pan and tilt */
-        for (quint32 i = 0; i < quint32(mode->channels().size()); i++)
-        {
-            QLCChannel* ch = mode->channel(i);
-            Q_ASSERT(ch != NULL);
-
-            if (ch->group() == QLCChannel::Pan)
-            {
-                if (ch->controlByte() == QLCChannel::MSB)
-                    ef->setMsbPanChannel(fxi->universeAddress() + i);
-                else if (ch->controlByte() == QLCChannel::LSB)
-                    ef->setLsbPanChannel(fxi->universeAddress() + i);
-            }
-            else if (ch->group() == QLCChannel::Tilt)
-            {
-                if (ch->controlByte() == QLCChannel::MSB)
-                    ef->setMsbTiltChannel(fxi->universeAddress() + i);
-                else if (ch->controlByte() == QLCChannel::LSB)
-                    ef->setLsbTiltChannel(fxi->universeAddress() + i);
-            }
-            else if (ch->group() == QLCChannel::Intensity &&
-                     ch->colour() == QLCChannel::NoColour) // Don't touch RGB/CMY channels
-            {
-                if (ch->searchCapability(/*D*/"immer", false) != NULL ||
-                    ch->searchCapability(/*I*/"ntensity", false) != NULL)
-                {
-                    intensityChannels << (fxi->universeAddress() + i);
-                }
-            }
-        }
-
-        ef->setIntensityChannels(intensityChannels);
-        ef->setFadeBus(fadeBusID());
     }
 
     Q_ASSERT(m_fader == NULL);
-    m_fader = new GenericFader(doc);
+    m_fader = new GenericFader(doc());
 
-    resetElapsed();
-}
-
-void EFX::disarm()
-{
-    Q_ASSERT(m_fader != NULL);
-    delete m_fader;
-    m_fader = NULL;
-}
-
-void EFX::postRun(MasterTimer* timer, UniverseArray* universes)
-{
-    /* Reset all fixtures */
-    QListIterator <EFXFixture*> it(m_fixtures);
-    while (it.hasNext() == true)
-    {
-        EFXFixture* ef(it.next());
-
-        /* Run the EFX's stop scene for Loop & PingPong modes */
-        if (m_runOrder != SingleShot)
-            ef->stop(timer, universes);
-        ef->reset();
-    }
-
-    m_fader->removeAll();
-
-    Function::postRun(timer, universes);
+    Function::preRun(timer);
 }
 
 void EFX::write(MasterTimer* timer, UniverseArray* universes)
@@ -986,6 +909,28 @@ void EFX::write(MasterTimer* timer, UniverseArray* universes)
     if (ready == m_fixtures.count())
         stop();
     m_fader->write(universes);
+}
+
+void EFX::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    /* Reset all fixtures */
+    QListIterator <EFXFixture*> it(m_fixtures);
+    while (it.hasNext() == true)
+    {
+        EFXFixture* ef(it.next());
+
+        /* Run the EFX's stop scene for Loop & PingPong modes */
+        if (m_runOrder != SingleShot)
+            ef->stop(timer, universes);
+        ef->reset();
+    }
+
+    Q_ASSERT(m_fader != NULL);
+    m_fader->removeAll();
+    delete m_fader;
+    m_fader = NULL;
+
+    Function::postRun(timer, universes);
 }
 
 /*****************************************************************************

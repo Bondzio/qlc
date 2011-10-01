@@ -79,6 +79,9 @@ public:
      */
     virtual ~Function();
 
+    /** Get the parent Doc object */
+    Doc* doc() const;
+
     /*********************************************************************
      * Copying
      *********************************************************************/
@@ -355,12 +358,6 @@ private:
      * Running
      *********************************************************************/
 public:
-    /** Allocate run-time stuff */
-    virtual void arm() = 0;
-
-    /** Free any run-time allocations */
-    virtual void disarm() = 0;
-
     /**
      * Called by MasterTimer when the function is started. MasterTimer's
      * function list mutex is locked during this call, so functions must

@@ -50,10 +50,7 @@
 void Doc_Test::initTestCase()
 {
     Bus::init(this);
-}
 
-void Doc_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -62,10 +59,13 @@ void Doc_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
+void Doc_Test::init()
+{
+}
+
 void Doc_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void Doc_Test::defaults()

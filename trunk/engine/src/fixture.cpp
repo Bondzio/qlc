@@ -43,6 +43,12 @@ Fixture::Fixture(QObject* parent) : QObject(parent)
     m_address = 0;
     m_channels = 0;
 
+    m_panMsbChannel = QLCChannel::invalid();
+    m_tiltMsbChannel = QLCChannel::invalid();
+    m_panLsbChannel = QLCChannel::invalid();
+    m_tiltLsbChannel = QLCChannel::invalid();
+    m_masterIntensityChannel = QLCChannel::invalid();
+
     m_fixtureDef = NULL;
     m_fixtureMode = NULL;
 
@@ -265,6 +271,31 @@ QSet <quint32> Fixture::channels(const QString& name, Qt::CaseSensitivity cs,
     return set;
 }
 
+quint32 Fixture::panMsbChannel() const
+{
+    return m_panMsbChannel;
+}
+
+quint32 Fixture::tiltMsbChannel() const
+{
+    return m_tiltMsbChannel;
+}
+
+quint32 Fixture::panLsbChannel() const
+{
+    return m_panLsbChannel;
+}
+
+quint32 Fixture::tiltLsbChannel() const
+{
+    return m_tiltLsbChannel;
+}
+
+quint32 Fixture::masterIntensityChannel() const
+{
+    return m_masterIntensityChannel;
+}
+
 void Fixture::createGenericChannel()
 {
     if (m_genericChannel == NULL)
@@ -275,6 +306,44 @@ void Fixture::createGenericChannel()
         m_genericChannel->setName(tr("Intensity"));
         m_genericChannel->addCapability(
                             new QLCCapability(0, UCHAR_MAX, tr("Intensity")));
+    }
+}
+
+void Fixture::findChannels()
+{
+    m_panMsbChannel = QLCChannel::invalid();
+    m_tiltMsbChannel = QLCChannel::invalid();
+    m_panLsbChannel = QLCChannel::invalid();
+    m_tiltLsbChannel = QLCChannel::invalid();
+    m_masterIntensityChannel = QLCChannel::invalid();
+
+    if (m_fixtureDef == NULL || m_fixtureMode == NULL)
+        return;
+
+    for (quint32 i = 0; i < quint32(m_fixtureMode->channels().size()); i++)
+    {
+        const QLCChannel* ch = m_fixtureMode->channel(i);
+        Q_ASSERT(ch != NULL);
+
+        if (ch->group() == QLCChannel::Pan)
+        {
+            if (ch->controlByte() == QLCChannel::MSB)
+                m_panMsbChannel = i;
+            else if (ch->controlByte() == QLCChannel::LSB)
+                m_panLsbChannel = i;
+        }
+        else if (ch->group() == QLCChannel::Tilt)
+        {
+            if (ch->controlByte() == QLCChannel::MSB)
+                m_tiltMsbChannel = i;
+            else if (ch->controlByte() == QLCChannel::LSB)
+                m_tiltLsbChannel = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::NoColour) // Don't touch RGB/CMY channels
+        {
+            m_masterIntensityChannel = i;
+        }
     }
 }
 
@@ -300,6 +369,8 @@ void Fixture::setFixtureDefinition(const QLCFixtureDef* fixtureDef,
         m_fixtureMode = NULL;
         createGenericChannel();
     }
+
+    findChannels();
 
     emit changed(m_id);
 }

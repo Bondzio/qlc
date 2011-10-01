@@ -39,12 +39,8 @@
 
 void Collection_Test::initTestCase()
 {
-    m_doc = NULL;
     Bus::init(this);
-}
 
-void Collection_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -53,10 +49,18 @@ void Collection_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
-void Collection_Test::cleanup()
+void Collection_Test::cleanupTestCase()
 {
     delete m_doc;
-    m_doc = NULL;
+}
+
+void Collection_Test::init()
+{
+}
+
+void Collection_Test::cleanup()
+{
+    m_doc->clearContents();
 }
 
 void Collection_Test::initial()
@@ -257,6 +261,25 @@ void Collection_Test::loadWrongMemberTag()
     QCOMPARE(c.functions().size(), 1);
 }
 
+void Collection_Test::loadPostLoad()
+{
+    QDomDocument doc;
+
+    QDomElement root = doc.createElement("Function");
+    root.setAttribute("Type", "Collection");
+
+    QDomElement s2 = doc.createElement("Step");
+    QDomText s2Text = doc.createTextNode("12");
+    s2.appendChild(s2Text);
+    root.appendChild(s2);
+
+    Collection c(m_doc);
+    QVERIFY(c.loadXML(&root) == true);
+    QCOMPARE(c.functions().size(), 1);
+    c.postLoad();
+    QCOMPARE(c.functions().size(), 0);
+}
+
 void Collection_Test::save()
 {
     Collection c(m_doc);
@@ -362,80 +385,6 @@ void Collection_Test::createCopy()
     QVERIFY(copy->functions().at(2) == 40);
 }
 
-void Collection_Test::armSuccess()
-{
-    Doc* doc = new Doc(this);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setName("Test Fixture");
-    fxi->setAddress(0);
-    fxi->setUniverse(0);
-    fxi->setChannels(2);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("Scene1");
-    s1->setValue(fxi->id(), 0, UCHAR_MAX);
-    s1->setValue(fxi->id(), 1, UCHAR_MAX);
-    doc->addFunction(s1);
-    QVERIFY(s1->id() != Function::invalidId());
-
-    Scene* s2 = new Scene(doc);
-    s2->setName("Scene2");
-    s2->setValue(fxi->id(), 0, 0);
-    s2->setValue(fxi->id(), 1, 0);
-    doc->addFunction(s2);
-    QVERIFY(s2->id() != Function::invalidId());
-
-    Collection* c = new Collection(doc);
-    c->setName("Collection");
-    c->addFunction(s1->id());
-    c->addFunction(s2->id());
-
-    QVERIFY(c->functions().size() == 2);
-    c->arm();
-    QVERIFY(c->functions().size() == 2);
-
-    delete doc;
-}
-
-void Collection_Test::armMissingFunction()
-{
-    Doc* doc = new Doc(this);
-
-    Fixture* fxi = new Fixture(doc);
-    fxi->setName("Test Fixture");
-    fxi->setAddress(0);
-    fxi->setUniverse(0);
-    fxi->setChannels(2);
-    doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(doc);
-    s1->setName("Scene1");
-    s1->setValue(fxi->id(), 0, UCHAR_MAX);
-    s1->setValue(fxi->id(), 1, UCHAR_MAX);
-    doc->addFunction(s1);
-
-    Scene* s2 = new Scene(doc);
-    s2->setName("Scene2");
-    s2->setValue(fxi->id(), 0, 0);
-    s2->setValue(fxi->id(), 1, 0);
-    doc->addFunction(s2);
-
-    Collection* c = new Collection(doc);
-    c->setName("Collection");
-    c->addFunction(s1->id());
-    c->addFunction(123); // Nonexistent function
-    c->addFunction(s2->id());
-    c->addFunction(55); // Nonexistent function
-
-    QVERIFY(c->functions().size() == 4);
-    c->arm();
-    QVERIFY(c->functions().size() == 2); // Nonexistent functions are removed
-
-    delete doc;
-}
-
 void Collection_Test::write()
 {
     Doc* doc = new Doc(this);
@@ -465,10 +414,6 @@ void Collection_Test::write()
     c->setName("Collection");
     c->addFunction(s1->id());
     c->addFunction(s2->id());
-
-    s1->arm();
-    s2->arm();
-    c->arm();
 
     UniverseArray uni(1);
     MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
@@ -519,10 +464,6 @@ void Collection_Test::write()
     QVERIFY(c->stopped() == true);
     mts->stopFunction(c);
 
-    c->disarm();
-    s1->disarm();
-    s2->disarm();
-
     delete mts;
     delete doc;
 }
@@ -557,10 +498,6 @@ void Collection_Test::stopNotOwnChildren()
     c->addFunction(s1->id());
     c->addFunction(s2->id());
     doc->addFunction(c);
-
-    s1->arm();
-    s2->arm();
-    c->arm();
 
     UniverseArray uni(512);
     MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);

@@ -49,20 +49,19 @@ void Chaser_Test::initTestCase()
     Bus::init(this);
 }
 
+void Chaser_Test::cleanupTestCase()
+{
+    delete m_doc;
+}
+
 void Chaser_Test::init()
 {
     m_doc = new Doc(this);
-
-    //QDir dir(INTERNAL_FIXTUREDIR);
-    //dir.setFilter(QDir::Files);
-    //dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
-    //QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void Chaser_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void Chaser_Test::initial()
@@ -684,46 +683,6 @@ void Chaser_Test::save()
     QVERIFY(fids == 4);
 }
 
-void Chaser_Test::arm()
-{
-    Scene* s1 = new Scene(m_doc);
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    m_doc->addFunction(s3);
-
-    Scene* s4 = new Scene(m_doc);
-    m_doc->addFunction(s4);
-
-    Chaser* c = new Chaser(m_doc);
-    c->addStep(s1->id());
-    c->addStep(s2->id());
-    c->addStep(s3->id());
-    c->addStep(s4->id());
-    c->addStep(123); // Nonexistent, should not appear in stepFunctions()
-    m_doc->addFunction(c);
-
-    QVERIFY(c->m_runner == NULL);
-    c->arm();
-    QVERIFY(c->m_runner != NULL);
-    QCOMPARE(c->elapsed(), quint32(0));
-
-    QList <Function*> funcs (c->m_runner->m_steps);
-    QCOMPARE(funcs.size(), 4);
-    QCOMPARE(funcs.at(0), s1);
-    QCOMPARE(funcs.at(1), s2);
-    QCOMPARE(funcs.at(2), s3);
-    QCOMPARE(funcs.at(3), s4);
-
-    c->disarm();
-    QCOMPARE(c->m_runner, (ChaserRunner*)(0));
-    c->disarm();
-    QCOMPARE(c->m_runner, (ChaserRunner*)(0));
-}
-
 void Chaser_Test::tap()
 {
     Scene* s1 = new Scene(m_doc);
@@ -747,7 +706,8 @@ void Chaser_Test::tap()
 
     c->slotBusTapped(Bus::defaultFade()); // Wrong bus
     c->slotBusTapped(Bus::defaultHold()); // Correct bus, m_runner == NULL
-    c->arm();
+
+    c->preRun(m_doc->masterTimer());
     c->slotBusTapped(Bus::defaultHold()); // Correct bus, m_runner != NULL
     QCOMPARE(c->m_runner->m_next, true);
 }
@@ -760,14 +720,13 @@ void Chaser_Test::preRun()
     UniverseArray ua(512);
     MasterTimerStub timer(m_doc, ua);
 
-    c->arm();
-    c->m_runner->m_elapsed = 31337;
     c->m_stop = true;
 
     c->preRun(&timer);
+    QVERIFY(c->m_runner != NULL);
     QCOMPARE(c->m_stop, false); // Make sure Function::preRun() is called
     QCOMPARE(c->m_runner->m_elapsed, quint32(0)); // Make sure ChaserRunner::reset() is called
-    c->disarm();
+    c->postRun(&timer, &ua);
 }
 
 void Chaser_Test::write()
@@ -782,7 +741,6 @@ void Chaser_Test::write()
     UniverseArray ua(512);
     MasterTimerStub timer(m_doc, ua);
 
-    c->arm();
     c->preRun(&timer);
 
     QCOMPARE(c->m_runner->m_elapsed, quint32(0));
@@ -794,8 +752,6 @@ void Chaser_Test::write()
     c->write(&timer, &ua);
     QCOMPARE(c->elapsed(), quint32(2)); // Chaser counts overall tick count
     QCOMPARE(c->m_runner->m_elapsed, quint32(1)); // Runner counts ticks per step
-
-    c->disarm();
 }
 
 void Chaser_Test::postRun()
@@ -806,15 +762,12 @@ void Chaser_Test::postRun()
     UniverseArray ua(512);
     MasterTimerStub timer(m_doc, ua);
 
-    c->arm();
     c->preRun(&timer);
     QCOMPARE(c->m_stop, false);
 
     // The chaser has no steps so ChaserRunner::postrun() shouldn't do much
     c->postRun(&timer, &ua);
     QCOMPARE(c->m_stop, true); // Make sure Function::postRun() is called
-
-    c->disarm();
 }
 
 void Chaser_Test::adjustIntensity()
@@ -825,7 +778,7 @@ void Chaser_Test::adjustIntensity()
     UniverseArray ua(512);
     MasterTimerStub timer(m_doc, ua);
 
-    c->arm();
+    c->preRun(&timer);
     c->adjustIntensity(0.5);
     QCOMPARE(c->m_runner->m_intensity, qreal(0.5));
     c->adjustIntensity(0.8);
@@ -834,8 +787,8 @@ void Chaser_Test::adjustIntensity()
     QCOMPARE(c->m_runner->m_intensity, qreal(1.0));
     c->adjustIntensity(-0.1);
     QCOMPARE(c->m_runner->m_intensity, qreal(0.0));
-    c->disarm();
+    c->postRun(&timer, &ua);
 
-    // Mustn't crash after disarm
+    // Mustn't crash after postRun
     c->adjustIntensity(1.0);
 }

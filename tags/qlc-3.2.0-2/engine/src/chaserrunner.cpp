@@ -218,6 +218,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
     if (function != NULL)
         bus = function->busID();
 
+    // Give to-be-zeroed channels to MasterTimer's GenericFader
     QMapIterator <quint32,FadeChannel> it(m_channelMap);
     while (it.hasNext() == true)
     {
@@ -228,7 +229,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
             ch.setTarget(0);
             ch.setBus(bus);
             ch.setReady(false);
-            timer->fader()->add(ch, false);
+            timer->fader()->add(ch);
         }
     }
 }
@@ -311,7 +312,7 @@ void ChaserRunner::handleChannelSwitch(MasterTimer* timer, const UniverseArray* 
     // Give to-be-zeroed channels to MasterTimer, but don't overwrite channels
     QMapIterator <quint32,FadeChannel> it(zeroChannels);
     while (it.hasNext() == true)
-        timer->fader()->add(it.next().value(), false);
+        timer->fader()->add(it.next().value());
 }
 
 QMap <quint32,FadeChannel>
@@ -342,6 +343,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
         channel.setAddress(fxi->universeAddress() + value.channel);
         channel.setGroup(fxi->channel(value.channel)->group());
         channel.setTarget(value.value);
+        channel.setBus(scene->busID());
 
         // Get starting value from universes. For HTP channels it's always 0.
         channel.setStart(uchar(universes->preGMValues()[channel.address()]));

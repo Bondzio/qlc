@@ -2,8 +2,9 @@ qlc (3.2.0-2) stable; urgency=low
 
   * Enttec DMX USB plugin treats a widget as an Open DMX USB when vendor string == "FTDI".
     Otherwise it treats the widget as a DMX USB Pro.
+  * Fixed Chaser & CueList channel zeroing bug.
 
- -- Heikki Junnila <hjunnila@users.sf.net>  Thu, 29 Sep 2011 10:11:32 +0300
+ -- Heikki Junnila <hjunnila@julia>  Sat, 01 Oct 2011 14:22:14 +0300
 
 qlc (3.2.0-1) stable; urgency=high
 

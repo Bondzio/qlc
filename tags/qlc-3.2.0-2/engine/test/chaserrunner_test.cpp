@@ -68,18 +68,21 @@ void ChaserRunner_Test::init()
     m_doc->addFixture(fxi);
 
     m_scene1 = new Scene(m_doc);
+    m_scene1->setBus(10);
     QVERIFY(m_scene1 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene1->setValue(fxi->id(), i, 255 - i);
     m_doc->addFunction(m_scene1);
 
     m_scene2 = new Scene(m_doc);
+    m_scene2->setBus(10);
     QVERIFY(m_scene2 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene2->setValue(fxi->id(), i, 127 - i);
     m_doc->addFunction(m_scene2);
 
     m_scene3 = new Scene(m_doc);
+    m_scene3->setBus(10);
     QVERIFY(m_scene3 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene3->setValue(fxi->id(), i, 0 + i);
@@ -642,7 +645,8 @@ void ChaserRunner_Test::writeMissingFixture()
     UniverseArray ua(512);
     MasterTimerStub timer(this, NULL, ua);
 
-    Bus::instance()->setValue(Bus::defaultFade(), 5);
+    Bus::instance()->setValue(Bus::defaultFade(), 42); // Make sure this bus is not used
+    Bus::instance()->setValue(10, 5);
     Bus::instance()->setValue(Bus::defaultHold(), 5);
 
     for (int i = 0; i < 120; i++)
@@ -659,7 +663,8 @@ void ChaserRunner_Test::writeHoldZero()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 0);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(10, 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
 
     QVERIFY(cr.write(&timer, &ua) == true);
     QCOMPARE(cr.m_elapsed, quint32(1));
@@ -722,7 +727,8 @@ void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
     {
@@ -843,7 +849,8 @@ void ChaserRunner_Test::writeBackwardLoopHoldFiveNextPrevious()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
     {
@@ -964,7 +971,8 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFive()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     for (quint32 i = 0; i < Bus::instance()->value(Bus::defaultHold()); i++)
     {
@@ -1029,7 +1037,8 @@ void ChaserRunner_Test::writeNoAutoStepHoldFive()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     for (quint32 i = 0; i < 10; i++)
     {
@@ -1113,7 +1122,8 @@ void ChaserRunner_Test::writeNoAutoSetCurrentStep()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     for (quint32 i = 0; i < 10; i++)
     {
@@ -1220,7 +1230,8 @@ void ChaserRunner_Test::writeForwardSingleShotHoldFiveAdjustIntensity()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 5);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     cr.adjustIntensity(0.7);
     QCOMPARE(cr.m_intensity, 0.7);
@@ -1317,7 +1328,8 @@ void ChaserRunner_Test::postRun()
     MasterTimerStub timer(this, NULL, ua);
 
     Bus::instance()->setValue(Bus::defaultHold(), 0);
-    Bus::instance()->setValue(Bus::defaultFade(), 0);
+    Bus::instance()->setValue(Bus::defaultFade(), 42);
+    Bus::instance()->setValue(10, 0);
 
     QVERIFY(cr.write(&timer, &ua) == true);
     cr.postRun(&timer, &ua);

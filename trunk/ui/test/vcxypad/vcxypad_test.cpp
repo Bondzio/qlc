@@ -49,10 +49,6 @@
 void VCXYPad_Test::initTestCase()
 {
     Bus::init(this);
-}
-
-void VCXYPad_Test::init()
-{
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -61,10 +57,13 @@ void VCXYPad_Test::init()
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
+void VCXYPad_Test::init()
+{
+}
+
 void VCXYPad_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void VCXYPad_Test::initial()

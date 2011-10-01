@@ -38,24 +38,22 @@
 
 void VCXYPadFixture_Test::initTestCase()
 {
-    m_doc = NULL;
     Bus::init(this);
-}
 
-void VCXYPadFixture_Test::init()
-{
     m_doc = new Doc(this);
-
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
     QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
+void VCXYPadFixture_Test::init()
+{
+}
+
 void VCXYPadFixture_Test::cleanup()
 {
-    delete m_doc;
-    m_doc = NULL;
+    m_doc->clearContents();
 }
 
 void VCXYPadFixture_Test::initial()

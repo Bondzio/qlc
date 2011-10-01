@@ -22,7 +22,7 @@ popd
 #############################################################################
 
 TESTDIR=ui/test
-TESTS=`find ${TESTDIR} -type d -maxdepth 1 -mindepth 1`
+TESTS=`find ${TESTDIR} -maxdepth 1 -mindepth 1 -type d`
 for test in ${TESTS}
 do
     # Ignore .svn

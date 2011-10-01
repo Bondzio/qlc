@@ -100,6 +100,12 @@ void GenericFader_Test::addRemove()
     ch.setAddress(0);
     ch.setTarget(63);
     fader.add(ch);
+    QCOMPARE(fader.m_channels[0].target(), uchar(127));
+    QCOMPARE(fader.m_channels.count(), 1);
+
+    ch.setAddress(0);
+    ch.setCurrent(63);
+    fader.add(ch);
     QCOMPARE(fader.m_channels[0].target(), uchar(63));
     QCOMPARE(fader.m_channels.count(), 1);
 }

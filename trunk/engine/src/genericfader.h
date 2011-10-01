@@ -39,10 +39,14 @@ public:
      * the time specified by ch.bus(). If ch.target() == 0, the channel will
      * be removed automatically from the fader when done.
      *
+     * If the fader already contains the same channel, the one whose current
+     * value is higher remains in the fader. With LTP channels this might result
+     * in the value jumping ina weird way but LTP channels are rarely faded anyway.
+     * With HTP channels the lower value has no meaning in the first place.
+     *
      * @param ch The channel to fade
-     * @param replace If true, replace an existing channel with the new one
      */
-    void add(const FadeChannel& ch, bool replace = true);
+    void add(const FadeChannel& ch);
 
     /**
      * Remove the channel specified by $address from the faded channels.

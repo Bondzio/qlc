@@ -3,8 +3,9 @@ qlc (3.2.0-2) stable; urgency=low
   * Peperoni plugin (unix) explicitly sets DMX startcode to zero during open,
     sends a bulk reset only to bulk-capable devices and uses nonblocking ctrl
     write with devices that don't support blocking write.
+  * Fixed Chaser & CueList channel zeroing bug.
 
- -- Heikki Junnila <hjunnila@users.sf.net>  Thu, 18 Aug 2011 15:16:16 +0300
+ -- Heikki Junnila <hjunnila@users.sf.net>  Sat, 01 Oct 2011 14:22:14 +0300
 
 qlc (3.2.0-1) stable; urgency=high
 

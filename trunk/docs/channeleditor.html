@@ -31,22 +31,58 @@ list of the fixture's channels and values.
    <B>Group</B>
   </TD>
   <TD>
-   The channel group. The group names are usually rather self-explanatory and
-   are used mainly for showing a correct icon and colour in <A HREF="sceneeditor.html">Scene Editor</A>, but
-   there are also some advanced features related to channel groups:
-   <LI><B>Intensity:</B> By default, QLC's <A HREF="concept.html#GrandMaster">Grand Master</A>
-   controls only Intensity channels. Note also when you create RGB/CMY channels,
-   that they should be assigned to the <I>Intensity</I> group, NOT the <EM STYLE="text-decoration:line-through;">Colour</EM> group.</LI>
-   <LI><B>Intensity:</B> The Colour Tool in <A HREF="sceneeditor.html">Scene Editor</A>
-   is available if a fixture provides channels named <U>"Red", "Green" and "Blue"</U>
-   and/or <U>"Cyan", "Magenta" and "Yellow"</U>, belonging to the <I>Intensity</I> group.</LI>
-   <LI><B>Colour:</B> If a <A HREF="concept.html#Capabilities">capability</A> name contains the keyword <U>rainbow</U>
-   in a channel that belongs to the <I>Colour</I> group, that capability will
-   have a rainbow icon beside it in <A HREF="sceneeditor.html">Scene Editor</A>
-   and <A HREF="fixturemanager.html">fixture console</A>.</LI>
-   <LI><B>Pan/Tilt:</B> <A HREF="concept.html#EFX">EFX</A> and
-   <A HREF="vcxypad.html">XY Pad</A> are able to control a fixture only if it
-   has <U>Pan and Tilt</U> channels (8bit or 16bit).</LI>
+   <P>The channel's logical group (role in the fixture):</P>
+
+   <LI>Assign a channel to the <B>Colour</B> group if the channel controls a fixed colour
+   wheel or pre-defined colour macros. <I>Don't</I> assign individual RGB/CMY colour channels
+   to the </B>Colour</B> group but instead use the <B>Intensity</B> group as described below.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Gobo</B> group if the channel controls gobo wheel position
+   or indexing.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Speed</B> group if the channel controls something related
+   to speed (gobo rotation, rainbow speed, tracking speed).</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Prism</B> group if the channel controls a prism.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Prism</B> group if the channel controls a prism.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Shutter</B> group if the channel controls a shutter or
+   strobe.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Beam</B> group if the channel controls a beam shaper.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Effect</B> group if the channel controls something that
+   doesn't quite fit into any of the other groups.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Maintenance</B> group if the channel contains fixture
+   resetting or cooling fan controls or something similar.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Nothing</B> group if the channel should not appear in
+   the <A HREF="sceneeditor.html">Scene Editor</A> or
+   <A HREF="fixturemanager.html">Fixture Console</A>.</LI>
+   <BR>
+   <LI>Assign pan channel(s) to the <B>Pan</B> group and respectively, tilt channel(s) to
+   the <B>Tilt</B> group. See the <B>Control Byte</B> property below.</LI>
+   <BR>
+   <LI>Assign a channel to the <B>Intensity</B> group if the channel should obey HTP rules.
+   Also, the <A HREF="concept.html#GrandMaster">Grand Master</A> controls only Intensity
+   channels by default. Note also when you create RGB/CMY channels, that they should be
+   assigned to the <I>Intensity</I> group, and <B>NOT the Colour group</B>. The Colour Tool
+   in <A HREF="sceneeditor.html">Scene Editor</A> is available only if a fixture provides
+   <B>Intensity</B> channels for RGB/CMY, whose <B>Colour</B> properties have been set
+   accordingly (see the <B>Colour</B> setting below).</LI>
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <B>Colour</B>
+  </TD>
+  <TD>
+   Only available when the channel has been assigned to the <B>Intensity</B> group. Tells,
+   whether the channel controls a specific colour out of the primary colours
+   <B>Red, Green, Blue</B> or <B>Cyan, Magenta, Yellow</B>. If the channel controls the
+   fixture's master intensity, the <B>Generic</B> colour setting should be used.
   </TD>
  </TR>
  <TR>
@@ -54,11 +90,11 @@ list of the fixture's channels and values.
    <B>Control Byte</B>
   </TD>
   <TD>
-   This feature is available only for <U>Pan and Tilt</U> channels. If a fixture
-   has only one pan and one tilt channel, assign them both the <B>Coarse (MSB)</B>
-   control byte. If a fixture has two pan and two tilt channels, assign the
-   <B>Fine (LSB)</B> byte to those pan/tilt channels that provide only subtle
-   (fine 16bit) movement.
+   Only available when the channle has been assigned either to the <B>Pan</B> or <B>Tilt</B> group.
+   If the fixture supports only 8bit movement (only one channel for each), assign the <B>Coarse MSB</B> control byte to the
+   both of them. If, however, the fixture supports 16bit movement (two channels for each),
+   you should assign the <B>Coarse MSB</B> byte to the channels that provide coarse head/mirror
+   movement and the <B>Fine LSB</B> byte to the channels that provide subtle head/mirror adjustment.</LI>
   </TD>
  </TR>
  <TR>

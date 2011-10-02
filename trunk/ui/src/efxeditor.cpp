@@ -38,10 +38,12 @@
 
 #include "fixtureselection.h"
 #include "efxpreviewarea.h"
+#include "vcdockslider.h"
 #include "efxeditor.h"
 #include "fixture.h"
 #include "apputil.h"
 #include "doc.h"
+#include "app.h"
 
 #define SETTINGS_GEOMETRY "efxeditor/geometry"
 
@@ -93,6 +95,9 @@ EFXEditor::~EFXEditor()
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
+    if (m_efx->stopped() == false)
+        m_efx->stopAndWait();
+
     delete m_efx;
 }
 
@@ -125,6 +130,17 @@ void EFXEditor::initGeneralPage()
             this, SLOT(slotMovementBusComboActivated(int)));
     connect(m_fadeBusCombo, SIGNAL(activated(int)),
             this, SLOT(slotFadeBusComboActivated(int)));
+
+    connect(m_testButton, SIGNAL(clicked()),
+            this, SLOT(slotTestClicked()));
+    connect(m_movementBusCombo, SIGNAL(activated(int)),
+            this, SLOT(slotRestartTest()));
+    connect(m_parallelRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotRestartTest()));
+    connect(m_serialRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotRestartTest()));
+    connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotRestartTest()));
 
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
@@ -275,6 +291,49 @@ void EFXEditor::accept()
     m_original->copyFrom(m_efx);
 
     QDialog::accept();
+}
+
+void EFXEditor::slotTestClicked()
+{
+    if (m_testButton->isChecked() == true)
+    {
+        VCDockSlider* slider = new VCDockSlider(NULL, m_doc->inputMap(),
+                                                m_movementBusCombo->currentIndex());
+        slider->setLimits(0, 60);
+
+        slider->show();
+        slider->setFixedSize(QSize(50, 200));
+        QRect r(this->frameGeometry());
+        QRect sr(slider->frameGeometry());
+        slider->hide();
+
+        r.setLeft(r.left() - sr.width() - 2);
+        r.setTop(r.bottom() - sr.height());
+        slider->move(r.topLeft());
+
+        slider->setParent(this, Qt::Tool);
+        slider->setStyle(App::saneStyle());
+        slider->show();
+
+        connect(m_testButton, SIGNAL(clicked()), slider, SLOT(deleteLater()));
+        connect(this, SIGNAL(destroyed()), slider, SLOT(deleteLater()));
+
+        m_doc->masterTimer()->startFunction(m_efx, false);
+    }
+    else
+    {
+        m_efx->stopAndWait();
+    }
+}
+
+void EFXEditor::slotRestartTest()
+{
+    if (m_testButton->isChecked() == true)
+    {
+        // Toggle off, toggle on. Duh.
+        m_testButton->click();
+        m_testButton->click();
+    }
 }
 
 /*****************************************************************************

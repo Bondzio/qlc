@@ -54,8 +54,12 @@ protected:
     void initMovementPage();
     void initInitializationPage();
 
-protected slots:
+public slots:
     void accept();
+
+private slots:
+    void slotTestClicked();
+    void slotRestartTest();
 
 protected:
     EFXPreviewArea* m_previewArea;

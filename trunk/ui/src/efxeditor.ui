@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
+    <width>476</width>
     <height>531</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>EFX Editor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="m_tab">
      <property name="toolTip">
       <string/>
@@ -650,7 +650,17 @@
      </widget>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="m_testButton">
+     <property name="text">
+      <string>&amp;Test Run</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

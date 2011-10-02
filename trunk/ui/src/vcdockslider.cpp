@@ -69,6 +69,7 @@ VCDockSlider::VCDockSlider(QWidget* parent, InputMap* inputMap, quint32 bus)
 
     m_tapButton = new QToolButton(this);
     layout()->addWidget(m_tapButton);
+    layout()->setAlignment(m_tapButton, Qt::AlignHCenter);
     connect(m_tapButton, SIGNAL(clicked()), this, SLOT(slotTapButtonClicked()));
 
     m_bus = bus;
@@ -120,6 +121,11 @@ void VCDockSlider::refreshProperties()
         high = VirtualConsole::properties().holdHighLimit();
     }
 
+    setLimits(low, high);
+}
+
+void VCDockSlider::setLimits(quint32 low, quint32 high)
+{
     Q_ASSERT(m_slider != NULL);
     m_slider->setRange(low * MasterTimer::frequency(), high * MasterTimer::frequency());
 
@@ -149,6 +155,13 @@ void VCDockSlider::slotBusValueChanged(quint32 bus, quint32 value)
 {
     if (bus == m_bus && m_slider->isSliderDown() == false)
         m_slider->setValue(value);
+}
+
+void VCDockSlider::setBus(quint32 bus)
+{
+    m_bus = bus;
+    slotBusNameChanged(bus, Bus::instance()->name(bus));
+    slotBusValueChanged(bus, Bus::instance()->value(bus));
 }
 
 /*****************************************************************************

@@ -45,6 +45,9 @@ public:
     /** Refresh properties from VCProperties */
     void refreshProperties();
 
+    /** Set the slider's low and high limits */
+    void setLimits(quint32 low, quint32 high);
+
 private:
     InputMap* m_inputMap;
 
@@ -57,6 +60,9 @@ private slots:
 
     /** Catches bus value changes */
     void slotBusValueChanged(quint32 bus, quint32 value);
+
+    /** Change the bus */
+    void setBus(quint32 bus);
 
 private:
     quint32 m_bus;

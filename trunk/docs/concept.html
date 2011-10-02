@@ -309,6 +309,20 @@ the Grand Master slider. For example, Grand Master at 127 will result in all
 affected channel's maximum values being limited at exactly 127.</LI>
 </UL>
 
+<A NAME="HTP" HREF="#HTP"><H3>HTP (Highest Takes Precedence)</H3></A>
+
+<P>
+All channels that have been assigned to the <B>Intensity</B> group obey the very simple
+HTP rule: The highest value (nearer 100%) that is currently set to the channel is the one
+that gets sent out to the DMX universe. This is particularly useful for dimmer channels
+that namely control the <I>light intensity</I>. Let's say you have two sliders that control
+the same intensity channel. First, you set slider 1 to 50% and then slider 2 to 75%; as long
+as slider 2 is below 50%, nothing happens but after crossing the 50% value set by slider 1,
+the light intensity increased all the way to 75%. If you drag slider 2 again to 0%, the light
+intensity diminishes until it reaches the 50% set by slider 1 and stays there until slider 1
+is dragged down. See also <A HREF="concept.html#LTP">LTP</A>.
+</P>
+
 <A NAME="InputPlugins" HREF="#InputPlugins"><H3>Input plugins</H3></A>
 
 <P>
@@ -337,6 +351,16 @@ Input profiles can be thought of as <A HREF="#Fixtures">fixtures'</A> cousins;
 they contain information on specific devices that produce input data.
 An input device can be, for example, a slider board like the Behringer BCF-2000,
 Korg nanoKONTROL, an Enttec Playback Wing...
+</P>
+
+<A NAME="LTP" HREF="#LTP"><H3>LTP (Latest Takes Precedence)</H3></A>
+
+<P>
+All channels that have been assigned to the <B>Intensity</B> group obey the very simple
+LTP rule: The latest value that was set by a function or a slider gets sent out to the DMX
+universe. This scheme is useful for <I>intelligent fixture parameters</I> not related to
+<I>intensity</I>. For example, a gobo change is expected to happen immediately, regardless
+of what some other control has done to it. See also <A HREF="concept.html#HTP">HTP</A>.
 </P>
 
 <A NAME="Modes" HREF="#Modes"><H3>Modes</H3></A>

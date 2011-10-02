@@ -19,12 +19,59 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#include <QMessageBox>
 #include <QDebug>
 
 #include "enttecdmxusbwidget.h"
 #include "enttecdmxusbopen.h"
 #include "enttecdmxusbpro.h"
 #include "qlcftdi.h"
+
+/**
+ * Get some interesting strings from the device.
+ *
+ * @param deviceIndex The device index, whose strings to get
+ * @param vendor Returned vendor string
+ * @param description Returned description string
+ * @param serial Returned serial string
+ * @return FT_OK if strings were extracted successfully
+ */
+static FT_STATUS qlcftdi_get_strings(DWORD deviceIndex,
+                                     QString& vendor,
+                                     QString& description,
+                                     QString& serial)
+{
+    char cVendor[256];
+    char cVendorId[256];
+    char cDescription[256];
+    char cSerial[256];
+
+    FT_HANDLE handle;
+
+    FT_STATUS status = FT_Open(deviceIndex, &handle);
+    if (status != FT_OK)
+        return status;
+
+    FT_PROGRAM_DATA pData;
+    pData.Signature1 = 0;
+    pData.Signature2 = 0xFFFFFFFF;
+    pData.Version = 0x00000005;
+    pData.Manufacturer = cVendor;
+    pData.ManufacturerId = cVendorId;
+    pData.Description = cDescription;
+    pData.SerialNumber = cSerial;
+    status = FT_EE_Read(handle, &pData);
+    if (status == FT_OK)
+    {
+        vendor = QString(cVendor);
+        description = QString(cDescription);
+        serial = QString(cSerial);
+    }
+
+    FT_Close(handle);
+
+    return status;
+}
 
 QLCFTDI::QLCFTDI(const QString& serial, const QString& name, quint32 id)
     : m_serial(serial)
@@ -65,22 +112,15 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
     {
         for (DWORD i = 0; i < num; i++)
         {
-            /* Get the device description field so that it can be
-               used to determine the device type (Pro/Open) */
-            QString name(devInfo[i].Description);
-            QString serial(devInfo[i].SerialNumber);
+            QString vendor, description, serial;
 
-            if (name.toLower().contains("pro") == true ||
-                name.toLower().contains("dmxking") == true)
-            {
-                /* This is a DMX USB Pro widget */
-                list << new EnttecDMXUSBPro(serial, name, i);
-            }
+            if (qlcftdi_get_strings(i, vendor, description, serial) != FT_OK)
+                continue;
+
+            if (vendor.toUpper().contains("FTDI") == true)
+                list << new EnttecDMXUSBOpen(serial, description, i);
             else
-            {
-                /* This is an Open DMX USB widget */
-                list << new EnttecDMXUSBOpen(serial, name, i);
-            }
+                list << new EnttecDMXUSBPro(serial, description, i);
         }
     }
 

@@ -12,6 +12,7 @@ fixtures.files += American-DJ-Quad-Gem-DMX.qxf
 fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
 fixtures.files += Chauvet-200b.qxf
+fixtures.files += Chauvet-ColorStrip-Mini.qxf
 fixtures.files += Chauvet-COLORado-1-Tour.qxf
 fixtures.files += Chauvet-DMX-Mega-Strobe-III.qxf
 fixtures.files += Chauvet-Hurricane-1800-Flex.qxf

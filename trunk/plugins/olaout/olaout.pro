@@ -9,7 +9,13 @@ CONFIG   += plugin
 QTPLUGIN  =
 
 INCLUDEPATH += ../interfaces
-LIBS        += -L/usr/local/lib -lolaserver -lola -lolacommon -lprotobuf
+
+macx: {
+    CONFIG    += link_pkgconfig
+    PKGCONFIG += libola libolaserver
+} else {
+    LIBS      += -L/usr/local/lib -lolaserver -lola -lolacommon -lprotobuf
+}
 
 # Forms
 FORMS += configureolaout.ui

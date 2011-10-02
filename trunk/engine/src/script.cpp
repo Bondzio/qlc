@@ -527,9 +527,6 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
     {
         if (ch < fxi->channels())
         {
-            const QLCChannel* channel = fxi->channel(ch);
-            Q_ASSERT(channel != NULL);
-
             int address = fxi->universeAddress() + ch;
             if (address < universes->size())
             {

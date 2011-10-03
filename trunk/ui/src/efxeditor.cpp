@@ -417,19 +417,31 @@ void EFXEditor::addFixtureItem(EFXFixture* ef)
     else
         item->setCheckState(KColumnReverse, Qt::Unchecked);
 
-    QSpinBox* spin = new QSpinBox(this);
-    spin->setRange(0, 255);
-    spin->setValue(ef->fadeIntensity());
-    m_tree->setItemWidget(item, KColumnIntensity, spin);
-    spin->setProperty(PROPERTY_FIXTURE, (qulonglong) ef);
-    connect(spin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFixtureIntensityChanged(int)));
+    updateIntensityColumn(item, ef);
 
     updateIndices(m_tree->indexOfTopLevelItem(item),
                   m_tree->topLevelItemCount() - 1);
 
     /* Select newly-added fixtures so that they can be moved quickly */
     m_tree->setCurrentItem(item);
+}
+
+void EFXEditor::updateIntensityColumn(QTreeWidgetItem* item, EFXFixture* ef)
+{
+    Q_ASSERT(item != NULL);
+    Q_ASSERT(ef != NULL);
+
+    if (m_tree->itemWidget(item, KColumnIntensity) == NULL)
+    {
+        QSpinBox* spin = new QSpinBox(m_tree);
+        spin->setAutoFillBackground(true);
+        spin->setRange(0, 255);
+        spin->setValue(ef->fadeIntensity());
+        m_tree->setItemWidget(item, KColumnIntensity, spin);
+        spin->setProperty(PROPERTY_FIXTURE, (qulonglong) ef);
+        connect(spin, SIGNAL(valueChanged(int)),
+                this, SLOT(slotFixtureIntensityChanged(int)));
+    }
 }
 
 void EFXEditor::removeFixtureItem(EFXFixture* ef)
@@ -600,8 +612,10 @@ void EFXEditor::slotRaiseFixtureClicked()
         if (m_efx->raiseFixture(ef) == true)
         {
             item = m_tree->takeTopLevelItem(index);
+
             m_tree->insertTopLevelItem(index - 1, item);
             m_tree->setCurrentItem(item);
+            updateIntensityColumn(item, ef);
 
             updateIndices(index - 1, index);
         }
@@ -626,6 +640,7 @@ void EFXEditor::slotLowerFixtureClicked()
             item = m_tree->takeTopLevelItem(index);
             m_tree->insertTopLevelItem(index + 1, item);
             m_tree->setCurrentItem(item);
+            updateIntensityColumn(item, ef);
 
             updateIndices(index, index + 1);
         }

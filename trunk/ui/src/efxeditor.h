@@ -78,6 +78,7 @@ protected:
     const QList <EFXFixture*> selectedFixtures() const;
     void updateIndices(int from, int to);
     void addFixtureItem(EFXFixture* ef);
+    void updateIntensityColumn(QTreeWidgetItem* item, EFXFixture* ef);
     void removeFixtureItem(EFXFixture* ef);
 
 protected slots:

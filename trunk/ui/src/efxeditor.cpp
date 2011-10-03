@@ -88,6 +88,11 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
     AppUtil::ensureWidgetIsVisible(this);
+
+    // Used for intensity changes
+    m_testTimer.setSingleShot(true);
+    m_testTimer.setInterval(500);
+    connect(&m_testTimer, SIGNAL(timeout()), this, SLOT(slotRestartTest()));
 }
 
 EFXEditor::~EFXEditor()
@@ -133,6 +138,10 @@ void EFXEditor::initGeneralPage()
 
     connect(m_testButton, SIGNAL(clicked()),
             this, SLOT(slotTestClicked()));
+    connect(m_raiseFixtureButton, SIGNAL(clicked()),
+            this, SLOT(slotRestartTest()));
+    connect(m_lowerFixtureButton, SIGNAL(clicked()),
+            this, SLOT(slotRestartTest()));
     connect(m_movementBusCombo, SIGNAL(activated(int)),
             this, SLOT(slotRestartTest()));
     connect(m_parallelRadio, SIGNAL(toggled(bool)),
@@ -467,6 +476,9 @@ void EFXEditor::slotFixtureIntensityChanged(int intensity)
     EFXFixture* ef = (EFXFixture*) spin->property(PROPERTY_FIXTURE).toULongLong();
     Q_ASSERT(ef != NULL);
     ef->setFadeIntensity(uchar(intensity));
+
+    // Restart the test after the latest intensity change, delayed
+    m_testTimer.start();
 }
 
 void EFXEditor::slotAddFixtureClicked()
@@ -514,6 +526,14 @@ void EFXEditor::slotAddFixtureClicked()
     FixtureSelection fs(this, m_doc, true, disabled);
     if (fs.exec() == QDialog::Accepted)
     {
+        // Stop test while adding fixtures
+        bool testing = false;
+        if (m_testButton->isChecked() == true)
+        {
+            m_testButton->click();
+            testing = true;
+        }
+
         QListIterator <quint32> it(fs.selection);
         while (it.hasNext() == true)
         {
@@ -525,6 +545,10 @@ void EFXEditor::slotAddFixtureClicked()
             else
                 delete ef;
         }
+
+        // Restart test if appropriate
+        if (testing == true)
+            m_testButton->click();
     }
 }
 
@@ -534,6 +558,13 @@ void EFXEditor::slotRemoveFixtureClicked()
                 this, tr("Remove fixtures"),
                 tr("Do you want to remove the selected fixture(s)?"),
                 QMessageBox::Yes, QMessageBox::No);
+
+    bool testing = false;
+    if (m_testButton->isChecked() == true)
+    {
+        m_testButton->click();
+        testing = true;
+    }
 
     if (r == QMessageBox::Yes)
     {
@@ -548,6 +579,9 @@ void EFXEditor::slotRemoveFixtureClicked()
                 delete ef;
         }
     }
+
+    if (testing == true)
+        m_testButton->click();
 }
 
 void EFXEditor::slotRaiseFixtureClicked()

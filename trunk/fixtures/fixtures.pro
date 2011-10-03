@@ -127,6 +127,7 @@ fixtures.files += Movitec-SL-250.qxf
 fixtures.files += Movitec-SL-575.qxf
 fixtures.files += Movitec-WL-250.qxf
 fixtures.files += Movitec-WL-575.qxf
+fixtures.files += ProLights-V200.qxf
 fixtures.files += Robe-ClubScan-150CT.qxf
 fixtures.files += Robe-ClubScan-250CT.qxf
 fixtures.files += Robe-ClubSpot-150CT.qxf

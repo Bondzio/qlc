@@ -9,6 +9,7 @@ fixtures.files += American-DJ-Mega-Bar-LED.qxf
 fixtures.files += American-DJ-Mega-Flash-DMX.qxf
 fixtures.files += American-DJ-Nucleus-LED.qxf
 fixtures.files += American-DJ-Quad-Gem-DMX.qxf
+fixtures.files += American-DJ-Spherion-Tri-LED.qxf
 fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
 fixtures.files += Chauvet-200b.qxf

@@ -10,12 +10,12 @@ APPVERSION = 3.2.0-1
 # Compiler & linker configuration
 #############################################################################
 
-QMAKE_CXXFLAGS += -Werror
+QMAKE_CXXFLAGS += -Werror -g -O2
 CONFIG         += warn_on
 macx:CONFIG    -= app_bundle # Let QLC construct the .app bundle
 
-CONFIG        -= release # Enable this when making a release
-CONFIG        += debug   # Disable this when making a release
+#CONFIG        -= release # Enable this when making a release
+#CONFIG        += debug   # Disable this when making a release
 
 # Disable these if you don't want to see SVN revision in the About Box
 unix:REVISION = $$system(svn info | grep "Revision" | sed 's/Revision://')

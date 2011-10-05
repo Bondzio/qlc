@@ -50,7 +50,7 @@ const QString Script::jumpCmd = QString("jump");
  * Initialization
  ****************************************************************************/
 
-Script::Script(Doc* doc) : Function(doc)
+Script::Script(Doc* doc) : Function(doc, Function::Script)
     , m_currentCommand(0)
     , m_waitCount(0)
     , m_fader(NULL)
@@ -63,11 +63,6 @@ Script::~Script()
     if (m_fader != NULL)
         delete m_fader;
     m_fader = NULL;
-}
-
-Function::Type Script::type() const
-{
-    return Function::Script;
 }
 
 Function* Script::createCopy(Doc* doc)
@@ -213,25 +208,25 @@ bool Script::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCBus);
     root.appendChild(tag);
     tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    text = doc->createTextNode(QString::number(busID()));
+    text = doc->createTextNode(QString::number(bus()));
     tag.appendChild(text);
 
     /* Direction */
     tag = doc->createElement(KXMLQLCFunctionDirection);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::directionToString(m_direction));
+    text = doc->createTextNode(Function::directionToString(direction()));
     tag.appendChild(text);
 
     /* Run order */
     tag = doc->createElement(KXMLQLCFunctionRunOrder);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::runOrderToString(m_runOrder));
+    text = doc->createTextNode(Function::runOrderToString(runOrder()));
     tag.appendChild(text);
 
     /* Contents */
     tag = doc->createElement(KXMLQLCScriptContents);
     root.appendChild(tag);
-    text = doc->createTextNode(QUrl::toPercentEncoding(m_data));
+    text = doc->createTextNode(QUrl::toPercentEncoding(data()));
     tag.appendChild(text);
 
     return true;

@@ -1519,7 +1519,7 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.name() == e1.name());
     QVERIFY(e2.direction() == EFX::Backward);
     QVERIFY(e2.runOrder() == EFX::SingleShot);
-    QVERIFY(e2.busID() == 15);
+    QVERIFY(e2.bus() == 15);
     QVERIFY(e2.algorithm() == EFX::Lissajous);
     QVERIFY(e2.width() == 13);
     QVERIFY(e2.height() == 42);
@@ -1570,7 +1570,7 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.name() == e3.name());
     QVERIFY(e2.direction() == EFX::Forward);
     QVERIFY(e2.runOrder() == EFX::Loop);
-    QVERIFY(e2.busID() == 3);
+    QVERIFY(e2.bus() == 3);
     QVERIFY(e2.algorithm() == EFX::Eight);
     QVERIFY(e2.width() == 31);
     QVERIFY(e2.height() == 24);
@@ -1631,7 +1631,7 @@ void EFX_Test::createCopy()
     QVERIFY(copy->name() == e1->name());
     QVERIFY(copy->direction() == EFX::Forward);
     QVERIFY(copy->runOrder() == EFX::PingPong);
-    QVERIFY(copy->busID() == 15);
+    QVERIFY(copy->bus() == 15);
     QVERIFY(copy->algorithm() == EFX::Line);
     QVERIFY(copy->width() == 13);
     QVERIFY(copy->height() == 42);
@@ -1896,7 +1896,7 @@ void EFX_Test::loadSuccess()
 
     EFX e(m_doc);
     QVERIFY(e.loadXML(&root) == true);
-    QVERIFY(e.busID() == 12);
+    QVERIFY(e.bus() == 12);
     QVERIFY(e.direction() == EFX::Forward);
     QVERIFY(e.runOrder() == EFX::Loop);
 

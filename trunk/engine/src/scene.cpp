@@ -39,7 +39,7 @@
  * Initialization
  *****************************************************************************/
 
-Scene::Scene(Doc* doc) : Function(doc)
+Scene::Scene(Doc* doc) : Function(doc, Function::Scene)
 {
     setName(tr("New Scene"));
     setBus(Bus::defaultFade());
@@ -47,15 +47,6 @@ Scene::Scene(Doc* doc) : Function(doc)
 
 Scene::~Scene()
 {
-}
-
-/*****************************************************************************
- * Function type
- *****************************************************************************/
-
-Function::Type Scene::type() const
-{
-    return Function::Scene;
 }
 
 /*****************************************************************************
@@ -101,7 +92,7 @@ void Scene::setValue(const SceneValue& scv)
         m_values.replace(index, scv);
     qSort(m_values.begin(), m_values.end());
 
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 void Scene::setValue(quint32 fxi, quint32 ch, uchar value)
@@ -112,7 +103,7 @@ void Scene::setValue(quint32 fxi, quint32 ch, uchar value)
 void Scene::unsetValue(quint32 fxi, quint32 ch)
 {
     m_values.removeAll(SceneValue(fxi, ch, 0));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 uchar Scene::value(quint32 fxi, quint32 ch)
@@ -149,7 +140,7 @@ void Scene::slotFixtureRemoved(quint32 fxi_id)
             it.remove();
     }
 
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 /*****************************************************************************
@@ -178,7 +169,7 @@ bool Scene::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCBus);
     root.appendChild(tag);
     tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    str.setNum(busID());
+    str.setNum(bus());
     text = doc->createTextNode(str);
     tag.appendChild(text);
 
@@ -351,7 +342,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     }
 
     // Grab current fade bus value
-    quint32 fadeTime = Bus::instance()->value(m_busID);
+    quint32 fadeTime = Bus::instance()->value(bus());
 
     while (it.hasNext() == true)
     {
@@ -409,7 +400,7 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
         {
             fc.setTarget(0);
             fc.setStart(fc.current());
-            fc.setBus(m_busID);
+            fc.setBus(bus());
             fc.setElapsed(0);
             fc.setReady(false);
             timer->fader()->add(fc);

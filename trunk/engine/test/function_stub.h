@@ -36,13 +36,8 @@ public:
 
     Function* createCopy(Doc* parent);
 
-    Function::Type type() const;
-
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
     bool loadXML(const QDomElement* root);
-
-    void arm();
-    void disarm();
 
     void preRun(MasterTimer* timer);
     void write(MasterTimer* timer, UniverseArray* universes);
@@ -52,12 +47,11 @@ public slots:
     void slotFixtureRemoved(quint32 id);
 
 public:
-    int m_writeCalls;
     int m_preRunCalls;
+    int m_writeCalls;
     int m_postRunCalls;
 
     quint32 m_slotFixtureRemovedId;
-    Function::Type m_type;
 };
 
 #endif

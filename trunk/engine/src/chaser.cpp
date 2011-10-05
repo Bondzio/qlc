@@ -40,7 +40,7 @@
  * Initialization
  *****************************************************************************/
 
-Chaser::Chaser(Doc* doc) : Function(doc)
+Chaser::Chaser(Doc* doc) : Function(doc, Function::Chaser)
 {
     m_runTimeDirection = Forward;
     m_runTimePosition = 0;
@@ -59,15 +59,6 @@ Chaser::Chaser(Doc* doc) : Function(doc)
 
 Chaser::~Chaser()
 {
-}
-
-/*****************************************************************************
- * Function type
- *****************************************************************************/
-
-Function::Type Chaser::type() const
-{
-    return Function::Chaser;
 }
 
 /*****************************************************************************
@@ -106,10 +97,10 @@ bool Chaser::copyFrom(const Function* function)
 
 bool Chaser::addStep(quint32 id)
 {
-    if (id != m_id)
+    if (id != this->id())
     {
         m_steps.append(id);
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -123,7 +114,7 @@ bool Chaser::removeStep(int index)
     if (index >= 0 && index < m_steps.size())
     {
         m_steps.removeAt(index);
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -135,7 +126,7 @@ bool Chaser::removeStep(int index)
 void Chaser::clear()
 {
     m_steps.clear();
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 QList <quint32> Chaser::steps() const
@@ -192,20 +183,20 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCBus);
     root.appendChild(tag);
     tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusHold);
-    str.setNum(busID());
+    str.setNum(bus());
     text = doc->createTextNode(str);
     tag.appendChild(text);
 
     /* Direction */
     tag = doc->createElement(KXMLQLCFunctionDirection);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::directionToString(m_direction));
+    text = doc->createTextNode(Function::directionToString(direction()));
     tag.appendChild(text);
 
     /* Run order */
     tag = doc->createElement(KXMLQLCFunctionRunOrder);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::runOrderToString(m_runOrder));
+    text = doc->createTextNode(Function::runOrderToString(runOrder()));
     tag.appendChild(text);
 
     /* Steps */
@@ -315,7 +306,7 @@ void Chaser::postLoad()
 
 void Chaser::slotBusTapped(quint32 id)
 {
-    if (id == m_busID && m_runner != NULL)
+    if (id == bus() && m_runner != NULL)
         m_runner->next();
 }
 
@@ -323,7 +314,7 @@ void Chaser::preRun(MasterTimer* timer)
 {
     Doc* doc = qobject_cast <Doc*> (parent());
     Q_ASSERT(doc != NULL);
-    m_runner = new ChaserRunner(doc, stepFunctions(), busID(), direction(),
+    m_runner = new ChaserRunner(doc, stepFunctions(), bus(), direction(),
                                 runOrder(), intensity());
     Function::preRun(timer);
 }

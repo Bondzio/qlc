@@ -608,7 +608,7 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
     item->setText(KColumnName, function->name());
     item->setIcon(KColumnName, functionIcon(function));
     item->setText(KColumnType, function->typeString());
-    item->setText(KColumnBus, Bus::instance()->idName(function->busID()));
+    item->setText(KColumnBus, Bus::instance()->idName(function->bus()));
     item->setText(KColumnID, QString::number(function->id()));
 }
 

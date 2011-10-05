@@ -23,13 +23,12 @@
 #include "fixture.h"
 #include "function_stub.h"
 
-Function_Stub::Function_Stub(Doc* doc) : Function(doc)
+Function_Stub::Function_Stub(Doc* doc) : Function(doc, Function::Type(0xDEADBEEF))
 {
     m_writeCalls = 0;
     m_preRunCalls = 0;
     m_postRunCalls = 0;
     m_slotFixtureRemovedId = Fixture::invalidId();
-    m_type = Function::Type(0xDEADBEEF);
 }
 
 Function_Stub::~Function_Stub()
@@ -57,11 +56,6 @@ Function* Function_Stub::createCopy(Doc* doc)
     return copy;
 }
 
-Function::Type Function_Stub::type() const
-{
-    return m_type;
-}
-
 bool Function_Stub::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
     Q_UNUSED(doc);
@@ -74,14 +68,6 @@ bool Function_Stub::loadXML(const QDomElement* root)
 {
     Q_UNUSED(root);
     return false;
-}
-
-void Function_Stub::arm()
-{
-}
-
-void Function_Stub::disarm()
-{
 }
 
 void Function_Stub::preRun(MasterTimer* timer)

@@ -182,7 +182,7 @@ void EFXEditor::fillMovementBusCombo()
 {
     m_movementBusCombo->clear();
     m_movementBusCombo->addItems(Bus::instance()->idNames());
-    m_movementBusCombo->setCurrentIndex(m_efx->busID());
+    m_movementBusCombo->setCurrentIndex(m_efx->bus());
 }
 
 void EFXEditor::fillFadeBusCombo()

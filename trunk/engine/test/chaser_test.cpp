@@ -242,7 +242,7 @@ void Chaser_Test::copyFrom()
     QVERIFY(c2.copyFrom(&c1) == true);
     QCOMPARE(spy.size(), 1);
     QVERIFY(c2.name() == c1.name());
-    QVERIFY(c2.busID() == 15);
+    QVERIFY(c2.bus() == 15);
     QVERIFY(c2.direction() == Chaser::Backward);
     QVERIFY(c2.runOrder() == Chaser::PingPong);
     QVERIFY(c2.steps().size() == 4);
@@ -269,7 +269,7 @@ void Chaser_Test::copyFrom()
        that steps are not appended but replaced completely. */
     QVERIFY(c2.copyFrom(&c3) == true);
     QVERIFY(c2.name() == c3.name());
-    QVERIFY(c2.busID() == 8);
+    QVERIFY(c2.bus() == 8);
     QVERIFY(c2.direction() == Chaser::Forward);
     QVERIFY(c2.runOrder() == Chaser::Loop);
     QVERIFY(c2.steps().size() == 3);
@@ -301,7 +301,7 @@ void Chaser_Test::createCopy()
 
     Chaser* copy = qobject_cast<Chaser*> (f);
     QVERIFY(copy != NULL);
-    QVERIFY(copy->busID() == 15);
+    QVERIFY(copy->bus() == 15);
     QVERIFY(copy->direction() == Chaser::Backward);
     QVERIFY(copy->runOrder() == Chaser::SingleShot);
     QVERIFY(copy->steps().size() == 3);
@@ -390,7 +390,7 @@ void Chaser_Test::loadSuccess()
 
     Chaser c(m_doc);
     QVERIFY(c.loadXML(&root) == true);
-    QVERIFY(c.busID() == 16);
+    QVERIFY(c.bus() == 16);
     QVERIFY(c.direction() == Chaser::Backward);
     QVERIFY(c.runOrder() == Chaser::SingleShot);
     QVERIFY(c.steps().size() == 3);

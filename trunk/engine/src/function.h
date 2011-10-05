@@ -28,7 +28,6 @@
 #include <QMutex>
 #include <QList>
 
-
 class QDomDocument;
 class QDomElement;
 
@@ -63,6 +62,20 @@ class Function : public QObject
     Q_DISABLE_COPY(Function)
 
 public:
+    /**
+     * All known function types.
+     * This is a bit mask to facilitate easy AND-mode type filtering
+     */
+    enum Type
+    {
+        Undefined  = 0,
+        Scene      = 1 << 0,
+        Chaser     = 1 << 1,
+        EFX        = 1 << 2,
+        Collection = 1 << 3,
+        Script     = 1 << 4
+    };
+
     /*********************************************************************
      * Initialization
      *********************************************************************/
@@ -71,8 +84,9 @@ public:
      * Create a new function
      *
      * @param doc The parent object that owns this function (Doc)
+     * @param t The function type (see enum Type)
      */
-    Function(Doc* doc);
+    Function(Doc* doc, Type t);
 
     /**
      * Destroy this function
@@ -81,6 +95,10 @@ public:
 
     /** Get the parent Doc object */
     Doc* doc() const;
+
+signals:
+    /** Signal telling that the contents of this function have changed */
+    void changed(quint32 fid);
 
     /*********************************************************************
      * Copying
@@ -126,12 +144,8 @@ public:
      */
     static quint32 invalidId();
 
-protected:
+private:
     quint32 m_id;
-
-signals:
-    /** Signal telling that the contents of this function have changed */
-    void changed(quint32 fid);
 
     /*********************************************************************
      * Name
@@ -142,35 +156,24 @@ public:
      *
      * @param name The function's new name
      */
-    virtual void setName(const QString& name);
+    void setName(const QString& name);
 
     /**
      * Return the name of this function
      */
-    virtual QString name() const;
+    QString name() const;
 
-protected:
+private:
     QString m_name;
 
     /*********************************************************************
      * Type
      *********************************************************************/
 public:
-    /** This is a bit mask because FunctionSelection does type filtering */
-    enum Type
-    {
-        Undefined  = 0,
-        Scene      = 1 << 0,
-        Chaser     = 1 << 1,
-        EFX        = 1 << 2,
-        Collection = 1 << 3,
-        Script     = 1 << 4
-    };
-
     /**
      * Return the type of this function (see the enum above)
      */
-    virtual Function::Type type() const = 0;
+    Type type() const;
 
     /**
      * Return the type of this function as a string
@@ -191,6 +194,9 @@ public:
      */
     static Type stringToType(const QString& str);
 
+private:
+    Type m_type;
+
     /*********************************************************************
      * Running order
      *********************************************************************/
@@ -203,12 +209,12 @@ public:
      *
      * @param dir This function's running order
      */
-    virtual void setRunOrder(const Function::RunOrder& order);
+    void setRunOrder(const Function::RunOrder& order);
 
     /**
      * Get this function's running order
      */
-    virtual Function::RunOrder runOrder() const;
+    Function::RunOrder runOrder() const;
 
     /**
      * Convert a RunOrder to string
@@ -224,7 +230,7 @@ public:
      */
     static Function::RunOrder stringToRunOrder(const QString& str);
 
-protected:
+private:
     RunOrder m_runOrder;
 
     /*********************************************************************
@@ -239,12 +245,12 @@ public:
      *
      * @param dir This function's direction
      */
-    virtual void setDirection(const Function::Direction& dir);
+    void setDirection(const Function::Direction& dir);
 
     /**
      * Get this function's direction
      */
-    virtual Function::Direction direction() const;
+    Function::Direction direction() const;
 
     /**
      * Convert a Direction to a string
@@ -260,7 +266,7 @@ public:
      */
     static Function::Direction stringToDirection(const QString& str);
 
-protected:
+private:
     Direction m_direction;
 
     /*********************************************************************
@@ -272,20 +278,19 @@ public:
      *
      * @param id The ID of the bus
      */
-    virtual void setBus(quint32 id);
+    void setBus(quint32 id);
 
     /**
      * Get the bus used for setting the speed of this function
      */
-    quint32 busID() const;
+    quint32 bus() const;
 
-protected:
-    quint32 m_busID;
+private:
+    quint32 m_bus;
 
     /*********************************************************************
      * Fixtures
      *********************************************************************/
-
 public slots:
     /** Slot that captures Doc::fixtureRemoved signals */
     virtual void slotFixtureRemoved(quint32 fxi_id);
@@ -468,14 +473,14 @@ public:
      * There is no way to cancel it, but the function can be started again
      * normally.
      */
-    virtual void stop();
+    void stop();
 
     /**
      * Check, whether the function should be stopped ASAP.
      *
      * @return true if the function should be stopped, otherwise false.
      */
-    virtual bool stopped() const;
+    bool stopped() const;
 
     /**
      * Mark the function to be stopped and block the calling thread until it is

@@ -54,18 +54,20 @@ const QString KForwardString    (    "Forward" );
  * Initialization
  *****************************************************************************/
 
-Function::Function(Doc* doc) : QObject(doc)
+Function::Function(Doc* doc, Type t)
+    : QObject(doc)
+    , m_id(Function::invalidId())
+    , m_type(t)
+    , m_runOrder(Loop)
+    , m_direction(Forward)
+    , m_bus(Bus::defaultFade())
+    , m_flashing(false)
+    , m_initiatedByOtherFunction(false)
+    , m_elapsed(0)
+    , m_stop(true)
+    , m_intensity(1.0)
 {
     Q_ASSERT(doc != NULL);
-
-    m_id = Function::invalidId();
-    m_runOrder = Loop;
-    m_direction = Forward;
-    m_busID = Bus::defaultFade();
-    m_flashing = false;
-    m_elapsed = 0;
-    m_stop = true;
-    m_intensity = 1.0;
 }
 
 Function::~Function()
@@ -90,7 +92,7 @@ bool Function::copyFrom(const Function* function)
     m_name = function->name();
     m_runOrder = function->runOrder();
     m_direction = function->direction();
-    m_busID = function->busID();
+    m_bus = function->bus();
 
     emit changed(m_id);
 
@@ -136,6 +138,11 @@ QString Function::name() const
 /*****************************************************************************
  * Type
  *****************************************************************************/
+
+Function::Type Function::type() const
+{
+    return m_type;
+}
 
 QString Function::typeString() const
 {
@@ -274,14 +281,14 @@ void Function::setBus(quint32 id)
 {
     if (id < Bus::count() && type() != Collection)
     {
-        m_busID = id;
+        m_bus = id;
         emit changed(m_id);
     }
 }
 
-quint32 Function::busID() const
+quint32 Function::bus() const
 {
-    return m_busID;
+    return m_bus;
 }
 
 /*****************************************************************************

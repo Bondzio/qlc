@@ -37,7 +37,7 @@
  * Initialization
  *****************************************************************************/
 
-Collection::Collection(Doc* doc) : Function(doc)
+Collection::Collection(Doc* doc) : Function(doc, Function::Collection)
 {
     setName(tr("New Collection"));
 
@@ -49,15 +49,6 @@ Collection::Collection(Doc* doc) : Function(doc)
 Collection::~Collection()
 {
     m_functions.clear();
-}
-
-/*****************************************************************************
- * Function type
- *****************************************************************************/
-
-Function::Type Collection::type() const
-{
-    return Function::Collection;
 }
 
 /*****************************************************************************
@@ -96,10 +87,10 @@ bool Collection::copyFrom(const Function* function)
 
 bool Collection::addFunction(quint32 fid)
 {
-    if (fid != m_id && m_functions.contains(fid) == false)
+    if (fid != this->id() && m_functions.contains(fid) == false)
     {
         m_functions.append(fid);
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -112,7 +103,7 @@ bool Collection::removeFunction(quint32 fid)
 {
     if (m_functions.removeAll(fid) > 0)
     {
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else

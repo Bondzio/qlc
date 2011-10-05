@@ -290,7 +290,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         m_skipIterator < m_skipThreshold)
     {
         /* Fixture still needs to wait for its turn in serial mode */
-        quint32 busValue = Bus::instance()->value(m_parent->busID());
+        quint32 busValue = Bus::instance()->value(m_parent->bus());
         m_skipIterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
     }
     else
@@ -305,14 +305,14 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
             if (m_skipIterator >= m_skipThreshold)
             {
                 /* Increment for next round. */
-                quint32 busValue = Bus::instance()->value(m_parent->busID());
+                quint32 busValue = Bus::instance()->value(m_parent->bus());
                 m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
             }
         }
         else
         {
             /* Increment for next round. */
-            quint32 busValue = Bus::instance()->value(m_parent->busID());
+            quint32 busValue = Bus::instance()->value(m_parent->bus());
             m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
         }
 
@@ -330,7 +330,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
     }
     else
     {
-        if (m_parent->m_runOrder == Function::PingPong)
+        if (m_parent->runOrder() == Function::PingPong)
         {
             /* Reverse direction for ping-pong EFX. */
             if (m_runTimeDirection == Function::Forward)
@@ -342,7 +342,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
                 m_runTimeDirection = Function::Forward;
             }
         }
-        else if (m_parent->m_runOrder == Function::SingleShot)
+        else if (m_parent->runOrder() == Function::SingleShot)
         {
             /* De-initialize the fixture and mark as ready. */
             m_ready = true;

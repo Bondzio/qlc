@@ -41,16 +41,6 @@ public:
     Collection(Doc* doc);
     virtual ~Collection();
 
-    /** Collections don't belong to any particular fixture */
-    void setFixture(quint32) { /* NOP */ }
-
-    /*********************************************************************
-     * Function type
-     *********************************************************************/
-public:
-    /** @reimpl */
-    Function::Type type() const;
-
     /*********************************************************************
      * Copying
      *********************************************************************/

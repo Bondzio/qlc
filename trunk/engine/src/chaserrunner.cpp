@@ -188,7 +188,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
             continue;
 
         // Why the fsck isn't fc.bus() used below????
-        quint32 fadeTime = Bus::instance()->value(scene->busID());
+        quint32 fadeTime = Bus::instance()->value(scene->bus());
 
         FadeChannel& fc(it.next().value());
         if (fc.current() == fc.target() && fc.group(m_doc) != QLCChannel::Intensity)
@@ -217,7 +217,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
     int step = CLAMP(m_currentStep, 0, m_steps.size() - 1);
     Function* function = m_steps.at(step);
     if (function != NULL)
-        bus = function->busID();
+        bus = function->bus();
 
     // Give to-be-zeroed channels to MasterTimer's GenericFader
     QMapIterator <quint32,FadeChannel> it(m_channelMap);
@@ -344,7 +344,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
         fc.setFixture(value.fxi);
         fc.setChannel(value.channel);
         fc.setTarget(value.value);
-        fc.setBus(scene->busID());
+        fc.setBus(scene->bus());
 
         quint32 addr = fc.address(m_doc);
 

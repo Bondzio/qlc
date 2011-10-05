@@ -41,13 +41,11 @@
 #include "efx.h"
 #include "bus.h"
 
-/* Supported EFX algorithms */
-
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-EFX::EFX(Doc* doc) : Function(doc)
+EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
 {
     m_width = 127;
     m_height = 127;
@@ -77,15 +75,6 @@ EFX::~EFX()
 {
     while (m_fixtures.isEmpty() == false)
         delete m_fixtures.takeFirst();
-}
-
-/*****************************************************************************
- * Function type
- *****************************************************************************/
-
-Function::Type EFX::type() const
-{
-    return Function::EFX;
 }
 
 /*****************************************************************************
@@ -157,7 +146,7 @@ void EFX::setAlgorithm(EFX::Algorithm algo)
     else
         m_algorithm = EFX::Circle;
 
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 QStringList EFX::algorithmList()
@@ -284,7 +273,7 @@ void EFX::rotateAndScale(qreal* x, qreal* y) const
 void EFX::setWidth(int width)
 {
     m_width = static_cast<double> (CLAMP(width, 0, 127));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::width() const
@@ -299,7 +288,7 @@ int EFX::width() const
 void EFX::setHeight(int height)
 {
     m_height = static_cast<double> (CLAMP(height, 0, 127));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::height() const
@@ -314,7 +303,7 @@ int EFX::height() const
 void EFX::setRotation(int rot)
 {
     m_rotation = static_cast<int> (CLAMP(rot, 0, 359));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::rotation() const
@@ -329,7 +318,7 @@ int EFX::rotation() const
 void EFX::setXOffset(int offset)
 {
     m_xOffset = static_cast<double> (CLAMP(offset, 0, UCHAR_MAX));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::xOffset() const
@@ -340,7 +329,7 @@ int EFX::xOffset() const
 void EFX::setYOffset(int offset)
 {
     m_yOffset = static_cast<double> (CLAMP(offset, 0, UCHAR_MAX));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::yOffset() const
@@ -355,7 +344,7 @@ int EFX::yOffset() const
 void EFX::setXFrequency(int freq)
 {
     m_xFrequency = static_cast<qreal> (CLAMP(freq, 0, 5));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::xFrequency() const
@@ -366,7 +355,7 @@ int EFX::xFrequency() const
 void EFX::setYFrequency(int freq)
 {
     m_yFrequency = static_cast<qreal> (CLAMP(freq, 0, 5));
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::yFrequency() const
@@ -389,7 +378,7 @@ bool EFX::isFrequencyEnabled()
 void EFX::setXPhase(int phase)
 {
     m_xPhase = static_cast<qreal> (CLAMP(phase, 0, 359)) * M_PI / 180.0;
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::xPhase() const
@@ -400,7 +389,7 @@ int EFX::xPhase() const
 void EFX::setYPhase(int phase)
 {
     m_yPhase = static_cast<qreal> (CLAMP(phase, 0, 359)) * M_PI / 180.0;
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 int EFX::yPhase() const
@@ -437,7 +426,7 @@ bool EFX::addFixture(EFXFixture* ef)
     /* Put the EFXFixture object into our list */
     m_fixtures.append(ef);
 
-    emit changed(m_id);
+    emit changed(this->id());
 
     return true;
 }
@@ -448,7 +437,7 @@ bool EFX::removeFixture(EFXFixture* ef)
 
     if (m_fixtures.removeAll(ef) > 0)
     {
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -465,7 +454,7 @@ bool EFX::raiseFixture(EFXFixture* ef)
     if (index > 0)
     {
         m_fixtures.move(index, index - 1);
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -480,7 +469,7 @@ bool EFX::lowerFixture(EFXFixture* ef)
     if (index < (m_fixtures.count() - 1))
     {
         m_fixtures.move(index, index + 1);
-        emit changed(m_id);
+        emit changed(this->id());
         return true;
     }
     else
@@ -518,7 +507,7 @@ void EFX::slotFixtureRemoved(quint32 fxi_id)
 void EFX::setPropagationMode(PropagationMode mode)
 {
     m_propagationMode = mode;
-    emit changed(m_id);
+    emit changed(this->id());
 }
 
 EFX::PropagationMode EFX::propagationMode() const
@@ -584,20 +573,20 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCBus);
     root.appendChild(tag);
     tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    str.setNum(busID());
+    str.setNum(bus());
     text = doc->createTextNode(str);
     tag.appendChild(text);
 
     /* Direction */
     tag = doc->createElement(KXMLQLCFunctionDirection);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::directionToString(m_direction));
+    text = doc->createTextNode(Function::directionToString(direction()));
     tag.appendChild(text);
 
     /* Run order */
     tag = doc->createElement(KXMLQLCFunctionRunOrder);
     root.appendChild(tag);
-    text = doc->createTextNode(Function::runOrderToString(m_runOrder));
+    text = doc->createTextNode(Function::runOrderToString(runOrder()));
     tag.appendChild(text);
 
     /* Algorithm */
@@ -920,7 +909,7 @@ void EFX::postRun(MasterTimer* timer, UniverseArray* universes)
         EFXFixture* ef(it.next());
 
         /* Run the EFX's stop scene for Loop & PingPong modes */
-        if (m_runOrder != SingleShot)
+        if (runOrder() != SingleShot)
             ef->stop(timer, universes);
         ef->reset();
     }

@@ -132,7 +132,7 @@ void PaletteGenerator_Test::createColours()
         QCOMPARE(s->values().at(0).channel, quint32(2)); // DJScan colour channel
         QCOMPARE(s->values().at(1).fxi, fxi2->id());
         QCOMPARE(s->values().at(1).channel, quint32(2)); // DJScan colour channel
-        QCOMPARE(s->busID(), Bus::defaultPalette());
+        QCOMPARE(s->bus(), Bus::defaultPalette());
     }
 }
 
@@ -170,7 +170,7 @@ void PaletteGenerator_Test::createGobos()
         QCOMPARE(s->values().at(0).channel, quint32(3)); // DJScan gobo channel
         QCOMPARE(s->values().at(1).fxi, fxi2->id());
         QCOMPARE(s->values().at(1).channel, quint32(3)); // DJScan gobo channel
-        QCOMPARE(s->busID(), Bus::defaultPalette());
+        QCOMPARE(s->bus(), Bus::defaultPalette());
     }
 }
 
@@ -209,6 +209,6 @@ void PaletteGenerator_Test::createShutters()
         QCOMPARE(s->values().at(0).channel, quint32(0)); // MAC300 shutter channel
         QCOMPARE(s->values().at(1).fxi, fxi2->id());
         QCOMPARE(s->values().at(1).channel, quint32(0)); // MAC300 shutter channel
-        QCOMPARE(s->busID(), Bus::defaultPalette());
+        QCOMPARE(s->bus(), Bus::defaultPalette());
     }
 }

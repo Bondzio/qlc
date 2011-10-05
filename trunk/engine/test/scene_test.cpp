@@ -217,7 +217,7 @@ void Scene_Test::loadSuccess()
 
     Scene s(m_doc);
     QVERIFY(s.loadXML(&root) == true);
-    QVERIFY(s.busID() == 5);
+    QVERIFY(s.bus() == 5);
     QVERIFY(s.values().size() == 2);
     QVERIFY(s.value(5, 60) == 100);
     QVERIFY(s.value(133, 4) == 59);
@@ -329,7 +329,7 @@ void Scene_Test::copyFrom()
     QVERIFY(s2.copyFrom(&s1) == true);
     QCOMPARE(spy.size(), 1);
     QVERIFY(s2.name() == s1.name());
-    QVERIFY(s2.busID() == 15);
+    QVERIFY(s2.bus() == 15);
     QVERIFY(s2.value(1, 2) == 3);
     QVERIFY(s2.value(4, 5) == 6);
     QVERIFY(s2.value(7, 8) == 9);
@@ -349,7 +349,7 @@ void Scene_Test::copyFrom()
     /* Verify that copying TO the same Scene a second time succeeds */
     QVERIFY(s2.copyFrom(&s3) == true);
     QVERIFY(s2.name() == s3.name());
-    QVERIFY(s2.busID() == 8);
+    QVERIFY(s2.bus() == 8);
     QVERIFY(s2.value(3, 1) == 2);
     QVERIFY(s2.value(6, 4) == 5);
     QVERIFY(s2.value(9, 7) == 8);
@@ -376,7 +376,7 @@ void Scene_Test::createCopy()
 
     Scene* copy = qobject_cast<Scene*> (f);
     QVERIFY(copy != NULL);
-    QVERIFY(copy->busID() == 15);
+    QVERIFY(copy->bus() == 15);
     QVERIFY(copy->values().size() == 3);
     QVERIFY(copy->value(1, 2) == 3);
     QVERIFY(copy->value(4, 5) == 6);

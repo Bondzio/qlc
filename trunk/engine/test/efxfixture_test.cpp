@@ -465,7 +465,7 @@ void EFXFixture_Test::nextStepLoop()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
-    Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
+    Bus::instance()->setValue(e.bus(), 50); /* 50 steps */
 
     EFXFixture* ef = new EFXFixture(&e);
     ef->setFixture(0);
@@ -486,7 +486,7 @@ void EFXFixture_Test::nextStepLoop()
     {
         ef->nextStep(&mts, &array);
 
-        quint32 busValue = Bus::instance()->value(e.busID());
+        quint32 busValue = Bus::instance()->value(e.bus());
         qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
         checkIter += stepSize;
 
@@ -506,7 +506,7 @@ void EFXFixture_Test::nextStepSingleShot()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
-    Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
+    Bus::instance()->setValue(e.bus(), 50); /* 50 steps */
     e.setRunOrder(EFX::SingleShot);
 
     EFXFixture* ef = new EFXFixture(&e);
@@ -529,7 +529,7 @@ void EFXFixture_Test::nextStepSingleShot()
     {
         ef->nextStep(&mts, &array);
 
-        quint32 busValue = Bus::instance()->value(e.busID());
+        quint32 busValue = Bus::instance()->value(e.bus());
         qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
         checkIter += stepSize;
 

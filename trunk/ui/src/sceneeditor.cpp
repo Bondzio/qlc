@@ -177,7 +177,7 @@ void SceneEditor::fillBusCombo()
 {
     m_busCombo->clear();
     m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_scene->busID());
+    m_busCombo->setCurrentIndex(m_scene->bus());
 }
 
 void SceneEditor::setSceneValue(const SceneValue& scv)

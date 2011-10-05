@@ -96,7 +96,7 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     /* Bus */
     m_busCombo->clear();
     m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_chaser->busID());
+    m_busCombo->setCurrentIndex(m_chaser->bus());
 
     /* Running order */
     switch (m_chaser->runOrder())

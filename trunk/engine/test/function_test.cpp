@@ -45,7 +45,7 @@ void Function_Test::initial()
     QCOMPARE(stub->name(), QString());
     QCOMPARE(stub->runOrder(), Function::Loop);
     QCOMPARE(stub->direction(), Function::Forward);
-    QCOMPARE(stub->busID(), Bus::defaultFade());
+    QCOMPARE(stub->bus(), Bus::defaultFade());
     QCOMPARE(stub->elapsed(), quint32(0));
     QCOMPARE(stub->stopped(), true);
 }
@@ -77,7 +77,7 @@ void Function_Test::properties()
     stub->setBus(14);
     QCOMPARE(spy.size(), 4);
     QCOMPARE(spy[3][0].toUInt(), stub->id());
-    QCOMPARE(stub->busID(), quint32(14));
+    QCOMPARE(stub->bus(), quint32(14));
 }
 
 void Function_Test::copyFrom()
@@ -99,7 +99,7 @@ void Function_Test::copyFrom()
     QCOMPARE(stub2->name(), stub1->name());
     QCOMPARE(stub2->runOrder(), stub1->runOrder());
     QCOMPARE(stub2->direction(), stub1->direction());
-    QCOMPARE(stub2->busID(), stub1->busID());
+    QCOMPARE(stub2->bus(), stub1->bus());
 }
 
 void Function_Test::flashUnflash()

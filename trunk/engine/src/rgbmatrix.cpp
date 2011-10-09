@@ -19,7 +19,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QTransform>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QDomText>
 #include <QDebug>
 #include <cmath>
 
@@ -27,6 +30,9 @@
 #include "rgbmatrix.h"
 #include "qlcmacros.h"
 #include "doc.h"
+
+#define KXMLQLCRGBMatrixPattern "Pattern"
+#define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
 
 #define KPatternOutwardBox  "Outward Box"
 #define KPatternFullRows    "Full Rows"
@@ -275,16 +281,125 @@ quint32 RGBMatrix::fadeBus() const
 
 bool RGBMatrix::loadXML(const QDomElement* root)
 {
-    Q_UNUSED(root);
-    return false;
+    QDomNode node;
+    QDomElement tag;
+
+    Q_ASSERT(root != NULL);
+
+    if (root->tagName() != KXMLQLCFunction)
+    {
+        qWarning() << Q_FUNC_INFO << "Function node not found";
+        return false;
+    }
+
+    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::RGBMatrix))
+    {
+        qWarning() << Q_FUNC_INFO << "Function is not an RGB matrix";
+        return false;
+    }
+
+    /* Load matrix contents */
+    node = root->firstChild();
+    while (node.isNull() == false)
+    {
+        tag = node.toElement();
+
+        if (tag.tagName() == KXMLQLCBus)
+        {
+            if (tag.attribute(KXMLQLCBusRole) == KXMLQLCBusHold)
+                setBus(tag.text().toUInt());
+            else if (tag.attribute(KXMLQLCBusRole) == KXMLQLCBusFade)
+                setFadeBus(tag.text().toUInt());
+            else
+                qWarning() << Q_FUNC_INFO << "Unrecognized bus role:" << tag.attribute(KXMLQLCBusRole);
+        }
+        else if (tag.tagName() == KXMLQLCRGBMatrixPattern)
+        {
+            setPattern(stringToPattern(tag.text()));
+        }
+        else if (tag.tagName() == KXMLQLCRGBMatrixFixtureGroup)
+        {
+            setFixtureGroup(tag.text().toUInt());
+        }
+        else if (tag.tagName() == KXMLQLCFunctionDirection)
+        {
+            setDirection(Function::stringToDirection(tag.text()));
+        }
+        else if (tag.tagName() == KXMLQLCFunctionRunOrder)
+        {
+            setRunOrder(Function::stringToRunOrder(tag.text()));
+        }
+
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unknown RGB matrix tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
 }
 
-bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* root)
+bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(root);
+    QDomElement root;
+    QDomElement tag;
+    QDomText text;
+    QString str;
 
-    return false;
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(wksp_root != NULL);
+
+    /* Function tag */
+    root = doc->createElement(KXMLQLCFunction);
+    wksp_root->appendChild(root);
+
+    root.setAttribute(KXMLQLCFunctionID, id());
+    root.setAttribute(KXMLQLCFunctionType, Function::typeToString(type()));
+    root.setAttribute(KXMLQLCFunctionName, name());
+
+    /* Fade bus */
+    tag = doc->createElement(KXMLQLCBus);
+    root.appendChild(tag);
+    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
+    str.setNum(fadeBus());
+    text = doc->createTextNode(str);
+    tag.appendChild(text);
+
+    /* Hold bus */
+    tag = doc->createElement(KXMLQLCBus);
+    root.appendChild(tag);
+    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusHold);
+    str.setNum(bus());
+    text = doc->createTextNode(str);
+    tag.appendChild(text);
+
+    /* Pattern */
+    tag = doc->createElement(KXMLQLCRGBMatrixPattern);
+    root.appendChild(tag);
+    text = doc->createTextNode(patternToString(pattern()));
+    tag.appendChild(text);
+
+    /* Fixture Group */
+    tag = doc->createElement(KXMLQLCRGBMatrixFixtureGroup);
+    root.appendChild(tag);
+    text = doc->createTextNode(QString::number(fixtureGroup()));
+    tag.appendChild(text);
+
+    /* Direction */
+    tag = doc->createElement(KXMLQLCFunctionDirection);
+    root.appendChild(tag);
+    text = doc->createTextNode(Function::directionToString(direction()));
+    tag.appendChild(text);
+
+    /* Run order */
+    tag = doc->createElement(KXMLQLCFunctionRunOrder);
+    root.appendChild(tag);
+    text = doc->createTextNode(Function::runOrderToString(runOrder()));
+    tag.appendChild(text);
+
+    return true;
 }
 
 /****************************************************************************

@@ -102,6 +102,33 @@ void RGBMatrixEditor::init()
     m_nameEdit->setText(m_mtx->name());
     m_nameEdit->setSelection(0, m_mtx->name().length());
 
+    /* Running order */
+    switch (m_mtx->runOrder())
+    {
+    default:
+    case Function::Loop:
+        m_loop->setChecked(true);
+        break;
+    case Function::PingPong:
+        m_pingPong->setChecked(true);
+        break;
+    case Function::SingleShot:
+        m_singleShot->setChecked(true);
+        break;
+    }
+
+    /* Running direction */
+    switch (m_mtx->direction())
+    {
+    default:
+    case Function::Forward:
+        m_forward->setChecked(true);
+        break;
+    case Function::Backward:
+        m_backward->setChecked(true);
+        break;
+    }
+
     fillPatternCombo();
     fillFixtureGroupCombo();
     fillHoldBusCombo();

@@ -49,6 +49,7 @@
 #include "collection_test.h"
 #include "efxfixture_test.h"
 #include "outputmap_test.h"
+#include "rgbmatrix_test.h"
 #include "inputmap_test.h"
 #include "function_test.h"
 #include "fixture_test.h"
@@ -65,7 +66,13 @@ int main(int argc, char** argv)
 {
     QCoreApplication qapp(argc, argv);
     int r;
-
+#if 0
+    // This test doesn't practically exist yet
+    RGBMatrix_Test mtx;
+    r = QTest::qExec(&mtx, argc, argv);
+    if (r != 0)
+        return r;
+#endif
     /********************************************************************
      * Fixture metadata
      ********************************************************************/
@@ -208,11 +215,13 @@ int main(int argc, char** argv)
     r = QTest::qExec(&efx, argc, argv);
     if (r != 0)
         return r;
-
+#if 0
+    // This test doesn't practically exist yet
     Script_Test scr;
     r = QTest::qExec(&scr, argc, argv);
     if (r != 0)
         return r;
+#endif
 
     MasterTimer_Test mt;
     r = QTest::qExec(&mt, argc, argv);

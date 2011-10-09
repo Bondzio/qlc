@@ -22,10 +22,12 @@
 #include <QTreeWidgetItem>
 #include <QMdiSubWindow>
 #include <QTextBrowser>
+#include <QInputDialog>
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QScrollArea>
 #include <QMessageBox>
+#include <QToolButton>
 #include <QTabWidget>
 #include <QSplitter>
 #include <QMdiArea>
@@ -43,6 +45,7 @@
 #include "qlcchannel.h"
 #include "qlcfile.h"
 
+#include "fixturegroupeditor.h"
 #include "fixtureconsole.h"
 #include "fixturemanager.h"
 #include "universearray.h"
@@ -59,11 +62,13 @@
 #define SETTINGS_GEOMETRY "fixturemanager/geometry"
 #define SETTINGS_SPLITTER "fixturemanager/splitterstate"
 
+#define PROP_FIXTURE Qt::UserRole
+#define PROP_GROUP   Qt::UserRole + 1
+
 // List view column numbers
-#define KColumnUniverse 0
-#define KColumnAddress  1
-#define KColumnName     2
-#define KColumnID       3
+#define KColumnName     0
+#define KColumnUniverse 1
+#define KColumnAddress  2
 
 // Tab widget tabs
 #define KTabInformation 0
@@ -88,6 +93,7 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     new QVBoxLayout(this);
 
     m_console = NULL;
+    m_groupMenu = NULL;
 
     initActions();
     initToolBar();
@@ -103,6 +109,11 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
 
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
+
+    connect(m_doc, SIGNAL(fixtureGroupRemoved(quint32)),
+            this, SLOT(slotFixtureGroupRemoved(quint32)));
+
+    slotModeChanged(m_doc->mode());
 }
 
 FixtureManager::~FixtureManager()
@@ -177,32 +188,79 @@ void FixtureManager::createAndShow(QWidget* parent, Doc* doc)
 
 void FixtureManager::slotFixtureAdded(quint32 id)
 {
-    Fixture* fxi = m_doc->fixture(id);
-    if (fxi != NULL)
-    {
-        // Create a new list view item and fill it with fixture info
-        QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
-        updateItem(item, fxi);
-    }
+    Q_UNUSED(id);
+    // Don't do anything here. Groups go wacko.
 }
 
 void FixtureManager::slotFixtureRemoved(quint32 id)
 {
-    // Find a matching fixture item and destroy it
-    QTreeWidgetItem* item = fixtureItem(id);
-    if (item != NULL)
-        delete item;
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* grpItem = m_tree->topLevelItem(i);
+        Q_ASSERT(grpItem != NULL);
+        for (int j = 0; j < grpItem->childCount(); j++)
+        {
+            QTreeWidgetItem* fxiItem = grpItem->child(j);
+            Q_ASSERT(fxiItem != NULL);
+            QVariant var = fxiItem->data(KColumnName, PROP_FIXTURE);
+            if (var.isValid() == true && var.toUInt() == id)
+                delete fxiItem;
+        }
+    }
 }
 
 void FixtureManager::slotModeChanged(Doc::Mode mode)
 {
     if (mode == Doc::Design)
     {
-        m_addAction->setEnabled(true);
-        if (m_tree->selectedItems().isEmpty() == false)
+        int selected = m_tree->selectedItems().size();
+
+        QTreeWidgetItem* item = m_tree->currentItem();
+        if (item == NULL)
         {
+            m_addAction->setEnabled(true);
+            m_removeAction->setEnabled(false);
+            m_propertiesAction->setEnabled(false);
+            m_groupAction->setEnabled(false);
+            m_unGroupAction->setEnabled(false);
+        }
+        else if (item->data(KColumnName, PROP_FIXTURE).isValid() == true)
+        {
+            // Fixture selected
+            m_addAction->setEnabled(true);
             m_removeAction->setEnabled(true);
-            m_propertiesAction->setEnabled(true);
+            if (selected == 1)
+                m_propertiesAction->setEnabled(true);
+            else
+                m_propertiesAction->setEnabled(false);
+            m_groupAction->setEnabled(true);
+
+            // Don't allow ungrouping from the "All fixtures" group
+            if (item->parent()->data(KColumnName, PROP_GROUP).isValid() == true)
+                m_unGroupAction->setEnabled(true);
+            else
+                m_unGroupAction->setEnabled(false);
+        }
+        else if (item->data(KColumnName, PROP_GROUP).isValid() == true)
+        {
+            // Group selected
+            m_addAction->setEnabled(true);
+            m_removeAction->setEnabled(true);
+            if (selected == 1)
+                m_propertiesAction->setEnabled(true);
+            else
+                m_propertiesAction->setEnabled(false);
+            m_groupAction->setEnabled(false);
+            m_unGroupAction->setEnabled(false);
+        }
+        else
+        {
+            // All fixtures selected
+            m_addAction->setEnabled(true);
+            m_removeAction->setEnabled(false);
+            m_propertiesAction->setEnabled(false);
+            m_groupAction->setEnabled(false);
+            m_unGroupAction->setEnabled(false);
         }
     }
     else
@@ -210,6 +268,20 @@ void FixtureManager::slotModeChanged(Doc::Mode mode)
         m_addAction->setEnabled(false);
         m_removeAction->setEnabled(false);
         m_propertiesAction->setEnabled(false);
+        m_groupAction->setEnabled(false);
+        m_unGroupAction->setEnabled(false);
+    }
+}
+
+void FixtureManager::slotFixtureGroupRemoved(quint32 id)
+{
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+        QVariant var = item->data(KColumnName, PROP_GROUP);
+        if (var.isValid() && var.toUInt() == id)
+            delete item;
     }
 }
 
@@ -230,14 +302,15 @@ void FixtureManager::initDataView()
     m_splitter->addWidget(m_tree);
 
     QStringList labels;
-    labels << tr("Universe") << tr("Address") << tr("Name");
+    labels << tr("Name") << tr("Universe") << tr("Address");
     m_tree->setHeaderLabels(labels);
-    m_tree->setRootIsDecorated(false);
+    m_tree->setRootIsDecorated(true);
     m_tree->setSortingEnabled(true);
     m_tree->setAllColumnsShowFocus(true);
     m_tree->sortByColumn(KColumnAddress, Qt::AscendingOrder);
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     connect(m_tree, SIGNAL(itemSelectionChanged()),
             this, SLOT(slotSelectionChanged()));
@@ -269,16 +342,33 @@ void FixtureManager::initDataView()
 
 void FixtureManager::updateView()
 {
-    QTreeWidgetItem* item;
-    quint32 currentId = Fixture::invalidId();
-
-    // Store the currently selected fixture's ID
-    item = m_tree->currentItem();
-    if (item != NULL)
-        currentId = item->text(KColumnID).toUInt();
+    // Record which groups are open
+    QList <QVariant> openGroups;
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        if (item->isExpanded() == true)
+            openGroups << item->data(KColumnName, PROP_GROUP);
+    }
 
     // Clear the view
     m_tree->clear();
+
+    foreach (FixtureGroup* grp, m_doc->fixtureGroups())
+    {
+        QTreeWidgetItem* grpItem = new QTreeWidgetItem(m_tree);
+        grpItem->setText(KColumnName, grp->name());
+        grpItem->setData(KColumnName, PROP_GROUP, grp->id());
+
+        foreach (quint32 id, grp->fixtureList())
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem(grpItem);
+            updateItem(item, m_doc->fixture(id));
+        }
+    }
+
+    QTreeWidgetItem* grpItem = new QTreeWidgetItem(m_tree);
+    grpItem->setText(KColumnName, tr("All fixtures"));
 
     // Add all fixtures
     foreach (Fixture* fixture, m_doc->fixtures())
@@ -286,17 +376,24 @@ void FixtureManager::updateView()
         Q_ASSERT(fixture != NULL);
 
         // Update fixture information to the item
-        item = new QTreeWidgetItem(m_tree);
+        QTreeWidgetItem* item = new QTreeWidgetItem(grpItem);
         updateItem(item, fixture);
-
-        // Select this if it was selected before update
-        if (currentId == fixture->id())
-            m_tree->setCurrentItem(item);
     }
 
-    /* Select the first fixture unless something else is wanted */
-    if (currentId == Fixture::invalidId())
-        m_tree->setCurrentItem(m_tree->topLevelItem(0));
+    // Reopen groups that were open before update
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        QVariant var = item->data(KColumnName, PROP_GROUP);
+        if (openGroups.contains(var) == true)
+        {
+            item->setExpanded(true);
+            openGroups.removeAll(var);
+        }
+    }
+
+    updateGroupMenu();
+    slotModeChanged(m_doc->mode());
 }
 
 QTreeWidgetItem* FixtureManager::fixtureItem(quint32 id) const
@@ -304,10 +401,13 @@ QTreeWidgetItem* FixtureManager::fixtureItem(quint32 id) const
     QTreeWidgetItemIterator it(m_tree);
     while (*it != NULL)
     {
-        if ((*it)->text(KColumnID).toUInt() == id)
-            return (*it);
+        QTreeWidgetItem* item(*it);
+        QVariant var = item->data(KColumnName, PROP_FIXTURE);
+        if (var.isValid() == true && var.toUInt() == id)
+            return item;
         ++it;
     }
+
     return NULL;
 }
 
@@ -336,7 +436,42 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
     item->setText(KColumnName, fxi->name());
 
     // ID column
-    item->setText(KColumnID, QString("%1").arg(fxi->id()));
+    item->setData(KColumnName, PROP_FIXTURE, fxi->id());
+}
+
+void FixtureManager::fixtureSelected(quint32 id)
+{
+    Fixture* fxi = m_doc->fixture(id);
+    if (fxi == NULL)
+        return;
+
+    m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
+                    .arg(fixtureInfoStyleSheetHeader())
+                    .arg(fxi->status()));
+
+    /* Mark the current tab widget page */
+    int page = m_tab->currentIndex();
+
+    /* Delete existing scroll area and console */
+    delete m_console;
+    delete m_tab->widget(KTabConsole);
+
+    /* Create a new console for the selected fixture */
+    m_console = new FixtureConsole(this, m_doc);
+    m_console->setFixture(id);
+    m_console->setChannelsCheckable(false);
+
+    /* Put the console inside a scroll area */
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(m_console);
+    scrollArea->setWidgetResizable(true);
+    m_tab->addTab(scrollArea, tr("Console"));
+
+    /* Recall the same tab widget page */
+    m_tab->setCurrentIndex(page);
+
+    // Enable/disable actions
+    slotModeChanged(m_doc->mode());
 }
 
 void FixtureManager::slotSelectionChanged()
@@ -344,85 +479,63 @@ void FixtureManager::slotSelectionChanged()
     int selectedCount = m_tree->selectedItems().size();
     if (selectedCount == 1)
     {
-        QScrollArea* scrollArea;
-        quint32 id;
-        Fixture* fxi;
-        int page;
-
         QTreeWidgetItem* item = m_tree->selectedItems().first();
         Q_ASSERT(item != NULL);
 
         // Set the text view's contents
-        id = item->text(KColumnID).toUInt();
-        fxi = m_doc->fixture(id);
-        Q_ASSERT(fxi != NULL);
-        m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
-                        .arg(fixtureInfoStyleSheetHeader())
-                        .arg(fxi->status()));
-
-        /* Mark the current tab widget page */
-        page = m_tab->currentIndex();
-
-        /* Delete existing scroll area and console */
-        delete m_console;
-        delete m_tab->widget(KTabConsole);
-
-        /* Create a new console for the selected fixture */
-        m_console = new FixtureConsole(this, m_doc);
-        m_console->setFixture(id);
-        m_console->setChannelsCheckable(false);
-
-        /* Put the console inside a scroll area */
-        scrollArea = new QScrollArea(this);
-        scrollArea->setWidget(m_console);
-        scrollArea->setWidgetResizable(true);
-        m_tab->addTab(scrollArea, tr("Console"));
-
-        /* Recall the same tab widget page */
-        m_tab->setCurrentIndex(page);
-
-        // Enable/disable actions
-        if (m_doc->mode() == Doc::Design)
+        QVariant fxivar = item->data(KColumnName, PROP_FIXTURE);
+        QVariant grpvar = item->data(KColumnName, PROP_GROUP);
+        if (fxivar.isValid() == true)
         {
-            m_addAction->setEnabled(true);
-            m_removeAction->setEnabled(true);
-            m_propertiesAction->setEnabled(true);
+            // Selected a fixture
+            fixtureSelected(fxivar.toUInt());
+        }
+        else if (grpvar.isValid() == true)
+        {
+            FixtureGroup* grp = m_doc->fixtureGroup(grpvar.toUInt());
+            Q_ASSERT(grp != NULL);
+
+            m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
+                            .arg(fixtureInfoStyleSheetHeader())
+                            .arg(grp->infoText()));
+
+            // Selected a group
+            if (m_console != NULL)
+            {
+                delete m_console;
+                m_console = NULL;
+                m_tab->removeTab(KTabConsole);
+            }
         }
         else
         {
-            m_addAction->setEnabled(false);
-            m_removeAction->setEnabled(false);
-            m_propertiesAction->setEnabled(false);
+            QString info("<HTML><BODY><H1>%1</H1><P>%2</P></BODY></HTML>");
+            m_info->setText(info.arg(tr("All fixtures")).arg(tr("This group contains all fixtures.")));
+
+            // Selected "All fixtures" group
+            if (m_console != NULL)
+            {
+                delete m_console;
+                m_console = NULL;
+                m_tab->removeTab(KTabConsole);
+            }
         }
     }
     else
     {
         // More than one or less than one selected
-
         QString info;
-
-        // Add is not available in operate mode
-        if (m_doc->mode() == Doc::Design)
-            m_addAction->setEnabled(true);
-        else
-            m_addAction->setEnabled(false);
-
-        // Disable properties action because its target is ambiguous
-        m_propertiesAction->setEnabled(false);
-
         if (selectedCount > 1)
         {
             // Enable removal of multiple items in design mode
             if (m_doc->mode() == Doc::Design)
             {
-                m_removeAction->setEnabled(true);
                 info = tr("<HTML><BODY><H1>Multiple fixtures selected</H1>" \
                           "<P>Click <IMG SRC=\"" ":/edit_remove.png\">" \
                           " to remove the selected fixtures.</P></BODY></HTML>");
             }
             else
             {
-                m_removeAction->setEnabled(false);
                 info = tr("<HTML><BODY><H1>Multiple fixtures selected</H1>" \
                           "<P>Fixture list modification is not permitted" \
                           " in operate mode.</P></BODY></HTML>");
@@ -430,8 +543,6 @@ void FixtureManager::slotSelectionChanged()
         }
         else
         {
-            // Disable remove since nothing is selected
-            m_removeAction->setEnabled(false);
             if (m_tree->topLevelItemCount() <= 0)
             {
                 info = tr("<HTML><BODY><H1>No fixtures</H1>" \
@@ -449,16 +560,40 @@ void FixtureManager::slotSelectionChanged()
 
         m_info->setText(info);
 
-        delete m_console;
-        m_console = NULL;
-        m_tab->removeTab(KTabConsole);
+        if (m_console != NULL)
+        {
+            delete m_console;
+            m_console = NULL;
+            m_tab->removeTab(KTabConsole);
+        }
     }
+
+    // Enable/disable actions
+    slotModeChanged(m_doc->mode());
 }
 
 void FixtureManager::slotDoubleClicked(QTreeWidgetItem* item)
 {
     if (item != NULL && m_doc->mode() != Doc::Operate)
         slotProperties();
+}
+
+void FixtureManager::selectGroup(quint32 id)
+{
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        QVariant var = item->data(KColumnName, PROP_GROUP);
+        if (var.isValid() == false)
+            continue;
+
+        if (var.toUInt() == id)
+        {
+            m_tree->setCurrentItem(item);
+            slotSelectionChanged();
+            break;
+        }
+    }
 }
 
 QString FixtureManager::fixtureInfoStyleSheetHeader()
@@ -484,6 +619,9 @@ QString FixtureManager::fixtureInfoStyleSheetHeader()
     info += QString(".emphasis {" \
                     "	font-weight: bold;" \
                     "}");
+    info += QString(".tiny {"\
+                    "   font-size: small;" \
+                    "}");
     info += QString(".author {" \
                     "	font-weight: light;" \
                     "	font-style: italic;" \
@@ -500,20 +638,60 @@ QString FixtureManager::fixtureInfoStyleSheetHeader()
 
 void FixtureManager::initActions()
 {
+    // Fixture actions
     m_addAction = new QAction(QIcon(":/edit_add.png"),
                               tr("Add fixture..."), this);
     connect(m_addAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAdd()));
 
     m_removeAction = new QAction(QIcon(":/edit_remove.png"),
-                                 tr("Delete fixture"), this);
+                                 tr("Delete items"), this);
     connect(m_removeAction, SIGNAL(triggered(bool)),
             this, SLOT(slotRemove()));
 
     m_propertiesAction = new QAction(QIcon(":/configure.png"),
-                                     tr("Configure fixture..."), this);
+                                     tr("Properties..."), this);
     connect(m_propertiesAction, SIGNAL(triggered(bool)),
             this, SLOT(slotProperties()));
+
+    // Group actions
+    m_groupAction = new QAction(QIcon(":/group.png"),
+                                tr("Add fixture to group..."), this);
+
+    m_unGroupAction = new QAction(QIcon(":/ungroup.png"),
+                                tr("Remove fixture from group"), this);
+    connect(m_unGroupAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotUnGroup()));
+
+    m_newGroupAction = new QAction(tr("New Group..."), this);
+
+    updateGroupMenu();
+}
+
+void FixtureManager::updateGroupMenu()
+{
+    if (m_groupMenu != NULL)
+    {
+        m_groupAction->setMenu(NULL);
+        delete m_groupMenu;
+    }
+
+    // Put all known fixture groups to a menu
+    m_groupMenu = new QMenu(this);
+    foreach (FixtureGroup* grp, m_doc->fixtureGroups())
+    {
+        QAction* a = m_groupMenu->addAction(grp->name());
+        a->setData((qulonglong) grp);
+    }
+
+    // Put a new group action to the group menu
+    m_groupMenu->addAction(m_newGroupAction);
+
+    // Put the group menu to the group action
+    m_groupAction->setMenu(m_groupMenu);
+
+    connect(m_groupMenu, SIGNAL(triggered(QAction*)),
+            this, SLOT(slotGroupSelected(QAction*)));
 }
 
 void FixtureManager::initToolBar()
@@ -524,8 +702,14 @@ void FixtureManager::initToolBar()
     layout()->setMenuBar(toolbar);
     toolbar->addAction(m_addAction);
     toolbar->addAction(m_removeAction);
-    toolbar->addSeparator();
     toolbar->addAction(m_propertiesAction);
+    toolbar->addSeparator();
+    toolbar->addAction(m_groupAction);
+    toolbar->addAction(m_unGroupAction);
+
+    QToolButton* btn = qobject_cast<QToolButton*> (toolbar->widgetForAction(m_groupAction));
+    Q_ASSERT(btn != NULL);
+    btn->setPopupMode(QToolButton::InstantPopup);
 }
 
 void FixtureManager::slotAdd()
@@ -544,6 +728,26 @@ void FixtureManager::slotAdd()
 
     const QLCFixtureDef* fixtureDef = af.fixtureDef();
     const QLCFixtureMode* mode = af.mode();
+
+    FixtureGroup* addToGroup = NULL;
+    QTreeWidgetItem* current = m_tree->currentItem();
+    if (current != NULL)
+    {
+        if (current->parent() != NULL)
+        {
+            // Fixture selected
+            QVariant var = current->parent()->data(KColumnName, PROP_GROUP);
+            if (var.isValid() == true)
+                addToGroup = m_doc->fixtureGroup(var.toUInt());
+        }
+        else
+        {
+            // Group selected
+            QVariant var = current->data(KColumnName, PROP_GROUP);
+            if (var.isValid() == true)
+                addToGroup = m_doc->fixtureGroup(var.toUInt());
+        }
+    }
 
     QString modname;
 
@@ -578,20 +782,10 @@ void FixtureManager::slotAdd()
     else
         fxi->setChannels(channels);
 
-    /* Attempt to add the fixture to doc. If the first one fails,
-       it is very likely that others would, too. */
-    if (m_doc->addFixture(fxi) == false)
-    {
-        /* Adding failed. Display error and bail out. */
-        addFixtureErrorMessage();
-        delete fxi;
-        fxi = NULL;
-        return;
-    }
-    else
-    {
-        latestFxi = fxi->id();
-    }
+    m_doc->addFixture(fxi);
+    latestFxi = fxi->id();
+    if (addToGroup != NULL)
+        addToGroup->assignFixture(latestFxi);
 
     /* Add the rest (if any) WITH address gap */
     for (int i = 1; i < af.amount(); i++)
@@ -619,25 +813,17 @@ void FixtureManager::slotAdd()
         else
             fxi->setChannels(channels);
 
-        /* Attempt to add the fixture to doc. If one fails,
-        it is very likely that others would, too. */
-        if (m_doc->addFixture(fxi) == false)
-        {
-            /* Adding failed. Display error and bail out. */
-            addFixtureErrorMessage();
-            delete fxi;
-            fxi = NULL;
-            break;
-        }
-        else
-        {
-            latestFxi = fxi->id();
-        }
+        m_doc->addFixture(fxi);
+        latestFxi = fxi->id();
+        if (addToGroup != NULL)
+            addToGroup->assignFixture(latestFxi);
     }
 
     QTreeWidgetItem* selectItem = fixtureItem(latestFxi);
     if (selectItem != NULL)
         m_tree->setCurrentItem(selectItem);
+
+    updateView();
 }
 
 void FixtureManager::addFixtureErrorMessage()
@@ -650,7 +836,7 @@ void FixtureManager::slotRemove()
 {
     // Ask before deletion
     if (QMessageBox::question(this, tr("Delete Fixtures"),
-                              tr("Do you want to DELETE the selected fixtures?"),
+                              tr("Do you want to delete the selected items?"),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
     {
         return;
@@ -662,7 +848,11 @@ void FixtureManager::slotRemove()
         QTreeWidgetItem* item(it.next());
         Q_ASSERT(item != NULL);
 
-        quint32 id = item->text(KColumnID).toUInt();
+        QVariant var = item->data(KColumnName, PROP_FIXTURE);
+        if (var.isValid() == false)
+            continue;
+
+        quint32 id = var.toUInt();
 
         /** @todo This is REALLY bogus here, since Fixture or Doc should do
             this. However, FixtureManager is the only place to destroy fixtures,
@@ -677,13 +867,15 @@ void FixtureManager::slotRemove()
     }
 }
 
-void FixtureManager::slotProperties()
+void FixtureManager::editFixtureProperties(QTreeWidgetItem* item)
 {
-    QTreeWidgetItem* item = m_tree->currentItem();
-    if (item == NULL)
+    Q_ASSERT(item != NULL);
+
+    QVariant var = item->data(KColumnName, PROP_FIXTURE);
+    if (var.isValid() == false)
         return;
 
-    quint32 id = item->text(KColumnID).toUInt();
+    quint32 id = var.toUInt();
     Fixture* fxi = m_doc->fixture(id);
     if (fxi == NULL)
         return;
@@ -736,12 +928,138 @@ void FixtureManager::slotProperties()
     }
 }
 
+void FixtureManager::editGroupProperties(QTreeWidgetItem* item)
+{
+    Q_ASSERT(item != NULL);
+
+    QVariant var = item->data(KColumnName, PROP_GROUP);
+    if (var.isValid() == false)
+        return;
+
+    quint32 id = var.toUInt();
+    FixtureGroup* grp = m_doc->fixtureGroup(id);
+    if (grp == NULL)
+        return;
+
+    FixtureGroupEditor fge(grp, m_doc, this);
+    if (fge.exec() == QDialog::Accepted)
+    {
+        updateView();
+        selectGroup(id);
+        m_doc->setModified();
+    }
+}
+
+void FixtureManager::slotProperties()
+{
+    QTreeWidgetItem* item = m_tree->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant var = item->data(KColumnName, PROP_FIXTURE);
+    if (var.isValid() == true)
+    {
+        editFixtureProperties(item);
+    }
+    else
+    {
+        var = item->data(KColumnName, PROP_GROUP);
+        if (var.isValid() == true)
+            editGroupProperties(item);
+    }
+}
+
+void FixtureManager::slotUnGroup()
+{
+    if (QMessageBox::question(this, tr("Ungroup fixtures?"),
+                              tr("Do you want to ungroup the selected fixtures?"),
+                              QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+    {
+        return;
+    }
+
+    foreach (QTreeWidgetItem* item, m_tree->selectedItems())
+    {
+        QTreeWidgetItem* parentItem = item->parent();
+        if (parentItem == NULL)
+            continue;
+
+        QVariant var = parentItem->data(KColumnName, PROP_GROUP);
+        if (var.isValid() == false)
+            continue;
+
+        FixtureGroup* grp = m_doc->fixtureGroup(var.toUInt());
+        Q_ASSERT(grp != NULL);
+
+        var = item->data(KColumnName, PROP_FIXTURE);
+        if (var.isValid() == false)
+            continue;
+
+        quint32 id = var.toUInt();
+
+        grp->resignFixture(id);
+    }
+
+    updateView();
+}
+
+void FixtureManager::slotGroupSelected(QAction* action)
+{
+    FixtureGroup* grp = NULL;
+
+    if (action->data().isValid() == true)
+    {
+        // Existing group selected
+        grp = (FixtureGroup*) action->data().toULongLong();
+        Q_ASSERT(grp != NULL);
+    }
+    else
+    {
+        // New Group selected
+        bool ok = false;
+        QString name;
+
+        while (ok == false)
+        {
+            name = QInputDialog::getText(this, tr("Create new group"), tr("Group name"),
+                                         QLineEdit::Normal, name, &ok);
+            if (ok == false)
+                return; // User pressed cancel
+
+            grp = new FixtureGroup(m_doc);
+            Q_ASSERT(grp != NULL);
+            grp->setName(name);
+            m_doc->addFixtureGroup(grp);
+            updateGroupMenu();
+            ok = true;
+
+            qreal side = sqrt(m_tree->selectedItems().size());
+            if (side != floor(side))
+                side += 1; // Fixture number doesn't provide a full square
+            grp->setSize(QSize(side, side)); // Arrange fixtures into a grid
+        }
+    }
+
+    foreach (QTreeWidgetItem* item, m_tree->selectedItems())
+    {
+        QVariant var = item->data(KColumnName, PROP_FIXTURE);
+        if (var.isValid() == false)
+            continue;
+
+        grp->assignFixture(var.toUInt());
+    }
+
+    updateView();
+}
+
 void FixtureManager::slotContextMenuRequested(const QPoint&)
 {
     QMenu menu(this);
     menu.addAction(m_addAction);
     menu.addAction(m_propertiesAction);
-    menu.addSeparator();
     menu.addAction(m_removeAction);
+    menu.addSeparator();
+    menu.addAction(m_groupAction);
+    menu.addAction(m_unGroupAction);
     menu.exec(QCursor::pos());
 }

@@ -222,7 +222,7 @@ void Fixture_Test::fixtureDef()
     QCOMPARE(fxi.masterIntensityChannel(), QLCChannel::invalid());
 
     const QLCFixtureDef* fixtureDef;
-    fixtureDef = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC250+");
+    fixtureDef = m_doc->fixtureDefCache()->fixtureDef("Martin", "MAC300");
     Q_ASSERT(fixtureDef != NULL);
 
     fxi.setFixtureDefinition(fixtureDef, NULL);
@@ -255,16 +255,18 @@ void Fixture_Test::fixtureDef()
     ch = fxi.channel(fxi.channel("Pan", Qt::CaseInsensitive, QLCChannel::Colour));
     QVERIFY(ch == NULL);
 
-    QVERIFY(fxi.channel("otation") != QLCChannel::invalid());
-    ch = fxi.channel(fxi.channel("otati"));
+    QVERIFY(fxi.channel("fect") != QLCChannel::invalid());
+    ch = fxi.channel(fxi.channel("fect"));
     QVERIFY(ch != NULL);
-    QVERIFY(ch->name().toLower() == "gobo rotation");
+    QCOMPARE(ch->name(), QString("Effect speed"));
 
     QCOMPARE(fxi.panMsbChannel(), quint32(7));
     QCOMPARE(fxi.tiltMsbChannel(), quint32(9));
     QCOMPARE(fxi.panLsbChannel(), quint32(8));
     QCOMPARE(fxi.tiltLsbChannel(), quint32(10));
     QCOMPARE(fxi.masterIntensityChannel(), quint32(1));
+    QCOMPARE(fxi.rgbChannels(), QList <quint32> ());
+    QCOMPARE(fxi.cmyChannels(), QList <quint32> () << 2 << 3 << 4);
 }
 
 void Fixture_Test::channels()

@@ -47,6 +47,7 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     , m_inputMap(new InputMap(this, inputUniverses))
     , m_mode(Design)
     , m_latestFixtureId(0)
+    , m_latestFixtureGroupId(0)
     , m_latestFunctionId(0)
 {
     /* Connect to bus emitter so that Doc can be marked as modified when
@@ -97,8 +98,23 @@ void Doc::clearContents()
         delete fxi;
     }
 
+    // Delete all fixture groups
+    QListIterator <quint32> grpit(m_fixtureGroups.keys());
+    while (grpit.hasNext() == true)
+    {
+        FixtureGroup* grp = m_fixtureGroups.take(grpit.next());
+        emit fixtureGroupRemoved(grp->id());
+        delete grp;
+    }
+
     m_latestFunctionId = 0;
     m_latestFixtureId = 0;
+    m_latestFixtureGroupId = 0;
+}
+
+void Doc::slotBusNameChanged()
+{
+    setModified();
 }
 
 /*****************************************************************************
@@ -275,6 +291,88 @@ int Doc::totalPowerConsumption(int& fuzzy) const
     return totalPowerConsumption;
 }
 
+void Doc::slotFixtureChanged(quint32 id)
+{
+    setModified();
+    emit fixtureChanged(id);
+}
+
+/*****************************************************************************
+ * Fixture groups
+ *****************************************************************************/
+
+bool Doc::addFixtureGroup(FixtureGroup* grp, quint32 id)
+{
+    Q_ASSERT(grp != NULL);
+
+    // No ID given, this method can assign one
+    if (id == FixtureGroup::invalidId())
+        id = createFixtureGroupId();
+
+    if (m_fixtureGroups.contains(id) == true || id == FixtureGroup::invalidId())
+    {
+        qWarning() << Q_FUNC_INFO << "a fixture with ID" << id << "already exists!";
+        return false;
+    }
+    else
+    {
+        grp->setId(id);
+        m_fixtureGroups[id] = grp;
+
+        emit fixtureGroupAdded(id);
+        setModified();
+
+        return true;
+    }
+}
+
+bool Doc::deleteFixtureGroup(quint32 id)
+{
+    if (m_fixtureGroups.contains(id) == true)
+    {
+        FixtureGroup* grp = m_fixtureGroups.take(id);
+        Q_ASSERT(grp != NULL);
+
+        emit fixtureGroupRemoved(id);
+        setModified();
+        delete grp;
+
+        return true;
+    }
+    else
+    {
+        qWarning() << Q_FUNC_INFO << "No fixture group with id" << id;
+        return false;
+    }
+}
+
+FixtureGroup* Doc::fixtureGroup(quint32 id) const
+{
+    if (m_fixtureGroups.contains(id) == true)
+        return m_fixtureGroups[id];
+    else
+        return NULL;
+}
+
+QList <FixtureGroup*> Doc::fixtureGroups() const
+{
+    return m_fixtureGroups.values();
+}
+
+quint32 Doc::createFixtureGroupId()
+{
+    /* This results in an endless loop if there are UINT_MAX-1 fixture groups. That,
+       however, seems a bit unlikely. Are there even 4294967295-1 fixtures in
+       total in the whole world? */
+    while (m_fixtureGroups.contains(m_latestFixtureGroupId) == true ||
+           m_latestFixtureGroupId == FixtureGroup::invalidId())
+    {
+        m_latestFixtureGroupId++;
+    }
+
+    return m_latestFixtureGroupId;
+}
+
 /*****************************************************************************
  * Functions
  *****************************************************************************/
@@ -358,25 +456,10 @@ Function* Doc::function(quint32 id)
         return NULL;
 }
 
-/*****************************************************************************
- * Monitoring/listening methods
- *****************************************************************************/
-
 void Doc::slotFunctionChanged(quint32 fid)
 {
     setModified();
     emit functionChanged(fid);
-}
-
-void Doc::slotFixtureChanged(quint32 id)
-{
-    setModified();
-    emit fixtureChanged(id);
-}
-
-void Doc::slotBusNameChanged()
-{
-    setModified();
 }
 
 /*****************************************************************************
@@ -412,6 +495,10 @@ bool Doc::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCBus)
         {
             Bus::instance()->loadXML(&tag);
+        }
+        else if (tag.tagName() == KXMLQLCFixtureGroup)
+        {
+            FixtureGroup::loader(&tag, this);
         }
         else
         {
@@ -453,6 +540,14 @@ bool Doc::saveXML(QDomDocument* doc, QDomElement* wksp_root)
         Function* func(funcit.next());
         Q_ASSERT(func != NULL);
         func->saveXML(doc, &root);
+    }
+
+    QListIterator <FixtureGroup*> grpit(fixtureGroups());
+    while (grpit.hasNext() == true)
+    {
+        FixtureGroup* grp(grpit.next());
+        Q_ASSERT(grp != NULL);
+        grp->saveXML(doc, &root);
     }
 
     /* Write buses */

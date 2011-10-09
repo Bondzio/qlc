@@ -28,6 +28,7 @@
 #include <QMap>
 
 #include "qlcfixturedefcache.h"
+#include "fixturegroup.h"
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -63,6 +64,10 @@ public:
 
     /** Remove all functions and fixtures from the doc, signalling each removal. */
     void clearContents();
+
+private slots:
+    /** Catches bus name changes so that Doc can be marked as modified */
+    void slotBusNameChanged();
 
     /*********************************************************************
      * Engine components
@@ -195,12 +200,51 @@ signals:
     /** Signal that a fixture's properties have changed */
     void fixtureChanged(quint32 fxi_id);
 
+private slots:
+    /** Catch fixture property changes */
+    void slotFixtureChanged(quint32 fxi_id);
+
 protected:
     /** Fixtures */
     QMap <quint32,Fixture*> m_fixtures;
 
     /** Latest assigned fixture ID */
     quint32 m_latestFixtureId;
+
+    /*********************************************************************
+     * Fixture groups
+     *********************************************************************/
+public:
+    /** Add a new fixture group. Doc takes ownership of the group. */
+    bool addFixtureGroup(FixtureGroup* grp, quint32 id = FixtureGroup::invalidId());
+
+    /**
+     * Remove and delete a fixture group. Doesn't destroy group's fixtures.
+     * The group pointer is invalid after this call.
+     */
+    bool deleteFixtureGroup(quint32 id);
+
+    /** Get a fixture group by id */
+    FixtureGroup* fixtureGroup(quint32 id) const;
+
+    /** Get a list of Doc's fixture groups */
+    QList <FixtureGroup*> fixtureGroups() const;
+
+signals:
+    void fixtureGroupAdded(quint32 id);
+    void fixtureGroupRemoved(quint32 id);
+    void fixtureGroupChanged(quint32 id);
+
+private:
+    /** Create a new fixture group ID */
+    quint32 createFixtureGroupId();
+
+private:
+    /** Fixture Groups */
+    QMap <quint32,FixtureGroup*> m_fixtureGroups;
+
+    /** Latest assigned fixture group ID */
+    quint32 m_latestFixtureGroupId;
 
     /*********************************************************************
      * Functions
@@ -259,16 +303,9 @@ protected:
      */
     void assignFunction(Function* function, quint32 id);
 
-public slots:
-    /** Catch fixture property changes */
-    void slotFixtureChanged(quint32 fxi_id);
-
-protected slots:
+private slots:
     /** Slot that catches function change signals */
     void slotFunctionChanged(quint32 fid);
-
-    /** Catches bus name changes so that Doc can be marked as modified */
-    void slotBusNameChanged();
 
 signals:
     /** Signal that a function has been added */

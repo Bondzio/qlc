@@ -40,12 +40,14 @@
 
 #include "collectioneditor.h"
 #include "functionmanager.h"
+#include "rgbmatrixeditor.h"
 #include "functionwizard.h"
 #include "chasereditor.h"
 #include "scripteditor.h"
 #include "sceneeditor.h"
 #include "collection.h"
 #include "efxeditor.h"
+#include "rgbmatrix.h"
 #include "function.h"
 #include "apputil.h"
 #include "chaser.h"
@@ -213,9 +215,15 @@ void FunctionManager::initActions()
     connect(m_addEFXAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddEFX()));
 
+    m_addRGBMatrixAction = new QAction(QIcon(":/rgbmatrix.png"),
+                                 tr("New &RGB Matrix"), this);
+    m_addRGBMatrixAction->setShortcut(QKeySequence("CTRL+R"));
+    connect(m_addRGBMatrixAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotAddRGBMatrix()));
+
     m_addScriptAction = new QAction(QIcon(":/script.png"),
-                                 tr("New sc&ript"), this);
-    m_addScriptAction->setShortcut(QKeySequence("CTRL+R"));
+                                 tr("New scrip&t"), this);
+    m_addScriptAction->setShortcut(QKeySequence("CTRL+T"));
     connect(m_addScriptAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddScript()));
 
@@ -267,6 +275,7 @@ void FunctionManager::initMenu()
     m_addMenu->addAction(m_addChaserAction);
     m_addMenu->addAction(m_addEFXAction);
     m_addMenu->addAction(m_addCollectionAction);
+    m_addMenu->addAction(m_addRGBMatrixAction);
     m_addMenu->addAction(m_addScriptAction);
     m_addMenu->addSeparator();
     m_addMenu->addAction(m_wizardAction);
@@ -322,6 +331,7 @@ void FunctionManager::initToolbar()
     m_toolbar->addAction(m_addChaserAction);
     m_toolbar->addAction(m_addEFXAction);
     m_toolbar->addAction(m_addCollectionAction);
+    m_toolbar->addAction(m_addRGBMatrixAction);
     m_toolbar->addAction(m_addScriptAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_wizardAction);
@@ -431,6 +441,20 @@ void FunctionManager::slotAddCollection()
 void FunctionManager::slotAddEFX()
 {
     Function* f = new EFX(m_doc);
+    if (m_doc->addFunction(f) == true)
+    {
+        addFunction(f);
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Function creation failed"),
+                              tr("Unable to create new function."));
+    }
+}
+
+void FunctionManager::slotAddRGBMatrix()
+{
+    Function* f = new RGBMatrix(m_doc);
     if (m_doc->addFunction(f) == true)
     {
         addFunction(f);
@@ -624,6 +648,10 @@ QIcon FunctionManager::functionIcon(const Function* function) const
         return QIcon(":/efx.png");
     case Function::Collection:
         return QIcon(":/collection.png");
+    case Function::RGBMatrix:
+        return QIcon(":/rgbmatrix.png");
+    case Function::Script:
+        return QIcon(":/script.png");
     default:
         return QIcon(":/function.png");
     }
@@ -747,6 +775,11 @@ int FunctionManager::editFunction(Function* function)
     else if (function->type() == Function::EFX)
     {
         EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
+        result = editor.exec();
+    }
+    else if (function->type() == Function::RGBMatrix)
+    {
+        RGBMatrixEditor editor(this, qobject_cast<RGBMatrix*> (function), m_doc);
         result = editor.exec();
     }
     else if (function->type() == Function::Script)

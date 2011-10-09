@@ -118,6 +118,7 @@ protected slots:
     void slotAddChaser();
     void slotAddCollection();
     void slotAddEFX();
+    void slotAddRGBMatrix();
     void slotAddScript();
     void slotWizard();
 
@@ -140,6 +141,7 @@ protected:
     QAction* m_addChaserAction;
     QAction* m_addCollectionAction;
     QAction* m_addEFXAction;
+    QAction* m_addRGBMatrixAction;
     QAction* m_addScriptAction;
     QAction* m_wizardAction;
 
@@ -173,4 +175,3 @@ protected:
 };
 
 #endif
-

@@ -31,30 +31,44 @@
 #include "qlcphysical.h"
 
 QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef)
+    : m_fixtureDef(fixtureDef)
+    , m_channelsCached(false)
+    , m_panMsbChannel(QLCChannel::invalid())
+    , m_tiltMsbChannel(QLCChannel::invalid())
+    , m_panLsbChannel(QLCChannel::invalid())
+    , m_tiltLsbChannel(QLCChannel::invalid())
+    , m_masterIntensityChannel(QLCChannel::invalid())
 {
     Q_ASSERT(fixtureDef != NULL);
-    m_fixtureDef = fixtureDef;
 }
 
-QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef,
-                               const QLCFixtureMode* mode)
+QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef, const QLCFixtureMode* mode)
+    : m_fixtureDef(fixtureDef)
+    , m_channelsCached(false)
+    , m_panMsbChannel(QLCChannel::invalid())
+    , m_tiltMsbChannel(QLCChannel::invalid())
+    , m_panLsbChannel(QLCChannel::invalid())
+    , m_tiltLsbChannel(QLCChannel::invalid())
+    , m_masterIntensityChannel(QLCChannel::invalid())
 {
     Q_ASSERT(fixtureDef != NULL);
     Q_ASSERT(mode != NULL);
-
-    m_fixtureDef = fixtureDef;
 
     if (mode != NULL)
         *this = *mode;
 }
 
-QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef,
-                               const QDomElement* tag)
+QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef, const QDomElement* tag)
+    : m_fixtureDef(fixtureDef)
+    , m_channelsCached(false)
+    , m_panMsbChannel(QLCChannel::invalid())
+    , m_tiltMsbChannel(QLCChannel::invalid())
+    , m_panLsbChannel(QLCChannel::invalid())
+    , m_tiltLsbChannel(QLCChannel::invalid())
+    , m_masterIntensityChannel(QLCChannel::invalid())
 {
     Q_ASSERT(fixtureDef != NULL);
     Q_ASSERT(tag != NULL);
-
-    m_fixtureDef = fixtureDef;
 
     if (tag != NULL)
         loadXML(tag);
@@ -96,6 +110,15 @@ QLCFixtureMode& QLCFixtureMode::operator=(const QLCFixtureMode& mode)
                            << m_name << "from its fixture definition";
         }
     }
+
+    m_panMsbChannel = mode.m_panMsbChannel;
+    m_tiltMsbChannel = mode.m_tiltMsbChannel;
+    m_panLsbChannel = mode.m_panLsbChannel;
+    m_tiltLsbChannel = mode.m_tiltLsbChannel;
+    m_masterIntensityChannel = mode.m_masterIntensityChannel;
+    m_rgbChannels = mode.m_rgbChannels;
+    m_cmyChannels = mode.m_cmyChannels;
+    m_channelsCached = mode.m_channelsCached;
 
     return *this;
 }
@@ -220,6 +243,119 @@ quint32 QLCFixtureMode::channelNumber(QLCChannel* channel) const
     return QLCChannel::invalid();
 }
 
+quint32 QLCFixtureMode::panMsbChannel() const
+{
+    return m_panMsbChannel;
+}
+
+quint32 QLCFixtureMode::tiltMsbChannel() const
+{
+    return m_tiltMsbChannel;
+}
+
+quint32 QLCFixtureMode::panLsbChannel() const
+{
+    return m_panLsbChannel;
+}
+
+quint32 QLCFixtureMode::tiltLsbChannel() const
+{
+    return m_tiltLsbChannel;
+}
+
+quint32 QLCFixtureMode::masterIntensityChannel() const
+{
+    return m_masterIntensityChannel;
+}
+
+QList <quint32> QLCFixtureMode::rgbChannels() const
+{
+    return m_rgbChannels;
+}
+
+QList <quint32> QLCFixtureMode::cmyChannels() const
+{
+    return m_cmyChannels;
+}
+
+void QLCFixtureMode::cacheChannels()
+{
+    // Allow only one caching round per fixture mode instance
+    if (m_channelsCached == true)
+        return;
+
+    quint32 r, g, b, c, m, y;
+    r = g = b = c = m = y = QLCChannel::invalid();
+
+    for (quint32 i = 0; i < quint32(m_channels.size()); i++)
+    {
+        const QLCChannel* ch = m_channels[i];
+        Q_ASSERT(ch != NULL);
+
+        if (ch->group() == QLCChannel::Pan)
+        {
+            if (ch->controlByte() == QLCChannel::MSB)
+                m_panMsbChannel = i;
+            else if (ch->controlByte() == QLCChannel::LSB)
+                m_panLsbChannel = i;
+        }
+        else if (ch->group() == QLCChannel::Tilt)
+        {
+            if (ch->controlByte() == QLCChannel::MSB)
+                m_tiltMsbChannel = i;
+            else if (ch->controlByte() == QLCChannel::LSB)
+                m_tiltLsbChannel = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::NoColour)
+        {
+            m_masterIntensityChannel = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Red)
+        {
+            r = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Green)
+        {
+            g = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Blue)
+        {
+            b = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Cyan)
+        {
+            c = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Magenta)
+        {
+            m = i;
+        }
+        else if (ch->group() == QLCChannel::Intensity &&
+                 ch->colour() == QLCChannel::Yellow)
+        {
+            y = i;
+        }
+    }
+
+    if (r != QLCChannel::invalid() && g != QLCChannel::invalid() && b != QLCChannel::invalid())
+        m_rgbChannels << r << g << b;
+    if (c != QLCChannel::invalid() && m != QLCChannel::invalid() && y != QLCChannel::invalid())
+        m_cmyChannels << c << m << y;
+
+    // Allow only one caching round per fixture mode instance
+    m_channelsCached = true;
+}
+
+/****************************************************************************
+ * Physical
+ ****************************************************************************/
+
 void QLCFixtureMode::setPhysical(const QLCPhysical& physical)
 {
     m_physical = physical;
@@ -229,6 +365,10 @@ QLCPhysical QLCFixtureMode::physical() const
 {
     return m_physical;
 }
+
+/****************************************************************************
+ * Load & Save
+ ****************************************************************************/
 
 bool QLCFixtureMode::loadXML(const QDomElement* root)
 {

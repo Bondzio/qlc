@@ -37,6 +37,7 @@ class QTabWidget;
 class OutputMap;
 class QSplitter;
 class QAction;
+class QMenu;
 class Doc;
 
 #define KXMLQLCFixtureManager "FixtureManager"
@@ -79,6 +80,9 @@ public slots:
     /** Callback that listens to mode change signals */
     void slotModeChanged(Doc::Mode mode);
 
+    /** Callback that listens to fixture group removals */
+    void slotFixtureGroupRemoved(quint32 id);
+
 private:
     Doc* m_doc;
 
@@ -105,6 +109,9 @@ protected:
     /** Display an error message if fixture add fails */
     void addFixtureErrorMessage();
 
+    /** Handle single fixture selection */
+    void fixtureSelected(quint32 id);
+
 protected slots:
     /** Callback for fixture list selection changes */
     void slotSelectionChanged();
@@ -113,6 +120,9 @@ protected slots:
     void slotDoubleClicked(QTreeWidgetItem* item);
 
 protected:
+    /** Select a fixture group */
+    void selectGroup(quint32 id);
+
     /** Get a CSS style sheet & HTML header for fixture info */
     QString fixtureInfoStyleSheetHeader();
 
@@ -131,13 +141,24 @@ protected:
     /** Construct actions for toolbar & context menu */
     void initActions();
 
+    /** Update the contents of the group menu */
+    void updateGroupMenu();
+
     /** Construct the toolbar */
     void initToolBar();
+
+    /** Edit properties for the fixture represented by $item */
+    void editFixtureProperties(QTreeWidgetItem* item);
+
+    /** Edit properties for the fixture group represented by $item */
+    void editGroupProperties(QTreeWidgetItem* item);
 
 protected slots:
     void slotAdd();
     void slotRemove();
     void slotProperties();
+    void slotUnGroup();
+    void slotGroupSelected(QAction* action);
 
     /** Callback for right mouse button clicks over a fixture item */
     void slotContextMenuRequested(const QPoint& pos);
@@ -146,7 +167,10 @@ protected:
     QAction* m_addAction;
     QAction* m_removeAction;
     QAction* m_propertiesAction;
-    QAction* m_consoleAction;
+    QAction* m_groupAction;
+    QAction* m_unGroupAction;
+    QAction* m_newGroupAction;
+    QMenu* m_groupMenu;
 };
 
 #endif

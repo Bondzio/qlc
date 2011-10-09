@@ -248,35 +248,26 @@ public:
                     Qt::CaseSensitivity cs = Qt::CaseSensitive,
                     QLCChannel::Group group = QLCChannel::NoGroup) const;
 
-    /**
-     * Get the channel number for pan MSB (8bit).
-     * @return The coarse pan channel or QLCChannel::invalid() if not applicable.
-     */
+    /** @see QLCFixtureMode */
     quint32 panMsbChannel() const;
 
-    /**
-     * Get the channel number for tilt MSB (16bit).
-     * @return The coarse tilt channel or QLCChannel::invalid() if not applicable.
-     */
+    /** @see QLCFixtureMode */
     quint32 tiltMsbChannel() const;
 
-    /**
-     * Get the channel number for pan LSB (16bit).
-     * @return The fine pan channel or QLCChannel::invalid() if not applicable
-     */
+    /** @see QLCFixtureMode */
     quint32 panLsbChannel() const;
 
-    /**
-     * Get the channel number for tilt LSB (16bit).
-     * @return The fine tilt channel or QLCChannel::invalid() if not applicable.
-     */
+    /** @see QLCFixtureMode */
     quint32 tiltLsbChannel() const;
 
-    /**
-     * Get the master intensity channel. For dimmers this is invalid.
-     * @return The master intensity channel or QLCChannel::invalid() if not applicable.
-     */
+    /** @see QLCFixtureMode */
     quint32 masterIntensityChannel() const;
+
+    /** @see QLCFixtureMode */
+    QList <quint32> rgbChannels() const;
+
+    /** @see QLCFixtureMode */
+    QList <quint32> cmyChannels() const;
 
 protected:
     /** Create a generic intensity channel */
@@ -294,21 +285,6 @@ protected:
 
     /** Generic intensity channel for dimmer fixtures */
     QLCChannel* m_genericChannel;
-
-    /** The coarse pan channel */
-    quint32 m_panMsbChannel;
-
-    /** The coarse tilt channel */
-    quint32 m_tiltMsbChannel;
-
-    /** The fine pan channel */
-    quint32 m_panLsbChannel;
-
-    /** The fine tilt channel */
-    quint32 m_tiltLsbChannel;
-
-    /** The master intensity channel */
-    quint32 m_masterIntensityChannel;
 
     /*********************************************************************
      * Fixture definition

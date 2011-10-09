@@ -44,10 +44,14 @@ private slots:
     void channels();
     void channelNumber();
     void copy();
+
     void load();
     void loadWrongRoot();
     void loadNoName();
     void save();
+    void cacheChannelsRgbMaster();
+    void cacheChannelsCmyMaster();
+    void cacheChannelsPanTilt();
 
     void cleanupTestCase();
 

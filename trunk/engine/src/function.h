@@ -73,7 +73,8 @@ public:
         Chaser     = 1 << 1,
         EFX        = 1 << 2,
         Collection = 1 << 3,
-        Script     = 1 << 4
+        Script     = 1 << 4,
+        RGBMatrix  = 1 << 5
     };
 
     /*********************************************************************
@@ -284,6 +285,11 @@ public:
      * Get the bus used for setting the speed of this function
      */
     quint32 bus() const;
+
+    /**
+     * Get the current value of Function::bus()
+     */
+    quint32 busValue() const;
 
 private:
     quint32 m_bus;

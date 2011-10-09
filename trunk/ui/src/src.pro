@@ -39,6 +39,7 @@ HEADERS += aboutbox.h \
            efxeditor.h \
            efxpreviewarea.h \
            fixtureconsole.h \
+           fixturegroupeditor.h \
            fixturemanager.h \
            fixtureselection.h \
            functionmanager.h \
@@ -54,6 +55,7 @@ HEADERS += aboutbox.h \
            monitorlayout.h \
            outputmanager.h \
            outputpatcheditor.h \
+           rgbmatrixeditor.h \
            sceneeditor.h \
            scripteditor.h \
            selectinputchannel.h \
@@ -88,6 +90,7 @@ FORMS += aboutbox.ui \
          chasereditor.ui \
          collectioneditor.ui \
          efxeditor.ui \
+         fixturegroupeditor.ui \
          fixtureselection.ui \
          functionselection.ui \
          functionwizard.ui \
@@ -95,6 +98,7 @@ FORMS += aboutbox.ui \
          inputprofileeditor.ui \
          inputpatcheditor.ui \
          outputpatcheditor.ui \
+         rgbmatrixeditor.ui \
          sceneeditor.ui \
          scripteditor.ui \
          selectinputchannel.ui \
@@ -121,6 +125,7 @@ SOURCES += aboutbox.cpp \
            efxeditor.cpp \
            efxpreviewarea.cpp \
            fixtureconsole.cpp \
+           fixturegroupeditor.cpp \
            fixturemanager.cpp \
            fixtureselection.cpp \
            functionmanager.cpp \
@@ -136,6 +141,7 @@ SOURCES += aboutbox.cpp \
            monitorlayout.cpp \
            outputmanager.cpp \
            outputpatcheditor.cpp \
+           rgbmatrixeditor.cpp \
            sceneeditor.cpp \
            scripteditor.cpp \
            selectinputchannel.cpp \

@@ -176,9 +176,80 @@ public:
      */
     quint32 channelNumber(QLCChannel* channel) const;
 
+    /**
+     * Get the channel number for pan MSB (8bit).
+     * @return The coarse pan channel or QLCChannel::invalid() if not applicable.
+     */
+    quint32 panMsbChannel() const;
+
+    /**
+     * Get the channel number for tilt MSB (16bit).
+     * @return The coarse tilt channel or QLCChannel::invalid() if not applicable.
+     */
+    quint32 tiltMsbChannel() const;
+
+    /**
+     * Get the channel number for pan LSB (16bit).
+     * @return The fine pan channel or QLCChannel::invalid() if not applicable
+     */
+    quint32 panLsbChannel() const;
+
+    /**
+     * Get the channel number for tilt LSB (16bit).
+     * @return The fine tilt channel or QLCChannel::invalid() if not applicable.
+     */
+    quint32 tiltLsbChannel() const;
+
+    /**
+     * Get the master intensity channel. For dimmers this is invalid.
+     * @return The master intensity channel or QLCChannel::invalid() if not applicable.
+     */
+    quint32 masterIntensityChannel() const;
+
+    /**
+     * Get a list of RGB channels. If the fixture doesn't support RGB mixing,
+     * the list is empty. The first item is always red, then green, then blue.
+     * @return A list of three channels or an empty list
+     */
+    QList <quint32> rgbChannels() const;
+
+    /**
+     * Get a list of CMY channels. If the fixture doesn't support CMY mixing,
+     * the list is empty. The first item is always cyan, then magenta, then yellow.
+     * @return A list of three channels or an empty list
+     */
+    QList <quint32> cmyChannels() const;
+
+    /** Find some interesting channels and store their indices. */
+    void cacheChannels();
+
 protected:
     /** List of channels (not owned) */
     QList <QLCChannel*> m_channels;
+
+    /** Indicates, whether cacheChannels() has already been called */
+    bool m_channelsCached;
+
+    /** The coarse pan channel */
+    quint32 m_panMsbChannel;
+
+    /** The coarse tilt channel */
+    quint32 m_tiltMsbChannel;
+
+    /** The fine pan channel */
+    quint32 m_panLsbChannel;
+
+    /** The fine tilt channel */
+    quint32 m_tiltLsbChannel;
+
+    /** The master intensity channel */
+    quint32 m_masterIntensityChannel;
+
+    /** The RGB mix intensity channels */
+    QList <quint32> m_rgbChannels;
+
+    /** The CMY mix intensity channels */
+    QList <quint32> m_cmyChannels;
 
     /*********************************************************************
      * Physical

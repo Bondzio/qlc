@@ -7,7 +7,7 @@ TARGET   = qlcengine
 
 CONFIG  += qt
 QT      += core xml
-QT      -= gui
+#QT      -= gui
 QTPLUGIN =
 
 INCLUDEPATH += ../../plugins/interfaces
@@ -53,6 +53,7 @@ HEADERS += bus.h \
            efxfixture.h \
            fadechannel.h \
            fixture.h \
+           fixturegroup.h \
            function.h \
            genericfader.h \
            inputmap.h \
@@ -63,6 +64,8 @@ HEADERS += bus.h \
            outputmap.h \
            outputpatch.h \
            palettegenerator.h \
+           qlcpoint.h \
+           rgbmatrix.h \
            scene.h \
            scenevalue.h \
            script.h
@@ -90,6 +93,7 @@ SOURCES += bus.cpp \
            efxfixture.cpp \
            fadechannel.cpp \
            fixture.cpp \
+           fixturegroup.cpp \
            function.cpp \
            genericfader.cpp \
            inputmap.cpp \
@@ -100,6 +104,8 @@ SOURCES += bus.cpp \
            outputmap.cpp \
            outputpatch.cpp \
            palettegenerator.cpp \
+           qlcpoint.cpp \
+           rgbmatrix.cpp \
            scene.cpp \
            scenevalue.cpp \
            script.cpp

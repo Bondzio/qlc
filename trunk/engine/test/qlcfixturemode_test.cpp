@@ -22,9 +22,11 @@
 #include <QtTest>
 #include <QtXml>
 
+#define protected public
 #include "qlcfixturemode_test.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
+#undef protected
 
 void QLCFixtureMode_Test::initTestCase()
 {
@@ -259,6 +261,14 @@ void QLCFixtureMode_Test::copy()
     mode->insertChannel(m_ch3, 2);
     mode->insertChannel(m_ch4, 3);
 
+    mode->m_panMsbChannel = 0;
+    mode->m_panLsbChannel = 1;
+    mode->m_tiltMsbChannel = 2;
+    mode->m_tiltLsbChannel = 3;
+    mode->m_masterIntensityChannel = 4;
+    mode->m_rgbChannels = QList <quint32> () << 5 << 6 << 7;
+    mode->m_cmyChannels = QList <quint32> () << 8 << 9 << 10;
+
     /* Create a copy of the mode to the same fixtureDef as the original */
     QLCFixtureMode* copy = new QLCFixtureMode(m_fixtureDef, mode);
     QVERIFY(copy != NULL);
@@ -269,6 +279,13 @@ void QLCFixtureMode_Test::copy()
     QVERIFY(copy->channel(1) == m_ch2);
     QVERIFY(copy->channel(2) == m_ch3);
     QVERIFY(copy->channel(3) == m_ch4);
+    QCOMPARE(copy->panMsbChannel(), quint32(0));
+    QCOMPARE(copy->panLsbChannel(), quint32(1));
+    QCOMPARE(copy->tiltMsbChannel(), quint32(2));
+    QCOMPARE(copy->tiltLsbChannel(), quint32(3));
+    QCOMPARE(copy->masterIntensityChannel(), quint32(4));
+    QCOMPARE(copy->rgbChannels(), QList <quint32> () << 5 << 6 << 7);
+    QCOMPARE(copy->cmyChannels(), QList <quint32> () << 8 << 9 << 10);
     delete copy;
     copy = NULL;
 
@@ -305,6 +322,14 @@ void QLCFixtureMode_Test::copy()
 
     QVERIFY(copy->channel(1)->name() == "Channel 4");
     QVERIFY(copy->channel(1) == ch4);
+
+    QCOMPARE(copy->panMsbChannel(), quint32(0));
+    QCOMPARE(copy->panLsbChannel(), quint32(1));
+    QCOMPARE(copy->tiltMsbChannel(), quint32(2));
+    QCOMPARE(copy->tiltLsbChannel(), quint32(3));
+    QCOMPARE(copy->masterIntensityChannel(), quint32(4));
+    QCOMPARE(copy->rgbChannels(), QList <quint32> () << 5 << 6 << 7);
+    QCOMPARE(copy->cmyChannels(), QList <quint32> () << 8 << 9 << 10);
 
     delete copy;
     delete anotherDef;
@@ -487,6 +512,108 @@ void QLCFixtureMode_Test::save()
     QCOMPARE(channels[1], m_ch4->name());
     QCOMPARE(channels[2], m_ch2->name());
     QCOMPARE(channels[3], m_ch3->name());
+}
+
+void QLCFixtureMode_Test::cacheChannelsRgbMaster()
+{
+    QLCFixtureMode* mode = new QLCFixtureMode(m_fixtureDef);
+    QCOMPARE(mode->channels().size(), 0);
+
+    m_ch1->setGroup(QLCChannel::Intensity);
+    m_ch1->setColour(QLCChannel::Red);
+    mode->insertChannel(m_ch1, 0);
+
+    m_ch2->setGroup(QLCChannel::Intensity);
+    m_ch2->setColour(QLCChannel::Green);
+    mode->insertChannel(m_ch2, 1);
+
+    m_ch3->setGroup(QLCChannel::Intensity);
+    m_ch3->setColour(QLCChannel::Blue);
+    mode->insertChannel(m_ch3, 2);
+
+    m_ch4->setGroup(QLCChannel::Intensity);
+    m_ch4->setColour(QLCChannel::NoColour);
+    mode->insertChannel(m_ch4, 3);
+
+    mode->cacheChannels();
+
+    QCOMPARE(mode->panMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->panLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->tiltMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->tiltLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->rgbChannels(), QList <quint32> () << 0 << 1 << 2);
+    QCOMPARE(mode->cmyChannels(), QList <quint32> ());
+    QCOMPARE(mode->masterIntensityChannel(), quint32(3));
+
+    delete mode;
+}
+
+void QLCFixtureMode_Test::cacheChannelsCmyMaster()
+{
+    QLCFixtureMode* mode = new QLCFixtureMode(m_fixtureDef);
+    QCOMPARE(mode->channels().size(), 0);
+
+    m_ch1->setGroup(QLCChannel::Intensity);
+    m_ch1->setColour(QLCChannel::Cyan);
+    mode->insertChannel(m_ch1, 0);
+
+    m_ch2->setGroup(QLCChannel::Intensity);
+    m_ch2->setColour(QLCChannel::Magenta);
+    mode->insertChannel(m_ch2, 1);
+
+    m_ch3->setGroup(QLCChannel::Intensity);
+    m_ch3->setColour(QLCChannel::NoColour);
+    mode->insertChannel(m_ch3, 2);
+
+    m_ch4->setGroup(QLCChannel::Intensity);
+    m_ch4->setColour(QLCChannel::Yellow);
+    mode->insertChannel(m_ch4, 3);
+
+    mode->cacheChannels();
+
+    QCOMPARE(mode->panMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->panLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->tiltMsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->tiltLsbChannel(), QLCChannel::invalid());
+    QCOMPARE(mode->rgbChannels(), QList <quint32> ());
+    QCOMPARE(mode->cmyChannels(), QList <quint32> () << 0 << 1 << 3);
+    QCOMPARE(mode->masterIntensityChannel(), quint32(2));
+
+    delete mode;
+}
+
+void QLCFixtureMode_Test::cacheChannelsPanTilt()
+{
+    QLCFixtureMode* mode = new QLCFixtureMode(m_fixtureDef);
+    QCOMPARE(mode->channels().size(), 0);
+
+    m_ch1->setGroup(QLCChannel::Pan);
+    m_ch1->setControlByte(QLCChannel::MSB);
+    mode->insertChannel(m_ch1, 0);
+
+    m_ch2->setGroup(QLCChannel::Pan);
+    m_ch2->setControlByte(QLCChannel::LSB);
+    mode->insertChannel(m_ch2, 1);
+
+    m_ch3->setGroup(QLCChannel::Tilt);
+    m_ch3->setControlByte(QLCChannel::MSB);
+    mode->insertChannel(m_ch3, 2);
+
+    m_ch4->setGroup(QLCChannel::Tilt);
+    m_ch4->setControlByte(QLCChannel::LSB);
+    mode->insertChannel(m_ch4, 3);
+
+    mode->cacheChannels();
+
+    QCOMPARE(mode->panMsbChannel(), quint32(0));
+    QCOMPARE(mode->panLsbChannel(), quint32(1));
+    QCOMPARE(mode->tiltMsbChannel(), quint32(2));
+    QCOMPARE(mode->tiltLsbChannel(), quint32(3));
+    QCOMPARE(mode->rgbChannels(), QList <quint32> ());
+    QCOMPARE(mode->cmyChannels(), QList <quint32> ());
+    QCOMPARE(mode->masterIntensityChannel(), QLCChannel::invalid());
+
+    delete mode;
 }
 
 void QLCFixtureMode_Test::cleanupTestCase()

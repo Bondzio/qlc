@@ -28,6 +28,7 @@
 
 #include "mastertimer.h"
 #include "collection.h"
+#include "rgbmatrix.h"
 #include "function.h"
 #include "chaser.h"
 #include "script.h"
@@ -41,6 +42,7 @@ const QString KChaserString     (     "Chaser" );
 const QString KEFXString        (        "EFX" );
 const QString KCollectionString ( "Collection" );
 const QString KScriptString     (     "Script" );
+const QString KRGBMatrixString  (  "RGBMatrix" );
 const QString KUndefinedString  (  "Undefined" );
 
 const QString KLoopString       (       "Loop" );
@@ -163,6 +165,8 @@ QString Function::typeToString(const Type& type)
         return KCollectionString;
     case Script:
         return KScriptString;
+    case RGBMatrix:
+        return KRGBMatrixString;
     case Undefined:
     default:
         return KUndefinedString;
@@ -181,6 +185,8 @@ Function::Type Function::stringToType(const QString& string)
         return Collection;
     else if (string == KScriptString)
         return Script;
+    else if (string == KRGBMatrixString)
+        return RGBMatrix;
     else
         return Undefined;
 }
@@ -291,6 +297,11 @@ quint32 Function::bus() const
     return m_bus;
 }
 
+quint32 Function::busValue() const
+{
+    return Bus::instance()->value(bus());
+}
+
 /*****************************************************************************
  * Fixtures
  *****************************************************************************/
@@ -339,6 +350,8 @@ bool Function::loader(const QDomElement* root, Doc* doc)
         function = new class EFX(doc);
     else if (type == Function::Script)
         function = new class Script(doc);
+    else if (type == Function::RGBMatrix)
+        function = new class RGBMatrix(doc);
     else
         return false;
 

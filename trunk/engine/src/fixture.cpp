@@ -43,12 +43,6 @@ Fixture::Fixture(QObject* parent) : QObject(parent)
     m_address = 0;
     m_channels = 0;
 
-    m_panMsbChannel = QLCChannel::invalid();
-    m_tiltMsbChannel = QLCChannel::invalid();
-    m_panLsbChannel = QLCChannel::invalid();
-    m_tiltLsbChannel = QLCChannel::invalid();
-    m_masterIntensityChannel = QLCChannel::invalid();
-
     m_fixtureDef = NULL;
     m_fixtureMode = NULL;
 
@@ -273,27 +267,58 @@ QSet <quint32> Fixture::channels(const QString& name, Qt::CaseSensitivity cs,
 
 quint32 Fixture::panMsbChannel() const
 {
-    return m_panMsbChannel;
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->panMsbChannel();
+    else
+        return QLCChannel::invalid();
 }
 
 quint32 Fixture::tiltMsbChannel() const
 {
-    return m_tiltMsbChannel;
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->tiltMsbChannel();
+    else
+        return QLCChannel::invalid();
 }
 
 quint32 Fixture::panLsbChannel() const
 {
-    return m_panLsbChannel;
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->panLsbChannel();
+    else
+        return QLCChannel::invalid();
 }
 
 quint32 Fixture::tiltLsbChannel() const
 {
-    return m_tiltLsbChannel;
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->tiltLsbChannel();
+    else
+        return QLCChannel::invalid();
 }
 
 quint32 Fixture::masterIntensityChannel() const
 {
-    return m_masterIntensityChannel;
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->masterIntensityChannel();
+    else
+        return QLCChannel::invalid();
+}
+
+QList <quint32> Fixture::rgbChannels() const
+{
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->rgbChannels();
+    else
+        return QList <quint32> ();
+}
+
+QList <quint32> Fixture::cmyChannels() const
+{
+    if (m_fixtureMode != NULL)
+        return m_fixtureMode->cmyChannels();
+    else
+        return QList <quint32> ();
 }
 
 void Fixture::createGenericChannel()
@@ -306,44 +331,6 @@ void Fixture::createGenericChannel()
         m_genericChannel->setName(tr("Intensity"));
         m_genericChannel->addCapability(
                             new QLCCapability(0, UCHAR_MAX, tr("Intensity")));
-    }
-}
-
-void Fixture::findChannels()
-{
-    m_panMsbChannel = QLCChannel::invalid();
-    m_tiltMsbChannel = QLCChannel::invalid();
-    m_panLsbChannel = QLCChannel::invalid();
-    m_tiltLsbChannel = QLCChannel::invalid();
-    m_masterIntensityChannel = QLCChannel::invalid();
-
-    if (m_fixtureDef == NULL || m_fixtureMode == NULL)
-        return;
-
-    for (quint32 i = 0; i < quint32(m_fixtureMode->channels().size()); i++)
-    {
-        const QLCChannel* ch = m_fixtureMode->channel(i);
-        Q_ASSERT(ch != NULL);
-
-        if (ch->group() == QLCChannel::Pan)
-        {
-            if (ch->controlByte() == QLCChannel::MSB)
-                m_panMsbChannel = i;
-            else if (ch->controlByte() == QLCChannel::LSB)
-                m_panLsbChannel = i;
-        }
-        else if (ch->group() == QLCChannel::Tilt)
-        {
-            if (ch->controlByte() == QLCChannel::MSB)
-                m_tiltMsbChannel = i;
-            else if (ch->controlByte() == QLCChannel::LSB)
-                m_tiltLsbChannel = i;
-        }
-        else if (ch->group() == QLCChannel::Intensity &&
-                 ch->colour() == QLCChannel::NoColour) // Don't touch RGB/CMY channels
-        {
-            m_masterIntensityChannel = i;
-        }
     }
 }
 
@@ -362,6 +349,8 @@ void Fixture::setFixtureDefinition(const QLCFixtureDef* fixtureDef,
         if (m_genericChannel != NULL)
             delete m_genericChannel;
         m_genericChannel = NULL;
+
+        const_cast<QLCFixtureMode*>(m_fixtureMode)->cacheChannels();
     }
     else
     {
@@ -369,8 +358,6 @@ void Fixture::setFixtureDefinition(const QLCFixtureDef* fixtureDef,
         m_fixtureMode = NULL;
         createGenericChannel();
     }
-
-    findChannels();
 
     emit changed(m_id);
 }

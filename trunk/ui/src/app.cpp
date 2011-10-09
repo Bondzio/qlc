@@ -993,6 +993,8 @@ QFile::FileError App::slotFileOpen()
        a result of calling clearDocument() a few lines ago. */
     if (FunctionManager::instance() != NULL)
         FunctionManager::instance()->updateTree();
+    if (FixtureManager::instance() != NULL)
+        FixtureManager::instance()->updateView();
     if (OutputManager::instance() != NULL)
         OutputManager::instance()->updateTree();
     if (InputManager::instance() != NULL)

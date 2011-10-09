@@ -50,7 +50,8 @@ HEADERS += bus_test.h \
            doc_test.h \
            palettegenerator_test.h \
            intensitygenerator_test.h \
-           script_test.h
+           script_test.h \
+           rgbmatrix_test.h
 
 # Interfaces
 HEADERS += ../../plugins/interfaces/qlcoutplugin.h
@@ -97,7 +98,8 @@ SOURCES += bus_test.cpp \
            doc_test.cpp \
            palettegenerator_test.cpp \
            intensitygenerator_test.cpp \
-           script_test.cpp
+           script_test.cpp \
+           rgbmatrix_test.cpp
     
 # Stubs
 SOURCES += mastertimer_stub.cpp \

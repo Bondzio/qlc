@@ -49,7 +49,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     : Function(doc, Function::RGBMatrix)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
-    , m_monoColor(Qt::white)
+    , m_monoColor(Qt::red)
     , m_fader(NULL)
 {
     setName(tr("New RGB Matrix"));
@@ -437,8 +437,6 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 void RGBMatrix::preRun(MasterTimer* timer)
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_UNUSED(timer);
     m_direction = direction();
 
@@ -474,57 +472,62 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
             if (channels.isEmpty() == false)
             {
                 FadeChannel fc;
+                fc.setBus(fadeBus());
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].red());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
-                m_fader->add(fc);
+                insertStartValues(m_fader, fc);
+
+                if (m_fader->channels().contains(fc) == false ||
+                    m_fader->channels()[fc].target() != fc.target())
+                {
+                    m_fader->add(fc);
+                }
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].green());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
-                m_fader->add(fc);
+                insertStartValues(m_fader, fc);
+
+                if (m_fader->channels().contains(fc) == false ||
+                    m_fader->channels()[fc].target() != fc.target())
+                {
+                    m_fader->add(fc);
+                }
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].blue());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
-                m_fader->add(fc);
+                insertStartValues(m_fader, fc);
+
+                if (m_fader->channels().contains(fc) == false ||
+                    m_fader->channels()[fc].target() != fc.target())
+                {
+                    m_fader->add(fc);
+                }
             }
             else
             {
                 channels = fxi->cmyChannels();
                 if (channels.isEmpty() == true)
-                    break;
+                    continue;
 
                 FadeChannel fc;
+                fc.setBus(fadeBus());
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].cyan());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
+                insertStartValues(m_fader, fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].magenta());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
+                insertStartValues(m_fader, fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setBus(fadeBus());
                 fc.setTarget(map[y][x].yellow());
-                fc.setCurrent(0); // TODO
-                fc.setStart(0); // TODO
+                insertStartValues(m_fader, fc);
                 m_fader->add(fc);
             }
         }
@@ -558,7 +561,27 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
     Q_UNUSED(universes);
+
     delete m_fader;
+    m_fader = NULL;
 
     Function::postRun(timer, universes);
 }
+
+void RGBMatrix::insertStartValues(const GenericFader* fader, FadeChannel& fc)
+{
+    Q_ASSERT(fader != NULL);
+
+    if (fader->channels().contains(fc) == true)
+    {
+        FadeChannel old = fader->channels()[fc];
+        fc.setCurrent(old.current());
+        fc.setStart(old.current());
+    }
+    else
+    {
+        fc.setCurrent(0);
+        fc.setStart(0);
+    }
+}
+

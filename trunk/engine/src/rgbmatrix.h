@@ -33,6 +33,8 @@
 typedef QVector<QVector<QColor> > RGBMap;
 
 class GenericFader;
+class FadeChannel;
+
 class RGBMatrix : public Function
 {
     Q_OBJECT
@@ -138,6 +140,10 @@ public:
 
     /** @reimpl */
     void postRun(MasterTimer* timer, UniverseArray* universes);
+
+private:
+    /** Grab starting values for a fade channel from $fader if available */
+    static void insertStartValues(const GenericFader* fader, FadeChannel& fc);
 
 private:
     Function::Direction m_direction;

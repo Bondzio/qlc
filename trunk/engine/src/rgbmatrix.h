@@ -86,14 +86,24 @@ public:
 
 private:
     static void outwardBox(qreal step, qreal totalSteps, Function::Direction direction,
-                           const QSize& size, RGBMap& map);
+                           const QSize& size, const QColor& color, RGBMap& map);
     static void fullRows(qreal step, qreal totalSteps, Function::Direction direction,
-                         const QSize& size, RGBMap& map);
+                         const QSize& size, const QColor& color, RGBMap& map);
     static void fullColumns(qreal step, qreal totalSteps, Function::Direction direction,
-                            const QSize& size, RGBMap& map);
+                            const QSize& size, const QColor& color, RGBMap& map);
 
 private:
     Pattern m_pattern;
+
+    /************************************************************************
+     * Colour
+     ************************************************************************/
+public:
+    void setMonoColor(const QColor& c);
+    QColor monoColor() const;
+
+private:
+    QColor m_monoColor;
 
     /************************************************************************
      * Fade bus

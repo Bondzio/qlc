@@ -70,6 +70,8 @@ private slots:
     void slotForwardClicked();
     void slotBackwardClicked();
 
+    void slotColorButtonClicked();
+
 private:
     Doc* m_doc;
     RGBMatrix* m_original;

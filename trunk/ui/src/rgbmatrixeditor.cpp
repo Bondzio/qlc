@@ -24,6 +24,7 @@
 #include <QGraphicsEffect>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QColorDialog>
 #include <QGradient>
 #include <QSettings>
 #include <QTimer>
@@ -138,12 +139,18 @@ void RGBMatrixEditor::init()
             this, SLOT(slotPatternActivated(const QString&)));
     connect(m_fixtureGroupCombo, SIGNAL(activated(int)),
             this, SLOT(slotFixtureGroupActivated(int)));
+    connect(m_colorButton, SIGNAL(clicked()),
+            this, SLOT(slotColorButtonClicked()));
 
     connect(m_loop, SIGNAL(clicked()), this, SLOT(slotLoopClicked()));
     connect(m_pingPong, SIGNAL(clicked()), this, SLOT(slotPingPongClicked()));
     connect(m_singleShot, SIGNAL(clicked()), this, SLOT(slotSingleShotClicked()));
     connect(m_forward, SIGNAL(clicked()), this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()), this, SLOT(slotBackwardClicked()));
+
+    QPixmap pm(100, 26);
+    pm.fill(m_mtx->monoColor());
+    m_colorButton->setIcon(QIcon(pm));
 
     createPreviewItems();
     m_preview->setScene(m_scene);
@@ -255,6 +262,18 @@ void RGBMatrixEditor::slotPatternActivated(const QString& text)
 {
     m_mtx->setPattern(RGBMatrix::stringToPattern(text));
     createPreviewItems();
+}
+
+void RGBMatrixEditor::slotColorButtonClicked()
+{
+    QColor col = QColorDialog::getColor(m_mtx->monoColor());
+    if (col.isValid() == true)
+    {
+        m_mtx->setMonoColor(col);
+        QPixmap pm(100, 26);
+        pm.fill(col);
+        m_colorButton->setIcon(QIcon(pm));
+    }
 }
 
 void RGBMatrixEditor::slotFixtureGroupActivated(int index)

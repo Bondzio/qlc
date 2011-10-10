@@ -32,6 +32,7 @@
 #include "doc.h"
 
 #define KXMLQLCRGBMatrixPattern "Pattern"
+#define KXMLQLCRGBMatrixMonoColor "MonoColor"
 #define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
 
 #define KPatternOutwardBox  "Outward Box"
@@ -46,6 +47,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     : Function(doc, Function::RGBMatrix)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
+    , m_monoColor(Qt::white)
 {
     setName(tr("New RGB Matrix"));
     setBus(Bus::defaultHold());
@@ -83,6 +85,7 @@ bool RGBMatrix::copyFrom(const Function* function)
     m_fixtureGroup = mtx->m_fixtureGroup;
     m_pattern = mtx->m_pattern;
     m_fadeBus = mtx->m_fadeBus;
+    m_monoColor = mtx->m_monoColor;
 
     return Function::copyFrom(function);
 }
@@ -137,13 +140,13 @@ RGBMap RGBMatrix::colorMap(quint32 step, quint32 totalSteps) const
     switch (pattern())
     {
     case OutwardBox:
-        outwardBox(step, totalSteps, direction(), grp->size(), map);
+        outwardBox(step, totalSteps, direction(), grp->size(), monoColor(), map);
         break;
     case FullRows:
-        fullRows(step, totalSteps, direction(), grp->size(), map);
+        fullRows(step, totalSteps, direction(), grp->size(), monoColor(), map);
         break;
     case FullColumns:
-        fullColumns(step, totalSteps, direction(), grp->size(), map);
+        fullColumns(step, totalSteps, direction(), grp->size(), monoColor(), map);
         break;
     default:
         break;
@@ -180,7 +183,7 @@ QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
 }
 
 void RGBMatrix::outwardBox(qreal step, qreal totalSteps, Function::Direction direction,
-                           const QSize& size, RGBMap& map)
+                           const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
     if (totalSteps > 0)
@@ -207,18 +210,18 @@ void RGBMatrix::outwardBox(qreal step, qreal totalSteps, Function::Direction dir
     bottom       = CLAMP(bottom, 0, size.height() - 1);
 
     for (int i = left; i <= right; i++) {
-        map[top][i] = Qt::yellow;
-        map[bottom][i] = Qt::yellow;
+        map[top][i] = color;
+        map[bottom][i] = color;
     }
 
     for (int i = top; i <= bottom; i++) {
-        map[i][left] = Qt::yellow;
-        map[i][right] = Qt::yellow;
+        map[i][left] = color;
+        map[i][right] = color;
     }
 }
 
 void RGBMatrix::fullRows(qreal step, qreal totalSteps, Function::Direction direction,
-                         const QSize& size, RGBMap& map)
+                         const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
     if (totalSteps > 0)
@@ -234,13 +237,13 @@ void RGBMatrix::fullRows(qreal step, qreal totalSteps, Function::Direction direc
     qreal bottom = top;
 
     for (int i = left; i <= right; i++) {
-        map[top][i] = Qt::yellow;
-        map[bottom][i] = Qt::yellow;
+        map[top][i] = color;
+        map[bottom][i] = color;
     }
 }
 
 void RGBMatrix::fullColumns(qreal step, qreal totalSteps, Function::Direction direction,
-                            const QSize& size, RGBMap& map)
+                            const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
     if (totalSteps > 0)
@@ -256,9 +259,23 @@ void RGBMatrix::fullColumns(qreal step, qreal totalSteps, Function::Direction di
     qreal bottom = qreal(size.height() - 1);
 
     for (int i = top; i <= bottom; i++) {
-        map[i][left] = Qt::yellow;
-        map[i][right] = Qt::yellow;
+        map[i][left] = color;
+        map[i][right] = color;
     }
+}
+
+/****************************************************************************
+ * Colour
+ ****************************************************************************/
+
+void RGBMatrix::setMonoColor(const QColor& c)
+{
+    m_monoColor = c;
+}
+
+QColor RGBMatrix::monoColor() const
+{
+    return m_monoColor;
 }
 
 /****************************************************************************
@@ -329,7 +346,10 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         {
             setRunOrder(Function::stringToRunOrder(tag.text()));
         }
-
+        else if (tag.tagName() == KXMLQLCRGBMatrixMonoColor)
+        {
+            setMonoColor(QColor::fromRgb(QRgb(tag.text().toUInt())));
+        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown RGB matrix tag:" << tag.tagName();
@@ -379,6 +399,12 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCRGBMatrixPattern);
     root.appendChild(tag);
     text = doc->createTextNode(patternToString(pattern()));
+    tag.appendChild(text);
+
+    /* Mono Color */
+    tag = doc->createElement(KXMLQLCRGBMatrixMonoColor);
+    root.appendChild(tag);
+    text = doc->createTextNode(QString::number(monoColor().rgb()));
     tag.appendChild(text);
 
     /* Fixture Group */

@@ -81,9 +81,13 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
 
 RGBMatrixEditor::~RGBMatrixEditor()
 {
+    m_previewTimer->stop();
+
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
+
     delete m_mtx;
+    m_mtx = NULL;
 }
 
 void RGBMatrixEditor::accept()

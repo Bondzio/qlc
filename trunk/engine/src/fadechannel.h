@@ -69,7 +69,7 @@ public:
     virtual ~FadeChannel();
 
     /** Comparison operator (true if fixture & channel match) */
-    bool operator==(const FadeChannel& fc);
+    bool operator==(const FadeChannel& fc) const;
 
     /************************************************************************
      * Values
@@ -172,5 +172,11 @@ private:
     quint32 m_elapsed;
     bool m_removeWhenTargetReached;
 };
+
+/**
+ * Hash function for FadeChannel. Needs a valid .fixture() and .channel() to work
+ * correctly.
+ */
+uint qHash(const FadeChannel& key);
 
 #endif

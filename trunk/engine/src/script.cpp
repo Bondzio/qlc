@@ -538,8 +538,8 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
                 // If the script has used the channel previously, it might still be in
                 // the bowels of GenericFader so get the starting value from there.
                 // Otherwise get it from universes (HTP channels are always 0 then).
-                if (gf->channels().contains(address) == true)
-                    fc.setStart(gf->channels()[address].current());
+                if (gf->channels().contains(fc) == true)
+                    fc.setStart(gf->channels()[fc].current());
                 else
                     fc.setStart(universes->preGMValues()[address]);
                 fc.setCurrent(fc.start());

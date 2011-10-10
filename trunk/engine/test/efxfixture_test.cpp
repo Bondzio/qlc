@@ -570,7 +570,11 @@ void EFXFixture_Test::start()
     ef->setFadeIntensity(1);
     ef->start(&mts, &array);
     QCOMPARE(e.m_fader->m_channels.size(), 1);
-    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
+
+    FadeChannel fc;
+    fc.setFixture(fxi->id());
+    fc.setChannel(fxi->masterIntensityChannel());
+    QVERIFY(e.m_fader->m_channels.contains(fc) == true);
 
     e.postRun(&mts, &array);
 }
@@ -598,7 +602,10 @@ void EFXFixture_Test::stop()
     // Start
     ef->start(&mts, &array);
     QCOMPARE(e.m_fader->m_channels.size(), 1);
-    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
+    FadeChannel fc;
+    fc.setFixture(fxi->id());
+    fc.setChannel(fxi->masterIntensityChannel());
+    QVERIFY(e.m_fader->m_channels.contains(fc) == true);
 
     // Then stop
     ef->stop(&mts, &array);
@@ -606,8 +613,8 @@ void EFXFixture_Test::stop()
 
     // FadeChannels are handed over to MasterTimer's GenericFader
     QCOMPARE(mts.fader()->m_channels.size(), 1);
-    QVERIFY(e.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == false);
-    QVERIFY(mts.m_fader->m_channels.contains(fxi->masterIntensityChannel()) == true);
+    QVERIFY(e.m_fader->m_channels.contains(fc) == false);
+    QVERIFY(mts.m_fader->m_channels.contains(fc) == true);
 
     e.postRun(&mts, &array);
 }

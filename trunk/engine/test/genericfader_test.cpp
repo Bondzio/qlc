@@ -55,37 +55,39 @@ void GenericFader_Test::addRemove()
 {
     GenericFader fader(m_doc);
 
-    QCOMPARE(fader.m_channels.count(), 0);
-    QVERIFY(fader.m_channels.contains(15) == false);
-
     FadeChannel fc;
     fc.setFixture(0);
     fc.setChannel(0);
+
+    FadeChannel wrong;
+    fc.setFixture(0);
+
+    QCOMPARE(fader.m_channels.count(), 0);
+    QVERIFY(fader.m_channels.contains(fc) == false);
+
     fader.add(fc);
-    QVERIFY(fader.m_channels.contains(10) == true);
+    QVERIFY(fader.m_channels.contains(fc) == true);
     QCOMPARE(fader.m_channels.count(), 1);
 
-    fader.remove(1); // No such channel
-    QVERIFY(fader.m_channels.contains(10) == true);
+    fader.remove(wrong);
+    QVERIFY(fader.m_channels.contains(fc) == true);
     QCOMPARE(fader.m_channels.count(), 1);
 
-    fader.remove(2);
-    QVERIFY(fader.m_channels.contains(10) == true);
-    QCOMPARE(fader.m_channels.count(), 1);
-
-    fader.remove(10);
-    QVERIFY(fader.m_channels.contains(10) == false);
+    fader.remove(fc);
+    QVERIFY(fader.m_channels.contains(fc) == false);
     QCOMPARE(fader.m_channels.count(), 0);
 
     fc.setChannel(0);
     fader.add(fc);
+    QVERIFY(fader.m_channels.contains(fc) == true);
+
     fc.setChannel(1);
     fader.add(fc);
+    QVERIFY(fader.m_channels.contains(fc) == true);
+
     fc.setChannel(2);
     fader.add(fc);
-    QVERIFY(fader.m_channels.contains(10) == true);
-    QVERIFY(fader.m_channels.contains(11) == true);
-    QVERIFY(fader.m_channels.contains(12) == true);
+    QVERIFY(fader.m_channels.contains(fc) == true);
     QCOMPARE(fader.m_channels.count(), 3);
 
     fader.removeAll();
@@ -96,17 +98,17 @@ void GenericFader_Test::addRemove()
     fc.setTarget(127);
     fader.add(fc);
     QCOMPARE(fader.m_channels.size(), 1);
-    QCOMPARE(fader.m_channels[10].target(), uchar(127));
+    QCOMPARE(fader.m_channels[fc].target(), uchar(127));
 
     fc.setTarget(63);
     fader.add(fc);
     QCOMPARE(fader.m_channels.size(), 1);
-    QCOMPARE(fader.m_channels[10].target(), uchar(127));
+    QCOMPARE(fader.m_channels[fc].target(), uchar(127));
 
     fc.setCurrent(63);
     fader.add(fc);
     QCOMPARE(fader.m_channels.size(), 1);
-    QCOMPARE(fader.m_channels[10].target(), uchar(63));
+    QCOMPARE(fader.m_channels[fc].target(), uchar(63));
 }
 
 void GenericFader_Test::write()

@@ -48,11 +48,6 @@ public:
      */
     void add(const FadeChannel& ch);
 
-    /**
-     * Remove the channel specified by $address from the faded channels.
-     */
-    void remove(quint32 address);
-
     /** Remove a channel whose fixture & channel match with $fc's */
     void remove(const FadeChannel& fc);
 
@@ -62,7 +57,7 @@ public:
     void removeAll();
 
     /** Get all channels in a non-modifiable hashmap */
-    const QHash <quint32,FadeChannel>& channels() const;
+    const QHash <FadeChannel,FadeChannel>& channels() const;
 
     /**
      * Run the channels forward by one step and write their current values to
@@ -87,7 +82,7 @@ public:
     qreal intensity() const;
 
 private:
-    QHash <quint32,FadeChannel> m_channels;
+    QHash <FadeChannel,FadeChannel> m_channels;
     qreal m_intensity;
     Doc* m_doc;
 };

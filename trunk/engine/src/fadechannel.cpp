@@ -58,7 +58,7 @@ FadeChannel::~FadeChannel()
 {
 }
 
-bool FadeChannel::operator==(const FadeChannel& ch)
+bool FadeChannel::operator==(const FadeChannel& ch) const
 {
     return (m_fixture == ch.m_fixture && m_channel == ch.m_channel);
 }
@@ -206,4 +206,12 @@ uchar FadeChannel::calculateCurrent(quint32 fadeTime, quint32 elapsedTime)
     m_current += m_start;
 
     return static_cast<uchar>(m_current);
+}
+
+uint qHash(const FadeChannel& key)
+{
+    uint hash = key.fixture() << 16;
+    hash = hash | (key.channel() & 0xFFFF);
+    hash = hash & (~0U);
+    return hash;
 }

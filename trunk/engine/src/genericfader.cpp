@@ -40,28 +40,21 @@ GenericFader::~GenericFader()
 
 void GenericFader::add(const FadeChannel& ch)
 {
-    quint32 addr = ch.address(m_doc);
-
-    if (m_channels.contains(addr) == true)
+    if (m_channels.contains(ch) == true)
     {
-        if (m_channels[addr].current() < ch.current())
-            m_channels[addr] = ch;
+        if (m_channels[ch].current() < ch.current())
+            m_channels[ch] = ch;
     }
     else
     {
-        m_channels[addr] = ch;
+        m_channels[ch] = ch;
     }
 }
 
-void GenericFader::remove(quint32 address)
+void GenericFader::remove(const FadeChannel& ch)
 {
-    if (m_channels.contains(address) == true)
-        m_channels.remove(address);
-}
-
-void GenericFader::remove(const FadeChannel& fc)
-{
-    remove(fc.address(m_doc));
+    if (m_channels.contains(ch) == true)
+        m_channels.remove(ch);
 }
 
 void GenericFader::removeAll()
@@ -69,14 +62,14 @@ void GenericFader::removeAll()
     m_channels.clear();
 }
 
-const QHash<quint32,FadeChannel>& GenericFader::channels() const
+const QHash <FadeChannel,FadeChannel>& GenericFader::channels() const
 {
     return m_channels;
 }
 
 void GenericFader::write(UniverseArray* ua)
 {
-    QMutableHashIterator <quint32,FadeChannel> it(m_channels);
+    QMutableHashIterator <FadeChannel,FadeChannel> it(m_channels);
     while (it.hasNext() == true)
     {
         FadeChannel& fc(it.next().value());
@@ -90,13 +83,13 @@ void GenericFader::write(UniverseArray* ua)
 
                 // Remove all channels that reach zero
                 if (fc.target() == 0 && fc.current() == 0)
-                    remove(fc.address(m_doc));
+                    remove(fc);
             }
             else
             {
                 // After an LTP channel becomes ready, its value is no longer written.
                 // Remove it from the fader.
-                remove(fc.address(m_doc));
+                remove(fc);
             }
         }
         else

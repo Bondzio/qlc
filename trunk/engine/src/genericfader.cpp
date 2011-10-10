@@ -42,7 +42,7 @@ void GenericFader::add(const FadeChannel& ch)
 {
     if (m_channels.contains(ch) == true)
     {
-        if (m_channels[ch].current() < ch.current())
+        if (m_channels[ch].current() <= ch.current())
             m_channels[ch] = ch;
     }
     else

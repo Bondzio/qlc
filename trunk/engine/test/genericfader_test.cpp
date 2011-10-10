@@ -103,7 +103,7 @@ void GenericFader_Test::addRemove()
     fc.setTarget(63);
     fader.add(fc);
     QCOMPARE(fader.m_channels.size(), 1);
-    QCOMPARE(fader.m_channels[fc].target(), uchar(127));
+    QCOMPARE(fader.m_channels[fc].target(), uchar(63));
 
     fc.setCurrent(63);
     fader.add(fc);

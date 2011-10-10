@@ -237,6 +237,14 @@ void FixtureGroup::swap(const QLCPoint& a, const QLCPoint& b)
         m_fixtures.remove(a);
 }
 
+quint32 FixtureGroup::fixture(const QLCPoint& pt) const
+{
+    if (m_fixtures.contains(pt) == true)
+        return m_fixtures[pt];
+    else
+        return Fixture::invalidId();
+}
+
 QList <quint32> FixtureGroup::fixtureList() const
 {
     return m_fixtures.values();

@@ -103,6 +103,9 @@ public:
     /** Switch places with fixtures at two points a and b. */
     void swap(const QLCPoint& a, const QLCPoint& b);
 
+    /** Get a fixture by its position in the group */
+    quint32 fixture(const QLCPoint& pt) const;
+
     /** Get a list of fixtures assigned to a group */
     QList <quint32> fixtureList() const;
 

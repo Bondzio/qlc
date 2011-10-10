@@ -67,9 +67,6 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     m_nameLabel->setText(tr("Grand<BR>Master"));
     layout()->addWidget(m_nameLabel);
 
-    // Get the current grand master value
-    m_slider->setValue(m_outputMap->peekUniverses()->gMValue());
-
     /* External input connection */
     connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
@@ -116,7 +113,7 @@ void GrandMasterSlider::refreshProperties()
     uchar value = uni->gMValue();
     m_outputMap->releaseUniverses();
 
-    slotValueChanged(value);
+    m_slider->setValue(value);
 }
 
 void GrandMasterSlider::slotValueChanged(int value)

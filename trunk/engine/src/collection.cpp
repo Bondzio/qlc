@@ -216,8 +216,6 @@ void Collection::postLoad()
         if (doc->function(it.next()) == NULL)
             it.remove();
     }
-
-    resetElapsed();
 }
 
 /*****************************************************************************

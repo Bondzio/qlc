@@ -27,6 +27,8 @@
 #include <cmath>
 
 #include "fixturegroup.h"
+#include "genericfader.h"
+#include "fadechannel.h"
 #include "rgbmatrix.h"
 #include "qlcmacros.h"
 #include "doc.h"
@@ -48,6 +50,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
     , m_monoColor(Qt::white)
+    , m_fader(NULL)
 {
     setName(tr("New RGB Matrix"));
     setBus(Bus::defaultHold());
@@ -434,8 +437,15 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 void RGBMatrix::preRun(MasterTimer* timer)
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_UNUSED(timer);
     m_direction = direction();
+
+    Q_ASSERT(m_fader == NULL);
+    m_fader = new GenericFader(doc());
+
+    Function::preRun(timer);
 }
 
 void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
@@ -445,14 +455,82 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
     incrementElapsed();
 
-    switch (pattern())
+    FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
+    if (grp == NULL)
+        return;
+
+    RGBMap map = colorMap(elapsed() % busValue(), busValue());
+
+    for (int y = 0; y < map.size(); y++)
     {
-    case OutwardBox:
-        // outwardBox(elapsed(), busValue(), m_direction, size(), map);
-        break;
-    default:
-        break;
+        for (int x = 0; x < map[y].size(); x++)
+        {
+            QLCPoint pt(x, y);
+            Fixture* fxi = doc()->fixture(grp->fixture(pt));
+            if (fxi == NULL)
+                continue;
+
+            QList <quint32> channels = fxi->rgbChannels();
+            if (channels.isEmpty() == false)
+            {
+                FadeChannel fc;
+                fc.setFixture(fxi->id());
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].red());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].green());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].blue());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+            }
+            else
+            {
+                channels = fxi->cmyChannels();
+                if (channels.isEmpty() == true)
+                    break;
+
+                FadeChannel fc;
+                fc.setFixture(fxi->id());
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].cyan());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].magenta());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+
+                fc.setChannel(channels.takeFirst());
+                fc.setBus(fadeBus());
+                fc.setTarget(map[y][x].yellow());
+                fc.setCurrent(0); // TODO
+                fc.setStart(0); // TODO
+                m_fader->add(fc);
+            }
+        }
     }
+
+    m_fader->write(universes);
 
     if (elapsed() >= busValue())
     {
@@ -463,7 +541,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
             else
                 m_direction = Function::Backward;
 
-            resetElapsed();
+            //resetElapsed();
         }
         else if (runOrder() == Function::SingleShot)
         {
@@ -471,7 +549,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
         }
         else // if (runOrder() == Function::Loop)
         {
-            resetElapsed();
+            //resetElapsed();
         }
     }
 }
@@ -480,4 +558,7 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(timer);
     Q_UNUSED(universes);
+    delete m_fader;
+
+    Function::postRun(timer, universes);
 }

@@ -32,6 +32,7 @@
 
 typedef QVector<QVector<QColor> > RGBMap;
 
+class GenericFader;
 class RGBMatrix : public Function
 {
     Q_OBJECT
@@ -140,6 +141,7 @@ public:
 
 private:
     Function::Direction m_direction;
+    GenericFader* m_fader;
 };
 
 #endif

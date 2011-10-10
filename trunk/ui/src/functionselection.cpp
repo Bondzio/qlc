@@ -28,12 +28,14 @@
 
 #include "functionselection.h"
 #include "collectioneditor.h"
+#include "rgbmatrixeditor.h"
 #include "chasereditor.h"
 #include "scripteditor.h"
 #include "sceneeditor.h"
 #include "mastertimer.h"
 #include "collection.h"
 #include "outputmap.h"
+#include "rgbmatrix.h"
 #include "efxeditor.h"
 #include "inputmap.h"
 #include "function.h"
@@ -56,7 +58,8 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
     : QDialog(parent)
     , m_doc(doc)
     , m_multiSelection(true)
-    , m_filter(Function::Scene | Function::Chaser | Function::Collection | Function::EFX | Function::Script)
+    , m_filter(Function::Scene | Function::Chaser | Function::Collection |
+               Function::EFX | Function::Script | Function::RGBMatrix)
     , m_constFilter(false)
 {
     Q_ASSERT(doc != NULL);
@@ -66,6 +69,8 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
     m_addChaserAction = NULL;
     m_addEFXAction = NULL;
     m_addCollectionAction = NULL;
+    m_addScriptAction = NULL;
+    m_addRGBMatrixAction = NULL;
 
     setupUi(this);
 
@@ -91,6 +96,9 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
 
     connect(m_scriptCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotScriptChecked(bool)));
+
+    connect(m_rgbMatrixCheck, SIGNAL(toggled(bool)),
+            this, SLOT(slotRGBMatrixChecked(bool)));
 }
 
 int FunctionSelection::exec()
@@ -110,6 +118,9 @@ int FunctionSelection::exec()
     m_scriptCheck->setChecked(m_filter & Function::Script);
     m_addScriptAction->setEnabled(m_filter & Function::Script);
 
+    m_rgbMatrixCheck->setChecked(m_filter & Function::RGBMatrix);
+    m_addRGBMatrixAction->setEnabled(m_filter & Function::RGBMatrix);
+
     if (m_constFilter == true)
     {
         m_sceneCheck->setEnabled(false);
@@ -117,6 +128,7 @@ int FunctionSelection::exec()
         m_efxCheck->setEnabled(false);
         m_collectionCheck->setEnabled(false);
         m_scriptCheck->setEnabled(false);
+        m_rgbMatrixCheck->setEnabled(false);
     }
 
     /* Multiple/single selection */
@@ -203,6 +215,8 @@ void FunctionSelection::initToolBar()
                             tr("New Collection"), this, SLOT(slotNewCollection()));
     m_addScriptAction = m_toolbar->addAction(QIcon(":/script.png"),
                             tr("New Script"), this, SLOT(slotNewScript()));
+    m_addRGBMatrixAction = m_toolbar->addAction(QIcon(":/rgbmatrix.png"),
+                            tr("New RGB Matrix"), this, SLOT(slotNewRGBMatrix()));
 }
 
 void FunctionSelection::slotNewScene()
@@ -244,6 +258,15 @@ void FunctionSelection::slotNewCollection()
 void FunctionSelection::slotNewScript()
 {
     Function* function = new Script(m_doc);
+    if (m_doc->addFunction(function) == true)
+        addFunction(function);
+    else
+        addFunctionErrorMessage();
+}
+
+void FunctionSelection::slotNewRGBMatrix()
+{
+    Function* function = new RGBMatrix(m_doc);
     if (m_doc->addFunction(function) == true)
         addFunction(function);
     else
@@ -393,6 +416,16 @@ void FunctionSelection::slotScriptChecked(bool state)
     refillTree();
 }
 
+void FunctionSelection::slotRGBMatrixChecked(bool state)
+{
+    if (state == true)
+        m_filter = (m_filter | Function::RGBMatrix);
+    else
+        m_filter = (m_filter & ~Function::RGBMatrix);
+    m_addRGBMatrixAction->setEnabled(state);
+    refillTree();
+}
+
 /*****************************************************************************
  * Helpers
  *****************************************************************************/
@@ -426,6 +459,11 @@ int FunctionSelection::editFunction(Function* function)
     else if (function->type() == Function::Script)
     {
         ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc);
+        result = editor.exec();
+    }
+    else if (function->type() == Function::RGBMatrix)
+    {
+        RGBMatrixEditor editor(this, qobject_cast<RGBMatrix*> (function), m_doc);
         result = editor.exec();
     }
     else

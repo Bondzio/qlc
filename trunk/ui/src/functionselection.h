@@ -125,6 +125,7 @@ protected slots:
     void slotNewEFX();
     void slotNewCollection();
     void slotNewScript();
+    void slotNewRGBMatrix();
 
 protected:
     /** Create toolbar */
@@ -137,6 +138,7 @@ protected:
     QAction* m_addEFXAction;
     QAction* m_addCollectionAction;
     QAction* m_addScriptAction;
+    QAction* m_addRGBMatrixAction;
 
     /*********************************************************************
      * Internal
@@ -177,6 +179,7 @@ protected slots:
     void slotChaserChecked(bool state);
     void slotSceneChecked(bool state);
     void slotScriptChecked(bool state);
+    void slotRGBMatrixChecked(bool state);
 };
 
 #endif

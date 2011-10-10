@@ -815,7 +815,11 @@ void VCCueList_Test::operation()
     cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner == NULL);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), -1);
-    QVERIFY(m_doc->masterTimer()->fader()->m_channels.contains(0));
+
+    FadeChannel fc;
+    fc.setFixture(fxi->id());
+    fc.setChannel(0);
+    QVERIFY(m_doc->masterTimer()->fader()->m_channels.contains(fc));
 }
 
 void VCCueList_Test::input()

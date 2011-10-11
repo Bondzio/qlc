@@ -109,14 +109,22 @@ private:
     QColor m_monoColor;
 
     /************************************************************************
-     * Fade bus
+     * Speed
      ************************************************************************/
 public:
-    void setFadeBus(quint32 id);
-    quint32 fadeBus() const;
+    void setFadeIn(qreal seconds);
+    qreal fadeIn() const;
+
+    void setFadeOut(qreal seconds);
+    qreal fadeOut() const;
+
+    void setPatternSpeed(qreal seconds);
+    qreal patternSpeed() const;
 
 private:
-    quint32 m_fadeBus;
+    qreal m_fadeIn;
+    qreal m_fadeOut;
+    qreal m_patternSpeed;
 
     /************************************************************************
      * Load & Save
@@ -143,7 +151,7 @@ public:
 
 private:
     /** Grab starting values for a fade channel from $fader if available */
-    static void insertStartValues(const GenericFader* fader, FadeChannel& fc);
+    void insertStartValues(FadeChannel& fc) const;
 
 private:
     Function::Direction m_direction;

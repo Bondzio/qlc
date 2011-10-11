@@ -37,6 +37,11 @@
 #define KXMLQLCRGBMatrixMonoColor "MonoColor"
 #define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
 
+#define KXMLQLCRGBMatrixSpeed        "Speed"
+#define KXMLQLCRGBMatrixSpeedFadeIn  "FadeIn"
+#define KXMLQLCRGBMatrixSpeedFadeOut "FadeOut"
+#define KXMLQLCRGBMatrixSpeedPattern "Pattern"
+
 #define KPatternOutwardBox  "Outward Box"
 #define KPatternFullRows    "Full Rows"
 #define KPatternFullColumns "Full Columns"
@@ -50,11 +55,12 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
     , m_monoColor(Qt::red)
+    , m_fadeIn(0.0)
+    , m_fadeOut(0.25)
+    , m_patternSpeed(2.00)
     , m_fader(NULL)
 {
     setName(tr("New RGB Matrix"));
-    setBus(Bus::defaultHold());
-    setFadeBus(Bus::defaultFade());
 }
 
 RGBMatrix::~RGBMatrix()
@@ -87,8 +93,10 @@ bool RGBMatrix::copyFrom(const Function* function)
 
     m_fixtureGroup = mtx->m_fixtureGroup;
     m_pattern = mtx->m_pattern;
-    m_fadeBus = mtx->m_fadeBus;
     m_monoColor = mtx->m_monoColor;
+    m_fadeIn = mtx->m_fadeIn;
+    m_fadeOut = mtx->m_fadeOut;
+    m_patternSpeed = mtx->m_patternSpeed;
 
     return Function::copyFrom(function);
 }
@@ -282,17 +290,37 @@ QColor RGBMatrix::monoColor() const
 }
 
 /****************************************************************************
- * Fade bus
+ * Speed
  ****************************************************************************/
 
-void RGBMatrix::setFadeBus(quint32 id)
+void RGBMatrix::setFadeIn(qreal seconds)
 {
-    m_fadeBus = id;
+    m_fadeIn = seconds;
 }
 
-quint32 RGBMatrix::fadeBus() const
+qreal RGBMatrix::fadeIn() const
 {
-    return m_fadeBus;
+    return m_fadeIn;
+}
+
+void RGBMatrix::setFadeOut(qreal seconds)
+{
+    m_fadeOut = seconds;
+}
+
+qreal RGBMatrix::fadeOut() const
+{
+    return m_fadeOut;
+}
+
+void RGBMatrix::setPatternSpeed(qreal seconds)
+{
+    m_patternSpeed = seconds;
+}
+
+qreal RGBMatrix::patternSpeed() const
+{
+    return m_patternSpeed;
 }
 
 /****************************************************************************
@@ -326,12 +354,13 @@ bool RGBMatrix::loadXML(const QDomElement* root)
 
         if (tag.tagName() == KXMLQLCBus)
         {
-            if (tag.attribute(KXMLQLCBusRole) == KXMLQLCBusHold)
-                setBus(tag.text().toUInt());
-            else if (tag.attribute(KXMLQLCBusRole) == KXMLQLCBusFade)
-                setFadeBus(tag.text().toUInt());
-            else
-                qWarning() << Q_FUNC_INFO << "Unrecognized bus role:" << tag.attribute(KXMLQLCBusRole);
+            /* Ignore */
+        }
+        else if (tag.tagName() == KXMLQLCRGBMatrixSpeed)
+        {
+            setFadeIn(tag.attribute(KXMLQLCRGBMatrixSpeedFadeIn).toDouble());
+            setFadeOut(tag.attribute(KXMLQLCRGBMatrixSpeedFadeOut).toDouble());
+            setPatternSpeed(tag.attribute(KXMLQLCRGBMatrixSpeedPattern).toDouble());
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixPattern)
         {
@@ -382,21 +411,12 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionType, Function::typeToString(type()));
     root.setAttribute(KXMLQLCFunctionName, name());
 
-    /* Fade bus */
-    tag = doc->createElement(KXMLQLCBus);
+    /* Speeds */
+    tag = doc->createElement(KXMLQLCRGBMatrixSpeed);
+    tag.setAttribute(KXMLQLCRGBMatrixSpeedFadeIn, QString::number(fadeIn()));
+    tag.setAttribute(KXMLQLCRGBMatrixSpeedFadeOut, QString::number(fadeOut()));
+    tag.setAttribute(KXMLQLCRGBMatrixSpeedPattern, QString::number(patternSpeed()));
     root.appendChild(tag);
-    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    str.setNum(fadeBus());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
-
-    /* Hold bus */
-    tag = doc->createElement(KXMLQLCBus);
-    root.appendChild(tag);
-    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusHold);
-    str.setNum(bus());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
 
     /* Pattern */
     tag = doc->createElement(KXMLQLCRGBMatrixPattern);
@@ -457,7 +477,8 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     if (grp == NULL)
         return;
 
-    RGBMap map = colorMap(elapsed() % busValue(), busValue());
+    RGBMap map = colorMap(elapsed() % quint32(patternSpeed() * MasterTimer::frequency()),
+                          quint32(MasterTimer::frequency() * patternSpeed()));
 
     for (int y = 0; y < map.size(); y++)
     {
@@ -472,12 +493,11 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
             if (channels.isEmpty() == false)
             {
                 FadeChannel fc;
-                fc.setBus(fadeBus());
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].red());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
 
                 if (m_fader->channels().contains(fc) == false ||
                     m_fader->channels()[fc].target() != fc.target())
@@ -487,7 +507,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].green());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
 
                 if (m_fader->channels().contains(fc) == false ||
                     m_fader->channels()[fc].target() != fc.target())
@@ -497,7 +517,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].blue());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
 
                 if (m_fader->channels().contains(fc) == false ||
                     m_fader->channels()[fc].target() != fc.target())
@@ -512,22 +532,21 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
                     continue;
 
                 FadeChannel fc;
-                fc.setBus(fadeBus());
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].cyan());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].magenta());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
                 fc.setTarget(map[y][x].yellow());
-                insertStartValues(m_fader, fc);
+                insertStartValues(fc);
                 m_fader->add(fc);
             }
         }
@@ -568,13 +587,13 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
     Function::postRun(timer, universes);
 }
 
-void RGBMatrix::insertStartValues(const GenericFader* fader, FadeChannel& fc)
+void RGBMatrix::insertStartValues(FadeChannel& fc) const
 {
-    Q_ASSERT(fader != NULL);
+    Q_ASSERT(m_fader != NULL);
 
-    if (fader->channels().contains(fc) == true)
+    if (m_fader->channels().contains(fc) == true)
     {
-        FadeChannel old = fader->channels()[fc];
+        FadeChannel old = m_fader->channels()[fc];
         fc.setCurrent(old.current());
         fc.setStart(old.current());
     }
@@ -583,5 +602,9 @@ void RGBMatrix::insertStartValues(const GenericFader* fader, FadeChannel& fc)
         fc.setCurrent(0);
         fc.setStart(0);
     }
-}
 
+    if (fc.target() == 0)
+        fc.setFixedTime(fadeOut() * MasterTimer::frequency());
+    else
+        fc.setFixedTime(fadeIn() * MasterTimer::frequency());
+}

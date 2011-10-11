@@ -92,13 +92,7 @@ RGBMatrixEditor::~RGBMatrixEditor()
 
 void RGBMatrixEditor::accept()
 {
-    m_mtx->setName(m_nameEdit->text());
-    m_mtx->setBus(m_holdBusCombo->currentIndex());
-    m_mtx->setFadeBus(m_fadeBusCombo->currentIndex());
-    m_mtx->setPattern(RGBMatrix::stringToPattern(m_patternCombo->currentText()));
-
     m_original->copyFrom(m_mtx);
-
     QDialog::accept();
 }
 
@@ -136,9 +130,17 @@ void RGBMatrixEditor::init()
 
     fillPatternCombo();
     fillFixtureGroupCombo();
-    fillHoldBusCombo();
-    fillFadeBusCombo();
 
+    m_fadeInSpin->setValue(m_mtx->fadeIn());
+    m_fadeOutSpin->setValue(m_mtx->fadeOut());
+    m_patternSpin->setValue(m_mtx->patternSpeed());
+
+    QPixmap pm(100, 26);
+    pm.fill(m_mtx->monoColor());
+    m_colorButton->setIcon(QIcon(pm));
+
+    connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+            this, SLOT(slotNameEdited(const QString&)));
     connect(m_patternCombo, SIGNAL(activated(const QString&)),
             this, SLOT(slotPatternActivated(const QString&)));
     connect(m_fixtureGroupCombo, SIGNAL(activated(int)),
@@ -152,13 +154,15 @@ void RGBMatrixEditor::init()
     connect(m_forward, SIGNAL(clicked()), this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()), this, SLOT(slotBackwardClicked()));
 
-    QPixmap pm(100, 26);
-    pm.fill(m_mtx->monoColor());
-    m_colorButton->setIcon(QIcon(pm));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeInSpinChanged(double)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeOutSpinChanged(double)));
+    connect(m_patternSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotPatternSpinChanged(double)));
 
     createPreviewItems();
     m_preview->setScene(m_scene);
-
     m_previewTimer->start(10);
 }
 
@@ -184,20 +188,6 @@ void RGBMatrixEditor::fillFixtureGroupCombo()
         if (m_mtx->fixtureGroup() == grp->id())
             m_fixtureGroupCombo->setCurrentIndex(m_fixtureGroupCombo->count() - 1);
     }
-}
-
-void RGBMatrixEditor::fillHoldBusCombo()
-{
-    m_holdBusCombo->clear();
-    m_holdBusCombo->addItems(Bus::instance()->idNames());
-    m_holdBusCombo->setCurrentIndex(m_mtx->bus());
-}
-
-void RGBMatrixEditor::fillFadeBusCombo()
-{
-    m_fadeBusCombo->clear();
-    m_fadeBusCombo->addItems(Bus::instance()->idNames());
-    m_fadeBusCombo->setCurrentIndex(m_mtx->fadeBus());
 }
 
 void RGBMatrixEditor::createPreviewItems()
@@ -262,6 +252,11 @@ void RGBMatrixEditor::slotPreviewTimeout()
     }
 }
 
+void RGBMatrixEditor::slotNameEdited(const QString& text)
+{
+    m_mtx->setName(text);
+}
+
 void RGBMatrixEditor::slotPatternActivated(const QString& text)
 {
     m_mtx->setPattern(RGBMatrix::stringToPattern(text));
@@ -313,4 +308,19 @@ void RGBMatrixEditor::slotForwardClicked()
 void RGBMatrixEditor::slotBackwardClicked()
 {
     m_mtx->setDirection(Function::Backward);
+}
+
+void RGBMatrixEditor::slotFadeInSpinChanged(double seconds)
+{
+    m_mtx->setFadeIn(seconds);
+}
+
+void RGBMatrixEditor::slotFadeOutSpinChanged(double seconds)
+{
+    m_mtx->setFadeOut(seconds);
+}
+
+void RGBMatrixEditor::slotPatternSpinChanged(double seconds)
+{
+    m_mtx->setPatternSpeed(seconds);
 }

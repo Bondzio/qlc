@@ -54,23 +54,26 @@ private:
 
     void fillPatternCombo();
     void fillFixtureGroupCombo();
-    void fillHoldBusCombo();
-    void fillFadeBusCombo();
 
     void createPreviewItems();
 
 private slots:
     void slotPreviewTimeout();
+    void slotNameEdited(const QString& text);
     void slotPatternActivated(const QString& text);
     void slotFixtureGroupActivated(int index);
+    void slotColorButtonClicked();
 
     void slotLoopClicked();
     void slotPingPongClicked();
     void slotSingleShotClicked();
+
     void slotForwardClicked();
     void slotBackwardClicked();
 
-    void slotColorButtonClicked();
+    void slotFadeInSpinChanged(double seconds);
+    void slotFadeOutSpinChanged(double seconds);
+    void slotPatternSpinChanged(double seconds);
 
 private:
     Doc* m_doc;

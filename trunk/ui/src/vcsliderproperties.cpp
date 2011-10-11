@@ -247,7 +247,7 @@ void VCSliderProperties::slotModeLevelClicked()
     m_switchToPlaybackModeButton->show();
 
     m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 

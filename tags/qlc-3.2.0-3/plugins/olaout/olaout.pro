@@ -12,9 +12,9 @@ INCLUDEPATH += ../interfaces
 
 macx: {
     CONFIG    += link_pkgconfig
-    PKGCONFIG += libola
+    PKGCONFIG += libola libolaserver
 } else {
-    LIBS        += -L/usr/local/lib -lolaserver -lola -lolacommon -lprotobuf
+    LIBS      += -L/usr/local/lib -lolaserver -lola -lolacommon -lprotobuf
 }
 
 # Forms

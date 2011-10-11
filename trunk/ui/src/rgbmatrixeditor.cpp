@@ -86,6 +86,9 @@ RGBMatrixEditor::~RGBMatrixEditor()
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
+    if (m_mtx->stopped() == false)
+        m_mtx->stopAndWait();
+
     delete m_mtx;
     m_mtx = NULL;
 }
@@ -160,6 +163,10 @@ void RGBMatrixEditor::init()
             this, SLOT(slotFadeOutSpinChanged(double)));
     connect(m_patternSpin, SIGNAL(valueChanged(double)),
             this, SLOT(slotPatternSpinChanged(double)));
+
+    // Test slots
+    connect(m_testButton, SIGNAL(clicked(bool)),
+            this, SLOT(slotTestClicked()));
 
     createPreviewItems();
     m_preview->setScene(m_scene);
@@ -323,4 +330,22 @@ void RGBMatrixEditor::slotFadeOutSpinChanged(double seconds)
 void RGBMatrixEditor::slotPatternSpinChanged(double seconds)
 {
     m_mtx->setPatternSpeed(seconds);
+}
+
+void RGBMatrixEditor::slotTestClicked()
+{
+    if (m_testButton->isChecked() == true)
+        m_doc->masterTimer()->startFunction(m_mtx, false);
+    else
+        m_mtx->stopAndWait();
+}
+
+void RGBMatrixEditor::slotRestartTest()
+{
+    if (m_testButton->isChecked() == true)
+    {
+        // Toggle off, toggle on. Duh.
+        m_testButton->click();
+        m_testButton->click();
+    }
 }

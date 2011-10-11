@@ -75,6 +75,9 @@ private slots:
     void slotFadeOutSpinChanged(double seconds);
     void slotPatternSpinChanged(double seconds);
 
+    void slotTestClicked();
+    void slotRestartTest();
+
 private:
     Doc* m_doc;
     RGBMatrix* m_original;

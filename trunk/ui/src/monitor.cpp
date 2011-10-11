@@ -29,7 +29,6 @@
 #include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
-#include <QTimer>
 #include <QFont>
 #include <QIcon>
 #include <QtXml>
@@ -102,21 +101,17 @@ Monitor::Monitor(QWidget* parent, Doc* doc, Qt::WindowFlags f)
     connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 
-    m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
-    m_timer->start(1000 / 50);
-    QWidget::show();
+    connect(m_doc->outputMap(), SIGNAL(universesWritten(const QByteArray&)),
+            this, SLOT(slotUniversesWritten(const QByteArray&)));
 }
 
 Monitor::~Monitor()
 {
-    m_timer->stop();
-    delete m_timer;
+    disconnect(m_doc->outputMap(), SIGNAL(universesWritten(const QByteArray&)),
+               this, SLOT(slotUniversesWritten(const QByteArray&)));
 
     while (m_monitorFixtures.isEmpty() == false)
-    {
         delete m_monitorFixtures.takeFirst();
-    }
 
     saveSettings();
 
@@ -402,15 +397,9 @@ void Monitor::slotFixtureRemoved(quint32 fxi_id)
     }
 }
 
-/****************************************************************************
- * Timer
- ****************************************************************************/
-
-void Monitor::slotTimeout()
+void Monitor::slotUniversesWritten(const QByteArray& ua)
 {
-    const UniverseArray* universes = m_doc->outputMap()->peekUniverses();
-    QList <MonitorFixture*> list = findChildren <MonitorFixture*>();
-    QListIterator <MonitorFixture*> it(list);
+    QListIterator <MonitorFixture*> it(m_monitorFixtures);
     while (it.hasNext() == true)
-        it.next()->updateValues(universes->postGMValues());
+        it.next()->updateValues(ua);
 }

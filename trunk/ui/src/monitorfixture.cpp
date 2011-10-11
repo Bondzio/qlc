@@ -188,7 +188,7 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
  * Values
  ****************************************************************************/
 
-void MonitorFixture::updateValues(const QByteArray* universes)
+void MonitorFixture::updateValues(const QByteArray& ua)
 {
     QLabel* label;
     uchar value;
@@ -211,7 +211,7 @@ void MonitorFixture::updateValues(const QByteArray* universes)
         label = it.next();
         Q_ASSERT(label != NULL);
 
-        value = uchar(universes->at(fxi->universeAddress() + i));
+        value = uchar(ua.at(fxi->universeAddress() + i));
         i++;
 
         /* Set the label's text to reflect the changed value */

@@ -59,9 +59,8 @@ void OutputMap_Test::initial()
     QVERIFY(om.m_universeMutex.tryLock() == true);
     om.m_universeMutex.unlock();
 
-    // Test that peekUniverses() returns valid stuff
     for (quint32 i = 0; i < 512 * om.universes(); i++)
-        QVERIFY(om.peekUniverses()->preGMValues().data()[i] == 0);
+        QVERIFY(om.m_universeArray->preGMValues().data()[i] == 0);
 }
 
 void OutputMap_Test::appendPlugin()
@@ -197,7 +196,7 @@ void OutputMap_Test::claimReleaseDumpReset()
 
     om.resetUniverses();
     for (quint32 i = 0; i < 512 * om.universes(); i++)
-        QVERIFY(om.peekUniverses()->preGMValues().data()[i] == 0);
+        QVERIFY(om.m_universeArray->preGMValues().data()[i] == 0);
 }
 
 void OutputMap_Test::blackout()

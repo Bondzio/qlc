@@ -126,8 +126,10 @@ public:
     /**
      * Release access to all universes. This is declared virtual to make
      * unit testing a bit easier.
+     *
+     * @param changed Set to true if DMX values were changed
      */
-    virtual void releaseUniverses();
+    virtual void releaseUniverses(bool changed = true);
 
     /**
      * Write current universe array data to plugins, each universe within
@@ -136,17 +138,12 @@ public:
     void dumpUniverses();
 
     /**
-     * Get a read-only pointer to OutputMap's UniverseArray. You're not supposed
-     * to write anything to the returned universes.
-     *
-     * @return Current UniverseArray snapshot
-     */
-    const UniverseArray* peekUniverses() const;
-
-    /**
      * Reset all universes (useful when starting from scratch)
      */
     void resetUniverses();
+
+signals:
+    void universesWritten(const QByteArray& universes);
 
 protected:
     /** The values of all universes */

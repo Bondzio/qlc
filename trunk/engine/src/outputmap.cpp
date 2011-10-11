@@ -163,29 +163,33 @@ UniverseArray* OutputMap::claimUniverses()
     return m_universeArray;
 }
 
-void OutputMap::releaseUniverses()
+void OutputMap::releaseUniverses(bool changed)
 {
-    m_universeChanged = true;
+    m_universeChanged = changed;
     m_universeMutex.unlock();
 }
 
 void OutputMap::dumpUniverses()
 {
+    QByteArray ba;
+
     m_universeMutex.lock();
     if (m_universeChanged == true && m_blackout == false)
     {
-        const QByteArray* postGM(m_universeArray->postGMValues());
+        const QByteArray* postGM = m_universeArray->postGMValues();
         for (quint32 i = 0; i < m_universes; i++)
             m_patch[i]->dump(postGM->mid(i * 512, 512));
+
+        // Grab a copy of universe values to prevent timer thread blocking
+        ba = *postGM;
 
         m_universeChanged = false;
     }
     m_universeMutex.unlock();
-}
 
-const UniverseArray* OutputMap::peekUniverses() const
-{
-    return m_universeArray;
+    // Emit new values
+    if (ba.isEmpty() == false)
+        emit universesWritten(ba);
 }
 
 void OutputMap::resetUniverses()

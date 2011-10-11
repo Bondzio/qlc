@@ -548,8 +548,9 @@ void ConsoleChannel::enable(bool state)
 {
     setChecked(state);
 
-    const UniverseArray* unis(m_doc->outputMap()->peekUniverses());
-    m_value = unis->preGMValues()[m_fixture->universeAddress() + m_channel];
+    UniverseArray* ua = m_doc->outputMap()->claimUniverses();
+    m_value = ua->preGMValues()[m_fixture->universeAddress() + m_channel];
+    m_doc->outputMap()->releaseUniverses(false);
 }
 
 void ConsoleChannel::setCheckable(bool checkable)

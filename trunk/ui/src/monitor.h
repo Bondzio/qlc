@@ -123,6 +123,9 @@ protected slots:
     /** Slot for fixture removals (to remove the fixture from layout) */
     void slotFixtureRemoved(quint32 fxi_id);
 
+    /** Slot for getting the latest values from OutputMap */
+    void slotUniversesWritten(const QByteArray& ua);
+
 signals:
     void channelStyleChanged(Monitor::ChannelStyle style);
     void valueStyleChanged(Monitor::ValueStyle style);
@@ -132,17 +135,6 @@ protected:
     QWidget* m_monitorWidget;
     MonitorLayout* m_monitorLayout;
     QList <MonitorFixture*> m_monitorFixtures;
-
-    /*********************************************************************
-     * Timer
-     *********************************************************************/
-private slots:
-    /** Timer callback */
-    void slotTimeout();
-
-private:
-    /** Timer that fires every 1/32th of a second and gets new values */
-    QTimer* m_timer;
 };
 
 #endif

@@ -66,6 +66,7 @@ private slots:
     void loadYAxis();
     void loadYAxisWrongRoot();
     void loadAxisNoXY();
+    void loadSuccessLegacy();
     void loadSuccess();
     void loadWrongType();
     void loadWrongRoot();

@@ -290,8 +290,8 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         m_skipIterator < m_skipThreshold)
     {
         /* Fixture still needs to wait for its turn in serial mode */
-        quint32 busValue = Bus::instance()->value(m_parent->bus());
-        m_skipIterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+        quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+        m_skipIterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
     }
     else
     {
@@ -305,15 +305,15 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
             if (m_skipIterator >= m_skipThreshold)
             {
                 /* Increment for next round. */
-                quint32 busValue = Bus::instance()->value(m_parent->bus());
-                m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+                quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+                m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
             }
         }
         else
         {
             /* Increment for next round. */
-            quint32 busValue = Bus::instance()->value(m_parent->bus());
-            m_iterator += qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+            quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+            m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
         }
 
         if (m_runTimeDirection == Function::Forward)
@@ -369,7 +369,7 @@ void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setBus(m_parent->fadeBusID());
+            fc.setFixedTime(MasterTimer::frequency() * m_parent->fadeIn());
 
             fc.setStart(0);
             fc.setCurrent(fc.start());
@@ -397,7 +397,7 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setBus(m_parent->fadeBusID());
+            fc.setFixedTime(MasterTimer::frequency() * m_parent->fadeOut());
 
             fc.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
             fc.setCurrent(fc.start());

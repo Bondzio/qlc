@@ -47,8 +47,6 @@
 
 void EFX_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -1492,7 +1490,6 @@ void EFX_Test::copyFrom()
     e1.setName("First");
     e1.setDirection(EFX::Backward);
     e1.setRunOrder(EFX::SingleShot);
-    e1.setBus(15);
     e1.setAlgorithm(EFX::Lissajous);
     e1.setWidth(13);
     e1.setHeight(42);
@@ -1504,6 +1501,10 @@ void EFX_Test::copyFrom()
     e1.setXPhase(163);
     e1.setYPhase(94);
     e1.setPropagationMode(EFX::Serial);
+    e1.setFadeIn(4.2);
+    e1.setFadeOut(6.9);
+    e1.setPatternSpeed(13.37);
+
     EFXFixture* ef1 = new EFXFixture(&e1);
     ef1->setFixture(12);
     e1.addFixture(ef1);
@@ -1519,7 +1520,6 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.name() == e1.name());
     QVERIFY(e2.direction() == EFX::Backward);
     QVERIFY(e2.runOrder() == EFX::SingleShot);
-    QVERIFY(e2.bus() == 15);
     QVERIFY(e2.algorithm() == EFX::Lissajous);
     QVERIFY(e2.width() == 13);
     QVERIFY(e2.height() == 42);
@@ -1531,6 +1531,9 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.xPhase() == 163);
     QVERIFY(e2.yPhase() == 94);
     QVERIFY(e2.propagationMode() == EFX::Serial);
+    QCOMPARE(e2.fadeIn(), qreal(4.2));
+    QCOMPARE(e2.fadeOut(), qreal(6.9));
+    QCOMPARE(e2.patternSpeed(), qreal(13.37));
     QVERIFY(e2.fixtures().size() == 2);
     QVERIFY(e2.fixtures().at(0)->fixture() == 12);
     QVERIFY(e2.fixtures().at(1)->fixture() == 34);
@@ -1546,7 +1549,6 @@ void EFX_Test::copyFrom()
     e3.setName("Third");
     e3.setDirection(EFX::Forward);
     e3.setRunOrder(EFX::Loop);
-    e3.setBus(3);
     e3.setAlgorithm(EFX::Eight);
     e3.setWidth(31);
     e3.setHeight(24);
@@ -1558,6 +1560,9 @@ void EFX_Test::copyFrom()
     e3.setXPhase(136);
     e3.setYPhase(49);
     e3.setPropagationMode(EFX::Parallel);
+    e3.setFadeIn(6.9);
+    e3.setFadeOut(13.37);
+    e3.setPatternSpeed(4.2);
     EFXFixture* ef3 = new EFXFixture(&e3);
     ef3->setFixture(56);
     e3.addFixture(ef3);
@@ -1570,7 +1575,6 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.name() == e3.name());
     QVERIFY(e2.direction() == EFX::Forward);
     QVERIFY(e2.runOrder() == EFX::Loop);
-    QVERIFY(e2.bus() == 3);
     QVERIFY(e2.algorithm() == EFX::Eight);
     QVERIFY(e2.width() == 31);
     QVERIFY(e2.height() == 24);
@@ -1582,6 +1586,9 @@ void EFX_Test::copyFrom()
     QVERIFY(e2.xPhase() == 136);
     QVERIFY(e2.yPhase() == 49);
     QVERIFY(e2.propagationMode() == EFX::Parallel);
+    QCOMPARE(e2.fadeIn(), qreal(6.9));
+    QCOMPARE(e2.fadeOut(), qreal(13.37));
+    QCOMPARE(e2.patternSpeed(), qreal(4.2));
     QVERIFY(e2.fixtures().size() == 2);
     QVERIFY(e2.fixtures().at(0)->fixture() == 56);
     QVERIFY(e2.fixtures().at(1)->fixture() == 78);
@@ -1599,7 +1606,6 @@ void EFX_Test::createCopy()
     e1->setName("First");
     e1->setDirection(EFX::Forward);
     e1->setRunOrder(EFX::PingPong);
-    e1->setBus(15);
     e1->setAlgorithm(EFX::Line);
     e1->setWidth(13);
     e1->setHeight(42);
@@ -1611,6 +1617,9 @@ void EFX_Test::createCopy()
     e1->setXPhase(163);
     e1->setYPhase(94);
     e1->setPropagationMode(EFX::Serial);
+    e1->setFadeIn(4.2);
+    e1->setFadeOut(6.9);
+    e1->setPatternSpeed(13.37);
     EFXFixture* ef1 = new EFXFixture(e1);
     ef1->setFixture(12);
     e1->addFixture(ef1);
@@ -1631,7 +1640,6 @@ void EFX_Test::createCopy()
     QVERIFY(copy->name() == e1->name());
     QVERIFY(copy->direction() == EFX::Forward);
     QVERIFY(copy->runOrder() == EFX::PingPong);
-    QVERIFY(copy->bus() == 15);
     QVERIFY(copy->algorithm() == EFX::Line);
     QVERIFY(copy->width() == 13);
     QVERIFY(copy->height() == 42);
@@ -1643,6 +1651,9 @@ void EFX_Test::createCopy()
     QVERIFY(copy->xPhase() == 163);
     QVERIFY(copy->yPhase() == 94);
     QVERIFY(copy->propagationMode() == EFX::Serial);
+    QCOMPARE(copy->fadeIn(), qreal(4.2));
+    QCOMPARE(copy->fadeOut(), qreal(6.9));
+    QCOMPARE(copy->patternSpeed(), qreal(13.37));
     QVERIFY(copy->fixtures().size() == 2);
     QVERIFY(copy->fixtures().at(0)->fixture() == 12);
     QVERIFY(copy->fixtures().at(1)->fixture() == 34);
@@ -1763,9 +1774,11 @@ void EFX_Test::loadAxisNoXY()
     QVERIFY(e.xPhase() != 333);
 }
 
-void EFX_Test::loadSuccess()
+void EFX_Test::loadSuccessLegacy()
 {
     QDomDocument doc;
+
+    Bus::init(this);
 
     QDomElement root = doc.createElement("Function");
     root.setAttribute("Type", "EFX");
@@ -1781,6 +1794,12 @@ void EFX_Test::loadSuccess()
     QDomText busText = doc.createTextNode("12");
     bus.appendChild(busText);
     root.appendChild(bus);
+
+    QDomElement hbus = doc.createElement("Bus");
+    hbus.setAttribute("Role", "Hold");
+    QDomText hbusText = doc.createTextNode("13");
+    hbus.appendChild(hbusText);
+    root.appendChild(hbus);
 
     QDomElement dir = doc.createElement("Direction");
     QDomText dirText = doc.createTextNode("Forward");
@@ -1896,7 +1915,9 @@ void EFX_Test::loadSuccess()
 
     EFX e(m_doc);
     QVERIFY(e.loadXML(&root) == true);
-    QVERIFY(e.bus() == 12);
+
+    QVERIFY(e.m_legacyFadeBus == 12);
+    QVERIFY(e.m_legacyHoldBus == 13);
     QVERIFY(e.direction() == EFX::Forward);
     QVERIFY(e.runOrder() == EFX::Loop);
 
@@ -1920,6 +1941,176 @@ void EFX_Test::loadSuccess()
     QVERIFY(e.fixtures().at(1)->direction() == EFX::Backward);
     QVERIFY(e.fixtures().at(2)->fixture() == 45);
     QVERIFY(e.fixtures().at(2)->direction() == EFX::Backward);
+
+    Bus::instance()->setValue(12, 50);
+    Bus::instance()->setValue(13, 100);
+    e.postLoad();
+
+    QVERIFY(e.fadeIn() == qreal(50 / MasterTimer::frequency()));
+    QVERIFY(e.fadeOut() == qreal(50 / MasterTimer::frequency()));
+    QVERIFY(e.patternSpeed() == qreal(100 / MasterTimer::frequency()));
+}
+
+void EFX_Test::loadSuccess()
+{
+    QDomDocument doc;
+
+    QDomElement root = doc.createElement("Function");
+    root.setAttribute("Type", "EFX");
+    root.setAttribute("Name", "Test EFX");
+
+    QDomElement prop = doc.createElement("PropagationMode");
+    QDomText propText = doc.createTextNode("Serial");
+    prop.appendChild(propText);
+    root.appendChild(prop);
+
+    QDomElement speed = doc.createElement("Speed");
+    speed.setAttribute("FadeIn", "13.0");
+    speed.setAttribute("FadeOut", "14.0");
+    speed.setAttribute("Pattern", "15.0");
+    root.appendChild(speed);
+
+    QDomElement dir = doc.createElement("Direction");
+    QDomText dirText = doc.createTextNode("Forward");
+    dir.appendChild(dirText);
+    root.appendChild(dir);
+
+    QDomElement run = doc.createElement("RunOrder");
+    QDomText runText = doc.createTextNode("Loop");
+    run.appendChild(runText);
+    root.appendChild(run);
+
+    QDomElement algo = doc.createElement("Algorithm");
+    QDomText algoText = doc.createTextNode("Diamond");
+    algo.appendChild(algoText);
+    root.appendChild(algo);
+
+    QDomElement w = doc.createElement("Width");
+    QDomText wText = doc.createTextNode("100");
+    w.appendChild(wText);
+    root.appendChild(w);
+
+    QDomElement h = doc.createElement("Height");
+    QDomText hText = doc.createTextNode("90");
+    h.appendChild(hText);
+    root.appendChild(h);
+
+    QDomElement rot = doc.createElement("Rotation");
+    QDomText rotText = doc.createTextNode("310");
+    rot.appendChild(rotText);
+    root.appendChild(rot);
+
+    /* X Axis */
+    QDomElement xax = doc.createElement("Axis");
+    xax.setAttribute("Name", "X");
+    root.appendChild(xax);
+
+    QDomElement xoff = doc.createElement("Offset");
+    QDomText xoffText = doc.createTextNode("10");
+    xoff.appendChild(xoffText);
+    xax.appendChild(xoff);
+
+    QDomElement xfreq = doc.createElement("Frequency");
+    QDomText xfreqText = doc.createTextNode("2");
+    xfreq.appendChild(xfreqText);
+    xax.appendChild(xfreq);
+
+    QDomElement xpha = doc.createElement("Phase");
+    QDomText xphaText = doc.createTextNode("270");
+    xpha.appendChild(xphaText);
+    xax.appendChild(xpha);
+
+    /* Y Axis */
+    QDomElement yax = doc.createElement("Axis");
+    yax.setAttribute("Name", "Y");
+    root.appendChild(yax);
+
+    QDomElement yoff = doc.createElement("Offset");
+    QDomText yoffText = doc.createTextNode("20");
+    yoff.appendChild(yoffText);
+    yax.appendChild(yoff);
+
+    QDomElement yfreq = doc.createElement("Frequency");
+    QDomText yfreqText = doc.createTextNode("3");
+    yfreq.appendChild(yfreqText);
+    yax.appendChild(yfreq);
+
+    QDomElement ypha = doc.createElement("Phase");
+    QDomText yphaText = doc.createTextNode("80");
+    ypha.appendChild(yphaText);
+    yax.appendChild(ypha);
+
+    /* Fixture 1 */
+    QDomElement ef1 = doc.createElement("Fixture");
+    root.appendChild(ef1);
+
+    QDomElement ef1ID = doc.createElement("ID");
+    QDomText ef1IDText = doc.createTextNode("33");
+    ef1ID.appendChild(ef1IDText);
+    ef1.appendChild(ef1ID);
+
+    QDomElement ef1dir = doc.createElement("Direction");
+    QDomText ef1dirText = doc.createTextNode("Forward");
+    ef1dir.appendChild(ef1dirText);
+    ef1.appendChild(ef1dir);
+
+    /* Fixture 2 */
+    QDomElement ef2 = doc.createElement("Fixture");
+    root.appendChild(ef2);
+
+    QDomElement ef2ID = doc.createElement("ID");
+    QDomText ef2IDText = doc.createTextNode("11");
+    ef2ID.appendChild(ef2IDText);
+    ef2.appendChild(ef2ID);
+
+    QDomElement ef2dir = doc.createElement("Direction");
+    QDomText ef2dirText = doc.createTextNode("Backward");
+    ef2dir.appendChild(ef2dirText);
+    ef2.appendChild(ef2dir);
+
+    /* Fixture 3 */
+    QDomElement ef3 = doc.createElement("Fixture");
+    root.appendChild(ef3);
+
+    QDomElement ef3ID = doc.createElement("ID");
+    QDomText ef3IDText = doc.createTextNode("45");
+    ef3ID.appendChild(ef3IDText);
+    ef3.appendChild(ef3ID);
+
+    QDomElement ef3dir = doc.createElement("Direction");
+    QDomText ef3dirText = doc.createTextNode("Backward");
+    ef3dir.appendChild(ef3dirText);
+    ef3.appendChild(ef3dir);
+
+    EFX e(m_doc);
+    QVERIFY(e.loadXML(&root) == true);
+    QVERIFY(e.direction() == EFX::Forward);
+    QVERIFY(e.runOrder() == EFX::Loop);
+
+    QVERIFY(e.algorithm() == EFX::Diamond);
+    QVERIFY(e.width() == 100);
+    QVERIFY(e.height() == 90);
+    QVERIFY(e.rotation() == 310);
+
+    QVERIFY(e.xOffset() == 10);
+    QVERIFY(e.xFrequency() == 2);
+    QVERIFY(e.xPhase() == 270);
+    QVERIFY(e.yOffset() == 20);
+    QVERIFY(e.yFrequency() == 3);
+    QVERIFY(e.yPhase() == 80);
+
+    QVERIFY(e.propagationMode() == EFX::Serial);
+    QVERIFY(e.fixtures().size() == 3);
+    QVERIFY(e.fixtures().at(0)->fixture() == 33);
+    QVERIFY(e.fixtures().at(0)->direction() == EFX::Forward);
+    QVERIFY(e.fixtures().at(1)->fixture() == 11);
+    QVERIFY(e.fixtures().at(1)->direction() == EFX::Backward);
+    QVERIFY(e.fixtures().at(2)->fixture() == 45);
+    QVERIFY(e.fixtures().at(2)->direction() == EFX::Backward);
+
+    QVERIFY(e.fadeIn() == qreal(13.0));
+    QVERIFY(e.fadeOut() == qreal(14.0));
+    QVERIFY(e.patternSpeed() == qreal(15.0));
 }
 
 void EFX_Test::loadWrongType()
@@ -1991,7 +2182,9 @@ void EFX_Test::save()
     e1.setName("First");
     e1.setDirection(EFX::Backward);
     e1.setRunOrder(EFX::SingleShot);
-    e1.setBus(15);
+    e1.setFadeIn(4.2);
+    e1.setFadeOut(6.9);
+    e1.setPatternSpeed(13.37);
     e1.setAlgorithm(EFX::Lissajous);
     e1.setWidth(13);
     e1.setHeight(42);
@@ -2025,10 +2218,10 @@ void EFX_Test::save()
     QVERIFY(root.firstChild().toElement().attribute("Type") == "EFX");
     QVERIFY(root.firstChild().toElement().attribute("Name") == "First");
 
-    bool dir = false, run = false, bus = false, algo = false, w = false,
+    bool dir = false, run = false, algo = false, w = false,
          h = false, rot = false, xoff = false, yoff = false,
          xfreq = false, yfreq = false, xpha = false, ypha = false,
-         prop = false, intensity = false;
+         prop = false, intensity = false, speed = false;
     int fixtureid = 0, fixturedirection = 0;
     QList <QString> fixtures;
 
@@ -2036,7 +2229,14 @@ void EFX_Test::save()
     while (node.isNull() == false)
     {
         QDomElement tag = node.toElement();
-        if (tag.tagName() == "Direction")
+        if (tag.tagName() == "Speed")
+        {
+            QCOMPARE(tag.attribute("FadeIn").toDouble(), double(4.2));
+            QCOMPARE(tag.attribute("FadeOut").toDouble(), double(6.9));
+            QCOMPARE(tag.attribute("Pattern").toDouble(), double(13.37));
+            speed = true;
+        }
+        else if (tag.tagName() == "Direction")
         {
             QVERIFY(tag.text() == "Backward");
             dir = true;
@@ -2048,8 +2248,7 @@ void EFX_Test::save()
         }
         else if (tag.tagName() == "Bus")
         {
-            QVERIFY(tag.text() == "15");
-            bus = true;
+            QFAIL("EFX should not save a Bus tag anymore!");
         }
         else if (tag.tagName() == "Algorithm")
         {
@@ -2204,7 +2403,7 @@ void EFX_Test::save()
     QCOMPARE(fixturedirection, 3);
     QVERIFY(dir == true);
     QVERIFY(run == true);
-    QVERIFY(bus == true);
+    QVERIFY(speed == true);
     QVERIFY(algo == true);
     QVERIFY(w == true);
     QVERIFY(h == true);

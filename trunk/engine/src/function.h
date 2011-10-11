@@ -56,6 +56,11 @@ class Doc;
 
 #define KXMLQLCFunctionEnabled "Enabled"
 
+#define KXMLQLCFunctionSpeed        "Speed"
+#define KXMLQLCFunctionSpeedFadeIn  "FadeIn"
+#define KXMLQLCFunctionSpeedFadeOut "FadeOut"
+#define KXMLQLCFunctionSpeedPattern "Pattern"
+
 class Function : public QObject
 {
     Q_OBJECT

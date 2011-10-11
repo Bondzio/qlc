@@ -46,7 +46,6 @@
 
 void EFXFixture_Test::initTestCase()
 {
-    Bus::init(this);
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -465,7 +464,7 @@ void EFXFixture_Test::nextStepLoop()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
-    Bus::instance()->setValue(e.bus(), 50); /* 50 steps */
+    e.setPatternSpeed(1); // 1s
 
     EFXFixture* ef = new EFXFixture(&e);
     ef->setFixture(0);
@@ -482,12 +481,12 @@ void EFXFixture_Test::nextStepLoop()
     /* Run two cycles (2 * 50 = 100) and reset the checking iterator in
        the middle to expect correct iterator values. */
     qreal checkIter = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < (2 * MasterTimer::frequency()); i++)
     {
         ef->nextStep(&mts, &array);
 
-        quint32 busValue = Bus::instance()->value(e.bus());
-        qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+        quint32 ticks = MasterTimer::frequency() * e.patternSpeed();
+        qreal stepSize = qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
         checkIter += stepSize;
 
         if (i == 50)
@@ -506,7 +505,7 @@ void EFXFixture_Test::nextStepSingleShot()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
-    Bus::instance()->setValue(e.bus(), 50); /* 50 steps */
+    e.setPatternSpeed(1); // 1s
     e.setRunOrder(EFX::SingleShot);
 
     EFXFixture* ef = new EFXFixture(&e);
@@ -525,12 +524,12 @@ void EFXFixture_Test::nextStepSingleShot()
 
     /* Run one cycle (50 steps) */
     qreal checkIter = 0;
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < MasterTimer::frequency(); i++)
     {
         ef->nextStep(&mts, &array);
 
-        quint32 busValue = Bus::instance()->value(e.bus());
-        qreal stepSize = qreal(1) / (qreal(busValue) / qreal(M_PI * 2));
+        quint32 ticks = MasterTimer::frequency() * e.patternSpeed();
+        qreal stepSize = qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
         checkIter += stepSize;
 
         QVERIFY(ef->m_iterator == checkIter);
@@ -551,6 +550,8 @@ void EFXFixture_Test::start()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
+    e.setFadeIn(1);
+    e.setFadeOut(2);
     EFXFixture* ef = new EFXFixture(&e);
     ef->setFixture(0);
     e.addFixture(ef);
@@ -575,6 +576,7 @@ void EFXFixture_Test::start()
     fc.setFixture(fxi->id());
     fc.setChannel(fxi->masterIntensityChannel());
     QVERIFY(e.m_fader->m_channels.contains(fc) == true);
+    QCOMPARE(e.m_fader->m_channels[fc].fixedTime(), 1 * MasterTimer::frequency());
 
     e.postRun(&mts, &array);
 }
@@ -585,6 +587,8 @@ void EFXFixture_Test::stop()
     MasterTimerStub mts(m_doc, array);
 
     EFX e(m_doc);
+    e.setFadeIn(1);
+    e.setFadeOut(2);
     EFXFixture* ef = new EFXFixture(&e);
     ef->setFixture(0);
     e.addFixture(ef);
@@ -615,6 +619,7 @@ void EFXFixture_Test::stop()
     QCOMPARE(mts.fader()->m_channels.size(), 1);
     QVERIFY(e.m_fader->m_channels.contains(fc) == false);
     QVERIFY(mts.m_fader->m_channels.contains(fc) == true);
+    QCOMPARE(mts.m_fader->m_channels[fc].fixedTime(), 2 * MasterTimer::frequency());
 
     e.postRun(&mts, &array);
 }

@@ -49,8 +49,6 @@ private:
 
 protected:
     void initGeneralPage();
-    void fillMovementBusCombo();
-    void fillFadeBusCombo();
     void initMovementPage();
     void initInitializationPage();
 
@@ -94,8 +92,9 @@ protected slots:
     void slotSerialRadioToggled(bool state);
     void slotAsymmetricRadioToggled(bool state);
 
-    void slotMovementBusComboActivated(int index);
-    void slotFadeBusComboActivated(int index);
+    void slotFadeInSpinChanged(double seconds);
+    void slotFadeOutSpinChanged(double seconds);
+    void slotPatternSpinChanged(double seconds);
 
     /*********************************************************************
      * Movement page

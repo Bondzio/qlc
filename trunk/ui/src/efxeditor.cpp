@@ -131,18 +131,19 @@ void EFXEditor::initGeneralPage()
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotAsymmetricRadioToggled(bool)));
 
-    connect(m_movementBusCombo, SIGNAL(activated(int)),
-            this, SLOT(slotMovementBusComboActivated(int)));
-    connect(m_fadeBusCombo, SIGNAL(activated(int)),
-            this, SLOT(slotFadeBusComboActivated(int)));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeInSpinChanged(double)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeOutSpinChanged(double)));
+    connect(m_patternSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotPatternSpinChanged(double)));
 
+    // Test slots
     connect(m_testButton, SIGNAL(clicked()),
             this, SLOT(slotTestClicked()));
     connect(m_raiseFixtureButton, SIGNAL(clicked()),
             this, SLOT(slotRestartTest()));
     connect(m_lowerFixtureButton, SIGNAL(clicked()),
-            this, SLOT(slotRestartTest()));
-    connect(m_movementBusCombo, SIGNAL(activated(int)),
             this, SLOT(slotRestartTest()));
     connect(m_parallelRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotRestartTest()));
@@ -150,6 +151,12 @@ void EFXEditor::initGeneralPage()
             this, SLOT(slotRestartTest()));
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotRestartTest()));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotRestartTest()));
+
+    m_fadeInSpin->setValue(m_efx->fadeIn());
+    m_fadeOutSpin->setValue(m_efx->fadeOut());
+    m_patternSpin->setValue(m_efx->patternSpeed());
 
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
@@ -170,26 +177,6 @@ void EFXEditor::initGeneralPage()
         m_asymmetricRadio->setChecked(true);
     else
         m_parallelRadio->setChecked(true);
-
-    /* Init movement bus combo and select the EFX's movement bus */
-    fillMovementBusCombo();
-
-    /* Init fade bus combo and select the EFX's fade bus */
-    fillFadeBusCombo();
-}
-
-void EFXEditor::fillMovementBusCombo()
-{
-    m_movementBusCombo->clear();
-    m_movementBusCombo->addItems(Bus::instance()->idNames());
-    m_movementBusCombo->setCurrentIndex(m_efx->bus());
-}
-
-void EFXEditor::fillFadeBusCombo()
-{
-    m_fadeBusCombo->clear();
-    m_fadeBusCombo->addItems(Bus::instance()->idNames());
-    //m_fadeBusCombo->setCurrentIndex(m_efx->busID());
 }
 
 void EFXEditor::initMovementPage()
@@ -305,34 +292,9 @@ void EFXEditor::accept()
 void EFXEditor::slotTestClicked()
 {
     if (m_testButton->isChecked() == true)
-    {
-        VCDockSlider* slider = new VCDockSlider(NULL, m_doc->inputMap(),
-                                                m_movementBusCombo->currentIndex());
-        slider->setLimits(0, 60);
-
-        slider->show();
-        slider->setFixedSize(QSize(50, 200));
-        QRect r(this->frameGeometry());
-        QRect sr(slider->frameGeometry());
-        slider->hide();
-
-        r.setLeft(r.left() - sr.width() - 2);
-        r.setTop(r.bottom() - sr.height());
-        slider->move(r.topLeft());
-
-        slider->setParent(this, Qt::Tool);
-        slider->setStyle(App::saneStyle());
-        slider->show();
-
-        connect(m_testButton, SIGNAL(clicked()), slider, SLOT(deleteLater()));
-        connect(this, SIGNAL(destroyed()), slider, SLOT(deleteLater()));
-
         m_doc->masterTimer()->startFunction(m_efx, false);
-    }
     else
-    {
         m_efx->stopAndWait();
-    }
 }
 
 void EFXEditor::slotRestartTest()
@@ -668,17 +630,19 @@ void EFXEditor::slotAsymmetricRadioToggled(bool state)
         m_efx->setPropagationMode(EFX::Asymmetric);
 }
 
-void EFXEditor::slotMovementBusComboActivated(int index)
+void EFXEditor::slotFadeInSpinChanged(double seconds)
 {
-    Q_ASSERT(m_efx != NULL);
-    m_efx->setBus(index);
+    m_efx->setFadeIn(seconds);
 }
 
-void EFXEditor::slotFadeBusComboActivated(int index)
+void EFXEditor::slotFadeOutSpinChanged(double seconds)
 {
-    Q_ASSERT(m_efx != NULL);
-    Q_UNUSED(index);
-    //m_efx->setBus(index);
+    m_efx->setFadeOut(seconds);
+}
+
+void EFXEditor::slotPatternSpinChanged(double seconds)
+{
+    m_efx->setPatternSpeed(seconds);
 }
 
 /*****************************************************************************

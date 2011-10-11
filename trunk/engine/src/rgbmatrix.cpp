@@ -37,11 +37,6 @@
 #define KXMLQLCRGBMatrixMonoColor "MonoColor"
 #define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
 
-#define KXMLQLCRGBMatrixSpeed        "Speed"
-#define KXMLQLCRGBMatrixSpeedFadeIn  "FadeIn"
-#define KXMLQLCRGBMatrixSpeedFadeOut "FadeOut"
-#define KXMLQLCRGBMatrixSpeedPattern "Pattern"
-
 #define KPatternOutwardBox  "Outward Box"
 #define KPatternFullRows    "Full Rows"
 #define KPatternFullColumns "Full Columns"
@@ -356,11 +351,11 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         {
             /* Ignore */
         }
-        else if (tag.tagName() == KXMLQLCRGBMatrixSpeed)
+        else if (tag.tagName() == KXMLQLCFunctionSpeed)
         {
-            setFadeIn(tag.attribute(KXMLQLCRGBMatrixSpeedFadeIn).toDouble());
-            setFadeOut(tag.attribute(KXMLQLCRGBMatrixSpeedFadeOut).toDouble());
-            setPatternSpeed(tag.attribute(KXMLQLCRGBMatrixSpeedPattern).toDouble());
+            setFadeIn(tag.attribute(KXMLQLCFunctionSpeedFadeIn).toDouble());
+            setFadeOut(tag.attribute(KXMLQLCFunctionSpeedFadeOut).toDouble());
+            setPatternSpeed(tag.attribute(KXMLQLCFunctionSpeedPattern).toDouble());
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixPattern)
         {
@@ -412,10 +407,10 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionName, name());
 
     /* Speeds */
-    tag = doc->createElement(KXMLQLCRGBMatrixSpeed);
-    tag.setAttribute(KXMLQLCRGBMatrixSpeedFadeIn, QString::number(fadeIn()));
-    tag.setAttribute(KXMLQLCRGBMatrixSpeedFadeOut, QString::number(fadeOut()));
-    tag.setAttribute(KXMLQLCRGBMatrixSpeedPattern, QString::number(patternSpeed()));
+    tag = doc->createElement(KXMLQLCFunctionSpeed);
+    tag.setAttribute(KXMLQLCFunctionSpeedFadeIn, QString::number(fadeIn()));
+    tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOut()));
+    tag.setAttribute(KXMLQLCFunctionSpeedPattern, QString::number(patternSpeed()));
     root.appendChild(tag);
 
     /* Pattern */

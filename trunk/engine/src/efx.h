@@ -423,23 +423,32 @@ protected:
 public:
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
     bool loadXML(const QDomElement* root);
+    void postLoad();
 
 protected:
     /** Load an axis' contents from an XML document*/
     bool loadXMLAxis(const QDomElement* root);
 
     /*********************************************************************
-     * Bus
+     * Speed
      *********************************************************************/
 public:
-    /** Set the bus that adjusts EFX intensity fade speed */
-    void setFadeBus(quint32 bus);
+    void setFadeIn(qreal seconds);
+    qreal fadeIn() const;
 
-    /** Get the bus that adjusts EFX intensity fade speed */
-    quint32 fadeBusID() const;
+    void setFadeOut(qreal seconds);
+    qreal fadeOut() const;
+
+    void setPatternSpeed(qreal seconds);
+    qreal patternSpeed() const;
 
 private:
-    quint32 m_fadeBus;
+    qreal m_fadeIn;
+    qreal m_fadeOut;
+    qreal m_patternSpeed;
+
+    quint32 m_legacyFadeBus;
+    quint32 m_legacyHoldBus;
 
     /*********************************************************************
      * Running

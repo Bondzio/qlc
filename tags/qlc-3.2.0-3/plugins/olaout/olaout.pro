@@ -11,8 +11,10 @@ QTPLUGIN  =
 INCLUDEPATH += ../interfaces
 
 macx: {
-    CONFIG    += link_pkgconfig
-    PKGCONFIG += libola libolaserver
+    #CONFIG    += link_pkgconfig
+    #PKGCONFIG += libola libolaserver
+    INCLUDEPATH += /opt/local/include
+    LIBS      += -L/opt/local/lib -lolaserver -lola -lolacommon -lprotobuf
 } else {
     LIBS      += -L/usr/local/lib -lolaserver -lola -lolacommon -lprotobuf
 }

@@ -33,20 +33,24 @@ void MIDIProtocol_Test::macros()
     for (cmd = 0x00; cmd < 0x80; cmd++)
         QVERIFY(MIDI_IS_CMD(cmd) == false);
 
-    for (cmd = 0x80; cmd <= 0x0F; cmd += 0x10)
+    for (cmd = 0x80; cmd <= 0xE0; cmd += 0x10)
     {
         for (uchar ch = 0x00; ch <= 0xF; ch++)
         {
             uchar cmdch = cmd | ch;
+            QCOMPARE(MIDI_IS_CMD(cmdch), true);
             QCOMPARE(uchar(MIDI_CH(cmdch)), ch);
             QCOMPARE(uchar(MIDI_CMD(cmdch)), cmd);
-            QVERIFY(MIDI_IS_CMD(cmdch) == true);
         }
     }
 
+    for (cmd = 0xF0; cmd < 0xFE; cmd++)
+        QCOMPARE(MIDI_IS_SYSCOMMON(cmd), true);
+
     QCOMPARE(uchar(MIDI_CH(0xFF)), uchar(0x0F));
     QCOMPARE(uchar(MIDI_CMD(0xFF)), uchar(0xF0));
-    QVERIFY(MIDI_IS_CMD(0xFF) == true);
+    QCOMPARE(MIDI_IS_CMD(0xFF), true);
+    QCOMPARE(MIDI_IS_SYSCOMMON(0xFF), true);
 }
 
 void MIDIProtocol_Test::noteToInput()
@@ -161,6 +165,15 @@ void MIDIProtocol_Test::singleChannelCommandsToInput()
             QCOMPARE(val, uchar(MIDI2DMX(data1)));
         }
     }
+}
+
+void MIDIProtocol_Test::sysCommonToInput()
+{
+    quint32 ch = 0;
+    uchar val = 0;
+    QCOMPARE(midiToInput(MIDI_BEATC_CLOCK, 0x00, 0x00, 0x00, &ch, &val), true);
+    QCOMPARE(ch, quint32(CHANNEL_OFFSET_MBC));
+    QCOMPARE(val, uchar(127));
 }
 
 void MIDIProtocol_Test::ccToInput()

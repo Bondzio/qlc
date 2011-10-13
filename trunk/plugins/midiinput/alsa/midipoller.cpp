@@ -290,6 +290,10 @@ void MIDIPoller::readEvent(snd_seq_t* alsa)
         if (QLCMIDIProtocol::midiToInput(cmd, data1, data2, device->midiChannel(),
                                          &channel, &value) == true)
         {
+            if (channel == CHANNEL_OFFSET_MBC)
+                if (device->incrementMBCCount() == false)
+                    continue;
+
             MIDIInputEvent* event = new MIDIInputEvent(device, channel, value);
             QApplication::postEvent(parent(), event);
         }

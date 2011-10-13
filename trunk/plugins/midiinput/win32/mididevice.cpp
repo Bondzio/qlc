@@ -40,6 +40,7 @@ MIDIDevice::MIDIDevice(MIDIInput* parent, UINT id) : QObject(parent)
     m_feedBackHandle = NULL;
     m_isOK = false;
     m_midiChannel = 0;
+    m_mbcCount = 0;
 
     extractName();
     loadSettings();
@@ -109,6 +110,10 @@ static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg,
         if (QLCMIDIProtocol::midiToInput(cmd, data1, data2,
             uchar(self->midiChannel()), &channel, &value) == true)
         {
+            if (channel == CHANNEL_OFFSET_MBC)
+                if (self->incrementMBCCount() == false)
+                    continue;
+
             MIDIInputEvent* event = new MIDIInputEvent(self, channel, value);
             QApplication::postEvent(self, event);
         }
@@ -276,6 +281,23 @@ void MIDIDevice::extractName()
     {
         m_name += QString::fromWCharArray(inCaps.szPname);
         m_isOK = true;
+    }
+}
+
+/*****************************************************************************
+ * MIDI Beat Clock
+ *****************************************************************************/
+
+bool MIDIDevice::incrementMBCCount()
+{
+    if (++m_mbcCount >= 24)
+    {
+        m_mbcCount = 0;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

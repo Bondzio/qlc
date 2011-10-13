@@ -95,6 +95,19 @@ protected:
     uchar m_midiChannel;
 
     /*********************************************************************
+     * MIDI Beat Clock
+     *********************************************************************/
+public:
+    /**
+     * Increment MBC count and return true if a beat should be evented.
+     * This happens on every 24th tick.
+     */
+    bool incrementMBCCount();
+
+private:
+    int m_mbcCount;
+
+    /*********************************************************************
      * Input data
      *********************************************************************/
 signals:

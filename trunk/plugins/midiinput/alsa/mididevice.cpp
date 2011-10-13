@@ -35,6 +35,7 @@ MIDIDevice::MIDIDevice(MIDIInput* parent, const snd_seq_addr_t* address)
 {
     m_address = NULL;
     m_midiChannel = 0;
+    m_mbcCount = 0;
 
     setAddress(address);
     extractName();
@@ -151,6 +152,23 @@ void MIDIDevice::extractName()
         m_name = QString(snd_seq_port_info_get_name(portInfo));
     else
         m_name = QString("ERROR");
+}
+
+/*****************************************************************************
+ * MIDI Beat Clock
+ *****************************************************************************/
+
+bool MIDIDevice::incrementMBCCount()
+{
+    if (++m_mbcCount >= 24)
+    {
+        m_mbcCount = 0;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /*****************************************************************************

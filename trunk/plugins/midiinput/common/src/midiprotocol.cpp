@@ -36,6 +36,10 @@ bool QLCMIDIProtocol::midiToInput(uchar cmd, uchar data1, uchar data2,
     if (!MIDI_IS_CMD(cmd))
         return false;
 
+    /** Use a special handler function for system common messages */
+    if (MIDI_IS_SYSCOMMON(cmd))
+        return midiSysCommonToInput(cmd, data1, data2, channel, value);
+
     /* Check that the command came on the correct MIDI channel */
     if (midiChannel <= 0xF && MIDI_CH(cmd) != midiChannel)
         return false;
@@ -75,6 +79,24 @@ bool QLCMIDIProtocol::midiToInput(uchar cmd, uchar data1, uchar data2,
         case MIDI_PITCH_WHEEL:
             *channel = CHANNEL_OFFSET_PITCH_WHEEL;
             *value = MIDI2DMX(data2);
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+bool QLCMIDIProtocol::midiSysCommonToInput(uchar cmd, uchar data1, uchar data2,
+                                           quint32* channel, uchar* value)
+{
+    Q_UNUSED(data1);
+    Q_UNUSED(data2);
+
+    switch (cmd)
+    {
+        case MIDI_BEATC_CLOCK:
+            *channel = CHANNEL_OFFSET_MBC;
+            *value = 127;
             return true;
 
         default:
@@ -133,6 +155,10 @@ bool QLCMIDIProtocol::feedbackToMidi(quint32 channel, uchar value,
         *data1 = DMX2MIDI(value);
         *data2Valid = false;
     }
+    //else if (channel == MIDI_BEATC_CLOCK)
+    //{
+    //    Don't send feedback to MIDI clock
+    //}
     else
     {
         return false;

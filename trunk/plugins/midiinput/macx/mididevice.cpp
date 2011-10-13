@@ -178,6 +178,10 @@ static void MidiInProc(const MIDIPacketList* pktList, void* readProcRefCon,
                                              self->midiChannel(),
                                              &channel, &value) == true)
             {
+                if (channel == CHANNEL_OFFSET_MBC)
+                    if (self->incrementMBCCount() == false)
+                        continue;
+
                 // If message was parsed successfully, send an event downstream
                 MIDIInputEvent* ev = new MIDIInputEvent(self, channel, value);
                 QApplication::postEvent(self, ev);
@@ -326,6 +330,23 @@ QString MIDIDevice::infoText() const
     }
 
     return info;
+}
+
+/*****************************************************************************
+ * MIDI Beat Clock
+ *****************************************************************************/
+
+bool MIDIDevice::incrementMBCCount()
+{
+    if (++m_mbcCount >= 24)
+    {
+        m_mbcCount = 0;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /*****************************************************************************

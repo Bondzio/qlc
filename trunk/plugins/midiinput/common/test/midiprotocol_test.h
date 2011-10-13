@@ -39,6 +39,7 @@ private slots:
     void ccToInputAnyMidiChannel();
     void ccToInputWrongMidiChannel();
     void singleChannelCommandsToInput();
+    void sysCommonToInput();
 
     void inputToNote();
     void inputToControl();

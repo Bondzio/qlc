@@ -368,7 +368,7 @@ void FunctionManager::slotBusTriggered(QAction* action)
         function = m_doc->function(item->text(KColumnID).toUInt());
         Q_ASSERT(function != NULL);
 
-        function->setBus(bus);
+        //function->setBus(bus);
         updateFunctionItem(item, function);
     }
 }
@@ -632,7 +632,7 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
     item->setText(KColumnName, function->name());
     item->setIcon(KColumnName, functionIcon(function));
     item->setText(KColumnType, function->typeString());
-    item->setText(KColumnBus, Bus::instance()->idName(function->bus()));
+    //item->setText(KColumnBus, Bus::instance()->idName(function->bus()));
     item->setText(KColumnID, QString::number(function->id()));
 }
 

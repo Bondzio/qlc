@@ -30,10 +30,11 @@
 #include "fixture.h"
 #include "scene.h"
 #include "doc.h"
-#include "bus.h"
 
 ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
-                           quint32 holdBusId,
+                           qreal fadeInSpeed,
+                           qreal fadeOutSpeed,
+                           qreal patternSpeed,
                            Function::Direction direction,
                            Function::RunOrder runOrder,
                            qreal intensity,
@@ -42,7 +43,9 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
     : QObject(parent)
     , m_doc(doc)
     , m_steps(steps)
-    , m_holdBusId(holdBusId)
+    , m_fadeInSpeed(fadeInSpeed)
+    , m_fadeOutSpeed(fadeOutSpeed)
+    , m_patternSpeed(patternSpeed)
     , m_originalDirection(direction)
     , m_runOrder(runOrder)
 
@@ -142,7 +145,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
-    else if ((isAutoStep() && m_elapsed >= Bus::instance()->value(m_holdBusId))
+    else if ((isAutoStep() && m_elapsed >= quint32(m_patternSpeed * MasterTimer::frequency()))
              || m_next == true || m_previous == true)
     {
         // Next step
@@ -187,8 +190,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         if (scene == NULL)
             continue;
 
-        // Why the fsck isn't fc.bus() used below????
-        quint32 fadeTime = Bus::instance()->value(scene->bus());
+        quint32 fadeTime(m_fadeInSpeed * MasterTimer::frequency());
 
         FadeChannel& fc(it.next().value());
         if (fc.current() == fc.target() && fc.group(m_doc) != QLCChannel::Intensity)
@@ -207,17 +209,11 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
 
 void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
 {
-    quint32 bus = Bus::defaultFade();
     Q_UNUSED(universes);
 
     // Nothing to do
     if (m_steps.size() == 0)
         return;
-
-    int step = CLAMP(m_currentStep, 0, m_steps.size() - 1);
-    Function* function = m_steps.at(step);
-    if (function != NULL)
-        bus = function->bus();
 
     // Give to-be-zeroed channels to MasterTimer's GenericFader
     QMapIterator <quint32,FadeChannel> it(m_channelMap);
@@ -228,7 +224,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
         {
             ch.setStart(ch.current());
             ch.setTarget(0);
-            ch.setBus(bus); //! @todo: Set remaining time as the channel's zero-fade time
+            ch.setFixedTime(m_fadeOutSpeed * MasterTimer::frequency());
             ch.setReady(false);
             timer->fader()->add(ch);
         }
@@ -344,7 +340,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
         fc.setFixture(value.fxi);
         fc.setChannel(value.channel);
         fc.setTarget(value.value);
-        fc.setBus(scene->bus());
+        fc.setFixedTime(m_fadeInSpeed);
 
         quint32 addr = fc.address(m_doc);
 
@@ -384,6 +380,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
             // than just let it drop straight to zero.
             fc.setStart(fc.current());
             fc.setTarget(0);
+            fc.setFixedTime(m_fadeOutSpeed * MasterTimer::frequency());
         }
     }
 

@@ -154,8 +154,8 @@ void EFXEditor::initGeneralPage()
     connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
             this, SLOT(slotRestartTest()));
 
-    m_fadeInSpin->setValue(m_efx->fadeIn());
-    m_fadeOutSpin->setValue(m_efx->fadeOut());
+    m_fadeInSpin->setValue(m_efx->fadeInSpeed());
+    m_fadeOutSpin->setValue(m_efx->fadeOutSpeed());
     m_patternSpin->setValue(m_efx->patternSpeed());
 
     /* Set the EFX's name to the name field */
@@ -632,12 +632,12 @@ void EFXEditor::slotAsymmetricRadioToggled(bool state)
 
 void EFXEditor::slotFadeInSpinChanged(double seconds)
 {
-    m_efx->setFadeIn(seconds);
+    m_efx->setFadeInSpeed(seconds);
 }
 
 void EFXEditor::slotFadeOutSpinChanged(double seconds)
 {
-    m_efx->setFadeOut(seconds);
+    m_efx->setFadeOutSpeed(seconds);
 }
 
 void EFXEditor::slotPatternSpinChanged(double seconds)

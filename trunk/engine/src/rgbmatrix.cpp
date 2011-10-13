@@ -50,12 +50,10 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
     , m_monoColor(Qt::red)
-    , m_fadeIn(0.0)
-    , m_fadeOut(0.25)
-    , m_patternSpeed(2.00)
     , m_fader(NULL)
 {
     setName(tr("New RGB Matrix"));
+    setPatternSpeed(5);
 }
 
 RGBMatrix::~RGBMatrix()
@@ -89,9 +87,6 @@ bool RGBMatrix::copyFrom(const Function* function)
     m_fixtureGroup = mtx->m_fixtureGroup;
     m_pattern = mtx->m_pattern;
     m_monoColor = mtx->m_monoColor;
-    m_fadeIn = mtx->m_fadeIn;
-    m_fadeOut = mtx->m_fadeOut;
-    m_patternSpeed = mtx->m_patternSpeed;
 
     return Function::copyFrom(function);
 }
@@ -285,40 +280,6 @@ QColor RGBMatrix::monoColor() const
 }
 
 /****************************************************************************
- * Speed
- ****************************************************************************/
-
-void RGBMatrix::setFadeIn(qreal seconds)
-{
-    m_fadeIn = seconds;
-}
-
-qreal RGBMatrix::fadeIn() const
-{
-    return m_fadeIn;
-}
-
-void RGBMatrix::setFadeOut(qreal seconds)
-{
-    m_fadeOut = seconds;
-}
-
-qreal RGBMatrix::fadeOut() const
-{
-    return m_fadeOut;
-}
-
-void RGBMatrix::setPatternSpeed(qreal seconds)
-{
-    m_patternSpeed = seconds;
-}
-
-qreal RGBMatrix::patternSpeed() const
-{
-    return m_patternSpeed;
-}
-
-/****************************************************************************
  * Load & Save
  ****************************************************************************/
 
@@ -353,9 +314,7 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionSpeed)
         {
-            setFadeIn(tag.attribute(KXMLQLCFunctionSpeedFadeIn).toDouble());
-            setFadeOut(tag.attribute(KXMLQLCFunctionSpeedFadeOut).toDouble());
-            setPatternSpeed(tag.attribute(KXMLQLCFunctionSpeedPattern).toDouble());
+            loadXMLSpeed(tag);
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixPattern)
         {
@@ -407,11 +366,7 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionName, name());
 
     /* Speeds */
-    tag = doc->createElement(KXMLQLCFunctionSpeed);
-    tag.setAttribute(KXMLQLCFunctionSpeedFadeIn, QString::number(fadeIn()));
-    tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOut()));
-    tag.setAttribute(KXMLQLCFunctionSpeedPattern, QString::number(patternSpeed()));
-    root.appendChild(tag);
+    saveXMLSpeed(doc, &root);
 
     /* Pattern */
     tag = doc->createElement(KXMLQLCRGBMatrixPattern);
@@ -549,7 +504,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
     m_fader->write(universes);
 
-    if (elapsed() >= busValue())
+    if (elapsed() >= (patternSpeed() / MasterTimer::frequency()))
     {
         if (runOrder() == Function::PingPong)
         {
@@ -599,7 +554,7 @@ void RGBMatrix::insertStartValues(FadeChannel& fc) const
     }
 
     if (fc.target() == 0)
-        fc.setFixedTime(fadeOut() * MasterTimer::frequency());
+        fc.setFixedTime(fadeOutSpeed() * MasterTimer::frequency());
     else
-        fc.setFixedTime(fadeIn() * MasterTimer::frequency());
+        fc.setFixedTime(fadeInSpeed() * MasterTimer::frequency());
 }

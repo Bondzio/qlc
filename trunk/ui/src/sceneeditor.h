@@ -53,7 +53,6 @@ private:
 
 protected:
     void init();
-    void fillBusCombo();
     void setSceneValue(const SceneValue& scv);
 
 protected:
@@ -63,14 +62,8 @@ protected:
      * Common
      *********************************************************************/
 protected slots:
-    void slotNameEdited(const QString& name);
-    void slotBusComboActivated(int index);
-
     void accept();
     void slotTabChanged(int tab);
-
-    void slotEnableAll();
-    void slotDisableAll();
 
     void slotEnableCurrent();
     void slotDisableCurrent();
@@ -103,8 +96,15 @@ protected:
     void removeFixtureItem(Fixture* fixture);
 
 protected slots:
+    void slotNameEdited(const QString& name);
     void slotAddFixtureClicked();
     void slotRemoveFixtureClicked();
+
+    void slotEnableAll();
+    void slotDisableAll();
+
+    void slotFadeInSpinChanged(double seconds);
+    void slotFadeOutSpinChanged(double seconds);
 
     /*********************************************************************
      * Fixture tabs

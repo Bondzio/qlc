@@ -66,9 +66,7 @@ EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
 
     m_fader = NULL;
 
-    m_fadeIn = 0;
-    m_fadeOut = 0;
-    m_patternSpeed = 20;
+    setPatternSpeed(20);
 
     m_legacyHoldBus = Bus::invalid();
     m_legacyFadeBus = Bus::invalid();
@@ -129,10 +127,6 @@ bool EFX::copyFrom(const Function* function)
     m_yPhase = efx->m_yPhase;
 
     m_algorithm = efx->m_algorithm;
-
-    m_fadeIn = efx->m_fadeIn;
-    m_fadeOut = efx->m_fadeOut;
-    m_patternSpeed = efx->m_patternSpeed;
 
     return Function::copyFrom(function);
 }
@@ -577,11 +571,7 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag.appendChild(text);
 
     /* Speeds */
-    tag = doc->createElement(KXMLQLCFunctionSpeed);
-    tag.setAttribute(KXMLQLCFunctionSpeedFadeIn, QString::number(fadeIn()));
-    tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOut()));
-    tag.setAttribute(KXMLQLCFunctionSpeedPattern, QString::number(patternSpeed()));
-    root.appendChild(tag);
+    saveXMLSpeed(doc, &root);
 
     /* Direction */
     tag = doc->createElement(KXMLQLCFunctionDirection);
@@ -718,9 +708,7 @@ bool EFX::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionSpeed)
         {
-            setFadeIn(tag.attribute(KXMLQLCFunctionSpeedFadeIn).toDouble());
-            setFadeOut(tag.attribute(KXMLQLCFunctionSpeedFadeOut).toDouble());
-            setPatternSpeed(tag.attribute(KXMLQLCFunctionSpeedPattern).toDouble());
+            loadXMLSpeed(tag);
         }
         else if (tag.tagName() == KXMLQLCEFXFixture)
         {
@@ -860,8 +848,8 @@ void EFX::postLoad()
     if (m_legacyFadeBus != Bus::invalid())
     {
         quint32 value = Bus::instance()->value(m_legacyFadeBus);
-        setFadeIn(value / MasterTimer::frequency());
-        setFadeOut(value / MasterTimer::frequency());
+        setFadeInSpeed(value / MasterTimer::frequency());
+        setFadeOutSpeed(value / MasterTimer::frequency());
     }
 
     if (m_legacyHoldBus != Bus::invalid())
@@ -869,40 +857,6 @@ void EFX::postLoad()
         quint32 value = Bus::instance()->value(m_legacyHoldBus);
         setPatternSpeed(value / MasterTimer::frequency());
     }
-}
-
-/****************************************************************************
- * Speed
- ****************************************************************************/
-
-void EFX::setFadeIn(qreal seconds)
-{
-    m_fadeIn = seconds;
-}
-
-qreal EFX::fadeIn() const
-{
-    return m_fadeIn;
-}
-
-void EFX::setFadeOut(qreal seconds)
-{
-    m_fadeOut = seconds;
-}
-
-qreal EFX::fadeOut() const
-{
-    return m_fadeOut;
-}
-
-void EFX::setPatternSpeed(qreal seconds)
-{
-    m_patternSpeed = seconds;
-}
-
-qreal EFX::patternSpeed() const
-{
-    return m_patternSpeed;
 }
 
 /*****************************************************************************

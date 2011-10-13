@@ -142,7 +142,7 @@ void PaletteGenerator::createGroupScenes(const Fixture* fxi,
             }
 
             scene->setValue(fxi->id(), ch, cap->middle());
-            scene->setBus(Bus::defaultPalette());
+            //scene->setBus(Bus::defaultPalette());
         }
     }
 }

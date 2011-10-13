@@ -276,7 +276,8 @@ void VCCueList::createRunner(int startIndex)
             cues << function;
     }
 
-    m_runner = new ChaserRunner(m_doc, cues, Bus::defaultHold(),
+    //! @todo speeds
+    m_runner = new ChaserRunner(m_doc, cues, 0, 0, 0,
                                 Function::Forward, Function::Loop, 1.0, this, startIndex);
     m_runner->setAutoStep(false);
     connect(m_runner, SIGNAL(currentStepChanged(int)),

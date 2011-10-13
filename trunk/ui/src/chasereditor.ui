@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>437</width>
-    <height>535</height>
+    <width>527</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="3">
+   <item row="0" column="1" colspan="2">
     <widget class="QLineEdit" name="m_nameEdit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -112,6 +112,13 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="3">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="3">
     <widget class="QToolButton" name="m_raise">
      <property name="toolTip">
@@ -143,6 +150,64 @@
      <property name="icon">
       <iconset resource="qlcui.qrc">
        <normaloff>:/down.png</normaloff>:/down.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>26</width>
+       <height>26</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="3">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3">
+    <widget class="QToolButton" name="m_cutButton">
+     <property name="text">
+      <string notr="true">...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="qlcui.qrc">
+       <normaloff>:/editcut.png</normaloff>:/editcut.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>26</width>
+       <height>26</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="3">
+    <widget class="QToolButton" name="m_copyButton">
+     <property name="text">
+      <string notr="true">...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="qlcui.qrc">
+       <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>26</width>
+       <height>26</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="3">
+    <widget class="QToolButton" name="m_pasteButton">
+     <property name="text">
+      <string notr="true">...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="qlcui.qrc">
+       <normaloff>:/editpaste.png</normaloff>:/editpaste.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -237,40 +302,9 @@
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="11" column="2" colspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Speed bus</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QComboBox" name="m_busCombo"/>
-      </item>
-      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -283,6 +317,78 @@
      </layout>
     </widget>
    </item>
+   <item row="11" column="2">
+    <widget class="QGroupBox" name="m_busGroup">
+     <property name="title">
+      <string>Speed</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Fade In</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="m_fadeInSpin">
+        <property name="suffix">
+         <string>s</string>
+        </property>
+        <property name="maximum">
+         <double>999999.989999999990687</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Fade Out</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="m_fadeOutSpin">
+        <property name="suffix">
+         <string>s</string>
+        </property>
+        <property name="maximum">
+         <double>999999.989999999990687</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Step</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="m_patternSpin">
+        <property name="suffix">
+         <string>s</string>
+        </property>
+        <property name="maximum">
+         <double>999999.989999999990687</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="12" column="0" colspan="4">
     <widget class="QDialogButtonBox" name="m_buttonBox">
      <property name="orientation">
@@ -290,71 +396,6 @@
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="3">
-    <widget class="QToolButton" name="m_cutButton">
-     <property name="text">
-      <string notr="true">...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="qlcui.qrc">
-       <normaloff>:/editcut.png</normaloff>:/editcut.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>26</width>
-       <height>26</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="3">
-    <widget class="QToolButton" name="m_copyButton">
-     <property name="text">
-      <string notr="true">...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="qlcui.qrc">
-       <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>26</width>
-       <height>26</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="3">
-    <widget class="QToolButton" name="m_pasteButton">
-     <property name="text">
-      <string notr="true">...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="qlcui.qrc">
-       <normaloff>:/editpaste.png</normaloff>:/editpaste.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>26</width>
-       <height>26</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="3">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="3">
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>

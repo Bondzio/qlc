@@ -52,6 +52,9 @@ public:
     Chaser(Doc* doc);
     virtual ~Chaser();
 
+private:
+    quint32 m_legacyHoldBus;
+
     /*********************************************************************
      * Copying
      *********************************************************************/
@@ -74,8 +77,9 @@ public:
      * direct member).
      *
      * @param fid The ID of the function to add
+     * @param index Insertion point. -1 to append.
      */
-    bool addStep(quint32 fid);
+    bool addStep(quint32 fid, int index = -1);
 
     /**
      * Remove a function from the given step index. If the given index is

@@ -149,10 +149,11 @@ void SceneEditor::init()
             this, SLOT(slotNameEdited(const QString&)));
     slotNameEdited(m_scene->name());
 
-    /* Bus */
-    connect(m_busCombo, SIGNAL(activated(int)),
-            this, SLOT(slotBusComboActivated(int)));
-    fillBusCombo();
+    /* Speeds */
+    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeInSpinChanged(double)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotFadeOutSpinChanged(double)));
 
     QListIterator <SceneValue> it(m_scene->values());
     while (it.hasNext() == true)
@@ -173,13 +174,6 @@ void SceneEditor::init()
     }
 }
 
-void SceneEditor::fillBusCombo()
-{
-    m_busCombo->clear();
-    m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_scene->bus());
-}
-
 void SceneEditor::setSceneValue(const SceneValue& scv)
 {
     FixtureConsole* fc;
@@ -197,17 +191,6 @@ void SceneEditor::setSceneValue(const SceneValue& scv)
 /*****************************************************************************
  * Common
  *****************************************************************************/
-
-void SceneEditor::slotNameEdited(const QString& name)
-{
-    setWindowTitle(tr("Scene - %1").arg(name));
-}
-
-void SceneEditor::slotBusComboActivated(int index)
-{
-    Q_ASSERT(m_scene != NULL);
-    m_scene->setBus(index);
-}
 
 void SceneEditor::accept()
 {
@@ -267,26 +250,6 @@ void SceneEditor::slotTabChanged(int tab)
         FixtureConsole* fc = consoleTab(m_currentTab);
         Q_ASSERT(fc != NULL);
         fc->enableExternalInput(true);
-    }
-}
-
-void SceneEditor::slotEnableAll()
-{
-    for (int i = KTabFirstFixture; i < m_tab->count(); i++)
-    {
-        FixtureConsole* fc = consoleTab(i);
-        if (fc != NULL)
-            fc->enableAllChannels(true);
-    }
-}
-
-void SceneEditor::slotDisableAll()
-{
-    for (int i = KTabFirstFixture; i < m_tab->count(); i++)
-    {
-        FixtureConsole* fc = consoleTab(i);
-        if (fc != NULL)
-            fc->enableAllChannels(false);
     }
 }
 
@@ -532,6 +495,11 @@ void SceneEditor::removeFixtureItem(Fixture* fixture)
     delete item;
 }
 
+void SceneEditor::slotNameEdited(const QString& name)
+{
+    setWindowTitle(tr("Scene - %1").arg(name));
+}
+
 void SceneEditor::slotAddFixtureClicked()
 {
     /* Put all fixtures already present into a list of fixtures that
@@ -585,6 +553,36 @@ void SceneEditor::slotRemoveFixtureClicked()
                 m_scene->unsetValue(fixture->id(), i);
         }
     }
+}
+
+void SceneEditor::slotEnableAll()
+{
+    for (int i = KTabFirstFixture; i < m_tab->count(); i++)
+    {
+        FixtureConsole* fc = consoleTab(i);
+        if (fc != NULL)
+            fc->enableAllChannels(true);
+    }
+}
+
+void SceneEditor::slotDisableAll()
+{
+    for (int i = KTabFirstFixture; i < m_tab->count(); i++)
+    {
+        FixtureConsole* fc = consoleTab(i);
+        if (fc != NULL)
+            fc->enableAllChannels(false);
+    }
+}
+
+void SceneEditor::slotFadeInSpinChanged(double seconds)
+{
+    m_scene->setFadeInSpeed(seconds);
+}
+
+void SceneEditor::slotFadeOutSpinChanged(double seconds)
+{
+    m_scene->setFadeOutSpeed(seconds);
 }
 
 /*****************************************************************************

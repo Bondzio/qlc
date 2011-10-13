@@ -35,7 +35,6 @@ class UniverseArray;
 class GenericFader;
 class MasterTimer;
 class Function;
-class Bus;
 class Doc;
 
 #define KXMLQLCFunction "Function"
@@ -276,28 +275,38 @@ private:
     Direction m_direction;
 
     /*********************************************************************
-     * Bus
+     * Speed
      *********************************************************************/
 public:
-    /**
-     * Set the function's speed bus
-     *
-     * @param id The ID of the bus
-     */
-    void setBus(quint32 id);
+    /** Set the fade in time in seconds */
+    void setFadeInSpeed(qreal seconds);
 
-    /**
-     * Get the bus used for setting the speed of this function
-     */
-    quint32 bus() const;
+    /** Get the fade in time in seconds */
+    qreal fadeInSpeed() const;
 
-    /**
-     * Get the current value of Function::bus()
-     */
-    quint32 busValue() const;
+    /** Set the fade out time in seconds */
+    void setFadeOutSpeed(qreal seconds);
+
+    /** Get the fade out time in seconds */
+    qreal fadeOutSpeed() const;
+
+    /** Set the pattern time in seconds */
+    void setPatternSpeed(qreal seconds);
+
+    /** Get the pattern time in seconds */
+    qreal patternSpeed() const;
+
+protected:
+    /** Load the contents of a speed node */
+    bool loadXMLSpeed(const QDomElement& speedRoot);
+
+    /** Save function's speed values under the given $root element in $doc */
+    void saveXMLSpeed(QDomDocument* doc, QDomElement* root) const;
 
 private:
-    quint32 m_bus;
+    qreal m_fadeInSpeed;
+    qreal m_fadeOutSpeed;
+    qreal m_patternSpeed;
 
     /*********************************************************************
      * Fixtures

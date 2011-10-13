@@ -37,9 +37,10 @@ class ChaserRunner : public QObject
     Q_OBJECT
 
 public:
-    ChaserRunner(Doc* doc, QList <Function*> steps, quint32 holdBusId,
-                 Function::Direction direction, Function::RunOrder runOrder,
-                 qreal intensity = 1.0, QObject* parent = NULL, int startIndex = -1);
+    ChaserRunner(Doc* doc, QList <Function*> steps, qreal fadeInSpeed, qreal fadeOutSpeed,
+                 qreal patternSpeed, Function::Direction direction,
+                 Function::RunOrder runOrder, qreal intensity = 1.0, QObject* parent = NULL,
+                 int startIndex = -1);
     ~ChaserRunner();
 
     /**
@@ -155,7 +156,9 @@ public:
 private:
     const Doc* m_doc;
     const QList <Function*> m_steps; //! List of steps to go thru
-    const quint32 m_holdBusId;
+    const qreal m_fadeInSpeed;
+    const qreal m_fadeOutSpeed;
+    const qreal m_patternSpeed;
     const Function::Direction m_originalDirection; //! Set during constructor
     const Function::RunOrder m_runOrder;
 

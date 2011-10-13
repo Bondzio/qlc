@@ -109,24 +109,6 @@ private:
     QColor m_monoColor;
 
     /************************************************************************
-     * Speed
-     ************************************************************************/
-public:
-    void setFadeIn(qreal seconds);
-    qreal fadeIn() const;
-
-    void setFadeOut(qreal seconds);
-    qreal fadeOut() const;
-
-    void setPatternSpeed(qreal seconds);
-    qreal patternSpeed() const;
-
-private:
-    qreal m_fadeIn;
-    qreal m_fadeOut;
-    qreal m_patternSpeed;
-
-    /************************************************************************
      * Load & Save
      ************************************************************************/
 public:

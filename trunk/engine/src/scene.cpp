@@ -40,9 +40,9 @@
  *****************************************************************************/
 
 Scene::Scene(Doc* doc) : Function(doc, Function::Scene)
+    , m_legacyFadeBus(Bus::defaultFade())
 {
     setName(tr("New Scene"));
-    setBus(Bus::defaultFade());
 }
 
 Scene::~Scene()
@@ -165,13 +165,8 @@ bool Scene::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionType, Function::typeToString(type()));
     root.setAttribute(KXMLQLCFunctionName, name());
 
-    /* Speed bus */
-    tag = doc->createElement(KXMLQLCBus);
-    root.appendChild(tag);
-    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    str.setNum(bus());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
+    /* Speed */
+    saveXMLSpeed(doc, &root);
 
     /* Scene contents */
     QListIterator <SceneValue> it(m_values);
@@ -210,8 +205,11 @@ bool Scene::loadXML(const QDomElement* root)
 
         if (tag.tagName() == KXMLQLCBus)
         {
-            /* Bus */
-            setBus(tag.text().toUInt());
+            m_legacyFadeBus = tag.text().toUInt();
+        }
+        else if (tag.tagName() == KXMLQLCFunctionSpeed)
+        {
+            loadXMLSpeed(tag);
         }
         else if (tag.tagName() == KXMLQLCFunctionValue)
         {
@@ -233,6 +231,14 @@ bool Scene::loadXML(const QDomElement* root)
 
 void Scene::postLoad()
 {
+    // Map legacy bus speed to fixed speed values
+    if (m_legacyFadeBus != Bus::invalid())
+    {
+        quint32 value = Bus::instance()->value(m_legacyFadeBus);
+        setFadeInSpeed(value / MasterTimer::frequency());
+        setFadeOutSpeed(value / MasterTimer::frequency());
+    }
+
     // Remove such fixtures and channels that don't exist
     QMutableListIterator <SceneValue> it(m_values);
     while (it.hasNext() == true)
@@ -342,7 +348,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     }
 
     // Grab current fade bus value
-    quint32 fadeTime = Bus::instance()->value(bus());
+    quint32 fadeTime = quint32(fadeInSpeed() * MasterTimer::frequency());
 
     while (it.hasNext() == true)
     {
@@ -400,7 +406,7 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
         {
             fc.setTarget(0);
             fc.setStart(fc.current());
-            fc.setBus(bus());
+            fc.setFixedTime(fadeOutSpeed() * MasterTimer::frequency());
             fc.setElapsed(0);
             fc.setReady(false);
             timer->fader()->add(fc);

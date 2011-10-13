@@ -52,10 +52,8 @@ protected:
 protected slots:
     void accept();
 
-    /** Name has been edited */
     void slotNameEdited(const QString& text);
 
-    /** Add a step */
     void slotAddClicked();
     void slotRemoveClicked();
     void slotRaiseClicked();
@@ -65,7 +63,19 @@ protected slots:
     void slotCopyClicked();
     void slotPasteClicked();
 
+    void slotLoopClicked();
+    void slotSingleShotClicked();
+    void slotPingPongClicked();
+
+    void slotForwardClicked();
+    void slotBackwardClicked();
+
+    void slotFadeInSpinChanged(double seconds);
+    void slotFadeOutSpinChanged(double seconds);
+    void slotPatternSpinChanged(double seconds);
+
 protected:
+    Chaser* m_original;
     Chaser* m_chaser;
     QList <quint32> m_clipboard;
 

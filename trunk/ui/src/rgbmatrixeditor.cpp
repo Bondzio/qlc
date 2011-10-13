@@ -134,8 +134,8 @@ void RGBMatrixEditor::init()
     fillPatternCombo();
     fillFixtureGroupCombo();
 
-    m_fadeInSpin->setValue(m_mtx->fadeIn());
-    m_fadeOutSpin->setValue(m_mtx->fadeOut());
+    m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
+    m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
     m_patternSpin->setValue(m_mtx->patternSpeed());
 
     QPixmap pm(100, 26);
@@ -319,12 +319,12 @@ void RGBMatrixEditor::slotBackwardClicked()
 
 void RGBMatrixEditor::slotFadeInSpinChanged(double seconds)
 {
-    m_mtx->setFadeIn(seconds);
+    m_mtx->setFadeInSpeed(seconds);
 }
 
 void RGBMatrixEditor::slotFadeOutSpinChanged(double seconds)
 {
-    m_mtx->setFadeOut(seconds);
+    m_mtx->setFadeOutSpeed(seconds);
 }
 
 void RGBMatrixEditor::slotPatternSpinChanged(double seconds)

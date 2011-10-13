@@ -34,7 +34,6 @@
 #include "script.h"
 #include "scene.h"
 #include "efx.h"
-#include "bus.h"
 #include "doc.h"
 
 const QString KSceneString      (      "Scene" );
@@ -62,7 +61,9 @@ Function::Function(Doc* doc, Type t)
     , m_type(t)
     , m_runOrder(Loop)
     , m_direction(Forward)
-    , m_bus(Bus::defaultFade())
+    , m_fadeInSpeed(0)
+    , m_fadeOutSpeed(0)
+    , m_patternSpeed(0)
     , m_flashing(false)
     , m_initiatedByOtherFunction(false)
     , m_elapsed(0)
@@ -94,7 +95,9 @@ bool Function::copyFrom(const Function* function)
     m_name = function->name();
     m_runOrder = function->runOrder();
     m_direction = function->direction();
-    m_bus = function->bus();
+    m_fadeInSpeed = function->fadeInSpeed();
+    m_fadeOutSpeed = function->fadeOutSpeed();
+    m_patternSpeed = function->patternSpeed();
 
     emit changed(m_id);
 
@@ -279,27 +282,64 @@ Function::Direction Function::stringToDirection(const QString& str)
         return Forward;
 }
 
-/*****************************************************************************
- * Bus
- *****************************************************************************/
+/****************************************************************************
+ * Speed
+ ****************************************************************************/
 
-void Function::setBus(quint32 id)
+void Function::setFadeInSpeed(qreal seconds)
 {
-    if (id < Bus::count() && type() != Collection)
-    {
-        m_bus = id;
-        emit changed(m_id);
-    }
+    m_fadeInSpeed = seconds;
+    emit changed(m_id);
 }
 
-quint32 Function::bus() const
+qreal Function::fadeInSpeed() const
 {
-    return m_bus;
+    return m_fadeInSpeed;
 }
 
-quint32 Function::busValue() const
+void Function::setFadeOutSpeed(qreal seconds)
 {
-    return Bus::instance()->value(bus());
+    m_fadeOutSpeed = seconds;
+    emit changed(m_id);
+}
+
+qreal Function::fadeOutSpeed() const
+{
+    return m_fadeOutSpeed;
+}
+
+void Function::setPatternSpeed(qreal seconds)
+{
+    m_patternSpeed = seconds;
+    emit changed(m_id);
+}
+
+qreal Function::patternSpeed() const
+{
+    return m_patternSpeed;
+}
+
+bool Function::loadXMLSpeed(const QDomElement& speedRoot)
+{
+    if (speedRoot.tagName() != KXMLQLCFunctionSpeed)
+        return false;
+
+    m_fadeInSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeIn).toDouble();
+    m_fadeOutSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeOut).toDouble();
+    m_patternSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedPattern).toDouble();
+
+    return true;
+}
+
+void Function::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
+{
+    QDomElement tag;
+
+    tag = doc->createElement(KXMLQLCFunctionSpeed);
+    tag.setAttribute(KXMLQLCFunctionSpeedFadeIn, QString::number(fadeInSpeed()));
+    tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOutSpeed()));
+    tag.setAttribute(KXMLQLCFunctionSpeedPattern, QString::number(patternSpeed()));
+    root->appendChild(tag);
 }
 
 /*****************************************************************************

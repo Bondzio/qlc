@@ -159,8 +159,11 @@ bool Script::loadXML(const QDomElement* root)
 
         if (tag.tagName() == KXMLQLCBus)
         {
-            /* Bus */
-            setBus(tag.text().toUInt());
+            /* Ignore */
+        }
+        else if (tag.tagName() == KXMLQLCFunctionSpeed)
+        {
+            loadXMLSpeed(tag);
         }
         else if (tag.tagName() == KXMLQLCFunctionDirection)
         {
@@ -204,12 +207,8 @@ bool Script::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     root.setAttribute(KXMLQLCFunctionType, Function::typeToString(type()));
     root.setAttribute(KXMLQLCFunctionName, name());
 
-    /* Speed bus */
-    tag = doc->createElement(KXMLQLCBus);
-    root.appendChild(tag);
-    tag.setAttribute(KXMLQLCBusRole, KXMLQLCBusFade);
-    text = doc->createTextNode(QString::number(bus()));
-    tag.appendChild(text);
+    /* Speed */
+    saveXMLSpeed(doc, &root);
 
     /* Direction */
     tag = doc->createElement(KXMLQLCFunctionDirection);

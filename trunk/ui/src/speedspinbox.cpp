@@ -21,11 +21,11 @@
 
 #include <QApplication>
 #include <QPalette>
+
 #include "speedspinbox.h"
 #include "mastertimer.h"
-#include "chaserstep.h"
 
-#define SINGLESTEP (MasterTimer::tick())
+#define SINGLESTEP int(MasterTimer::tick())
 #define DEFAULT (0 - SINGLESTEP)
 #define INFINITE (DEFAULT - SINGLESTEP)
 

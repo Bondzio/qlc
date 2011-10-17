@@ -25,6 +25,7 @@
 #include <QList>
 #include <QtXml>
 
+#include "genericfader.h"
 #include "fadechannel.h"
 #include "scenevalue.h"
 #include "dmxsource.h"
@@ -175,8 +176,8 @@ public:
                              QLCChannel::Group grp = QLCChannel::NoGroup,
                              qreal percentage = 1.0);
 
-protected:
-    QList <FadeChannel> m_armedChannels;
+private:
+    GenericFader* m_fader;
 };
 
 #endif

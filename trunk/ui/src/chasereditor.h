@@ -31,6 +31,7 @@ class Function;
 class InputMap;
 class OutputMap;
 class MasterTimer;
+class SpeedSpinBox;
 class QTreeWidgetItem;
 
 class ChaserEditor : public QDialog, public Ui_ChaserEditor
@@ -45,11 +46,11 @@ public:
 private:
     Doc* m_doc;
 
-protected:
+private:
     void updateFunctionItem(QTreeWidgetItem* item, const Function* function);
     void updateStepNumbers();
 
-protected slots:
+private slots:
     void accept();
 
     void slotNameEdited(const QString& text);
@@ -70,11 +71,11 @@ protected slots:
     void slotForwardClicked();
     void slotBackwardClicked();
 
-    void slotFadeInSpinChanged(double seconds);
-    void slotFadeOutSpinChanged(double seconds);
-    void slotPatternSpinChanged(double seconds);
+    void slotFadeInSpinChanged(int ms);
+    void slotFadeOutSpinChanged(int ms);
+    void slotDurationSpinChanged(int ms);
 
-protected:
+private:
     Chaser* m_original;
     Chaser* m_chaser;
     QList <quint32> m_clipboard;
@@ -82,6 +83,10 @@ protected:
     QAction* m_cutAction;
     QAction* m_copyAction;
     QAction* m_pasteAction;
+
+    SpeedSpinBox* m_fadeInSpin;
+    SpeedSpinBox* m_fadeOutSpin;
+    SpeedSpinBox* m_durationSpin;
 };
 
 #endif

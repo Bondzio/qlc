@@ -32,9 +32,9 @@
 #include "doc.h"
 
 ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
-                           qreal fadeInSpeed,
-                           qreal fadeOutSpeed,
-                           qreal patternSpeed,
+                           uint fadeInSpeed,
+                           uint fadeOutSpeed,
+                           uint duration,
                            Function::Direction direction,
                            Function::RunOrder runOrder,
                            qreal intensity,
@@ -45,7 +45,7 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
     , m_steps(steps)
     , m_fadeInSpeed(fadeInSpeed)
     , m_fadeOutSpeed(fadeOutSpeed)
-    , m_patternSpeed(patternSpeed)
+    , m_duration(duration)
     , m_originalDirection(direction)
     , m_runOrder(runOrder)
 
@@ -134,18 +134,18 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         // No need to do roundcheck here, since manually-set steps are
         // always within m_steps limits.
 
-        m_elapsed = 1;
+        m_elapsed = MasterTimer::tick();
         handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
     else if (m_elapsed == 0)
     {
         // First step
-        m_elapsed = 1;
+        m_elapsed = MasterTimer::tick();
         handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
-    else if ((isAutoStep() && m_elapsed >= quint32(m_patternSpeed * MasterTimer::frequency()))
+    else if ((isAutoStep() && m_elapsed >= m_duration)
              || m_next == true || m_previous == true)
     {
         // Next step
@@ -169,7 +169,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         if (roundCheck() == false)
             return false;
 
-        m_elapsed = 1;
+        m_elapsed = MasterTimer::tick();
         m_next = false;
         m_previous = false;
 
@@ -180,7 +180,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
     {
         // Current step. UINT_MAX is the maximum hold time.
         if (m_elapsed < UINT_MAX)
-            m_elapsed++;
+            m_elapsed += MasterTimer::tick();
     }
 
     QMutableMapIterator <quint32,FadeChannel> it(m_channelMap);
@@ -190,8 +190,6 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         if (scene == NULL)
             continue;
 
-        quint32 fadeTime(m_fadeInSpeed * MasterTimer::frequency());
-
         FadeChannel& fc(it.next().value());
         if (fc.current() == fc.target() && fc.group(m_doc) != QLCChannel::Intensity)
         {
@@ -199,7 +197,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         }
         else
         {
-            uchar value = uchar(floor((qreal(fc.calculateCurrent(fadeTime, m_elapsed)) * m_intensity) + 0.5));
+            uchar value = uchar(floor((qreal(fc.calculateCurrent(m_fadeInSpeed, m_elapsed)) * m_intensity) + 0.5));
             universes->write(fc.address(m_doc), value, fc.group(m_doc));
         }
     }
@@ -224,7 +222,7 @@ void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
         {
             ch.setStart(ch.current());
             ch.setTarget(0);
-            ch.setFixedTime(m_fadeOutSpeed * MasterTimer::frequency());
+            ch.setFadeTime(m_fadeOutSpeed);
             ch.setReady(false);
             timer->fader()->add(ch);
         }
@@ -340,7 +338,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
         fc.setFixture(value.fxi);
         fc.setChannel(value.channel);
         fc.setTarget(value.value);
-        fc.setFixedTime(m_fadeInSpeed);
+        fc.setFadeTime(m_fadeInSpeed);
 
         quint32 addr = fc.address(m_doc);
 
@@ -380,7 +378,7 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
             // than just let it drop straight to zero.
             fc.setStart(fc.current());
             fc.setTarget(0);
-            fc.setFixedTime(m_fadeOutSpeed * MasterTimer::frequency());
+            fc.setFadeTime(m_fadeOutSpeed);
         }
     }
 

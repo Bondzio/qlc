@@ -11,6 +11,7 @@ QT      += core xml
 QTPLUGIN =
 
 INCLUDEPATH += ../../plugins/interfaces
+INCLUDEPATH += ../../libfixmath
 
 #############################################################################
 # Installation

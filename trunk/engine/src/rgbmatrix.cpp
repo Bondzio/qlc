@@ -53,7 +53,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_fader(NULL)
 {
     setName(tr("New RGB Matrix"));
-    setPatternSpeed(5);
+    setDuration(5 * 1000);
 }
 
 RGBMatrix::~RGBMatrix()
@@ -427,8 +427,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     if (grp == NULL)
         return;
 
-    RGBMap map = colorMap(elapsed() % quint32(patternSpeed() * MasterTimer::frequency()),
-                          quint32(MasterTimer::frequency() * patternSpeed()));
+    RGBMap map = colorMap(elapsed() % duration(), duration());
 
     for (int y = 0; y < map.size(); y++)
     {
@@ -504,7 +503,7 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
     m_fader->write(universes);
 
-    if (elapsed() >= (patternSpeed() / MasterTimer::frequency()))
+    if (elapsed() >= duration())
     {
         if (runOrder() == Function::PingPong)
         {
@@ -554,7 +553,7 @@ void RGBMatrix::insertStartValues(FadeChannel& fc) const
     }
 
     if (fc.target() == 0)
-        fc.setFixedTime(fadeOutSpeed() * MasterTimer::frequency());
+        fc.setFadeTime(fadeOutSpeed());
     else
-        fc.setFixedTime(fadeInSpeed() * MasterTimer::frequency());
+        fc.setFadeTime(fadeInSpeed());
 }

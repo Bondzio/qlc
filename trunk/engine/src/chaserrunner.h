@@ -37,8 +37,8 @@ class ChaserRunner : public QObject
     Q_OBJECT
 
 public:
-    ChaserRunner(Doc* doc, QList <Function*> steps, qreal fadeInSpeed, qreal fadeOutSpeed,
-                 qreal patternSpeed, Function::Direction direction,
+    ChaserRunner(Doc* doc, QList <Function*> steps, uint fadeInSpeed, uint fadeOutSpeed,
+                 uint duration, Function::Direction direction,
                  Function::RunOrder runOrder, qreal intensity = 1.0, QObject* parent = NULL,
                  int startIndex = -1);
     ~ChaserRunner();
@@ -156,9 +156,9 @@ public:
 private:
     const Doc* m_doc;
     const QList <Function*> m_steps; //! List of steps to go thru
-    const qreal m_fadeInSpeed;
-    const qreal m_fadeOutSpeed;
-    const qreal m_patternSpeed;
+    const uint m_fadeInSpeed;
+    const uint m_fadeOutSpeed;
+    const uint m_duration;
     const Function::Direction m_originalDirection; //! Set during constructor
     const Function::RunOrder m_runOrder;
 
@@ -169,7 +169,7 @@ private:
     bool m_autoStep; //! Automatic stepping
     Function::Direction m_direction; //! Run-time direction
     QMap <quint32,FadeChannel> m_channelMap; //! Current step channels
-    quint32 m_elapsed; //! Elapsed timer ticks (==write() calls)
+    uint m_elapsed; //! Elapsed milliseconds
     bool m_next; //! If true, skips to the next step when write is called
     bool m_previous; //! If true, skips to the previous step when write is called
     int m_currentStep; //! Current step from m_steps

@@ -262,7 +262,7 @@ bool Chaser::loadXML(const QDomElement* root)
             int num = 0;
 
             num = tag.attribute(KXMLQLCFunctionNumber).toInt();
-            fid = tag.text().toInt();
+            fid = tag.text().toUInt();
 
             /* Don't check for the member function's existence,
                because it might not have been loaded yet. */
@@ -285,7 +285,10 @@ bool Chaser::loadXML(const QDomElement* root)
 void Chaser::postLoad()
 {
     if (m_legacyHoldBus != Bus::invalid())
-        setPatternSpeed(Bus::instance()->value(m_legacyHoldBus) / MasterTimer::frequency());
+    {
+        quint32 value = Bus::instance()->value(m_legacyHoldBus);
+        setDuration((value / MasterTimer::frequency()) * 1000);
+    }
 
     QMutableListIterator <quint32> it(m_steps);
     while (it.hasNext() == true)
@@ -303,7 +306,7 @@ void Chaser::postLoad()
 void Chaser::preRun(MasterTimer* timer)
 {
     m_runner = new ChaserRunner(doc(), stepFunctions(), fadeInSpeed(), fadeOutSpeed(),
-                                patternSpeed(), direction(), runOrder(), intensity());
+                                duration(), direction(), runOrder(), intensity());
     Function::preRun(timer);
 }
 

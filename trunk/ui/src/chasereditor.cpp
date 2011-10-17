@@ -32,6 +32,7 @@
 #include "qlcmacros.h"
 
 #include "functionselection.h"
+#include "speedspinbox.h"
 #include "chasereditor.h"
 #include "mastertimer.h"
 #include "outputmap.h"
@@ -90,9 +91,23 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     slotNameEdited(m_chaser->name());
 
     /* Speed */
+    new QHBoxLayout(m_fadeInContainer);
+    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
+    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
+    m_fadeInContainer->layout()->setMargin(0);
     m_fadeInSpin->setValue(m_chaser->fadeInSpeed());
+
+    new QHBoxLayout(m_fadeOutContainer);
+    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
+    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
+    m_fadeOutContainer->layout()->setMargin(0);
     m_fadeOutSpin->setValue(m_chaser->fadeOutSpeed());
-    m_patternSpin->setValue(m_chaser->patternSpeed());
+
+    new QHBoxLayout(m_durationContainer);
+    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
+    m_durationContainer->layout()->addWidget(m_durationSpin);
+    m_durationContainer->layout()->setMargin(0);
+    m_durationSpin->setValue(m_chaser->duration());
 
     /* Running order */
     switch (m_chaser->runOrder())
@@ -132,12 +147,12 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     connect(m_lower, SIGNAL(clicked()),
             this, SLOT(slotLowerClicked()));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeInSpinChanged(double)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeOutSpinChanged(double)));
-    connect(m_patternSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotPatternSpinChanged(double)));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeInSpinChanged(int)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeOutSpinChanged(int)));
+    connect(m_durationSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotDurationSpinChanged(int)));
 
     connect(m_loop, SIGNAL(clicked()),
             this, SLOT(slotLoopClicked()));
@@ -378,19 +393,19 @@ void ChaserEditor::slotBackwardClicked()
     m_chaser->setDirection(Function::Backward);
 }
 
-void ChaserEditor::slotFadeInSpinChanged(double seconds)
+void ChaserEditor::slotFadeInSpinChanged(int ms)
 {
-    m_chaser->setFadeInSpeed(seconds);
+    m_chaser->setFadeInSpeed(ms);
 }
 
-void ChaserEditor::slotFadeOutSpinChanged(double seconds)
+void ChaserEditor::slotFadeOutSpinChanged(int ms)
 {
-    m_chaser->setFadeOutSpeed(seconds);
+    m_chaser->setFadeOutSpeed(ms);
 }
 
-void ChaserEditor::slotPatternSpinChanged(double seconds)
+void ChaserEditor::slotDurationSpinChanged(int ms)
 {
-    m_chaser->setPatternSpeed(seconds);
+    m_chaser->setDuration(ms);
 }
 
 void ChaserEditor::updateFunctionItem(QTreeWidgetItem* item, const Function* function)

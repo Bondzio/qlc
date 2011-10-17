@@ -290,7 +290,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         m_skipIterator < m_skipThreshold)
     {
         /* Fixture still needs to wait for its turn in serial mode */
-        quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+        quint32 ticks = m_parent->duration();
         m_skipIterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
     }
     else
@@ -305,14 +305,14 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
             if (m_skipIterator >= m_skipThreshold)
             {
                 /* Increment for next round. */
-                quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+                quint32 ticks = m_parent->duration();
                 m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
             }
         }
         else
         {
             /* Increment for next round. */
-            quint32 ticks = m_parent->patternSpeed() * MasterTimer::frequency();
+            quint32 ticks = m_parent->duration();
             m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
         }
 
@@ -369,7 +369,7 @@ void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setFixedTime(MasterTimer::frequency() * m_parent->fadeInSpeed());
+            fc.setFadeTime(m_parent->fadeInSpeed());
 
             fc.setStart(0);
             fc.setCurrent(fc.start());
@@ -397,7 +397,7 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setFixedTime(MasterTimer::frequency() * m_parent->fadeOutSpeed());
+            fc.setFadeTime(m_parent->fadeOutSpeed());
 
             fc.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
             fc.setCurrent(fc.start());

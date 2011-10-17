@@ -41,6 +41,7 @@
 
 Scene::Scene(Doc* doc) : Function(doc, Function::Scene)
     , m_legacyFadeBus(Bus::defaultFade())
+    , m_fader(NULL)
 {
     setName(tr("New Scene"));
 }
@@ -235,8 +236,8 @@ void Scene::postLoad()
     if (m_legacyFadeBus != Bus::invalid())
     {
         quint32 value = Bus::instance()->value(m_legacyFadeBus);
-        setFadeInSpeed(value / MasterTimer::frequency());
-        setFadeOutSpeed(value / MasterTimer::frequency());
+        setFadeInSpeed((value / MasterTimer::frequency()) * 1000);
+        setFadeOutSpeed((value / MasterTimer::frequency()) * 1000);
     }
 
     // Remove such fixtures and channels that don't exist
@@ -290,17 +291,8 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
 
 void Scene::preRun(MasterTimer* timer)
 {
-    QListIterator <SceneValue> it(m_values);
-    while (it.hasNext() == true)
-    {
-        SceneValue value(it.next());
-
-        FadeChannel fc;
-        fc.setFixture(value.fxi);
-        fc.setChannel(value.channel);
-        fc.setTarget(value.value);
-        m_armedChannels << fc;
-    }
+    Q_ASSERT(m_fader == NULL);
+    m_fader = new GenericFader(doc());
 
     Function::preRun(timer);
 }
@@ -310,110 +302,75 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
     Q_UNUSED(timer);
     Q_ASSERT(universes != NULL);
 
-    /* Count ready channels so that the scene can be stopped */
-    quint32 ready = m_armedChannels.count();
+    if (m_values.size() == 0)
+    {
+        stop();
+        return;
+    }
 
-    /* Iterator for all scene channels */
-    QMutableListIterator <FadeChannel> it(m_armedChannels);
+    quint32 ready = 0;
 
-    /* Get starting values for each channel on the first pass */
     if (elapsed() == 0)
     {
+        QListIterator <SceneValue> it(m_values);
         while (it.hasNext() == true)
         {
-            FadeChannel& fc(it.next());
+            SceneValue value(it.next());
 
-            /* Get the starting value from universes. Important
-               to cast to uchar, since UniverseArray handles signed
-               char, whereas uchar is unsigned. Without cast,
-               this will result in negative values when x > 127 */
+            FadeChannel fc;
+            fc.setFixture(value.fxi);
+            fc.setChannel(value.channel);
+            fc.setTarget(value.value);
+            fc.setFadeTime(fadeInSpeed());
             fc.setStart(uchar(universes->preGMValues()[fc.address(doc())]));
             fc.setCurrent(fc.start());
-
-            // Don't touch the value at all if it's already on target
-            if (fc.start() == fc.target())
-            {
-                fc.setReady(true);
-                if (fc.group(doc()) != QLCChannel::Intensity)
-                    ready--;
-            }
-            else
-            {
-                fc.setReady(false);
-            }
+            m_fader->add(fc);
         }
-
-        /* Reel back to start of list */
-        it.toFront();
     }
 
-    // Grab current fade bus value
-    quint32 fadeTime = quint32(fadeInSpeed() * MasterTimer::frequency());
+    m_fader->write(universes);
 
+    // Count all LTP channels and mark them ready if appropriate
+    QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)
     {
-        FadeChannel& fc(it.next());
-        if (elapsed() >= fadeTime)
+        it.next();
+        FadeChannel fc = it.value();
+
+        if (fc.group(doc()) != QLCChannel::Intensity && fc.current() == fc.target())
         {
-            if (fc.group(doc()) == QLCChannel::Intensity)
-            {
-                // Don't do "ready--" for intensity channels to keep the
-                // scene on as long as its manually stopped.
-                fc.setReady(true);
-                universes->write(fc.address(doc()), fc.target(), fc.group(doc()));
-            }
-            else if (fc.isReady() == false)
-            {
-                // If an LTP channel has not been marked ready (i.e. we've just
-                // consumed all time) mark it ready so that its value will not
-                // be written anymore (otherwise it would not be LTP anymore).
-                ready--;
-                fc.setReady(true);
-                universes->write(fc.address(doc()), fc.target(), fc.group(doc()));
-            }
-            else
-            {
-                // Once an LTP-channel (non-intensity) has been marked ready,
-                // it's value is no longer touched by scene.
-            }
-        }
-        else
-        {
-            /* Write the next value to the universe buffer */
-            universes->write(fc.address(doc()),
-                             fc.calculateCurrent(fadeTime, elapsed()),
-                             fc.group(doc()));
+            fc.setReady(true); //! @todo ???
+            ready++;
         }
     }
 
-    /* Next time unit */
-    incrementElapsed();
-
-    // When all channels are ready, this function can be stopped. If there is
-    // even one HTP channel in a scene, the function will not stop by itself
-    // because then (ready == HTP_channel_count).
-    if (ready == 0)
+    // If all channels are ready (and scene contains only LTP channels) we can stop
+    if (ready == m_values.size())
         stop();
+
+    incrementElapsed();
 }
 
 void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
 {
-    QListIterator <FadeChannel> it(m_armedChannels);
+    QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)
     {
-        FadeChannel fc(it.next());
+        it.next();
+        FadeChannel fc = it.value();
+
         if (fc.group(doc()) == QLCChannel::Intensity)
         {
             fc.setTarget(0);
-            fc.setStart(fc.current());
-            fc.setFixedTime(fadeOutSpeed() * MasterTimer::frequency());
+            fc.setFadeTime(fadeOutSpeed());
             fc.setElapsed(0);
-            fc.setReady(false);
             timer->fader()->add(fc);
         }
     }
 
-    m_armedChannels.clear();
+    Q_ASSERT(m_fader != NULL);
+    delete m_fader;
+    m_fader = NULL;
 
     Function::postRun(timer, universes);
 }

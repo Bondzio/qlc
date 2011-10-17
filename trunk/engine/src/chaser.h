@@ -139,9 +139,6 @@ public:
     /*********************************************************************
      * Running
      *********************************************************************/
-protected slots:
-    void slotBusTapped(quint32 id);
-
 public:
     /** @reimpl */
     void preRun(MasterTimer* timer);

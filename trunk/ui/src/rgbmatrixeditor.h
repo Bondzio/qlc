@@ -30,6 +30,7 @@
 #include "qlcpoint.h"
 
 class QGraphicsScene;
+class SpeedSpinBox;
 class RGBMatrix;
 class QTimer;
 class Doc;
@@ -71,9 +72,9 @@ private slots:
     void slotForwardClicked();
     void slotBackwardClicked();
 
-    void slotFadeInSpinChanged(double seconds);
-    void slotFadeOutSpinChanged(double seconds);
-    void slotPatternSpinChanged(double seconds);
+    void slotFadeInSpinChanged(int ms);
+    void slotFadeOutSpinChanged(int ms);
+    void slotDurationSpinChanged(int ms);
 
     void slotTestClicked();
     void slotRestartTest();
@@ -82,6 +83,10 @@ private:
     Doc* m_doc;
     RGBMatrix* m_original;
     RGBMatrix* m_mtx;
+
+    SpeedSpinBox* m_fadeInSpin;
+    SpeedSpinBox* m_fadeOutSpin;
+    SpeedSpinBox* m_durationSpin;
 
     QGraphicsScene* m_scene;
     QTimer* m_previewTimer;

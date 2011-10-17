@@ -324,67 +324,34 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="m_fadeInLabel">
         <property name="text">
          <string>Fade In</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="m_fadeInSpin">
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="m_fadeOutLabel">
         <property name="text">
          <string>Fade Out</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="m_fadeOutSpin">
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+      <item row="2" column="0">
+       <widget class="QLabel" name="m_durationLabel">
+        <property name="text">
+         <string>Duration</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Step</string>
-        </property>
-       </widget>
+      <item row="0" column="1">
+       <widget class="QWidget" name="m_fadeInContainer" native="true"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QWidget" name="m_fadeOutContainer" native="true"/>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="m_patternSpin">
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>0.000000000000000</double>
-        </property>
-       </widget>
+       <widget class="QWidget" name="m_durationContainer" native="true"/>
       </item>
      </layout>
     </widget>

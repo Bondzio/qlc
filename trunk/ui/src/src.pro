@@ -59,6 +59,7 @@ HEADERS += aboutbox.h \
            sceneeditor.h \
            scripteditor.h \
            selectinputchannel.h \
+           speedspinbox.h \
            vcbutton.h \
            vcbuttonproperties.h \
            vccuelist.h \
@@ -145,6 +146,7 @@ SOURCES += aboutbox.cpp \
            sceneeditor.cpp \
            scripteditor.cpp \
            selectinputchannel.cpp \
+           speedspinbox.cpp \
            vcbutton.cpp \
            vcbuttonproperties.cpp \
            vccuelist.cpp \

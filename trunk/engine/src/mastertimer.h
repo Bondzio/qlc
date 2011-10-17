@@ -54,11 +54,14 @@ public:
     virtual ~MasterTimer();
 
     /** Get the timer tick frequency in Hertz */
-    static quint32 frequency();
+    static uint frequency();
+
+    /** Get the length of one timer tick in milliseconds */
+    static uint tick();
 
 protected:
     /** An OutputMap instance that routes all values to correct plugins. */
-    static const quint32 s_frequency;
+    static const uint s_frequency;
 
     /*********************************************************************
      * Functions

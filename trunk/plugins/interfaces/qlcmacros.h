@@ -48,7 +48,7 @@
  * @return The value of x clamped to the range between low and high
  */
 #define CLAMP(x, low, high) \
-	(((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
+    (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #ifdef MAX
 #undef MAX
@@ -83,6 +83,6 @@
  * of 0 - 20.
  */
 #define SCALE(x, src_min, src_max, dest_min, dest_max) \
-	((x - src_min) * (dest_max / (src_max - src_min)))
+    ((x - src_min) * (dest_max / (src_max - src_min)))
 
 #endif

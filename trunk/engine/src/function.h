@@ -55,10 +55,10 @@ class Doc;
 
 #define KXMLQLCFunctionEnabled "Enabled"
 
-#define KXMLQLCFunctionSpeed        "Speed"
-#define KXMLQLCFunctionSpeedFadeIn  "FadeIn"
-#define KXMLQLCFunctionSpeedFadeOut "FadeOut"
-#define KXMLQLCFunctionSpeedPattern "Pattern"
+#define KXMLQLCFunctionSpeed         "Speed"
+#define KXMLQLCFunctionSpeedFadeIn   "FadeIn"
+#define KXMLQLCFunctionSpeedFadeOut  "FadeOut"
+#define KXMLQLCFunctionSpeedDuration "Duration"
 
 class Function : public QObject
 {
@@ -278,23 +278,23 @@ private:
      * Speed
      *********************************************************************/
 public:
-    /** Set the fade in time in seconds */
-    void setFadeInSpeed(qreal seconds);
+    /** Set the fade in time in milliseconds */
+    void setFadeInSpeed(uint ms);
 
-    /** Get the fade in time in seconds */
-    qreal fadeInSpeed() const;
+    /** Get the fade in time in milliseconds */
+    uint fadeInSpeed() const;
 
-    /** Set the fade out time in seconds */
-    void setFadeOutSpeed(qreal seconds);
+    /** Set the fade out time in milliseconds */
+    void setFadeOutSpeed(uint ms);
 
-    /** Get the fade out time in seconds */
-    qreal fadeOutSpeed() const;
+    /** Get the fade out time in milliseconds */
+    uint fadeOutSpeed() const;
 
-    /** Set the pattern time in seconds */
-    void setPatternSpeed(qreal seconds);
+    /** Set the duration in milliseconds */
+    void setDuration(uint ms);
 
-    /** Get the pattern time in seconds */
-    qreal patternSpeed() const;
+    /** Get the duration in milliseconds */
+    uint duration() const;
 
 protected:
     /** Load the contents of a speed node */
@@ -304,9 +304,9 @@ protected:
     void saveXMLSpeed(QDomDocument* doc, QDomElement* root) const;
 
 private:
-    qreal m_fadeInSpeed;
-    qreal m_fadeOutSpeed;
-    qreal m_patternSpeed;
+    uint m_fadeInSpeed;
+    uint m_fadeOutSpeed;
+    uint m_duration;
 
     /*********************************************************************
      * Fixtures

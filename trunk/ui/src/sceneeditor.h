@@ -30,6 +30,7 @@
 #include "fixture.h"
 #include "scene.h"
 
+class SpeedSpinBox;
 class MasterTimer;
 class OutputMap;
 class InputMap;
@@ -51,17 +52,17 @@ public:
 private:
     Doc* m_doc;
 
-protected:
+private:
     void init();
     void setSceneValue(const SceneValue& scv);
 
-protected:
+private:
     bool m_initializing;
 
     /*********************************************************************
      * Common
      *********************************************************************/
-protected slots:
+private slots:
     void accept();
     void slotTabChanged(int tab);
 
@@ -73,10 +74,10 @@ protected slots:
     void slotCopyToAll();
     void slotColorTool();
 
-protected:
+private:
     bool isColorToolAvailable();
 
-protected:
+private:
     QAction* m_enableCurrentAction;
     QAction* m_disableCurrentAction;
 
@@ -88,14 +89,14 @@ protected:
     /*********************************************************************
      * General tab
      *********************************************************************/
-protected:
+private:
     QTreeWidgetItem* fixtureItem(quint32 fxi_id);
     QList <Fixture*> selectedFixtures() const;
 
     void addFixtureItem(Fixture* fixture);
     void removeFixtureItem(Fixture* fixture);
 
-protected slots:
+private slots:
     void slotNameEdited(const QString& name);
     void slotAddFixtureClicked();
     void slotRemoveFixtureClicked();
@@ -103,26 +104,31 @@ protected slots:
     void slotEnableAll();
     void slotDisableAll();
 
-    void slotFadeInSpinChanged(double seconds);
-    void slotFadeOutSpinChanged(double seconds);
+    void slotFadeInSpinChanged(int ms);
+    void slotFadeOutSpinChanged(int ms);
+
+private:
+    SpeedSpinBox* m_fadeInSpin;
+    SpeedSpinBox* m_fadeOutSpin;
+    SpeedSpinBox* m_durationSpin;
 
     /*********************************************************************
      * Fixture tabs
      *********************************************************************/
-protected:
+private:
     FixtureConsole* fixtureConsole(Fixture* fixture);
 
     void addFixtureTab(Fixture* fixture);
     void removeFixtureTab(Fixture* fixture);
     FixtureConsole* consoleTab(int tab);
 
-protected:
+private:
     int m_currentTab;
 
     /*********************************************************************
      * Scene
      *********************************************************************/
-protected:
+private:
     Scene* m_scene;
     Scene* m_original;
 

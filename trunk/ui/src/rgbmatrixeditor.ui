@@ -247,64 +247,34 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="m_fadeInLabel">
         <property name="text">
          <string>Fade in</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="m_fadeInSpin">
-        <property name="toolTip">
-         <string>Time allocated for fade in</string>
-        </property>
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="m_fadeOutLabel">
         <property name="text">
          <string>Fade out</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="m_fadeOutSpin">
-        <property name="toolTip">
-         <string>Time allocated for fade out</string>
-        </property>
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
+      <item row="2" column="0">
+       <widget class="QLabel" name="m_durationLabel">
+        <property name="text">
+         <string>Duration</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Pattern</string>
-        </property>
-       </widget>
+      <item row="0" column="1">
+       <widget class="QWidget" name="m_fadeInContainer" native="true"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QWidget" name="m_fadeOutContainer" native="true"/>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="m_patternSpin">
-        <property name="toolTip">
-         <string>Time allocated for the whole pattern</string>
-        </property>
-        <property name="suffix">
-         <string>s</string>
-        </property>
-        <property name="maximum">
-         <double>999999.989999999990687</double>
-        </property>
-       </widget>
+       <widget class="QWidget" name="m_durationContainer" native="true"/>
       </item>
      </layout>
     </widget>

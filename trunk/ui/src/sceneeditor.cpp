@@ -35,6 +35,7 @@
 
 #include "fixtureselection.h"
 #include "fixtureconsole.h"
+#include "speedspinbox.h"
 #include "sceneeditor.h"
 #include "mastertimer.h"
 #include "outputmap.h"
@@ -93,8 +94,6 @@ SceneEditor::~SceneEditor()
 
 void SceneEditor::init()
 {
-    QToolBar* toolBar;
-
     /* Actions */
     m_enableCurrentAction = new QAction(QIcon(":/check.png"),
                                         tr("Enable all channels in current fixture"), this);
@@ -123,7 +122,7 @@ void SceneEditor::init()
             this, SLOT(slotColorTool()));
 
     /* Toolbar */
-    toolBar = new QToolBar(this);
+    QToolBar* toolBar = new QToolBar(this);
     layout()->setMenuBar(toolBar);
     toolBar->addAction(m_enableCurrentAction);
     toolBar->addAction(m_disableCurrentAction);
@@ -150,10 +149,22 @@ void SceneEditor::init()
     slotNameEdited(m_scene->name());
 
     /* Speeds */
-    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeInSpinChanged(double)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeOutSpinChanged(double)));
+    new QHBoxLayout(m_fadeInContainer);
+    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
+    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
+    m_fadeInContainer->layout()->setMargin(0);
+    m_fadeInSpin->setValue(m_scene->fadeInSpeed());
+
+    new QHBoxLayout(m_fadeOutContainer);
+    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
+    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
+    m_fadeOutContainer->layout()->setMargin(0);
+    m_fadeOutSpin->setValue(m_scene->fadeOutSpeed());
+
+    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeInSpinChanged(int)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeOutSpinChanged(int)));
 
     QListIterator <SceneValue> it(m_scene->values());
     while (it.hasNext() == true)
@@ -575,14 +586,14 @@ void SceneEditor::slotDisableAll()
     }
 }
 
-void SceneEditor::slotFadeInSpinChanged(double seconds)
+void SceneEditor::slotFadeInSpinChanged(int ms)
 {
-    m_scene->setFadeInSpeed(seconds);
+    m_scene->setFadeInSpeed(ms);
 }
 
-void SceneEditor::slotFadeOutSpinChanged(double seconds)
+void SceneEditor::slotFadeOutSpinChanged(int ms)
 {
-    m_scene->setFadeOutSpeed(seconds);
+    m_scene->setFadeOutSpeed(ms);
 }
 
 /*****************************************************************************

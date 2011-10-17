@@ -23,8 +23,8 @@
 
 #include "fadechannel.h"
 #include "qlcchannel.h"
+#include "qlcmacros.h"
 #include "fixture.h"
-#include "bus.h"
 
 FadeChannel::FadeChannel()
     : m_fixture(Fixture::invalidId())
@@ -33,10 +33,8 @@ FadeChannel::FadeChannel()
     , m_target(0)
     , m_current(0)
     , m_ready(false)
-    , m_bus(Bus::invalid())
-    , m_fixedTime(0)
+    , m_fadeTime(0)
     , m_elapsed(0)
-    , m_removeWhenTargetReached(false)
 {
 }
 
@@ -47,10 +45,8 @@ FadeChannel::FadeChannel(const FadeChannel& ch)
     , m_target(ch.m_target)
     , m_current(ch.m_current)
     , m_ready(ch.m_ready)
-    , m_bus(ch.m_bus)
-    , m_fixedTime(ch.m_fixedTime)
+    , m_fadeTime(ch.m_fadeTime)
     , m_elapsed(ch.m_elapsed)
-    , m_removeWhenTargetReached(ch.m_removeWhenTargetReached)
 {
 }
 
@@ -142,70 +138,57 @@ bool FadeChannel::isReady() const
     return m_ready;
 }
 
-void FadeChannel::setBus(quint32 busId)
+void FadeChannel::setFadeTime(uint ms)
 {
-    m_bus = busId;
+    m_fadeTime = ms;
 }
 
-quint32 FadeChannel::bus() const
+uint FadeChannel::fadeTime() const
 {
-    return m_bus;
+    return m_fadeTime;
 }
 
-void FadeChannel::setFixedTime(quint32 ticks)
-{
-    m_fixedTime = ticks;
-}
-
-quint32 FadeChannel::fixedTime() const
-{
-    return m_fixedTime;
-}
-
-void FadeChannel::setElapsed(quint32 time)
+void FadeChannel::setElapsed(uint time)
 {
     m_elapsed = time;
 }
 
-quint32 FadeChannel::elapsed() const
+uint FadeChannel::elapsed() const
 {
     return m_elapsed;
 }
 
-quint32 FadeChannel::fadeTime() const
-{
-    if (bus() != Bus::invalid())
-        return Bus::instance()->value(m_bus);
-    else
-        return m_fixedTime;
-}
-
-uchar FadeChannel::nextStep()
+uchar FadeChannel::nextStep(uint ms)
 {
     if (elapsed() < UINT_MAX)
-        setElapsed(elapsed() + 1);
+        setElapsed(elapsed() + ms);
     return calculateCurrent(fadeTime(), elapsed());
 }
 
-uchar FadeChannel::calculateCurrent(quint32 fadeTime, quint32 elapsedTime)
+uchar FadeChannel::calculateCurrent(uint fadeTime, uint elapsedTime)
 {
-    // Return the target value if all time has been consumed or the channel
-    // has been marked ready.
     if (elapsedTime >= fadeTime || m_ready == true)
     {
+        // Return the target value if all time has been consumed
+        // or if the channel has been marked ready.
         m_current = m_target;
-        return m_current;
+    }
+    else if (elapsedTime == 0)
+    {
+        m_current = m_start;
+    }
+    else if (fadeTime == 0)
+    {
+        m_current = m_target;
+    }
+    else
+    {
+        m_current  = m_target - m_start;
+        m_current  = m_current * (qreal(elapsedTime) / qreal(fadeTime));
+        m_current += m_start;
     }
 
-    // Time scale is basically a percentage (0.0 - 1.0) of remaining time.
-    // Add 1.0 to both to get correct scale (fadeTime==1 means two steps)
-    qreal timeScale = qreal(elapsedTime + 1.0) / qreal(fadeTime + 1.0);
-
-    m_current = m_target - m_start;
-    m_current = qint32(qreal(m_current) * timeScale);
-    m_current += m_start;
-
-    return static_cast<uchar>(m_current);
+    return current();
 }
 
 uint qHash(const FadeChannel& key)

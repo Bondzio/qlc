@@ -32,6 +32,7 @@
 
 #include "fixtureselection.h"
 #include "rgbmatrixeditor.h"
+#include "speedspinbox.h"
 #include "rgbmatrix.h"
 #include "apputil.h"
 #include "bus.h"
@@ -101,6 +102,10 @@ void RGBMatrixEditor::accept()
 
 void RGBMatrixEditor::init()
 {
+    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_fadeInContainer);
+    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_fadeOutContainer);
+    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_durationContainer);
+
     m_nameEdit->setText(m_mtx->name());
     m_nameEdit->setSelection(0, m_mtx->name().length());
 
@@ -136,7 +141,7 @@ void RGBMatrixEditor::init()
 
     m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
     m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
-    m_patternSpin->setValue(m_mtx->patternSpeed());
+    m_durationSpin->setValue(m_mtx->duration());
 
     QPixmap pm(100, 26);
     pm.fill(m_mtx->monoColor());
@@ -157,12 +162,12 @@ void RGBMatrixEditor::init()
     connect(m_forward, SIGNAL(clicked()), this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()), this, SLOT(slotBackwardClicked()));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeInSpinChanged(double)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeOutSpinChanged(double)));
-    connect(m_patternSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotPatternSpinChanged(double)));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeInSpinChanged(int)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeOutSpinChanged(int)));
+    connect(m_durationSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotDurationSpinChanged(int)));
 
     // Test slots
     connect(m_testButton, SIGNAL(clicked(bool)),
@@ -317,19 +322,19 @@ void RGBMatrixEditor::slotBackwardClicked()
     m_mtx->setDirection(Function::Backward);
 }
 
-void RGBMatrixEditor::slotFadeInSpinChanged(double seconds)
+void RGBMatrixEditor::slotFadeInSpinChanged(int ms)
 {
-    m_mtx->setFadeInSpeed(seconds);
+    m_mtx->setFadeInSpeed(ms);
 }
 
-void RGBMatrixEditor::slotFadeOutSpinChanged(double seconds)
+void RGBMatrixEditor::slotFadeOutSpinChanged(int ms)
 {
-    m_mtx->setFadeOutSpeed(seconds);
+    m_mtx->setFadeOutSpeed(ms);
 }
 
-void RGBMatrixEditor::slotPatternSpinChanged(double seconds)
+void RGBMatrixEditor::slotDurationSpinChanged(int ms)
 {
-    m_mtx->setPatternSpeed(seconds);
+    m_mtx->setDuration(ms);
 }
 
 void RGBMatrixEditor::slotTestClicked()

@@ -96,7 +96,7 @@ void GenericFader::write(UniverseArray* ua)
         {
             uchar value = uchar(floor((qreal(fc.current()) * intensity()) + 0.5));
             ua->write(fc.address(m_doc), value, fc.group(m_doc));
-            fc.nextStep();
+            fc.nextStep(MasterTimer::tick());
         }
     }
 }

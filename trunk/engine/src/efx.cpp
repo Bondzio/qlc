@@ -66,7 +66,7 @@ EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
 
     m_fader = NULL;
 
-    setPatternSpeed(20);
+    setDuration(20 * 1000);
 
     m_legacyHoldBus = Bus::invalid();
     m_legacyFadeBus = Bus::invalid();
@@ -848,14 +848,14 @@ void EFX::postLoad()
     if (m_legacyFadeBus != Bus::invalid())
     {
         quint32 value = Bus::instance()->value(m_legacyFadeBus);
-        setFadeInSpeed(value / MasterTimer::frequency());
-        setFadeOutSpeed(value / MasterTimer::frequency());
+        setFadeInSpeed((value / MasterTimer::frequency()) * 1000);
+        setFadeOutSpeed((value / MasterTimer::frequency()) * 1000);
     }
 
     if (m_legacyHoldBus != Bus::invalid())
     {
         quint32 value = Bus::instance()->value(m_legacyHoldBus);
-        setPatternSpeed(value / MasterTimer::frequency());
+        setDuration((value / MasterTimer::frequency()) * 1000);
     }
 }
 

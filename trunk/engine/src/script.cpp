@@ -531,8 +531,7 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
                 fc.setFixture(fxi->id());
                 fc.setChannel(ch);
                 fc.setTarget(value);
-                fc.setFixedTime(time * MasterTimer::frequency());
-                fc.setBus(bus);
+                fc.setFadeTime(time);
 
                 // If the script has used the channel previously, it might still be in
                 // the bowels of GenericFader so get the starting value from there.

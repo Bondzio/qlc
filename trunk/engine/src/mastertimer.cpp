@@ -44,7 +44,7 @@
 #include "doc.h"
 
 /** The timer tick frequency in Hertz */
-const quint32 MasterTimer::s_frequency = 50;
+const uint MasterTimer::s_frequency = 50;
 
 /*****************************************************************************
  * Initialization
@@ -67,9 +67,14 @@ MasterTimer::~MasterTimer()
     m_fader = NULL;
 }
 
-quint32 MasterTimer::frequency()
+uint MasterTimer::frequency()
 {
     return s_frequency;
+}
+
+uint MasterTimer::tick()
+{
+    return uint(double(1000) / double(s_frequency));
 }
 
 /*****************************************************************************

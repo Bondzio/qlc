@@ -63,7 +63,7 @@ Function::Function(Doc* doc, Type t)
     , m_direction(Forward)
     , m_fadeInSpeed(0)
     , m_fadeOutSpeed(0)
-    , m_patternSpeed(0)
+    , m_duration(0)
     , m_flashing(false)
     , m_initiatedByOtherFunction(false)
     , m_elapsed(0)
@@ -97,7 +97,7 @@ bool Function::copyFrom(const Function* function)
     m_direction = function->direction();
     m_fadeInSpeed = function->fadeInSpeed();
     m_fadeOutSpeed = function->fadeOutSpeed();
-    m_patternSpeed = function->patternSpeed();
+    m_duration = function->duration();
 
     emit changed(m_id);
 
@@ -286,37 +286,37 @@ Function::Direction Function::stringToDirection(const QString& str)
  * Speed
  ****************************************************************************/
 
-void Function::setFadeInSpeed(qreal seconds)
+void Function::setFadeInSpeed(uint ms)
 {
-    m_fadeInSpeed = seconds;
+    m_fadeInSpeed = ms;
     emit changed(m_id);
 }
 
-qreal Function::fadeInSpeed() const
+uint Function::fadeInSpeed() const
 {
     return m_fadeInSpeed;
 }
 
-void Function::setFadeOutSpeed(qreal seconds)
+void Function::setFadeOutSpeed(uint ms)
 {
-    m_fadeOutSpeed = seconds;
+    m_fadeOutSpeed = ms;
     emit changed(m_id);
 }
 
-qreal Function::fadeOutSpeed() const
+uint Function::fadeOutSpeed() const
 {
     return m_fadeOutSpeed;
 }
 
-void Function::setPatternSpeed(qreal seconds)
+void Function::setDuration(uint ms)
 {
-    m_patternSpeed = seconds;
+    m_duration = ms;
     emit changed(m_id);
 }
 
-qreal Function::patternSpeed() const
+uint Function::duration() const
 {
-    return m_patternSpeed;
+    return m_duration;
 }
 
 bool Function::loadXMLSpeed(const QDomElement& speedRoot)
@@ -324,9 +324,9 @@ bool Function::loadXMLSpeed(const QDomElement& speedRoot)
     if (speedRoot.tagName() != KXMLQLCFunctionSpeed)
         return false;
 
-    m_fadeInSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeIn).toDouble();
-    m_fadeOutSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeOut).toDouble();
-    m_patternSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedPattern).toDouble();
+    m_fadeInSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeIn).toUInt();
+    m_fadeOutSpeed = speedRoot.attribute(KXMLQLCFunctionSpeedFadeOut).toUInt();
+    m_duration = speedRoot.attribute(KXMLQLCFunctionSpeedDuration).toUInt();
 
     return true;
 }
@@ -338,7 +338,7 @@ void Function::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
     tag = doc->createElement(KXMLQLCFunctionSpeed);
     tag.setAttribute(KXMLQLCFunctionSpeedFadeIn, QString::number(fadeInSpeed()));
     tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOutSpeed()));
-    tag.setAttribute(KXMLQLCFunctionSpeedPattern, QString::number(patternSpeed()));
+    tag.setAttribute(KXMLQLCFunctionSpeedDuration, QString::number(duration()));
     root->appendChild(tag);
 }
 
@@ -502,7 +502,7 @@ void Function::incrementElapsed()
 {
     // Don't wrap around. UINT_MAX is the maximum fade/hold time.
     if (m_elapsed < UINT_MAX)
-        m_elapsed++;
+        m_elapsed += (1000 / MasterTimer::frequency());
 }
 
 /*****************************************************************************

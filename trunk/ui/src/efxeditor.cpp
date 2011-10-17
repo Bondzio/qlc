@@ -38,6 +38,7 @@
 
 #include "fixtureselection.h"
 #include "efxpreviewarea.h"
+#include "speedspinbox.h"
 #include "vcdockslider.h"
 #include "efxeditor.h"
 #include "fixture.h"
@@ -108,6 +109,24 @@ EFXEditor::~EFXEditor()
 
 void EFXEditor::initGeneralPage()
 {
+    new QHBoxLayout(m_fadeInContainer);
+    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
+    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
+    m_fadeInContainer->layout()->setMargin(0);
+    m_fadeInSpin->setValue(m_efx->fadeInSpeed());
+
+    new QHBoxLayout(m_fadeOutContainer);
+    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
+    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
+    m_fadeOutContainer->layout()->setMargin(0);
+    m_fadeOutSpin->setValue(m_efx->fadeOutSpeed());
+
+    new QHBoxLayout(m_durationContainer);
+    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
+    m_durationContainer->layout()->addWidget(m_durationSpin);
+    m_durationContainer->layout()->setMargin(0);
+    m_durationSpin->setValue(m_efx->duration());
+
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
 
@@ -131,12 +150,12 @@ void EFXEditor::initGeneralPage()
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotAsymmetricRadioToggled(bool)));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeInSpinChanged(double)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotFadeOutSpinChanged(double)));
-    connect(m_patternSpin, SIGNAL(valueChanged(double)),
-            this, SLOT(slotPatternSpinChanged(double)));
+    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeInSpinChanged(int)));
+    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotFadeOutSpinChanged(int)));
+    connect(m_durationSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotDurationSpinChanged(int)));
 
     // Test slots
     connect(m_testButton, SIGNAL(clicked()),
@@ -151,12 +170,8 @@ void EFXEditor::initGeneralPage()
             this, SLOT(slotRestartTest()));
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotRestartTest()));
-    connect(m_fadeInSpin, SIGNAL(valueChanged(double)),
+    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotRestartTest()));
-
-    m_fadeInSpin->setValue(m_efx->fadeInSpeed());
-    m_fadeOutSpin->setValue(m_efx->fadeOutSpeed());
-    m_patternSpin->setValue(m_efx->patternSpeed());
 
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
@@ -630,19 +645,19 @@ void EFXEditor::slotAsymmetricRadioToggled(bool state)
         m_efx->setPropagationMode(EFX::Asymmetric);
 }
 
-void EFXEditor::slotFadeInSpinChanged(double seconds)
+void EFXEditor::slotFadeInSpinChanged(int ms)
 {
-    m_efx->setFadeInSpeed(seconds);
+    m_efx->setFadeInSpeed(ms);
 }
 
-void EFXEditor::slotFadeOutSpinChanged(double seconds)
+void EFXEditor::slotFadeOutSpinChanged(int ms)
 {
-    m_efx->setFadeOutSpeed(seconds);
+    m_efx->setFadeOutSpeed(ms);
 }
 
-void EFXEditor::slotPatternSpinChanged(double seconds)
+void EFXEditor::slotDurationSpinChanged(int ms)
 {
-    m_efx->setPatternSpeed(seconds);
+    m_efx->setDuration(ms);
 }
 
 /*****************************************************************************

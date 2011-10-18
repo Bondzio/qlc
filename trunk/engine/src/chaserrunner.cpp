@@ -145,8 +145,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         handleChannelSwitch(timer, universes);
         emit currentStepChanged(m_currentStep);
     }
-    else if ((isAutoStep() && m_elapsed >= m_duration)
-             || m_next == true || m_previous == true)
+    else if ((isAutoStep() && m_elapsed >= m_duration) || m_next == true || m_previous == true)
     {
         // Next step
         if (m_direction == Function::Forward)

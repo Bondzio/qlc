@@ -4,6 +4,7 @@ LANGUAGE = C++
 TARGET   = qlccapability_test
 
 QT      += testlib xml
+CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../../src

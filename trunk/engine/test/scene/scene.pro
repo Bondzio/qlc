@@ -4,6 +4,7 @@ LANGUAGE = C++
 TARGET   = scene_test
 
 QT      += testlib xml
+CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../mastertimer

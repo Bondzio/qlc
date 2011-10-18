@@ -4,6 +4,7 @@ LANGUAGE = C++
 TARGET   = fadechannel_test
 
 QT      += testlib
+CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../../src

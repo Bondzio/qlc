@@ -4,6 +4,7 @@ LANGUAGE = C++
 TARGET   = efx_test
 
 QT      += testlib xml
+CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../mastertimer

@@ -249,6 +249,27 @@ void VCProperties_Test::loadPropertiesHappy()
     QCOMPARE(p.isGrabKeyboard(), true);
     QCOMPARE(p.isKeyRepeatOff(), true);
 
+    QCOMPARE(p.isGMVisible(), false);
+
+    QCOMPARE(p.grandMasterChannelMode(), UniverseArray::GMAllChannels);
+    QCOMPARE(p.grandMasterValueMode(), UniverseArray::GMLimit);
+    QCOMPARE(p.grandMasterInputUniverse(), quint32(2));
+    QCOMPARE(p.grandMasterInputChannel(), quint32(15));
+
+    QCOMPARE(p.blackoutInputUniverse(), quint32(6));
+    QCOMPARE(p.blackoutInputChannel(), quint32(1));
+
+    // Load with new (post 3.2.0) GM visibility tag
+    gm.setAttribute("Visible", "True");
+    p.resetContents(&w, m_doc);
+    QVERIFY(p.loadProperties(root) == true);
+    QCOMPARE(p.isGridEnabled(), true);
+    QCOMPARE(p.gridX(), 1);
+    QCOMPARE(p.gridY(), 2);
+
+    QCOMPARE(p.isGrabKeyboard(), true);
+    QCOMPARE(p.isKeyRepeatOff(), true);
+
     QCOMPARE(p.isGMVisible(), true);
 
     QCOMPARE(p.grandMasterChannelMode(), UniverseArray::GMAllChannels);
@@ -259,6 +280,7 @@ void VCProperties_Test::loadPropertiesHappy()
     QCOMPARE(p.blackoutInputUniverse(), quint32(6));
     QCOMPARE(p.blackoutInputChannel(), quint32(1));
 
+    // Load with invalid root
     root.setTagName("Porperties");
     QVERIFY(p.loadXML(root) == false);
 }

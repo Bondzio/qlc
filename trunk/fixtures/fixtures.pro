@@ -118,6 +118,7 @@ fixtures.files += Martin-MX-1.qxf
 fixtures.files += Martin-MX-4.qxf
 fixtures.files += Martin-Punisher.qxf
 fixtures.files += Martin-Robocolor-Pro-400.qxf
+fixtures.files += Martin-Roboscan-218.qxf
 fixtures.files += Martin-Roboscan-518.qxf
 fixtures.files += Martin-Roboscan-812.qxf
 fixtures.files += Martin-SCX-500.qxf

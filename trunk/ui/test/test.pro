@@ -7,7 +7,6 @@ SUBDIRS += efxpreviewarea
 SUBDIRS += monitorfixture
 SUBDIRS += vcbutton
 SUBDIRS += vccuelist
-SUBDIRS += vcdockslider
 SUBDIRS += vcframe
 SUBDIRS += vcframeproperties
 SUBDIRS += vclabel

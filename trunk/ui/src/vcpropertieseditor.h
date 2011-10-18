@@ -66,30 +66,6 @@ protected slots:
     void slotGridYChanged(int value);
 
     /*************************************************************************
-     * Fade slider page
-     *************************************************************************/
-protected slots:
-    void slotFadeLimitsChanged();
-    void slotAutoDetectFadeInputToggled(bool checked);
-    void slotFadeInputValueChanged(quint32 universe, quint32 channel);
-    void slotChooseFadeInputClicked();
-
-protected:
-    void updateFadeInputSource();
-
-    /*************************************************************************
-     * Hold slider page
-     *************************************************************************/
-protected slots:
-    void slotHoldLimitsChanged();
-    void slotAutoDetectHoldInputToggled(bool checked);
-    void slotHoldInputValueChanged(quint32 universe, quint32 channel);
-    void slotChooseHoldInputClicked();
-
-protected:
-    void updateHoldInputSource();
-
-    /*************************************************************************
      * Grand Master page
      *************************************************************************/
 protected slots:

@@ -46,7 +46,6 @@
 #include "addvcslidermatrix.h"
 #include "virtualconsole.h"
 #include "vcproperties.h"
-#include "vcdockslider.h"
 #include "vcsoloframe.h"
 #include "mastertimer.h"
 #include "vcdockarea.h"
@@ -370,7 +369,7 @@ void VirtualConsole::initActions()
     m_toolsSettingsAction->setMenuRole(QAction::NoRole);
 
     m_toolsSlidersAction = new QAction(QIcon(":/slider.png"),
-                                       tr("Default sliders"), this);
+                                       tr("Grand Master"), this);
     connect(m_toolsSlidersAction, SIGNAL(triggered(bool)),
             this, SLOT(slotToolsSliders()));
 
@@ -981,12 +980,12 @@ void VirtualConsole::slotToolsSliders()
 {
     if (m_dockArea->isHidden() == true)
     {
-        s_properties.setSlidersVisible(true);
+        s_properties.setGMVisible(true);
         m_dockArea->show();
     }
     else
     {
-        s_properties.setSlidersVisible(false);
+        s_properties.setGMVisible(false);
         m_dockArea->hide();
     }
 

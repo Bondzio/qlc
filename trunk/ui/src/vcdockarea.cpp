@@ -29,7 +29,6 @@
 #include "grandmasterslider.h"
 #include "virtualconsole.h"
 #include "vcproperties.h"
-#include "vcdockslider.h"
 #include "vcdockarea.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -47,18 +46,6 @@ VCDockArea::VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap
 
     m_gm = new GrandMasterSlider(this, outputMap, inputMap);
     layout()->addWidget(m_gm);
-
-    QVBoxLayout* vbox = new QVBoxLayout;
-    vbox->setMargin(0);
-    layout()->addItem(vbox);
-
-    /* Default fade time slider */
-    m_fade = new VCDockSlider(this, inputMap, Bus::defaultFade());
-    vbox->addWidget(m_fade);
-
-    /* Default hold time slider */
-    m_hold = new VCDockSlider(this, inputMap, Bus::defaultHold());
-    vbox->addWidget(m_hold);
 }
 
 VCDockArea::~VCDockArea()
@@ -71,18 +58,13 @@ VCDockArea::~VCDockArea()
 
 void VCDockArea::refreshProperties()
 {
-    Q_ASSERT(m_fade != NULL);
-    Q_ASSERT(m_hold != NULL);
-
-    m_fade->refreshProperties();
-    m_hold->refreshProperties();
+    Q_ASSERT(m_gm != NULL);
     m_gm->refreshProperties();
 
-    if (VirtualConsole::properties().slidersVisible() == true)
+    if (VirtualConsole::properties().isGMVisible() == true)
         show();
     else
         hide();
-
 }
 
 /*****************************************************************************

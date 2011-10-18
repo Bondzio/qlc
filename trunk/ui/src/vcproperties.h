@@ -50,15 +50,8 @@ class Doc;
 #define KXMLQLCVCPropertiesKeyboardGrab "Grab"
 #define KXMLQLCVCPropertiesKeyboardRepeatOff "RepeatOff"
 
-#define KXMLQLCVCPropertiesDefaultSlider "DefaultSlider"
-#define KXMLQLCVCPropertiesDefaultSliderRole "Role"
-#define KXMLQLCVCPropertiesDefaultSliderRoleFade "Fade"
-#define KXMLQLCVCPropertiesDefaultSliderRoleHold "Hold"
-#define KXMLQLCVCPropertiesDefaultSliderVisible "Visible"
-#define KXMLQLCVCPropertiesLowLimit "Low"
-#define KXMLQLCVCPropertiesHighLimit "High"
-
 #define KXMLQLCVCPropertiesGrandMaster "GrandMaster"
+#define KXMLQLCVCPropertiesGrandMasterVisible "Visible"
 #define KXMLQLCVCPropertiesGrandMasterChannelMode "ChannelMode"
 #define KXMLQLCVCPropertiesGrandMasterValueMode "ValueMode"
 
@@ -136,6 +129,12 @@ private:
      * Grand Master
      *************************************************************************/
 public:
+    /** Set grand master visible/hidden */
+    void setGMVisible(bool visible);
+
+    /** Check if grand master slider is visible */
+    bool isGMVisible() const;
+
     void setGrandMasterChannelMode(UniverseArray::GMChannelMode mode);
     UniverseArray::GMChannelMode grandMasterChannelMode() const;
 
@@ -151,6 +150,7 @@ private:
     UniverseArray::GMValueMode m_gmValueMode;
     quint32 m_gmInputUniverse;
     quint32 m_gmInputChannel;
+    bool m_gmVisible;
 
     /*************************************************************************
      * Blackout
@@ -163,54 +163,6 @@ public:
 private:
     quint32 m_blackoutInputUniverse;
     quint32 m_blackoutInputChannel;
-
-    /*********************************************************************
-     * Default Fade Slider
-     *********************************************************************/
-public:
-    /** Set, whether default sliders are visible */
-    void setSlidersVisible(bool visible);
-
-    /** Check if default sliders are visible */
-    bool slidersVisible() const;
-
-    /** Set limits for fade slider */
-    void setFadeLimits(quint32 low, quint32 high);
-    quint32 fadeLowLimit() const;
-    quint32 fadeHighLimit() const;
-
-    /** Set input source for fade slider */
-    void setFadeInputSource(quint32 uni, quint32 ch);
-    quint32 fadeInputUniverse() const;
-    quint32 fadeInputChannel() const;
-
-private:
-    bool m_slidersVisible;
-
-    quint32 m_fadeLowLimit;
-    quint32 m_fadeHighLimit;
-    quint32 m_fadeInputUniverse;
-    quint32 m_fadeInputChannel;
-
-    /*********************************************************************
-     * Default Hold Slider
-     *********************************************************************/
-public:
-    /** Set limits for hold slider */
-    void setHoldLimits(quint32 low, quint32 high);
-    quint32 holdLowLimit() const;
-    quint32 holdHighLimit() const;
-
-    /** Set input source for hold slider */
-    void setHoldInputSource(quint32 uni, quint32 ch);
-    quint32 holdInputUniverse() const;
-    quint32 holdInputChannel() const;
-
-private:
-    quint32 m_holdLowLimit;
-    quint32 m_holdHighLimit;
-    quint32 m_holdInputUniverse;
-    quint32 m_holdInputChannel;
 
     /*************************************************************************
      * Load & Save

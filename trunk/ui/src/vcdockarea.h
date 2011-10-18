@@ -25,7 +25,6 @@
 #include <qframe.h>
 
 class GrandMasterSlider;
-class VCDockSlider;
 class QShowEvent;
 class QHideEvent;
 class OutputMap;
@@ -43,17 +42,14 @@ public:
     VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap);
     ~VCDockArea();
 
-    /*********************************************************************
-     * Sliders
-     *********************************************************************/
-public:
     /** Refresh slider properties */
     void refreshProperties();
 
-protected:
+signals:
+    void visibilityChanged(bool isVisible);
+
+private:
     GrandMasterSlider* m_gm;
-    VCDockSlider* m_fade;
-    VCDockSlider* m_hold;
 
     /*********************************************************************
      * Event Handlers & Signals
@@ -61,9 +57,6 @@ protected:
 protected:
     void showEvent(QShowEvent* event);
     void hideEvent(QHideEvent* event);
-
-signals:
-    void visibilityChanged(bool isVisible);
 };
 
 #endif

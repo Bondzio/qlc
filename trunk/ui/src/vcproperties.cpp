@@ -58,17 +58,7 @@ VCProperties::VCProperties() : VCWidgetProperties()
     m_blackoutInputUniverse = InputMap::invalidUniverse();
     m_blackoutInputChannel = InputMap::invalidChannel();
 
-    m_slidersVisible = true;
-
-    m_fadeLowLimit = 0;
-    m_fadeHighLimit = 10;
-    m_holdLowLimit = 0;
-    m_holdHighLimit = 10;
-
-    m_fadeInputUniverse = InputMap::invalidUniverse();
-    m_fadeInputChannel = InputMap::invalidChannel();
-    m_holdInputUniverse = InputMap::invalidUniverse();
-    m_holdInputChannel = InputMap::invalidChannel();
+    m_gmVisible = true;
 }
 
 VCProperties::VCProperties(const VCProperties& properties)
@@ -105,17 +95,7 @@ VCProperties& VCProperties::operator=(const VCProperties& properties)
     m_blackoutInputUniverse = properties.m_blackoutInputUniverse;
     m_blackoutInputChannel = properties.m_blackoutInputChannel;
 
-    m_slidersVisible = properties.m_slidersVisible;
-
-    m_fadeLowLimit = properties.m_fadeLowLimit;
-    m_fadeHighLimit = properties.m_fadeHighLimit;
-    m_holdLowLimit = properties.m_holdLowLimit;
-    m_holdHighLimit = properties.m_holdHighLimit;
-
-    m_fadeInputUniverse = properties.m_fadeInputUniverse;
-    m_fadeInputChannel = properties.m_fadeInputChannel;
-    m_holdInputUniverse = properties.m_holdInputUniverse;
-    m_holdInputChannel = properties.m_holdInputChannel;
+    m_gmVisible = properties.m_gmVisible;
 
     return *this;
 }
@@ -201,6 +181,16 @@ bool VCProperties::isGrabKeyboard() const
  * Grand Master
  *****************************************************************************/
 
+void VCProperties::setGMVisible(bool v)
+{
+    m_gmVisible = v;
+}
+
+bool VCProperties::isGMVisible() const
+{
+    return m_gmVisible;
+}
+
 void VCProperties::setGrandMasterChannelMode(UniverseArray::GMChannelMode mode)
 {
     m_gmChannelMode = mode;
@@ -258,89 +248,7 @@ quint32 VCProperties::blackoutInputChannel() const
 }
 
 /*****************************************************************************
- * Default Fade Slider
- *****************************************************************************/
-
-void VCProperties::setSlidersVisible(bool visible)
-{
-    m_slidersVisible = visible;
-}
-
-bool VCProperties::slidersVisible() const
-{
-    return m_slidersVisible;
-}
-
-void VCProperties::setFadeLimits(quint32 low, quint32 high)
-{
-    m_fadeLowLimit = low;
-    m_fadeHighLimit = high;
-}
-
-quint32 VCProperties::fadeLowLimit() const
-{
-    return m_fadeLowLimit;
-}
-
-quint32 VCProperties::fadeHighLimit() const
-{
-    return m_fadeHighLimit;
-}
-
-void VCProperties::setFadeInputSource(quint32 uni, quint32 ch)
-{
-    m_fadeInputUniverse = uni;
-    m_fadeInputChannel = ch;
-}
-
-quint32 VCProperties::fadeInputUniverse() const
-{
-    return m_fadeInputUniverse;
-}
-
-quint32 VCProperties::fadeInputChannel() const
-{
-    return m_fadeInputChannel;
-}
-
-/*****************************************************************************
- * Default Hold Slider
- *****************************************************************************/
-
-quint32 VCProperties::holdLowLimit() const
-{
-    return m_holdLowLimit;
-}
-
-void VCProperties::setHoldLimits(quint32 low, quint32 high)
-{
-    m_holdLowLimit = low;
-    m_holdHighLimit = high;
-}
-
-quint32 VCProperties::holdHighLimit() const
-{
-    return m_holdHighLimit;
-}
-
-void VCProperties::setHoldInputSource(quint32 uni, quint32 ch)
-{
-    m_holdInputUniverse = uni;
-    m_holdInputChannel = ch;
-}
-
-quint32 VCProperties::holdInputUniverse() const
-{
-    return m_holdInputUniverse;
-}
-
-quint32 VCProperties::holdInputChannel() const
-{
-    return m_holdInputChannel;
-}
-
-/*****************************************************************************
- * Properties Load & Save
+ * Load & Save
  *****************************************************************************/
 
 bool VCProperties::loadXML(const QDomElement& root)
@@ -433,63 +341,10 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
         tag.setAttribute(KXMLQLCVCPropertiesKeyboardRepeatOff, KXMLQLCFalse);
 
     /***********************
-     * Default fade slider *
-     ***********************/
-    tag = doc->createElement(KXMLQLCVCPropertiesDefaultSlider);
-    prop_root.appendChild(tag);
-    tag.setAttribute(KXMLQLCVCPropertiesDefaultSliderRole,
-                     KXMLQLCVCPropertiesDefaultSliderRoleFade);
-
-    /* Slider visibility */
-    if (m_slidersVisible == true)
-        tag.setAttribute(KXMLQLCVCPropertiesDefaultSliderVisible, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCVCPropertiesDefaultSliderVisible, KXMLQLCFalse);
-
-    /* Fade slider limits */
-    tag.setAttribute(KXMLQLCVCPropertiesLowLimit, QString("%1").arg(m_fadeLowLimit));
-    tag.setAttribute(KXMLQLCVCPropertiesHighLimit, QString("%1").arg(m_fadeHighLimit));
-
-    /* Fade slider external input */
-    if (m_fadeInputUniverse != InputMap::invalidUniverse() &&
-        m_fadeInputChannel != InputMap::invalidChannel())
-    {
-        subtag = doc->createElement(KXMLQLCVCPropertiesInput);
-        tag.appendChild(subtag);
-        subtag.setAttribute(KXMLQLCVCPropertiesInputUniverse,
-                            QString("%1").arg(m_fadeInputUniverse));
-        subtag.setAttribute(KXMLQLCVCPropertiesInputChannel,
-                            QString("%1").arg(m_fadeInputChannel));
-    }
-
-    /***********************
-     * Default hold slider *
-     ***********************/
-    tag = doc->createElement(KXMLQLCVCPropertiesDefaultSlider);
-    prop_root.appendChild(tag);
-    tag.setAttribute(KXMLQLCVCPropertiesDefaultSliderRole,
-                     KXMLQLCVCPropertiesDefaultSliderRoleHold);
-
-    /* Hold slider limits */
-    tag.setAttribute(KXMLQLCVCPropertiesLowLimit, QString("%1").arg(m_holdLowLimit));
-    tag.setAttribute(KXMLQLCVCPropertiesHighLimit, QString("%1").arg(m_holdHighLimit));
-
-    /* Hold slider external input */
-    if (m_holdInputUniverse != InputMap::invalidUniverse() &&
-        m_holdInputChannel != InputMap::invalidChannel())
-    {
-        subtag = doc->createElement(KXMLQLCVCPropertiesInput);
-        tag.appendChild(subtag);
-        subtag.setAttribute(KXMLQLCVCPropertiesInputUniverse,
-                            QString("%1").arg(m_holdInputUniverse));
-        subtag.setAttribute(KXMLQLCVCPropertiesInputChannel,
-                            QString("%1").arg(m_holdInputChannel));
-    }
-
-    /***********************
      * Grand Master slider *
      ***********************/
     tag = doc->createElement(KXMLQLCVCPropertiesGrandMaster);
+    tag.setAttribute(KXMLQLCVCPropertiesGrandMasterVisible, (isGMVisible()) ? KXMLQLCTrue : KXMLQLCFalse);
     prop_root.appendChild(tag);
 
     /* Channel mode */
@@ -586,53 +441,13 @@ bool VCProperties::loadProperties(const QDomElement& root)
             else
                 setKeyRepeatOff(false);
         }
-        else if (tag.tagName() == KXMLQLCVCPropertiesDefaultSlider)
-        {
-            quint32 low = 0;
-            quint32 high = 10;
-            quint32 universe = InputMap::invalidUniverse();
-            quint32 channel = InputMap::invalidChannel();
-            QDomElement subtag;
-
-            /* Bus low limit */
-            str = tag.attribute(KXMLQLCVCPropertiesLowLimit);
-            if (str.isEmpty() == false)
-                low = quint32(str.toUInt());
-
-            /* Bus high limit */
-            str = tag.attribute(KXMLQLCVCPropertiesHighLimit);
-            if (str.isEmpty() == false)
-                high = quint32(str.toUInt());
-
-            /* Sliders' visibility (on by default) */
-            str = tag.attribute(KXMLQLCVCPropertiesDefaultSliderVisible);
-            if (str.isEmpty() == false)
-            {
-                if (str == KXMLQLCTrue)
-                    setSlidersVisible(true);
-                else
-                    setSlidersVisible(false);
-            }
-
-            /* External input */
-            bool ok = loadXMLInput(tag.firstChild().toElement(), &universe, &channel);
-            if (tag.attribute(KXMLQLCBusRole) == KXMLQLCBusFade)
-            {
-                setFadeLimits(low, high);
-                if (ok == true)
-                    setFadeInputSource(universe, channel);
-            }
-            else
-            {
-                setHoldLimits(low, high);
-                if (ok == true)
-                    setHoldInputSource(universe, channel);
-            }
-        }
         else if (tag.tagName() == KXMLQLCVCPropertiesGrandMaster)
         {
             quint32 universe = InputMap::invalidUniverse();
             quint32 channel = InputMap::invalidChannel();
+
+            str = tag.attribute(KXMLQLCVCPropertiesGrandMasterVisible);
+            setGMVisible((str == KXMLQLCTrue) ? true : false);
 
             str = tag.attribute(KXMLQLCVCPropertiesGrandMasterChannelMode);
             setGrandMasterChannelMode(UniverseArray::stringToGMChannelMode(str));

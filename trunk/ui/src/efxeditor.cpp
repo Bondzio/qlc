@@ -39,7 +39,6 @@
 #include "fixtureselection.h"
 #include "efxpreviewarea.h"
 #include "speedspinbox.h"
-#include "vcdockslider.h"
 #include "efxeditor.h"
 #include "fixture.h"
 #include "apputil.h"

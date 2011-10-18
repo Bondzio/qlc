@@ -65,7 +65,6 @@ HEADERS += aboutbox.h \
            vccuelist.h \
            vccuelistproperties.h \
            vcdockarea.h \
-           vcdockslider.h \
            vcframe.h \
            vcframeproperties.h \
            vclabel.h \
@@ -152,7 +151,6 @@ SOURCES += aboutbox.cpp \
            vccuelist.cpp \
            vccuelistproperties.cpp \
            vcdockarea.cpp \
-           vcdockslider.cpp \
            vcframe.cpp \
            vcframeproperties.cpp \
            vclabel.cpp \

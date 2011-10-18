@@ -53,6 +53,10 @@ void VCButton_Test::init()
 {
     m_doc = new Doc(this);
     m_doc->masterTimer()->start();
+
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(4);
+    m_doc->addFixture(fxi);
 }
 
 void VCButton_Test::cleanup()
@@ -471,6 +475,9 @@ void VCButton_Test::toggle()
     QWidget w;
 
     Scene* sc = new Scene(m_doc);
+    sc->setValue(0, 0, 255);
+    sc->setFadeInSpeed(1000);
+    sc->setFadeOutSpeed(1000);
     m_doc->addFunction(sc);
 
     VCButton btn(&w, m_doc);
@@ -481,25 +488,24 @@ void VCButton_Test::toggle()
     btn.setAdjustIntensity(true);
     btn.setIntensityAdjustment(0.2);
 
+    // Mouse button press in design mode doesn't toggle the function
+    QCOMPARE(m_doc->mode(), Doc::Design);
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
     btn.mousePressEvent(&ev);
     QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
-
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
     btn.mouseReleaseEvent(&ev);
     QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
 
+    // Mouse button press in operate mode should toggle the function
     m_doc->setMode(Doc::Operate);
     btn.slotKeyPressed(QKeySequence(QKeySequence::Undo));
     QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 1);
     QCOMPARE(m_doc->masterTimer()->m_functionList[0], sc);
-    QCOMPARE(btn.isOn(), false);
-    sc->preRun(m_doc->masterTimer());
-    QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
-
     btn.slotKeyReleased(QKeySequence(QKeySequence::Undo));
-    QCOMPARE(sc->m_stop, false);
+    QTest::qWait(100); // Allow MasterTimer to take the function under execution
+    QCOMPARE(sc->stopped(), false);
     QCOMPARE(btn.isOn(), true);
 
     ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
@@ -559,6 +565,9 @@ void VCButton_Test::input()
     QWidget w;
 
     Scene* sc = new Scene(m_doc);
+    sc->setValue(0, 0, 255);
+    sc->setFadeInSpeed(1000);
+    sc->setFadeOutSpeed(1000);
     m_doc->addFunction(sc);
 
     VCButton btn(&w, m_doc);
@@ -597,8 +606,7 @@ void VCButton_Test::input()
     m_doc->setMode(Doc::Operate);
 
     btn.slotInputValueChanged(0, 0, 255);
-    QCOMPARE(btn.isOn(), false);
-    sc->preRun(m_doc->masterTimer());
+    QTest::qWait(100);
     QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
 

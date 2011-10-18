@@ -53,7 +53,6 @@
 #include "inputmanager.h"
 #include "mastertimer.h"
 #include "docbrowser.h"
-#include "busmanager.h"
 #include "outputmap.h"
 #include "inputmap.h"
 #include "aboutbox.h"
@@ -130,9 +129,6 @@ App::~App()
 
     if (FunctionManager::instance() != NULL)
         delete FunctionManager::instance();
-
-    if (BusManager::instance() != NULL)
-        delete BusManager::instance();
 
     if (InputManager::instance() != NULL)
         delete InputManager::instance();
@@ -655,12 +651,6 @@ void App::initActions()
     connect(m_functionManagerAction, SIGNAL(triggered(bool)),
             this, SLOT(slotFunctionManager()));
 
-    m_busManagerAction = new QAction(QIcon(":/bus.png"),
-                                     tr("&Buses"), this);
-    m_busManagerAction->setShortcut(QKeySequence(tr("ALT+B", "Manager|Buses")));
-    connect(m_busManagerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotBusManager()));
-
     m_inputManagerAction = new QAction(QIcon(":/input.png"),
                                        tr("&Inputs"), this);
     m_inputManagerAction->setShortcut(QKeySequence(tr("ALT+I", "Manager|Inputs")));
@@ -765,7 +755,6 @@ void App::initMenuBar()
     menuBar()->addMenu(m_managerMenu);
     m_managerMenu->addAction(m_fixtureManagerAction);
     m_managerMenu->addAction(m_functionManagerAction);
-    m_managerMenu->addAction(m_busManagerAction);
     m_managerMenu->addSeparator();
     m_managerMenu->addAction(m_inputManagerAction);
     m_managerMenu->addAction(m_outputManagerAction);
@@ -1095,17 +1084,6 @@ void App::slotFunctionManager()
     parent = centralWidget();
 #endif
     FunctionManager::createAndShow(parent, m_doc);
-}
-
-void App::slotBusManager()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    BusManager::createAndShow(parent);
 }
 
 void App::slotOutputManager()

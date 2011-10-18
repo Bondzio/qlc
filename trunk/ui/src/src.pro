@@ -31,7 +31,6 @@ HEADERS += aboutbox.h \
            app.h \
            apputil.h \
            assignhotkey.h \
-           busmanager.h \
            chasereditor.h \
            collectioneditor.h \
            consolechannel.h \
@@ -117,7 +116,6 @@ SOURCES += aboutbox.cpp \
            app.cpp \
            apputil.cpp \
            assignhotkey.cpp \
-           busmanager.cpp \
            chasereditor.cpp \
            collectioneditor.cpp \
            consolechannel.cpp \

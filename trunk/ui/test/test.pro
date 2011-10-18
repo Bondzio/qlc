@@ -2,7 +2,6 @@ TEMPLATE = subdirs
 SUBDIRS += aboutbox
 SUBDIRS += assignhotkey
 SUBDIRS += addfixture
-SUBDIRS += busmanager
 SUBDIRS += efxpreviewarea
 SUBDIRS += monitorfixture
 SUBDIRS += vcbutton

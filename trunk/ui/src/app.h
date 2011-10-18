@@ -166,7 +166,6 @@ public slots:
 
     void slotFixtureManager();
     void slotFunctionManager();
-    void slotBusManager();
     void slotOutputManager();
     void slotInputManager();
 
@@ -198,7 +197,6 @@ protected:
 
     QAction* m_fixtureManagerAction;
     QAction* m_functionManagerAction;
-    QAction* m_busManagerAction;
     QAction* m_inputManagerAction;
     QAction* m_outputManagerAction;
 

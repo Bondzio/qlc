@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 SUBDIRS += bus
 SUBDIRS += chaser
-#SUBDIRS += chaserrunner
+SUBDIRS += chaserrunner
 SUBDIRS += collection
 SUBDIRS += doc
 SUBDIRS += efx

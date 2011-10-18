@@ -54,6 +54,7 @@ private slots:
     void writeMissingFixture();
     void writeHoldZero();
 
+#if 0
     void writeForwardLoopHoldFiveNextPrevious();
     void writeBackwardLoopHoldFiveNextPrevious();
     void writeForwardSingleShotHoldFive();
@@ -63,7 +64,7 @@ private slots:
     void writeForwardSingleShotHoldFiveAdjustIntensity();
 
     void postRun();
-
+#endif
 private:
     Doc* m_doc;
     Scene* m_scene1;

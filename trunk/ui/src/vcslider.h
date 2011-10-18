@@ -118,7 +118,6 @@ public slots:
 public:
     enum SliderMode
     {
-        Bus,
         Level,
         Playback
     };
@@ -179,65 +178,6 @@ protected:
 public:
     bool invertedAppearance() const;
     void setInvertedAppearance(bool invert);
-
-    /*********************************************************************
-     * Bus
-     *********************************************************************/
-public:
-    /**
-     * Set the ID of the bus to control (when in Bus mode)
-     *
-     * @param bus A bus id
-     */
-    void setBus(quint32 bus);
-
-    /**
-     * Get the ID of the controlled bus
-     *
-     */
-    quint32 bus();
-
-    /**
-     * Set the low limit for bus values set thru the slider
-     */
-    void setBusLowLimit(quint32 limit);
-
-    /**
-     * Get the low limit for bus values set thru the slider
-     */
-    quint32 busLowLimit();
-
-    /**
-     * Set the high limit for bus values set thru the slider
-     */
-    void setBusHighLimit(quint32 limit);
-
-    /**
-     * Get the high limit for bus values set thru the slider
-     */
-    quint32 busHighLimit();
-
-protected:
-    /**
-     * Set the current slider value to the assigned bus
-     */
-    void setBusValue(int value);
-
-public slots:
-    /**
-     * Callback for bus value changes
-     */
-    void slotBusValueChanged(quint32 bus, quint32 value);
-
-    /**
-     * Callback for bus name changes
-     */
-    void slotBusNameChanged(quint32 bus, const QString& name);
-
-protected:
-    quint32 m_bus;
-    quint32 m_busLowLimit;
-    quint32 m_busHighLimit;
 
     /*************************************************************************
      * Class LevelChannel
@@ -492,7 +432,6 @@ protected:
     /*********************************************************************
      * External input
      *********************************************************************/
-
 protected:
     /**
      * Check, whether the given channel's type is QLCInputProfile::Button.
@@ -505,8 +444,7 @@ protected:
 
 protected slots:
     /** Called when an external input device produces input data */
-    void slotInputValueChanged(quint32 universe, quint32 channel,
-                               uchar value);
+    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
 
     /*********************************************************************
      * Load & Save

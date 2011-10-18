@@ -56,7 +56,6 @@ private:
      * General page
      *********************************************************************/
 protected slots:
-    void slotModeBusClicked();
     void slotModeLevelClicked();
     void slotModePlaybackClicked();
 
@@ -70,23 +69,6 @@ protected:
 protected:
     QLCInputSource m_inputSource;
     int m_sliderMode;
-
-    /*********************************************************************
-     * Bus page
-     *********************************************************************/
-protected:
-    /** Fill all buses to the combo on bus page */
-    void fillBusCombo();
-
-protected slots:
-    /** Callback for bus combo item activations */
-    void slotBusComboActivated(int item);
-
-    /** Callback for bus low limit spin value changes */
-    void slotBusLowLimitSpinChanged(int value);
-
-    /** Callback for bus high limit spin value changes */
-    void slotBusHighLimitSpinChanged(int value);
 
     /*********************************************************************
      * Level page
@@ -105,17 +87,13 @@ protected:
     void levelUpdateChannels(QTreeWidgetItem* parent, Fixture* fxi);
 
     /** Update a fixture channel node to the listview on the level page */
-    void levelUpdateChannelNode(QTreeWidgetItem* parent,
-                                Fixture* fxi,
-                                quint32 ch);
+    void levelUpdateChannelNode(QTreeWidgetItem* parent, Fixture* fxi, quint32 ch);
 
     /** Update a channel's capabilities */
-    void levelUpdateCapabilities(QTreeWidgetItem* parent,
-                                 const QLCChannel* channel);
+    void levelUpdateCapabilities(QTreeWidgetItem* parent, const QLCChannel* channel);
 
     /** Update a channel's capability node */
-    void levelUpdateCapabilityNode(QTreeWidgetItem* parent,
-                                   QLCCapability* cap);
+    void levelUpdateCapabilityNode(QTreeWidgetItem* parent, QLCCapability* cap);
 
     /** Get a fixture channel node from the listview on the level page */
     QTreeWidgetItem* levelChannelNode(QTreeWidgetItem* parent, quint32 ch);

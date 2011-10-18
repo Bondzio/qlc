@@ -52,8 +52,6 @@
 #include "app.h"
 #include "doc.h"
 
-static const quint32 KDefaultBusLowLimit ( 0 );
-static const quint32 KDefaultBusHighLimit ( 10 );
 const QSize VCSlider::defaultSize(QSize(60, 200));
 
 /*****************************************************************************
@@ -71,15 +69,10 @@ VCSlider::VCSlider(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     m_bottomLabel = NULL;
     m_tapButton = NULL;
 
-    m_sliderMode = Bus;
     m_valueDisplayStyle = ExactValue;
 
     m_levelLowLimit = 0;
     m_levelHighLimit = UCHAR_MAX;
-
-    m_bus = Bus::defaultFade();
-    m_busLowLimit = KDefaultBusLowLimit;
-    m_busHighLimit = KDefaultBusHighLimit;
 
     m_levelValue = 0;
     m_levelValueChanged = false;
@@ -112,8 +105,7 @@ VCSlider::VCSlider(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     m_slider = new QSlider(this);
     m_slider->setStyle(App::saneStyle());
     m_hbox->addWidget(m_slider);
-    m_slider->setRange(KDefaultBusLowLimit * MasterTimer::frequency(),
-                       KDefaultBusHighLimit * MasterTimer::frequency());
+    m_slider->setRange(0, 255);
     m_slider->setPageStep(1);
     m_slider->setInvertedAppearance(false);
     connect(m_slider, SIGNAL(valueChanged(int)),
@@ -139,10 +131,9 @@ VCSlider::VCSlider(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     setMinimumSize(20, 20);
     resize(VCSlider::defaultSize);
 
-    /* Initialize to bus mode by default */
-    setInvertedAppearance(true);
-    setBus(Bus::defaultFade());
-    setSliderMode(Bus);
+    /* Initialize to playback mode by default */
+    setInvertedAppearance(false);
+    setSliderMode(Playback);
 
     /* Update the slider according to current mode */
     slotModeChanged(mode());
@@ -194,10 +185,8 @@ bool VCSlider::copyFrom(VCWidget* widget)
     setLevelHighLimit(slider->levelHighLimit());
     m_levelChannels = slider->m_levelChannels;
 
-    /* Copy bus stuff */
-    setBusLowLimit(slider->busLowLimit());
-    setBusHighLimit(slider->busHighLimit());
-    setBus(slider->bus());
+    /* Copy playback stuff */
+    m_playbackFunction = slider->m_playbackFunction;
 
     /* Copy slider appearance */
     setValueDisplayStyle(slider->valueDisplayStyle());
@@ -355,10 +344,6 @@ QString VCSlider::sliderModeToString(SliderMode mode)
 {
     switch (mode)
     {
-    case Bus:
-        return QString("Bus");
-        break;
-
     case Level:
         return QString("Level");
         break;
@@ -375,14 +360,10 @@ QString VCSlider::sliderModeToString(SliderMode mode)
 
 VCSlider::SliderMode VCSlider::stringToSliderMode(const QString& mode)
 {
-    if (mode == QString("Bus"))
-        return Bus;
-    else if (mode == QString("Level"))
+    if (mode == QString("Level"))
         return Level;
-    else if (mode == QString("Playback"))
+    else // if (mode == QString("Playback"))
         return Playback;
-    else
-        return Bus;
 }
 
 VCSlider::SliderMode VCSlider::sliderMode()
@@ -392,13 +373,7 @@ VCSlider::SliderMode VCSlider::sliderMode()
 
 void VCSlider::setSliderMode(SliderMode mode)
 {
-    Q_ASSERT(mode >= Bus && mode <= Playback);
-
-    /* Disconnect these to prevent double callbacks and non-needes signals */
-    disconnect(Bus::instance(), SIGNAL(nameChanged(quint32, const QString&)),
-               this, SLOT(slotBusNameChanged(quint32, const QString&)));
-    disconnect(Bus::instance(), SIGNAL(valueChanged(quint32, quint32)),
-               this, SLOT(slotBusValueChanged(quint32, quint32)));
+    Q_ASSERT(mode >= Level && mode <= Playback);
 
     /* Unregister this as a DMX source if the new mode is not "Level" or "Playback" */
     if ((m_sliderMode == Level && mode != Level) ||
@@ -409,26 +384,7 @@ void VCSlider::setSliderMode(SliderMode mode)
 
     m_sliderMode = mode;
 
-    if (mode == Bus)
-    {
-        /* Set the slider range */
-        m_slider->setRange(busLowLimit() * MasterTimer::frequency(),
-                           busHighLimit() * MasterTimer::frequency());
-        m_slider->setValue(Bus::instance()->value(bus()));
-        slotSliderMoved(m_slider->value());
-
-        /* Reconnect to bus emitter */
-        connect(Bus::instance(), SIGNAL(nameChanged(quint32, const QString&)),
-                this, SLOT(slotBusNameChanged(quint32, const QString&)));
-        connect(Bus::instance(), SIGNAL(valueChanged(quint32, quint32)),
-                this, SLOT(slotBusValueChanged(quint32, quint32)));
-
-        m_bottomLabel->hide();
-        m_tapButton->show();
-
-        m_time->start();
-    }
-    else if (mode == Level)
+    if (mode == Level)
     {
         /* Set the slider range */
         uchar level = levelValue();
@@ -453,58 +409,6 @@ void VCSlider::setSliderMode(SliderMode mode)
 
         m_doc->masterTimer()->registerDMXSource(this);
     }
-}
-
-/*****************************************************************************
- * Bus
- *****************************************************************************/
-
-void VCSlider::setBus(quint32 bus)
-{
-    m_bus = bus;
-    setCaption(Bus::instance()->idName(bus));
-}
-
-quint32 VCSlider::bus()
-{
-    return m_bus;
-}
-
-void VCSlider::setBusLowLimit(quint32 limit)
-{
-    m_busLowLimit = limit;
-}
-
-quint32 VCSlider::busLowLimit()
-{
-    return m_busLowLimit;
-}
-
-void VCSlider::setBusHighLimit(quint32 limit)
-{
-    m_busHighLimit = limit;
-}
-
-quint32 VCSlider::busHighLimit()
-{
-    return m_busHighLimit;
-}
-
-void VCSlider::setBusValue(int value)
-{
-    Bus::instance()->setValue(m_bus, value);
-}
-
-void VCSlider::slotBusValueChanged(quint32 bus, quint32 value)
-{
-    if (bus == m_bus && m_slider->isSliderDown() == false)
-        m_slider->setValue(value);
-}
-
-void VCSlider::slotBusNameChanged(quint32 bus, const QString&)
-{
-    if (m_bus == bus)
-        setBus(bus);
 }
 
 /*****************************************************************************
@@ -761,29 +665,6 @@ void VCSlider::slotSliderMoved(int value)
 
     switch (sliderMode())
     {
-    case Bus:
-    {
-        setBusValue(value);
-
-        /* Set text for the top label */
-        if (valueDisplayStyle() == ExactValue)
-        {
-            num.sprintf("%.2fs", ((float) value / (float) MasterTimer::frequency()));
-        }
-        else
-        {
-            /* Horrible code... */
-            num.sprintf("%.3d%%", static_cast<int>
-                        (((float) ((m_busHighLimit * MasterTimer::frequency())
-                                   - value) / (float) ((m_busHighLimit
-                                                        - m_busLowLimit) *
-                                                       (float) MasterTimer::frequency())) * 100.0));
-        }
-
-        setTopLabelText(num);
-    }
-    break;
-
     case Level:
     {
         setLevelValue(value);
@@ -881,8 +762,7 @@ QString VCSlider::tapButtonText()
 void VCSlider::slotTapButtonClicked()
 {
     int t = m_time->elapsed();
-    m_slider->setValue(static_cast<int> (t * 0.001 * MasterTimer::frequency()));
-    Bus::instance()->tap(m_bus);
+    qDebug() << "TODO!" << t;
     m_time->restart();
 }
 
@@ -922,7 +802,7 @@ void VCSlider::slotInputValueChanged(quint32 universe, quint32 channel,
 
     if (inputSource() == QLCInputSource(universe, channel))
     {
-        if (m_sliderMode == Bus && isButton(universe, channel) == true)
+        if (isButton(universe, channel) == true)
         {
             // Check value here so that value == 0 won't end up in the else branch
             if (value > 0)
@@ -930,7 +810,7 @@ void VCSlider::slotInputValueChanged(quint32 universe, quint32 channel,
         }
         else
         {
-            /* Scale the from input value range to this slider's range */
+            /* Scale from input value range to this slider's range */
             float val;
             val = SCALE((float) value, (float) 0, (float) UCHAR_MAX,
                         (float) m_slider->minimum(),
@@ -956,7 +836,7 @@ bool VCSlider::loadXML(const QDomElement* root)
     int w = 0;
     int h = 0;
 
-    SliderMode sliderMode = Bus;
+    SliderMode sliderMode = Playback;
     QDomElement tag;
     QDomNode node;
     QString caption;
@@ -998,16 +878,6 @@ bool VCSlider::loadXML(const QDomElement* root)
             str = tag.attribute(KXMLQLCVCSliderValueDisplayStyle);
             setValueDisplayStyle(stringToValueDisplayStyle(str));
         }
-        else if (tag.tagName() == KXMLQLCVCSliderBus)
-        {
-            str = tag.attribute(KXMLQLCVCSliderBusLowLimit);
-            setBusLowLimit(str.toUInt());
-
-            str = tag.attribute(KXMLQLCVCSliderBusHighLimit);
-            setBusHighLimit(str.toUInt());
-
-            setBus(tag.text().toUInt());
-        }
         else if (tag.tagName() == KXMLQLCVCSliderLevel)
         {
             loadXMLLevel(&tag);
@@ -1030,8 +900,7 @@ bool VCSlider::loadXML(const QDomElement* root)
 
     /* Set the mode last, after everything else has been set */
     setSliderMode(sliderMode);
-    if (sliderMode != Bus)
-        setCaption(caption);
+    setCaption(caption);
 
     return true;
 }
@@ -1162,21 +1031,6 @@ bool VCSlider::saveXML(QDomDocument* doc, QDomElement* vc_root)
     /* Value display style */
     str = valueDisplayStyleToString(valueDisplayStyle());
     tag.setAttribute(KXMLQLCVCSliderValueDisplayStyle, str);
-
-    /* Bus */
-    tag = doc->createElement(KXMLQLCVCSliderBus);
-    root.appendChild(tag);
-    str.setNum(bus());
-    text = doc->createTextNode(str);
-    tag.appendChild(text);
-
-    /* Bus low limit */
-    str.setNum(busLowLimit());
-    tag.setAttribute(KXMLQLCVCSliderBusLowLimit, str);
-
-    /* Bus high limit */
-    str.setNum(busHighLimit());
-    tag.setAttribute(KXMLQLCVCSliderBusHighLimit, str);
 
     /* Level */
     tag = doc->createElement(KXMLQLCVCSliderLevel);

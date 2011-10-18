@@ -68,10 +68,6 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
     connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
     addAction(action);
 
-    /* Bus page connections */
-    connect(m_switchToBusModeButton, SIGNAL(clicked()),
-            this, SLOT(slotModeBusClicked()));
-
     /* Level page connections */
     connect(m_levelLowLimitSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotLevelLowSpinChanged(int)));
@@ -112,9 +108,6 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
     switch (m_sliderMode)
     {
     default:
-    case VCSlider::Bus:
-        slotModeBusClicked();
-        break;
     case VCSlider::Level:
         slotModeLevelClicked();
         break;
@@ -153,17 +146,6 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
             this, SLOT(slotChooseInputClicked()));
 
     /*********************************************************************
-     * Bus page
-     *********************************************************************/
-
-    /* Bus combo contents */
-    fillBusCombo();
-
-    /* Bus value limit spins */
-    m_busLowLimitSpin->setValue(m_slider->busLowLimit());
-    m_busHighLimitSpin->setValue(m_slider->busHighLimit());
-
-    /*********************************************************************
      * Level page
      *********************************************************************/
 
@@ -195,43 +177,11 @@ VCSliderProperties::~VCSliderProperties()
  * General page
  *****************************************************************************/
 
-void VCSliderProperties::slotModeBusClicked()
-{
-    m_sliderMode = VCSlider::Bus;
-
-    m_nameEdit->setEnabled(false);
-    slotBusComboActivated(m_busCombo->currentIndex());
-    m_sliderMovementInvertedRadio->setChecked(true);
-
-    m_busValueRangeGroup->show();
-    m_busGroup->show();
-
-    m_levelValueRangeGroup->hide();
-    m_levelList->hide();
-    m_levelAllButton->hide();
-    m_levelNoneButton->hide();
-    m_levelInvertButton->hide();
-    m_levelByGroupButton->hide();
-
-    m_playbackFunctionGroup->hide();
-
-    m_switchToBusModeButton->hide();
-    m_switchToLevelModeButton->show();
-    m_switchToPlaybackModeButton->show();
-
-    m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
-    m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
-}
-
 void VCSliderProperties::slotModeLevelClicked()
 {
     m_sliderMode = VCSlider::Level;
 
     m_nameEdit->setEnabled(true);
-    m_busValueRangeGroup->hide();
-    m_busGroup->hide();
-    m_sliderMovementNormalRadio->setChecked(true);
 
     m_levelValueRangeGroup->show();
     m_levelList->show();
@@ -242,11 +192,9 @@ void VCSliderProperties::slotModeLevelClicked()
 
     m_playbackFunctionGroup->hide();
 
-    m_switchToBusModeButton->show();
     m_switchToLevelModeButton->hide();
     m_switchToPlaybackModeButton->show();
 
-    m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
@@ -256,9 +204,6 @@ void VCSliderProperties::slotModePlaybackClicked()
     m_sliderMode = VCSlider::Playback;
 
     m_nameEdit->setEnabled(true);
-    m_busValueRangeGroup->hide();
-    m_busGroup->hide();
-    m_sliderMovementNormalRadio->setChecked(true);
 
     m_levelValueRangeGroup->hide();
     m_levelList->hide();
@@ -270,10 +215,8 @@ void VCSliderProperties::slotModePlaybackClicked()
     m_playbackFunctionGroup->show();
 
     m_switchToLevelModeButton->show();
-    m_switchToBusModeButton->show();
     m_switchToPlaybackModeButton->hide();
 
-    m_busSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_levelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_playbackSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
@@ -321,36 +264,6 @@ void VCSliderProperties::updateInputSource()
 
     m_inputUniverseEdit->setText(uniName);
     m_inputChannelEdit->setText(chName);
-}
-
-/*****************************************************************************
- * Bus page
- *****************************************************************************/
-
-void VCSliderProperties::fillBusCombo()
-{
-    m_busCombo->clear();
-    m_busCombo->addItems(Bus::instance()->idNames());
-    m_busCombo->setCurrentIndex(m_slider->bus());
-}
-
-void VCSliderProperties::slotBusComboActivated(int item)
-{
-    m_nameEdit->setText(Bus::instance()->name(item));
-}
-
-void VCSliderProperties::slotBusLowLimitSpinChanged(int value)
-{
-    /* Don't allow the low limit to get higher than the high limit */
-    if (value >= m_busHighLimitSpin->value())
-        m_busHighLimitSpin->setValue(value + 1);
-}
-
-void VCSliderProperties::slotBusHighLimitSpinChanged(int value)
-{
-    /* Don't allow the high limit to get lower than the low limit */
-    if (value <= m_busLowLimitSpin->value())
-        m_busLowLimitSpin->setValue(value - 1);
 }
 
 /*****************************************************************************
@@ -732,11 +645,6 @@ void VCSliderProperties::storeLevelChannels()
 
 void VCSliderProperties::accept()
 {
-    /* Bus page */
-    m_slider->setBus(m_busCombo->currentIndex());
-    m_slider->setBusLowLimit(m_busLowLimitSpin->value());
-    m_slider->setBusHighLimit(m_busHighLimitSpin->value());
-
     /* Level page */
     m_slider->setLevelLowLimit(m_levelLowLimitSpin->value());
     m_slider->setLevelHighLimit(m_levelHighLimitSpin->value());

@@ -33,7 +33,7 @@
 #include "inputmap.h"
 #undef protected
 
-#define TESTPLUGINDIR "../../inputpluginstub"
+#define TESTPLUGINDIR "../inputpluginstub"
 
 void InputPatch_Test::defaults()
 {

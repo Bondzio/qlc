@@ -33,8 +33,8 @@
 #include "outputmap.h"
 #undef protected
 
-#define TESTPLUGINDIR "../../outputpluginstub"
-#define INPUT_TESTPLUGINDIR "../../inputpluginstub"
+#define TESTPLUGINDIR "../outputpluginstub"
+#define INPUT_TESTPLUGINDIR "../inputpluginstub"
 #define ENGINEDIR "../../src"
 
 static QDir testPluginDir()

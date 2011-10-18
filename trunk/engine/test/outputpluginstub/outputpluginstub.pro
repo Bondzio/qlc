@@ -5,8 +5,8 @@ LANGUAGE = C++
 TARGET   = outputpluginstub
 
 CONFIG      += plugin
-INCLUDEPATH += ../../plugins/interfaces
+INCLUDEPATH += ../../../plugins/interfaces
 
 HEADERS += outputpluginstub.h \
-           ../../plugins/interfaces/qlcoutplugin.h
+           ../../../plugins/interfaces/qlcoutplugin.h
 SOURCES += outputpluginstub.cpp

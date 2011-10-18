@@ -33,8 +33,8 @@
 #include "inputmap.h"
 #undef protected
 
-#define TESTPLUGINDIR "../../inputpluginstub"
-#define OUTPUT_TESTPLUGINDIR "../../outputpluginstub"
+#define TESTPLUGINDIR "../inputpluginstub"
+#define OUTPUT_TESTPLUGINDIR "../outputpluginstub"
 #define ENGINEDIR "../../src"
 #define PROFILEDIR "../../../inputprofiles"
 

@@ -33,3 +33,7 @@ SUBDIRS += scene
 SUBDIRS += scenevalue
 SUBDIRS += script
 SUBDIRS += universearray
+
+# Stubs
+SUBDIRS += inputpluginstub
+SUBDIRS += outputpluginstub

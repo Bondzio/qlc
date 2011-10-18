@@ -8,7 +8,7 @@ CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../../src
-INCLUDEPATH  += ../../inputpluginstub
+INCLUDEPATH  += ../inputpluginstub
 QMAKE_LIBDIR += ../../src
 LIBS         += -lqlcengine
 

@@ -5,8 +5,8 @@ LANGUAGE = C++
 TARGET   = inputpluginstub
 
 CONFIG      += plugin
-INCLUDEPATH += ../../plugins/interfaces
+INCLUDEPATH += ../../../plugins/interfaces
 
 HEADERS += inputpluginstub.h \
-           ../../plugins/interfaces/qlcinplugin.h
+           ../../../plugins/interfaces/qlcinplugin.h
 SOURCES += inputpluginstub.cpp

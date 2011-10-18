@@ -32,7 +32,7 @@
 #include "outputmap.h"
 #undef protected
 
-#define TESTPLUGINDIR "../../outputpluginstub"
+#define TESTPLUGINDIR "../outputpluginstub"
 
 static QDir testPluginDir()
 {

@@ -308,11 +308,7 @@ bool RGBMatrix::loadXML(const QDomElement* root)
     {
         tag = node.toElement();
 
-        if (tag.tagName() == KXMLQLCBus)
-        {
-            /* Ignore */
-        }
-        else if (tag.tagName() == KXMLQLCFunctionSpeed)
+        if (tag.tagName() == KXMLQLCFunctionSpeed)
         {
             loadXMLSpeed(tag);
         }

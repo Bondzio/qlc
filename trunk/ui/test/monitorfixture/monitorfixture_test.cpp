@@ -37,7 +37,6 @@
 void MonitorFixture_Test::initTestCase()
 {
     m_doc = new Doc(this);
-    Bus::init(this);
 }
 
 void MonitorFixture_Test::cleanupTestCase()

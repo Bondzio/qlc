@@ -98,10 +98,6 @@ protected slots:
 protected:
     QTreeWidget* m_tree;
 
-protected slots:
-    /** Set the selected bus to all selected functions */
-    void slotBusTriggered(QAction* action);
-
     /*********************************************************************
      * Menus, toolbar & actions
      *********************************************************************/
@@ -111,9 +107,6 @@ protected:
     void initToolbar();
 
 protected slots:
-    /** When bus name changes, its action must also be updated */
-    void slotBusNameChanged(quint32 id, const QString& name);
-
     void slotAddScene();
     void slotAddChaser();
     void slotAddCollection();
@@ -133,7 +126,6 @@ protected:
 protected:
     QMenu* m_addMenu;
     QMenu* m_editMenu;
-    QMenu* m_busMenu;
 
     QToolBar* m_toolbar;
 
@@ -149,9 +141,6 @@ protected:
     QAction* m_editAction;
     QAction* m_deleteAction;
     QAction* m_selectAllAction;
-
-    QActionGroup* m_busGroup;
-    QToolButton* m_busButton;
 
     /*********************************************************************
      * Helpers

@@ -36,7 +36,7 @@ public:
 
     /**
      * Add a channel that shall be faded from ch.start() to ch.target() within
-     * the time specified by ch.bus(). If ch.target() == 0, the channel will
+     * the time specified by ch.fadeTime(). If ch.target() == 0, the channel will
      * be removed automatically from the fader when done.
      *
      * If the fader already contains the same channel, the one whose current

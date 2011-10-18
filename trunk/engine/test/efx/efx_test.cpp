@@ -39,6 +39,7 @@
 #include "scene.h"
 #include "doc.h"
 #include "efx.h"
+#include "bus.h"
 #undef private
 #undef protected
 
@@ -1776,8 +1777,6 @@ void EFX_Test::loadAxisNoXY()
 void EFX_Test::loadSuccessLegacy()
 {
     QDomDocument doc;
-
-    Bus::init(this);
 
     QDomElement root = doc.createElement("Function");
     root.setAttribute("Type", "EFX");

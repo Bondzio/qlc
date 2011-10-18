@@ -539,7 +539,7 @@ void Doc_Test::save()
 
     QVERIFY(m_doc->saveXML(&document, &root) == true);
 
-    unsigned int fixtures = 0, functions = 0, buses = 0;
+    uint fixtures = 0, functions = 0;
     QDomNode node = root.firstChild();
     QVERIFY(node.toElement().tagName() == "Engine");
 
@@ -552,7 +552,7 @@ void Doc_Test::save()
         else if (tag.tagName() == "Function")
             functions++;
         else if (tag.tagName() == "Bus")
-            buses++;
+            QFAIL("Bus tags should not be saved anymore!");
         else
             QFAIL(QString("Unexpected tag: %1")
                   .arg(tag.tagName()).toAscii());
@@ -562,7 +562,6 @@ void Doc_Test::save()
 
     QVERIFY(fixtures == 3);
     QVERIFY(functions == 4);
-    QVERIFY(buses == Bus::count());
 
     /* Saving doesn't implicitly reset modified status */
     QVERIFY(m_doc->isModified() == true);
@@ -642,6 +641,7 @@ QDomElement Doc_Test::createCollectionNode(QDomDocument& doc, quint32 id)
 
 QDomElement Doc_Test::createBusNode(QDomDocument& doc, quint32 id, quint32 val)
 {
+    // Used to test that loading legacy Bus tags won't screw up Doc
     QDomElement root = doc.createElement("Bus");
     doc.appendChild(root);
     root.setAttribute("ID", id);

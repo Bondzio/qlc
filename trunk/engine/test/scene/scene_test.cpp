@@ -36,6 +36,7 @@
 #include "scene.h"
 #include "chaser.h"
 #include "doc.h"
+#include "bus.h"
 #undef private
 #undef protected
 
@@ -43,8 +44,6 @@
 
 void Scene_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

@@ -60,8 +60,7 @@
 
 #define KColumnName 0
 #define KColumnType 1
-#define KColumnBus  2
-#define KColumnID   3
+#define KColumnID   2
 
 FunctionManager* FunctionManager::s_instance = NULL;
 
@@ -291,33 +290,9 @@ void FunctionManager::initMenu()
     m_editMenu->addAction(m_deleteAction);
     m_editMenu->addSeparator();
 
-    /* Bus menu */
-    m_busGroup = new QActionGroup(this);
-    m_busGroup->setExclusive(false);
-    m_busMenu = new QMenu(menuBar);
-    m_busMenu->setTitle(tr("Assign &bus"));
-    for (quint32 id = 0; id < Bus::count(); id++)
-    {
-        /* <xx>: <name> */
-        action = new QAction(Bus::instance()->idName(id), this);
-        action->setCheckable(false);
-        action->setData(id);
-        m_busGroup->addAction(action);
-        m_busMenu->addAction(action);
-    }
-
-    /* Catch bus assignment changes */
-    connect(m_busGroup, SIGNAL(triggered(QAction*)),
-            this, SLOT(slotBusTriggered(QAction*)));
-
-    /* Catch bus name changes */
-    connect(Bus::instance(), SIGNAL(nameChanged(quint32, const QString&)),
-            this, SLOT(slotBusNameChanged(quint32, const QString&)));
-
     /* Construct menu bar */
     menuBar->addMenu(m_addMenu);
     menuBar->addMenu(m_editMenu);
-    m_editMenu->addMenu(m_busMenu);
 }
 
 void FunctionManager::initToolbar()
@@ -338,62 +313,8 @@ void FunctionManager::initToolbar()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_editAction);
     m_toolbar->addAction(m_cloneAction);
-    m_busButton = new QToolButton(this);
-    m_busButton->setIcon(QIcon(":/bus.png"));
-    m_busButton->setMenu(m_busMenu);
-    m_busButton->setPopupMode(QToolButton::InstantPopup);
-    m_toolbar->addWidget(m_busButton);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_deleteAction);
-}
-
-void FunctionManager::slotBusTriggered(QAction* action)
-{
-    quint32 bus;
-
-    Q_ASSERT(action != NULL);
-
-    bus = action->data().toUInt();
-
-    /* Set the selected bus to all selected functions */
-    QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item;
-        Function* function;
-
-        item = it.next();
-        Q_ASSERT(item != NULL);
-
-        function = m_doc->function(item->text(KColumnID).toUInt());
-        Q_ASSERT(function != NULL);
-
-        //function->setBus(bus);
-        updateFunctionItem(item, function);
-    }
-}
-
-void FunctionManager::slotBusNameChanged(quint32 id, const QString& name)
-{
-    /* Change the menu item's name to reflect the new bus name */
-    QListIterator <QAction*> it(m_busGroup->actions());
-    while (it.hasNext() == true)
-    {
-        QAction* action = it.next();
-        Q_ASSERT(action != NULL);
-
-        if (action->data().toUInt() == id)
-        {
-            action->setText(QString("%1: %2").arg(id + 1).arg(name));
-            break;
-        }
-    }
-
-    /* Change all affected function item's bus names as well */
-    QListIterator <QTreeWidgetItem*> twit =
-        m_tree->findItems(QString("%1: ").arg(id + 1), Qt::MatchStartsWith, KColumnBus);
-    while (twit.hasNext() == true)
-        twit.next()->setText(KColumnBus, QString("%1: %2").arg(id + 1).arg(name));
 }
 
 void FunctionManager::slotAddScene()
@@ -562,9 +483,6 @@ void FunctionManager::updateActionStatus()
 
         m_deleteAction->setEnabled(true);
         m_selectAllAction->setEnabled(true);
-
-        m_busGroup->setEnabled(true);
-        m_busButton->setEnabled(true);
     }
     else
     {
@@ -574,9 +492,6 @@ void FunctionManager::updateActionStatus()
 
         m_deleteAction->setEnabled(false);
         m_selectAllAction->setEnabled(false);
-
-        m_busGroup->setEnabled(false);
-        m_busButton->setEnabled(false);
     }
 }
 
@@ -589,9 +504,9 @@ void FunctionManager::initTree()
     m_tree = new QTreeWidget(this);
     layout()->addWidget(m_tree);
 
-    // Add two columns for function and bus
+    // Add two columns for function and type
     QStringList labels;
-    labels << tr("Function") << tr("Type") << tr("Bus");
+    labels << tr("Function") << tr("Type");
     m_tree->setHeaderLabels(labels);
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
     m_tree->setRootIsDecorated(false);
@@ -632,7 +547,6 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
     item->setText(KColumnName, function->name());
     item->setIcon(KColumnName, functionIcon(function));
     item->setText(KColumnType, function->typeString());
-    //item->setText(KColumnBus, Bus::instance()->idName(function->bus()));
     item->setText(KColumnID, QString::number(function->id()));
 }
 

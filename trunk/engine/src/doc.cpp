@@ -38,6 +38,7 @@
 #include "scene.h"
 #include "efx.h"
 #include "doc.h"
+#include "bus.h"
 
 Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     : QObject(parent)
@@ -50,11 +51,7 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     , m_latestFixtureGroupId(0)
     , m_latestFunctionId(0)
 {
-    /* Connect to bus emitter so that Doc can be marked as modified when
-       bus name changes. */
-    connect(Bus::instance(), SIGNAL(nameChanged(quint32,const QString&)),
-            this, SLOT(slotBusNameChanged()));
-
+    Bus::init(this);
     resetModified();
 }
 
@@ -110,11 +107,6 @@ void Doc::clearContents()
     m_latestFunctionId = 0;
     m_latestFixtureId = 0;
     m_latestFixtureGroupId = 0;
-}
-
-void Doc::slotBusNameChanged()
-{
-    setModified();
 }
 
 /*****************************************************************************
@@ -549,9 +541,6 @@ bool Doc::saveXML(QDomDocument* doc, QDomElement* wksp_root)
         Q_ASSERT(grp != NULL);
         grp->saveXML(doc, &root);
     }
-
-    /* Write buses */
-    Bus::instance()->saveXML(doc, &root);
 
     return true;
 }

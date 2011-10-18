@@ -35,6 +35,7 @@
 #include "scene.h"
 #include "doc.h"
 #include "efx.h"
+#include "bus.h"
 #undef protected
 #undef private
 
@@ -46,7 +47,6 @@
 void Chaser_Test::initTestCase()
 {
     m_doc = NULL;
-    Bus::init(this);
 }
 
 void Chaser_Test::cleanupTestCase()

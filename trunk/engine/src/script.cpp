@@ -157,11 +157,7 @@ bool Script::loadXML(const QDomElement* root)
     {
         tag = node.toElement();
 
-        if (tag.tagName() == KXMLQLCBus)
-        {
-            /* Ignore */
-        }
-        else if (tag.tagName() == KXMLQLCFunctionSpeed)
+        if (tag.tagName() == KXMLQLCFunctionSpeed)
         {
             loadXMLSpeed(tag);
         }
@@ -484,7 +480,6 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
     quint32 ch = 0;
     uchar value = 0;
     double time = 0;
-    quint32 bus = Bus::invalid();
 
     id = tokens[0][1].toUInt(&ok);
     if (ok == false)
@@ -503,8 +498,6 @@ QString Script::handleSetFixture(const QList<QStringList>& tokens, UniverseArray
                 ch = list[1].toUInt(&ok);
             else if (list[0] == "time")
                 time = list[1].toDouble(&ok);
-            else if (list[0] == "bus")
-                bus = list[1].toUInt(&ok);
             else
                 return QString("Unrecognized keyword: %1").arg(list[0]);
 

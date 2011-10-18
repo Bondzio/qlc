@@ -4,7 +4,6 @@
         <file alias="back.png">../../gfx/back.png</file>
         <file alias="beam.png">../../gfx/beam.png</file>
         <file alias="blackout.png">../../gfx/blackout.png</file>
-        <file alias="bus.png">../../gfx/bus.png</file>
         <file alias="button.png">../../gfx/button.png</file>
         <file alias="buttonmatrix.png">../../gfx/buttonmatrix.png</file>
         <file alias="chaser.png">../../gfx/chaser.png</file>

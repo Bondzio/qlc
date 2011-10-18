@@ -40,8 +40,6 @@
 
 void MasterTimer_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

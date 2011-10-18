@@ -58,7 +58,6 @@
 #include "aboutbox.h"
 #include "monitor.h"
 #include "vcframe.h"
-#include "bus.h"
 #include "app.h"
 #include "doc.h"
 
@@ -228,9 +227,6 @@ void App::init()
         move(available.x(), available.y());
     }
 #endif
-
-    // Initialize buses
-    Bus::init(this);
 
     // The main engine object
     initDoc();
@@ -1389,11 +1385,6 @@ bool App::loadXML(const QDomDocument* doc)
         {
             /* Legacy support code, nowadays in Doc */
             Function::loader(&tag, m_doc);
-        }
-        else if (tag.tagName() == KXMLQLCBus)
-        {
-            /* Legacy support code, nowadays in Doc */
-            Bus::instance()->loadXML(&tag);
         }
         else if (tag.tagName() == KXMLQLCCreator)
         {

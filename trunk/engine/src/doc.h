@@ -34,7 +34,6 @@
 #include "inputmap.h"
 #include "function.h"
 #include "fixture.h"
-#include "bus.h"
 
 class QDomDocument;
 class QString;
@@ -64,10 +63,6 @@ public:
 
     /** Remove all functions and fixtures from the doc, signalling each removal. */
     void clearContents();
-
-private slots:
-    /** Catches bus name changes so that Doc can be marked as modified */
-    void slotBusNameChanged();
 
     /*********************************************************************
      * Engine components

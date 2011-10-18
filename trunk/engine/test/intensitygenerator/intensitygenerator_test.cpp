@@ -35,7 +35,6 @@
 
 void IntensityGenerator_Test::initTestCase()
 {
-    Bus::init(this);
     QDir dir(INTERNAL_FIXTUREDIR);
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));

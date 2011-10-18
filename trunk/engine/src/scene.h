@@ -35,12 +35,11 @@
 /**
  * Scene encapsulates the values of selected channels from one or more fixture
  * instances. When a scene is started, the duration it takes for its channels
- * to reach their target values depends on the function's speed setting. Bus
- * number 1 (Default Fade) is assigned to all newly created scenes by default.
- * If the bus' value is 0 seconds, scene values are set immediately and no
+ * to reach their target values depends on the function's fade in speed setting.
+ * For HTP channels, the fade out setting is also used when the scene is toggled off.
+ * If the speed value is 0 seconds, scene values are set immediately and no
  * fading occurs. Otherwise values are always faded from what they currently
  * are, to the target values defined in the scene (with SceneValue instances).
- * Channels that are not enabled in the scene will not be touched at all.
  */
 class Scene : public Function, public DMXSource
 {

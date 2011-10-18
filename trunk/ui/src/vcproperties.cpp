@@ -29,7 +29,6 @@
 #include "outputmap.h"
 #include "inputmap.h"
 #include "vcframe.h"
-#include "bus.h"
 #include "doc.h"
 
 /*****************************************************************************

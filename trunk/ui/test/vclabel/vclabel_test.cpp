@@ -38,7 +38,6 @@
 #include "outputmap.h"
 #include "inputmap.h"
 #include "doc.h"
-#include "bus.h"
 
 #undef private
 #undef protected
@@ -46,7 +45,6 @@
 void VCLabel_Test::initTestCase()
 {
     m_doc = NULL;
-    Bus::init(this);
 }
 
 void VCLabel_Test::init()

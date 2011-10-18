@@ -32,7 +32,6 @@
 #include "vcdockarea.h"
 #include "outputmap.h"
 #include "inputmap.h"
-#include "bus.h"
 
 VCDockArea::VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap)
     : QFrame(parent)

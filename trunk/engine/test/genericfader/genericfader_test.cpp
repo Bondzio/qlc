@@ -25,7 +25,6 @@
 #include "universearray.h"
 #include "fadechannel.h"
 #include "qlcchannel.h"
-#include "bus.h"
 #include "doc.h"
 
 #define private public
@@ -34,7 +33,6 @@
 
 void GenericFader_Test::initTestCase()
 {
-    Bus::init(this);
     m_doc = new Doc(this);
 }
 

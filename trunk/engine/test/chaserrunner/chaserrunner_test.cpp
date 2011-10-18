@@ -34,7 +34,6 @@
 #include "qlcfile.h"
 #include "fixture.h"
 #include "scene.h"
-#include "bus.h"
 #include "doc.h"
 #undef private
 
@@ -42,8 +41,6 @@
 
 void ChaserRunner_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);
@@ -638,10 +635,6 @@ void ChaserRunner_Test::writeMissingFixture()
     ChaserRunner cr(m_doc, steps, 10, 20, 30, Function::Forward, Function::Loop);
     UniverseArray ua(512);
     MasterTimerStub timer(m_doc, ua);
-
-    Bus::instance()->setValue(Bus::defaultFade(), 42); // Make sure this bus is not used
-    Bus::instance()->setValue(10, 5);
-    Bus::instance()->setValue(Bus::defaultHold(), 5);
 
     for (int i = 0; i < 120; i++)
         QVERIFY(cr.write(&timer, &ua) == true);

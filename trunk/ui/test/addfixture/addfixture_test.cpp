@@ -30,7 +30,7 @@
 #include "qlcfile.h"
 #include "fixture.h"
 #include "doc.h"
-#include "bus.h"
+
 #include "addfixture_test.h"
 #define protected public
 #include "addfixture.h"
@@ -40,8 +40,6 @@
 
 void AddFixture_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

@@ -35,7 +35,6 @@
 #include "speedspinbox.h"
 #include "rgbmatrix.h"
 #include "apputil.h"
-#include "bus.h"
 #include "doc.h"
 
 #define SETTINGS_GEOMETRY "rgbmatrixeditor/geometry"

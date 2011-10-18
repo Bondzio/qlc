@@ -34,14 +34,11 @@
 #include "universearray.h"
 #include "qlcfile.h"
 #include "doc.h"
-#include "bus.h"
 
 #define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void VCXYPadFixtureEditor_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

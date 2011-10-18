@@ -29,7 +29,6 @@
 #include "script_test.h"
 #include "script.h"
 #include "doc.h"
-#include "bus.h"
 
 #undef private
 
@@ -47,9 +46,7 @@ static QString script0(
 
 void Script_Test::initTestCase()
 {
-    Bus::init(this);
 }
-
 void Script_Test::initial()
 {
     Doc doc(this);

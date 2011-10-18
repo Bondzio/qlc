@@ -41,14 +41,12 @@
 #include "chaser.h"
 #include "scene.h"
 #include "doc.h"
-#include "bus.h"
 
 #undef private
 #undef protected
 
 void VCCueList_Test::initTestCase()
 {
-    Bus::init(this);
 }
 
 void VCCueList_Test::init()

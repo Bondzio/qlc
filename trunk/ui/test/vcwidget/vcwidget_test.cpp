@@ -36,13 +36,11 @@
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "doc.h"
-#include "bus.h"
 #undef private
 #undef protected
 
 void VCWidget_Test::initTestCase()
 {
-    Bus::init(this);
 }
 
 void VCWidget_Test::init()

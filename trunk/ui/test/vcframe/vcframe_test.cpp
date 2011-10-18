@@ -38,14 +38,12 @@
 #include "vcframe.h"
 #include "vcframe.h"
 #include "doc.h"
-#include "bus.h"
 
 #undef protected
 
 void VCFrame_Test::initTestCase()
 {
     m_doc = NULL;
-    Bus::init(this);
 }
 
 void VCFrame_Test::init()

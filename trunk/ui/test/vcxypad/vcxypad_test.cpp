@@ -40,7 +40,6 @@
 #include "vcframe.h"
 #include "qlcfile.h"
 #include "doc.h"
-#include "bus.h"
 #undef private
 #undef protected
 
@@ -48,7 +47,6 @@
 
 void VCXYPad_Test::initTestCase()
 {
-    Bus::init(this);
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

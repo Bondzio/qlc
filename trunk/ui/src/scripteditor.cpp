@@ -36,7 +36,6 @@
 #include "inputmap.h"
 #include "script.h"
 #include "doc.h"
-#include "bus.h"
 
 ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
     : QDialog(parent)

@@ -38,7 +38,6 @@
 #include "vcframe.h"
 #include "scene.h"
 #include "doc.h"
-#include "bus.h"
 
 #undef private
 #undef protected
@@ -46,7 +45,6 @@
 void VCButton_Test::initTestCase()
 {
     m_doc = NULL;
-    Bus::init(this);
 }
 
 void VCButton_Test::init()

@@ -32,14 +32,11 @@
 #include "fixture_test.h"
 #include "fixture.h"
 #include "doc.h"
-#include "bus.h"
 
 #define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void Fixture_Test::initTestCase()
 {
-    Bus::init(this);
-
     m_doc = new Doc(this);
 
     QDir dir(INTERNAL_FIXTUREDIR);

@@ -32,13 +32,11 @@
 #include "vcwidget.h"
 #include "vcframe.h"
 #include "doc.h"
-#include "bus.h"
 #undef protected
 
 void VCFrameProperties_Test::initTestCase()
 {
     m_doc = NULL;
-    Bus::init(this);
 }
 
 void VCFrameProperties_Test::init()

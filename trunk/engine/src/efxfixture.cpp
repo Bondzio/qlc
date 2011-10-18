@@ -26,6 +26,7 @@
 #include "genericfader.h"
 #include "mastertimer.h"
 #include "efxfixture.h"
+#include "qlcmacros.h"
 #include "function.h"
 #include "scene.h"
 #include "efx.h"
@@ -35,68 +36,51 @@
  * Initialization
  *****************************************************************************/
 
-EFXFixture::EFXFixture(EFX* parent)
+EFXFixture::EFXFixture(const EFX* parent)
+    : m_parent(parent)
+    , m_fixture(Fixture::invalidId())
+    , m_direction(Function::Forward)
+    , m_fadeIntensity(255)
+
+    , m_serialNumber(0)
+    , m_runTimeDirection(Function::Forward)
+    , m_ready(false)
+    , m_started(false)
+    , m_elapsed(0)
+
+    , m_intensity(1.0)
 {
     Q_ASSERT(parent != NULL);
-    m_parent = parent;
-
-    m_fixture = Fixture::invalidId();
-    m_serialNumber = 0;
-    m_direction = Function::Forward;
-    m_runTimeDirection = Function::Forward;
-    m_ready = false;
-    m_started = false;
-
-    m_skipIterator = 0;
-    m_skipThreshold = 0;
-    m_iterator = 0;
-    m_panValue = 0;
-    m_tiltValue = 0;
-
-    m_intensity = 1.0;
-
-    m_fadeIntensity = 255;
 }
 
 void EFXFixture::copyFrom(const EFXFixture* ef)
 {
-    /* Don't copy m_parent because it is assigned in constructor. */
-
+    // Don't copy m_parent because it is already assigned in constructor and might
+    // be different than $ef's
     m_fixture = ef->m_fixture;
-    m_serialNumber = ef->m_serialNumber;
     m_direction = ef->m_direction;
+    m_fadeIntensity = ef->m_fadeIntensity;
+
+    m_serialNumber = ef->m_serialNumber;
     m_runTimeDirection = ef->m_runTimeDirection;
     m_ready = ef->m_ready;
     m_started = ef->m_started;
-
-    m_skipIterator = ef->m_skipIterator;
-    m_skipThreshold = ef->m_skipThreshold;
-    m_iterator = ef->m_iterator;
-    m_panValue = ef->m_panValue;
-    m_tiltValue = ef->m_tiltValue;
+    m_elapsed = ef->m_elapsed;
 
     m_intensity = ef->m_intensity;
-
-    m_fadeIntensity = ef->m_fadeIntensity;
 }
 
 EFXFixture::~EFXFixture()
 {
 }
 
-Doc* EFXFixture::doc() const
-{
-    Q_ASSERT(m_parent != NULL);
-    return m_parent->doc();
-}
-
 /****************************************************************************
  * Public properties
  ****************************************************************************/
 
-void EFXFixture::setFixture(quint32 fxi_id)
+void EFXFixture::setFixture(quint32 id)
 {
-    m_fixture = fxi_id;
+    m_fixture = id;
 }
 
 quint32 EFXFixture::fixture() const
@@ -123,6 +107,18 @@ void EFXFixture::setFadeIntensity(uchar value)
 uchar EFXFixture::fadeIntensity() const
 {
     return m_fadeIntensity;
+}
+
+bool EFXFixture::isValid() const
+{
+    Fixture* fxi = doc()->fixture(fixture());
+    if (fxi == NULL)
+        return false;
+    else if (fxi->panMsbChannel() == QLCChannel::invalid() && // Maybe a device can pan OR tilt
+             fxi->tiltMsbChannel() == QLCChannel::invalid())   // but not both. Teh sux0r.
+        return false;
+    else
+        return true;
 }
 
 /*****************************************************************************
@@ -210,8 +206,14 @@ bool EFXFixture::saveXML(QDomDocument* doc, QDomElement* efx_root) const
 }
 
 /****************************************************************************
- * Protected run-time-only properties
+ * Run-time properties
  ****************************************************************************/
+
+const Doc* EFXFixture::doc() const
+{
+    Q_ASSERT(m_parent != NULL);
+    return m_parent->doc();
+}
 
 void EFXFixture::setSerialNumber(int number)
 {
@@ -223,49 +225,30 @@ int EFXFixture::serialNumber() const
     return m_serialNumber;
 }
 
-void EFXFixture::updateSkipThreshold()
-{
-    Q_ASSERT(m_parent != NULL);
-    Q_ASSERT(m_parent->fixtures().size() > 0);
-
-    /* One EFX "round" is always (pi * 2) long. Divide this "circumference"
-       into as many steps as there are fixtures in this EFX. If there are
-       four fixtures, these steps end up in 12 o'clock, 3 o'clock,
-       6 o'clock and 9 o'clock etc.. This skip threshold will specify the
-       point in the circumference, where the current EFXFixture will come
-       along to the EFX. */
-    m_skipThreshold = qreal(m_serialNumber) *
-                      (qreal(M_PI * 2.0) / qreal(m_parent->fixtures().size()));
-}
-
-bool EFXFixture::isValid()
-{
-    Fixture* fxi = doc()->fixture(fixture());
-    if (fxi == NULL)
-        return false;
-    else if (fxi->panMsbChannel() == QLCChannel::invalid() && // Maybe a device can pan OR tilt
-             fxi->tiltMsbChannel() == QLCChannel::invalid())   // but not both. Teh sux0r.
-        return false;
-    else
-        return true;
-}
-
 void EFXFixture::reset()
 {
-    m_panValue = 0;
-    m_tiltValue = 0;
-    m_skipIterator = 0;
-    m_iterator = 0;
     m_ready = false;
     m_runTimeDirection = m_direction;
     m_started = false;
-
-    updateSkipThreshold();
+    m_elapsed = 0;
 }
 
 bool EFXFixture::isReady() const
 {
     return m_ready;
+}
+
+uint EFXFixture::timeOffset() const
+{
+    if (m_parent->propagationMode() == EFX::Asymmetric ||
+        m_parent->propagationMode() == EFX::Serial)
+    {
+        return m_parent->duration() / (m_parent->fixtures().size() + 1) * serialNumber();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 /*****************************************************************************
@@ -274,59 +257,40 @@ bool EFXFixture::isReady() const
 
 void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
 {
-    /* Bail out without doing anything if this EFX is ready
-      (after single-shot), or it has no pan&tilt channels (not valid). */
+    m_elapsed += MasterTimer::tick();
+
+    // Bail out without doing anything if this fixture is ready (after single-shot)
+    // or it has no pan&tilt channels (not valid).
     if (m_ready == true || isValid() == false)
         return;
 
-    if (m_iterator == 0 && m_started == false)
-    {
-        updateSkipThreshold();
-        if (m_parent->propagationMode() == EFX::Asymmetric)
-            m_iterator = m_skipThreshold;
-    }
+    // Bail out without doing anything if this fixture is waiting for its turn.
+    if (m_parent->propagationMode() == EFX::Serial && m_elapsed < timeOffset() && !m_started)
+        return;
 
-    if (m_parent->propagationMode() == EFX::Serial &&
-        m_skipIterator < m_skipThreshold)
-    {
-        /* Fixture still needs to wait for its turn in serial mode */
-        quint32 ticks = m_parent->duration();
-        m_skipIterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
-    }
-    else
-    {
+    // Fade in
+    if (m_started == false)
         start(timer, universes);
-    }
 
-    if (m_iterator < (M_PI * 2.0))
+    // Scale from elapsed time in relation to overall duration to a point in a circle
+    uint pos = (m_elapsed + timeOffset()) % m_parent->duration();
+    qreal iterator = SCALE(qreal(pos),
+                           qreal(0), qreal(m_parent->duration()),
+                           qreal(0), qreal(M_PI * 2));
+    qreal pan = 0;
+    qreal tilt = 0;
+
+    if ((m_parent->propagationMode() == EFX::Serial &&
+        m_elapsed < (m_parent->duration() + timeOffset()))
+        || m_elapsed < m_parent->duration())
     {
-        if (m_parent->propagationMode() == EFX::Serial)
-        {
-            if (m_skipIterator >= m_skipThreshold)
-            {
-                /* Increment for next round. */
-                quint32 ticks = m_parent->duration();
-                m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
-            }
-        }
-        else
-        {
-            /* Increment for next round. */
-            quint32 ticks = m_parent->duration();
-            m_iterator += qreal(1) / (qreal(ticks) / qreal(M_PI * 2));
-        }
-
         if (m_runTimeDirection == Function::Forward)
-        {
-            m_parent->calculatePoint(m_iterator, &m_panValue, &m_tiltValue);
-        }
+            m_parent->calculatePoint(iterator, &pan, &tilt);
         else
-        {
-            m_parent->calculatePoint((M_PI * 2.0) - m_iterator, &m_panValue, &m_tiltValue);
-        }
+            m_parent->calculatePoint((M_PI * 2.0) - iterator, &pan, &tilt);
 
         /* Write this fixture's data to universes. */
-        setPoint(universes);
+        setPoint(universes, pan, tilt);
     }
     else
     {
@@ -334,13 +298,9 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         {
             /* Reverse direction for ping-pong EFX. */
             if (m_runTimeDirection == Function::Forward)
-            {
                 m_runTimeDirection = Function::Backward;
-            }
             else
-            {
                 m_runTimeDirection = Function::Forward;
-            }
         }
         else if (m_parent->runOrder() == Function::SingleShot)
         {
@@ -349,8 +309,38 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
             stop(timer, universes);
         }
 
-        /* Reset iterator, since we've gone a full cycle. */
-        m_iterator = 0;
+        m_elapsed = 0;
+    }
+}
+
+void EFXFixture::setPoint(UniverseArray* universes, qreal pan, qreal tilt)
+{
+    Q_ASSERT(universes != NULL);
+
+    Fixture* fxi = doc()->fixture(fixture());
+    Q_ASSERT(fxi != NULL);
+
+    /* Write coarse point data to universes */
+    if (fxi->panMsbChannel() != QLCChannel::invalid())
+        universes->write(fxi->universeAddress() + fxi->panMsbChannel(),
+                         static_cast<char>(pan), QLCChannel::Pan);
+    if (fxi->tiltMsbChannel() != QLCChannel::invalid())
+        universes->write(fxi->universeAddress() + fxi->tiltMsbChannel(),
+                         static_cast<char> (tilt), QLCChannel::Tilt);
+
+    /* Write fine point data to universes if applicable */
+    if (fxi->panLsbChannel() != QLCChannel::invalid())
+    {
+        /* Leave only the fraction */
+        char value = static_cast<char> ((pan - floor(pan)) * double(UCHAR_MAX));
+        universes->write(fxi->universeAddress() + fxi->panLsbChannel(), value, QLCChannel::Pan);
+    }
+
+    if (fxi->tiltLsbChannel() != QLCChannel::invalid())
+    {
+        /* Leave only the fraction */
+        char value = static_cast<char> ((tilt - floor(tilt)) * double(UCHAR_MAX));
+        universes->write(fxi->universeAddress() + fxi->tiltLsbChannel(), value, QLCChannel::Tilt);
     }
 }
 
@@ -411,41 +401,6 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
     }
 
     m_started = false;
-}
-
-void EFXFixture::setPoint(UniverseArray* universes)
-{
-    Q_ASSERT(universes != NULL);
-
-    Fixture* fxi = doc()->fixture(fixture());
-    Q_ASSERT(fxi != NULL);
-
-    /* Write coarse point data to universes */
-    if (fxi->panMsbChannel() != QLCChannel::invalid())
-        universes->write(fxi->universeAddress() + fxi->panMsbChannel(),
-                         static_cast<char>(m_panValue), QLCChannel::Pan);
-    if (fxi->tiltMsbChannel() != QLCChannel::invalid())
-        universes->write(fxi->universeAddress() + fxi->tiltMsbChannel(),
-                         static_cast<char> (m_tiltValue), QLCChannel::Tilt);
-
-    /* Write fine point data to universes if applicable */
-    if (fxi->panLsbChannel() != QLCChannel::invalid())
-    {
-        /* Leave only the fraction */
-        char value = static_cast<char> ((m_panValue - floor(m_panValue))
-                                        * double(UCHAR_MAX));
-        universes->write(fxi->universeAddress() + fxi->panLsbChannel(),
-                         value, QLCChannel::Pan);
-    }
-
-    if (fxi->tiltLsbChannel() != QLCChannel::invalid())
-    {
-        /* Leave only the fraction */
-        char value = static_cast<char> ((m_tiltValue - floor(m_tiltValue))
-                                        * double(UCHAR_MAX));
-        universes->write(fxi->universeAddress() + fxi->tiltLsbChannel(),
-                         value, QLCChannel::Tilt);
-    }
 }
 
 /*****************************************************************************

@@ -40,12 +40,12 @@ class EFXFixture
 {
     friend class EFX;
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** Constructor */
-    EFXFixture(EFX* parent);
+    EFXFixture(const EFX* parent);
 
     /** Destructor */
     ~EFXFixture();
@@ -54,77 +54,67 @@ public:
     void copyFrom(const EFXFixture* ef);
 
 private:
-    /** Get the master engine instance */
-    Doc* doc() const;
+    /** The EFX function that this fixture belongs to. */
+    const EFX* const m_parent;
 
-protected:
-    /** The EFX function that this fixture belongs to */
-    EFX* m_parent;
-
-    /********************************************************************
+    /*************************************************************************
      * Public properties
-     ********************************************************************/
+     *************************************************************************/
 public:
-    /** Set the fixture that this EFXFixture represents */
-    void setFixture(quint32 fxi_id);
+    /** Set the Fixture that this EFXFixture represents. */
+    void setFixture(quint32 id);
 
-    /** Get the fixture that this EFXFixture represents */
+    /** Get the Fixture that this EFXFixture represents. */
     quint32 fixture() const;
 
-    /** Set this fixture's direction */
+    /** Set this fixture's initial direction. */
     void setDirection(Function::Direction dir);
 
-    /** Get this fixture's direction */
+    /** Get this fixture's initial direction. */
     Function::Direction direction() const;
 
-    /** Set a value to fade the fixture's intensity channel(s) to during start */
+    /**
+     * Set a value to fade the fixture's intensity channel(s) to
+     * during start().
+     */
     void setFadeIntensity(uchar value);
 
-    /** Get the value to fade the fixture's intensity channel(s) to during start */
+    /**
+     * Get the value to fade the fixture's intensity channel(s) to
+     * during start().
+     */
     uchar fadeIntensity() const;
 
-protected:
-    /** The ID of the fixture this EFXFixture represents */
+    /**
+     * Check that this object has a fixture ID and at least LSB channel
+     * for pan and/or tilt.
+     */
+    bool isValid() const;
+
+private:
     quint32 m_fixture;
-
-    /** This fixture's original running direction */
     Function::Direction m_direction;
-
-    /** Intensity target value during start */
     uchar m_fadeIntensity;
 
-    /*********************************************************************
+    /*************************************************************************
      * Load & Save
-     *********************************************************************/
+     *************************************************************************/
 public:
-    /** Load public properties from an EFXFixture node */
     bool loadXML(const QDomElement* root);
-
-    /** Save public properties under an EFX node */
     bool saveXML(QDomDocument* doc, QDomElement* efx_root) const;
 
-    /********************************************************************
-    * Protected run-time-only properties
-    ********************************************************************/
-protected:
+    /*************************************************************************
+     * Run-time properties
+     *************************************************************************/
+private:
+    /** Get the master engine instance */
+    const Doc* doc() const;
+
     /** Set the order number in serial propagation mode */
     void setSerialNumber(int number);
 
     /** Get the order number in serial propagation mode */
     int serialNumber() const;
-
-    /** Update the waiting threshold value for serial operation */
-    void updateSkipThreshold();
-
-    /** Check that this object has a fixture ID and at least LSB channels
-        for pan and tilt. */
-    bool isValid();
-
-    /* Run the start scene if necessary */
-    void start(MasterTimer* timer, UniverseArray* universes);
-
-    /* Run the stop scene if necessary */
-    void stop(MasterTimer* timer, UniverseArray* universes);
 
     /** Reset the fixture when the EFX is stopped */
     void reset();
@@ -133,7 +123,10 @@ protected:
         This can happen basically only if SingleShot mode is enabled. */
     bool isReady() const;
 
-protected:
+    /** Get this fixture's time offset (in serial and asymmetric modes) */
+    uint timeOffset() const;
+
+private:
     /** This fixture's order number in serial propagation mode */
     int m_serialNumber;
 
@@ -147,48 +140,28 @@ protected:
     /** Indicates, whether start() has been called for this fixture */
     bool m_started;
 
-    /**
-     * This fixture's current position in the pattern (a point on a
-     * circle's circumference)
-     */
-    qreal m_iterator;
+    /** Elapsed milliseconds since last reset() */
+    uint m_elapsed;
 
-    /**
-     * This iterator is incremented until it is >= m_skipThreshold.
-     * After that, m_iterator is incremented. Used for serial propagation.
-     */
-    qreal m_skipIterator;
-
-    /**
-     * This is basically the index of a point in the EFX's pattern,
-     * where this fixture will start doing its stuff. Used for serial
-     * propagation.
-     */
-    qreal m_skipThreshold;
-
-    /**
-     * The current pan value
-     */
-    qreal m_panValue;
-
-    /**
-     * The current tilt value
-     */
-    qreal m_tiltValue;
-
-    /*********************************************************************
+    /*************************************************************************
      * Running
-     *********************************************************************/
-protected:
+     *************************************************************************/
+private:
     /** Calculate the next step data for this fixture */
     void nextStep(MasterTimer* timer, UniverseArray* universes);
 
     /** Write this EFXFixture's channel data to universes */
-    void setPoint(UniverseArray* universes);
+    void setPoint(UniverseArray* universes, qreal pan, qreal tilt);
 
-    /*********************************************************************
-     * Intensity
-     *********************************************************************/
+    /* Run the start scene if necessary */
+    void start(MasterTimer* timer, UniverseArray* universes);
+
+    /* Run the stop scene if necessary */
+    void stop(MasterTimer* timer, UniverseArray* universes);
+
+    /*************************************************************************
+     * Intensity adjustment
+     *************************************************************************/
 public:
     /**
      * Adjust the intensity of the fixture by a fraction.

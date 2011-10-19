@@ -28,6 +28,7 @@ SUBDIRS += qlcinputchannel
 SUBDIRS += qlcinputprofile
 SUBDIRS += qlcmacros
 SUBDIRS += qlcphysical
+SUBDIRS += qlcpoint
 SUBDIRS += rgbmatrix
 SUBDIRS += scene
 SUBDIRS += scenevalue

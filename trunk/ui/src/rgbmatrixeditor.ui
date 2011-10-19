@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>485</width>
-    <height>524</height>
+    <width>486</width>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,7 +44,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="m_fixtureGroupLabel">

@@ -101,10 +101,7 @@ void RGBMatrixEditor::accept()
 
 void RGBMatrixEditor::init()
 {
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_fadeInContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_fadeOutContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Default, m_durationContainer);
-
+    /* Name */
     m_nameEdit->setText(m_mtx->name());
     m_nameEdit->setSelection(0, m_mtx->name().length());
 
@@ -134,6 +131,25 @@ void RGBMatrixEditor::init()
         m_backward->setChecked(true);
         break;
     }
+
+    /* Speed */
+    new QHBoxLayout(m_fadeInContainer);
+    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
+    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
+    m_fadeInContainer->layout()->setMargin(0);
+    m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
+
+    new QHBoxLayout(m_fadeOutContainer);
+    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
+    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
+    m_fadeOutContainer->layout()->setMargin(0);
+    m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
+
+    new QHBoxLayout(m_durationContainer);
+    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
+    m_durationContainer->layout()->addWidget(m_durationSpin);
+    m_durationContainer->layout()->setMargin(0);
+    m_durationSpin->setValue(m_mtx->duration());
 
     fillPatternCombo();
     fillFixtureGroupCombo();

@@ -272,6 +272,10 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
     if (m_started == false)
         start(timer, universes);
 
+    // Nothing to do
+    if (m_parent->duration() == 0)
+        return;
+
     // Scale from elapsed time in relation to overall duration to a point in a circle
     uint pos = (m_elapsed + timeOffset()) % m_parent->duration();
     qreal iterator = SCALE(qreal(pos),

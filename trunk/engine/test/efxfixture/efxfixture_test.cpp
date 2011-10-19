@@ -439,6 +439,44 @@ void EFXFixture_Test::nextStepLoop()
     e.postRun(&mts, &array);
 }
 
+void EFXFixture_Test::nextStepLoopZeroDuration()
+{
+    UniverseArray array(512 * 4);
+    MasterTimerStub mts(m_doc, array);
+
+    EFX e(m_doc);
+    e.setDuration(0); // 0s
+
+    EFXFixture* ef = new EFXFixture(&e);
+    ef->setFixture(0);
+    e.addFixture(ef);
+
+    /* Initialize the EFXFixture so that it can do math */
+    ef->setSerialNumber(0);
+    QVERIFY(ef->isValid() == true);
+    QVERIFY(ef->isReady() == false);
+    QVERIFY(ef->m_elapsed == 0);
+
+    e.preRun(&mts);
+
+    /* Run two cycles (2 * tickms * freq) to see that Loop never quits */
+    uint max = MasterTimer::tick() * MasterTimer::frequency();
+    uint i = MasterTimer::tick();
+    for (uint times = 0; times < 2; times++)
+    {
+        for (; i < max; i += MasterTimer::tick())
+        {
+            ef->nextStep(&mts, &array);
+            QVERIFY(ef->isReady() == false); // Loop is never ready
+            QCOMPARE(ef->m_elapsed, i);
+        }
+
+        // m_elapsed is NOT zeroed since there are no "rounds" when duration == 0
+    }
+
+    e.postRun(&mts, &array);
+}
+
 void EFXFixture_Test::nextStepSingleShot()
 {
     UniverseArray array(512 * 4);

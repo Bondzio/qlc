@@ -52,6 +52,7 @@ private slots:
     void setPoint8bit();
     void setPoint16bit();
     void nextStepLoop();
+    void nextStepLoopZeroDuration();
     void nextStepSingleShot();
 
     void start();

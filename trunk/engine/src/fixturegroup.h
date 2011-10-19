@@ -72,17 +72,32 @@ private:
      * Information
      ************************************************************************/
 public:
+    enum DisplayStyle
+    {
+        DisplayIcon     = 1 << 0, //! Show an icon for each fixture
+        DisplayName     = 1 << 1, //! Show each fixture's name
+        DisplayAddress  = 1 << 2, //! Show each fixture's DMX address
+        DisplayUniverse = 1 << 3  //! Show each fixture's DMX universe
+    };
+
     /** Set the name of a fixture group */
     void setName(const QString& name);
 
     /** Get the name of a fixture group */
     QString name() const;
 
+    /** Set fixture display style */
+    void setDisplayStyle(int s);
+
+    /** Get fixture display style */
+    int displayStyle() const;
+
     /** Get an info text for FixtureManager */
     QString infoText() const;
 
 private:
     QString m_name;
+    int m_displayStyle;
 
     /************************************************************************
      * Fixtures

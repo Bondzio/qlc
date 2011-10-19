@@ -34,6 +34,7 @@
 #define KXMLQLCFixtureGroupFixture "Fixture"
 #define KXMLQLCFixtureGroupSize "Size"
 #define KXMLQLCFixtureGroupName "Name"
+#define KXMLQLCFixtureGroupDisplayStyle "DisplayStyle"
 
 /****************************************************************************
  * Initialization
@@ -42,6 +43,7 @@
 FixtureGroup::FixtureGroup(Doc* parent)
     : QObject(parent)
     , m_id(FixtureGroup::invalidId())
+    , m_displayStyle(DisplayIcon | DisplayAddress)
 {
     Q_ASSERT(parent != NULL);
 
@@ -60,6 +62,7 @@ void FixtureGroup::copyFrom(const FixtureGroup* grp)
     m_name = grp->name();
     m_size = grp->size();
     m_fixtures = grp->fixtureHash();
+    m_displayStyle = grp->displayStyle();
 }
 
 /****************************************************************************
@@ -93,6 +96,16 @@ void FixtureGroup::setName(const QString& name)
 QString FixtureGroup::name() const
 {
     return m_name;
+}
+
+void FixtureGroup::setDisplayStyle(int s)
+{
+    m_displayStyle = s;
+}
+
+int FixtureGroup::displayStyle() const
+{
+    return m_displayStyle;
 }
 
 QString FixtureGroup::infoText() const
@@ -135,10 +148,19 @@ QString FixtureGroup::infoText() const
                     Fixture* fxi = doc()->fixture(m_fixtures[pt]);
                     Q_ASSERT(fxi != NULL);
                     info += "<TD CLASS='tiny' ALIGN='center'>";
-                    info += "<IMG SRC='qrc:/fixture.png'/><BR/>";
-                    info += QString("DMX:%1").arg(fxi->address() + 1);
-                    info += "<BR/>";
-                    info += fxi->name();
+                    if (displayStyle() & DisplayIcon)
+                        info += "<IMG SRC='qrc:/fixture.png'/>";
+                    if (displayStyle() & DisplayName || displayStyle() & DisplayAddress ||
+                        displayStyle() & DisplayUniverse)
+                        info += "<BR/>";
+                    if (displayStyle() & DisplayName)
+                        info += QString("%1").arg(fxi->name());
+                    if (displayStyle() & DisplayName)
+                        info += "<BR/>";
+                    if (displayStyle() & DisplayAddress)
+                        info += QString("A:%1 ").arg(fxi->address() + 1);
+                    if (displayStyle() & DisplayUniverse)
+                        info += QString("U:%1").arg(fxi->universe() + 1);
                     info += "</TD>";
                 }
                 else
@@ -363,6 +385,11 @@ bool FixtureGroup::loadXML(const QDomElement* root)
         {
             m_name = tag.text();
         }
+        else if (tag.tagName() == KXMLQLCFixtureGroupDisplayStyle)
+        {
+            if (tag.text().isEmpty() == false)
+                m_displayStyle = tag.text().toInt();
+        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown fixture group tag:" << tag.tagName();
@@ -394,10 +421,16 @@ bool FixtureGroup::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag.appendChild(text);
     root.appendChild(tag);
 
-    /* Matrix */
+    /* Matrix size */
     tag = doc->createElement(KXMLQLCFixtureGroupSize);
     tag.setAttribute("X", size().width());
     tag.setAttribute("Y", size().height());
+    root.appendChild(tag);
+
+    /* Display style */
+    tag = doc->createElement(KXMLQLCFixtureGroupDisplayStyle);
+    text = doc->createTextNode(QString::number(displayStyle()));
+    tag.appendChild(text);
     root.appendChild(tag);
 
     /* Fixtures */

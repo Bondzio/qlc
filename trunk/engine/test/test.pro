@@ -8,6 +8,7 @@ SUBDIRS += efx
 SUBDIRS += efxfixture
 SUBDIRS += fadechannel
 SUBDIRS += fixture
+SUBDIRS += fixturegroup
 SUBDIRS += function
 SUBDIRS += genericfader
 SUBDIRS += inputmap

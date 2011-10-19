@@ -29,8 +29,6 @@ class QLCPoint : public QPoint
 public:
     QLCPoint();
     QLCPoint(int x, int y);
-
-    bool operator==(const QLCPoint& pt) const;
 };
 
 uint qHash(const QLCPoint& key);

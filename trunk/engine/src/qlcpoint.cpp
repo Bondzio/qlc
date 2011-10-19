@@ -33,11 +33,6 @@ QLCPoint::QLCPoint(int x, int y)
 {
 }
 
-bool QLCPoint::operator==(const QLCPoint& pt) const
-{
-    return (this->x() == pt.x() && this->y() == pt.y());
-}
-
 uint qHash(const QLCPoint& key)
 {
     uint hash;

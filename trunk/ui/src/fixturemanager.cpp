@@ -283,6 +283,8 @@ void FixtureManager::slotFixtureGroupRemoved(quint32 id)
         if (var.isValid() && var.toUInt() == id)
             delete item;
     }
+
+    updateGroupMenu();
 }
 
 /*****************************************************************************
@@ -849,21 +851,30 @@ void FixtureManager::slotRemove()
         Q_ASSERT(item != NULL);
 
         QVariant var = item->data(KColumnName, PROP_FIXTURE);
-        if (var.isValid() == false)
-            continue;
+        if (var.isValid() == true)
+        {
+            quint32 id = var.toUInt();
 
-        quint32 id = var.toUInt();
+            /** @todo This is REALLY bogus here, since Fixture or Doc should do
+                this. However, FixtureManager is the only place to destroy fixtures,
+                so it's rather safe to reset the fixture's address space here. */
+            Fixture* fxi = m_doc->fixture(id);
+            Q_ASSERT(fxi != NULL);
+            UniverseArray* ua = m_doc->outputMap()->claimUniverses();
+            ua->reset(fxi->address(), fxi->channels());
+            m_doc->outputMap()->releaseUniverses();
 
-        /** @todo This is REALLY bogus here, since Fixture or Doc should do
-            this. However, FixtureManager is the only place to destroy fixtures,
-            so it's rather safe to reset the fixture's address space here. */
-        Fixture* fxi = m_doc->fixture(id);
-        Q_ASSERT(fxi != NULL);
-        UniverseArray* ua = m_doc->outputMap()->claimUniverses();
-        ua->reset(fxi->address(), fxi->channels());
-        m_doc->outputMap()->releaseUniverses();
+            m_doc->deleteFixture(id);
+        }
+        else
+        {
+            var = item->data(KColumnName, PROP_GROUP);
+            if (var.isValid() == false)
+                continue;
 
-        m_doc->deleteFixture(id);
+            quint32 id = var.toUInt();
+            m_doc->deleteFixtureGroup(id);
+        }
     }
 }
 

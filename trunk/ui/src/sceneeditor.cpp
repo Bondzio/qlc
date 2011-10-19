@@ -648,8 +648,8 @@ void SceneEditor::removeFixtureTab(Fixture* fixture)
                might be intended or it might not. */
             QScrollArea* area = qobject_cast<QScrollArea*> (m_tab->widget(i));
             Q_ASSERT(area != NULL);
-            delete area; // Deletes also FixtureConsole
             m_tab->removeTab(i);
+            delete area; // Deletes also FixtureConsole
             break;
         }
     }

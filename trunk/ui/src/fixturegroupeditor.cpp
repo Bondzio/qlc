@@ -27,6 +27,7 @@
 #include <QDebug>
 
 #include "fixturegroupeditor.h"
+#include "fixtureselection.h"
 #include "fixturegroup.h"
 #include "qlcmacros.h"
 #include "fixture.h"
@@ -77,6 +78,11 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     connect(m_displayUniverseCheck, SIGNAL(clicked()),
             this, SLOT(slotDisplayStyleChecked()));
 
+    connect(m_addButton, SIGNAL(clicked()),
+            this, SLOT(slotAddFixtureClicked()));
+    connect(m_removeButton, SIGNAL(clicked()),
+            this, SLOT(slotRemoveFixtureClicked()));
+
     m_table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     updateTable();
@@ -100,7 +106,6 @@ void FixtureGroupEditor::accept()
     Q_ASSERT(m_grp != NULL);
 
     m_grp->setName(m_nameEdit->text());
-    m_grp->setSize(QSize(m_xSpin->value(), m_ySpin->value()));
 
     m_original->copyFrom(m_grp);
     delete m_grp;
@@ -159,8 +164,9 @@ void FixtureGroupEditor::updateTable()
     connect(m_table, SIGNAL(cellChanged(int,int)),
             this, SLOT(slotCellChanged(int,int)));
 
-    m_row = -1;
-    m_column = -1;
+    m_row = 0;
+    m_column = 0;
+    m_table->setCurrentCell(0, 0);
 }
 
 void FixtureGroupEditor::slotXSpinValueChanged(int value)
@@ -190,10 +196,44 @@ void FixtureGroupEditor::slotDisplayStyleChecked()
     updateTable();
 }
 
+void FixtureGroupEditor::slotAddFixtureClicked()
+{
+    FixtureSelection fs(this, m_doc, false, m_grp->fixtureList());
+    if (fs.exec() == QDialog::Accepted)
+    {
+        int row = m_row;
+        int col = m_column;
+        m_grp->assignFixture(fs.selection.first(), QLCPoint(col, row));
+        updateTable();
+        m_table->setCurrentCell(row, col);
+    }
+}
+
+void FixtureGroupEditor::slotRemoveFixtureClicked()
+{
+    QTableWidgetItem* item = m_table->currentItem();
+    if (item == NULL)
+        return;
+
+    // In case an empty cell was selected
+    QVariant var = item->data(PROP_FIXTURE);
+    if (var.isValid() == false)
+        return;
+
+    quint32 id = var.toUInt();
+    m_grp->resignFixture(id);
+    delete item;
+}
+
 void FixtureGroupEditor::slotCellActivated(int row, int column)
 {
     m_row = row;
     m_column = column;
+
+    if (m_table->currentItem() == NULL)
+        m_removeButton->setEnabled(false);
+    else
+        m_removeButton->setEnabled(true);
 }
 
 void FixtureGroupEditor::slotCellChanged(int row, int column)

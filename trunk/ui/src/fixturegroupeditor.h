@@ -45,7 +45,12 @@ private:
 private slots:
     void slotXSpinValueChanged(int value);
     void slotYSpinValueChanged(int value);
+
     void slotDisplayStyleChecked();
+
+    void slotAddFixtureClicked();
+    void slotRemoveFixtureClicked();
+
     void slotCellActivated(int row, int column);
     void slotCellChanged(int row, int column);
 

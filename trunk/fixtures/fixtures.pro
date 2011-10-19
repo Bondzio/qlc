@@ -23,6 +23,7 @@ fixtures.files += Chauvet-Vue-3.1.qxf
 fixtures.files += Chauvet-Vue-6.1.qxf
 fixtures.files += Elation-Color-Spot-150.qxf
 fixtures.files += Elation-Vision-250.qxf
+fixtures.files += Electroconcept-PAR-56-LED-Full-RGB-18x3W.qxf
 fixtures.files += Eurolite-DMXSuperstrobe-2700.qxf
 fixtures.files += Eurolite-LED-PAR56.qxf
 fixtures.files += Eurolite-LED-PAR64-RGB.qxf

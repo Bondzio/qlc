@@ -78,16 +78,19 @@ void SpeedSpinBox::slotValueChanged(int value)
         QPalette pal(palette());
         pal.setColor(QPalette::Base, QColor(255, 127, 127));
         setPalette(pal);
+        setToolTip(tr("Infinite"));
     }
     else if (value == DEFAULT)
     {
         QPalette pal(palette());
         pal.setColor(QPalette::Base, QColor(127, 255, 127));
         setPalette(pal);
+        setToolTip(tr("Use default value"));
     }
     else
     {
         setPalette(QApplication::palette());
+        setToolTip(tr("Seconds.MilliSeconds"));
     }
 }
 

@@ -106,32 +106,27 @@ QString FixtureGroup::infoText() const
     info += "<TABLE COLS='3' WIDTH='100%'>";
     info += title.arg(tr("Fixture Group")).arg(name());
     info += genInfo.arg(tr("Fixture count")).arg(fixtureList().size());
-    info += subTitle.arg(tr("Grid Placement"));
-    if (size().isValid() == true)
-    {
-        info += genInfo.arg(tr("Horizontal size")).arg(size().width());
-        info += genInfo.arg(tr("Vertical size")).arg(size().height());
-
-    }
     info += "</TABLE>";
 
     if (size().isValid() == true)
     {
-        info += QString("<TABLE ROWS='%1' COLS='%2' WIDTH='100%' BORDER='1'>").arg(size().height() + 1).arg(size().width() + 1);
+        info += QString("<TABLE ROWS='%1' COLS='%2' WIDTH='100%' BORDER='0'>").arg(size().height() + 1).arg(size().width() + 1);
+        QString subTitle("<TR><TD CLASS='subhi' COLSPAN='%1'>%2</TD></TR>");
+        info += subTitle.arg(size().width() + 1).arg(tr("Grid Placement"));
 
         // Horizontal header
         info += "<TR>";
         info += "<TD></TD>"; // Empty corner
         for (int x = 0; x < size().width(); x++)
         {
-            info += QString("<TD CLASS='emphasis'>%1</TD>").arg(x + 1);
+            info += QString("<TD CLASS='emphasis' ALIGN='center' VALIGN='center'>%1</TD>").arg(x + 1);
         }
         info += "</TR>";
 
         for (int y = 0; y < size().height(); y++)
         {
             info += "<TR>";
-            info += QString("<TD CLASS='emphasis'>%1</TD>").arg(y + 1);
+            info += QString("<TD CLASS='emphasis' ALIGN='center' VALIGN='center'>%1</TD>").arg(y + 1);
             for (int x = 0; x < size().width(); x++)
             {
                 QLCPoint pt(x, y);
@@ -139,14 +134,18 @@ QString FixtureGroup::infoText() const
                 {
                     Fixture* fxi = doc()->fixture(m_fixtures[pt]);
                     Q_ASSERT(fxi != NULL);
-                    info += "<TD CLASS='tiny'>";
+                    info += "<TD CLASS='tiny' ALIGN='center'>";
+                    info += "<IMG SRC='qrc:/fixture.png'/><BR/>";
+                    info += QString("DMX:%1").arg(fxi->address() + 1);
+                    info += "<BR/>";
                     info += fxi->name();
                     info += "</TD>";
                 }
                 else
                 {
-                    info += "<TD class='tiny'>";
-                    info += tr("---");
+                    info += "<TD class='tiny' ALIGN='center' VALIGN='center'>";
+                    info += "<IMG SRC='qrc:/empty.png'/><BR/>";
+                    info += "---";
                     info += "</TD>";
                 }
             }

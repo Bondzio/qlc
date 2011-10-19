@@ -294,11 +294,13 @@ bool FixtureGroup::loader(const QDomElement* root, Doc* doc)
     if (grp->loadXML(root) == true)
     {
         doc->addFixtureGroup(grp, grp->id());
+        result = true;
     }
     else
     {
         qWarning() << Q_FUNC_INFO << "FixtureGroup" << grp->name() << "cannot be loaded.";
         delete grp;
+        result = false;
     }
 
     return result;

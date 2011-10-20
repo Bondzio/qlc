@@ -190,7 +190,7 @@ void RGBMatrixEditor::init()
 
     createPreviewItems();
     m_preview->setScene(m_scene);
-    m_previewTimer->start(10);
+    m_previewTimer->start(MasterTimer::tick());
 }
 
 void RGBMatrixEditor::fillPatternCombo()
@@ -261,8 +261,11 @@ void RGBMatrixEditor::slotPreviewTimeout()
 {
     QAbstractGraphicsShapeItem* shape = NULL;
 
-    m_previewIterator = (m_previewIterator + 1) % 127;
-    RGBMap map = m_mtx->colorMap(m_previewIterator, 127);
+    if (m_mtx->duration() <= 0)
+        return;
+
+    m_previewIterator = (m_previewIterator + MasterTimer::tick()) % m_mtx->duration();
+    RGBMap map = m_mtx->colorMap(m_previewIterator, m_mtx->duration());
 
     for (int y = 0; y < map.size(); y++)
     {
@@ -287,7 +290,7 @@ void RGBMatrixEditor::slotNameEdited(const QString& text)
 void RGBMatrixEditor::slotPatternActivated(const QString& text)
 {
     m_mtx->setPattern(RGBMatrix::stringToPattern(text));
-    createPreviewItems();
+    slotRestartTest();
 }
 
 void RGBMatrixEditor::slotColorButtonClicked()
@@ -299,6 +302,8 @@ void RGBMatrixEditor::slotColorButtonClicked()
         QPixmap pm(100, 26);
         pm.fill(col);
         m_colorButton->setIcon(QIcon(pm));
+
+        slotRestartTest();
     }
 }
 
@@ -309,7 +314,8 @@ void RGBMatrixEditor::slotFixtureGroupActivated(int index)
         m_mtx->setFixtureGroup(var.toUInt());
     else
         m_mtx->setFixtureGroup(FixtureGroup::invalidId());
-    createPreviewItems();
+
+    slotRestartTest();
 }
 
 void RGBMatrixEditor::slotLoopClicked()
@@ -355,9 +361,16 @@ void RGBMatrixEditor::slotDurationSpinChanged(int ms)
 void RGBMatrixEditor::slotTestClicked()
 {
     if (m_testButton->isChecked() == true)
+    {
+        m_previewTimer->stop();
         m_doc->masterTimer()->startFunction(m_mtx, false);
+    }
     else
+    {
         m_mtx->stopAndWait();
+        m_previewIterator = 0;
+        m_previewTimer->start(MasterTimer::tick());
+    }
 }
 
 void RGBMatrixEditor::slotRestartTest()

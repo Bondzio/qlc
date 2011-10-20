@@ -64,6 +64,7 @@
         <file alias="qlc.png">../../gfx/qlc.png</file>
         <file alias="qt.png">../../gfx/qt.png</file>
         <file alias="rainbow.png">../../gfx/rainbow.png</file>
+        <file alias="rgbmatrix.png">../../gfx/rgbmatrix.png</file>
         <file alias="resize.png">../../gfx/resize.png</file>
         <file alias="scene.png">../../gfx/scene.png</file>
         <file alias="script.png">../../gfx/script.png</file>

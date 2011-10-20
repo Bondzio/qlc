@@ -128,7 +128,7 @@ RGBMatrix::Pattern RGBMatrix::pattern() const
     return m_pattern;
 }
 
-RGBMap RGBMatrix::colorMap(quint32 step, quint32 totalSteps) const
+RGBMap RGBMatrix::colorMap(uint elapsed, uint duration) const
 {
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
     if (grp == NULL)
@@ -141,13 +141,13 @@ RGBMap RGBMatrix::colorMap(quint32 step, quint32 totalSteps) const
     switch (pattern())
     {
     case OutwardBox:
-        outwardBox(step, totalSteps, direction(), grp->size(), monoColor(), map);
+        outwardBox(elapsed, duration, direction(), grp->size(), monoColor(), map);
         break;
     case FullRows:
-        fullRows(step, totalSteps, direction(), grp->size(), monoColor(), map);
+        fullRows(elapsed, duration, direction(), grp->size(), monoColor(), map);
         break;
     case FullColumns:
-        fullColumns(step, totalSteps, direction(), grp->size(), monoColor(), map);
+        fullColumns(elapsed, duration, direction(), grp->size(), monoColor(), map);
         break;
     default:
         break;
@@ -183,12 +183,12 @@ QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
     }
 }
 
-void RGBMatrix::outwardBox(qreal step, qreal totalSteps, Function::Direction direction,
+void RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
                            const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
-    if (totalSteps > 0)
-        scale = step / totalSteps;
+    if (duration > 0)
+        scale = elapsed / duration;
 
     if (direction == Function::Backward)
         scale = 1.0 - scale;
@@ -221,12 +221,12 @@ void RGBMatrix::outwardBox(qreal step, qreal totalSteps, Function::Direction dir
     }
 }
 
-void RGBMatrix::fullRows(qreal step, qreal totalSteps, Function::Direction direction,
+void RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction direction,
                          const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
-    if (totalSteps > 0)
-        scale = step / totalSteps;
+    if (duration > 0)
+        scale = elapsed / duration;
 
     if (direction == Function::Backward)
         scale = 1.0 - scale;
@@ -243,12 +243,12 @@ void RGBMatrix::fullRows(qreal step, qreal totalSteps, Function::Direction direc
     }
 }
 
-void RGBMatrix::fullColumns(qreal step, qreal totalSteps, Function::Direction direction,
+void RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
                             const QSize& size, const QColor& color, RGBMap& map)
 {
     qreal scale = 0;
-    if (totalSteps > 0)
-        scale = step / totalSteps;
+    if (duration > 0)
+        scale = elapsed / duration;
 
     if (direction == Function::Backward)
         scale = 1.0 - scale;

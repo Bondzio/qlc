@@ -82,17 +82,17 @@ public:
     void setPattern(const Pattern& pat);
     Pattern pattern() const;
 
-    RGBMap colorMap(quint32 step, quint32 totalSteps) const;
+    RGBMap colorMap(uint elapsed, uint duration) const;
 
     static Pattern stringToPattern(const QString& str);
     static QString patternToString(RGBMatrix::Pattern pat);
 
 private:
-    static void outwardBox(qreal step, qreal totalSteps, Function::Direction direction,
+    static void outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
                            const QSize& size, const QColor& color, RGBMap& map);
-    static void fullRows(qreal step, qreal totalSteps, Function::Direction direction,
+    static void fullRows(qreal elapsed, qreal duration, Function::Direction direction,
                          const QSize& size, const QColor& color, RGBMap& map);
-    static void fullColumns(qreal step, qreal totalSteps, Function::Direction direction,
+    static void fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
                             const QSize& size, const QColor& color, RGBMap& map);
 
 private:

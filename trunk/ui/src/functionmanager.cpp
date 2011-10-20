@@ -261,7 +261,6 @@ void FunctionManager::initActions()
 void FunctionManager::initMenu()
 {
     QMenuBar* menuBar = new QMenuBar(this);
-    QAction* action = NULL;
 
 #ifndef __APPLE__
     layout()->setMenuBar(menuBar);

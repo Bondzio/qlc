@@ -213,7 +213,7 @@ void ConsoleChannel::initMenu()
         m_presetButton->setIcon(QIcon(":/color.png"));
         break;
     case QLCChannel::Effect:
-        m_presetButton->setIcon(QIcon(":/efx.png"));
+        m_presetButton->setIcon(QIcon(":/star.png"));
         break;
     case QLCChannel::Gobo:
         m_presetButton->setIcon(QIcon(":/gobo.png"));

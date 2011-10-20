@@ -137,7 +137,7 @@ void FixtureGroupEditor::updateTable()
 
         QTableWidgetItem* item = new QTableWidgetItem;
         QFont font = item->font();
-        font.setPointSize(10);
+        font.setPointSize(font.pointSize() - 2);
         item->setFont(font);
         item->setData(PROP_FIXTURE, it.value());
 
@@ -146,9 +146,9 @@ void FixtureGroupEditor::updateTable()
             item->setIcon(QIcon(":/fixture.png"));
         if (m_grp->displayStyle() & FixtureGroup::DisplayName)
             str += fxi->name();
-        if ((m_grp->displayStyle() & FixtureGroup::DisplayAddress
-             || m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
-            && m_grp->displayStyle() & FixtureGroup::DisplayName)
+        if (((m_grp->displayStyle() & FixtureGroup::DisplayAddress)
+             || (m_grp->displayStyle() & FixtureGroup::DisplayUniverse))
+            && (m_grp->displayStyle() & FixtureGroup::DisplayName))
             str += "\n";
         if (m_grp->displayStyle() & FixtureGroup::DisplayAddress)
             str += QString("DMX:%1 ").arg(fxi->address() + 1);

@@ -241,6 +241,32 @@ Function::RunOrder Function::stringToRunOrder(const QString& str)
         return Loop;
 }
 
+bool Function::saveXMLRunOrder(QDomDocument* doc, QDomElement* root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(root != NULL);
+
+    QDomElement tag = doc->createElement(KXMLQLCFunctionRunOrder);
+    root->appendChild(tag);
+    QDomText text = doc->createTextNode(runOrderToString(runOrder()));
+    tag.appendChild(text);
+
+    return true;
+}
+
+bool Function::loadXMLRunOrder(const QDomElement& root)
+{
+    if (root.tagName() != KXMLQLCFunctionRunOrder)
+    {
+        qWarning() << Q_FUNC_INFO << "RunOrder node not found";
+        return false;
+    }
+
+    setRunOrder(stringToRunOrder(root.text()));
+
+    return true;
+}
+
 /*****************************************************************************
  * Direction
  *****************************************************************************/
@@ -280,6 +306,32 @@ Function::Direction Function::stringToDirection(const QString& str)
         return Backward;
     else
         return Forward;
+}
+
+bool Function::saveXMLDirection(QDomDocument* doc, QDomElement* root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(root != NULL);
+
+    QDomElement tag = doc->createElement(KXMLQLCFunctionDirection);
+    root->appendChild(tag);
+    QDomText text = doc->createTextNode(directionToString(direction()));
+    tag.appendChild(text);
+
+    return true;
+}
+
+bool Function::loadXMLDirection(const QDomElement& root)
+{
+    if (root.tagName() != KXMLQLCFunctionDirection)
+    {
+        qWarning() << Q_FUNC_INFO << "Direction node not found";
+        return false;
+    }
+
+    setDirection(stringToDirection(root.text()));
+
+    return true;
 }
 
 /****************************************************************************
@@ -331,7 +383,7 @@ bool Function::loadXMLSpeed(const QDomElement& speedRoot)
     return true;
 }
 
-void Function::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
+bool Function::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
 {
     QDomElement tag;
 
@@ -340,6 +392,18 @@ void Function::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
     tag.setAttribute(KXMLQLCFunctionSpeedFadeOut, QString::number(fadeOutSpeed()));
     tag.setAttribute(KXMLQLCFunctionSpeedDuration, QString::number(duration()));
     root->appendChild(tag);
+
+    return true;
+}
+
+uint Function::infiniteSpeed()
+{
+    return (uint) -2;
+}
+
+uint Function::defaultSpeed()
+{
+    return (uint) -1;
 }
 
 /*****************************************************************************

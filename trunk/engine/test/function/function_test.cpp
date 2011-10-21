@@ -629,4 +629,94 @@ void Function_Test::loaderUnknownType()
     QVERIFY(d.function(15) == NULL);
 }
 
+void Function_Test::runOrderXML()
+{
+    Doc d(this);
+    Function_Stub stub(&d);
+    stub.setRunOrder(Function::SingleShot);
+
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Foo");
+    QVERIFY(stub.saveXMLRunOrder(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("RunOrder"));
+    QCOMPARE(root.firstChild().toElement().text(), QString("SingleShot"));
+    stub.setRunOrder(Function::Loop);
+    QVERIFY(stub.loadXMLRunOrder(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.runOrder(), Function::SingleShot);
+
+    root = doc.createElement("Foo");
+    stub.setRunOrder(Function::Loop);
+    QVERIFY(stub.saveXMLRunOrder(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("RunOrder"));
+    QCOMPARE(root.firstChild().toElement().text(), QString("Loop"));
+    stub.setRunOrder(Function::SingleShot);
+    QVERIFY(stub.loadXMLRunOrder(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.runOrder(), Function::Loop);
+
+    root = doc.createElement("Foo");
+    stub.setRunOrder(Function::PingPong);
+    QVERIFY(stub.saveXMLRunOrder(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("RunOrder"));
+    QCOMPARE(root.firstChild().toElement().text(), QString("PingPong"));
+    stub.setRunOrder(Function::Loop);
+    QVERIFY(stub.loadXMLRunOrder(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.runOrder(), Function::PingPong);
+
+    QVERIFY(stub.loadXMLRunOrder(root) == false);
+}
+
+void Function_Test::directionXML()
+{
+    Doc d(this);
+    Function_Stub stub(&d);
+    stub.setDirection(Function::Backward);
+
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Foo");
+    QVERIFY(stub.saveXMLDirection(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("Direction"));
+    QCOMPARE(root.firstChild().toElement().text(), QString("Backward"));
+    stub.setDirection(Function::Forward);
+    QVERIFY(stub.loadXMLDirection(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.direction(), Function::Backward);
+
+    root = doc.createElement("Foo");
+    stub.setDirection(Function::Forward);
+    QVERIFY(stub.saveXMLDirection(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("Direction"));
+    QCOMPARE(root.firstChild().toElement().text(), QString("Forward"));
+    stub.setDirection(Function::Backward);
+    QVERIFY(stub.loadXMLDirection(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.direction(), Function::Forward);
+
+    QVERIFY(stub.loadXMLDirection(root) == false);
+}
+
+void Function_Test::speedXML()
+{
+    Doc d(this);
+    Function_Stub stub(&d);
+    stub.setFadeInSpeed(500);
+    stub.setFadeOutSpeed(1000);
+    stub.setDuration(1500);
+
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Foo");
+    QVERIFY(stub.saveXMLSpeed(&doc, &root) == true);
+    QCOMPARE(root.firstChild().toElement().tagName(), QString("Speed"));
+    QCOMPARE(root.firstChild().toElement().attribute("FadeIn"), QString("500"));
+    QCOMPARE(root.firstChild().toElement().attribute("FadeOut"), QString("1000"));
+    QCOMPARE(root.firstChild().toElement().attribute("Duration"), QString("1500"));
+
+    stub.setFadeInSpeed(0);
+    stub.setFadeOutSpeed(0);
+    stub.setDuration(0);
+    QVERIFY(stub.loadXMLSpeed(root.firstChild().toElement()) == true);
+    QCOMPARE(stub.fadeInSpeed(), uint(500));
+    QCOMPARE(stub.fadeOutSpeed(), uint(1000));
+    QCOMPARE(stub.duration(), uint(1500));
+
+    QVERIFY(stub.loadXMLSpeed(root) == false);
+}
+
 QTEST_APPLESS_MAIN(Function_Test)

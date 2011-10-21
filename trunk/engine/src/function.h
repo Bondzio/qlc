@@ -235,6 +235,13 @@ public:
      */
     static Function::RunOrder stringToRunOrder(const QString& str);
 
+protected:
+    /** Save function's running order in $doc, under $root */
+    bool saveXMLRunOrder(QDomDocument* doc, QDomElement* root) const;
+
+    /** Load function's direction from $root */
+    bool loadXMLRunOrder(const QDomElement& root);
+
 private:
     RunOrder m_runOrder;
 
@@ -271,6 +278,13 @@ public:
      */
     static Function::Direction stringToDirection(const QString& str);
 
+protected:
+    /** Save function's direction in $doc, under $root */
+    bool saveXMLDirection(QDomDocument* doc, QDomElement* root) const;
+
+    /** Load function's direction from $root */
+    bool loadXMLDirection(const QDomElement& root);
+
 private:
     Direction m_direction;
 
@@ -296,12 +310,15 @@ public:
     /** Get the duration in milliseconds */
     uint duration() const;
 
+    static uint defaultSpeed();
+    static uint infiniteSpeed();
+
 protected:
     /** Load the contents of a speed node */
     bool loadXMLSpeed(const QDomElement& speedRoot);
 
     /** Save function's speed values under the given $root element in $doc */
-    void saveXMLSpeed(QDomDocument* doc, QDomElement* root) const;
+    bool saveXMLSpeed(QDomDocument* doc, QDomElement* root) const;
 
 private:
     uint m_fadeInSpeed;

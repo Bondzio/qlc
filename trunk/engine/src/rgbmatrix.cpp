@@ -322,11 +322,11 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionDirection)
         {
-            setDirection(Function::stringToDirection(tag.text()));
+            loadXMLDirection(tag);
         }
         else if (tag.tagName() == KXMLQLCFunctionRunOrder)
         {
-            setRunOrder(Function::stringToRunOrder(tag.text()));
+            loadXMLRunOrder(tag);
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixMonoColor)
         {
@@ -364,6 +364,12 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     /* Speeds */
     saveXMLSpeed(doc, &root);
 
+    /* Direction */
+    saveXMLDirection(doc, &root);
+
+    /* Run order */
+    saveXMLRunOrder(doc, &root);
+
     /* Pattern */
     tag = doc->createElement(KXMLQLCRGBMatrixPattern);
     root.appendChild(tag);
@@ -380,18 +386,6 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCRGBMatrixFixtureGroup);
     root.appendChild(tag);
     text = doc->createTextNode(QString::number(fixtureGroup()));
-    tag.appendChild(text);
-
-    /* Direction */
-    tag = doc->createElement(KXMLQLCFunctionDirection);
-    root.appendChild(tag);
-    text = doc->createTextNode(Function::directionToString(direction()));
-    tag.appendChild(text);
-
-    /* Run order */
-    tag = doc->createElement(KXMLQLCFunctionRunOrder);
-    root.appendChild(tag);
-    text = doc->createTextNode(Function::runOrderToString(runOrder()));
     tag.appendChild(text);
 
     return true;

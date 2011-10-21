@@ -574,16 +574,10 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     saveXMLSpeed(doc, &root);
 
     /* Direction */
-    tag = doc->createElement(KXMLQLCFunctionDirection);
-    root.appendChild(tag);
-    text = doc->createTextNode(Function::directionToString(direction()));
-    tag.appendChild(text);
+    saveXMLDirection(doc, &root);
 
     /* Run order */
-    tag = doc->createElement(KXMLQLCFunctionRunOrder);
-    root.appendChild(tag);
-    text = doc->createTextNode(Function::runOrderToString(runOrder()));
-    tag.appendChild(text);
+    saveXMLRunOrder(doc, &root);
 
     /* Algorithm */
     tag = doc->createElement(KXMLQLCEFXAlgorithm);
@@ -732,13 +726,11 @@ bool EFX::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionDirection)
         {
-            /* Direction */
-            setDirection(Function::stringToDirection(tag.text()));
+            loadXMLDirection(tag);
         }
         else if (tag.tagName() == KXMLQLCFunctionRunOrder)
         {
-            /* Run Order */
-            setRunOrder(Function::stringToRunOrder(tag.text()));
+            loadXMLRunOrder(tag);
         }
         else if (tag.tagName() == KXMLQLCEFXWidth)
         {

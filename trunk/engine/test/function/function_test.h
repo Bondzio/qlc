@@ -55,6 +55,10 @@ private slots:
     void loaderCollection();
     void loaderEFX();
     void loaderUnknownType();
+
+    void runOrderXML();
+    void directionXML();
+    void speedXML();
 };
 
 #endif

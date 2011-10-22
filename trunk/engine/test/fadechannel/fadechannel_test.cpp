@@ -131,6 +131,7 @@ void FadeChannel_Test::nextStep()
     FadeChannel fc;
     fc.setStart(0);
     fc.setTarget(250);
+
     fc.setFadeTime(1000);
 
     for (int i = 5; i < 250; i += 5)
@@ -138,6 +139,41 @@ void FadeChannel_Test::nextStep()
         int value = fc.nextStep(MasterTimer::tick());
         QCOMPARE(value, i);
     }
+
+    fc.setCurrent(0);
+    fc.setReady(false);
+    fc.setFadeTime(0);
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
+
+    fc.setCurrent(0);
+    fc.setReady(false);
+    fc.setFadeTime(MasterTimer::tick() / 5);
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
+
+    fc.setCurrent(0);
+    fc.setReady(false);
+    fc.setFadeTime(1 * MasterTimer::tick());
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
+
+    fc.setCurrent(0);
+    fc.setReady(false);
+    fc.setFadeTime(2 * MasterTimer::tick());
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(125));
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
+
+    fc.setCurrent(0);
+    fc.setReady(false);
+    fc.setFadeTime(5 * MasterTimer::tick());
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(50));
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(100));
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(150));
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(200));
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
 }
 
 void FadeChannel_Test::calculateCurrent()

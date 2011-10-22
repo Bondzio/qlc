@@ -35,7 +35,8 @@ private slots:
     void cleanup();
 
     void addRemove();
-    void write();
+    void writeZeroFade();
+    void writeLoop();
     void adjustIntensity();
 
 private:

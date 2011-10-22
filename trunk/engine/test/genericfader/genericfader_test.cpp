@@ -109,7 +109,25 @@ void GenericFader_Test::addRemove()
     QCOMPARE(fader.m_channels[fc].target(), uchar(63));
 }
 
-void GenericFader_Test::write()
+void GenericFader_Test::writeZeroFade()
+{
+    UniverseArray ua(512);
+    GenericFader fader(m_doc);
+
+    FadeChannel fc;
+    fc.setFixture(0);
+    fc.setChannel(0);
+    fc.setStart(0);
+    fc.setTarget(255);
+    fc.setFadeTime(0);
+
+    fader.add(fc);
+    QCOMPARE(ua.preGMValues()[10], (char) 0);
+    fader.write(&ua);
+    QCOMPARE(ua.preGMValues()[10], (char) 255);
+}
+
+void GenericFader_Test::writeLoop()
 {
     UniverseArray ua(512);
     GenericFader fader(m_doc);
@@ -121,6 +139,8 @@ void GenericFader_Test::write()
     fc.setTarget(255);
     fc.setFadeTime(1000);
     fader.add(fc);
+
+    QCOMPARE(ua.preGMValues()[10], (char) 0);
 
     for (int i = 0; i <= 1000; i += MasterTimer::tick())
     {

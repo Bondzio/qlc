@@ -126,6 +126,20 @@ void FadeChannel_Test::fadeTime()
     QVERIFY(ch.fadeTime() == 50);
 }
 
+void FadeChannel_Test::nextStep()
+{
+    FadeChannel fc;
+    fc.setStart(0);
+    fc.setTarget(250);
+    fc.setFadeTime(1000);
+
+    for (int i = 5; i < 250; i += 5)
+    {
+        int value = fc.nextStep(MasterTimer::tick());
+        QCOMPARE(value, i);
+    }
+}
+
 void FadeChannel_Test::calculateCurrent()
 {
     FadeChannel fch;

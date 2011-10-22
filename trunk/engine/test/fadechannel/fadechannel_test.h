@@ -37,6 +37,7 @@ private slots:
     void current();
     void ready();
     void fadeTime();
+    void nextStep();
     void calculateCurrent();
 };
 

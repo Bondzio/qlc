@@ -71,7 +71,7 @@ public:
     int runningFunctions();
 
     /** Start running the given function */
-    virtual void startFunction(Function* function, bool initiatedByOtherFunction);
+    virtual void startFunction(Function* function);
 
     /** Stop all functions. Doesn't affect registered DMX sources. */
     void stopAllFunctions();

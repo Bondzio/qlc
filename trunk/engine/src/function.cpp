@@ -64,10 +64,14 @@ Function::Function(Doc* doc, Type t)
     , m_fadeInSpeed(0)
     , m_fadeOutSpeed(0)
     , m_duration(0)
+    , m_overrideFadeInSpeed(defaultSpeed())
+    , m_overrideFadeOutSpeed(defaultSpeed())
+    , m_overrideDuration(defaultSpeed())
     , m_flashing(false)
-    , m_initiatedByOtherFunction(false)
     , m_elapsed(0)
     , m_stop(true)
+    , m_running(false)
+    , m_startedAsChild(false)
     , m_intensity(1.0)
 {
     Q_ASSERT(doc != NULL);
@@ -349,6 +353,11 @@ uint Function::fadeInSpeed() const
     return m_fadeInSpeed;
 }
 
+uint Function::overrideFadeInSpeed() const
+{
+    return m_overrideFadeInSpeed;
+}
+
 void Function::setFadeOutSpeed(uint ms)
 {
     m_fadeOutSpeed = ms;
@@ -360,6 +369,11 @@ uint Function::fadeOutSpeed() const
     return m_fadeOutSpeed;
 }
 
+uint Function::overrideFadeOutSpeed() const
+{
+    return m_overrideFadeOutSpeed;
+}
+
 void Function::setDuration(uint ms)
 {
     m_duration = ms;
@@ -369,6 +383,11 @@ void Function::setDuration(uint ms)
 uint Function::duration() const
 {
     return m_duration;
+}
+
+uint Function::overrideDuration() const
+{
+    return m_overrideDuration;
 }
 
 bool Function::loadXMLSpeed(const QDomElement& speedRoot)
@@ -520,7 +539,9 @@ void Function::preRun(MasterTimer* timer)
 {
     Q_UNUSED(timer);
 
+    m_running = true;
     m_stop = false;
+
     emit running(m_id);
 }
 
@@ -533,19 +554,19 @@ void Function::postRun(MasterTimer* timer, UniverseArray* universes)
     resetElapsed();
     resetIntensity();
     m_stop = true;
+    m_overrideFadeInSpeed = defaultSpeed();
+    m_overrideFadeOutSpeed = defaultSpeed();
+    m_overrideDuration = defaultSpeed();
     m_functionStopped.wakeAll();
     m_stopMutex.unlock();
+
+    m_running = false;
     emit stopped(m_id);
 }
 
-bool Function::initiatedByOtherFunction() const
+bool Function::isRunning() const
 {
-    return m_initiatedByOtherFunction;
-}
-
-void Function::setInitiatedByOtherFunction(bool state)
-{
-    m_initiatedByOtherFunction = state;
+    return m_running;
 }
 
 /*****************************************************************************
@@ -566,12 +587,28 @@ void Function::incrementElapsed()
 {
     // Don't wrap around. UINT_MAX is the maximum fade/hold time.
     if (m_elapsed < UINT_MAX)
-        m_elapsed += (1000 / MasterTimer::frequency());
+        m_elapsed += MasterTimer::tick();
 }
 
 /*****************************************************************************
- * Stopping
+ * Start & Stop
  *****************************************************************************/
+
+void Function::start(MasterTimer* timer, bool child, uint overrideFadeIn,
+                     uint overrideFadeOut, uint overrideDuration)
+{
+    Q_ASSERT(timer != NULL);
+    m_startedAsChild = child;
+    m_overrideFadeInSpeed = overrideFadeIn;
+    m_overrideFadeOutSpeed = overrideFadeOut;
+    m_overrideDuration = overrideDuration;
+    timer->startFunction(this);
+}
+
+bool Function::startedAsChild() const
+{
+    return m_startedAsChild;
+}
 
 void Function::stop()
 {

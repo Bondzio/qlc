@@ -42,7 +42,6 @@ private slots:
     void functionRemoval();
     void copyFrom();
     void createCopy();
-    void stepFunctions();
 
     void loadSuccessLegacy();
     void loadSuccess();

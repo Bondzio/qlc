@@ -624,7 +624,7 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
             else
             {
                 if (function->stopped() == true)
-                    timer->startFunction(function, false);
+                    function->start(timer);
                 function->adjustIntensity(percentage);
             }
         }

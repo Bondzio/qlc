@@ -306,7 +306,7 @@ void EFXEditor::accept()
 void EFXEditor::slotTestClicked()
 {
     if (m_testButton->isChecked() == true)
-        m_doc->masterTimer()->startFunction(m_efx, false);
+        m_efx->start(m_doc->masterTimer());
     else
         m_efx->stopAndWait();
 }

@@ -440,7 +440,7 @@ bool Doc::deleteFunction(quint32 id)
     }
 }
 
-Function* Doc::function(quint32 id)
+Function* Doc::function(quint32 id) const
 {
     if (m_functions.contains(id) == true)
         return m_functions[id];

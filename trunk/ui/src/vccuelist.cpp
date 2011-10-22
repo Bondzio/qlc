@@ -33,6 +33,7 @@
 #include "virtualconsole.h"
 #include "chaserrunner.h"
 #include "mastertimer.h"
+#include "chaserstep.h"
 #include "vccuelist.h"
 #include "function.h"
 #include "inputmap.h"
@@ -263,7 +264,7 @@ void VCCueList::createRunner(int startIndex)
 {
     Q_ASSERT(m_runner == NULL);
 
-    QList <Function*> cues;
+    QList <ChaserStep> steps;
 
     for (int i = 0; i < m_list->topLevelItemCount(); i++)
     {
@@ -271,13 +272,11 @@ void VCCueList::createRunner(int startIndex)
         Q_ASSERT(item != NULL);
 
         quint32 fid = item->text(KColumnID).toUInt();
-        Function* function = m_doc->function(fid);
-        if (function != NULL)
-            cues << function;
+        steps << ChaserStep(fid);
     }
 
     //! @todo speeds
-    m_runner = new ChaserRunner(m_doc, cues, 0, 0, 0,
+    m_runner = new ChaserRunner(m_doc, steps, 0, 0, 0,
                                 Function::Forward, Function::Loop, 1.0, this, startIndex);
     m_runner->setAutoStep(false);
     connect(m_runner, SIGNAL(currentStepChanged(int)),

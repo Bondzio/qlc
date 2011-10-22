@@ -29,6 +29,7 @@
 #include "universearray.h"
 #include "chaserrunner.h"
 #include "mastertimer.h"
+#include "chaserstep.h"
 #include "function.h"
 #include "fixture.h"
 #include "chaser.h"
@@ -40,13 +41,11 @@
  * Initialization
  *****************************************************************************/
 
-Chaser::Chaser(Doc* doc) : Function(doc, Function::Chaser)
+Chaser::Chaser(Doc* doc)
+    : Function(doc, Function::Chaser)
+    , m_legacyHoldBus(Bus::invalid())
+    , m_runner(NULL)
 {
-    m_runTimeDirection = Forward;
-    m_runTimePosition = 0;
-    m_runner = NULL;
-    m_legacyHoldBus = Bus::defaultHold();
-
     setName(tr("New Chaser"));
 
     // Listen to member Function removals
@@ -92,16 +91,17 @@ bool Chaser::copyFrom(const Function* function)
  * Contents
  *****************************************************************************/
 
-bool Chaser::addStep(quint32 id, int index)
+bool Chaser::addStep(const ChaserStep& step, int index)
 {
-    if (id != this->id())
+    if (step.fid != this->id())
     {
         if (index < 0)
-            m_steps.append(id);
+            m_steps.append(step);
         else if (index <= m_steps.size())
-            m_steps.insert(index, id);
+            m_steps.insert(index, step);
 
         emit changed(this->id());
+
         return true;
     }
     else
@@ -130,28 +130,14 @@ void Chaser::clear()
     emit changed(this->id());
 }
 
-QList <quint32> Chaser::steps() const
+QList <ChaserStep> Chaser::steps() const
 {
     return m_steps;
 }
 
-QList <Function*> Chaser::stepFunctions() const
-{
-    QList <Function*> list;
-    QListIterator <quint32> it(m_steps);
-    while (it.hasNext() == true)
-    {
-        Function* function = doc()->function(it.next());
-        if (function != NULL)
-            list << function;
-    }
-
-    return list;
-}
-
 void Chaser::slotFunctionRemoved(quint32 fid)
 {
-    m_steps.removeAll(fid);
+    m_steps.removeAll(ChaserStep(fid));
 }
 
 /*****************************************************************************
@@ -164,7 +150,6 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     QDomElement tag;
     QDomText text;
     QString str;
-    int i = 0;
 
     Q_ASSERT(doc != NULL);
     Q_ASSERT(wksp_root != NULL);
@@ -187,20 +172,12 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     saveXMLRunOrder(doc, &root);
 
     /* Steps */
-    QListIterator <quint32> it(m_steps);
+    int stepNumber = 0;
+    QListIterator <ChaserStep> it(m_steps);
     while (it.hasNext() == true)
     {
-        /* Step tag */
-        tag = doc->createElement(KXMLQLCFunctionStep);
-        root.appendChild(tag);
-
-        /* Step number */
-        tag.setAttribute(KXMLQLCFunctionNumber, i++);
-
-        /* Step Function ID */
-        str.setNum(it.next());
-        text = doc->createTextNode(str);
-        tag.appendChild(text);
+        ChaserStep step(it.next());
+        step.saveXML(doc, &root, stepNumber++);
     }
 
     return true;
@@ -250,18 +227,16 @@ bool Chaser::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunctionStep)
         {
-            quint32 fid = -1;
-            int num = 0;
-
-            num = tag.attribute(KXMLQLCFunctionNumber).toInt();
-            fid = tag.text().toUInt();
-
-            /* Don't check for the member function's existence,
-               because it might not have been loaded yet. */
-            if (num >= m_steps.size())
-                m_steps.append(fid);
-            else
-                m_steps.insert(num, fid);
+            //! @todo stepNumber is useless if the steps are in the wrong order
+            ChaserStep step;
+            int stepNumber = -1;
+            if (step.loadXML(tag, stepNumber) == true)
+            {
+                if (stepNumber >= m_steps.size())
+                    m_steps.append(step);
+                else
+                    m_steps.insert(stepNumber, step);
+            }
         }
         else
         {
@@ -282,11 +257,12 @@ void Chaser::postLoad()
         setDuration((value / MasterTimer::frequency()) * 1000);
     }
 
-    QMutableListIterator <quint32> it(m_steps);
+    QMutableListIterator <ChaserStep> it(m_steps);
     while (it.hasNext() == true)
     {
-        Function* function = doc()->function(it.next());
-        if (function == NULL || function->type() != Function::Scene)
+        ChaserStep step(it.next());
+        Function* function = doc()->function(step.fid);
+        if (function == NULL)
             it.remove();
     }
 }
@@ -297,14 +273,29 @@ void Chaser::postLoad()
 
 void Chaser::preRun(MasterTimer* timer)
 {
-    m_runner = new ChaserRunner(doc(), stepFunctions(), fadeInSpeed(), fadeOutSpeed(),
-                                duration(), direction(), runOrder(), intensity());
+    Q_ASSERT(m_runner == NULL);
+
+    uint fadeIn = fadeInSpeed();
+    uint fadeOut = fadeOutSpeed();
+    uint dur = duration();
+
+    // These override* variables are set only if a chaser is started by another function
+    if (overrideFadeInSpeed() != defaultSpeed())
+        fadeIn = overrideFadeInSpeed();
+    if (overrideFadeOutSpeed() != defaultSpeed())
+        fadeOut = overrideFadeOutSpeed();
+    if (overrideDuration() != defaultSpeed())
+        dur = overrideDuration();
+
+    m_runner = new ChaserRunner(doc(), steps(), fadeIn, fadeOut, dur,
+                                direction(), runOrder(), intensity(), this);
     Function::preRun(timer);
 }
 
 void Chaser::write(MasterTimer* timer, UniverseArray* universes)
 {
     Q_ASSERT(m_runner != NULL);
+
     if (m_runner->write(timer, universes) == false)
         stop();
 
@@ -315,6 +306,7 @@ void Chaser::postRun(MasterTimer* timer, UniverseArray* universes)
 {
     m_runner->postRun(timer, universes);
 
+    Q_ASSERT(m_runner != NULL);
     delete m_runner;
     m_runner = NULL;
 

@@ -89,17 +89,14 @@ int MasterTimer::runningFunctions()
     return n;
 }
 
-void MasterTimer::startFunction(Function* function, bool initiatedByOtherFunction)
+void MasterTimer::startFunction(Function* function)
 {
     if (function == NULL)
         return;
 
     m_functionListMutex.lock();
     if (m_functionList.contains(function) == false)
-    {
         m_functionList.append(function);
-        function->setInitiatedByOtherFunction(initiatedByOtherFunction);
-    }
     m_functionListMutex.unlock();
 
     emit functionListChanged();
@@ -307,7 +304,7 @@ void MasterTimer::runFunctions(UniverseArray* universes)
 
         if (function != NULL)
         {
-            if (function->elapsed() == 0)
+            if (function->isRunning() == false)
                 function->preRun(this);
 
             /* Check for pre-conditions before getting data */

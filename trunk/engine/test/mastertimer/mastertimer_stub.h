@@ -40,7 +40,7 @@ public:
     MasterTimerStub(Doc* doc, UniverseArray& universes);
     ~MasterTimerStub();
 
-    void startFunction(Function* function, bool initiatedByOtherFunction);
+    void startFunction(Function* function);
     void stopFunction(Function* function);
     QList <Function*> m_functionList;
 

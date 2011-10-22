@@ -66,7 +66,7 @@ EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
 
     m_fader = NULL;
 
-    setDuration(20 * 1000);
+    setDuration(20000); // 20s
 
     m_legacyHoldBus = Bus::invalid();
     m_legacyFadeBus = Bus::invalid();

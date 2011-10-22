@@ -363,7 +363,10 @@ void EFXFixture::start(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setFadeTime(m_parent->fadeInSpeed());
+            if (m_parent->overrideFadeInSpeed() != Function::defaultSpeed())
+                fc.setFadeTime(m_parent->overrideFadeInSpeed());
+            else
+                fc.setFadeTime(m_parent->fadeInSpeed());
 
             fc.setStart(0);
             fc.setCurrent(fc.start());
@@ -391,7 +394,11 @@ void EFXFixture::stop(MasterTimer* timer, UniverseArray* universes)
             FadeChannel fc;
             fc.setFixture(fixture());
             fc.setChannel(fxi->masterIntensityChannel());
-            fc.setFadeTime(m_parent->fadeOutSpeed());
+
+            if (m_parent->overrideFadeOutSpeed() != Function::defaultSpeed())
+                fc.setFadeTime(m_parent->overrideFadeOutSpeed());
+            else
+                fc.setFadeTime(m_parent->fadeOutSpeed());
 
             fc.setStart(uchar(floor((qreal(fadeIntensity()) * intensity()) + 0.5)));
             fc.setCurrent(fc.start());

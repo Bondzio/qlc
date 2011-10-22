@@ -26,20 +26,16 @@
 #include "genericfader.h"
 #include "mastertimer.h"
 #include "fadechannel.h"
+#include "chaserstep.h"
 #include "qlcmacros.h"
 #include "fixture.h"
 #include "scene.h"
 #include "doc.h"
 
-ChaserRunner::ChaserRunner(Doc* doc, QList <Function*> steps,
-                           uint fadeInSpeed,
-                           uint fadeOutSpeed,
-                           uint duration,
-                           Function::Direction direction,
-                           Function::RunOrder runOrder,
-                           qreal intensity,
-                           QObject* parent,
-                           int startIndex)
+ChaserRunner::ChaserRunner(Doc* doc, QList <ChaserStep> steps,
+                           uint fadeInSpeed, uint fadeOutSpeed, uint duration,
+                           Function::Direction direction, Function::RunOrder runOrder,
+                           qreal intensity, QObject* parent, int startIndex)
     : QObject(parent)
     , m_doc(doc)
     , m_steps(steps)
@@ -113,14 +109,17 @@ void ChaserRunner::reset()
         m_currentStep = m_steps.size() - 1;
     else
         m_currentStep = 0;
+
     m_elapsed = 0;
     m_next = false;
     m_previous = false;
-    m_channelMap.clear();
+    m_currentFunction = NULL;
 }
 
 bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
 {
+    Q_UNUSED(universes);
+
     // Nothing to do
     if (m_steps.size() == 0)
         return false;
@@ -135,14 +134,14 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         // always within m_steps limits.
 
         m_elapsed = MasterTimer::tick();
-        handleChannelSwitch(timer, universes);
+        switchFunctions(timer);
         emit currentStepChanged(m_currentStep);
     }
     else if (m_elapsed == 0)
     {
         // First step
         m_elapsed = MasterTimer::tick();
-        handleChannelSwitch(timer, universes);
+        switchFunctions(timer);
         emit currentStepChanged(m_currentStep);
     }
     else if ((isAutoStep() && m_elapsed >= m_duration) || m_next == true || m_previous == true)
@@ -172,7 +171,7 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         m_next = false;
         m_previous = false;
 
-        handleChannelSwitch(timer, universes);
+        switchFunctions(timer);
         emit currentStepChanged(m_currentStep);
     }
     else
@@ -182,50 +181,17 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
             m_elapsed += MasterTimer::tick();
     }
 
-    QMutableMapIterator <quint32,FadeChannel> it(m_channelMap);
-    while (it.hasNext() == true)
-    {
-        Scene* scene = qobject_cast<Scene*> (m_steps.at(m_currentStep));
-        if (scene == NULL)
-            continue;
-
-        FadeChannel& fc(it.next().value());
-        if (fc.current() == fc.target() && fc.group(m_doc) != QLCChannel::Intensity)
-        {
-            /* Write the final value to LTP channels only once in the else branch */
-        }
-        else
-        {
-            uchar value = uchar(floor((qreal(fc.calculateCurrent(m_fadeInSpeed, m_elapsed)) * m_intensity) + 0.5));
-            universes->write(fc.address(m_doc), value, fc.group(m_doc));
-        }
-    }
-
     return true;
 }
 
 void ChaserRunner::postRun(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(universes);
+    Q_UNUSED(timer);
 
-    // Nothing to do
-    if (m_steps.size() == 0)
-        return;
-
-    // Give to-be-zeroed channels to MasterTimer's GenericFader
-    QMapIterator <quint32,FadeChannel> it(m_channelMap);
-    while (it.hasNext() == true)
-    {
-        FadeChannel ch(it.next().value());
-        if (ch.group(m_doc) == QLCChannel::Intensity)
-        {
-            ch.setStart(ch.current());
-            ch.setTarget(0);
-            ch.setFadeTime(m_fadeOutSpeed);
-            ch.setReady(false);
-            timer->fader()->add(ch);
-        }
-    }
+    if (m_currentFunction != NULL && m_currentFunction->stopped() == false)
+        m_currentFunction->stop();
+    m_currentFunction = NULL;
 }
 
 bool ChaserRunner::roundCheck()
@@ -295,93 +261,18 @@ bool ChaserRunner::roundCheck()
     return true;
 }
 
-void ChaserRunner::handleChannelSwitch(MasterTimer* timer, const UniverseArray* universes)
+void ChaserRunner::switchFunctions(MasterTimer* timer)
 {
-    QMap <quint32,FadeChannel> zeroChannels;
+    if (m_currentFunction != NULL)
+        m_currentFunction->stop();
 
-    // Create a channel map for the current step and pick a list of channels
-    // that can be given back to MasterTimer's GenericFader to be faded back to zero
-    m_channelMap = createFadeChannels(universes, zeroChannels);
-
-    // Give to-be-zeroed channels to MasterTimer, but don't overwrite channels
-    QMapIterator <quint32,FadeChannel> it(zeroChannels);
-    while (it.hasNext() == true)
-        timer->fader()->add(it.next().value());
-}
-
-QMap <quint32,FadeChannel>
-ChaserRunner::createFadeChannels(const UniverseArray* universes,
-                                 QMap <quint32,FadeChannel>& zeroChannels) const
-{
-    QMap <quint32,FadeChannel> map;
-    if (m_currentStep >= m_steps.size() || m_currentStep < 0)
-        return map;
-
-    Scene* scene = qobject_cast<Scene*> (m_steps.at(m_currentStep));
-    Q_ASSERT(scene != NULL);
-
-    // Put all current channels to a map of channels that will be faded to zero.
-    // If the same channels are added to the new channel map, they are removed
-    // from this zero map.
-    zeroChannels = m_channelMap;
-
-    QListIterator <SceneValue> it(scene->values());
-    while (it.hasNext() == true)
+    ChaserStep step(m_steps.at(m_currentStep));
+    m_currentFunction = m_doc->function(step.fid);
+    if (m_currentFunction != NULL && m_currentFunction->stopped() == true)
     {
-        SceneValue value(it.next());
-        Fixture* fxi = m_doc->fixture(value.fxi);
-        if (fxi == NULL || fxi->channel(value.channel) == NULL)
-            continue;
-
-        FadeChannel fc;
-        fc.setFixture(value.fxi);
-        fc.setChannel(value.channel);
-        fc.setTarget(value.value);
-        fc.setFadeTime(m_fadeInSpeed);
-
-        quint32 addr = fc.address(m_doc);
-
-        // Get starting value from universes. For HTP channels it's always 0.
-        fc.setStart(uchar(universes->preGMValues()[addr]));
-
-        // Transfer last step's current value to current step's starting value.
-        if (m_channelMap.contains(addr) == true)
-            fc.setStart(m_channelMap[addr].current());
-        fc.setCurrent(fc.start());
-
-        // Append the channel to the channel map
-        map[addr] = fc;
-
-        // Remove the channel from a map of to-be-zeroed channels since now it
-        // has a new value to fade to.
-        zeroChannels.remove(addr);
+        m_currentFunction->start(timer, true, m_fadeInSpeed, m_fadeOutSpeed, m_duration);
+        m_currentFunction->adjustIntensity(m_intensity);
     }
-
-    // All channels that were present in the previous step but are not present
-    // in the current step will go through this zeroing process.
-    QMutableMapIterator <quint32,FadeChannel> zit(zeroChannels);
-    while (zit.hasNext() == true)
-    {
-        zit.next();
-        FadeChannel& fc(zit.value());
-        if (fc.current() == 0 || fc.group(m_doc) != QLCChannel::Intensity)
-        {
-            // Remove all non-HTP channels and such HTP channels that are
-            // already at zero. There's nothing to do for them.
-            zit.remove();
-        }
-        else
-        {
-            // This HTP channel was present in the previous step, but is absent
-            // in the current. It's nicer that we fade it back to zero, rather
-            // than just let it drop straight to zero.
-            fc.setStart(fc.current());
-            fc.setTarget(0);
-            fc.setFadeTime(m_fadeOutSpeed);
-        }
-    }
-
-    return map;
 }
 
 /****************************************************************************
@@ -391,4 +282,6 @@ ChaserRunner::createFadeChannels(const UniverseArray* universes,
 void ChaserRunner::adjustIntensity(qreal fraction)
 {
     m_intensity = CLAMP(fraction, qreal(0.0), qreal(1.0));
+    if (m_currentFunction != NULL)
+        m_currentFunction->adjustIntensity(m_intensity);
 }

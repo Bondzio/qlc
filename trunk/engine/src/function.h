@@ -297,18 +297,21 @@ public:
 
     /** Get the fade in time in milliseconds */
     uint fadeInSpeed() const;
+    uint overrideFadeInSpeed() const;
 
     /** Set the fade out time in milliseconds */
     void setFadeOutSpeed(uint ms);
 
     /** Get the fade out time in milliseconds */
     uint fadeOutSpeed() const;
+    uint overrideFadeOutSpeed() const;
 
     /** Set the duration in milliseconds */
     void setDuration(uint ms);
 
     /** Get the duration in milliseconds */
     uint duration() const;
+    uint overrideDuration() const;
 
     static uint defaultSpeed();
     static uint infiniteSpeed();
@@ -324,6 +327,10 @@ private:
     uint m_fadeInSpeed;
     uint m_fadeOutSpeed;
     uint m_duration;
+
+    uint m_overrideFadeInSpeed;
+    uint m_overrideFadeOutSpeed;
+    uint m_overrideDuration;
 
     /*********************************************************************
      * Fixtures
@@ -443,21 +450,6 @@ public:
      */
     virtual void postRun(MasterTimer* timer, UniverseArray* universes);
 
-	/**
-     * Check, whether the function was started by another function.
-     *
-	 * @return true If the function was started by another function.
-     *              Otherwise false.
-	 */
-    bool initiatedByOtherFunction() const;
-
-    /**
-     * Set function as "started by another function".
-     *
-     * @param state true to set the function as started by another.
-     */
-    void setInitiatedByOtherFunction(bool state);
-
 signals:
     /**
      * Emitted when a function is started (i.e. added to MasterTimer's
@@ -474,9 +466,6 @@ signals:
      * @param id The ID of the stopped function
      */
     void stopped(quint32 id);
-
-private:
-    bool m_initiatedByOtherFunction;
 
     /*********************************************************************
      * Elapsed
@@ -501,9 +490,32 @@ private:
     quint32 m_elapsed;
 
     /*********************************************************************
-     * Stopping
+     * Start & Stop
      *********************************************************************/
 public:
+    /**
+     * Start running the function in the given MasterTimer instance.
+     *
+     * @param timer The MasterTimer that should run the function
+     * @param child Use true if called from another function
+     * @param overrideFadeIn Override the function's default fade in speed
+     * @param overrideFadeOut Override the function's default fade out speed
+     * @param overrideDuration Override the function's default duration
+     */
+    void start(MasterTimer* timer, bool child = false,
+               uint overrideFadeIn = defaultSpeed(),
+               uint overrideFadeOut = defaultSpeed(),
+               uint overrideDuration = defaultSpeed());
+
+	/**
+     * Check, whether the function was started by another function i.e.
+     * as the other function's child.
+     *
+	 * @return true If the function was started by another function.
+     *              Otherwise false.
+	 */
+    bool startedAsChild() const;
+
     /**
      * Mark the function to be stopped ASAP. MasterTimer will stop running
      * the function on the next pass after this method has been called.
@@ -513,7 +525,8 @@ public:
     void stop();
 
     /**
-     * Check, whether the function should be stopped ASAP.
+     * Check, whether the function should be stopped ASAP. Functions can use this
+     * to check, whether they should continue running or bail out.
      *
      * @return true if the function should be stopped, otherwise false.
      */
@@ -528,9 +541,18 @@ public:
      */
     bool stopAndWait();
 
+    /**
+     * Check, whether the function is currently running (preRun() has been run)
+     * or not (postRun() has been completed). This should be used only from MasterTimer.
+     *
+     * @return true if function is running, false if not
+     */
+    bool isRunning() const;
+
 private:
     /** Stop flag, private to keep functions from modifying it. */
     bool m_stop;
+    bool m_running;
 
     QMutex m_stopMutex;
     QWaitCondition m_functionStopped;
@@ -563,6 +585,7 @@ signals:
     void intensityChanged(qreal fraction);
 
 private:
+    bool m_startedAsChild;
     qreal m_intensity;
 };
 

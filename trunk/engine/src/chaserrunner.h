@@ -29,6 +29,7 @@
 
 class UniverseArray;
 class FadeChannel;
+class ChaserStep;
 class Function;
 class Doc;
 
@@ -37,10 +38,10 @@ class ChaserRunner : public QObject
     Q_OBJECT
 
 public:
-    ChaserRunner(Doc* doc, QList <Function*> steps, uint fadeInSpeed, uint fadeOutSpeed,
-                 uint duration, Function::Direction direction,
-                 Function::RunOrder runOrder, qreal intensity = 1.0, QObject* parent = NULL,
-                 int startIndex = -1);
+    ChaserRunner(Doc* doc, QList <ChaserStep> steps,
+                 uint fadeInSpeed, uint fadeOutSpeed, uint duration,
+                 Function::Direction direction, Function::RunOrder runOrder,
+                 qreal intensity = 1.0, QObject* parent = NULL, int startIndex = -1);
     ~ChaserRunner();
 
     /**
@@ -115,31 +116,11 @@ private:
     bool roundCheck();
 
     /**
-     * Build a new channel map of the current Function's channels and give previous
-     * to-be-zeroed channels (if any) back to MasterTimer's GenericFader. Stores
-     * the new channel map to m_channelMap.
+     * Stop the previous function (if applicable) and start a new one (current).
      *
-     * @param timer The MasterTimer that runs the show
-     * @param universes Current universe values
+     * @param timer The MasterTimer that runs the functions
      */
-    void handleChannelSwitch(MasterTimer* timer, const UniverseArray* universes);
-
-    /**
-     * Create FadeChannel map for the currently active scene. If m_channelMap
-     * is not empty, then the created FadeChannels' starting values are taken
-     * from the old m_channelMap's current values. If the old map doesn't contain
-     * a FadeChannel for a new channel, then the new FadeChannel will start
-     * from whatever is currently in $universes[address].
-     *
-     * This handover must be done for HTP channels to work since UniverseArray's
-     * intensity channels are always reset to zero before MasterTimer starts
-     * making Function::write() calls. If this handover isn't done, all intensity
-     * channels would always fade from 0 to the target value.
-     *
-     * @param universes Current UniverseArray
-     */
-    QMap <quint32,FadeChannel> createFadeChannels(const UniverseArray* universes,
-                                                  QMap<quint32,FadeChannel>& zeroChannels) const;
+    void switchFunctions(MasterTimer* timer);
 
     /************************************************************************
      * Intensity
@@ -155,7 +136,7 @@ public:
      ************************************************************************/
 private:
     const Doc* m_doc;
-    const QList <Function*> m_steps; //! List of steps to go thru
+    const QList <ChaserStep> m_steps;              //! List of steps (functions) to go thru
     const uint m_fadeInSpeed;
     const uint m_fadeOutSpeed;
     const uint m_duration;
@@ -166,15 +147,15 @@ private:
      * Run-time parameters
      ************************************************************************/
 private:
-    bool m_autoStep; //! Automatic stepping
-    Function::Direction m_direction; //! Run-time direction
-    QMap <quint32,FadeChannel> m_channelMap; //! Current step channels
-    uint m_elapsed; //! Elapsed milliseconds
-    bool m_next; //! If true, skips to the next step when write is called
-    bool m_previous; //! If true, skips to the previous step when write is called
-    int m_currentStep; //! Current step from m_steps
-    int m_newCurrent; //! Used to manually set the current step
-    qreal m_intensity; //! Intensity fraction 0.0 - 1.0
+    bool m_autoStep;                 //! Automatic stepping
+    Function::Direction m_direction; //! Run-time direction (reversed by ping-pong)
+    Function* m_currentFunction;     //! Currently active function
+    uint m_elapsed;                  //! Elapsed milliseconds
+    bool m_next;                     //! If true, skips to the next step when write is called
+    bool m_previous;                 //! If true, skips to the previous step when write is called
+    int m_currentStep;               //! Current step in m_steps
+    int m_newCurrent;                //! Manually set the current step
+    qreal m_intensity;               //! Intensity fraction 0.0 - 1.0
 };
 
 #endif

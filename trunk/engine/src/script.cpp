@@ -383,7 +383,7 @@ QString Script::handleStartFunction(const QList<QStringList>& tokens, MasterTime
     if (function != NULL)
     {
         if (function->stopped() == true)
-            timer->startFunction(function, true);
+            function->start(timer, true);
         else
             qWarning() << "Function (" << function->name() << ") is already running.";
 

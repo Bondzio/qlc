@@ -518,7 +518,7 @@ void Scene_Test::writeHTPBusZero()
     s1->setValue(fxi->id(), 2, 0);
     doc->addFunction(s1);
 
-    mts->startFunction(s1, false);
+    s1->start(mts);
     s1->write(mts, &uni);
     QVERIFY(uni.preGMValues()[0] == (char) UCHAR_MAX);
     QVERIFY(uni.preGMValues()[1] == (char) 127);
@@ -559,7 +559,7 @@ void Scene_Test::writeHTPBusOne()
     doc->addFunction(s1);
 
     QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
+    s1->start(mts);
     QVERIFY(s1->stopped() == false);
 
     QVERIFY(uni.preGMValues()[0] == (char) 0);
@@ -624,7 +624,7 @@ void Scene_Test::writeLTPHTPBusZero()
     doc->addFunction(s1);
 
     QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
+    s1->start(mts);
     QVERIFY(s1->stopped() == false);
 
     QVERIFY(uni.preGMValues()[0] == (char) 0);
@@ -690,7 +690,7 @@ void Scene_Test::writeLTPBusOne()
     doc->addFunction(s1);
 
     QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
+    s1->start(mts);
     QVERIFY(s1->stopped() == false);
 
     QVERIFY(uni.preGMValues()[0] == (char) 0);
@@ -756,7 +756,7 @@ void Scene_Test::writeLTPReady()
     doc->addFunction(s1);
 
     QVERIFY(s1->stopped() == true);
-    mts->startFunction(s1, false);
+    s1->start(mts);
     QVERIFY(s1->stopped() == false);
 
     QVERIFY(uni.preGMValues()[0] == (char) 0);

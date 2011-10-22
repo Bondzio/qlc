@@ -47,6 +47,7 @@ HEADERS += qlccapability.h \
 HEADERS += bus.h \
            chaser.h \
            chaserrunner.h \
+           chaserstep.h \
            collection.h \
            doc.h \
            efx.h \
@@ -87,6 +88,7 @@ SOURCES += qlccapability.cpp \
 SOURCES += bus.cpp \
            chaser.cpp \
            chaserrunner.cpp \
+           chaserstep.cpp \
            collection.cpp \
            doc.cpp \
            efx.cpp \

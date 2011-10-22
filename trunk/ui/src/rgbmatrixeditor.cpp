@@ -363,7 +363,7 @@ void RGBMatrixEditor::slotTestClicked()
     if (m_testButton->isChecked() == true)
     {
         m_previewTimer->stop();
-        m_doc->masterTimer()->startFunction(m_mtx, false);
+        m_mtx->start(m_doc->masterTimer());
     }
     else
     {

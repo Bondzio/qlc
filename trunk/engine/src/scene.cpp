@@ -308,7 +308,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
         return;
     }
 
-    quint32 ready = 0;
+    int ready = 0;
 
     if (elapsed() == 0)
     {
@@ -321,9 +321,13 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
             fc.setFixture(value.fxi);
             fc.setChannel(value.channel);
             fc.setTarget(value.value);
-            fc.setFadeTime(fadeInSpeed());
-            fc.setStart(uchar(universes->preGMValues()[fc.address(doc())]));
+            if (overrideFadeInSpeed() == defaultSpeed())
+                fc.setFadeTime(fadeInSpeed());
+            else
+                fc.setFadeTime(overrideFadeInSpeed());
+            fc.setStart(0);
             fc.setCurrent(fc.start());
+            insertStartValue(fc, timer, universes);
             m_fader->add(fc);
         }
     }
@@ -339,7 +343,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
 
         if (fc.group(doc()) != QLCChannel::Intensity && fc.current() == fc.target())
         {
-            fc.setReady(true); //! @todo ???
+            fc.setReady(true);
             ready++;
         }
     }
@@ -361,9 +365,14 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
 
         if (fc.group(doc()) == QLCChannel::Intensity)
         {
+            fc.setStart(fc.current());
             fc.setTarget(0);
-            fc.setFadeTime(fadeOutSpeed());
             fc.setElapsed(0);
+            fc.setReady(false);
+            if (overrideFadeOutSpeed() == defaultSpeed())
+                fc.setFadeTime(fadeOutSpeed());
+            else
+                fc.setFadeTime(overrideFadeOutSpeed());
             timer->fader()->add(fc);
         }
     }
@@ -397,5 +406,28 @@ void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
                 universes->write(fc.address(doc()), uchar(value), fc.group(doc()));
             }
         }
+    }
+}
+
+void Scene::insertStartValue(FadeChannel& fc, const MasterTimer* timer, const UniverseArray* ua)
+{
+    const QHash <FadeChannel,FadeChannel>& channels(timer->fader()->channels());
+    if (channels.contains(fc) == true)
+    {
+        // MasterTimer's GenericFader contains the channel so grab its current
+        // value as the new starting value to get a smoother fade
+        FadeChannel existing = channels[fc];
+        fc.setStart(existing.current());
+        fc.setCurrent(fc.start());
+    }
+    else
+    {
+        // MasterTimer didn't have the channel. Grab the starting value from UniverseArray.
+        quint32 address = fc.address(doc());
+        if (fc.group(doc()) != QLCChannel::Intensity)
+            fc.setStart(ua->preGMValues()[address]);
+        else
+            fc.setStart(0); // HTP channels must start at zero
+        fc.setCurrent(fc.start());
     }
 }

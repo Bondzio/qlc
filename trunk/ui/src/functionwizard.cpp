@@ -29,7 +29,7 @@
 #include "palettegenerator.h"
 #include "fixtureselection.h"
 #include "functionwizard.h"
-#include "qlcchannel.h"
+#include "chaserstep.h"
 #include "fixture.h"
 #include "chaser.h"
 #include "scene.h"
@@ -108,7 +108,8 @@ void FunctionWizard::accept()
             {
                 scene->setName(tr("Random Step %1").arg(++i));
                 m_doc->addFunction(scene);
-                chaser->addStep(scene->id());
+#warning Duration missing
+                chaser->addStep(ChaserStep(scene->id()));
             }
         }
 
@@ -130,8 +131,9 @@ void FunctionWizard::accept()
             {
                 scene->setName(tr("Sequence Step %1").arg(++i));
                 m_doc->addFunction(scene);
-                fw->addStep(scene->id());
-                bw->addStep(scene->id());
+#warning Duration missing
+                fw->addStep(ChaserStep(scene->id()));
+                bw->addStep(ChaserStep(scene->id()));
             }
         }
 
@@ -145,7 +147,8 @@ void FunctionWizard::accept()
             while (sceneList.isEmpty() == false)
             {
                 Scene* scene = sceneList.takeAt(rand() % sceneList.size());
-                chaser->addStep(scene->id());
+#warning Duration missing
+                chaser->addStep(ChaserStep(scene->id()));
             }
         }
 
@@ -160,8 +163,9 @@ void FunctionWizard::accept()
             m_doc->addFunction(sceneList[0]);
             sceneList[1]->setName(tr("Even"));
             m_doc->addFunction(sceneList[1]);
-            chaser->addStep(sceneList[0]->id());
-            chaser->addStep(sceneList[1]->id());
+#warning Duration missing
+            chaser->addStep(ChaserStep(sceneList[0]->id()));
+            chaser->addStep(ChaserStep(sceneList[1]->id()));
         }
 
         // Full/Zero chaser
@@ -175,8 +179,9 @@ void FunctionWizard::accept()
             m_doc->addFunction(sceneList[0]);
             sceneList[1]->setName(tr("Zero"));
             m_doc->addFunction(sceneList[1]);
-            chaser->addStep(sceneList[0]->id());
-            chaser->addStep(sceneList[1]->id());
+#warning Duration missing
+            chaser->addStep(ChaserStep(sceneList[0]->id()));
+            chaser->addStep(ChaserStep(sceneList[1]->id()));
         }
     }
 

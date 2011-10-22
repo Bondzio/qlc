@@ -409,7 +409,7 @@ void Collection_Test::write()
     /* Collection starts all of its members immediately when it is started
        itself. */
     QVERIFY(c->stopped() == true);
-    mts->startFunction(c, false);
+    c->start(mts);
     QVERIFY(c->stopped() == false);
 
     c->write(mts, &uni);
@@ -488,7 +488,7 @@ void Collection_Test::stopNotOwnChildren()
     MasterTimerStub* mts = new MasterTimerStub(m_doc, uni);
 
     QVERIFY(c->stopped() == true);
-    mts->startFunction(c, false);
+    c->start(mts);
     QVERIFY(c->stopped() == false);
 
     c->preRun(mts);
@@ -506,7 +506,7 @@ void Collection_Test::stopNotOwnChildren()
     s1->stop();
     s1->write(mts, &uni);
     s1->postRun(mts, &uni);
-    mts->startFunction(s1, true);
+    s1->start(mts);
     QVERIFY(s1->stopped() == false);
 
     // Collection should no longer be controlling s1

@@ -30,7 +30,7 @@
 
 #include "function.h"
 
-typedef QVector<QVector<QColor> > RGBMap;
+typedef QVector<QVector<QRgb> > RGBMap;
 
 class GenericFader;
 class FadeChannel;
@@ -82,21 +82,24 @@ public:
     void setPattern(const Pattern& pat);
     Pattern pattern() const;
 
-    RGBMap colorMap(uint elapsed, uint duration) const;
+    RGBMap colorMap(uint elapsed, uint duration);
 
     static Pattern stringToPattern(const QString& str);
     static QString patternToString(RGBMatrix::Pattern pat);
 
 private:
-    static void outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
-                           const QSize& size, const QColor& color, RGBMap& map);
-    static void fullRows(qreal elapsed, qreal duration, Function::Direction direction,
-                         const QSize& size, const QColor& color, RGBMap& map);
-    static void fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
-                            const QSize& size, const QColor& color, RGBMap& map);
+    bool outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
+                    const QSize& size, QRgb color, RGBMap& map);
+    bool fullRows(qreal elapsed, qreal duration, Function::Direction direction,
+                  const QSize& size, QRgb color, RGBMap& map);
+    bool fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
+                     const QSize& size, QRgb color, RGBMap& map);
 
 private:
     Pattern m_pattern;
+    RGBMap m_colorMap;
+    int m_stepH;
+    int m_stepW;
 
     /************************************************************************
      * Colour

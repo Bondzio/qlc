@@ -49,6 +49,8 @@ RGBMatrix::RGBMatrix(Doc* doc)
     : Function(doc, Function::RGBMatrix)
     , m_fixtureGroup(FixtureGroup::invalidId())
     , m_pattern(RGBMatrix::OutwardBox)
+    , m_stepH(-1)
+    , m_stepW(-1)
     , m_monoColor(Qt::red)
     , m_fader(NULL)
 {
@@ -121,6 +123,8 @@ QStringList RGBMatrix::patternNames()
 void RGBMatrix::setPattern(const RGBMatrix::Pattern& pat)
 {
     m_pattern = pat;
+    m_stepH = -1;
+    m_stepW = -1;
 }
 
 RGBMatrix::Pattern RGBMatrix::pattern() const
@@ -128,32 +132,35 @@ RGBMatrix::Pattern RGBMatrix::pattern() const
     return m_pattern;
 }
 
-RGBMap RGBMatrix::colorMap(uint elapsed, uint duration) const
+RGBMap RGBMatrix::colorMap(uint elapsed, uint duration)
 {
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
     if (grp == NULL)
         return RGBMap();
 
-    RGBMap map(grp->size().height());
-    for (int y = 0; y < map.size(); y++)
-        map[y].fill(Qt::black, grp->size().width());
+    if (m_colorMap.size() != grp->size().height() || m_colorMap[0].size() != grp->size().width())
+    {
+        m_colorMap = RGBMap(grp->size().height());
+        for (int y = 0; y < m_colorMap.size(); y++)
+            m_colorMap[y].fill(0, grp->size().width());
+    }
 
     switch (pattern())
     {
     case OutwardBox:
-        outwardBox(elapsed, duration, direction(), grp->size(), monoColor(), map);
+        outwardBox(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
         break;
     case FullRows:
-        fullRows(elapsed, duration, direction(), grp->size(), monoColor(), map);
+        fullRows(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
         break;
     case FullColumns:
-        fullColumns(elapsed, duration, direction(), grp->size(), monoColor(), map);
+        fullColumns(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
         break;
     default:
         break;
     }
 
-    return map;
+    return m_colorMap;
 }
 
 RGBMatrix::Pattern RGBMatrix::stringToPattern(const QString& str)
@@ -183,8 +190,8 @@ QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
     }
 }
 
-void RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
-                           const QSize& size, const QColor& color, RGBMap& map)
+bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
+                           const QSize& size, QRgb color, RGBMap& map)
 {
     qreal scale = 0;
     if (duration > 0)
@@ -210,19 +217,36 @@ void RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction di
     bottom       = bottom + ((size.height() - bottom) * scale);
     bottom       = CLAMP(bottom, 0, size.height() - 1);
 
-    for (int i = left; i <= right; i++) {
-        map[top][i] = color;
-        map[bottom][i] = color;
-    }
+    if (m_stepW != int(left) || m_stepH != int(top))
+    {
+        for (int y = 0; y < map.size(); y++)
+            map[y].fill(0, map[y].size());
 
-    for (int i = top; i <= bottom; i++) {
-        map[i][left] = color;
-        map[i][right] = color;
+        for (int i = left; i <= right; i++)
+        {
+            map[top][i] = color;
+            map[bottom][i] = color;
+        }
+
+        for (int i = top; i <= bottom; i++)
+        {
+            map[i][left] = color;
+            map[i][right] = color;
+        }
+
+        m_stepW = int(left);
+        m_stepH = int(top);
+
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
-void RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction direction,
-                         const QSize& size, const QColor& color, RGBMap& map)
+bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction direction,
+                         const QSize& size, QRgb color, RGBMap& map)
 {
     qreal scale = 0;
     if (duration > 0)
@@ -237,14 +261,28 @@ void RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
     qreal top    = MIN(scale * qreal(size.height()), qreal(size.height() - 1));
     qreal bottom = top;
 
-    for (int i = left; i <= right; i++) {
-        map[top][i] = color;
-        map[bottom][i] = color;
+    if (m_stepH != int(top))
+    {
+        for (int y = 0; y < map.size(); y++)
+            map[y].fill(0, map[y].size());
+
+        for (int i = left; i <= right; i++)
+        {
+            map[top][i] = color;
+            map[bottom][i] = color;
+        }
+
+        m_stepH = int(top);
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
-void RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
-                            const QSize& size, const QColor& color, RGBMap& map)
+bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
+                            const QSize& size, QRgb color, RGBMap& map)
 {
     qreal scale = 0;
     if (duration > 0)
@@ -259,9 +297,23 @@ void RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
     qreal top    = qreal(0);
     qreal bottom = qreal(size.height() - 1);
 
-    for (int i = top; i <= bottom; i++) {
-        map[i][left] = color;
-        map[i][right] = color;
+    if (m_stepW != int(left))
+    {
+        for (int y = 0; y < map.size(); y++)
+            map[y].fill(0, map[y].size());
+
+        for (int i = top; i <= bottom; i++)
+        {
+            map[i][left] = color;
+            map[i][right] = color;
+        }
+
+        m_stepW = int(left);
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -411,8 +463,6 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     Q_UNUSED(timer);
     Q_UNUSED(universes);
 
-    incrementElapsed();
-
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
     if (grp == NULL)
         return;
@@ -435,34 +485,19 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].red());
+                fc.setTarget(qRed(map[y][x]));
                 insertStartValues(fc);
-
-                if (m_fader->channels().contains(fc) == false ||
-                    m_fader->channels()[fc].target() != fc.target())
-                {
-                    m_fader->add(fc);
-                }
+                m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].green());
+                fc.setTarget(qGreen(map[y][x]));
                 insertStartValues(fc);
-
-                if (m_fader->channels().contains(fc) == false ||
-                    m_fader->channels()[fc].target() != fc.target())
-                {
-                    m_fader->add(fc);
-                }
+                m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].blue());
+                fc.setTarget(qBlue(map[y][x]));
                 insertStartValues(fc);
-
-                if (m_fader->channels().contains(fc) == false ||
-                    m_fader->channels()[fc].target() != fc.target())
-                {
-                    m_fader->add(fc);
-                }
+                m_fader->add(fc);
             }
             else
             {
@@ -470,21 +505,23 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
                 if (channels.isEmpty() == true)
                     continue;
 
+                QColor col(map[y][x]);
+
                 FadeChannel fc;
                 fc.setFixture(fxi->id());
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].cyan());
+                fc.setTarget(col.cyan());
                 insertStartValues(fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].magenta());
+                fc.setTarget(col.magenta());
                 insertStartValues(fc);
                 m_fader->add(fc);
 
                 fc.setChannel(channels.takeFirst());
-                fc.setTarget(map[y][x].yellow());
+                fc.setTarget(col.yellow());
                 insertStartValues(fc);
                 m_fader->add(fc);
             }
@@ -501,18 +538,14 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
                 m_direction = Function::Forward;
             else
                 m_direction = Function::Backward;
-
-            //resetElapsed();
         }
         else if (runOrder() == Function::SingleShot)
         {
             stop();
         }
-        else // if (runOrder() == Function::Loop)
-        {
-            //resetElapsed();
-        }
     }
+
+    incrementElapsed();
 }
 
 void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
@@ -520,6 +553,7 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
     Q_UNUSED(timer);
     Q_UNUSED(universes);
 
+    Q_ASSERT(m_fader != NULL);
     delete m_fader;
     m_fader = NULL;
 
@@ -541,6 +575,8 @@ void RGBMatrix::insertStartValues(FadeChannel& fc) const
         fc.setCurrent(0);
         fc.setStart(0);
     }
+
+    fc.setReady(false);
 
     if (fc.target() == 0)
         fc.setFadeTime(fadeOutSpeed());

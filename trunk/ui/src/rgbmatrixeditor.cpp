@@ -275,8 +275,8 @@ void RGBMatrixEditor::slotPreviewTimeout()
             if (m_previewHash.contains(pt) == true)
             {
                 shape = static_cast<QAbstractGraphicsShapeItem*>(m_previewHash[pt]);
-                shape->setBrush(map[y][x]);
-                shape->setPen(map[y][x]);
+                shape->setBrush(QColor(map[y][x]));
+                shape->setPen(QColor(map[y][x]));
             }
         }
     }

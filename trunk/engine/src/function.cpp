@@ -540,7 +540,6 @@ void Function::preRun(MasterTimer* timer)
     Q_UNUSED(timer);
 
     m_running = true;
-    m_stop = false;
 
     emit running(m_id);
 }
@@ -602,6 +601,7 @@ void Function::start(MasterTimer* timer, bool child, uint overrideFadeIn,
     m_overrideFadeInSpeed = overrideFadeIn;
     m_overrideFadeOutSpeed = overrideFadeOut;
     m_overrideDuration = overrideDuration;
+    m_stop = false;
     timer->startFunction(this);
 }
 

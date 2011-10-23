@@ -57,7 +57,6 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
 
 Doc::~Doc()
 {
-    m_masterTimer->stop();
     delete m_masterTimer;
     m_masterTimer = NULL;
 

@@ -95,6 +95,8 @@ void EFX_Test::initial()
     QVERIFY(e.propagationMode() == EFX::Parallel);
 
     QVERIFY(e.m_fader == NULL);
+    QCOMPARE(e.m_legacyFadeBus, Bus::invalid());
+    QCOMPARE(e.m_legacyHoldBus, Bus::invalid());
 }
 
 void EFX_Test::algorithmNames()

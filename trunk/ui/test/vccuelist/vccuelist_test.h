@@ -43,7 +43,11 @@ private slots:
     void modeChange();
     void loadXML();
     void saveXML();
-    void operation();
+
+    void nextPrevious();
+    void manualActivation();
+    void keyboardNextPrevious();
+
     void input();
 
 private:

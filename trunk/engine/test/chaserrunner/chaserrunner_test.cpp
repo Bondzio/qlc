@@ -73,18 +73,21 @@ void ChaserRunner_Test::init()
     m_doc->addFixture(fxi);
 
     m_scene1 = new Scene(m_doc);
+    m_scene1->setName("S1");
     QVERIFY(m_scene1 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene1->setValue(fxi->id(), i, 255 - i);
     m_doc->addFunction(m_scene1);
 
     m_scene2 = new Scene(m_doc);
+    m_scene2->setName("S2");
     QVERIFY(m_scene2 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene2->setValue(fxi->id(), i, 127 - i);
     m_doc->addFunction(m_scene2);
 
     m_scene3 = new Scene(m_doc);
+    m_scene3->setName("S3");
     QVERIFY(m_scene3 != NULL);
     for (quint32 i = 0; i < fxi->channels(); i++)
         m_scene3->setValue(fxi->id(), i, 0 + i);
@@ -640,81 +643,42 @@ void ChaserRunner_Test::writeNoSteps()
     QVERIFY(cr.write(&timer, &ua) == false);
 }
 
-void ChaserRunner_Test::writeMissingFixture()
-{
-    QList <Function*> steps;
-    steps << m_scene1 << m_scene2 << m_scene3;
-    m_scene3->setValue(500, 0, 255);
-    ChaserRunner cr(m_doc, chaserSteps(steps), 10, 20, 30, Function::Forward, Function::Loop);
-    MasterTimer timer(m_doc);
-
-    for (int i = 0; i < 120; i++)
-    {
-        timer.timerTick();
-    }
-}
-
 void ChaserRunner_Test::writeHoldZero()
 {
     QList <Function*> steps;
     steps << m_scene1 << m_scene2 << m_scene3;
-    ChaserRunner cr(m_doc, chaserSteps(steps), 10, 20, 0, Function::Forward, Function::Loop);
+    ChaserRunner cr(m_doc, chaserSteps(steps), 0, 0, 0, Function::Forward, Function::Loop);
     MasterTimer timer(m_doc);
-    UniverseArray* ua = NULL;
 
     QVERIFY(cr.write(&timer, NULL) == true);
     timer.timerTick();
-    ua = m_doc->outputMap()->claimUniverses();
-    QCOMPARE(cr.m_elapsed, MasterTimer::tick());
-    QCOMPARE(cr.currentStep(), 0);
-    QCOMPARE(uchar(ua->preGMValues().data()[0]), uchar(255));
-    QCOMPARE(uchar(ua->preGMValues().data()[1]), uchar(254));
-    QCOMPARE(uchar(ua->preGMValues().data()[2]), uchar(253));
-    QCOMPARE(uchar(ua->preGMValues().data()[3]), uchar(252));
-    QCOMPARE(uchar(ua->preGMValues().data()[4]), uchar(251));
-    QCOMPARE(uchar(ua->preGMValues().data()[5]), uchar(250));
-    m_doc->outputMap()->releaseUniverses(false);
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene1);
 
     QVERIFY(cr.write(&timer, NULL) == true);
     timer.timerTick();
-    ua = m_doc->outputMap()->claimUniverses();
-    QCOMPARE(cr.m_elapsed, MasterTimer::tick());
-    QCOMPARE(cr.currentStep(), 1);
-    QCOMPARE(uchar(ua->preGMValues().data()[0]), uchar(127));
-    QCOMPARE(uchar(ua->preGMValues().data()[1]), uchar(126));
-    QCOMPARE(uchar(ua->preGMValues().data()[2]), uchar(125));
-    QCOMPARE(uchar(ua->preGMValues().data()[3]), uchar(124));
-    QCOMPARE(uchar(ua->preGMValues().data()[4]), uchar(123));
-    QCOMPARE(uchar(ua->preGMValues().data()[5]), uchar(122));
-    m_doc->outputMap()->releaseUniverses(false);
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene2);
 
     QVERIFY(cr.write(&timer, NULL) == true);
     timer.timerTick();
-    timer.timerTick();
-    ua = m_doc->outputMap()->claimUniverses();
-    QCOMPARE(cr.m_elapsed, MasterTimer::tick());
-    QCOMPARE(cr.currentStep(), 2);
-    QCOMPARE(uchar(ua->preGMValues().data()[0]), uchar(0));
-    QCOMPARE(uchar(ua->preGMValues().data()[1]), uchar(1));
-    QCOMPARE(uchar(ua->preGMValues().data()[2]), uchar(2));
-    QCOMPARE(uchar(ua->preGMValues().data()[3]), uchar(3));
-    QCOMPARE(uchar(ua->preGMValues().data()[4]), uchar(4));
-    QCOMPARE(uchar(ua->preGMValues().data()[5]), uchar(5));
-    m_doc->outputMap()->releaseUniverses(false);
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene3);
 
     QVERIFY(cr.write(&timer, NULL) == true);
     timer.timerTick();
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene1);
+
+    QVERIFY(cr.write(&timer, NULL) == true);
     timer.timerTick();
-    ua = m_doc->outputMap()->claimUniverses();
-    QCOMPARE(cr.m_elapsed, MasterTimer::tick());
-    QCOMPARE(cr.currentStep(), 0);
-    QCOMPARE(uchar(ua->preGMValues().data()[0]), uchar(255));
-    QCOMPARE(uchar(ua->preGMValues().data()[1]), uchar(254));
-    QCOMPARE(uchar(ua->preGMValues().data()[2]), uchar(253));
-    QCOMPARE(uchar(ua->preGMValues().data()[3]), uchar(252));
-    QCOMPARE(uchar(ua->preGMValues().data()[4]), uchar(251));
-    QCOMPARE(uchar(ua->preGMValues().data()[5]), uchar(250));
-    m_doc->outputMap()->releaseUniverses(false);
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene2);
+
+    QVERIFY(cr.write(&timer, NULL) == true);
+    timer.timerTick();
+    QCOMPARE(timer.m_functionList.size(), 1);
+    QCOMPARE(timer.m_functionList[0], m_scene3);
 }
 
 void ChaserRunner_Test::writeForwardLoopHoldFiveNextPrevious()

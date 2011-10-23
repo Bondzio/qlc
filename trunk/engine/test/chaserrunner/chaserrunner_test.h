@@ -51,7 +51,6 @@ private slots:
     void createFadeChannelsAutoHTPZero();
 
     void writeNoSteps();
-    void writeMissingFixture();
     void writeHoldZero();
 
     void writeForwardLoopHoldFiveNextPrevious();

@@ -659,9 +659,8 @@ void VCCueList_Test::saveXML()
     QCOMPARE(appearance, 1);
 }
 
-void VCCueList_Test::operation()
+void VCCueList_Test::nextPrevious()
 {
-    UniverseArray ua(512);
     QWidget w;
 
     Fixture* fxi = new Fixture(m_doc);
@@ -683,14 +682,16 @@ void VCCueList_Test::operation()
     s3->setValue(fxi->id(), 0, 64);
     m_doc->addFunction(s3);
 
+    Scene* s4 = new Scene(m_doc);
+    s4->setName("The fourth one");
+    s4->setValue(fxi->id(), 0, 32);
+    m_doc->addFunction(s4);
+
     VCCueList cl(&w, m_doc);
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s3->id());
-    cl.append(s2->id());
-    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
-    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
-    cl.setStopKeySequence(QKeySequence(QKeySequence::Undo));
+    cl.append(s4->id());
 
     // Not in operate mode, check for crashes
     cl.slotNextCue();
@@ -698,131 +699,274 @@ void VCCueList_Test::operation()
     cl.slotItemActivated(cl.m_list->topLevelItem(2));
     QVERIFY(cl.m_runner == NULL);
 
+    // Switch mode
+    m_doc->setMode(Doc::Operate);
+    MasterTimer* timer = m_doc->masterTimer();
+
     // Create runner with a next action -> first item should be activated
-    m_doc->setMode(Doc::Operate);
     cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner != NULL);
-    QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
-    QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
-    QCOMPARE(cl.m_runner->isAutoStep(), false);
-    QCOMPARE(cl.m_runner->m_steps.size(), 4);
-    QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
 
     cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 1);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s1); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s2); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s2);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s2);
 
     cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 2);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
-
-    cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s2); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s3); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
 
     cl.slotPreviousCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 2);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s3); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s2); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s2);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s2);
 
     cl.slotPreviousCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 1);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s2); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s1); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
 
+    // Wrap around to the last cue
     cl.slotPreviousCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s1); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s4); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s4);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s4);
 
-    cl.slotPreviousCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
-
+    // Wrap around to the next cue
     cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s4); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s1); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+}
 
-    cl.slotNextCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 1);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+void VCCueList_Test::manualActivation()
+{
+    QWidget w;
 
-    cl.slotItemActivated(cl.m_list->topLevelItem(3));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(1);
+    m_doc->addFixture(fxi);
 
-    // Create runner with a previous action -> last item should be activated
-    m_doc->setMode(Doc::Design);
-    QVERIFY(cl.m_runner == NULL);
+    Scene* s1 = new Scene(m_doc);
+    s1->setName("The first");
+    s1->setValue(fxi->id(), 0, 255);
+    m_doc->addFunction(s1);
+
+    Scene* s2 = new Scene(m_doc);
+    s2->setName("Another one");
+    s2->setValue(fxi->id(), 0, 127);
+    m_doc->addFunction(s2);
+
+    Scene* s3 = new Scene(m_doc);
+    s3->setName("The third one");
+    s3->setValue(fxi->id(), 0, 64);
+    m_doc->addFunction(s3);
+
+    Scene* s4 = new Scene(m_doc);
+    s4->setName("The fourth one");
+    s4->setValue(fxi->id(), 0, 32);
+    m_doc->addFunction(s4);
+
+    VCCueList cl(&w, m_doc);
+    cl.append(s1->id());
+    cl.append(s2->id());
+    cl.append(s3->id());
+    cl.append(s4->id());
+
+    // Switch mode
     m_doc->setMode(Doc::Operate);
+    MasterTimer* timer = m_doc->masterTimer();
 
-    cl.slotPreviousCue();
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QVERIFY(cl.m_runner != NULL);
-    QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
-    QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
-    QCOMPARE(cl.m_runner->isAutoStep(), false);
-    QCOMPARE(cl.m_runner->m_steps.size(), 4);
-    QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
-
-    // Create runner thru direct item activation
-    m_doc->setMode(Doc::Design);
     QVERIFY(cl.m_runner == NULL);
-    m_doc->setMode(Doc::Operate);
-
     cl.slotItemActivated(cl.m_list->topLevelItem(2));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
     QVERIFY(cl.m_runner != NULL);
-    QCOMPARE(cl.m_runner->m_originalDirection, Function::Forward);
-    QCOMPARE(cl.m_runner->m_runOrder, Function::Loop);
-    QCOMPARE(cl.m_runner->isAutoStep(), false);
-    QCOMPARE(cl.m_runner->m_steps.size(), 4);
-    QCOMPARE(cl.m_runner->currentStep(), 2);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
 
-    // Unrecognized keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::SelectAll));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 2);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
+    // Same item
+    cl.slotItemActivated(cl.m_list->topLevelItem(2));
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s3);
+
+    // Another item
+    cl.slotItemActivated(cl.m_list->topLevelItem(0));
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
+    QCOMPARE(timer->m_functionList[0], s3); // the function will be removed in the next
+    QCOMPARE(timer->m_functionList[1], s1); // round.
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+
+    // Crash check
+    cl.slotItemActivated(NULL);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+    timer->timerTick();
+    QCOMPARE(timer->runningFunctions(), 1);
+    QCOMPARE(timer->m_functionList[0], s1);
+}
+
+
+void VCCueList_Test::keyboardNextPrevious()
+{
+    QWidget w;
+
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(1);
+    m_doc->addFixture(fxi);
+
+    Scene* s1 = new Scene(m_doc);
+    s1->setName("The first");
+    s1->setValue(fxi->id(), 0, 255);
+    m_doc->addFunction(s1);
+
+    Scene* s2 = new Scene(m_doc);
+    s2->setName("Another one");
+    s2->setValue(fxi->id(), 0, 127);
+    m_doc->addFunction(s2);
+
+    Scene* s3 = new Scene(m_doc);
+    s3->setName("The third one");
+    s3->setValue(fxi->id(), 0, 64);
+    m_doc->addFunction(s3);
+
+    Scene* s4 = new Scene(m_doc);
+    s4->setName("The fourth one");
+    s4->setValue(fxi->id(), 0, 32);
+    m_doc->addFunction(s4);
+
+    VCCueList cl(&w, m_doc);
+    cl.append(s1->id());
+    cl.append(s2->id());
+    cl.append(s3->id());
+    cl.append(s4->id());
+    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
+    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
+    cl.setStopKeySequence(QKeySequence(QKeySequence::Undo));
+
+    // Switch mode
+    m_doc->setMode(Doc::Operate);
+    MasterTimer* timer = m_doc->masterTimer();
 
     // Next keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 0);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+
+    // Next keyboard key
+    cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 1);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+
+    // Unrecognized keyboard key
+    cl.slotKeyPressed(QKeySequence(QKeySequence::SelectAll));
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 1);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
 
     // Previous keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::Cut));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
-    QCOMPARE(cl.m_runner->currentStep(), 2);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 2);
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 0);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+
+    // Previous keyboard key
+    cl.slotKeyPressed(QKeySequence(QKeySequence::Cut));
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 3);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
+
+    // Next keyboard key
+    cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    timer->timerTick();
+    QCOMPARE(cl.m_runner->currentStep(), 0);
+    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     // Stop
     cl.slotKeyPressed(QKeySequence(QKeySequence::Undo));
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QVERIFY(cl.m_runner == NULL);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), -1);
-
-    FadeChannel fc;
-    fc.setFixture(fxi->id());
-    fc.setChannel(0);
-    QVERIFY(m_doc->masterTimer()->fader()->m_channels.contains(fc));
 }
 
 void VCCueList_Test::input()
 {
-    UniverseArray ua(512);
     QWidget w;
 
     Scene* s1 = new Scene(m_doc);
@@ -837,17 +981,24 @@ void VCCueList_Test::input()
     s3->setName("The third one");
     m_doc->addFunction(s3);
 
+    Scene* s4 = new Scene(m_doc);
+    s4->setName("The fourth one");
+    m_doc->addFunction(s4);
+
     VCCueList cl(&w, m_doc);
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s3->id());
-    cl.append(s2->id());
+    cl.append(s4->id());
     cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
     cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
     cl.setInputSource(QLCInputSource(4, 5), VCCueList::stopInputSourceId);
 
-    // Runner creation thru next input
+    // Switch mode
     m_doc->setMode(Doc::Operate);
+    MasterTimer* timer = m_doc->masterTimer();
+
+    // Runner creation thru "next" input
     cl.slotInputValueChanged(5, 3, 255);
     QVERIFY(cl.m_runner == NULL);
 
@@ -856,17 +1007,17 @@ void VCCueList_Test::input()
 
     cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
     cl.slotInputValueChanged(0, 1, 0);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
 
     cl.slotInputValueChanged(0, 1, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 1);
 
     // Runner creation thru previous input
@@ -882,27 +1033,27 @@ void VCCueList_Test::input()
 
     cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
     cl.slotInputValueChanged(2, 3, 0);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 3);
 
     cl.slotInputValueChanged(2, 3, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 2);
 
     cl.slotInputValueChanged(4, 5, 255);
     QVERIFY(cl.m_runner != NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QVERIFY(cl.m_runner == NULL);
 
     cl.slotInputValueChanged(4, 5, 0);
     QVERIFY(cl.m_runner == NULL);
-    cl.writeDMX(m_doc->masterTimer(), &ua);
+    timer->timerTick();
     QVERIFY(cl.m_runner == NULL);
 }
 

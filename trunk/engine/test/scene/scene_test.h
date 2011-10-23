@@ -49,10 +49,8 @@ private slots:
 
     void flashUnflash();
 
-    void writeHTPBusZero();
-    void writeHTPBusOne();
-    void writeLTPHTPBusZero();
-    void writeLTPBusOne();
+    void writeHTPZeroTicks();
+    void writeHTPTwoTicks();
     void writeLTPReady();
 
     void writeValues();

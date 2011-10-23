@@ -68,7 +68,7 @@ protected:
      *********************************************************************/
 public:
     /** Get the number of currently running functions */
-    int runningFunctions();
+    int runningFunctions() const;
 
     /** Start running the given function */
     virtual void startFunction(Function* function);

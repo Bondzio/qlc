@@ -81,12 +81,9 @@ uint MasterTimer::tick()
  * Functions
  *****************************************************************************/
 
-int MasterTimer::runningFunctions()
+int MasterTimer::runningFunctions() const
 {
-    m_functionListMutex.lock();
-    int n = m_functionList.size();
-    m_functionListMutex.unlock();
-    return n;
+    return m_functionList.size();
 }
 
 void MasterTimer::startFunction(Function* function)
@@ -293,6 +290,10 @@ void MasterTimer::timerTick()
 
 void MasterTimer::runFunctions(UniverseArray* universes)
 {
+    // List of m_functionList indices that should be removed at the end of this
+    // function. The functions at the indices have been stopped.
+    QList <int> removeList;
+
     /* Lock before accessing the running functions list. */
     m_functionListMutex.lock();
     for (int i = 0; i < m_functionList.size(); i++)
@@ -307,26 +308,36 @@ void MasterTimer::runFunctions(UniverseArray* universes)
             if (function->isRunning() == false)
                 function->preRun(this);
 
-            /* Check for pre-conditions before getting data */
+            /* Run the function unless it's supposed to be stopped */
+            if (function->stopped() == false && m_stopAllFunctions == false)
+                function->write(this, universes);
+
             if (function->stopped() == true || m_stopAllFunctions == true)
             {
                 /* Function should be stopped instead */
                 m_functionListMutex.lock();
-                m_functionList.removeAt(i);
                 function->postRun(this, universes);
+                removeList << i; // Don't remove the item from the list just yet.
                 m_functionListMutex.unlock();
                 emit functionListChanged();
-            }
-            else
-            {
-                /* Run normally: get function data */
-                function->write(this, universes);
             }
         }
 
         /* Lock function list for the next round. */
         m_functionListMutex.lock();
     }
+
+    // Remove functions that need to be removed AFTER all functions have been run
+    // for this round. This is done separately to prevent a case when a function
+    // is first removed and then another is added (chaser, for example), keeping the
+    // list's size the same, thus preventing the last added function from being run
+    // on this round. The indices in removeList are automatically sorted because the
+    // list is iterated with an int above from 0 to size, so iterating the removeList
+    // backwards here will always remove the correct indices.
+    QListIterator <int> it(removeList);
+    it.toBack();
+    while (it.hasPrevious() == true)
+        m_functionList.removeAt(it.previous());
 
     /* No more functions. Get out and wait for next timer event. */
     m_functionListMutex.unlock();
@@ -378,8 +389,6 @@ void MasterTimer::runFader(UniverseArray* universes)
 void MasterTimer::stop()
 {
     stopAllFunctions();
-
     m_running = false;
     wait();
 }
-

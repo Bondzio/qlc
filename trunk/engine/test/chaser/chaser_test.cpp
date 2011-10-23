@@ -75,6 +75,7 @@ void Chaser_Test::initial()
     QVERIFY(c.runOrder() == Chaser::Loop);
     QVERIFY(c.id() == Function::invalidId());
     QVERIFY(c.m_runner == NULL);
+    QCOMPARE(c.m_legacyHoldBus, Bus::invalid());
 }
 
 void Chaser_Test::directionRunOrder()
@@ -788,37 +789,56 @@ void Chaser_Test::preRun()
 
     c->preRun(&timer);
     QVERIFY(c->m_runner != NULL);
-    QCOMPARE(c->m_stop, false); // Make sure Function::preRun() is called
+    QCOMPARE(c->isRunning(), true); // Make sure Function::preRun() is called
     QCOMPARE(c->m_runner->m_elapsed, uint(0)); // Make sure ChaserRunner::reset() is called
     c->postRun(&timer, &ua);
 }
 
 void Chaser_Test::write()
 {
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setAddress(0);
+    fxi->setUniverse(0);
+    fxi->setChannels(1);
+    m_doc->addFixture(fxi);
+
     Chaser* c = new Chaser(m_doc);
+    c->setDuration(MasterTimer::tick() * 10);
     m_doc->addFunction(c);
 
     Scene* s1 = new Scene(m_doc);
+    s1->setValue(fxi->id(), 0, 255);
     m_doc->addFunction(s1);
     c->addStep(s1->id());
 
-    UniverseArray ua(512);
-    MasterTimerStub timer(m_doc, ua);
+    Scene* s2 = new Scene(m_doc);
+    s2->setValue(fxi->id(), 0, 127);
+    m_doc->addFunction(s2);
+    c->addStep(s2->id());
 
-    qWarning() << "Test disabled";
-/*
-    c->preRun(&timer);
+    MasterTimer timer(m_doc);
 
-    QCOMPARE(c->m_runner->m_elapsed, quint32(0));
+    QVERIFY(c->isRunning() == false);
+    QVERIFY(c->stopped() == true);
+    c->start(&timer);
 
-    // Chaser::run() does very little by itself. Make sure ChaserRunner is called.
-    c->write(&timer, &ua);
-    QCOMPARE(c->elapsed(), MasterTimer::tick());
-    QCOMPARE(c->m_runner->m_elapsed, MasterTimer::tick() * 1);
-    c->write(&timer, &ua);
-    QCOMPARE(c->elapsed(), MasterTimer::tick() * 2); // Chaser counts overall tick count
-    QCOMPARE(c->m_runner->m_elapsed, MasterTimer::tick() * 1); // Runner counts ticks per step
-*/
+    for (uint i = 0; i < c->duration(); i += MasterTimer::tick())
+    {
+        timer.timerTick();
+        QVERIFY(c->isRunning() == true);
+        QVERIFY(c->stopped() == false);
+        QVERIFY(s1->isRunning() == true);
+        QVERIFY(s2->isRunning() == false);
+    }
+
+    for (uint i = 0; i < c->duration(); i += MasterTimer::tick())
+    {
+        timer.timerTick();
+        QVERIFY(c->isRunning() == true);
+        QVERIFY(c->stopped() == false);
+        QVERIFY(s1->isRunning() == false);
+        QVERIFY(s2->isRunning() == true);
+    }
 }
 
 void Chaser_Test::postRun()
@@ -830,11 +850,11 @@ void Chaser_Test::postRun()
     MasterTimerStub timer(m_doc, ua);
 
     c->preRun(&timer);
-    QCOMPARE(c->m_stop, false);
+    QCOMPARE(c->isRunning(), true);
 
     // The chaser has no steps so ChaserRunner::postrun() shouldn't do much
     c->postRun(&timer, &ua);
-    QCOMPARE(c->m_stop, true); // Make sure Function::postRun() is called
+    QCOMPARE(c->isRunning(), false); // Make sure Function::postRun() is called
 }
 
 void Chaser_Test::adjustIntensity()

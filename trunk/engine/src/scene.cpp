@@ -40,7 +40,7 @@
  *****************************************************************************/
 
 Scene::Scene(Doc* doc) : Function(doc, Function::Scene)
-    , m_legacyFadeBus(Bus::defaultFade())
+    , m_legacyFadeBus(Bus::invalid())
     , m_fader(NULL)
 {
     setName(tr("New Scene"));
@@ -274,13 +274,13 @@ void Scene::unFlash(MasterTimer* timer)
     Function::unFlash(timer);
 }
 
-void Scene::writeDMX(MasterTimer* timer, UniverseArray* universes)
+void Scene::writeDMX(MasterTimer* timer, UniverseArray* ua)
 {
     Q_ASSERT(timer != NULL);
-    Q_ASSERT(universes != NULL);
+    Q_ASSERT(ua != NULL);
 
     if (flashing() == true)
-        writeValues(universes); // Keep HTP & LTP up
+        writeValues(ua); // Keep HTP & LTP up
     else
         timer->unregisterDMXSource(this);
 }
@@ -293,22 +293,20 @@ void Scene::preRun(MasterTimer* timer)
 {
     Q_ASSERT(m_fader == NULL);
     m_fader = new GenericFader(doc());
-
     Function::preRun(timer);
 }
 
-void Scene::write(MasterTimer* timer, UniverseArray* universes)
+void Scene::write(MasterTimer* timer, UniverseArray* ua)
 {
     Q_UNUSED(timer);
-    Q_ASSERT(universes != NULL);
+    Q_ASSERT(ua != NULL);
+    Q_ASSERT(m_fader != NULL);
 
     if (m_values.size() == 0)
     {
         stop();
         return;
     }
-
-    int ready = 0;
 
     if (elapsed() == 0)
     {
@@ -325,37 +323,25 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
                 fc.setFadeTime(fadeInSpeed());
             else
                 fc.setFadeTime(overrideFadeInSpeed());
-            fc.setStart(0);
-            fc.setCurrent(fc.start());
-            insertStartValue(fc, timer, universes);
+            insertStartValue(fc, timer, ua);
             m_fader->add(fc);
         }
     }
 
-    m_fader->write(universes);
+    // Run the internal GenericFader
+    m_fader->write(ua);
 
-    // Count all LTP channels and mark them ready if appropriate
-    QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
-    while (it.hasNext() == true)
+    // Fader has nothing to do. Stop.
+    if (m_fader->channels().size() == 0)
     {
-        it.next();
-        FadeChannel fc = it.value();
-
-        if (fc.group(doc()) != QLCChannel::Intensity && fc.current() == fc.target())
-        {
-            fc.setReady(true);
-            ready++;
-        }
-    }
-
-    // If all channels are ready (and scene contains only LTP channels) we can stop
-    if (ready == m_values.size())
+        qDebug() << "Stopping";
         stop();
+    }
 
     incrementElapsed();
 }
 
-void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
+void Scene::postRun(MasterTimer* timer, UniverseArray* ua)
 {
     QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)
@@ -381,13 +367,13 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* universes)
     delete m_fader;
     m_fader = NULL;
 
-    Function::postRun(timer, universes);
+    Function::postRun(timer, ua);
 }
 
-void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
+void Scene::writeValues(UniverseArray* ua, quint32 fxi_id,
                         QLCChannel::Group grp, qreal percentage)
 {
-    Q_ASSERT(universes != NULL);
+    Q_ASSERT(ua != NULL);
 
     for (int i = 0; i < m_values.size(); i++)
     {
@@ -403,13 +389,14 @@ void Scene::writeValues(UniverseArray* universes, quint32 fxi_id,
             {
                 qreal value = CLAMP(percentage, 0.0, 1.0) * qreal(fc.target());
                 value = uchar(floor(value + 0.5));
-                universes->write(fc.address(doc()), uchar(value), fc.group(doc()));
+                ua->write(fc.address(doc()), uchar(value), fc.group(doc()));
             }
         }
     }
 }
 
-void Scene::insertStartValue(FadeChannel& fc, const MasterTimer* timer, const UniverseArray* ua)
+void Scene::insertStartValue(FadeChannel& fc, const MasterTimer* timer,
+                             const UniverseArray* ua)
 {
     const QHash <FadeChannel,FadeChannel>& channels(timer->fader()->channels());
     if (channels.contains(fc) == true)

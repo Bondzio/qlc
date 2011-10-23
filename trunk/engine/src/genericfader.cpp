@@ -73,30 +73,25 @@ void GenericFader::write(UniverseArray* ua)
     while (it.hasNext() == true)
     {
         FadeChannel& fc(it.next().value());
-        if (fc.elapsed() >= fc.fadeTime())
-        {
-            if (fc.group(m_doc) == QLCChannel::Intensity || fc.isReady() == false)
-            {
-                fc.setReady(true);
-                uchar value = uchar(floor((qreal(fc.target()) * intensity()) + 0.5));
-                ua->write(fc.address(m_doc), value, fc.group(m_doc));
+        uchar value = fc.nextStep(MasterTimer::tick());
+        value = uchar(floor((qreal(value) * intensity()) + 0.5));
+        QLCChannel::Group grp = fc.group(m_doc);
+        quint32 addr = fc.address(m_doc);
 
-                // Remove all channels that reach zero
-                if (fc.target() == 0 && fc.current() == 0)
-                    remove(fc);
-            }
-            else
-            {
-                // After an LTP channel becomes ready, its value is no longer written.
-                // Remove it from the fader.
+        ua->write(addr, value, grp);
+
+        if (grp == QLCChannel::Intensity)
+        {
+            // Remove all HTP channels that reach their target _zero_ value.
+            // They have no effect either way so removing them saves CPU a bit.
+            if (fc.current() == 0 && fc.target() == 0)
                 remove(fc);
-            }
         }
         else
         {
-            uchar value = uchar(floor((qreal(fc.current()) * intensity()) + 0.5));
-            ua->write(fc.address(m_doc), value, fc.group(m_doc));
-            fc.nextStep(MasterTimer::tick());
+            // Remove all LTP channels after their time is up
+            if (fc.elapsed() >= fc.fadeTime())
+                remove(fc);
         }
     }
 }

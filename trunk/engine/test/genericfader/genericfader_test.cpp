@@ -136,19 +136,20 @@ void GenericFader_Test::writeLoop()
     fc.setFixture(0);
     fc.setChannel(0);
     fc.setStart(0);
-    fc.setTarget(255);
+    fc.setTarget(250);
     fc.setFadeTime(1000);
     fader.add(fc);
 
     QCOMPARE(ua.preGMValues()[10], (char) 0);
 
-    for (int i = 0; i <= 1000; i += MasterTimer::tick())
+    int expected = 0;
+    for (int i = MasterTimer::tick(); i <= 1000; i += MasterTimer::tick())
     {
         ua.zeroIntensityChannels();
         fader.write(&ua);
 
-        uchar actual = ua.preGMValues()[10];
-        uchar expected = ((fc.target() - fc.start()) * (double(i) / double(1000))) + fc.start();
+        int actual = uchar(ua.preGMValues()[10]);
+        expected += 5;
         QCOMPARE(actual, expected);
     }
 }
@@ -162,7 +163,7 @@ void GenericFader_Test::adjustIntensity()
     fc.setFixture(0);
     fc.setChannel(0);
     fc.setStart(0);
-    fc.setTarget(255);
+    fc.setTarget(250);
     fc.setFadeTime(1000);
     fader.add(fc);
 
@@ -170,14 +171,16 @@ void GenericFader_Test::adjustIntensity()
     fader.adjustIntensity(intensity);
     QCOMPARE(fader.intensity(), intensity);
 
-    for (int i = 0; i <= 1000; i += MasterTimer::tick())
+    int expected = 0;
+    for (int i = MasterTimer::tick(); i <= 1000; i += MasterTimer::tick())
     {
         ua.zeroIntensityChannels();
         fader.write(&ua);
 
-        uchar actual = ua.preGMValues()[10];
-        uchar expected = floor((intensity * (((qreal(fc.target()) - qreal(fc.start())) * (qreal(i) / qreal(1000))) + qreal(fc.start()))) + 0.5);
-        QCOMPARE(actual, expected);
+        int actual = uchar(ua.preGMValues()[10]);
+        expected += 5;
+        int expectedWithIntensity = floor((qreal(expected) * intensity) + 0.5);
+        QVERIFY(actual == expectedWithIntensity);
     }
 }
 

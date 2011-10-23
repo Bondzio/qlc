@@ -166,7 +166,7 @@ void Function_Test::preRunPostRun()
     Function_Stub* stub = new Function_Stub(&doc);
     QSignalSpy spyRunning(stub, SIGNAL(running(quint32)));
     stub->preRun(NULL);
-    QVERIFY(stub->stopped() == false);
+    QVERIFY(stub->isRunning() == true);
     QCOMPARE(spyRunning.size(), 1);
     // @todo Check the contents of the signal in spyRunning
 
@@ -175,6 +175,7 @@ void Function_Test::preRunPostRun()
     QSignalSpy spyStopped(stub, SIGNAL(stopped(quint32)));
     stub->postRun(NULL, NULL);
     QVERIFY(stub->stopped() == true);
+    QVERIFY(stub->isRunning() == false);
     QCOMPARE(stub->elapsed(), quint32(0));
     QCOMPARE(spyRunning.size(), 1);
     QCOMPARE(spyStopped.size(), 1);

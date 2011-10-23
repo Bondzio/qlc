@@ -206,7 +206,7 @@ void MasterTimer_Test::interval()
     usleep(100000);
 #endif
 
-    mt->startFunction(&fs);
+    fs.start(mt);
     QVERIFY(mt->runningFunctions() == 1);
 
     mt->registerDMXSource(&dss);
@@ -242,7 +242,7 @@ void MasterTimer_Test::functionInitiatedStop()
 
     mt->start();
 
-    mt->startFunction(&fs);
+    fs.start(mt);
     QVERIFY(mt->runningFunctions() == 1);
 
     /* Wait a while so that the function starts running */

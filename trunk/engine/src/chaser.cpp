@@ -288,7 +288,7 @@ void Chaser::preRun(MasterTimer* timer)
         dur = overrideDuration();
 
     m_runner = new ChaserRunner(doc(), steps(), fadeIn, fadeOut, dur,
-                                direction(), runOrder(), intensity(), this);
+                                direction(), runOrder(), intensity());
     Function::preRun(timer);
 }
 

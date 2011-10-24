@@ -280,9 +280,21 @@ void Scene::writeDMX(MasterTimer* timer, UniverseArray* ua)
     Q_ASSERT(ua != NULL);
 
     if (flashing() == true)
-        writeValues(ua); // Keep HTP & LTP up
+    {
+        // Keep HTP and LTP channels up. Flash is more or less a forceful intervention
+        // so enforce all values that the user has chosen to flash.
+        foreach (const SceneValue& sv, m_values)
+        {
+            FadeChannel fc;
+            fc.setFixture(sv.fxi);
+            fc.setChannel(sv.channel);
+            ua->write(fc.address(doc()), sv.value, fc.group(doc()));
+        }
+    }
     else
+    {
         timer->unregisterDMXSource(this);
+    }
 }
 
 /****************************************************************************
@@ -369,31 +381,6 @@ void Scene::postRun(MasterTimer* timer, UniverseArray* ua)
     m_fader = NULL;
 
     Function::postRun(timer, ua);
-}
-
-void Scene::writeValues(UniverseArray* ua, quint32 fxi_id,
-                        QLCChannel::Group grp, qreal percentage)
-{
-    Q_ASSERT(ua != NULL);
-
-    for (int i = 0; i < m_values.size(); i++)
-    {
-        const SceneValue& sv(m_values[i]);
-        FadeChannel fc;
-        fc.setFixture(sv.fxi);
-        fc.setChannel(sv.channel);
-        fc.setTarget(sv.value);
-
-        if (fxi_id == Fixture::invalidId() || fxi_id == sv.fxi)
-        {
-            if (grp == QLCChannel::NoGroup || grp == fc.group(doc()))
-            {
-                qreal value = CLAMP(percentage, 0.0, 1.0) * qreal(fc.target());
-                value = uchar(floor(value + 0.5));
-                ua->write(fc.address(doc()), uchar(value), fc.group(doc()));
-            }
-        }
-    }
 }
 
 void Scene::insertStartValue(FadeChannel& fc, const MasterTimer* timer,

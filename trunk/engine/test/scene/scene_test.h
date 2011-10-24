@@ -54,8 +54,6 @@ private slots:
     void writeHTPTwoTicksIntensity();
     void writeLTPReady();
 
-    void writeValues();
-
 private:
     Doc* m_doc;
 };

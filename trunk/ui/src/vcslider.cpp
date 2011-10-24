@@ -581,7 +581,7 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
     m_levelValueMutex.unlock();
 }
 
-void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
+void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* ua)
 {
     Function* function = m_doc->function(m_playbackFunction);
     if (function == NULL || mode() == Doc::Design)
@@ -592,7 +592,7 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
     uchar value = m_playbackValue;
     bool changed = m_playbackValueChanged;
 
-    qreal percentage = qreal(value) / qreal(UCHAR_MAX);
+    qreal intensity = qreal(value) / qreal(UCHAR_MAX);
 
     switch(function->type())
     {
@@ -601,14 +601,23 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
         Scene* scene = qobject_cast<Scene*> (function);
         Q_ASSERT(scene != NULL);
 
-        /* When the value has changed recently (= slider moved since last writeDMX cycle)
-           write both HTP & LTP channels. Otherwise write only HTP channel values. */
-        if (changed == true) {
-            scene->writeValues(universes, Fixture::invalidId(),
-                               QLCChannel::NoGroup, percentage);
-        } else {
-            scene->writeValues(universes, Fixture::invalidId(),
-                               QLCChannel::Intensity, percentage);
+        foreach (const SceneValue& sv, scene->values())
+        {
+            FadeChannel fc;
+            fc.setFixture(sv.fxi);
+            fc.setChannel(sv.channel);
+            fc.setCurrent(sv.value);
+            QLCChannel::Group grp = fc.group(m_doc);
+
+            /* When the value has changed recently (= slider moved since last writeDMX cycle)
+               write both HTP & LTP channels. Otherwise write only HTP channel values. */
+            if (changed == true || grp == QLCChannel::Intensity)
+            {
+                if (grp == QLCChannel::Intensity)
+                    ua->write(fc.address(m_doc), fc.current(intensity), grp);
+                else if (intensity > 0)
+                    ua->write(fc.address(m_doc), fc.current(), grp);
+            }
         }
     }
     break;
@@ -625,7 +634,7 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* universes)
             {
                 if (function->stopped() == true)
                     function->start(timer);
-                function->adjustIntensity(percentage);
+                function->adjustIntensity(intensity);
             }
         }
         break;

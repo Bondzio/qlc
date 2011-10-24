@@ -158,23 +158,6 @@ public:
     /** @reimpl */
     void postRun(MasterTimer* timer, UniverseArray* ua);
 
-    /**
-     * Write the scene values to OutputMap. If fxi_id is given, writes
-     * values only for the specified fixture.
-     *
-     * The scene must be armed with arm() before calling this function or
-     * otherwise nothing will be written.
-     *
-     * @param ua The universe array to write values to
-     * @param fxi_id if non-invalid, writes values concerning only given fixture
-     * @param grp if non-invalid, writes values concerning only given channel group
-     * @param percentage Percentage 0.0 - 1.0 of the actual value to write (default 1.0)
-     */
-    virtual void writeValues(UniverseArray* ua,
-                             quint32 fxi_id = Fixture::invalidId(),
-                             QLCChannel::Group grp = QLCChannel::NoGroup,
-                             qreal percentage = 1.0);
-
 private:
     /** Insert starting values to $fc, either from $timer->fader() or $ua */
     void insertStartValue(FadeChannel& fc, const MasterTimer* timer, const UniverseArray* ua);

@@ -22,24 +22,39 @@
 #include <QtTest>
 
 #include "genericfader_test.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
 #include "universearray.h"
 #include "fadechannel.h"
 #include "qlcchannel.h"
+#include "qlcfile.h"
 #include "doc.h"
 
 #define private public
 #include "genericfader.h"
 #undef private
 
+#define INTERNAL_FIXTUREDIR "../../../fixtures/"
+
 void GenericFader_Test::initTestCase()
 {
     m_doc = new Doc(this);
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void GenericFader_Test::init()
 {
     Fixture* fxi = new Fixture(m_doc);
-    fxi->setChannels(4);
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 1");
+    QVERIFY(mode != NULL);
+
+    fxi->setFixtureDefinition(def, mode);
     fxi->setAddress(10);
     m_doc->addFixture(fxi);
 }
@@ -116,15 +131,15 @@ void GenericFader_Test::writeZeroFade()
 
     FadeChannel fc;
     fc.setFixture(0);
-    fc.setChannel(0);
+    fc.setChannel(5);
     fc.setStart(0);
     fc.setTarget(255);
     fc.setFadeTime(0);
 
     fader.add(fc);
-    QCOMPARE(ua.preGMValues()[10], (char) 0);
+    QCOMPARE(ua.preGMValues()[15], (char) 0);
     fader.write(&ua);
-    QCOMPARE(ua.preGMValues()[10], (char) 255);
+    QCOMPARE(ua.preGMValues()[15], (char) 255);
 }
 
 void GenericFader_Test::writeLoop()
@@ -134,13 +149,13 @@ void GenericFader_Test::writeLoop()
 
     FadeChannel fc;
     fc.setFixture(0);
-    fc.setChannel(0);
+    fc.setChannel(5);
     fc.setStart(0);
     fc.setTarget(250);
     fc.setFadeTime(1000);
     fader.add(fc);
 
-    QCOMPARE(ua.preGMValues()[10], (char) 0);
+    QCOMPARE(ua.preGMValues()[15], (char) 0);
 
     int expected = 0;
     for (int i = MasterTimer::tick(); i <= 1000; i += MasterTimer::tick())
@@ -148,7 +163,7 @@ void GenericFader_Test::writeLoop()
         ua.zeroIntensityChannels();
         fader.write(&ua);
 
-        int actual = uchar(ua.preGMValues()[10]);
+        int actual = uchar(ua.preGMValues()[15]);
         expected += 5;
         QCOMPARE(actual, expected);
     }
@@ -160,11 +175,17 @@ void GenericFader_Test::adjustIntensity()
     GenericFader fader(m_doc);
 
     FadeChannel fc;
+
+    // HTP channel
     fc.setFixture(0);
-    fc.setChannel(0);
+    fc.setChannel(5);
     fc.setStart(0);
     fc.setTarget(250);
     fc.setFadeTime(1000);
+    fader.add(fc);
+
+    // LTP channel
+    fc.setChannel(0);
     fader.add(fc);
 
     qreal intensity = 0.5;
@@ -177,10 +198,16 @@ void GenericFader_Test::adjustIntensity()
         ua.zeroIntensityChannels();
         fader.write(&ua);
 
-        int actual = uchar(ua.preGMValues()[10]);
         expected += 5;
+
+        // GenericFader should apply intensity only to HTP channels
+        int actual = uchar(ua.preGMValues()[15]);
         int expectedWithIntensity = floor((qreal(expected) * intensity) + 0.5);
         QVERIFY(actual == expectedWithIntensity);
+
+        // No intensity adjustment on LTP channels
+        actual = uchar(ua.preGMValues()[10]);
+        QVERIFY(actual == expected);
     }
 }
 

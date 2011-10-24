@@ -305,7 +305,9 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
     m_currentFunction = m_doc->function(step.fid);
     if (m_currentFunction != NULL && m_currentFunction->stopped() == true)
     {
-        m_currentFunction->start(timer, true, m_fadeInSpeed, m_fadeOutSpeed, m_duration);
+        // Set intensity before starting the function. Otherwise the intensity
+        // might momentarily jump too high.
         m_currentFunction->adjustIntensity(m_intensity);
+        m_currentFunction->start(timer, true, m_fadeInSpeed, m_fadeOutSpeed, m_duration);
     }
 }

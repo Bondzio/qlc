@@ -181,6 +181,13 @@ private:
 
 private:
     GenericFader* m_fader;
+
+    /*********************************************************************
+     * Intensity
+     *********************************************************************/
+public:
+    /** @reimpl */
+    void adjustIntensity(qreal intensity);
 };
 
 #endif

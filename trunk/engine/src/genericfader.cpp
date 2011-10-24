@@ -76,8 +76,14 @@ void GenericFader::write(UniverseArray* ua)
         QLCChannel::Group grp = fc.group(m_doc);
         quint32 addr = fc.address(m_doc);
 
-        fc.nextStep(MasterTimer::tick());
-        ua->write(addr, fc.current(intensity()), grp);
+        // Calculate the next step
+        uchar value = fc.nextStep(MasterTimer::tick());
+
+        // Apply intensity to HTP channels
+        if (grp == QLCChannel::Intensity)
+            value = fc.current(intensity());
+
+        ua->write(addr, value, grp);
 
         if (grp == QLCChannel::Intensity)
         {

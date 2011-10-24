@@ -107,6 +107,7 @@ void FadeChannel_Test::current()
     {
         fch.setCurrent(i);
         QCOMPARE(fch.current(), uchar(i));
+        QCOMPARE(fch.current(0.4), uchar(floor((qreal(i) * 0.4) + 0.5)));
     }
 }
 

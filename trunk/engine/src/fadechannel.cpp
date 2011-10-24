@@ -20,6 +20,7 @@
 */
 
 #include <QDebug>
+#include <cmath>
 
 #include "fadechannel.h"
 #include "qlcchannel.h"
@@ -126,6 +127,11 @@ void FadeChannel::setCurrent(uchar value)
 uchar FadeChannel::current() const
 {
     return m_current;
+}
+
+uchar FadeChannel::current(qreal intensity) const
+{
+    return uchar(floor((qreal(m_current) * intensity) + 0.5));
 }
 
 void FadeChannel::setReady(bool rdy)

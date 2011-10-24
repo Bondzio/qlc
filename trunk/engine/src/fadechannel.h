@@ -92,6 +92,9 @@ public:
     /** Get the current value. */
     uchar current() const;
 
+    /** Get the current value, modified by $intensity. */
+    uchar current(qreal intensity) const;
+
     /** Mark this channel as ready (useful for writing LTP values only once). */
     void setReady(bool rdy);
 

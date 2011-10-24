@@ -73,12 +73,11 @@ void GenericFader::write(UniverseArray* ua)
     while (it.hasNext() == true)
     {
         FadeChannel& fc(it.next().value());
-        uchar value = fc.nextStep(MasterTimer::tick());
-        value = uchar(floor((qreal(value) * intensity()) + 0.5));
         QLCChannel::Group grp = fc.group(m_doc);
         quint32 addr = fc.address(m_doc);
 
-        ua->write(addr, value, grp);
+        fc.nextStep(MasterTimer::tick());
+        ua->write(addr, fc.current(intensity()), grp);
 
         if (grp == QLCChannel::Intensity)
         {

@@ -39,6 +39,7 @@ private slots:
     void cleanup();
 
     void initial();
+    void speed();
     void nextPrevious();
     void autoStep();
     void roundCheckSingleShotForward();
@@ -47,21 +48,24 @@ private slots:
     void roundCheckLoopBackward();
     void roundCheckPingPongForward();
     void roundCheckPingPongBackward();
-    void createFadeChannels();
-    void createFadeChannelsAutoHTPZero();
 
     void writeNoSteps();
-    void writeHoldZero();
+    void writeForwardLoopZero();
+    void writeBackwardLoopZero();
+    void writeForwardSingleShotZero();
+    void writeBackwardSingleShotZero();
+    void writeForwardPingPongZero();
+    void writeBackwardPingPongZero();
 
-    void writeForwardLoopHoldFiveNextPrevious();
-    void writeBackwardLoopHoldFiveNextPrevious();
-    void writeForwardSingleShotHoldFive();
-    void writeNoAutoStepHoldFive();
-    void writeNoAutoSetCurrentStep();
+    void writeForwardLoopFive();
+    void writeBackwardLoopFive();
+    void writeForwardSingleShotFive();
+    void writeBackwardSingleShotFive();
+    void writeForwardPingPongFive();
+    void writeBackwardPingPongFive();
+    void writeNoAutoStep();
 
-    void writeForwardSingleShotHoldFiveAdjustIntensity();
-
-    void postRun();
+    void adjustIntensity();
 
 private:
     Doc* m_doc;

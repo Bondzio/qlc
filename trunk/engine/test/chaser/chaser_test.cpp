@@ -748,7 +748,6 @@ void Chaser_Test::save()
 
 void Chaser_Test::tap()
 {
-/*
     Scene* s1 = new Scene(m_doc);
     m_doc->addFunction(s1);
 
@@ -768,13 +767,17 @@ void Chaser_Test::tap()
     c->addStep(s4->id());
     m_doc->addFunction(c);
 
-    c->slotBusTapped(Bus::defaultFade()); // Wrong bus
-    c->slotBusTapped(Bus::defaultHold()); // Correct bus, m_runner == NULL
-
     c->preRun(m_doc->masterTimer());
-    c->slotBusTapped(Bus::defaultHold()); // Correct bus, m_runner != NULL
+    QVERIFY(c->m_runner != NULL);
+    QCOMPARE(c->duration(), uint(0));
+    c->write(m_doc->masterTimer(), NULL);
+    c->tap();
+    QTest::qWait(500);
+    c->tap();
     QCOMPARE(c->m_runner->m_next, true);
-*/
+    // Different OSs and different loads produce different results. But the exact
+    // value is not important here, just check that the value is altered.
+    QVERIFY(c->duration() >= uint(500 - 20) && c->duration() <= uint(500 + 20));
 }
 
 void Chaser_Test::preRun()

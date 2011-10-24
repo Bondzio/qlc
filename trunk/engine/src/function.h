@@ -27,6 +27,7 @@
 #include <QString>
 #include <QMutex>
 #include <QList>
+#include <QTime>
 
 class QDomDocument;
 class QDomElement;
@@ -313,6 +314,9 @@ public:
     uint duration() const;
     uint overrideDuration() const;
 
+    /** Set the function's speed by tapping it */
+    virtual void tap();
+
     static uint defaultSpeed();
     static uint infiniteSpeed();
 
@@ -331,6 +335,8 @@ private:
     uint m_overrideFadeInSpeed;
     uint m_overrideFadeOutSpeed;
     uint m_overrideDuration;
+
+    QTime m_tapTime;
 
     /*********************************************************************
      * Fixtures

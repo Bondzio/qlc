@@ -39,14 +39,17 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <ChaserStep> steps,
     : QObject(parent)
     , m_doc(doc)
     , m_steps(steps)
-    , m_fadeInSpeed(fadeInSpeed)
-    , m_fadeOutSpeed(fadeOutSpeed)
-    , m_duration(duration)
     , m_originalDirection(direction)
     , m_runOrder(runOrder)
 
+    , m_fadeInSpeed(fadeInSpeed)
+    , m_fadeOutSpeed(fadeOutSpeed)
+    , m_duration(duration)
+
     , m_autoStep(true)
+
     , m_direction(direction)
+    , m_currentFunction(NULL)
     , m_elapsed(0)
     , m_next(false)
     , m_previous(false)
@@ -62,6 +65,33 @@ ChaserRunner::ChaserRunner(Doc* doc, QList <ChaserStep> steps,
 ChaserRunner::~ChaserRunner()
 {
 }
+
+/****************************************************************************
+ * Speed adjustment
+ ****************************************************************************/
+
+void ChaserRunner::setDuration(uint ms)
+{
+    m_duration = ms;
+}
+
+/****************************************************************************
+ * Automatic stepping
+ ****************************************************************************/
+
+void ChaserRunner::setAutoStep(bool autoStep)
+{
+    m_autoStep = autoStep;
+}
+
+bool ChaserRunner::isAutoStep() const
+{
+    return m_autoStep;
+}
+
+/****************************************************************************
+ * Step control
+ ****************************************************************************/
 
 void ChaserRunner::next()
 {
@@ -90,16 +120,6 @@ int ChaserRunner::currentStep() const
     return m_currentStep;
 }
 
-void ChaserRunner::setAutoStep(bool autoStep)
-{
-    m_autoStep = autoStep;
-}
-
-bool ChaserRunner::isAutoStep() const
-{
-    return m_autoStep;
-}
-
 void ChaserRunner::reset()
 {
     // Restore original direction since Ping-Pong switches m_direction
@@ -115,6 +135,21 @@ void ChaserRunner::reset()
     m_previous = false;
     m_currentFunction = NULL;
 }
+
+/****************************************************************************
+ * Intensity
+ ****************************************************************************/
+
+void ChaserRunner::adjustIntensity(qreal fraction)
+{
+    m_intensity = CLAMP(fraction, qreal(0.0), qreal(1.0));
+    if (m_currentFunction != NULL)
+        m_currentFunction->adjustIntensity(m_intensity);
+}
+
+/****************************************************************************
+ * Running
+ ****************************************************************************/
 
 bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
 {
@@ -273,15 +308,4 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
         m_currentFunction->start(timer, true, m_fadeInSpeed, m_fadeOutSpeed, m_duration);
         m_currentFunction->adjustIntensity(m_intensity);
     }
-}
-
-/****************************************************************************
- * Intensity
- ****************************************************************************/
-
-void ChaserRunner::adjustIntensity(qreal fraction)
-{
-    m_intensity = CLAMP(fraction, qreal(0.0), qreal(1.0));
-    if (m_currentFunction != NULL)
-        m_currentFunction->adjustIntensity(m_intensity);
 }

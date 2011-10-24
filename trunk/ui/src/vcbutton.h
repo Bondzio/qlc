@@ -181,6 +181,8 @@ public:
     void setKeySequence(const QKeySequence& keySequence);
     QKeySequence keySequence() const;
 
+    bool isControlDown() const;
+
 protected slots:
     void slotKeyPressed(const QKeySequence& keySequence);
     void slotKeyReleased(const QKeySequence& keySequence);
@@ -258,6 +260,9 @@ protected:
     /** Handler for button releases (mouse/key)button up, not click */
     void releaseFunction();
 
+    /** Blink the button for $ms milliseconds */
+    void blink(int ms);
+
 protected slots:
     /** Handler for function running signal */
     void slotFunctionRunning(quint32 fid);
@@ -269,7 +274,7 @@ protected slots:
     void slotFunctionFlashing(quint32 fid, bool state);
 
     /** Slot for brief widget blink when controlled function stops */
-    void slotBlinkReady();
+    void slotBlink();
 
     /** Listent to OutputMap::blackoutChanged() signals in Blackout mode */
     void slotBlackoutChanged(bool state);

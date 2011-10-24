@@ -57,9 +57,13 @@ protected:
     /*********************************************************************
      * Layout page
      *********************************************************************/
+private:
+    void fillTapModifierCombo();
+
 protected slots:
     void slotGrabKeyboardClicked();
     void slotKeyRepeatOffClicked();
+    void slotTapModifierActivated(int index);
 
     void slotGridClicked();
     void slotGridXChanged(int value);

@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiArea>
 #include <QObject>
 #include <QtTest>
 #include <QMenu>
@@ -520,6 +521,79 @@ void VCButton_Test::toggle()
 
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
     btn.mouseReleaseEvent(&ev);
+}
+
+void VCButton_Test::tap()
+{
+    QMdiArea w;
+
+    VirtualConsole::resetContents(&w, m_doc);
+    w.showMinimized();
+    VirtualConsole::createAndShow(&w, m_doc);
+
+    Scene* sc = new Scene(m_doc);
+    sc->setValue(0, 0, 255);
+    sc->setFadeInSpeed(1000);
+    sc->setFadeOutSpeed(1000);
+    sc->setDuration(0);
+    m_doc->addFunction(sc);
+
+    VCButton btn(VirtualConsole::instance()->contents(), m_doc);
+    btn.setCaption("Foobar");
+    btn.setFunction(sc->id());
+    btn.setAction(VCButton::Toggle);
+    btn.setKeySequence(QKeySequence(QKeySequence::Undo));
+    btn.setAdjustIntensity(true);
+    btn.setIntensityAdjustment(0.2);
+
+    QMouseEvent ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
+
+    // Let's say the tap modifier is down
+    VirtualConsole::instance()->m_tapModifierDown = true;
+
+    // Mouse button press in design mode doesn't do tap
+    QCOMPARE(m_doc->mode(), Doc::Design);
+
+    // Perform a click
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mousePressEvent(&ev);
+    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mouseReleaseEvent(&ev);
+
+    QTest::qWait(100); // Wait a while
+
+    // Perform another click
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mousePressEvent(&ev);
+    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mouseReleaseEvent(&ev);
+
+    // Not in operate mode -> duration is unaffected
+    QCOMPARE(sc->duration(), uint(0));
+
+    // Mouse button press with tap modifier down in operate mode should do tap
+    m_doc->setMode(Doc::Operate);
+
+    // Perform a click
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mousePressEvent(&ev);
+    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mouseReleaseEvent(&ev);
+
+    QTest::qWait(100); // Wait a while
+
+    // Perform a click
+    ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mousePressEvent(&ev);
+    ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
+    btn.mouseReleaseEvent(&ev);
+
+    // In operate mode -> duration should be set
+    QVERIFY(sc->duration() >= 100);
+
+    VirtualConsole::instance()->close();
+
+    m_doc->setMode(Doc::Design);
 }
 
 void VCButton_Test::flash()

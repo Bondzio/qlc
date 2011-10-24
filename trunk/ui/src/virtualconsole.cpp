@@ -73,6 +73,7 @@ VirtualConsole* VirtualConsole::s_instance = NULL;
 VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
+    , m_tapModifierDown(false)
 {
     Q_ASSERT(doc != NULL);
 
@@ -1511,14 +1512,25 @@ void VirtualConsole::initContents()
  * Key press handler
  *****************************************************************************/
 
+bool VirtualConsole::isTapModifierDown() const
+{
+    return m_tapModifierDown;
+}
+
 void VirtualConsole::keyPressEvent(QKeyEvent* event)
 {
+    if ((event->modifiers() & properties().tapModifier()) != 0)
+        m_tapModifierDown = true;
+
     QKeySequence seq(event->key() | event->modifiers());
     emit keyPressed(seq);
 }
 
 void VirtualConsole::keyReleaseEvent(QKeyEvent* event)
 {
+    if ((event->modifiers() & properties().tapModifier()) == 0)
+        m_tapModifierDown = false;
+
     QKeySequence seq(event->key() | event->modifiers());
     emit keyReleased(seq);
 }

@@ -49,6 +49,7 @@ class Doc;
 #define KXMLQLCVCPropertiesKeyboard "Keyboard"
 #define KXMLQLCVCPropertiesKeyboardGrab "Grab"
 #define KXMLQLCVCPropertiesKeyboardRepeatOff "RepeatOff"
+#define KXMLQLCVCPropertiesKeyboardTapModifier "TapModifier"
 
 #define KXMLQLCVCPropertiesGrandMaster "GrandMaster"
 #define KXMLQLCVCPropertiesGrandMasterVisible "Visible"
@@ -106,7 +107,7 @@ private:
     int m_gridY;
 
     /*********************************************************************
-     * Keyboard state
+     * Keyboard
      *********************************************************************/
 public:
     /** Set key repeat off during operate mode or not. */
@@ -121,9 +122,16 @@ public:
     /** Check, if keyboard is grabbed in operate mode. */
     bool isGrabKeyboard() const;
 
+    /** Set the tap modifier key */
+    void setTapModifier(Qt::KeyboardModifier mod);
+
+    /** Get the tap modifier key */
+    Qt::KeyboardModifier tapModifier() const;
+
 private:
     bool m_keyRepeatOff;
     bool m_grabKeyboard;
+    Qt::KeyboardModifier m_tapModifier;
 
     /*************************************************************************
      * Grand Master

@@ -62,6 +62,7 @@ void VCProperties_Test::initial()
 
     QCOMPARE(p.m_keyRepeatOff, true);
     QCOMPARE(p.m_grabKeyboard, true);
+    QCOMPARE(p.m_tapModifier, Qt::ControlModifier);
 
     QCOMPARE(p.m_gmChannelMode, UniverseArray::GMIntensity);
     QCOMPARE(p.m_gmValueMode, UniverseArray::GMReduce);
@@ -85,6 +86,7 @@ void VCProperties_Test::copy()
     p.m_gridY = 4;
     p.m_keyRepeatOff = false;
     p.m_grabKeyboard = false;
+    p.m_tapModifier = Qt::ShiftModifier;
     p.m_gmChannelMode = UniverseArray::GMAllChannels;
     p.m_gmValueMode = UniverseArray::GMLimit;
     p.m_gmInputUniverse = 5;
@@ -104,6 +106,7 @@ void VCProperties_Test::copy()
     QCOMPARE(p2.m_gridY, p.m_gridY);
     QCOMPARE(p2.m_keyRepeatOff, p.m_keyRepeatOff);
     QCOMPARE(p2.m_grabKeyboard, p.m_grabKeyboard);
+    QCOMPARE(p2.m_tapModifier, p.m_tapModifier);
     QCOMPARE(p2.m_gmChannelMode, p.m_gmChannelMode);
     QCOMPARE(p2.m_gmValueMode, p.m_gmValueMode);
     QCOMPARE(p2.m_gmInputUniverse, p.m_gmInputUniverse);
@@ -121,6 +124,7 @@ void VCProperties_Test::copy()
     QCOMPARE(p3.m_gridY, p.m_gridY);
     QCOMPARE(p3.m_keyRepeatOff, p.m_keyRepeatOff);
     QCOMPARE(p3.m_grabKeyboard, p.m_grabKeyboard);
+    QCOMPARE(p3.m_tapModifier, p.m_tapModifier);
     QCOMPARE(p3.m_gmChannelMode, p.m_gmChannelMode);
     QCOMPARE(p3.m_gmValueMode, p.m_gmValueMode);
     QCOMPARE(p3.m_gmInputUniverse, p.m_gmInputUniverse);
@@ -186,6 +190,7 @@ void VCProperties_Test::loadPropertiesHappy()
     QDomElement kb = xmldoc.createElement("Keyboard");
     kb.setAttribute("Grab", "True");
     kb.setAttribute("RepeatOff", "True");
+    kb.setAttribute("TapModifier", QString::number(Qt::AltModifier));
     root.appendChild(kb);
 
     // Blackout
@@ -248,6 +253,7 @@ void VCProperties_Test::loadPropertiesHappy()
 
     QCOMPARE(p.isGrabKeyboard(), true);
     QCOMPARE(p.isKeyRepeatOff(), true);
+    QCOMPARE(p.tapModifier(), Qt::AltModifier);
 
     QCOMPARE(p.isGMVisible(), false);
 
@@ -411,6 +417,7 @@ void VCProperties_Test::saveXMLHappy()
 
     p.m_grabKeyboard = true;
     p.m_keyRepeatOff = true;
+    p.m_tapModifier = Qt::MetaModifier;
 
     p.m_gmVisible = true;
 
@@ -436,6 +443,7 @@ void VCProperties_Test::saveXMLHappy()
 
     QCOMPARE(p2.isGrabKeyboard(), true);
     QCOMPARE(p2.isKeyRepeatOff(), true);
+    QCOMPARE(p2.tapModifier(), Qt::MetaModifier);
 
     QCOMPARE(p2.isGMVisible(), true);
 

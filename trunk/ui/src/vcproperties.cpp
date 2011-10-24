@@ -48,6 +48,7 @@ VCProperties::VCProperties() : VCWidgetProperties()
 
     m_keyRepeatOff = true;
     m_grabKeyboard = true;
+    m_tapModifier = Qt::ControlModifier;
 
     m_gmChannelMode = UniverseArray::GMIntensity;
     m_gmValueMode = UniverseArray::GMReduce;
@@ -85,6 +86,7 @@ VCProperties& VCProperties::operator=(const VCProperties& properties)
 
     m_keyRepeatOff = properties.m_keyRepeatOff;
     m_grabKeyboard = properties.m_grabKeyboard;
+    m_tapModifier = properties.m_tapModifier;
 
     m_gmChannelMode = properties.m_gmChannelMode;
     m_gmValueMode = properties.m_gmValueMode;
@@ -153,7 +155,7 @@ int VCProperties::gridY() const
 }
 
 /*****************************************************************************
- * Keyboard state
+ * Keyboard
  *****************************************************************************/
 
 void VCProperties::setKeyRepeatOff(bool set)
@@ -174,6 +176,16 @@ void VCProperties::setGrabKeyboard(bool grab)
 bool VCProperties::isGrabKeyboard() const
 {
     return m_grabKeyboard;
+}
+
+void VCProperties::setTapModifier(Qt::KeyboardModifier mod)
+{
+    m_tapModifier = mod;
+}
+
+Qt::KeyboardModifier VCProperties::tapModifier() const
+{
+    return m_tapModifier;
 }
 
 /*****************************************************************************
@@ -325,6 +337,7 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Keyboard settings */
     tag = doc->createElement(KXMLQLCVCPropertiesKeyboard);
+    tag.setAttribute(KXMLQLCVCPropertiesKeyboardTapModifier, tapModifier());
     prop_root.appendChild(tag);
 
     /* Grab keyboard */
@@ -439,6 +452,11 @@ bool VCProperties::loadProperties(const QDomElement& root)
                 setKeyRepeatOff(true);
             else
                 setKeyRepeatOff(false);
+
+            /* Tap modifier */
+            str = tag.attribute(KXMLQLCVCPropertiesKeyboardTapModifier);
+            if (str.isEmpty() == false)
+                setTapModifier(Qt::KeyboardModifier(str.toInt()));
         }
         else if (tag.tagName() == KXMLQLCVCPropertiesGrandMaster)
         {

@@ -331,6 +331,10 @@ protected:
     /*********************************************************************
      * Key press handler
      *********************************************************************/
+public:
+    /** Check if the tap modifier is currently pressed */
+    bool isTapModifierDown() const;
+
 protected:
     /** Handler for keyboard key presse events */
     void keyPressEvent(QKeyEvent* event);
@@ -344,6 +348,9 @@ signals:
 
     /** Signal telling that the keySequence was released */
     void keyReleased(const QKeySequence& keySequence);
+
+private:
+    bool m_tapModifierDown;
 
     /*************************************************************************
      * External input

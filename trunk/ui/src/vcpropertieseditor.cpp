@@ -56,12 +56,13 @@ VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& prop
 
     m_properties = properties;
 
-    /* Layout page */
+    /* General page */
     m_gridGroup->setChecked(properties.isGridEnabled());
     m_gridXSpin->setValue(properties.gridX());
     m_gridYSpin->setValue(properties.gridY());
     m_grabKeyboardCheck->setChecked(properties.isGrabKeyboard());
     m_keyRepeatOffCheck->setChecked(properties.isKeyRepeatOff());
+    fillTapModifierCombo();
 
     /* Grand Master page */
     switch (properties.grandMasterChannelMode())
@@ -105,6 +106,24 @@ VCProperties VCPropertiesEditor::properties() const
  * Layout page
  *****************************************************************************/
 
+void VCPropertiesEditor::fillTapModifierCombo()
+{
+    QList <int> mods;
+    mods << Qt::ShiftModifier << Qt::ControlModifier << Qt::AltModifier << Qt::MetaModifier;
+    foreach (int mod, mods)
+    {
+        QKeySequence seq(mod);
+        QString str(seq.toString(QKeySequence::NativeText));
+        m_tapModifierCombo->addItem(str.remove(QRegExp("\\W")).trimmed(), mod);
+
+        if (mod == int(m_properties.tapModifier()))
+            m_tapModifierCombo->setCurrentIndex(m_tapModifierCombo->count() - 1);
+    }
+
+    connect(m_tapModifierCombo, SIGNAL(activated(int)),
+            this, SLOT(slotTapModifierActivated(int)));
+}
+
 void VCPropertiesEditor::slotGrabKeyboardClicked()
 {
     m_properties.setGrabKeyboard(m_grabKeyboardCheck->isChecked());
@@ -128,6 +147,11 @@ void VCPropertiesEditor::slotGridXChanged(int value)
 void VCPropertiesEditor::slotGridYChanged(int value)
 {
     m_properties.setGridY(value);
+}
+
+void VCPropertiesEditor::slotTapModifierActivated(int index)
+{
+    m_properties.setTapModifier(Qt::KeyboardModifier(m_tapModifierCombo->itemData(index).toInt()));
 }
 
 /*****************************************************************************

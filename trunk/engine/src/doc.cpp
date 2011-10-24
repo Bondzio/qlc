@@ -57,6 +57,8 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
 
 Doc::~Doc()
 {
+    clearContents();
+
     delete m_masterTimer;
     m_masterTimer = NULL;
 
@@ -70,8 +72,6 @@ Doc::~Doc()
 
     delete m_fixtureDefCache;
     m_fixtureDefCache = NULL;
-
-    clearContents();
 }
 
 void Doc::clearContents()

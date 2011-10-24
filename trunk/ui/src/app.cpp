@@ -389,11 +389,13 @@ void App::initDoc()
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
             this, SLOT(slotOutputMapBlackoutChanged(bool)));
 
-    /* Load input plugins */
+    /* Load input plugins & profiles */
     Q_ASSERT(m_doc->inputMap() != NULL);
     connect(m_doc->inputMap(), SIGNAL(pluginAdded(const QString&)),
             this, SLOT(slotSetProgressText(const QString&)));
     m_doc->inputMap()->loadPlugins(InputMap::systemPluginDirectory());
+    m_doc->inputMap()->loadProfiles(InputMap::userProfileDirectory());
+    m_doc->inputMap()->loadProfiles(InputMap::systemProfileDirectory());
     m_doc->inputMap()->loadDefaults();
 
     m_doc->masterTimer()->start();

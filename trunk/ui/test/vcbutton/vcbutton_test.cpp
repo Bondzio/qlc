@@ -51,7 +51,6 @@ void VCButton_Test::initTestCase()
 void VCButton_Test::init()
 {
     m_doc = new Doc(this);
-    m_doc->masterTimer()->start();
 
     Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(4);
@@ -503,7 +502,7 @@ void VCButton_Test::toggle()
     QCOMPARE(m_doc->masterTimer()->m_functionList[0], sc);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
     btn.slotKeyReleased(QKeySequence(QKeySequence::Undo));
-    QTest::qWait(100); // Allow MasterTimer to take the function under execution
+    m_doc->masterTimer()->timerTick(); // Allow MasterTimer to take the function under execution
     QCOMPARE(sc->stopped(), false);
     QCOMPARE(btn.isOn(), true);
 
@@ -591,9 +590,10 @@ void VCButton_Test::tap()
     // In operate mode -> duration should be set
     QVERIFY(sc->duration() >= 100);
 
-    VirtualConsole::instance()->close();
-
     m_doc->setMode(Doc::Design);
+
+    delete VirtualConsole::instance();
+    VirtualConsole::s_instance = NULL;
 }
 
 void VCButton_Test::flash()
@@ -613,7 +613,6 @@ void VCButton_Test::flash()
 
     QSignalSpy spy(sc, SIGNAL(flashing(quint32,bool)));
 
-    m_doc->setMode(Doc::Operate);
     btn.slotKeyPressed(QKeySequence(QKeySequence::Undo));
     QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
     QCOMPARE(btn.isOn(), true);
@@ -673,12 +672,10 @@ void VCButton_Test::input()
     btn.slotInputValueChanged(0, 0, 0);
     QCOMPARE(btn.isOn(), false);
 
-    m_doc->setMode(Doc::Design);
     btn.setAction(VCButton::Toggle);
-    m_doc->setMode(Doc::Operate);
 
     btn.slotInputValueChanged(0, 0, 255);
-    QTest::qWait(100);
+    m_doc->masterTimer()->timerTick();
     QCOMPARE(btn.isOn(), true);
     QCOMPARE(sc->intensity(), btn.intensityAdjustment());
 

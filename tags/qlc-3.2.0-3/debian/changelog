@@ -3,6 +3,7 @@ qlc (3.2.0-3) stable; urgency=low
   * Fixed EFX's intensity bus setting, which wasn't stored at all.
   * Fixed ticket#79: Deleting fixtures from Scene
   * Improved Enttec Open/Pro widget detection
+  * Made MIDI input plugin produce QLC(255) with MIDI(127) value.
 
  -- Heikki Junnila <hjunnila@users.sf.net>  Tue, 25 Oct 2011 09:52:32 +0300
 

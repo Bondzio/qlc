@@ -51,6 +51,17 @@ void MIDIProtocol_Test::macros()
     QCOMPARE(uchar(MIDI_CMD(0xFF)), uchar(0xF0));
     QCOMPARE(MIDI_IS_CMD(0xFF), true);
     QCOMPARE(MIDI_IS_SYSCOMMON(0xFF), true);
+
+    for (int i = 0; i <= CHAR_MAX; i++)
+    {
+        if (i == CHAR_MAX)
+            QCOMPARE(MIDI2DMX(i), uchar(UCHAR_MAX));
+        else
+            QCOMPARE(MIDI2DMX(i), uchar(i << 1));
+    }
+
+    for (int i = 0; i <= UCHAR_MAX; i++)
+        QCOMPARE(DMX2MIDI(i), uchar(i >> 1));
 }
 
 void MIDIProtocol_Test::noteToInput()

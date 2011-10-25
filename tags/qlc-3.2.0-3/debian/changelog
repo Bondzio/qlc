@@ -1,8 +1,10 @@
 qlc (3.2.0-3) stable; urgency=low
 
   * Fixed EFX's intensity bus setting, which wasn't stored at all.
+  * Fixed ticket#79: Deleting fixtures from Scene
+  * Improved Enttec Open/Pro widget detection
 
- -- Heikki Junnila <hjunnila@users.sf.net>  Thu, 06 Oct 2011 19:56:37 +0300
+ -- Heikki Junnila <hjunnila@users.sf.net>  Tue, 25 Oct 2011 09:52:32 +0300
 
 qlc (3.2.0-2) stable; urgency=low
 

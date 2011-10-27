@@ -23,14 +23,13 @@
 #ifndef UDMXDEVICE_H
 #define UDMXDEVICE_H
 
-#include <QObject>
-
+#include <QThread>
 
 struct usb_dev_handle;
 struct usb_device;
 class QString;
 
-class UDMXDevice : public QObject
+class UDMXDevice : public QThread
 {
     Q_OBJECT
 
@@ -51,10 +50,10 @@ public:
     QString name() const;
     QString infoText() const;
 
-protected:
+private:
     void extractName();
 
-protected:
+private:
     QString m_name;
 
     /********************************************************************
@@ -67,15 +66,30 @@ public:
     const struct usb_device* device() const;
     const usb_dev_handle* handle() const;
 
-protected:
+private:
     struct usb_device* m_device;
     usb_dev_handle* m_handle;
 
     /********************************************************************
-     * Write
+     * Thread
      ********************************************************************/
 public:
     void outputDMX(const QByteArray& universe);
+
+private:
+    enum TimerGranularity { Unknown, Good, Bad };
+
+    /** Stop the writer thread */
+    void stop();
+
+    /** DMX writer thread worker method */
+    void run();
+
+private:
+    bool m_running;
+    QByteArray m_universe;
+    double m_frequency;
+    TimerGranularity m_granularity;
 };
 
 #endif

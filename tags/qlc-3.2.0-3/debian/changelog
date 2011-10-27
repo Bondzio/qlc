@@ -6,8 +6,9 @@ qlc (3.2.0-3) stable; urgency=low
   * Put uDMX writer to a separate thread to prevent UI lockups.
   * Improved Enttec Open/Pro widget detection.
   * Made MIDI input plugin produce QLC(255) with MIDI(127) value.
+  * Fixed a layout glitch in Virtual Console slider editor's Level page.
 
- -- Heikki Junnila <hjunnila@julia>  Thu, 27 Oct 2011 22:21:04 +0300
+ -- Heikki Junnila <hjunnila@julia>  Thu, 27 Oct 2011 22:27:19 +0300
 
 qlc (3.2.0-2) stable; urgency=low
 

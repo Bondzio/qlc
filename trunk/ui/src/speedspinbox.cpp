@@ -102,6 +102,7 @@ int SpeedSpinBox::valueFromText(const QString& text) const
 
 QValidator::State SpeedSpinBox::validate(QString& input, int& pos) const
 {
+    Q_UNUSED(pos);
     bool ok = false;
     input.toDouble(&ok);
     if (ok == true || input.isEmpty() == false)

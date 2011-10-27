@@ -34,6 +34,7 @@
 #include "rgbmatrixeditor.h"
 #include "speedspinbox.h"
 #include "rgbmatrix.h"
+#include "rgbitem.h"
 #include "apputil.h"
 #include "doc.h"
 
@@ -240,12 +241,13 @@ void RGBMatrixEditor::createPreviewItems()
 
             if (grp->fixtureHash().contains(pt) == true)
             {
-                QGraphicsEllipseItem* item = new QGraphicsEllipseItem;
+                RGBItem* item = new RGBItem;
                 item->setRect(x * RECT_SIZE + RECT_PADDING + ITEM_PADDING,
                               y * RECT_SIZE + RECT_PADDING + ITEM_PADDING,
                               ITEM_SIZE - (2 * ITEM_PADDING),
                               ITEM_SIZE - (2 * ITEM_PADDING));
-                item->setBrush(QBrush());
+                item->setColor(Qt::black);
+                item->draw(0);
                 m_scene->addItem(item);
                 m_previewHash[pt] = item;
 
@@ -259,7 +261,7 @@ void RGBMatrixEditor::createPreviewItems()
 
 void RGBMatrixEditor::slotPreviewTimeout()
 {
-    QAbstractGraphicsShapeItem* shape = NULL;
+    RGBItem* shape = NULL;
 
     if (m_mtx->duration() <= 0)
         return;
@@ -274,9 +276,14 @@ void RGBMatrixEditor::slotPreviewTimeout()
             QLCPoint pt(x, y);
             if (m_previewHash.contains(pt) == true)
             {
-                shape = static_cast<QAbstractGraphicsShapeItem*>(m_previewHash[pt]);
-                shape->setBrush(QColor(map[y][x]));
-                shape->setPen(QColor(map[y][x]));
+                shape = static_cast<RGBItem*>(m_previewHash[pt]);
+                if (shape->color() != QColor(map[y][x]).rgb())
+                    shape->setColor(map[y][x]);
+
+                if (shape->color() == QColor(Qt::black).rgb())
+                    shape->draw(m_mtx->fadeOutSpeed());
+                else
+                    shape->draw(m_mtx->fadeInSpeed());
             }
         }
     }
@@ -314,7 +321,7 @@ void RGBMatrixEditor::slotFixtureGroupActivated(int index)
         m_mtx->setFixtureGroup(var.toUInt());
     else
         m_mtx->setFixtureGroup(FixtureGroup::invalidId());
-
+    createPreviewItems();
     slotRestartTest();
 }
 

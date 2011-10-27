@@ -55,6 +55,7 @@ HEADERS += aboutbox.h \
            outputmanager.h \
            outputpatcheditor.h \
            rgbmatrixeditor.h \
+           rgbitem.h \
            sceneeditor.h \
            scripteditor.h \
            selectinputchannel.h \
@@ -140,6 +141,7 @@ SOURCES += aboutbox.cpp \
            outputmanager.cpp \
            outputpatcheditor.cpp \
            rgbmatrixeditor.cpp \
+           rgbitem.cpp \
            sceneeditor.cpp \
            scripteditor.cpp \
            selectinputchannel.cpp \

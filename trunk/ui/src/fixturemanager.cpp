@@ -804,7 +804,7 @@ void FixtureManager::slotAdd()
 
         /* Assign the next address AFTER the previous fixture
            address space plus gap. */
-        fxi->setAddress(address + (i * channels) + gap);
+        fxi->setAddress(address + (i * channels) + (i * gap));
         fxi->setUniverse(universe);
         fxi->setName(modname);
         /* Set a fixture definition & mode if they were

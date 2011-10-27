@@ -7,8 +7,9 @@ qlc (3.2.0-3) stable; urgency=low
   * Improved Enttec Open/Pro widget detection.
   * Made MIDI input plugin produce QLC(255) with MIDI(127) value.
   * Fixed a layout glitch in Virtual Console slider editor's Level page.
+  * Fixed gap setting when adding fixtures in fixture manager.
 
- -- Heikki Junnila <hjunnila@julia>  Thu, 27 Oct 2011 22:27:19 +0300
+ -- Heikki Junnila <hjunnila@users.sourceforge.net>  Thu, 27 Oct 2011 22:42:58 +0300
 
 qlc (3.2.0-2) stable; urgency=low
 

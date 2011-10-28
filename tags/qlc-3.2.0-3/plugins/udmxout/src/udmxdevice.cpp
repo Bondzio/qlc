@@ -34,6 +34,7 @@
 #include <cmath>
 
 #include "udmxdevice.h"
+#include "qlcmacros.h"
 
 #define UDMX_SHARED_VENDOR     0x16C0 /* VOTI */
 #define UDMX_SHARED_PRODUCT    0x05DC /* Obdev's free shared PID */

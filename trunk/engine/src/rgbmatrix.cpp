@@ -217,8 +217,10 @@ bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction di
     bottom       = bottom + ((size.height() - bottom) * scale);
     bottom       = CLAMP(bottom, 0, size.height() - 1);
 
+    // Check if the new steps are different than the previous ones
     if (m_stepW != int(left) || m_stepH != int(top))
     {
+        // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
@@ -241,6 +243,7 @@ bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction di
     }
     else
     {
+        // No need to create a new colormap. The previous one applies.
         return false;
     }
 }
@@ -261,8 +264,10 @@ bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
     qreal top    = MIN(scale * qreal(size.height()), qreal(size.height() - 1));
     qreal bottom = top;
 
+    // Check if the new steps are different than the previous ones
     if (m_stepH != int(top))
     {
+        // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
@@ -277,6 +282,7 @@ bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
     }
     else
     {
+        // No need to create a new colormap. The previous one applies.
         return false;
     }
 }
@@ -297,8 +303,10 @@ bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
     qreal top    = qreal(0);
     qreal bottom = qreal(size.height() - 1);
 
+    // Check if the new steps are different than the previous ones
     if (m_stepW != int(left))
     {
+        // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
@@ -313,6 +321,7 @@ bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
     }
     else
     {
+        // No need to create a new colormap. The previous one applies.
         return false;
     }
 }

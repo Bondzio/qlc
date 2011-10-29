@@ -36,11 +36,13 @@
 #include "apputil.h"
 
 #define SETTINGS_GEOMETRY "documentbrowser/geometry"
+#define HYSTERESIS_MS 100
 
 QLCTextBrowser::QLCTextBrowser(QWidget* parent)
     : QTextBrowser(parent)
 {
     grabGesture(Qt::SwipeGesture);
+    m_hysteresis.start();
 }
 
 QLCTextBrowser::~QLCTextBrowser()
@@ -60,13 +62,21 @@ bool QLCTextBrowser::event(QEvent* ev)
         }
         else if (swipe->horizontalDirection() == QSwipeGesture::Left)
         {
-            backward();
-            ev->accept();
+            if (m_hysteresis.elapsed() > HYSTERESIS_MS)
+            {
+                backward();
+                ev->accept();
+                m_hysteresis.start();
+            }
         }
         else if (swipe->horizontalDirection() == QSwipeGesture::Right)
         {
-            forward();
-            ev->accept();
+            if (m_hysteresis.elapsed() > HYSTERESIS_MS)
+            {
+                forward();
+                ev->accept();
+                m_hysteresis.start();
+            }
         }
     }
 
@@ -94,6 +104,11 @@ DocBrowser::DocBrowser(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
 
     m_backwardAction->setEnabled(false);
     m_forwardAction->setEnabled(false);
+
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(close()));
+    addAction(action);
 
     /* Toolbar */
     m_toolbar = new QToolBar("Document Browser", this);

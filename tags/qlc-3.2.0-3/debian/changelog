@@ -8,6 +8,8 @@ qlc (3.2.0-3) stable; urgency=low
   * Made MIDI input plugin produce QLC(255) with MIDI(127) value.
   * Fixed a layout glitch in Virtual Console slider editor's Level page.
   * Fixed gap setting when adding fixtures in fixture manager.
+  * Fixed documentation browser's back/forward swipe action.
+  * Added keyboard shortcut for closing documentation browser.
 
  -- Heikki Junnila <hjunnila@users.sourceforge.net>  Thu, 27 Oct 2011 22:42:58 +0300
 

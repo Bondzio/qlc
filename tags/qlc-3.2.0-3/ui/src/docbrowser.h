@@ -24,6 +24,7 @@
 
 #include <QTextBrowser>
 #include <QMainWindow>
+#include <QTime>
 
 class QToolBar;
 class QAction;
@@ -37,6 +38,9 @@ public:
 
 protected:
     bool event(QEvent* ev);
+
+private:
+    QTime m_hysteresis;
 };
 
 class DocBrowser : public QWidget
@@ -48,11 +52,11 @@ public:
     DocBrowser(QWidget* parent, Qt::WindowFlags f = 0);
     ~DocBrowser();
 
-protected slots:
+private slots:
     void slotBackwardAvailable(bool);
     void slotForwardAvailable(bool);
 
-protected:
+private:
     QLCTextBrowser* m_browser;
     QToolBar* m_toolbar;
 

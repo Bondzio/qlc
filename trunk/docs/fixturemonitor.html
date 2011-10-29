@@ -2,8 +2,9 @@
 <HTML>
 <HEAD>
 <TITLE>Q Light Controller - Fixture Monitor</TITLE>
+<SCRIPT SRC="utility.js" TYPE="text/javascript"></SCRIPT>
 </HEAD>
-<BODY>
+<BODY onLoad="replaceqrc()">
 
 
 
@@ -20,7 +21,7 @@ addressing, after all, it is just a <B>monitor</B>.
 <TABLE BORDER="1">
  <TR>
   <TD>
-   <IMG SRC="qrc:/font.png">
+   <IMG SRC="qrc:/fonts.png">
   </TD>
   <TD>
    Change the monitor font. To prevent the numbers from flickering and jumping,
@@ -64,5 +65,5 @@ addressing, after all, it is just a <B>monitor</B>.
  </TR>
 </TABLE>
 
-</BODY>
+</BODY onLoad="replaceqrc()">
 </HTML>

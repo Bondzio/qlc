@@ -105,6 +105,11 @@ DocBrowser::DocBrowser(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
     m_backwardAction->setEnabled(false);
     m_forwardAction->setEnabled(false);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(close()));
+    addAction(action);
+
     /* Toolbar */
     m_toolbar = new QToolBar("Document Browser", this);
     layout()->addWidget(m_toolbar);

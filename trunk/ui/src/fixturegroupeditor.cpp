@@ -135,15 +135,10 @@ void FixtureGroupEditor::updateTable()
         if (fxi == NULL)
             continue;
 
-        QTableWidgetItem* item = new QTableWidgetItem;
-        QFont font = item->font();
-        font.setPointSize(font.pointSize() - 2);
-        item->setFont(font);
-        item->setData(PROP_FIXTURE, it.value());
-
         QString str;
+        QIcon icon;
         if (m_grp->displayStyle() & FixtureGroup::DisplayIcon)
-            item->setIcon(QIcon(":/fixture.png"));
+            icon = QIcon(":/fixture.png");
         if (m_grp->displayStyle() & FixtureGroup::DisplayName)
             str += fxi->name();
         if (((m_grp->displayStyle() & FixtureGroup::DisplayAddress)
@@ -154,7 +149,12 @@ void FixtureGroupEditor::updateTable()
             str += QString("DMX:%1 ").arg(fxi->address() + 1);
         if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
             str += QString("U:%1").arg(fxi->universe() + 1);
-        item->setText(str);
+
+        QTableWidgetItem* item = new QTableWidgetItem(icon, str);
+        QFont font = item->font();
+        font.setPointSize(font.pointSize() - 2);
+        item->setFont(font);
+        item->setData(PROP_FIXTURE, it.value());
 
         m_table->setItem(pt.y(), pt.x(), item);
     }

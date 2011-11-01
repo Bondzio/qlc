@@ -15,6 +15,7 @@ docs.files = \
              commandlineparameters.html \
              concept.html \
              efxeditor.html \
+             enttecdmxusboutput.html \
              fixturedefinitioneditor.html \
              fixtureeditor.html \
              fixturemanager.html \
@@ -27,12 +28,14 @@ docs.files = \
              howto-output-mapping.html \
              index.html \
              modeeditor.html \
+             peperonioutput.html \
              sceneeditor.html \
              selectfunction.html \
              selectfixture.html \
              selectinputchannel.html \
              tutorial.html \
              tutorial.png \
+             udmxoutput.html \
              vcbutton.html \
              vcbuttonmatrix.html \
              vccuelist.html \
@@ -43,5 +46,6 @@ docs.files = \
              vcslidermatrix.html \
              vcstylingplacement.html \
              vcxypad.html \
+             vellemanoutput.html \
              virtualconsole.html
 INSTALLS += docs

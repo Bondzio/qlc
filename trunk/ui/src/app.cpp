@@ -76,8 +76,10 @@ App::App() : QMainWindow()
     , m_helpIndexAction(NULL)
     , m_helpAboutAction(NULL)
 
+#ifdef __APPLE__
     , m_fileMenu(NULL)
     , m_helpMenu(NULL)
+#endif
 
     , m_toolbar(NULL)
 {
@@ -125,16 +127,6 @@ App::~App()
     if (m_doc != NULL)
         delete m_doc;
     m_doc = NULL;
-}
-
-QString App::longName()
-{
-    return QString(APPNAME);
-}
-
-QString App::version()
-{
-    return QString("Version %1").arg(APPVERSION);
 }
 
 void App::init()
@@ -303,7 +295,7 @@ void App::initDoc()
 
 void App::slotDocModified(bool state)
 {
-    QString caption(App::longName());
+    QString caption(APPNAME);
 
     if (fileName().isEmpty() == false)
         caption += QString(" - ") + QDir::toNativeSeparators(fileName());

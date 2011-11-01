@@ -63,7 +63,7 @@ void printVersion()
     QTextStream cout(stdout, QIODevice::WriteOnly);
 
     cout << endl;
-    cout << App::longName() << " " << App::version() << endl;
+    cout << APPNAME << " " << "version " << APPVERSION << endl;
     cout << "This program is licensed under the terms of the GNU ";
     cout << "General Public License v2." << endl;
     cout << "Copyright (c) Heikki Junnila (hjunnila@users.sf.net)." << endl;

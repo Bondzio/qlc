@@ -57,9 +57,6 @@ public:
     App();
     ~App();
 
-    static QString longName();
-    static QString version();
-
 private:
     void init();
     void closeEvent(QCloseEvent*);
@@ -141,9 +138,10 @@ private:
     QAction* m_helpAboutAction;
 
 private:
+#ifdef __APPLE
     QMenu* m_fileMenu;
     QMenu* m_helpMenu;
-
+#endif
     QToolBar* m_toolbar;
 
     /*********************************************************************

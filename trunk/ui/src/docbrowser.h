@@ -29,6 +29,10 @@
 class QToolBar;
 class QAction;
 
+/****************************************************************************
+ * QLCTextBrowser
+ ****************************************************************************/
+
 class QLCTextBrowser : public QTextBrowser
 {
     Q_OBJECT
@@ -43,6 +47,10 @@ private:
     QTime m_hysteresis;
 };
 
+/****************************************************************************
+ * DocBrowser
+ ****************************************************************************/
+
 class DocBrowser : public QWidget
 {
     Q_OBJECT
@@ -55,6 +63,7 @@ public:
 private slots:
     void slotBackwardAvailable(bool);
     void slotForwardAvailable(bool);
+    void slotAboutQt();
 
 private:
     QLCTextBrowser* m_browser;
@@ -63,6 +72,7 @@ private:
     QAction* m_backwardAction;
     QAction* m_forwardAction;
     QAction* m_homeAction;
+    QAction* m_aboutQtAction;
 };
 
 #endif

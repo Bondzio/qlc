@@ -75,10 +75,8 @@ App::App() : QMainWindow()
 
     , m_helpIndexAction(NULL)
     , m_helpAboutAction(NULL)
-    , m_helpAboutQtAction(NULL)
 
     , m_fileMenu(NULL)
-    , m_controlMenu(NULL)
     , m_helpMenu(NULL)
 
     , m_toolbar(NULL)
@@ -431,62 +429,28 @@ void App::initActions()
 
     m_helpAboutAction = new QAction(QIcon(":/qlc.png"), tr("&About QLC"), this);
     connect(m_helpAboutAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAbout()));
-
-    m_helpAboutQtAction = new QAction(QIcon(":/qt.png"), tr("About &Qt"), this);
-    connect(m_helpAboutQtAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAboutQt()));
-}
-
-QMenuBar* App::menuBar()
-{
-#ifdef __APPLE__
-    static QMenuBar *mainMenuBar = NULL;
-    if (mainMenuBar == NULL)
-        mainMenuBar = new QMenuBar(this);
-    return mainMenuBar;
-#else
-    return QMainWindow::menuBar();
-#endif
 }
 
 void App::initMenuBar()
 {
-    /* File Menu */
-    m_fileMenu = new QMenu(menuBar());
+#ifdef __APPLE__
+    QMenuBar *menuBar = new QMenuBar(this);
+
+    /* Since the menubar is there in Apple anyway, put these actions there. */
+    m_fileMenu = new QMenu(menuBar);
     m_fileMenu->setTitle(tr("&File"));
     menuBar()->addMenu(m_fileMenu);
-    m_fileMenu->addAction(m_fileNewAction);
-    m_fileMenu->addAction(m_fileOpenAction);
-    m_fileMenu->addSeparator();
-    m_fileMenu->addAction(m_fileSaveAction);
-    m_fileMenu->addAction(m_fileSaveAsAction);
-    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_fileQuitAction);
 
-    /* Control Menu */
-    m_controlMenu = new QMenu(menuBar());
-    m_controlMenu->setTitle(tr("&Control"));
-    menuBar()->addMenu(m_controlMenu);
-    m_controlMenu->addAction(m_modeToggleAction);
-    m_controlMenu->addAction(m_controlMonitorAction);
-    m_controlMenu->addSeparator();
-    m_controlMenu->addAction(m_controlFullScreenAction);
-
-    menuBar()->addSeparator();
-
-    /* Help menu */
-    m_helpMenu = new QMenu(menuBar());
+    m_helpMenu = new QMenu(menuBar);
     m_helpMenu->setTitle(tr("&Help"));
     menuBar()->addMenu(m_helpMenu);
-    m_helpMenu->addAction(m_helpIndexAction);
-    m_helpMenu->addSeparator();
     m_helpMenu->addAction(m_helpAboutAction);
-    m_helpMenu->addAction(m_helpAboutQtAction);
+#endif
 }
 
 void App::initToolBar()
 {
-    QWidget* widget;
-
     m_toolbar = new QToolBar(tr("Workspace"), this);
     m_toolbar->setFloatable(false);
     m_toolbar->setMovable(false);
@@ -500,11 +464,12 @@ void App::initToolBar()
     m_toolbar->addAction(m_modeToggleAction);
 
     /* Create an empty widget between help items to flush them to the right */
-    widget = new QWidget(this);
+    QWidget* widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_toolbar->addWidget(widget);
     m_toolbar->addAction(m_controlFullScreenAction);
     m_toolbar->addAction(m_helpIndexAction);
+    m_toolbar->addAction(m_helpAboutAction);
 }
 
 /*****************************************************************************
@@ -774,11 +739,6 @@ void App::slotHelpAbout()
 {
     AboutBox ab(this);
     ab.exec();
-}
-
-void App::slotHelpAboutQt()
-{
-    QMessageBox::aboutQt(this, QString(APPNAME));
 }
 
 /*****************************************************************************

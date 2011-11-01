@@ -36,7 +36,6 @@ class QDomElement;
 class QMessageBox;
 class QToolButton;
 class QFileDialog;
-class QMenuBar;
 class QToolBar;
 class QPixmap;
 class QAction;
@@ -110,7 +109,6 @@ private:
     void initActions();
     void initMenuBar();
     void initToolBar();
-    QMenuBar *menuBar();
 
     /** Displays an error message if a file error has occurred */
     bool handleFileError(QFile::FileError error);
@@ -127,7 +125,6 @@ public slots:
 
     void slotHelpIndex();
     void slotHelpAbout();
-    void slotHelpAboutQt();
 
 private:
     QAction* m_fileNewAction;
@@ -142,11 +139,9 @@ private:
 
     QAction* m_helpIndexAction;
     QAction* m_helpAboutAction;
-    QAction* m_helpAboutQtAction;
 
 private:
     QMenu* m_fileMenu;
-    QMenu* m_controlMenu;
     QMenu* m_helpMenu;
 
     QToolBar* m_toolbar;

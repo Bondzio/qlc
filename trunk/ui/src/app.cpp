@@ -20,31 +20,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QCoreApplication>
-#include <QProgressDialog>
-#include <QDesktopWidget>
-#include <QStyleFactory>
-#include <QApplication>
-#include <QImageReader>
-#include <QMessageBox>
-#include <QCloseEvent>
-#include <QFileDialog>
-#include <QStatusBar>
-#include <QSettings>
-#include <QMdiArea>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QToolTip>
-#include <QAction>
-#include <QDebug>
-#include <QLabel>
-#include <QColor>
-#include <QTimer>
-#include <QStyle>
-#include <QMenu>
-#include <QRect>
-#include <QFile>
-#include <QIcon>
+#include <QtCore>
+#include <QtGui>
+#include <QtXml>
 
 #include "functionmanager.h"
 #include "virtualconsole.h"
@@ -85,18 +63,29 @@ QStyle* App::s_saneStyle = NULL;
  *****************************************************************************/
 
 App::App() : QMainWindow()
+    , m_progressDialog(NULL)
+    , m_doc(NULL)
+
+    , m_fileNewAction(NULL)
+    , m_fileOpenAction(NULL)
+    , m_fileSaveAction(NULL)
+    , m_fileSaveAsAction(NULL)
+    , m_fileQuitAction(NULL)
+
+    , m_modeToggleAction(NULL)
+    , m_controlMonitorAction(NULL)
+    , m_controlFullScreenAction(NULL)
+
+    , m_helpIndexAction(NULL)
+    , m_helpAboutAction(NULL)
+    , m_helpAboutQtAction(NULL)
+
+    , m_fileMenu(NULL)
+    , m_controlMenu(NULL)
+    , m_helpMenu(NULL)
+
+    , m_toolbar(NULL)
 {
-    m_progressDialog = NULL;
-    m_doc = NULL;
-
-    m_modeIndicator = NULL;
-
-    m_blackoutIndicator = NULL;
-    m_blackoutIndicatorTimer = NULL;
-
-    m_fixtureAllocationIndicator = NULL;
-    m_functionAllocationIndicator = NULL;
-
     QCoreApplication::setOrganizationName("qlc");
     QCoreApplication::setOrganizationDomain("sf.net");
     QCoreApplication::setApplicationName(APPNAME);
@@ -110,7 +99,6 @@ App::App() : QMainWindow()
     slotDocModified(false);
 
 #ifdef __APPLE__
-    slotWindowAllToFront();
     destroyProgressDialog();
 #endif
 }
@@ -138,24 +126,6 @@ App::~App()
     if (VirtualConsole::instance() != NULL)
         delete VirtualConsole::instance();
 
-    if (VirtualConsole::properties().contents())
-        delete VirtualConsole::properties().contents();
-
-    // Delete mode indicator
-    if (m_modeIndicator != NULL)
-        delete m_modeIndicator;
-    m_modeIndicator = NULL;
-
-    // Delete blackout indicator's timer
-    if (m_blackoutIndicatorTimer != NULL)
-        delete m_blackoutIndicatorTimer;
-    m_blackoutIndicatorTimer = NULL;
-
-    // Delete the blackout indicator
-    if (m_blackoutIndicator != NULL)
-        delete m_blackoutIndicator;
-    m_blackoutIndicator = NULL;
-
     // Delete doc
     if (m_doc != NULL)
         delete m_doc;
@@ -178,17 +148,12 @@ void App::init()
 
     setWindowIcon(QIcon(":/qlc.png"));
 
-#ifndef __APPLE__
     /* MDI Area */
-    setCentralWidget(new QMdiArea(this));
-    centralWidget()->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(centralWidget(),
-            SIGNAL(customContextMenuRequested(const QPoint&)),
-            this,
-            SLOT(slotCustomContextMenuRequested(const QPoint&)));
-
-    /* Workspace background */
-    setBackgroundImage(settings.value("/workspace/background").toString());
+    QMdiArea* area = new QMdiArea(this);
+    area->setViewMode(QMdiArea::TabbedView);
+    area->setTabPosition(QTabWidget::South);
+    //area->setDocumentMode(true);
+    setCentralWidget(area);
 
     QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
@@ -204,42 +169,26 @@ void App::init()
         else
             resize(800, 600);
 
-        QVariant state = settings.value("/workspace/state",
-                                        Qt::WindowNoState);
+        QVariant state = settings.value("/workspace/state", Qt::WindowNoState);
         if (state.isValid() == true)
             setWindowState(Qt::WindowState(state.toInt()));
     }
-#else
-    /* App is just a toolbar, we only need it to be the size of the
-       toolbar's buttons. Resizing is not necessary with fixed policy. */
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-    {
-        this->restoreGeometry(var.toByteArray());
-    }
-    else
-    {
-        /* Move to the top of the available screen space */
-        QDesktopWidget dw;
-        QRect available(dw.availableGeometry());
-        move(available.x(), available.y());
-    }
-#endif
-
-    // The main engine object
+    // The engine object
     initDoc();
-
-    // The main view
-    initStatusBar();
+    // Main view actions
     initActions();
+    // Main menu bar
     initMenuBar();
+    // Main tool bar
     initToolBar();
 
-    // Virtual Console bottom frame
-    VirtualConsole::resetContents(this, m_doc);
-    VirtualConsole::properties().contents()->hide();
+    // Primary UI views
+    FixtureManager::createAndShow(centralWidget(), m_doc);
+    FunctionManager::createAndShow(centralWidget(), m_doc);
+    OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
+    InputManager::createAndShow(centralWidget(), m_doc->inputMap());
+    VirtualConsole::createAndShow(centralWidget(), m_doc);
 
     // Start up in non-modified state
     m_doc->resetModified();
@@ -323,48 +272,6 @@ void App::slotSetProgressText(const QString& text)
 }
 
 /*****************************************************************************
- * Output mapping
- *****************************************************************************/
-
-void App::slotOutputMapBlackoutChanged(bool state)
-{
-    if (state == true)
-    {
-        m_blackoutIndicator->show();
-        connect(m_blackoutIndicatorTimer, SIGNAL(timeout()),
-                this, SLOT(slotFlashBlackoutIndicator()));
-        m_blackoutIndicatorTimer->start(500);
-    }
-    else
-    {
-        m_blackoutIndicator->hide();
-        m_blackoutIndicatorTimer->stop();
-        disconnect(m_blackoutIndicatorTimer, SIGNAL(timeout()),
-                   this, SLOT(slotFlashBlackoutIndicator()));
-
-        m_blackoutIndicator->setPalette(QApplication::palette());
-    }
-}
-
-void App::slotFlashBlackoutIndicator()
-{
-    QPalette pal;
-    QColor bg;
-    QColor fg;
-
-    pal = m_blackoutIndicator->palette();
-    bg = pal.color(QPalette::Background);
-    bg.setRgb(bg.red() ^ 0xff, bg.green() ^ 0xff, bg.blue() ^ 0xff);
-    pal.setColor(QPalette::Background, bg);
-
-    fg = pal.color(QPalette::Foreground);
-    fg.setRgb(fg.red() ^ 0xff, fg.green() ^ 0xff, fg.blue() ^ 0xff);
-    pal.setColor(QPalette::Foreground, fg);
-
-    m_blackoutIndicator->setPalette(pal);
-}
-
-/*****************************************************************************
  * Doc
  *****************************************************************************/
 
@@ -386,8 +293,6 @@ void App::initDoc()
             this, SLOT(slotSetProgressText(const QString&)));
     m_doc->outputMap()->loadPlugins(OutputMap::systemPluginDirectory());
     m_doc->outputMap()->loadDefaults();
-    connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
-            this, SLOT(slotOutputMapBlackoutChanged(bool)));
 
     /* Load input plugins & profiles */
     Q_ASSERT(m_doc->inputMap() != NULL);
@@ -404,8 +309,6 @@ void App::initDoc()
 void App::slotDocModified(bool state)
 {
     QString caption(App::longName());
-    QString msg = "";
-    int fuzzy = 0;
 
     if (fileName().isEmpty() == false)
         caption += QString(" - ") + QDir::toNativeSeparators(fileName());
@@ -416,27 +319,6 @@ void App::slotDocModified(bool state)
         setWindowTitle(caption + QString(" *"));
     else
         setWindowTitle(caption);
-
-    int totalPowerConsumption = m_doc->totalPowerConsumption(fuzzy);
-
-    // Fixtures without power consumption values
-    if (fuzzy > 0)
-    {
-        msg += "\n";
-        msg += tr("(%n fixture(s) have no power consumption defined)", "", fuzzy);
-    }
-
-    /* Update fixture & function allocation status */
-    m_fixtureAllocationIndicator->setText(tr("Fixtures: %1 (%2W)")
-                                          .arg(m_doc->fixtures().size())
-                                          .arg(totalPowerConsumption));
-    m_fixtureAllocationIndicator->setToolTip(
-        tr("%1 fixtures currently consuming %2 watts of power in total.")
-           .arg(m_doc->fixtures().size())
-           .arg(totalPowerConsumption) + msg);
-
-    m_functionAllocationIndicator->setText(tr("Functions: %1").arg(m_doc->functions().size()));
-    m_functionAllocationIndicator->setToolTip(m_functionAllocationIndicator->text());
 }
 
 /*****************************************************************************
@@ -482,60 +364,25 @@ void App::slotModeChanged(Doc::Mode mode)
 {
     if (mode == Doc::Operate)
     {
-        /* Set highlighted palette to mode indicator */
-        m_modeIndicator->setText(KModeTextOperate);
-        m_modeIndicator->setToolTip(
-            tr("Operate mode is active; editing facilities are disabled"));
-
-        QPalette pal = palette();
-        pal.setColor(QPalette::Window,
-                     QApplication::palette().color(QPalette::Highlight));
-        pal.setColor(QPalette::WindowText,
-                     QApplication::palette().color(QPalette::HighlightedText));
-        m_modeIndicator->setPalette(pal);
-
         /* Disable editing features */
         m_fileNewAction->setEnabled(false);
         m_fileOpenAction->setEnabled(false);
         m_fileQuitAction->setEnabled(false);
 
-        m_functionManagerAction->setEnabled(false);
-
         m_modeToggleAction->setIcon(QIcon(":/design.png"));
         m_modeToggleAction->setText(tr("Design"));
         m_modeToggleAction->setToolTip(tr("Switch to design mode"));
-
-        /* Prevent opening a context menu */
-#ifndef __APPLE__
-        // No centralWidget() on APPLE
-        centralWidget()->setContextMenuPolicy(Qt::PreventContextMenu);
-#endif
     }
     else if (mode == Doc::Design)
     {
-        /* Set normal palette to mode indicator */
-        m_modeIndicator->setText(KModeTextDesign);
-        m_modeIndicator->setToolTip(
-            tr("Design mode is active; editing facilities are enabled"));
-
-        m_modeIndicator->setPalette(QApplication::palette());
-
         /* Enable editing features */
         m_fileNewAction->setEnabled(true);
         m_fileOpenAction->setEnabled(true);
         m_fileQuitAction->setEnabled(true);
 
-        m_functionManagerAction->setEnabled(true);
-
         m_modeToggleAction->setIcon(QIcon(":/operate.png"));
         m_modeToggleAction->setText(tr("Operate"));
         m_modeToggleAction->setToolTip(tr("Switch to operate mode"));
-
-        /* Allow opening a context menu */
-#ifndef __APPLE__
-        // No centralWidget on APPLE
-        centralWidget()->setContextMenuPolicy(Qt::CustomContextMenu);
-#endif
     }
 }
 
@@ -560,165 +407,56 @@ QStyle* App::saneStyle()
 }
 
 /*****************************************************************************
- * Status bar
- *****************************************************************************/
-
-void App::initStatusBar()
-{
-    /* Fixture Allocation Indicator */
-    m_fixtureAllocationIndicator = new QLabel(statusBar());
-    m_fixtureAllocationIndicator->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    m_fixtureAllocationIndicator->setText(tr("Fixtures: %1").arg(0));
-    statusBar()->addWidget(m_fixtureAllocationIndicator);
-
-    /* Function Allocation Indicator */
-    m_functionAllocationIndicator = new QLabel(statusBar());
-    m_functionAllocationIndicator->setFrameStyle(QFrame::StyledPanel |
-            QFrame::Sunken);
-    m_functionAllocationIndicator->setText(tr("Functions: %1").arg(0));
-    statusBar()->addWidget(m_functionAllocationIndicator);
-
-    /* Mode Indicator */
-    m_modeIndicator = new QLabel(statusBar());
-    m_modeIndicator->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    m_modeIndicator->setText(KModeTextDesign);
-    m_modeIndicator->setAutoFillBackground(true);
-    m_modeIndicator->setToolTip(
-        tr("Design mode is active; editing facilities are enabled"));
-    statusBar()->addWidget(m_modeIndicator);
-
-    /* Blackout Indicator */
-    m_blackoutIndicatorTimer = new QTimer(this);
-    m_blackoutIndicator = new QLabel(statusBar());
-    m_blackoutIndicator->setFrameStyle(QFrame::StyledPanel |
-                                       QFrame::Sunken);
-    m_blackoutIndicator->setText(tr("Blackout"));
-    m_blackoutIndicator->setAutoFillBackground(true);
-    m_blackoutIndicator->setToolTip(
-        tr("Blackout is active; all outputs are disabled"));
-    m_blackoutIndicator->hide();
-    statusBar()->addWidget(m_blackoutIndicator);
-}
-
-/*****************************************************************************
  * Actions, menubar, toolbar, statusbar
  *****************************************************************************/
 
 void App::initActions()
 {
     /* File actions */
-    m_fileNewAction = new QAction(QIcon(":/filenew.png"),
-                                  tr("&New"), this);
+    m_fileNewAction = new QAction(QIcon(":/filenew.png"), tr("&New"), this);
     m_fileNewAction->setShortcut(QKeySequence(tr("CTRL+N", "File|New")));
-    connect(m_fileNewAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFileNew()));
+    connect(m_fileNewAction, SIGNAL(triggered(bool)), this, SLOT(slotFileNew()));
 
-    m_fileOpenAction = new QAction(QIcon(":/fileopen.png"),
-                                   tr("&Open"), this);
+    m_fileOpenAction = new QAction(QIcon(":/fileopen.png"), tr("&Open"), this);
     m_fileOpenAction->setShortcut(QKeySequence(tr("CTRL+O", "File|Open")));
-    connect(m_fileOpenAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFileOpen()));
+    connect(m_fileOpenAction, SIGNAL(triggered(bool)), this, SLOT(slotFileOpen()));
 
-    m_fileSaveAction = new QAction(QIcon(":/filesave.png"),
-                                   tr("&Save"), this);
+    m_fileSaveAction = new QAction(QIcon(":/filesave.png"), tr("&Save"), this);
     m_fileSaveAction->setShortcut(QKeySequence(tr("CTRL+S", "File|Save")));
-    connect(m_fileSaveAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFileSave()));
+    connect(m_fileSaveAction, SIGNAL(triggered(bool)), this, SLOT(slotFileSave()));
 
-    m_fileSaveAsAction = new QAction(QIcon(":/filesaveas.png"),
-                                     tr("Save &As..."), this);
-    connect(m_fileSaveAsAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFileSaveAs()));
+    m_fileSaveAsAction = new QAction(QIcon(":/filesaveas.png"), tr("Save &As..."), this);
+    connect(m_fileSaveAsAction, SIGNAL(triggered(bool)), this, SLOT(slotFileSaveAs()));
 
-    m_fileQuitAction = new QAction(QIcon(":/exit.png"),
-                                   tr("&Quit"), this);
+    m_fileQuitAction = new QAction(QIcon(":/exit.png"), tr("&Quit"), this);
     m_fileQuitAction->setShortcut(QKeySequence(tr("CTRL+Q", "File|Quit")));
-    connect(m_fileQuitAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFileQuit()));
-
-    /* Manager actions */
-    m_fixtureManagerAction = new QAction(QIcon(":/fixture.png"),
-                                         tr("Fi&xtures"), this);
-    m_fixtureManagerAction->setShortcut(QKeySequence(tr("ALT+X", "Manager|Fixtures")));
-    connect(m_fixtureManagerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFixtureManager()));
-
-    m_functionManagerAction = new QAction(QIcon(":/function.png"),
-                                          tr("F&unctions"), this);
-    m_functionManagerAction->setShortcut(QKeySequence(tr("ALT+U", "Manager|Functions")));
-    connect(m_functionManagerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFunctionManager()));
-
-    m_inputManagerAction = new QAction(QIcon(":/input.png"),
-                                       tr("&Inputs"), this);
-    m_inputManagerAction->setShortcut(QKeySequence(tr("ALT+I", "Manager|Inputs")));
-    connect(m_inputManagerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotInputManager()));
-
-    m_outputManagerAction = new QAction(QIcon(":/output.png"),
-                                        tr("&Outputs"), this);
-    m_outputManagerAction->setShortcut(QKeySequence(tr("ALT+O", "Manager|Outputs")));
-    connect(m_outputManagerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotOutputManager()));
+    connect(m_fileQuitAction, SIGNAL(triggered(bool)), this, SLOT(slotFileQuit()));
 
     /* Control actions */
-    m_modeToggleAction = new QAction(QIcon(":/operate.png"),
-                                     tr("&Operate"), this);
+    m_modeToggleAction = new QAction(QIcon(":/operate.png"), tr("&Operate"), this);
     m_modeToggleAction->setToolTip(tr("Switch to operate mode"));
     m_modeToggleAction->setShortcut(QKeySequence(tr("CTRL+F12", "Control|Toggle operate/design mode")));
-    connect(m_modeToggleAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotModeToggle()));
+    connect(m_modeToggleAction, SIGNAL(triggered(bool)), this, SLOT(slotModeToggle()));
 
-    m_controlVCAction = new QAction(QIcon(":/virtualconsole.png"),
-                                    tr("&Virtual Console"), this);
-    m_controlVCAction->setShortcut(QKeySequence(tr("CTRL+R", "Control|Virtual Console")));
-    connect(m_controlVCAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotControlVC()));
-
-    m_controlMonitorAction = new QAction(QIcon(":/monitor.png"),
-                                         tr("&Monitor"), this);
+    m_controlMonitorAction = new QAction(QIcon(":/monitor.png"), tr("&Monitor"), this);
     m_controlMonitorAction->setShortcut(QKeySequence(tr("CTRL+M", "Control|Monitor")));
-    connect(m_controlMonitorAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotControlMonitor()));
+    connect(m_controlMonitorAction, SIGNAL(triggered(bool)), this, SLOT(slotControlMonitor()));
 
-#ifndef __APPLE__
-    // Full screen is rather pointless in Apple
-    m_controlFullScreenAction = new QAction(QIcon(":/fullscreen.png"),
-                                            tr("Toggle Full Screen"), this);
+    m_controlFullScreenAction = new QAction(QIcon(":/fullscreen.png"), tr("Toggle Full Screen"), this);
     m_controlFullScreenAction->setCheckable(true);
     m_controlFullScreenAction->setShortcut(QKeySequence(tr("CTRL+F11", "Control|Toggle Full Screen")));
-    connect(m_controlFullScreenAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotControlFullScreen()));
-#endif
-
-    /* Window actions */
-#ifdef __APPLE__
-    m_windowMinimizeAction = new QAction(tr("Minimize"), this);
-    m_windowMinimizeAction->setShortcut(QKeySequence(tr("CTRL+M", "Apple Window Action|Minimize")));
-    connect(m_windowMinimizeAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotWindowMinimize()));
-
-    m_windowAllToFrontAction = new QAction(tr("Bring All to Front"), this);
-    connect(m_windowAllToFrontAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotWindowAllToFront()));
-#endif
+    connect(m_controlFullScreenAction, SIGNAL(triggered(bool)), this, SLOT(slotControlFullScreen()));
 
     /* Help actions */
-    m_helpIndexAction = new QAction(QIcon(":/help.png"),
-                                    tr("&Index"), this);
+    m_helpIndexAction = new QAction(QIcon(":/help.png"), tr("&Index"), this);
     m_helpIndexAction->setShortcut(QKeySequence(tr("SHIFT+F1", "Help|Index")));
-    connect(m_helpIndexAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelpIndex()));
+    connect(m_helpIndexAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpIndex()));
 
-    m_helpAboutAction = new QAction(QIcon(":/qlc.png"),
-                                    tr("&About QLC"), this);
-    connect(m_helpAboutAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelpAbout()));
+    m_helpAboutAction = new QAction(QIcon(":/qlc.png"), tr("&About QLC"), this);
+    connect(m_helpAboutAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAbout()));
 
-    m_helpAboutQtAction = new QAction(QIcon(":/qt.png"),
-                                      tr("About &Qt"), this);
-    connect(m_helpAboutQtAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelpAboutQt()));
+    m_helpAboutQtAction = new QAction(QIcon(":/qt.png"), tr("About &Qt"), this);
+    connect(m_helpAboutQtAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAboutQt()));
 }
 
 QMenuBar* App::menuBar()
@@ -747,38 +485,14 @@ void App::initMenuBar()
     m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_fileQuitAction);
 
-    /* Manager Menu */
-    m_managerMenu = new QMenu(menuBar());
-    m_managerMenu->setTitle(tr("&Manager"));
-    menuBar()->addMenu(m_managerMenu);
-    m_managerMenu->addAction(m_fixtureManagerAction);
-    m_managerMenu->addAction(m_functionManagerAction);
-    m_managerMenu->addSeparator();
-    m_managerMenu->addAction(m_inputManagerAction);
-    m_managerMenu->addAction(m_outputManagerAction);
-
     /* Control Menu */
     m_controlMenu = new QMenu(menuBar());
     m_controlMenu->setTitle(tr("&Control"));
     menuBar()->addMenu(m_controlMenu);
     m_controlMenu->addAction(m_modeToggleAction);
-    m_controlMenu->addSeparator();
-    m_controlMenu->addAction(m_controlVCAction);
     m_controlMenu->addAction(m_controlMonitorAction);
     m_controlMenu->addSeparator();
-#ifndef __APPLE__
-    // Full screen is rather pointless in Apple
     m_controlMenu->addAction(m_controlFullScreenAction);
-#endif
-
-#ifdef __APPLE__
-    /* Window menu */
-    m_windowMenu = new QMenu(menuBar());
-    connect(m_windowMenu, SIGNAL(aboutToShow()),
-            this, SLOT(slotWindowMenuAboutToShow()));
-    m_windowMenu->setTitle(tr("&Window"));
-    menuBar()->addMenu(m_windowMenu);
-#endif
 
     menuBar()->addSeparator();
 
@@ -803,19 +517,17 @@ void App::initToolBar()
     m_toolbar->addAction(m_fileNewAction);
     m_toolbar->addAction(m_fileOpenAction);
     m_toolbar->addAction(m_fileSaveAction);
+    m_toolbar->addAction(m_fileSaveAsAction);
     m_toolbar->addSeparator();
-    m_toolbar->addAction(m_fixtureManagerAction);
-    m_toolbar->addAction(m_functionManagerAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_controlVCAction);
     m_toolbar->addAction(m_controlMonitorAction);
+    m_toolbar->addAction(m_modeToggleAction);
 
-    /* Create an empty widget between the last toolbar button and
-       BO & mode buttons to separate the critical ones from the rest. */
+    /* Create an empty widget between help items to flush them to the right */
     widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_toolbar->addWidget(widget);
-    m_toolbar->addAction(m_modeToggleAction);
+    m_toolbar->addAction(m_controlFullScreenAction);
+    m_toolbar->addAction(m_helpIndexAction);
 }
 
 /*****************************************************************************
@@ -904,7 +616,7 @@ bool App::slotFileNew()
 void App::clearDocument()
 {
     m_doc->clearContents();
-    VirtualConsole::resetContents(this, m_doc);
+    VirtualConsole::instance()->resetContents();
     m_doc->outputMap()->resetUniverses();
     setFileName(QString());
     m_doc->resetModified();
@@ -1009,12 +721,7 @@ QFile::FileError App::slotFileSaveAs()
     QString fn;
 
     /* Create a file save dialog */
-#ifdef __APPLE__
-    // Don't create it above the screen...
-    QFileDialog dialog(NULL);
-#else
     QFileDialog dialog(this);
-#endif
     dialog.setWindowTitle(tr("Save Workspace As"));
     dialog.setAcceptMode(QFileDialog::AcceptSave);
     dialog.selectFile(fileName());
@@ -1059,80 +766,14 @@ void App::slotFileQuit()
 }
 
 /*****************************************************************************
- * Manager action slots
- *****************************************************************************/
-
-void App::slotFixtureManager()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    FixtureManager::createAndShow(parent, m_doc);
-}
-
-void App::slotFunctionManager()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    FunctionManager::createAndShow(parent, m_doc);
-}
-
-void App::slotOutputManager()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    OutputManager::createAndShow(parent, m_doc->outputMap());
-}
-
-void App::slotInputManager()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    InputManager::createAndShow(parent, m_doc->inputMap());
-}
-
-/*****************************************************************************
  * Control action slots
  *****************************************************************************/
 
-void App::slotControlVC()
-{
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    VirtualConsole::createAndShow(parent, m_doc);
-}
-
 void App::slotControlMonitor()
 {
-    QWidget* parent;
-#ifdef __APPLE__
-    parent = this;
-#else
-    parent = centralWidget();
-#endif
-    Monitor::createAndShow(parent, m_doc);
+    Monitor::createAndShow(this, m_doc);
 }
 
-#ifndef __APPLE__
 void App::slotControlFullScreen()
 {
     if (windowState() & Qt::WindowFullScreen)
@@ -1140,88 +781,7 @@ void App::slotControlFullScreen()
     else
         showFullScreen();
 }
-#endif
 
-/*****************************************************************************
- * Window action slots
- *****************************************************************************/
-#ifdef __APPLE__
-void App::slotWindowMenuAboutToShow()
-{
-    m_windowMenu->clear();
-
-    m_windowMenu->addAction(m_windowMinimizeAction);
-    m_windowMenu->addSeparator();
-    m_windowMenu->addAction(m_windowAllToFrontAction);
-    m_windowMenu->addSeparator();
-
-    QListIterator <QObject*> it(children());
-    while (it.hasNext() == true)
-    {
-        QWidget* w = qobject_cast<QWidget*> (it.next());
-        if (w == NULL)
-            continue;
-
-        if (w->windowTitle().simplified().isEmpty() == false)
-        {
-            QAction* a = m_windowMenu->addAction(w->windowTitle());
-            a->setIcon(w->windowIcon());
-            a->setCheckable(true);
-
-            if (w->isMinimized() == true)
-            {
-                a->setChecked(false);
-                a->setData((qulonglong) w);
-                connect(a, SIGNAL(triggered(bool)), this,
-                        SLOT(slotWindowMenuItemSelected()));
-            }
-            else
-            {
-                a->setChecked(true);
-            }
-        }
-    }
-}
-
-void App::slotWindowMenuItemSelected()
-{
-    QAction* a = qobject_cast<QAction*> (QObject::sender());
-    if (a == NULL)
-        return;
-
-    QWidget* w = qobject_cast<QWidget*> (
-                     reinterpret_cast<QObject*> (a->data().toULongLong()));
-    if (w == NULL)
-        return;
-
-    if (w->isMinimized() == true)
-    {
-        w->raise();
-        w->showNormal();
-    }
-}
-
-void App::slotWindowMinimize()
-{
-    QWidget* active = QApplication::activeWindow();
-    if (active != NULL)
-        active->showMinimized();
-}
-
-void App::slotWindowAllToFront()
-{
-    QListIterator <QObject*> it(children());
-    while (it.hasNext() == true)
-    {
-        QWidget* w = qobject_cast<QWidget*> (it.next());
-        if (w == NULL)
-            continue;
-        w->raise();
-    }
-
-    this->raise();
-}
-#endif
 /*****************************************************************************
  * Help action slots
  *****************************************************************************/
@@ -1242,68 +802,6 @@ void App::slotHelpAbout()
 void App::slotHelpAboutQt()
 {
     QMessageBox::aboutQt(this, QString(APPNAME));
-}
-
-void App::slotCustomContextMenuRequested(const QPoint&)
-{
-    QMenu menu;
-    menu.addAction(QIcon(":/image.png"), tr("Set background image..."),
-                   this, SLOT(slotSetBackgroundImage()));
-    menu.addAction(QIcon(":/editdelete.png"),
-                   tr("Clear background image"),
-                   this, SLOT(slotClearBackgroundImage()));
-    menu.exec(QCursor::pos());
-}
-
-/*****************************************************************************
- * Workspace background
- *****************************************************************************/
-
-void App::setBackgroundImage(QString path)
-{
-    QMdiArea* area = qobject_cast<QMdiArea*>(centralWidget());
-    Q_ASSERT(area != NULL);
-
-    if (path.isEmpty() == true)
-    {
-        QMdiArea temp;
-        area->setBackground(temp.background());
-    }
-    else
-    {
-        area->setBackground(QBrush(QPixmap(path)));
-    }
-
-
-    // Force background update immediately in a rather weird way because
-    // for example area->update() has no effect.
-    area->hide();
-    QTimer::singleShot(1, area, SLOT(show()));
-
-    /* Save workspace background setting */
-    QSettings settings;
-    settings.setValue("/workspace/background", path);
-    m_backgroundImage = path;
-}
-
-void App::slotSetBackgroundImage()
-{
-    QString formats;
-    QListIterator <QByteArray> it(QImageReader::supportedImageFormats());
-    while (it.hasNext() == true)
-        formats += QString("*.%1 ").arg(QString(it.next()).toLower());
-
-    QString path = QFileDialog::getOpenFileName(
-                       this, tr("Open an image file"), getenv("HOME"),
-                       tr("Images (%1)").arg(formats));
-
-    if (path.isEmpty() == false)
-        setBackgroundImage(path);
-}
-
-void App::slotClearBackgroundImage()
-{
-    setBackgroundImage(QString());
 }
 
 /*****************************************************************************
@@ -1376,7 +874,7 @@ bool App::loadXML(const QDomDocument* doc)
         }
         else if (tag.tagName() == KXMLQLCVirtualConsole)
         {
-            VirtualConsole::loadXML(tag);
+            VirtualConsole::instance()->loadXML(tag);
         }
         else if (tag.tagName() == KXMLFixture)
         {
@@ -1401,11 +899,7 @@ bool App::loadXML(const QDomDocument* doc)
     }
 
     // Perform post-load operations
-    VirtualConsole::postLoad();
-
-    /* Display VC if appropriate */
-    if (VirtualConsole::properties().visible() == true)
-        slotControlVC();
+    VirtualConsole::instance()->postLoad();
 
     return true;
 }
@@ -1435,7 +929,7 @@ QFile::FileError App::saveXML(const QString& fileName)
         m_doc->saveXML(&doc, &root);
 
         /* Write virtual console to the XML document */
-        VirtualConsole::saveXML(&doc, &root);
+        VirtualConsole::instance()->saveXML(&doc, &root);
 
         /* Write the XML document to the stream (=file) */
         stream << doc.toString() << "\n";
@@ -1456,3 +950,4 @@ QFile::FileError App::saveXML(const QString& fileName)
 
     return retval;
 }
+

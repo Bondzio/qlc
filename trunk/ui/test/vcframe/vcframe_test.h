@@ -24,7 +24,9 @@
 
 #include <QObject>
 
+class QMdiArea;
 class Doc;
+
 class VCFrame_Test : public QObject
 {
     Q_OBJECT
@@ -43,6 +45,7 @@ private slots:
     void mouseMoveEvent();
 
 private:
+    QMdiArea* m_area;
     Doc* m_doc;
 };
 

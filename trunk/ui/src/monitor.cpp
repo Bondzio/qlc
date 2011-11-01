@@ -157,11 +157,7 @@ void Monitor::loadSettings()
 void Monitor::saveSettings()
 {
     QSettings settings;
-#ifdef __APPLE__
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-#else
-    settings.setValue(SETTINGS_GEOMETRY, parentWidget()->saveGeometry());
-#endif
     settings.setValue(SETTINGS_FONT, m_monitorWidget->font().toString());
     settings.setValue(SETTINGS_VALUESTYLE, valueStyle());
     settings.setValue(SETTINGS_CHANNELSTYLE, channelStyle());
@@ -174,19 +170,9 @@ void Monitor::createAndShow(QWidget* parent, Doc* doc)
     /* Must not create more than one instance */
     if (s_instance == NULL)
     {
-    #ifdef __APPLE__
         /* Create a separate window for OSX */
         s_instance = new Monitor(parent, doc, Qt::Window);
         window = s_instance;
-    #else
-        /* Create an MDI window for X11 & Win32 */
-        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-        Q_ASSERT(area != NULL);
-        QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new Monitor(sub, doc);
-        sub->setWidget(s_instance);
-        window = area->addSubWindow(sub);
-    #endif
 
         /* Set some common properties for the window and show it */
         window->setAttribute(Qt::WA_DeleteOnClose);
@@ -202,11 +188,7 @@ void Monitor::createAndShow(QWidget* parent, Doc* doc)
     }
     else
     {
-    #ifdef __APPLE__
         window = s_instance;
-    #else
-        window = s_instance->parentWidget();
-    #endif
     }
 
     window->show();

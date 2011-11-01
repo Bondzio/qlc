@@ -41,6 +41,7 @@
         <file alias="frame.png">../../gfx/frame.png</file>
         <file alias="frameraised.png">../../gfx/frameraised.png</file>
         <file alias="framesunken.png">../../gfx/framesunken.png</file>
+        <file alias="fullscreen.png">../../gfx/fullscreen.png</file>
         <file alias="function.png">../../gfx/function.png</file>
         <file alias="global.png">../../gfx/global.png</file>
         <file alias="gobo.png">../../gfx/gobo.png</file>

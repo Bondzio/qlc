@@ -46,11 +46,14 @@
 void VCButton_Test::initTestCase()
 {
     m_doc = NULL;
+    m_area = NULL;
 }
 
 void VCButton_Test::init()
 {
     m_doc = new Doc(this);
+    m_area = new QMdiArea;
+    VirtualConsole::createAndShow(m_area, m_doc);
 
     Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(4);
@@ -59,8 +62,9 @@ void VCButton_Test::init()
 
 void VCButton_Test::cleanup()
 {
+    delete VirtualConsole::instance();
+    delete m_area;
     delete m_doc;
-    m_doc = NULL;
 }
 
 void VCButton_Test::initial()
@@ -524,11 +528,7 @@ void VCButton_Test::toggle()
 
 void VCButton_Test::tap()
 {
-    QMdiArea w;
-
-    VirtualConsole::resetContents(&w, m_doc);
-    w.showMinimized();
-    VirtualConsole::createAndShow(&w, m_doc);
+    m_area->show();
 
     Scene* sc = new Scene(m_doc);
     sc->setValue(0, 0, 255);
@@ -537,13 +537,13 @@ void VCButton_Test::tap()
     sc->setDuration(0);
     m_doc->addFunction(sc);
 
-    VCButton btn(VirtualConsole::instance()->contents(), m_doc);
-    btn.setCaption("Foobar");
-    btn.setFunction(sc->id());
-    btn.setAction(VCButton::Toggle);
-    btn.setKeySequence(QKeySequence(QKeySequence::Undo));
-    btn.setAdjustIntensity(true);
-    btn.setIntensityAdjustment(0.2);
+    VCButton* btn = new VCButton(VirtualConsole::instance()->contents(), m_doc);
+    btn->setCaption("Foobar");
+    btn->setFunction(sc->id());
+    btn->setAction(VCButton::Toggle);
+    btn->setKeySequence(QKeySequence(QKeySequence::Undo));
+    btn->setAdjustIntensity(true);
+    btn->setIntensityAdjustment(0.2);
 
     QMouseEvent ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
 
@@ -555,17 +555,17 @@ void VCButton_Test::tap()
 
     // Perform a click
     ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mousePressEvent(&ev);
+    btn->mousePressEvent(&ev);
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mouseReleaseEvent(&ev);
+    btn->mouseReleaseEvent(&ev);
 
     QTest::qWait(100); // Wait a while
 
     // Perform another click
     ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mousePressEvent(&ev);
+    btn->mousePressEvent(&ev);
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mouseReleaseEvent(&ev);
+    btn->mouseReleaseEvent(&ev);
 
     // Not in operate mode -> duration is unaffected
     QCOMPARE(sc->duration(), uint(0));
@@ -575,17 +575,17 @@ void VCButton_Test::tap()
 
     // Perform a click
     ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mousePressEvent(&ev);
+    btn->mousePressEvent(&ev);
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mouseReleaseEvent(&ev);
+    btn->mouseReleaseEvent(&ev);
 
     QTest::qWait(100); // Wait a while
 
     // Perform a click
     ev = QMouseEvent(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mousePressEvent(&ev);
+    btn->mousePressEvent(&ev);
     ev = QMouseEvent(QEvent::MouseButtonRelease, QPoint(0, 0), Qt::LeftButton, 0, 0);
-    btn.mouseReleaseEvent(&ev);
+    btn->mouseReleaseEvent(&ev);
 
     // In operate mode -> duration should be set
     QVERIFY(sc->duration() >= 100);

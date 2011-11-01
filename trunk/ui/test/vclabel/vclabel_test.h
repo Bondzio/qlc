@@ -24,6 +24,7 @@
 
 #include <QObject>
 
+class QMdiArea;
 class Doc;
 class VCLabel_Test : public QObject
 {
@@ -41,6 +42,7 @@ private slots:
     void paintEvent();
 
 private:
+    QMdiArea* m_area;
     Doc* m_doc;
 };
 

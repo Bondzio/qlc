@@ -19,24 +19,26 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 #include <QtXml>
 
 #define protected public
 #define private public
-#include "mastertimer.h"
-#include "vcxypadarea.h"
-#include "vcwidget.h"
-#include "vcxypad.h"
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
 #include "qlcinputsource.h"
+#include "virtualconsole.h"
 #include "qlcfixturedef.h"
 #include "universearray.h"
 #include "vcxypad_test.h"
+#include "mastertimer.h"
+#include "vcxypadarea.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "vcwidget.h"
+#include "vcxypad.h"
 #include "vcframe.h"
 #include "qlcfile.h"
 #include "doc.h"
@@ -57,10 +59,14 @@ void VCXYPad_Test::initTestCase()
 
 void VCXYPad_Test::init()
 {
+    m_area = new QMdiArea;
+    VirtualConsole::createAndShow(m_area, m_doc);
 }
 
 void VCXYPad_Test::cleanup()
 {
+    delete VirtualConsole::instance();
+    delete m_area;
     m_doc->clearContents();
 }
 

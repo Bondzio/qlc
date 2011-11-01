@@ -56,8 +56,6 @@
 #include "doc.h"
 #include "efx.h"
 
-#define SETTINGS_GEOMETRY "functionmanager/geometry"
-
 #define KColumnName 0
 #define KColumnType 1
 #define KColumnID   2
@@ -75,6 +73,8 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     Q_ASSERT(doc != NULL);
 
     new QVBoxLayout(this);
+    layout()->setMargin(1);
+    layout()->setSpacing(1);
 
     initActions();
     initMenu();
@@ -95,12 +95,6 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
 
 FunctionManager::~FunctionManager()
 {
-    QSettings settings;
-#ifdef __APPLE__
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-#else
-    settings.setValue(SETTINGS_GEOMETRY, parentWidget()->saveGeometry());
-#endif
     FunctionManager::s_instance = NULL;
 }
 
@@ -111,62 +105,33 @@ FunctionManager* FunctionManager::instance()
 
 void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
 {
-    QWidget* window = NULL;
-
     /* Must not create more than one instance */
-    if (s_instance == NULL)
-    {
-    #ifdef __APPLE__
-        /* Create a separate window for OSX */
-        s_instance = new FunctionManager(parent, doc, Qt::Window);
-        window = s_instance;
-    #else
-        /* Create an MDI window for X11 & Win32 */
-        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-        Q_ASSERT(area != NULL);
-        QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new FunctionManager(sub, doc);
-        sub->setWidget(s_instance);
-        window = area->addSubWindow(sub);
-    #endif
+    Q_ASSERT(s_instance == NULL);
 
-        /* Set some common properties for the window and show it */
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        window->setWindowIcon(QIcon(":/function.png"));
-        window->setWindowTitle(tr("Function Manager"));
-        window->setContextMenuPolicy(Qt::CustomContextMenu);
-        window->show();
+    /* Create an MDI window for X11 & Win32 */
+    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+    Q_ASSERT(area != NULL);
+    QMdiSubWindow* sub = new QMdiSubWindow;
+    s_instance = new FunctionManager(sub, doc);
+    sub->setWidget(s_instance);
+    QWidget* window = area->addSubWindow(sub);
 
-        QSettings settings;
-        QVariant var = settings.value(SETTINGS_GEOMETRY);
-        if (var.isValid() == true)
-        {
-            window->restoreGeometry(var.toByteArray());
-            AppUtil::ensureWidgetIsVisible(window);
-        }
-    }
-    else
-    {
-    #ifdef __APPLE__
-        window = s_instance;
-    #else
-        window = s_instance->parentWidget();
-    #endif
-    }
+    /* Set some common properties for the window and show it */
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setWindowIcon(QIcon(":/function.png"));
+    window->setWindowTitle(tr("Functions"));
+    window->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    window->show();
-    window->raise();
+    sub->setSystemMenu(NULL);
 }
 
 void FunctionManager::slotModeChanged(Doc::Mode mode)
 {
-    /* Close this when entering operate mode */
+    /* Disable completely when in operate mode */
     if (mode == Doc::Operate)
-#ifdef __APPLE__
-        deleteLater();
-#else
-        parent()->deleteLater();
-#endif
+        setEnabled(false);
+    else
+        setEnabled(true);
 }
 
 void FunctionManager::slotFunctionRemoved(quint32 fid)

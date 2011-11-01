@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 
@@ -26,6 +27,7 @@
 #include "vcframeproperties_test.h"
 #include "qlcfixturedefcache.h"
 #include "vcframeproperties.h"
+#include "virtualconsole.h"
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -37,28 +39,30 @@
 void VCFrameProperties_Test::initTestCase()
 {
     m_doc = NULL;
+    m_area = NULL;
 }
 
 void VCFrameProperties_Test::init()
 {
     m_doc = new Doc(this);
+    m_area = new QMdiArea;
+    VirtualConsole::createAndShow(m_area, m_doc);
 }
 
 void VCFrameProperties_Test::cleanup()
 {
+    delete VirtualConsole::instance();
+    delete m_area;
     delete m_doc;
-    m_doc = NULL;
 }
 
 void VCFrameProperties_Test::initial()
 {
-    QWidget w;
+    VCFrame* frame = new VCFrame(VirtualConsole::instance()->contents(), m_doc);
+    frame->setAllowChildren(false);
+    frame->setAllowResize(true);
 
-    VCFrame frame(&w, m_doc);
-    frame.setAllowChildren(false);
-    frame.setAllowResize(true);
-
-    VCFrameProperties prop(&w, &frame);
+    VCFrameProperties prop(m_area, frame);
     QCOMPARE(prop.m_allowChildrenCheck->isChecked(), false);
     QCOMPARE(prop.m_allowResizeCheck->isChecked(), true);
     prop.m_allowChildrenCheck->setChecked(true);

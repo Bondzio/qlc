@@ -78,10 +78,9 @@ public:
 
 protected:
     /** Protected constructor to prevent multiple instances */
-    VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
+    VirtualConsole(QWidget* parent, Doc* doc);
 
 protected:
-    /** The singleton instance */
     static VirtualConsole* s_instance;
     Doc* m_doc;
 
@@ -89,12 +88,11 @@ protected:
      * Properties
      *********************************************************************/
 public:
-    /** Get VC properties */
-    static VCProperties properties();
+    /** Get Virtual Console properties (read-only) */
+    VCProperties properties() const;
 
-protected:
-    /** VC properties */
-    static VCProperties s_properties;
+private:
+    VCProperties m_properties;
 
     /*********************************************************************
      * Selected widgets
@@ -314,19 +312,19 @@ protected:
      * Contents
      *********************************************************************/
 public:
-    /** Get the VC's current contents */
+    /** Get the Virtual Console's current contents */
     VCFrame* contents() const;
 
-    /** Reset the VC contents to an initial state */
-    static void resetContents(QWidget* parent, Doc* doc);
+    /** Reset the Virtual Console contents to an initial state */
+    void resetContents();
 
 protected:
     /** Place the contents area to the VC view */
     void initContents();
 
 protected:
-    /** Scroll Area that contains the bottom-most VCFrame */
     QScrollArea* m_scrollArea;
+    VCFrame* m_contents;
 
     /*********************************************************************
      * Key press handler
@@ -371,13 +369,13 @@ public slots:
      *********************************************************************/
 public:
     /** Load properties and contents from an XML tree */
-    static bool loadXML(const QDomElement& root);
+    bool loadXML(const QDomElement& root);
 
     /** Save properties and contents to an XML document */
-    static bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
+    bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 
     /** Do post-load cleanup & checks */
-    static void postLoad();
+    void postLoad();
 };
 
 #endif

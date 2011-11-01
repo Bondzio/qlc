@@ -22,10 +22,6 @@
 #ifndef VCPROPERTIES_H
 #define VCPROPERTIES_H
 
-#include <QDialog>
-
-#include "vcwidgetproperties.h"
-#include "ui_vcproperties.h"
 #include "universearray.h"
 
 class VirtualConsole;
@@ -66,27 +62,12 @@ class Doc;
  * Properties
  *****************************************************************************/
 
-class VCProperties : public VCWidgetProperties
+class VCProperties
 {
 public:
     VCProperties();
     VCProperties(const VCProperties& properties);
     ~VCProperties();
-
-    VCProperties& operator=(const VCProperties& properties);
-
-    /*********************************************************************
-     * VC Contents
-     *********************************************************************/
-public:
-    /** Get Virtual Console's bottom-most frame */
-    VCFrame* contents() const;
-
-    /** Reset Virtual Console's bottom-most frame to initial state */
-    void resetContents(QWidget* parent, Doc* doc);
-
-private:
-    VCFrame* m_contents;
 
     /*********************************************************************
      * Grid
@@ -176,19 +157,13 @@ private:
      * Load & Save
      *************************************************************************/
 public:
-    /** Load VirtualConsole properties & contents from the given XML tag */
+    /** Load VirtualConsole properties from the given XML tag */
     bool loadXML(const QDomElement& vc_root);
 
-    /** Save VirtualConsole properties & contents to the given XML document */
-    bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
-
-    /** Perform post-load cleanup & checks */
-    void postLoad();
+    /** Save VirtualConsole properties to the given XML document */
+    bool saveXML(QDomDocument* doc, QDomElement* wksp_root) const;
 
 private:
-    /** Load VirtualConsole properties (not including contents) */
-    bool loadProperties(const QDomElement& root);
-
     /** Load the properties of a default slider */
     static bool loadXMLInput(const QDomElement& tag, quint32* universe, quint32* channel);
 };

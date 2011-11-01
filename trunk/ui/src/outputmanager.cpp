@@ -39,8 +39,6 @@
 #include "apputil.h"
 #include "app.h"
 
-#define SETTINGS_GEOMETRY "outputmanager/geometry"
-
 #define KColumnUniverse   0
 #define KColumnPlugin     1
 #define KColumnOutputName 2
@@ -60,6 +58,8 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
 
     /* Create a new layout for this widget */
     new QVBoxLayout(this);
+    layout()->setMargin(1);
+    layout()->setSpacing(1);
 
     /* Toolbar */
     m_toolbar = new QToolBar(tr("Output Manager"), this);
@@ -91,12 +91,6 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
 
 OutputManager::~OutputManager()
 {
-    QSettings settings;
-#ifdef __APPLE__
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-#else
-    settings.setValue(SETTINGS_GEOMETRY, parentWidget()->saveGeometry());
-#endif
     OutputManager::s_instance = NULL;
 }
 
@@ -107,51 +101,23 @@ OutputManager* OutputManager::instance()
 
 void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
 {
-    QWidget* window = NULL;
-
     /* Must not create more than one instance */
-    if (s_instance == NULL)
-    {
-    #ifdef __APPLE__
-        /* Create a separate window for OSX */
-        s_instance = new OutputManager(parent, outputMap, Qt::Window);
-        window = s_instance;
-    #else
-        /* Create an MDI window for X11 & Win32 */
-        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-        Q_ASSERT(area != NULL);
-        QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new OutputManager(sub, outputMap);
-        sub->setWidget(s_instance);
-        window = area->addSubWindow(sub);
-    #endif
+    Q_ASSERT(s_instance == NULL);
 
-        /* Set some common properties for the window and show it */
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        window->setWindowIcon(QIcon(":/output.png"));
-        window->setWindowTitle(tr("Output Manager"));
-        window->setContextMenuPolicy(Qt::CustomContextMenu);
-        window->show();
+    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+    Q_ASSERT(area != NULL);
+    QMdiSubWindow* sub = new QMdiSubWindow;
+    s_instance = new OutputManager(sub, outputMap);
+    sub->setWidget(s_instance);
+    QWidget* window = area->addSubWindow(sub);
 
-        QSettings settings;
-        QVariant var = settings.value(SETTINGS_GEOMETRY);
-        if (var.isValid() == true)
-        {
-            window->restoreGeometry(var.toByteArray());
-            AppUtil::ensureWidgetIsVisible(window);
-        }
-    }
-    else
-    {
-    #ifdef __APPLE__
-        window = s_instance;
-    #else
-        window = s_instance->parentWidget();
-    #endif
-    }
+    /* Set some common properties for the window and show it */
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setWindowIcon(QIcon(":/output.png"));
+    window->setWindowTitle(tr("Outputs"));
+    window->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    window->show();
-    window->raise();
+    sub->setSystemMenu(NULL);
 }
 
 /*****************************************************************************

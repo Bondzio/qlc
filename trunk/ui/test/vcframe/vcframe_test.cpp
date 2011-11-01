@@ -23,6 +23,7 @@
 #include <QFrame>
 #include <QtTest>
 #include <QMenu>
+#include <QtXml>
 #include <QSet>
 
 #define protected public
@@ -43,18 +44,23 @@
 
 void VCFrame_Test::initTestCase()
 {
+    m_area = NULL;
     m_doc = NULL;
 }
 
 void VCFrame_Test::init()
 {
     m_doc = new Doc(this);
+    m_area = new QMdiArea;
+    VirtualConsole::createAndShow(m_area, m_doc);
+    QVERIFY(VirtualConsole::instance() != NULL);
 }
 
 void VCFrame_Test::cleanup()
 {
+    delete VirtualConsole::instance();
+    delete m_area;
     delete m_doc;
-    m_doc = NULL;
 }
 
 void VCFrame_Test::initial()
@@ -300,51 +306,38 @@ void VCFrame_Test::saveXML()
 
 void VCFrame_Test::customMenu()
 {
-    QMdiArea w;
-
-    VCFrame frame(&w, m_doc);
-    QVERIFY(frame.customMenu(NULL) == NULL);
+    VCFrame* frame = VirtualConsole::instance()->contents();
+    QVERIFY(frame != NULL);
 
     QMenu menu;
-    VirtualConsole::resetContents(&w, m_doc);
-    VirtualConsole::createAndShow(&w, m_doc);
-    QMenu* customMenu = frame.customMenu(&menu);
+    QMenu* customMenu = frame->customMenu(&menu);
     QVERIFY(customMenu != NULL);
     QCOMPARE(customMenu->title(), tr("Add"));
     delete customMenu;
-    delete VirtualConsole::instance();
 }
 
 void VCFrame_Test::handleWidgetSelection()
 {
-    QMdiArea w;
-
-    VCFrame frame(&w, m_doc);
-    QVERIFY(frame.isBottomFrame() == true);
+    VCFrame* frame = VirtualConsole::instance()->contents();
+    QVERIFY(frame->isBottomFrame() == true);
 
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton,
                    Qt::LeftButton, Qt::NoModifier);
-    frame.handleWidgetSelection(&ev);
+    frame->handleWidgetSelection(&ev);
 
-    VirtualConsole::resetContents(&w, m_doc);
-    VirtualConsole::createAndShow(&w, m_doc);
-    VirtualConsole::instance()->hide();
-
-    // Select bottom frame
-    frame.handleWidgetSelection(&ev);
+    // Select bottom frame (->no selection)
+    frame->handleWidgetSelection(&ev);
     QCOMPARE(VirtualConsole::instance()->selectedWidgets().size(), 0);
 
     // Select a child frame
-    VCFrame child(&frame, m_doc);
-    QVERIFY(child.isBottomFrame() == false);
-    child.handleWidgetSelection(&ev);
+    VCFrame* child = new VCFrame(frame, m_doc);
+    QVERIFY(child->isBottomFrame() == false);
+    child->handleWidgetSelection(&ev);
     QCOMPARE(VirtualConsole::instance()->selectedWidgets().size(), 1);
 
     // Again select bottom frame
-    frame.handleWidgetSelection(&ev);
+    frame->handleWidgetSelection(&ev);
     QCOMPARE(VirtualConsole::instance()->selectedWidgets().size(), 0);
-
-    delete VirtualConsole::instance();
 }
 
 void VCFrame_Test::mouseMoveEvent()

@@ -724,12 +724,10 @@ void VCWidget::resize(const QSize& size)
     QSize sz(size);
 
     // Force grid settings, if applicable
-    if (VirtualConsole::properties().isGridEnabled() == true)
+    if (VirtualConsole::instance()->properties().isGridEnabled() == true)
     {
-        sz.setWidth(size.width() -
-                    (size.width() % VirtualConsole::properties().gridX()));
-        sz.setHeight(size.height() -
-                     (size.height() % VirtualConsole::properties().gridY()));
+        sz.setWidth(size.width() - (size.width() % VirtualConsole::instance()->properties().gridX()));
+        sz.setHeight(size.height() - (size.height() % VirtualConsole::instance()->properties().gridY()));
     }
 
     // Resize
@@ -741,12 +739,10 @@ void VCWidget::move(const QPoint& point)
     QPoint pt(point);
 
     // Force grid settings, if applicable
-    if (VirtualConsole::properties().isGridEnabled() == true)
+    if (VirtualConsole::instance()->properties().isGridEnabled() == true)
     {
-        pt.setX(point.x() -
-                (point.x() % VirtualConsole::properties().gridX()));
-        pt.setY(point.y() -
-                (point.y() % VirtualConsole::properties().gridY()));
+        pt.setX(point.x() - (point.x() % VirtualConsole::instance()->properties().gridX()));
+        pt.setY(point.y() - (point.y() % VirtualConsole::instance()->properties().gridY()));
     }
 
     // Don't move beyond left or right

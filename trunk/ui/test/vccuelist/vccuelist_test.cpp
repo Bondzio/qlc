@@ -21,6 +21,7 @@
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QMdiArea>
 #include <QtTest>
 
 #define protected public
@@ -47,17 +48,22 @@
 
 void VCCueList_Test::initTestCase()
 {
+    m_doc = NULL;
+    m_area = NULL;
 }
 
 void VCCueList_Test::init()
 {
     m_doc = new Doc(this);
+    m_area = new QMdiArea;
+    VirtualConsole::createAndShow(m_area, m_doc);
 }
 
 void VCCueList_Test::cleanup()
 {
+    delete VirtualConsole::instance();
+    delete m_area;
     delete m_doc;
-    m_doc = NULL;
 }
 
 void VCCueList_Test::initial()

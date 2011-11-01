@@ -50,12 +50,6 @@ void VCProperties_Test::cleanup()
 void VCProperties_Test::initial()
 {
     VCProperties p;
-    QVERIFY(p.m_contents == NULL);
-    QVERIFY(p.contents() == NULL);
-
-    QCOMPARE(p.width(), 640);
-    QCOMPARE(p.height(), 480);
-
     QCOMPARE(p.m_gridEnabled, true);
     QCOMPARE(p.m_gridX, 10);
     QCOMPARE(p.m_gridY, 10);
@@ -78,9 +72,6 @@ void VCProperties_Test::initial()
 void VCProperties_Test::copy()
 {
     VCProperties p;
-    p.m_contents = (VCFrame*) 0xDEADBEEF;
-    p.m_width = 1;
-    p.m_height = 2;
     p.m_gridEnabled = false;
     p.m_gridX = 3;
     p.m_gridY = 4;
@@ -91,16 +82,12 @@ void VCProperties_Test::copy()
     p.m_gmValueMode = UniverseArray::GMLimit;
     p.m_gmInputUniverse = 5;
     p.m_gmInputChannel = 6;
-
     p.m_blackoutInputUniverse = 7;
     p.m_blackoutInputChannel = 8;
 
     p.m_gmVisible = false;
 
     VCProperties p2(p);
-    QCOMPARE(p2.m_contents, p.m_contents);
-    QCOMPARE(p2.width(), p.width());
-    QCOMPARE(p2.height(), p.height());
     QCOMPARE(p2.m_gridEnabled, p.m_gridEnabled);
     QCOMPARE(p2.m_gridX, p.m_gridX);
     QCOMPARE(p2.m_gridY, p.m_gridY);
@@ -116,9 +103,6 @@ void VCProperties_Test::copy()
     QCOMPARE(p2.m_gmVisible, p.m_gmVisible);
 
     VCProperties p3 = p;
-    QCOMPARE(p3.m_contents, p.m_contents);
-    QCOMPARE(p3.width(), p.width());
-    QCOMPARE(p3.height(), p.height());
     QCOMPARE(p3.m_gridEnabled, p.m_gridEnabled);
     QCOMPARE(p3.m_gridX, p.m_gridX);
     QCOMPARE(p3.m_gridY, p.m_gridY);
@@ -136,16 +120,6 @@ void VCProperties_Test::copy()
 
 void VCProperties_Test::reset()
 {
-    QWidget w;
-
-    VCProperties p;
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.m_contents != NULL);
-    QVERIFY(qobject_cast<VCWidget*> (p.m_contents) != NULL);
-
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.m_contents != NULL);
-    QVERIFY(qobject_cast<VCWidget*> (p.m_contents) != NULL);
 }
 
 void VCProperties_Test::loadXML()
@@ -166,11 +140,8 @@ void VCProperties_Test::loadXML()
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.loadXML(root) == true);
-
-    root.setTagName("VirtualCosnole");
     QVERIFY(p.loadXML(root) == false);
+    QVERIFY(p.loadXML(prop) == true);
 }
 
 void VCProperties_Test::loadPropertiesHappy()
@@ -245,8 +216,7 @@ void VCProperties_Test::loadPropertiesHappy()
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.loadProperties(root) == true);
+    QVERIFY(p.loadXML(root) == true);
     QCOMPARE(p.isGridEnabled(), true);
     QCOMPARE(p.gridX(), 1);
     QCOMPARE(p.gridY(), 2);
@@ -267,8 +237,7 @@ void VCProperties_Test::loadPropertiesHappy()
 
     // Load with new (post 3.2.0) GM visibility tag
     gm.setAttribute("Visible", "True");
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.loadProperties(root) == true);
+    QVERIFY(p.loadXML(root) == true);
     QCOMPARE(p.isGridEnabled(), true);
     QCOMPARE(p.gridX(), 1);
     QCOMPARE(p.gridY(), 2);
@@ -350,8 +319,7 @@ void VCProperties_Test::loadPropertiesSad()
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, m_doc);
-    QVERIFY(p.loadProperties(root) == true);
+    QVERIFY(p.loadXML(root) == true);
     QCOMPARE(p.isGridEnabled(), false);
     QCOMPARE(p.gridX(), 1);
     QCOMPARE(p.gridY(), 2);
@@ -370,7 +338,6 @@ void VCProperties_Test::loadPropertiesSad()
     QCOMPARE(p.blackoutInputChannel(), InputMap::invalidChannel());
 
     root.setTagName("Porperties");
-    QVERIFY(p.loadProperties(root) == false);
     QVERIFY(p.loadXML(root) == false);
 }
 
@@ -409,7 +376,6 @@ void VCProperties_Test::saveXMLHappy()
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, m_doc);
 
     p.m_gridEnabled = true;
     p.m_gridX = 11;
@@ -435,7 +401,6 @@ void VCProperties_Test::saveXMLHappy()
     QVERIFY(p.saveXML(&xmldoc, &root) == true);
 
     VCProperties p2;
-    p2.resetContents(&w, m_doc);
     QVERIFY(p2.loadXML(root.firstChild().toElement()) == true);
     QCOMPARE(p2.isGridEnabled(), true);
     QCOMPARE(p2.gridX(), 11);
@@ -461,7 +426,6 @@ void VCProperties_Test::saveXMLSad()
     QWidget w;
 
     VCProperties p;
-    p.resetContents(&w, m_doc);
 
     p.m_gridEnabled = false;
     p.m_gridX = 11;
@@ -486,7 +450,6 @@ void VCProperties_Test::saveXMLSad()
     QVERIFY(p.saveXML(&xmldoc, &root) == true);
 
     VCProperties p2;
-    p2.resetContents(&w, m_doc);
     QVERIFY(p2.loadXML(root.firstChild().toElement()) == true);
     QCOMPARE(p2.isGridEnabled(), false);
     QCOMPARE(p2.gridX(), 11);

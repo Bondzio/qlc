@@ -63,43 +63,87 @@
 #include <X11/Xlib.h>
 #endif
 
-VCProperties VirtualConsole::s_properties;
 VirtualConsole* VirtualConsole::s_instance = NULL;
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
-    : QWidget(parent, flags)
+VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
+    : QWidget(parent)
     , m_doc(doc)
+
+    , m_editAction(EditNone)
+    , m_toolbar(NULL)
+
+    , m_addActionGroup(NULL)
+    , m_editActionGroup(NULL)
+    , m_bgActionGroup(NULL)
+    , m_fgActionGroup(NULL)
+    , m_fontActionGroup(NULL)
+    , m_frameActionGroup(NULL)
+    , m_stackingActionGroup(NULL)
+
+    , m_addButtonAction(NULL)
+    , m_addButtonMatrixAction(NULL)
+    , m_addSliderAction(NULL)
+    , m_addSliderMatrixAction(NULL)
+    , m_addXYPadAction(NULL)
+    , m_addCueListAction(NULL)
+    , m_addFrameAction(NULL)
+    , m_addSoloFrameAction(NULL)
+    , m_addLabelAction(NULL)
+
+    , m_toolsSettingsAction(NULL)
+    , m_toolsSlidersAction(NULL)
+    , m_toolsBlackoutAction(NULL)
+    , m_toolsPanicAction(NULL)
+
+    , m_editCutAction(NULL)
+    , m_editCopyAction(NULL)
+    , m_editPasteAction(NULL)
+    , m_editDeleteAction(NULL)
+    , m_editPropertiesAction(NULL)
+    , m_editRenameAction(NULL)
+
+    , m_bgColorAction(NULL)
+    , m_bgImageAction(NULL)
+    , m_bgDefaultAction(NULL)
+
+    , m_fgColorAction(NULL)
+    , m_fgDefaultAction(NULL)
+
+    , m_fontAction(NULL)
+    , m_resetFontAction(NULL)
+
+    , m_frameSunkenAction(NULL)
+    , m_frameRaisedAction(NULL)
+    , m_frameNoneAction(NULL)
+
+    , m_stackingRaiseAction(NULL)
+    , m_stackingLowerAction(NULL)
+
+    , m_customMenu(NULL)
+    , m_toolsMenu(NULL)
+    , m_editMenu(NULL)
+    , m_addMenu(NULL)
+
+    , m_dockArea(NULL)
+    , m_scrollArea(NULL)
+    , m_contents(NULL)
+
     , m_tapModifierDown(false)
 {
+    Q_ASSERT(s_instance == NULL);
     Q_ASSERT(doc != NULL);
 
-    m_editActionGroup = NULL;
-    m_addActionGroup = NULL;
-    m_bgActionGroup = NULL;
-    m_fgActionGroup = NULL;
-    m_fontActionGroup = NULL;
-    m_frameActionGroup = NULL;
-    m_stackingActionGroup = NULL;
-
-    m_customMenu = NULL;
-    m_toolsMenu = NULL;
-    m_editMenu = NULL;
-    m_addMenu = NULL;
-
-    m_dockArea = NULL;
-    m_scrollArea = NULL;
-
-    m_editAction = EditNone;
-    m_editMenu = NULL;
+    /* Initialize the singleton */
+    s_instance = this;
 
     /* Main layout */
     new QHBoxLayout(this);
     layout()->setMargin(1);
-    layout()->setSpacing(2);
+    layout()->setSpacing(1);
 
     initActions();
     initMenuBar();
@@ -107,17 +151,20 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     initDockArea();
     initContents();
 
+    // Used to enable/disable panic button
     connect(m_doc->masterTimer(), SIGNAL(functionListChanged()),
             this, SLOT(slotRunningFunctionsChanged()));
     slotRunningFunctionsChanged();
 
+    // Propagate input value changes to all widgets
     connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
             this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
 
+    // Propagate blackout state changes to widgets
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
             this, SLOT(slotBlackoutChanged(bool)));
 
-    /* Listen to mode changes */
+    // Propagate mode changes to all widgets
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
 
@@ -127,16 +174,6 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
 
 VirtualConsole::~VirtualConsole()
 {
-    /* The layout takes ownership of the contents. Adopt them back to the
-       main application object to prevent their destruction. */
-    s_properties.contents()->setParent(NULL);
-
-#ifdef __APPLE__
-    s_properties.store(this);
-#else
-    s_properties.store(parentWidget());
-#endif
-
     s_instance = NULL;
 }
 
@@ -147,55 +184,32 @@ VirtualConsole* VirtualConsole::instance()
 
 void VirtualConsole::createAndShow(QWidget* parent, Doc* doc)
 {
-    QWidget* window = NULL;
-
     /* Must not create more than one instance */
-    if (s_instance == NULL)
-    {
-    #ifdef __APPLE__
-        /* Create a separate window for OSX */
-        s_instance = new VirtualConsole(parent, doc, Qt::Window);
-        window = s_instance;
-    #else
-        /* Create an MDI window for X11 & Win32 */
-        QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-        Q_ASSERT(area != NULL);
-        QMdiSubWindow* sub = new QMdiSubWindow;
-        s_instance = new VirtualConsole(sub, doc);
-        sub->setWidget(s_instance);
-        window = area->addSubWindow(sub);
-    #endif
+    Q_ASSERT(s_instance == NULL);
 
-        /* Set some common properties for the window and show it */
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        window->setWindowIcon(QIcon(":/virtualconsole.png"));
-        window->setWindowTitle(tr("Virtual Console"));
-        window->setContextMenuPolicy(Qt::CustomContextMenu);
-        window->setWindowState(s_properties.state());
-        window->setGeometry(s_properties.x(), s_properties.y(),
-                            s_properties.width(), s_properties.height());
-    }
-    else
-    {
-    #ifdef __APPLE__
-        window = s_instance;
-    #else
-        window = s_instance->parentWidget();
-    #endif
-    }
+    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
+    Q_ASSERT(area != NULL);
+    QMdiSubWindow* sub = new QMdiSubWindow;
+    VirtualConsole* vc = new VirtualConsole(sub, doc);
+    sub->setWidget(vc);
+    QWidget* window = area->addSubWindow(sub);
 
-    window->show();
-    window->raise();
-    s_instance->dockArea()->refreshProperties();
+    /* Set some common properties for the window and show it */
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setWindowIcon(QIcon(":/virtualconsole.png"));
+    window->setWindowTitle(tr("Virtual Console"));
+    window->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    sub->setSystemMenu(NULL);
+    vc->dockArea()->refreshProperties();
 }
 
-/*********************************************************************
+/*****************************************************************************
  * Properties
- *********************************************************************/
-
-VCProperties VirtualConsole::properties()
+ *****************************************************************************/
+VCProperties VirtualConsole::properties() const
 {
-    return s_properties;
+    return m_properties;
 }
 
 /*****************************************************************************
@@ -968,10 +982,10 @@ void VirtualConsole::slotAddLabel()
 
 void VirtualConsole::slotToolsSettings()
 {
-    VCPropertiesEditor vcpe(this, s_properties, m_doc->inputMap());
+    VCPropertiesEditor vcpe(this, m_properties, m_doc->inputMap());
     if (vcpe.exec() == QDialog::Accepted)
     {
-        s_properties = vcpe.properties();
+        m_properties = vcpe.properties();
         m_dockArea->refreshProperties();
         m_doc->setModified();
     }
@@ -981,12 +995,12 @@ void VirtualConsole::slotToolsSliders()
 {
     if (m_dockArea->isHidden() == true)
     {
-        s_properties.setGMVisible(true);
+        m_properties.setGMVisible(true);
         m_dockArea->show();
     }
     else
     {
-        s_properties.setGMVisible(false);
+        m_properties.setGMVisible(false);
         m_dockArea->hide();
     }
 
@@ -996,12 +1010,12 @@ void VirtualConsole::slotToolsSliders()
 void VirtualConsole::slotToolsBlackout()
 {
     m_doc->outputMap()->setBlackout(!m_doc->outputMap()->blackout());
-    if (s_properties.blackoutInputUniverse() != InputMap::invalidUniverse() &&
-        s_properties.blackoutInputChannel() != InputMap::invalidChannel())
+    if (m_properties.blackoutInputUniverse() != InputMap::invalidUniverse() &&
+        m_properties.blackoutInputChannel() != InputMap::invalidChannel())
     {
         uchar value = (m_doc->outputMap()->blackout()) ? 255 : 0;
-        m_doc->inputMap()->feedBack(s_properties.blackoutInputUniverse(),
-                                   s_properties.blackoutInputChannel(),
+        m_doc->inputMap()->feedBack(m_properties.blackoutInputUniverse(),
+                                   m_properties.blackoutInputChannel(),
                                    value);
     }
 }
@@ -1448,41 +1462,21 @@ void VirtualConsole::initDockArea()
 
 VCFrame* VirtualConsole::contents() const
 {
-    return s_properties.contents();
+    return m_contents;
 }
 
-void VirtualConsole::resetContents(QWidget* parent, Doc* doc)
+void VirtualConsole::resetContents()
 {
-    /* Create new contents */
-    s_properties.resetContents(parent, doc);
+    if (m_contents != NULL)
+        delete m_contents;
 
-    /* If there is an instance of the VC, make it re-read the contents */
-    if (s_instance != NULL)
-    {
-        s_instance->dockArea()->refreshProperties();
-        s_instance->initContents();
-    }
-}
-
-void VirtualConsole::initContents()
-{
-    Q_ASSERT(layout() != NULL);
-    Q_ASSERT(contents() != NULL);
-
-    /* Add the contents area into the master horizontal layout */
-    if (m_scrollArea == NULL)
-    {
-        m_scrollArea = new QScrollArea(this);
-        layout()->addWidget(m_scrollArea);
-        m_scrollArea->setAlignment(Qt::AlignCenter);
-        m_scrollArea->setWidgetResizable(false);
-    }
+    Q_ASSERT(m_scrollArea != NULL);
+    m_contents = new VCFrame(m_scrollArea, m_doc);
 
     /* Make the bottom frame as big as the screen */
     QDesktopWidget dw;
     contents()->setGeometry(dw.availableGeometry(this));
     contents()->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    // Put the bottom VCFrame to the scroll area
     m_scrollArea->setWidget(contents());
 
     /* Disconnect old key handlers to prevent duplicates */
@@ -1498,14 +1492,25 @@ void VirtualConsole::initContents()
             contents(), SLOT(slotKeyReleased(const QKeySequence&)));
 
     /* Make the contents area take up all available space */
-    contents()->setSizePolicy(QSizePolicy::Expanding,
-                              QSizePolicy::Expanding);
+    contents()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     m_clipboard.clear();
     m_selectedWidgets.clear();
 
     /* Update actions' enabled status */
     updateActions();
+}
+
+void VirtualConsole::initContents()
+{
+    Q_ASSERT(layout() != NULL);
+
+    m_scrollArea = new QScrollArea(this);
+    layout()->addWidget(m_scrollArea);
+    m_scrollArea->setAlignment(Qt::AlignCenter);
+    m_scrollArea->setWidgetResizable(false);
+
+    resetContents();
 }
 
 /*****************************************************************************
@@ -1541,8 +1546,8 @@ void VirtualConsole::keyReleaseEvent(QKeyEvent* event)
 
 void VirtualConsole::slotInputValueChanged(quint32 uni, quint32 ch, uchar value)
 {
-    if (uni == s_properties.blackoutInputUniverse() &&
-        ch == s_properties.blackoutInputChannel() && value > 0)
+    if (uni == m_properties.blackoutInputUniverse() &&
+        ch == m_properties.blackoutInputChannel() && value > 0)
     {
         slotToolsBlackout();
     }
@@ -1557,7 +1562,7 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
     QString config;
 
     /* Key repeat */
-    if (s_properties.isKeyRepeatOff() == true)
+    if (m_properties.isKeyRepeatOff() == true)
     {
 #if !defined(WIN32) && !defined(__APPLE__)
         Display* display;
@@ -1575,7 +1580,7 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
     }
 
     /* Grab keyboard */
-    if (s_properties.isGrabKeyboard() == true)
+    if (m_properties.isGrabKeyboard() == true)
     {
         if (mode == Doc::Design)
             releaseKeyboard();
@@ -1683,7 +1688,38 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
 
 bool VirtualConsole::loadXML(const QDomElement& root)
 {
-    return s_properties.loadXML(root);
+    if (root.tagName() != KXMLQLCVirtualConsole)
+    {
+        qWarning() << Q_FUNC_INFO << "Virtual Console node not found";
+        return false;
+    }
+
+    QDomNode node = root.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == KXMLQLCVCProperties)
+        {
+            /* Properties */
+            m_properties.loadXML(tag);
+        }
+        else if (tag.tagName() == KXMLQLCVCFrame)
+        {
+            /* Contents */
+            Q_ASSERT(m_contents != NULL);
+            m_contents->loadXML(&tag);
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unknown Virtual Console tag"
+                       << tag.tagName();
+        }
+
+        /* Next node */
+        node = node.nextSibling();
+    }
+
+    return true;
 }
 
 bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
@@ -1691,20 +1727,19 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     Q_ASSERT(doc != NULL);
     Q_ASSERT(wksp_root != NULL);
 
-    /* Store instance properties (geometry) */
-    if (s_instance != NULL)
-    {
-#ifdef __APPLE__
-        s_properties.store(s_instance);
-#else
-        s_properties.store(s_instance->parentWidget());
-#endif
-    }
+    /* Virtual Console entry */
+    QDomElement vc_root = doc->createElement(KXMLQLCVirtualConsole);
+    wksp_root->appendChild(vc_root);
 
-    return s_properties.saveXML(doc, wksp_root);
+    /* Contents */
+    Q_ASSERT(m_contents != NULL);
+    m_contents->saveXML(doc, &vc_root);
+
+    /* Properties */
+    m_properties.saveXML(doc, &vc_root);
 }
 
 void VirtualConsole::postLoad()
 {
-    s_properties.postLoad();
+    m_contents->postLoad();
 }

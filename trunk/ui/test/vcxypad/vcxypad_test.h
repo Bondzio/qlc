@@ -24,6 +24,7 @@
 
 #include <QObject>
 
+class QMdiArea;
 class Doc;
 class VCXYPad_Test : public QObject
 {
@@ -42,6 +43,7 @@ private slots:
     void modeChange();
 
 private:
+    QMdiArea* m_area;
     Doc* m_doc;
 };
 

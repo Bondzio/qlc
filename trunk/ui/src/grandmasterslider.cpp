@@ -23,6 +23,7 @@
 #include <QHBoxLayout>
 #include <QSlider>
 #include <QLabel>
+#include <cmath>
 
 #include "grandmasterslider.h"
 #include "virtualconsole.h"
@@ -70,8 +71,6 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     /* External input connection */
     connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
-
-    refreshProperties();
 }
 
 GrandMasterSlider::~GrandMasterSlider()
@@ -82,7 +81,7 @@ void GrandMasterSlider::refreshProperties()
 {
     QString tooltip;
 
-    switch (VirtualConsole::properties().grandMasterValueMode())
+    switch (VirtualConsole::instance()->properties().grandMasterValueMode())
     {
         case UniverseArray::GMLimit:
             tooltip += tr("Limits the maximum value of");
@@ -94,7 +93,7 @@ void GrandMasterSlider::refreshProperties()
 
     tooltip += QString(" ");
 
-    switch (VirtualConsole::properties().grandMasterChannelMode())
+    switch (VirtualConsole::instance()->properties().grandMasterChannelMode())
     {
         case UniverseArray::GMIntensity:
             tooltip += tr("intensity channels");
@@ -108,8 +107,8 @@ void GrandMasterSlider::refreshProperties()
 
     /* Set properties to UniverseArray */
     UniverseArray* uni = m_outputMap->claimUniverses();
-    uni->setGMChannelMode(VirtualConsole::properties().grandMasterChannelMode());
-    uni->setGMValueMode(VirtualConsole::properties().grandMasterValueMode());
+    //uni->setGMChannelMode(VirtualConsole::properties().grandMasterChannelMode());
+    //uni->setGMValueMode(VirtualConsole::properties().grandMasterValueMode());
     uchar value = uni->gMValue();
     m_outputMap->releaseUniverses();
 
@@ -125,7 +124,7 @@ void GrandMasterSlider::slotValueChanged(int value)
 
     // Display value
     QString str;
-    if (VirtualConsole::properties().grandMasterValueMode() == UniverseArray::GMLimit)
+    if (VirtualConsole::instance()->properties().grandMasterValueMode() == UniverseArray::GMLimit)
     {
         str = QString("%1").arg(value, 3, 10, QChar('0'));
     }
@@ -145,8 +144,8 @@ void GrandMasterSlider::slotValueChanged(int value)
 void GrandMasterSlider::slotInputValueChanged(quint32 universe, quint32 channel,
                                               uchar value)
 {
-    if (universe == VirtualConsole::properties().grandMasterInputUniverse() &&
-        channel == VirtualConsole::properties().grandMasterInputChannel())
+    if (universe == VirtualConsole::instance()->properties().grandMasterInputUniverse() &&
+        channel == VirtualConsole::instance()->properties().grandMasterInputChannel())
     {
         m_slider->setValue(value);
     }

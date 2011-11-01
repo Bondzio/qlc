@@ -1737,6 +1737,8 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
     /* Properties */
     m_properties.saveXML(doc, &vc_root);
+
+    return true;
 }
 
 void VirtualConsole::postLoad()

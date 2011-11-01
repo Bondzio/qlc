@@ -722,9 +722,7 @@ void App::slotControlFullScreen()
 
 void App::slotHelpIndex()
 {
-    DocBrowser* browser = new DocBrowser(this, Qt::Window);
-    browser->setAttribute(Qt::WA_DeleteOnClose);
-    browser->show();
+    DocBrowser::createAndShow(this);
 }
 
 void App::slotHelpAbout()

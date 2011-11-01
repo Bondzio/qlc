@@ -56,8 +56,11 @@ class DocBrowser : public QWidget
     Q_OBJECT
     Q_DISABLE_COPY(DocBrowser)
 
+private:
+    DocBrowser(QWidget* parent);
+
 public:
-    DocBrowser(QWidget* parent, Qt::WindowFlags f = 0);
+    static void createAndShow(QWidget* parent);
     ~DocBrowser();
 
 private slots:
@@ -66,6 +69,7 @@ private slots:
     void slotAboutQt();
 
 private:
+    static DocBrowser* s_instance;
     QLCTextBrowser* m_browser;
     QToolBar* m_toolbar;
 

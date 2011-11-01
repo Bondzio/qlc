@@ -91,9 +91,10 @@ bool QLCTextBrowser::event(QEvent* ev)
 /****************************************************************************
  * DocBrowser
  ****************************************************************************/
+DocBrowser* DocBrowser::s_instance = NULL;
 
-DocBrowser::DocBrowser(QWidget* parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
+DocBrowser::DocBrowser(QWidget* parent)
+    : QWidget(parent, Qt::Window)
     , m_backwardAction(NULL)
     , m_forwardAction(NULL)
     , m_homeAction(NULL)
@@ -171,6 +172,19 @@ DocBrowser::~DocBrowser()
 {
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
+    s_instance = NULL;
+}
+
+void DocBrowser::createAndShow(QWidget* parent)
+{
+    if (s_instance == NULL)
+    {
+        s_instance = new DocBrowser(parent);
+        s_instance->setAttribute(Qt::WA_DeleteOnClose);
+    }
+
+    s_instance->show();
+    s_instance->raise();
 }
 
 void DocBrowser::slotBackwardAvailable(bool available)

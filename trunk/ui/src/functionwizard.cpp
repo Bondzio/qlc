@@ -33,7 +33,6 @@
 #include "fixture.h"
 #include "chaser.h"
 #include "scene.h"
-#include "app.h"
 #include "doc.h"
 
 #include "qlccapability.h"

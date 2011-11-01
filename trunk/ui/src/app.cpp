@@ -49,14 +49,11 @@
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
-#define SETTINGS_SLIDERSTYLE "workspace/sliderstyle"
 
 #define KModeTextOperate QObject::tr("Operate")
 #define KModeTextDesign QObject::tr("Design")
 #define KInputUniverseCount 4
 #define KUniverseCount 4
-
-QStyle* App::s_saneStyle = NULL;
 
 /*****************************************************************************
  * Initialization
@@ -384,26 +381,6 @@ void App::slotModeChanged(Doc::Mode mode)
         m_modeToggleAction->setText(tr("Operate"));
         m_modeToggleAction->setToolTip(tr("Switch to operate mode"));
     }
-}
-
-/*****************************************************************************
- * Sane style
- *****************************************************************************/
-
-QStyle* App::saneStyle()
-{
-    if (s_saneStyle == NULL)
-    {
-        QSettings settings;
-        QVariant var = settings.value(SETTINGS_SLIDERSTYLE, QString("Cleanlooks"));
-        QStringList keys(QStyleFactory::keys());
-        if (keys.contains(var.toString()) == true)
-            s_saneStyle = QStyleFactory::create(var.toString());
-        else
-            s_saneStyle = QApplication::style();
-    }
-
-    return s_saneStyle;
 }
 
 /*****************************************************************************

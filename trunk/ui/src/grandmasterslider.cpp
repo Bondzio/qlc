@@ -31,6 +31,7 @@
 #include "vcproperties.h"
 #include "outputmap.h"
 #include "inputmap.h"
+#include "apputil.h"
 
 GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, InputMap* inputMap)
     : QFrame(parent)
@@ -56,7 +57,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     m_slider = new QSlider(this);
     hbox->addWidget(m_slider);
     m_slider->setRange(0, UCHAR_MAX);
-    m_slider->setStyle(App::saneStyle());
+    m_slider->setStyle(AppUtil::saneStyle());
     connect(m_slider, SIGNAL(valueChanged(int)),
             this, SLOT(slotValueChanged(int)));
     hbox->addSpacing(1);

@@ -36,8 +36,6 @@
 #include "outputmanager.h"
 #include "outputpatch.h"
 #include "outputmap.h"
-#include "apputil.h"
-#include "app.h"
 
 #define KColumnUniverse   0
 #define KColumnPlugin     1

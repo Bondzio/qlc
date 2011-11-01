@@ -43,7 +43,6 @@
 #include "fixture.h"
 #include "apputil.h"
 #include "doc.h"
-#include "app.h"
 
 #define SETTINGS_GEOMETRY "efxeditor/geometry"
 

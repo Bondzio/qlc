@@ -104,17 +104,6 @@ public slots:
     void slotModeChanged(Doc::Mode mode);
 
     /*********************************************************************
-     * Sane style
-     *********************************************************************/
-public:
-    /** Attempt to get a sane style that replaces windows' crappy sliders
-     *  and buttons that don't obey background color setting. */
-    static QStyle* saneStyle();
-
-private:
-    static QStyle* s_saneStyle;
-
-    /*********************************************************************
      * Menus & toolbars
      *********************************************************************/
 private:

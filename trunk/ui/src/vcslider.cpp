@@ -46,10 +46,10 @@
 #include "vcslider.h"
 #include "qlcmacros.h"
 #include "qlcfile.h"
+#include "apputil.h"
 #include "chaser.h"
 #include "scene.h"
 #include "efx.h"
-#include "app.h"
 #include "doc.h"
 
 const QSize VCSlider::defaultSize(QSize(60, 200));
@@ -103,7 +103,7 @@ VCSlider::VCSlider(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 
     /* The slider */
     m_slider = new QSlider(this);
-    m_slider->setStyle(App::saneStyle());
+    m_slider->setStyle(AppUtil::saneStyle());
     m_hbox->addWidget(m_slider);
     m_slider->setRange(0, 255);
     m_slider->setPageStep(1);

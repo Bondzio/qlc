@@ -20,10 +20,16 @@
 */
 
 #include <QDesktopWidget>
+#include <QStyleFactory>
+#include <QApplication>
+#include <QSettings>
 #include <QWidget>
+#include <QStyle>
 #include <QRect>
 
 #include "apputil.h"
+
+static QStyle* s_saneStyle = NULL;
 
 /****************************************************************************
  * Widget visibility helper
@@ -72,3 +78,26 @@ void AppUtil::ensureWidgetIsVisible(QWidget* widget)
         }
     }
 }
+
+/*****************************************************************************
+ * Sane style
+ *****************************************************************************/
+
+#define SETTINGS_SLIDERSTYLE "workspace/sliderstyle"
+
+QStyle* AppUtil::saneStyle()
+{
+    if (s_saneStyle == NULL)
+    {
+        QSettings settings;
+        QVariant var = settings.value(SETTINGS_SLIDERSTYLE, QString("Cleanlooks"));
+        QStringList keys(QStyleFactory::keys());
+        if (keys.contains(var.toString()) == true)
+            s_saneStyle = QStyleFactory::create(var.toString());
+        else
+            s_saneStyle = QApplication::style();
+    }
+
+    return s_saneStyle;
+}
+

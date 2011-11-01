@@ -53,6 +53,7 @@
 #include "vcbutton.h"
 #include "function.h"
 #include "fixture.h"
+#include "apputil.h"
 #include "doc.h"
 
 const QSize VCButton::defaultSize(QSize(50, 50));
@@ -92,7 +93,7 @@ VCButton::VCButton(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     /* Initial size */
     resize(defaultSize);
 
-    setStyle(App::saneStyle());
+    setStyle(AppUtil::saneStyle());
 
     /* Listen to function removals */
     connect(m_doc, SIGNAL(functionRemoved(quint32)),

@@ -33,9 +33,9 @@
 #include "qlcchannel.h"
 #include "qlccapability.h"
 
-#include "app.h"
 #include "doc.h"
 #include "fixture.h"
+#include "apputil.h"
 #include "outputmap.h"
 #include "mastertimer.h"
 #include "universearray.h"
@@ -91,7 +91,7 @@ ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, quint32 fixtureID,
     setMaximumWidth(50);
     init();
 
-    setStyle(App::saneStyle());
+    setStyle(AppUtil::saneStyle());
 }
 
 ConsoleChannel::~ConsoleChannel()
@@ -115,7 +115,7 @@ void ConsoleChannel::init()
     if (m_fixture->fixtureDef() != NULL && m_fixture->fixtureMode() != NULL)
     {
         m_presetButton = new QToolButton(this);
-        m_presetButton->setStyle(App::saneStyle());
+        m_presetButton->setStyle(AppUtil::saneStyle());
         m_presetButton->setIconSize(QSize(26, 26));
         m_presetButton->setMinimumSize(QSize(32, 32));
         layout()->addWidget(m_presetButton);
@@ -132,7 +132,7 @@ void ConsoleChannel::init()
     m_valueEdit->setMinimumSize(QSize(1, 1));
 
     m_valueSlider = new QSlider(this);
-    m_valueSlider->setStyle(App::saneStyle());
+    m_valueSlider->setStyle(AppUtil::saneStyle());
     layout()->addWidget(m_valueSlider);
     m_valueSlider->setInvertedAppearance(false);
     m_valueSlider->setRange(0, UCHAR_MAX);

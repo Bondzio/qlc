@@ -43,7 +43,6 @@
 #include "inputmap.h"
 #include "function.h"
 #include "fixture.h"
-#include "app.h"
 #include "doc.h"
 
 VCButtonProperties::VCButtonProperties(VCButton* button, Doc* doc)

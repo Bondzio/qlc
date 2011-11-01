@@ -44,6 +44,7 @@
 #include "vcxypadarea.h"
 #include "vcxypad.h"
 #include "fixture.h"
+#include "apputil.h"
 #include "doc.h"
 
 const quint8 VCXYPad::panInputSourceId = 0;
@@ -83,8 +84,8 @@ VCXYPad::VCXYPad(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     m_vSlider->setTickInterval(16);
     m_hSlider->setTickPosition(QSlider::TicksAbove);
     m_hSlider->setTickInterval(16);
-    m_vSlider->setStyle(App::saneStyle());
-    m_hSlider->setStyle(App::saneStyle());
+    m_vSlider->setStyle(AppUtil::saneStyle());
+    m_hSlider->setStyle(AppUtil::saneStyle());
     connect(m_area, SIGNAL(positionChanged(const QPoint&)),
             this, SLOT(slotPositionChanged(const QPoint&)));
     connect(m_vSlider, SIGNAL(valueChanged(int)),

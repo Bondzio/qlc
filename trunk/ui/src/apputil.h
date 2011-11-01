@@ -38,6 +38,15 @@ namespace AppUtil
      * @param widget The widget to expose
      */
     void ensureWidgetIsVisible(QWidget* widget);
+
+    /*********************************************************************
+     * Sane style
+     *********************************************************************/
+    /**
+     * Attempt to get a sane style that replaces Windows' & OSX's crappy
+     * sliders as well as buttons that don't obey background color setting.
+     */
+    QStyle* saneStyle();
 };
 
 #endif

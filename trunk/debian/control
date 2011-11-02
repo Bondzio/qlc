@@ -1,34 +1,19 @@
 Source: qlc
-Section: Other
+Section: misc
 Priority: optional
-Maintainer: Heikki Junnila <hjunnila@users.sf.net>
+Maintainer: Heikki Junnila <hjunnila@users.sourceforge.net>
 Build-Depends: debhelper (>= 7.0.50), libqt4-dev (>= 4.6.0), libasound2-dev (>= 1.0.16),
                libusb-dev (>= 2:0.1.12), libftdi-dev (>= 0.17), shared-mime-info (>= 0.71),
-               make, g++, libstdc++-dev, libola-dev
-Standards-Version: 3.6.0
+               make, g++, libstdc++-dev
+Standards-Version: 3.7.3
+Homepage: http://qlc.sourceforge.net/
 
 Package: qlc
-Section: Other
-Architecture: i386 amd64
-Replaces: qlc-fixtures, qlc-input-profiles, qlc-output-midi, qlc-output-peperoni,
-          qlc-output-udmx, qlc-output-enttec-dmxusb, qlc-output-dmx4linux,
-          qlc-input-enttec-wing, qlc-input-midi, qlc-input-hid
-Conflicts: qlc-fixtures, qlc-input-profiles, qlc-output-midi, qlc-output-peperoni,
-           qlc-output-udmx, qlc-output-enttec-dmxusb, qlc-output-dmx4linux,
-           qlc-input-enttec-wing, qlc-input-midi, qlc-input-hid
-Provides: qlc-fixtures, qlc-input-profiles, qlc-output-midi, qlc-output-peperoni,
-           qlc-output-udmx, qlc-output-enttec-dmxusb, qlc-output-dmx4linux,
-           qlc-input-enttec-wing, qlc-input-midi, qlc-input-hid
+Section: misc
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Q Light Controller - The open DMX lighting desk
   Software lighting desk for controlling professional lighting fixtures.
-
-Package: qlc-ola
-Section: Other
-Architecture: i386 amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: OLA Output plugin for Q Light Controller
-  Open Lighting Architecture (OLA) output plugin for Q Light Controller.
 
 Package: qlc-dbg
 Architecture: any
@@ -36,5 +21,4 @@ Section: debug
 Priority: extra
 Depends: qlc (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for Q Light Controller
-  Q Light Controller - The Linux DMX lighting desk. This package contains the debugging
-  symbols for QLC.
+  Q Light Controller debugging symbols.

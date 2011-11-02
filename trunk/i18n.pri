@@ -1,3 +1,5 @@
+never {
+
 # Compile all .ts files specified above
 qmfiles.path = $$INSTALLROOT/$$TRANSLATIONDIR
 unix {
@@ -45,3 +47,5 @@ INSTALLS += i18n
 
 QMAKE_CLEAN     += $$QMFILES
 QMAKE_DISTCLEAN += $$QMFILES
+
+}

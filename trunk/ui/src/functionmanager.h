@@ -26,7 +26,7 @@
 #include <QList>
 
 #include "function.h"
-#include "app.h"
+#include "doc.h"
 
 class QTreeWidgetItem;
 class QActionGroup;

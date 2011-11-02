@@ -26,7 +26,7 @@
 
 #include "function.h"
 #include "fixture.h"
-#include "app.h"
+#include "doc.h"
 
 class QLCFixtureDefCache;
 class QTreeWidgetItem;
@@ -38,7 +38,6 @@ class OutputMap;
 class QSplitter;
 class QAction;
 class QMenu;
-class Doc;
 
 #define KXMLQLCFixtureManager "FixtureManager"
 #define KXMLQLCFixtureManagerSplitterSize "SplitterSize"

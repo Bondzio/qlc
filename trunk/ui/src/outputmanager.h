@@ -24,8 +24,6 @@
 
 #include <QWidget>
 
-#include "app.h"
-
 class QTreeWidgetItem;
 class QTreeWidget;
 class OutputPatch;

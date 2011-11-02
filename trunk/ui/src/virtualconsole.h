@@ -28,7 +28,7 @@
 #include <QList>
 
 #include "vcproperties.h"
-#include "app.h"
+#include "doc.h"
 
 class VirtualConsole;
 class QDomDocument;
@@ -37,6 +37,7 @@ class QScrollArea;
 class QDomElement;
 class VCDockArea;
 class QKeyEvent;
+class QToolBar;
 class VCWidget;
 class VCFrame;
 class QAction;

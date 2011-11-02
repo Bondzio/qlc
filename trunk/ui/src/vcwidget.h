@@ -24,8 +24,7 @@
 
 #include <QKeySequence>
 #include <QWidget>
-
-#include "app.h"
+#include "doc.h"
 
 class QLCInputSource;
 class QDomDocument;

@@ -22,13 +22,11 @@ HEADERS += vellemanout.h
 SOURCES += vellemanout.cpp
 HEADERS += ../../interfaces/qlcoutplugin.h
 
-PRO_FILE = src.pro
 TRANSLATIONS += Velleman_Output_fi_FI.ts
 TRANSLATIONS += Velleman_Output_de_DE.ts
 TRANSLATIONS += Velleman_Output_es_ES.ts
 TRANSLATIONS += Velleman_Output_fr_FR.ts
 TRANSLATIONS += Velleman_Output_it_IT.ts
-include(../../../i18n.pri)
 
 target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
 win32:INSTALLS   += target

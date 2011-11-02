@@ -13,14 +13,11 @@ INCLUDEPATH += ../engine/src
 HEADERS += launcher.h
 SOURCES += launcher.cpp main.cpp
 
-# Translations
-PRO_FILE      = launcher.pro
 TRANSLATIONS += launcher_fi_FI.ts
 TRANSLATIONS += launcher_de_DE.ts
 TRANSLATIONS += launcher_fr_FR.ts
 TRANSLATIONS += launcher_es_ES.ts
 TRANSLATIONS += launcher_it_IT.ts
-include(../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation

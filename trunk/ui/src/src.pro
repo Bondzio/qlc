@@ -168,14 +168,11 @@ SOURCES += aboutbox.cpp \
            vcxypadproperties.cpp \
            virtualconsole.cpp
 
-# Internationalization
-PRO_FILE      = src.pro
 TRANSLATIONS += qlc_fi_FI.ts
 TRANSLATIONS += qlc_fr_FR.ts
 TRANSLATIONS += qlc_es_ES.ts
 TRANSLATIONS += qlc_de_DE.ts
 TRANSLATIONS += qlc_it_IT.ts
-include(../../i18n.pri)
 
 macx {
     # This must be after "TARGET = " and before target installation so that

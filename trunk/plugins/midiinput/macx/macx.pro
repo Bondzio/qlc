@@ -29,13 +29,11 @@ SOURCES += ../common/src/midiinputevent.cpp \
 
 HEADERS += ../../interfaces/qlcinplugin.h
 
-PRO_FILE = macx.pro
 TRANSLATIONS += MIDI_Input_fi_FI.ts
 TRANSLATIONS += MIDI_Input_de_DE.ts
 TRANSLATIONS += MIDI_Input_es_ES.ts
 TRANSLATIONS += MIDI_Input_fr_FR.ts
 TRANSLATIONS += MIDI_Input_it_IT.ts
-include(../../../i18n.pri)
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation

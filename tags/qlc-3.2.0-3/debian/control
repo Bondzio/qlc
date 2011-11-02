@@ -4,8 +4,7 @@ Priority: optional
 Maintainer: Heikki Junnila <hjunnila@users.sf.net>
 Build-Depends: debhelper (>= 7.0.50), libqt4-dev (>= 4.6.0), libasound2-dev (>= 1.0.16),
                libusb-dev (>= 2:0.1.12), libftdi-dev (>= 0.17), shared-mime-info (>= 0.71),
-               make, g++, libstdc++-dev, libasound2-dev (>= 1.0.16), libftdi1 (>= 0.17),
-               libusb-0.1-4 (>= 2:0.1.12)
+               make, g++, libstdc++-dev, libola-dev
 Standards-Version: 3.6.0
 
 Package: qlc
@@ -21,10 +20,15 @@ Provides: qlc-fixtures, qlc-input-profiles, qlc-output-midi, qlc-output-peperoni
            qlc-output-udmx, qlc-output-enttec-dmxusb, qlc-output-dmx4linux,
            qlc-input-enttec-wing, qlc-input-midi, qlc-input-hid
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Software DMX lighting desk
-  Q Light Controller - The Linux DMX lighting desk. Includes also fixture
-  definitions and input profiles. In order to get access to real DMX hardware,
-  you need to download an output plugin from http://www.sf.net/projects/qlc/files
+Description: Q Light Controller - The open DMX lighting desk
+  Software lighting desk for controlling professional lighting fixtures.
+
+Package: qlc-ola
+Section: Other
+Architecture: i386 amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: OLA Output plugin for Q Light Controller
+  Open Lighting Architecture (OLA) output plugin for Q Light Controller.
 
 Package: qlc-dbg
 Architecture: any

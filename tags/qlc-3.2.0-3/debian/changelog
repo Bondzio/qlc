@@ -10,8 +10,9 @@ qlc (3.2.0-3) stable; urgency=low
   * Fixed gap setting when adding fixtures in fixture manager.
   * Fixed documentation browser's back/forward swipe action.
   * Added keyboard shortcut for closing documentation browser.
+  * Fixed Scene stop problem when an LTP channel was already at target value.
 
- -- Heikki Junnila <hjunnila@users.sourceforge.net>  Thu, 27 Oct 2011 22:42:58 +0300
+ -- Heikki Junnila <hjunnila@users.sf.net>  Wed, 02 Nov 2011 08:15:58 +0200
 
 qlc (3.2.0-2) stable; urgency=low
 

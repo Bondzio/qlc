@@ -385,6 +385,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* universes)
             {
                 // Once an LTP-channel (non-intensity) has been marked ready,
                 // it's value is no longer touched by scene.
+                ready--; // If fc.current() is already fc.target() when Scene starts
             }
         }
         else

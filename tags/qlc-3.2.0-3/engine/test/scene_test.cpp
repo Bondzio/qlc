@@ -907,6 +907,79 @@ void Scene_Test::writeLTPReady()
     delete doc;
 }
 
+void Scene_Test::writeLTPReadyFade()
+{
+    Doc* doc = new Doc(this, m_cache);
+
+    Bus::instance()->setValue(Bus::defaultFade(), 2);
+
+    const QLCFixtureDef* def = m_cache.fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->mode("Mode 1");
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(doc);
+    fxi->setFixtureDefinition(def, mode);
+    QCOMPARE(fxi->channels(), quint32(6));
+    fxi->setAddress(0);
+    fxi->setUniverse(0);
+    doc->addFixture(fxi);
+
+    // Verify that channels that are already at target value ar also counted
+    // as being ready so that fully-LTP-containing scene stops properly.
+
+    Scene* s1 = new Scene(doc);
+    s1->setName("First");
+    s1->setValue(fxi->id(), 0, 0);
+    s1->setValue(fxi->id(), 1, 255);
+    s1->setBus(Bus::defaultFade());
+    doc->addFunction(s1);
+
+    s1->arm();
+
+    UniverseArray uni(4 * 512);
+    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+
+    QVERIFY(s1->stopped() == true);
+    mts->startFunction(s1, false);
+    QVERIFY(s1->stopped() == false);
+
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 0);
+
+    uni.write(0, 0, QLCChannel::Pan);
+    uni.write(1, 0, QLCChannel::Pan);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 84);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 169);
+    QVERIFY(s1->stopped() == false);
+
+    uni.zeroIntensityChannels();
+
+    s1->write(mts, &uni);
+    QVERIFY(uni.preGMValues()[0] == (char) 0);
+    QVERIFY(uni.preGMValues()[1] == (char) 255);
+    QVERIFY(s1->stopped() == true);
+
+    uni.zeroIntensityChannels();
+
+    s1->disarm();
+
+    delete mts;
+    delete doc;
+}
+
 void Scene_Test::writeValues()
 {
     Doc* doc = new Doc(this, m_cache);

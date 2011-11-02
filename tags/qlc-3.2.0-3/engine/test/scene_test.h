@@ -57,6 +57,7 @@ private slots:
     void writeLTPHTPBusZero();
     void writeLTPBusOne();
     void writeLTPReady();
+    void writeLTPReadyFade();
 
     void writeValues();
 

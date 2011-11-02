@@ -138,9 +138,8 @@ private:
     QAction* m_helpAboutAction;
 
 private:
-#ifdef __APPLE
+#ifdef __APPLE__
     QMenu* m_fileMenu;
-    QMenu* m_helpMenu;
 #endif
     QToolBar* m_toolbar;
 

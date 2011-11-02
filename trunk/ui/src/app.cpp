@@ -78,7 +78,6 @@ App::App() : QMainWindow()
 
 #ifdef __APPLE__
     , m_fileMenu(NULL)
-    , m_helpMenu(NULL)
 #endif
 
     , m_toolbar(NULL)
@@ -428,16 +427,11 @@ void App::initMenuBar()
 #ifdef __APPLE__
     QMenuBar *menuBar = new QMenuBar(this);
 
-    /* Since the menubar is there in Apple anyway, put these actions there. */
+    /* Since the menubar is there in Apple anyway, put the quit action there. */
     m_fileMenu = new QMenu(menuBar);
     m_fileMenu->setTitle(tr("&File"));
-    menuBar()->addMenu(m_fileMenu);
+    menuBar->addMenu(m_fileMenu);
     m_fileMenu->addAction(m_fileQuitAction);
-
-    m_helpMenu = new QMenu(menuBar);
-    m_helpMenu->setTitle(tr("&Help"));
-    menuBar()->addMenu(m_helpMenu);
-    m_helpMenu->addAction(m_helpAboutAction);
 #endif
 }
 

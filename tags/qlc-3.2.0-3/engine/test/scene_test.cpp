@@ -955,14 +955,16 @@ void Scene_Test::writeLTPReadyFade()
 
     s1->write(mts, &uni);
     QVERIFY(uni.preGMValues()[0] == (char) 0);
-    QVERIFY(uni.preGMValues()[1] == (char) 84);
+    QVERIFY(uni.preGMValues()[1] == (char) 84 ||
+            uni.preGMValues()[1] == (char) 85); // Damn floating-point errors
     QVERIFY(s1->stopped() == false);
 
     uni.zeroIntensityChannels();
 
     s1->write(mts, &uni);
     QVERIFY(uni.preGMValues()[0] == (char) 0);
-    QVERIFY(uni.preGMValues()[1] == (char) 169);
+    QVERIFY(uni.preGMValues()[1] == (char) 169 ||
+            uni.preGMValues()[1] == (char) 170); // Damn floating-point errors
     QVERIFY(s1->stopped() == false);
 
     uni.zeroIntensityChannels();

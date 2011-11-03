@@ -174,9 +174,15 @@ void App::init()
     // Primary UI views
     FixtureManager::createAndShow(centralWidget(), m_doc);
     FunctionManager::createAndShow(centralWidget(), m_doc);
+    VirtualConsole::createAndShow(centralWidget(), m_doc);
     OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
     InputManager::createAndShow(centralWidget(), m_doc->inputMap());
-    VirtualConsole::createAndShow(centralWidget(), m_doc);
+
+    // Activate FixtureManager
+    QMdiSubWindow* sub = area->subWindowList().first();
+    Q_ASSERT(sub != NULL);
+    area->setActiveSubWindow(sub);
+    sub->raise();
 
     // Listen to blackout changes and toggle m_controlBlackoutAction
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));

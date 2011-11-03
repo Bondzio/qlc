@@ -156,6 +156,9 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
 
     // Use the initial mode
     slotModeChanged(m_doc->mode());
+
+    // Nothing is selected
+    updateActions();
 }
 
 VirtualConsole::~VirtualConsole()
@@ -684,6 +687,8 @@ void VirtualConsole::slotAddButton()
     Q_ASSERT(button != NULL);
     button->show();
     button->move(parent->lastClickPoint());
+    m_selectedWidgets << button;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -740,6 +745,8 @@ void VirtualConsole::slotAddButtonMatrix()
     frame->show();
     frame->move(parent->lastClickPoint());
     frame->setAllowChildren(false); // Don't allow more children
+    m_selectedWidgets << frame;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -753,6 +760,8 @@ void VirtualConsole::slotAddSlider()
     Q_ASSERT(slider != NULL);
     slider->show();
     slider->move(parent->lastClickPoint());
+    m_selectedWidgets << slider;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -790,6 +799,8 @@ void VirtualConsole::slotAddSliderMatrix()
     frame->show();
     frame->move(parent->lastClickPoint());
     frame->setAllowChildren(false); // Don't allow more children
+    m_selectedWidgets << frame;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -803,6 +814,8 @@ void VirtualConsole::slotAddXYPad()
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());
+    m_selectedWidgets << xypad;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -816,6 +829,8 @@ void VirtualConsole::slotAddCueList()
     Q_ASSERT(cuelist != NULL);
     cuelist->show();
     cuelist->move(parent->lastClickPoint());
+    m_selectedWidgets << cuelist;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -829,6 +844,8 @@ void VirtualConsole::slotAddFrame()
     Q_ASSERT(frame != NULL);
     frame->show();
     frame->move(parent->lastClickPoint());
+    m_selectedWidgets << frame;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -842,6 +859,8 @@ void VirtualConsole::slotAddSoloFrame()
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());
+    m_selectedWidgets << soloframe;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -855,6 +874,8 @@ void VirtualConsole::slotAddLabel()
     Q_ASSERT(label != NULL);
     label->show();
     label->move(parent->lastClickPoint());
+    m_selectedWidgets << label;
+    updateActions();
     m_doc->setModified();
 }
 
@@ -896,6 +917,8 @@ void VirtualConsole::slotEditCut()
         m_clipboard = m_selectedWidgets;
         m_editPasteAction->setEnabled(true);
     }
+
+    updateActions();
 }
 
 void VirtualConsole::slotEditCopy()
@@ -990,6 +1013,8 @@ void VirtualConsole::slotEditPaste()
             copy->show();
         }
     }
+
+    updateActions();
 }
 
 void VirtualConsole::slotEditDelete()
@@ -1013,6 +1038,8 @@ void VirtualConsole::slotEditDelete()
             m_clipboard.removeAll(widget);
             m_editPasteAction->setEnabled(false);
         }
+
+        updateActions();
     }
 }
 

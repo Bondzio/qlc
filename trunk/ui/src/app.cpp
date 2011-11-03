@@ -735,10 +735,21 @@ void App::slotRunningFunctionsChanged()
 
 void App::slotControlFullScreen()
 {
+    static int wstate = windowState();
+
     if (windowState() & Qt::WindowFullScreen)
-        showNormal();
+    {
+        if (wstate & Qt::WindowMaximized)
+            showMaximized();
+        else
+            showNormal();
+        wstate = windowState();
+    }
     else
+    {
+        wstate = windowState();
         showFullScreen();
+    }
 }
 
 /*****************************************************************************

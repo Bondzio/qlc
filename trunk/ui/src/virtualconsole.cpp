@@ -1367,20 +1367,36 @@ bool VirtualConsole::isTapModifierDown() const
 
 void VirtualConsole::keyPressEvent(QKeyEvent* event)
 {
+    if (event->isAutoRepeat() == true)
+    {
+        event->ignore();
+        return;
+    }
+
     if ((event->modifiers() & properties().tapModifier()) != 0)
         m_tapModifierDown = true;
 
     QKeySequence seq(event->key() | event->modifiers());
     emit keyPressed(seq);
+
+    event->accept();
 }
 
 void VirtualConsole::keyReleaseEvent(QKeyEvent* event)
 {
+    if (event->isAutoRepeat() == true)
+    {
+        event->ignore();
+        return;
+    }
+
     if ((event->modifiers() & properties().tapModifier()) == 0)
         m_tapModifierDown = false;
 
     QKeySequence seq(event->key() | event->modifiers());
     emit keyReleased(seq);
+
+    event->accept();
 }
 
 /*****************************************************************************

@@ -95,9 +95,6 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_addLabelAction(NULL)
 
     , m_toolsSettingsAction(NULL)
-    , m_toolsSlidersAction(NULL)
-    , m_toolsBlackoutAction(NULL)
-    , m_toolsPanicAction(NULL)
 
     , m_editCutAction(NULL)
     , m_editCopyAction(NULL)
@@ -129,6 +126,7 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_addMenu(NULL)
 
     , m_dockArea(NULL)
+    , m_contentsLayout(NULL)
     , m_scrollArea(NULL)
     , m_contents(NULL)
 
@@ -146,23 +144,11 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     layout()->setSpacing(1);
 
     initActions();
-    initMenuBar();
-
     initDockArea();
+    m_contentsLayout = new QVBoxLayout(this);
+    layout()->addItem(m_contentsLayout);
+    initMenuBar();
     initContents();
-
-    // Used to enable/disable panic button
-    connect(m_doc->masterTimer(), SIGNAL(functionListChanged()),
-            this, SLOT(slotRunningFunctionsChanged()));
-    slotRunningFunctionsChanged();
-
-    // Propagate input value changes to all widgets
-    connect(m_doc->inputMap(), SIGNAL(inputValueChanged(quint32,quint32,uchar)),
-            this, SLOT(slotInputValueChanged(quint32,quint32,uchar)));
-
-    // Propagate blackout state changes to widgets
-    connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)),
-            this, SLOT(slotBlackoutChanged(bool)));
 
     // Propagate mode changes to all widgets
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
@@ -316,50 +302,32 @@ QMenu* VirtualConsole::addMenu() const
 void VirtualConsole::initActions()
 {
     /* Add menu actions */
-    m_addButtonAction = new QAction(QIcon(":/button.png"),
-                                    tr("Button"), this);
-    connect(m_addButtonAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddButton()));
+    m_addButtonAction = new QAction(QIcon(":/button.png"), tr("New Button"), this);
+    connect(m_addButtonAction, SIGNAL(triggered(bool)), this, SLOT(slotAddButton()));
 
-    m_addButtonMatrixAction = new QAction(QIcon(":/buttonmatrix.png"),
-                                          tr("Button Matrix"), this);
-    connect(m_addButtonMatrixAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddButtonMatrix()));
+    m_addButtonMatrixAction = new QAction(QIcon(":/buttonmatrix.png"), tr("New Button Matrix"), this);
+    connect(m_addButtonMatrixAction, SIGNAL(triggered(bool)), this, SLOT(slotAddButtonMatrix()));
 
-    m_addSliderAction = new QAction(QIcon(":/slider.png"),
-                                    tr("Slider"), this);
-    connect(m_addSliderAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddSlider()));
+    m_addSliderAction = new QAction(QIcon(":/slider.png"), tr("New Slider"), this);
+    connect(m_addSliderAction, SIGNAL(triggered(bool)), this, SLOT(slotAddSlider()));
 
-    m_addSliderMatrixAction = new QAction(QIcon(":/slidermatrix.png"),
-                                          tr("Slider Matrix"), this);
-    connect(m_addSliderMatrixAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddSliderMatrix()));
+    m_addSliderMatrixAction = new QAction(QIcon(":/slidermatrix.png"), tr("New Slider Matrix"), this);
+    connect(m_addSliderMatrixAction, SIGNAL(triggered(bool)), this, SLOT(slotAddSliderMatrix()));
 
-    m_addXYPadAction = new QAction(QIcon(":/xypad.png"),
-                                   tr("XY pad"), this);
-    connect(m_addXYPadAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddXYPad()));
+    m_addXYPadAction = new QAction(QIcon(":/xypad.png"), tr("New XY pad"), this);
+    connect(m_addXYPadAction, SIGNAL(triggered(bool)), this, SLOT(slotAddXYPad()));
 
-    m_addCueListAction = new QAction(QIcon(":/cuelist.png"),
-                                     tr("Cue list"), this);
-    connect(m_addCueListAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddCueList()));
+    m_addCueListAction = new QAction(QIcon(":/cuelist.png"), tr("New Cue list"), this);
+    connect(m_addCueListAction, SIGNAL(triggered(bool)), this, SLOT(slotAddCueList()));
 
-    m_addFrameAction = new QAction(QIcon(":/frame.png"),
-                                   tr("Frame"), this);
-    connect(m_addFrameAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddFrame()));
+    m_addFrameAction = new QAction(QIcon(":/frame.png"), tr("New Frame"), this);
+    connect(m_addFrameAction, SIGNAL(triggered(bool)), this, SLOT(slotAddFrame()));
 
-    m_addSoloFrameAction = new QAction(QIcon(":/soloframe.png"),
-                       tr("Solo frame"), this);
-    connect(m_addSoloFrameAction, SIGNAL(triggered(bool)),
-        this, SLOT(slotAddSoloFrame()));
+    m_addSoloFrameAction = new QAction(QIcon(":/soloframe.png"), tr("New Solo frame"), this);
+    connect(m_addSoloFrameAction, SIGNAL(triggered(bool)), this, SLOT(slotAddSoloFrame()));
 
-    m_addLabelAction = new QAction(QIcon(":/label.png"),
-                                   tr("Label"), this);
-    connect(m_addLabelAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotAddLabel()));
+    m_addLabelAction = new QAction(QIcon(":/label.png"), tr("New Label"), this);
+    connect(m_addLabelAction, SIGNAL(triggered(bool)), this, SLOT(slotAddLabel()));
 
     /* Put add actions under the same group */
     m_addActionGroup = new QActionGroup(this);
@@ -375,63 +343,31 @@ void VirtualConsole::initActions()
     m_addActionGroup->addAction(m_addLabelAction);
 
     /* Tools menu actions */
-    m_toolsSettingsAction = new QAction(QIcon(":/configure.png"),
-                                        tr("Settings"), this);
-    connect(m_toolsSettingsAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotToolsSettings()));
+    m_toolsSettingsAction = new QAction(QIcon(":/configure.png"), tr("Virtual Console Settings"), this);
+    connect(m_toolsSettingsAction, SIGNAL(triggered(bool)), this, SLOT(slotToolsSettings()));
     // Prevent this action from ending up to the application menu on OSX
     // and crashing the app after VC window is closed.
     m_toolsSettingsAction->setMenuRole(QAction::NoRole);
 
-    m_toolsSlidersAction = new QAction(QIcon(":/slider.png"),
-                                       tr("Grand Master"), this);
-    connect(m_toolsSlidersAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotToolsSliders()));
-
-    m_toolsBlackoutAction = new QAction(QIcon(":/blackout.png"),
-                                        tr("Toggle &Blackout"), this);
-    m_toolsBlackoutAction->setCheckable(true);
-    connect(m_toolsBlackoutAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotToolsBlackout()));
-    m_toolsBlackoutAction->setChecked(m_doc->outputMap()->blackout());
-
-    m_toolsPanicAction = new QAction(QIcon(":/panic.png"),
-                                     tr("Stop ALL functions!"), this);
-    m_toolsPanicAction->setShortcut(QKeySequence("CTRL+SHIFT+ESC"));
-    connect(m_toolsPanicAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotToolsPanic()));
-
     /* Edit menu actions */
-    m_editCutAction = new QAction(QIcon(":/editcut.png"),
-                                  tr("Cut"), this);
-    connect(m_editCutAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditCut()));
+    m_editCutAction = new QAction(QIcon(":/editcut.png"), tr("Cut"), this);
+    connect(m_editCutAction, SIGNAL(triggered(bool)), this, SLOT(slotEditCut()));
 
-    m_editCopyAction = new QAction(QIcon(":/editcopy.png"),
-                                   tr("Copy"), this);
-    connect(m_editCopyAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditCopy()));
+    m_editCopyAction = new QAction(QIcon(":/editcopy.png"), tr("Copy"), this);
+    connect(m_editCopyAction, SIGNAL(triggered(bool)), this, SLOT(slotEditCopy()));
 
-    m_editPasteAction = new QAction(QIcon(":/editpaste.png"),
-                                    tr("Paste"), this);
+    m_editPasteAction = new QAction(QIcon(":/editpaste.png"), tr("Paste"), this);
     m_editPasteAction->setEnabled(false);
-    connect(m_editPasteAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditPaste()));
+    connect(m_editPasteAction, SIGNAL(triggered(bool)), this, SLOT(slotEditPaste()));
 
-    m_editDeleteAction = new QAction(QIcon(":/editdelete.png"),
-                                     tr("Delete"), this);
-    connect(m_editDeleteAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditDelete()));
+    m_editDeleteAction = new QAction(QIcon(":/editdelete.png"), tr("Delete"), this);
+    connect(m_editDeleteAction, SIGNAL(triggered(bool)), this, SLOT(slotEditDelete()));
 
-    m_editPropertiesAction = new QAction(QIcon(":/configure.png"),
-                                         tr("Properties"), this);
-    connect(m_editPropertiesAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditProperties()));
+    m_editPropertiesAction = new QAction(QIcon(":/configure.png"), tr("Widget Properties"), this);
+    connect(m_editPropertiesAction, SIGNAL(triggered(bool)), this, SLOT(slotEditProperties()));
 
-    m_editRenameAction = new QAction(QIcon(":/editclear.png"),
-                                     tr("Rename"), this);
-    connect(m_editRenameAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEditRename()));
+    m_editRenameAction = new QAction(QIcon(":/editclear.png"), tr("Rename Widget"), this);
+    connect(m_editRenameAction, SIGNAL(triggered(bool)), this, SLOT(slotEditRename()));
 
     /* Put edit actions under the same group */
     m_editActionGroup = new QActionGroup(this);
@@ -444,20 +380,14 @@ void VirtualConsole::initActions()
     m_editActionGroup->addAction(m_editRenameAction);
 
     /* Background menu actions */
-    m_bgColorAction = new QAction(QIcon(":/color.png"),
-                                  tr("Color"), this);
-    connect(m_bgColorAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotBackgroundColor()));
+    m_bgColorAction = new QAction(QIcon(":/color.png"), tr("Background Color"), this);
+    connect(m_bgColorAction, SIGNAL(triggered(bool)), this, SLOT(slotBackgroundColor()));
 
-    m_bgImageAction = new QAction(QIcon(":/image.png"),
-                                  tr("Image"), this);
-    connect(m_bgImageAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotBackgroundImage()));
+    m_bgImageAction = new QAction(QIcon(":/image.png"), tr("Background Image"), this);
+    connect(m_bgImageAction, SIGNAL(triggered(bool)), this, SLOT(slotBackgroundImage()));
 
-    m_bgDefaultAction = new QAction(QIcon(":/undo.png"),
-                                    tr("Default"), this);
-    connect(m_bgDefaultAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotBackgroundNone()));
+    m_bgDefaultAction = new QAction(QIcon(":/undo.png"), tr("Default"), this);
+    connect(m_bgDefaultAction, SIGNAL(triggered(bool)), this, SLOT(slotBackgroundNone()));
 
     /* Put BG actions under the same group */
     m_bgActionGroup = new QActionGroup(this);
@@ -467,15 +397,11 @@ void VirtualConsole::initActions()
     m_bgActionGroup->addAction(m_bgDefaultAction);
 
     /* Foreground menu actions */
-    m_fgColorAction = new QAction(QIcon(":/color.png"),
-                                  tr("Color"), this);
-    connect(m_fgColorAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotForegroundColor()));
+    m_fgColorAction = new QAction(QIcon(":/fontcolor.png"), tr("Font Colour"), this);
+    connect(m_fgColorAction, SIGNAL(triggered(bool)), this, SLOT(slotForegroundColor()));
 
-    m_fgDefaultAction = new QAction(QIcon(":/undo.png"),
-                                    tr("Default"), this);
-    connect(m_fgDefaultAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotForegroundNone()));
+    m_fgDefaultAction = new QAction(QIcon(":/undo.png"), tr("Default"), this);
+    connect(m_fgDefaultAction, SIGNAL(triggered(bool)), this, SLOT(slotForegroundNone()));
 
     /* Put FG actions under the same group */
     m_fgActionGroup = new QActionGroup(this);
@@ -484,15 +410,11 @@ void VirtualConsole::initActions()
     m_fgActionGroup->addAction(m_fgDefaultAction);
 
     /* Font menu actions */
-    m_fontAction = new QAction(QIcon(":/fonts.png"),
-                               tr("Choose..."), this);
-    connect(m_fontAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFont()));
+    m_fontAction = new QAction(QIcon(":/fonts.png"), tr("Font"), this);
+    connect(m_fontAction, SIGNAL(triggered(bool)), this, SLOT(slotFont()));
 
-    m_resetFontAction = new QAction(QIcon(":/undo.png"),
-                                    tr("Default"), this);
-    connect(m_resetFontAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotResetFont()));
+    m_resetFontAction = new QAction(QIcon(":/undo.png"), tr("Default"), this);
+    connect(m_resetFontAction, SIGNAL(triggered(bool)), this, SLOT(slotResetFont()));
 
     /* Put font actions under the same group */
     m_fontActionGroup = new QActionGroup(this);
@@ -501,20 +423,14 @@ void VirtualConsole::initActions()
     m_fontActionGroup->addAction(m_resetFontAction);
 
     /* Frame menu actions */
-    m_frameSunkenAction = new QAction(QIcon(":/framesunken.png"),
-                                      tr("Sunken"), this);
-    connect(m_frameSunkenAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFrameSunken()));
+    m_frameSunkenAction = new QAction(QIcon(":/framesunken.png"), tr("Sunken"), this);
+    connect(m_frameSunkenAction, SIGNAL(triggered(bool)), this, SLOT(slotFrameSunken()));
 
-    m_frameRaisedAction = new QAction(QIcon(":/frameraised.png"),
-                                      tr("Raised"), this);
-    connect(m_frameRaisedAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFrameRaised()));
+    m_frameRaisedAction = new QAction(QIcon(":/frameraised.png"), tr("Raised"), this);
+    connect(m_frameRaisedAction, SIGNAL(triggered(bool)), this, SLOT(slotFrameRaised()));
 
-    m_frameNoneAction = new QAction(QIcon(":/framenone.png"),
-                                    tr("None"), this);
-    connect(m_frameNoneAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotFrameNone()));
+    m_frameNoneAction = new QAction(QIcon(":/framenone.png"), tr("None"), this);
+    connect(m_frameNoneAction, SIGNAL(triggered(bool)), this, SLOT(slotFrameNone()));
 
     /* Put frame actions under the same group */
     m_frameActionGroup = new QActionGroup(this);
@@ -524,15 +440,11 @@ void VirtualConsole::initActions()
     m_frameActionGroup->addAction(m_frameNoneAction);
 
     /* Stacking menu actions */
-    m_stackingRaiseAction = new QAction(QIcon(":/up.png"),
-                                        tr("Raise"), this);
-    connect(m_stackingRaiseAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotStackingRaise()));
+    m_stackingRaiseAction = new QAction(QIcon(":/up.png"), tr("Bring to front"), this);
+    connect(m_stackingRaiseAction, SIGNAL(triggered(bool)), this, SLOT(slotStackingRaise()));
 
-    m_stackingLowerAction = new QAction(QIcon(":/down.png"),
-                                        tr("Lower"), this);
-    connect(m_stackingLowerAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotStackingLower()));
+    m_stackingLowerAction = new QAction(QIcon(":/down.png"), tr("Send to back"), this);
+    connect(m_stackingLowerAction, SIGNAL(triggered(bool)), this, SLOT(slotStackingLower()));
 
     /* Put stacking actions under the same group */
     m_stackingActionGroup = new QActionGroup(this);
@@ -543,28 +455,9 @@ void VirtualConsole::initActions()
 
 void VirtualConsole::initMenuBar()
 {
-    QMenuBar* menuBar;
-    QVBoxLayout* vbox;
-    QWidget* widget;
-
-    /* Menu widget to the layout */
-    widget = new QWidget(this);
-    vbox = new QVBoxLayout(widget);
-    vbox->setMargin(0);
-    layout()->setMenuBar(widget);
-
-    /* Menubar */
-#ifndef __APPLE__
-    menuBar = new QMenuBar(this);
-    vbox->addWidget(menuBar);
-#else
-    menuBar = new QMenuBar(this);
-#endif
-
     /* Add menu */
-    m_addMenu = new QMenu(menuBar);
+    m_addMenu = new QMenu(this);
     m_addMenu->setTitle(tr("&Add"));
-    menuBar->addMenu(m_addMenu);
     m_addMenu->addAction(m_addButtonAction);
     m_addMenu->addAction(m_addButtonMatrixAction);
     m_addMenu->addSeparator();
@@ -579,9 +472,8 @@ void VirtualConsole::initMenuBar()
     m_addMenu->addAction(m_addLabelAction);
 
     /* Edit menu */
-    m_editMenu = new QMenu(menuBar);
+    m_editMenu = new QMenu(this);
     m_editMenu->setTitle(tr("&Edit"));
-    menuBar->addMenu(m_editMenu);
     m_editMenu->addAction(m_editCutAction);
     m_editMenu->addAction(m_editCopyAction);
     m_editMenu->addAction(m_editPasteAction);
@@ -592,13 +484,8 @@ void VirtualConsole::initMenuBar()
     m_editMenu->addSeparator();
 
     /* Tools menu */
-    m_toolsMenu = new QMenu(menuBar);
+    m_toolsMenu = new QMenu(this);
     m_toolsMenu->setTitle(tr("&Tools"));
-    menuBar->addMenu(m_toolsMenu);
-    m_toolsMenu->addAction(m_toolsBlackoutAction);
-    m_toolsMenu->addAction(m_toolsPanicAction);
-    m_toolsMenu->addAction(m_toolsSlidersAction);
-    m_toolsMenu->addSeparator();
     m_toolsMenu->addAction(m_toolsSettingsAction);
 
     /* Background Menu */
@@ -644,8 +531,8 @@ void VirtualConsole::initMenuBar()
     m_editMenu->addSeparator();
 
     /* Toolbar */
-    m_toolbar = new QToolBar(widget);
-    vbox->addWidget(m_toolbar);
+    m_toolbar = new QToolBar(this);
+    m_contentsLayout->addWidget(m_toolbar);
 
     m_toolbar->addAction(m_addButtonAction);
     m_toolbar->addAction(m_addButtonMatrixAction);
@@ -665,10 +552,14 @@ void VirtualConsole::initMenuBar()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_editPropertiesAction);
     m_toolbar->addAction(m_editRenameAction);
-
-    QWidget* spacerWidget = new QWidget(this);
-    spacerWidget->setSizePolicy(QSizePolicy::Expanding,
-                                QSizePolicy::Preferred);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_stackingRaiseAction);
+    m_toolbar->addAction(m_stackingLowerAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_bgColorAction);
+    m_toolbar->addAction(m_bgImageAction);
+    m_toolbar->addAction(m_fgColorAction);
+    m_toolbar->addAction(m_fontAction);
 }
 
 void VirtualConsole::updateCustomMenu()
@@ -715,7 +606,6 @@ void VirtualConsole::updateActions()
         m_editPropertiesAction->setEnabled(false);
 
         /* All the rest are disabled for draw area, except BG & font */
-        m_fgActionGroup->setEnabled(false);
         m_frameActionGroup->setEnabled(false);
         m_stackingActionGroup->setEnabled(false);
 
@@ -759,14 +649,6 @@ void VirtualConsole::updateActions()
             m_editPasteAction->setEnabled(false);
         }
     }
-}
-
-void VirtualConsole::slotRunningFunctionsChanged()
-{
-    if (m_doc->masterTimer()->runningFunctions() > 0)
-        m_toolsPanicAction->setEnabled(true);
-    else
-        m_toolsPanicAction->setEnabled(false);
 }
 
 /*****************************************************************************
@@ -989,45 +871,6 @@ void VirtualConsole::slotToolsSettings()
         m_dockArea->refreshProperties();
         m_doc->setModified();
     }
-}
-
-void VirtualConsole::slotToolsSliders()
-{
-    if (m_dockArea->isHidden() == true)
-    {
-        m_properties.setGMVisible(true);
-        m_dockArea->show();
-    }
-    else
-    {
-        m_properties.setGMVisible(false);
-        m_dockArea->hide();
-    }
-
-    m_doc->setModified();
-}
-
-void VirtualConsole::slotToolsBlackout()
-{
-    m_doc->outputMap()->setBlackout(!m_doc->outputMap()->blackout());
-    if (m_properties.blackoutInputUniverse() != InputMap::invalidUniverse() &&
-        m_properties.blackoutInputChannel() != InputMap::invalidChannel())
-    {
-        uchar value = (m_doc->outputMap()->blackout()) ? 255 : 0;
-        m_doc->inputMap()->feedBack(m_properties.blackoutInputUniverse(),
-                                   m_properties.blackoutInputChannel(),
-                                   value);
-    }
-}
-
-void VirtualConsole::slotToolsPanic()
-{
-    m_doc->masterTimer()->stopAllFunctions();
-}
-
-void VirtualConsole::slotBlackoutChanged(bool state)
-{
-    m_toolsBlackoutAction->setChecked(state);
 }
 
 /*****************************************************************************
@@ -1506,7 +1349,7 @@ void VirtualConsole::initContents()
     Q_ASSERT(layout() != NULL);
 
     m_scrollArea = new QScrollArea(this);
-    layout()->addWidget(m_scrollArea);
+    m_contentsLayout->addWidget(m_scrollArea);
     m_scrollArea->setAlignment(Qt::AlignCenter);
     m_scrollArea->setWidgetResizable(false);
 
@@ -1541,52 +1384,12 @@ void VirtualConsole::keyReleaseEvent(QKeyEvent* event)
 }
 
 /*****************************************************************************
- * External input
- *****************************************************************************/
-
-void VirtualConsole::slotInputValueChanged(quint32 uni, quint32 ch, uchar value)
-{
-    if (uni == m_properties.blackoutInputUniverse() &&
-        ch == m_properties.blackoutInputChannel() && value > 0)
-    {
-        slotToolsBlackout();
-    }
-}
-
-/*****************************************************************************
  * Main application mode
  *****************************************************************************/
 
 void VirtualConsole::slotModeChanged(Doc::Mode mode)
 {
     QString config;
-
-    /* Key repeat */
-    if (m_properties.isKeyRepeatOff() == true)
-    {
-#if !defined(WIN32) && !defined(__APPLE__)
-        Display* display;
-        display = XOpenDisplay(NULL);
-        Q_ASSERT(display != NULL);
-
-        if (mode == Doc::Design)
-            XAutoRepeatOn(display);
-        else
-            XAutoRepeatOff(display);
-
-        XCloseDisplay(display);
-#else
-#endif
-    }
-
-    /* Grab keyboard */
-    if (m_properties.isGrabKeyboard() == true)
-    {
-        if (mode == Doc::Design)
-            releaseKeyboard();
-        else
-            grabKeyboard();
-    }
 
     if (mode == Doc::Operate)
     {

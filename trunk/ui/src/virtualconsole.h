@@ -33,6 +33,7 @@
 class VirtualConsole;
 class QDomDocument;
 class QActionGroup;
+class QVBoxLayout;
 class QScrollArea;
 class QDomElement;
 class VCDockArea;
@@ -154,9 +155,6 @@ protected:
     /** Enable or disable actions based on current selection */
     void updateActions();
 
-protected slots:
-    void slotRunningFunctionsChanged();
-
 protected:
     QToolBar* m_toolbar;
 
@@ -179,9 +177,6 @@ protected:
     QAction* m_addLabelAction;
 
     QAction* m_toolsSettingsAction;
-    QAction* m_toolsSlidersAction;
-    QAction* m_toolsBlackoutAction;
-    QAction* m_toolsPanicAction;
 
     QAction* m_editCutAction;
     QAction* m_editCopyAction;
@@ -239,12 +234,7 @@ public slots:
      * Tools menu callbacks
      *********************************************************************/
 public slots:
-    void slotToolsSliders();
     void slotToolsSettings();
-    void slotToolsBlackout();
-    void slotToolsPanic();
-
-    void slotBlackoutChanged(bool state);
 
     /*********************************************************************
      * Edit menu callbacks
@@ -306,7 +296,7 @@ protected:
     void initDockArea();
 
 protected:
-    /** Dock area that holds the default fade & hold sliders */
+    /** Dock area that holds the default sliders */
     VCDockArea* m_dockArea;
 
     /*********************************************************************
@@ -324,6 +314,7 @@ protected:
     void initContents();
 
 protected:
+    QVBoxLayout* m_contentsLayout;
     QScrollArea* m_scrollArea;
     VCFrame* m_contents;
 
@@ -350,13 +341,6 @@ signals:
 
 private:
     bool m_tapModifierDown;
-
-    /*************************************************************************
-     * External input
-     *************************************************************************/
-public slots:
-    /** Listens to external input data */
-    void slotInputValueChanged(quint32 uni, quint32 ch, uchar value);
 
     /*********************************************************************
      * Main application mode

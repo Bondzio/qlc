@@ -119,6 +119,10 @@ public slots:
 
     void slotControlMonitor();
     void slotControlFullScreen();
+    void slotControlBlackout();
+    void slotBlackoutChanged(bool state);
+    void slotControlPanic();
+    void slotRunningFunctionsChanged();
 
     void slotHelpIndex();
     void slotHelpAbout();
@@ -133,6 +137,8 @@ private:
     QAction* m_modeToggleAction;
     QAction* m_controlMonitorAction;
     QAction* m_controlFullScreenAction;
+    QAction* m_controlBlackoutAction;
+    QAction* m_controlPanicAction;
 
     QAction* m_helpIndexAction;
     QAction* m_helpAboutAction;

@@ -51,6 +51,8 @@
 #include "vcwidget.h"
 #include "doc.h"
 
+#define GRID_RESOLUTION 10
+
 VCWidget::VCWidget(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
@@ -726,8 +728,8 @@ void VCWidget::resize(const QSize& size)
     // Force grid settings, if applicable
     if (VirtualConsole::instance()->properties().isGridEnabled() == true)
     {
-        sz.setWidth(size.width() - (size.width() % VirtualConsole::instance()->properties().gridX()));
-        sz.setHeight(size.height() - (size.height() % VirtualConsole::instance()->properties().gridY()));
+        sz.setWidth(size.width() - (size.width() % GRID_RESOLUTION));
+        sz.setHeight(size.height() - (size.height() % GRID_RESOLUTION));
     }
 
     // Resize
@@ -741,8 +743,8 @@ void VCWidget::move(const QPoint& point)
     // Force grid settings, if applicable
     if (VirtualConsole::instance()->properties().isGridEnabled() == true)
     {
-        pt.setX(point.x() - (point.x() % VirtualConsole::instance()->properties().gridX()));
-        pt.setY(point.y() - (point.y() % VirtualConsole::instance()->properties().gridY()));
+        pt.setX(point.x() - (point.x() % GRID_RESOLUTION));
+        pt.setY(point.y() - (point.y() % GRID_RESOLUTION));
     }
 
     // Don't move beyond left or right

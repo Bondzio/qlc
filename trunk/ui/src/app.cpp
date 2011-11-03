@@ -72,6 +72,8 @@ App::App() : QMainWindow()
     , m_modeToggleAction(NULL)
     , m_controlMonitorAction(NULL)
     , m_controlFullScreenAction(NULL)
+    , m_controlBlackoutAction(NULL)
+    , m_controlPanicAction(NULL)
 
     , m_helpIndexAction(NULL)
     , m_helpAboutAction(NULL)
@@ -175,6 +177,13 @@ void App::init()
     OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
     InputManager::createAndShow(centralWidget(), m_doc->inputMap());
     VirtualConsole::createAndShow(centralWidget(), m_doc);
+
+    // Listen to blackout changes and toggle m_controlBlackoutAction
+    connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
+
+    // Enable/Disable panic button
+    connect(m_doc->masterTimer(), SIGNAL(functionListChanged()), this, SLOT(slotRunningFunctionsChanged()));
+    slotRunningFunctionsChanged();
 
     // Start up in non-modified state
     m_doc->resetModified();
@@ -408,6 +417,15 @@ void App::initActions()
     m_controlMonitorAction->setShortcut(QKeySequence(tr("CTRL+M", "Control|Monitor")));
     connect(m_controlMonitorAction, SIGNAL(triggered(bool)), this, SLOT(slotControlMonitor()));
 
+    m_controlBlackoutAction = new QAction(QIcon(":/blackout.png"), tr("Toggle &Blackout"), this);
+    m_controlBlackoutAction->setCheckable(true);
+    connect(m_controlBlackoutAction, SIGNAL(triggered(bool)), this, SLOT(slotControlBlackout()));
+    m_controlBlackoutAction->setChecked(m_doc->outputMap()->blackout());
+
+    m_controlPanicAction = new QAction(QIcon(":/panic.png"), tr("Stop ALL functions!"), this);
+    m_controlPanicAction->setShortcut(QKeySequence("CTRL+SHIFT+ESC"));
+    connect(m_controlPanicAction, SIGNAL(triggered(bool)), this, SLOT(slotControlPanic()));
+
     m_controlFullScreenAction = new QAction(QIcon(":/fullscreen.png"), tr("Toggle Full Screen"), this);
     m_controlFullScreenAction->setCheckable(true);
     m_controlFullScreenAction->setShortcut(QKeySequence(tr("CTRL+F11", "Control|Toggle Full Screen")));
@@ -440,6 +458,7 @@ void App::initToolBar()
     m_toolbar = new QToolBar(tr("Workspace"), this);
     m_toolbar->setFloatable(false);
     m_toolbar->setMovable(false);
+    m_toolbar->setAllowedAreas(Qt::TopToolBarArea);
     addToolBar(m_toolbar);
     m_toolbar->addAction(m_fileNewAction);
     m_toolbar->addAction(m_fileOpenAction);
@@ -448,6 +467,8 @@ void App::initToolBar()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_controlMonitorAction);
     m_toolbar->addAction(m_modeToggleAction);
+    m_toolbar->addAction(m_controlBlackoutAction);
+    m_toolbar->addAction(m_controlPanicAction);
 
     /* Create an empty widget between help items to flush them to the right */
     QWidget* widget = new QWidget(this);
@@ -700,6 +721,29 @@ void App::slotFileQuit()
 void App::slotControlMonitor()
 {
     Monitor::createAndShow(this, m_doc);
+}
+
+void App::slotControlBlackout()
+{
+    m_doc->outputMap()->setBlackout(!m_doc->outputMap()->blackout());
+}
+
+void App::slotBlackoutChanged(bool state)
+{
+    m_controlBlackoutAction->setChecked(state);
+}
+
+void App::slotControlPanic()
+{
+    m_doc->masterTimer()->stopAllFunctions();
+}
+
+void App::slotRunningFunctionsChanged()
+{
+    if (m_doc->masterTimer()->runningFunctions() > 0)
+        m_controlPanicAction->setEnabled(true);
+    else
+        m_controlPanicAction->setEnabled(false);
 }
 
 void App::slotControlFullScreen()

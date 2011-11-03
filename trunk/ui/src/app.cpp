@@ -486,6 +486,14 @@ void App::initToolBar()
     m_toolbar->addAction(m_controlBlackoutAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_modeToggleAction);
+
+    connect(m_toolbar, SIGNAL(visibilityChanged(bool)), this, SLOT(slotToolBarVisibilityChanged(bool)));
+}
+
+void App::slotToolBarVisibilityChanged(bool visible)
+{
+    if (visible == false)
+        m_toolbar->show();
 }
 
 /*****************************************************************************

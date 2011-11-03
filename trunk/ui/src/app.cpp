@@ -466,17 +466,20 @@ void App::initToolBar()
     m_toolbar->addAction(m_fileSaveAsAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_controlMonitorAction);
-    m_toolbar->addAction(m_modeToggleAction);
-    m_toolbar->addAction(m_controlBlackoutAction);
-    m_toolbar->addAction(m_controlPanicAction);
+    m_toolbar->addAction(m_controlFullScreenAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_helpIndexAction);
+    m_toolbar->addAction(m_helpAboutAction);
 
     /* Create an empty widget between help items to flush them to the right */
     QWidget* widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_toolbar->addWidget(widget);
-    m_toolbar->addAction(m_controlFullScreenAction);
-    m_toolbar->addAction(m_helpIndexAction);
-    m_toolbar->addAction(m_helpAboutAction);
+    m_toolbar->addAction(m_controlPanicAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_controlBlackoutAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_modeToggleAction);
 }
 
 /*****************************************************************************

@@ -145,7 +145,7 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
 
     initActions();
     initDockArea();
-    m_contentsLayout = new QVBoxLayout(this);
+    m_contentsLayout = new QVBoxLayout;
     layout()->addItem(m_contentsLayout);
     initMenuBar();
     initContents();

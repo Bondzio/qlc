@@ -67,7 +67,6 @@ App::App() : QMainWindow()
     , m_fileOpenAction(NULL)
     , m_fileSaveAction(NULL)
     , m_fileSaveAsAction(NULL)
-    , m_fileQuitAction(NULL)
 
     , m_modeToggleAction(NULL)
     , m_controlMonitorAction(NULL)
@@ -77,10 +76,6 @@ App::App() : QMainWindow()
 
     , m_helpIndexAction(NULL)
     , m_helpAboutAction(NULL)
-
-#ifdef __APPLE__
-    , m_fileMenu(NULL)
-#endif
 
     , m_toolbar(NULL)
 {
@@ -166,8 +161,6 @@ void App::init()
     initDoc();
     // Main view actions
     initActions();
-    // Main menu bar
-    initMenuBar();
     // Main tool bar
     initToolBar();
 
@@ -276,6 +269,15 @@ void App::slotSetProgressText(const QString& text)
  * Doc
  *****************************************************************************/
 
+void App::clearDocument()
+{
+    m_doc->clearContents();
+    VirtualConsole::instance()->resetContents();
+    m_doc->outputMap()->resetUniverses();
+    setFileName(QString());
+    m_doc->resetModified();
+}
+
 void App::initDoc()
 {
     Q_ASSERT(m_doc == NULL);
@@ -368,7 +370,6 @@ void App::slotModeChanged(Doc::Mode mode)
         /* Disable editing features */
         m_fileNewAction->setEnabled(false);
         m_fileOpenAction->setEnabled(false);
-        m_fileQuitAction->setEnabled(false);
 
         m_modeToggleAction->setIcon(QIcon(":/design.png"));
         m_modeToggleAction->setText(tr("Design"));
@@ -379,7 +380,6 @@ void App::slotModeChanged(Doc::Mode mode)
         /* Enable editing features */
         m_fileNewAction->setEnabled(true);
         m_fileOpenAction->setEnabled(true);
-        m_fileQuitAction->setEnabled(true);
 
         m_modeToggleAction->setIcon(QIcon(":/operate.png"));
         m_modeToggleAction->setText(tr("Operate"));
@@ -388,7 +388,7 @@ void App::slotModeChanged(Doc::Mode mode)
 }
 
 /*****************************************************************************
- * Actions, menubar, toolbar, statusbar
+ * Actions and toolbar
  *****************************************************************************/
 
 void App::initActions()
@@ -408,10 +408,6 @@ void App::initActions()
 
     m_fileSaveAsAction = new QAction(QIcon(":/filesaveas.png"), tr("Save &As..."), this);
     connect(m_fileSaveAsAction, SIGNAL(triggered(bool)), this, SLOT(slotFileSaveAs()));
-
-    m_fileQuitAction = new QAction(QIcon(":/exit.png"), tr("&Quit"), this);
-    m_fileQuitAction->setShortcut(QKeySequence(tr("CTRL+Q", "File|Quit")));
-    connect(m_fileQuitAction, SIGNAL(triggered(bool)), this, SLOT(slotFileQuit()));
 
     /* Control actions */
     m_modeToggleAction = new QAction(QIcon(":/operate.png"), tr("&Operate"), this);
@@ -444,19 +440,6 @@ void App::initActions()
 
     m_helpAboutAction = new QAction(QIcon(":/qlc.png"), tr("&About QLC"), this);
     connect(m_helpAboutAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAbout()));
-}
-
-void App::initMenuBar()
-{
-#ifdef __APPLE__
-    QMenuBar *menuBar = new QMenuBar(this);
-
-    /* Since the menubar is there in Apple anyway, put the quit action there. */
-    m_fileMenu = new QMenu(menuBar);
-    m_fileMenu->setTitle(tr("&File"));
-    menuBar->addMenu(m_fileMenu);
-    m_fileMenu->addAction(m_fileQuitAction);
-#endif
 }
 
 void App::initToolBar()
@@ -492,6 +475,7 @@ void App::initToolBar()
 
 void App::slotToolBarVisibilityChanged(bool visible)
 {
+    // Don't allow hiding the main toolbar
     if (visible == false)
         m_toolbar->show();
 }
@@ -577,15 +561,6 @@ bool App::slotFileNew()
     }
 
     return result;
-}
-
-void App::clearDocument()
-{
-    m_doc->clearContents();
-    VirtualConsole::instance()->resetContents();
-    m_doc->outputMap()->resetUniverses();
-    setFileName(QString());
-    m_doc->resetModified();
 }
 
 QFile::FileError App::slotFileOpen()
@@ -724,11 +699,6 @@ QFile::FileError App::slotFileSaveAs()
     QFile::FileError error = saveXML(fn);
     handleFileError(error);
     return error;
-}
-
-void App::slotFileQuit()
-{
-    close();
 }
 
 /*****************************************************************************
@@ -932,4 +902,3 @@ QFile::FileError App::saveXML(const QString& fileName)
 
     return retval;
 }
-

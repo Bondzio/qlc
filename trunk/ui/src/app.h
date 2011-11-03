@@ -40,7 +40,6 @@ class QToolBar;
 class QPixmap;
 class QAction;
 class QLabel;
-class QMenu;
 class App;
 
 #define KXMLQLCWorkspace "Workspace"
@@ -96,18 +95,14 @@ public slots:
     void slotModeOperate();
     void slotModeDesign();
     void slotModeToggle();
-
     void slotModeChanged(Doc::Mode mode);
 
     /*********************************************************************
-     * Menus & toolbars
+     * Actions and toolbar
      *********************************************************************/
 private:
     void initActions();
-    void initMenuBar();
     void initToolBar();
-
-    /** Displays an error message if a file error has occurred */
     bool handleFileError(QFile::FileError error);
 
 public slots:
@@ -117,7 +112,6 @@ public slots:
     QFile::FileError slotFileOpen();
     QFile::FileError slotFileSave();
     QFile::FileError slotFileSaveAs();
-    void slotFileQuit();
 
     void slotControlMonitor();
     void slotControlFullScreen();
@@ -134,7 +128,6 @@ private:
     QAction* m_fileOpenAction;
     QAction* m_fileSaveAction;
     QAction* m_fileSaveAsAction;
-    QAction* m_fileQuitAction;
 
     QAction* m_modeToggleAction;
     QAction* m_controlMonitorAction;
@@ -146,9 +139,6 @@ private:
     QAction* m_helpAboutAction;
 
 private:
-#ifdef __APPLE__
-    QMenu* m_fileMenu;
-#endif
     QToolBar* m_toolbar;
 
     /*********************************************************************

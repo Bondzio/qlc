@@ -225,14 +225,8 @@ void FunctionManager::initActions()
 
 void FunctionManager::initMenu()
 {
-    QMenuBar* menuBar = new QMenuBar(this);
-
-#ifndef __APPLE__
-    layout()->setMenuBar(menuBar);
-#endif
-
     /* Function menu */
-    m_addMenu = new QMenu(menuBar);
+    m_addMenu = new QMenu(this);
     m_addMenu->setTitle(tr("&Add"));
     m_addMenu->addAction(m_addSceneAction);
     m_addMenu->addAction(m_addChaserAction);
@@ -244,7 +238,7 @@ void FunctionManager::initMenu()
     m_addMenu->addAction(m_wizardAction);
 
     /* Edit menu */
-    m_editMenu = new QMenu(menuBar);
+    m_editMenu = new QMenu(this);
     m_editMenu->setTitle(tr("&Edit"));
     m_editMenu->addAction(m_editAction);
     m_editMenu->addSeparator();
@@ -252,11 +246,6 @@ void FunctionManager::initMenu()
     m_editMenu->addAction(m_selectAllAction);
     m_editMenu->addSeparator();
     m_editMenu->addAction(m_deleteAction);
-    m_editMenu->addSeparator();
-
-    /* Construct menu bar */
-    menuBar->addMenu(m_addMenu);
-    menuBar->addMenu(m_editMenu);
 }
 
 void FunctionManager::initToolbar()

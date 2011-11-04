@@ -418,6 +418,22 @@ void VCWidget::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
  * Key sequence handler
  *****************************************************************************/
 
+QKeySequence VCWidget::stripKeySequence(const QKeySequence& seq)
+{
+    /* In QLC 3.2.x it is possible to set shortcuts like CTRL+X, but since
+       CTRL is now the tap modifier, it must be stripped away. */
+    int keys[4] = { 0, 0, 0, 0 };
+    for (uint i = 0; i < seq.count() && i < 4; i++)
+    {
+        if ((seq[i] & Qt::ControlModifier) != 0)
+            keys[i] = seq[i] & (~Qt::ControlModifier);
+        else
+            keys[i] = seq[i];
+    }
+
+    return QKeySequence(keys[0], keys[1], keys[2], keys[3]);
+}
+
 void VCWidget::slotKeyPressed(const QKeySequence& keySequence)
 {
     emit keyPressed(keySequence);

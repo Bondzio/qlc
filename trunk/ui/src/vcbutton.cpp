@@ -701,7 +701,7 @@ bool VCButton::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCVCButtonKey)
         {
-            setKeySequence(QKeySequence(tag.text()));
+            setKeySequence(stripKeySequence(QKeySequence(tag.text())));
         }
         else if (tag.tagName() == KXMLQLCVCButtonIntensity)
         {

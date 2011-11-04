@@ -42,9 +42,13 @@
 #include "chaser.h"
 #include "scene.h"
 #include "doc.h"
-
 #undef private
 #undef protected
+
+static const QKeySequence keySequenceA(Qt::Key_A);
+static const QKeySequence keySequenceB(Qt::Key_B);
+static const QKeySequence keySequenceC(Qt::Key_C);
+static const QKeySequence keySequenceD(Qt::Key_D);
 
 void VCCueList_Test::initTestCase()
 {
@@ -243,20 +247,20 @@ void VCCueList_Test::keySequences()
     QWidget w;
 
     VCCueList cl(&w, m_doc);
-    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
-    QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Copy));
+    cl.setNextKeySequence(QKeySequence(keySequenceB));
+    QCOMPARE(cl.nextKeySequence(), QKeySequence(keySequenceB));
     QCOMPARE(cl.previousKeySequence(), QKeySequence());
     QCOMPARE(cl.stopKeySequence(), QKeySequence());
 
-    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
-    QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Copy));
-    QCOMPARE(cl.previousKeySequence(), QKeySequence(QKeySequence::Cut));
+    cl.setPreviousKeySequence(QKeySequence(keySequenceA));
+    QCOMPARE(cl.nextKeySequence(), QKeySequence(keySequenceB));
+    QCOMPARE(cl.previousKeySequence(), QKeySequence(keySequenceA));
     QCOMPARE(cl.stopKeySequence(), QKeySequence());
 
-    cl.setStopKeySequence(QKeySequence(QKeySequence::Undo));
-    QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Copy));
-    QCOMPARE(cl.previousKeySequence(), QKeySequence(QKeySequence::Cut));
-    QCOMPARE(cl.stopKeySequence(), QKeySequence(QKeySequence::Undo));
+    cl.setStopKeySequence(QKeySequence(keySequenceD));
+    QCOMPARE(cl.nextKeySequence(), QKeySequence(keySequenceB));
+    QCOMPARE(cl.previousKeySequence(), QKeySequence(keySequenceA));
+    QCOMPARE(cl.stopKeySequence(), QKeySequence(keySequenceD));
 }
 
 void VCCueList_Test::copy()
@@ -281,9 +285,9 @@ void VCCueList_Test::copy()
 
     VCCueList cl(&parent, m_doc);
     cl.setCaption("Wheeee");
-    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
-    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
-    cl.setStopKeySequence(QKeySequence(QKeySequence::Paste));
+    cl.setNextKeySequence(QKeySequence(keySequenceB));
+    cl.setPreviousKeySequence(QKeySequence(keySequenceA));
+    cl.setStopKeySequence(QKeySequence(keySequenceC));
     cl.append(s1->id());
     cl.append(s2->id());
     cl.append(s1->id());
@@ -294,9 +298,9 @@ void VCCueList_Test::copy()
     VCCueList* cl2 = qobject_cast<VCCueList*> (cl.createCopy(&parent));
     QVERIFY(cl2 != NULL);
     QCOMPARE(cl2->caption(), QString("Wheeee"));
-    QCOMPARE(cl2->nextKeySequence(), QKeySequence(QKeySequence::Copy));
-    QCOMPARE(cl2->previousKeySequence(), QKeySequence(QKeySequence::Cut));
-    QCOMPARE(cl2->stopKeySequence(), QKeySequence(QKeySequence::Paste));
+    QCOMPARE(cl2->nextKeySequence(), QKeySequence(keySequenceB));
+    QCOMPARE(cl2->previousKeySequence(), QKeySequence(keySequenceA));
+    QCOMPARE(cl2->stopKeySequence(), QKeySequence(keySequenceC));
     QCOMPARE(cl2->m_list->topLevelItemCount(), 5);
     QCOMPARE(cl2->m_list->topLevelItem(0)->text(1), s1->name());
     QCOMPARE(cl2->m_list->topLevelItem(1)->text(1), s2->name());
@@ -404,7 +408,7 @@ void VCCueList_Test::loadXML()
     nextInput.setAttribute("Channel", "1");
     next.appendChild(nextInput);
     QDomElement nextKey = xmldoc.createElement("Key");
-    QDomText nextKeyText = xmldoc.createTextNode(QKeySequence(QKeySequence::Undo).toString());
+    QDomText nextKeyText = xmldoc.createTextNode(QKeySequence(keySequenceD).toString());
     nextKey.appendChild(nextKeyText);
     next.appendChild(nextKey);
     QDomElement nextFoo = xmldoc.createElement("Foo");
@@ -417,7 +421,7 @@ void VCCueList_Test::loadXML()
     previousInput.setAttribute("Channel", "3");
     previous.appendChild(previousInput);
     QDomElement previousKey = xmldoc.createElement("Key");
-    QDomText previousKeyText = xmldoc.createTextNode(QKeySequence(QKeySequence::Paste).toString());
+    QDomText previousKeyText = xmldoc.createTextNode(QKeySequence(keySequenceC).toString());
     previousKey.appendChild(previousKeyText);
     previous.appendChild(previousKey);
     QDomElement previousFoo = xmldoc.createElement("Foo");
@@ -430,7 +434,7 @@ void VCCueList_Test::loadXML()
     stopInput.setAttribute("Channel", "5");
     stop.appendChild(stopInput);
     QDomElement stopKey = xmldoc.createElement("Key");
-    QDomText stopKeyText = xmldoc.createTextNode(QKeySequence(QKeySequence::Cut).toString());
+    QDomText stopKeyText = xmldoc.createTextNode(QKeySequence(keySequenceA).toString());
     stopKey.appendChild(stopKeyText);
     stop.appendChild(stopKey);
     QDomElement stopFoo = xmldoc.createElement("Foo");
@@ -481,11 +485,11 @@ void VCCueList_Test::loadXML()
     QCOMPARE(cl.m_list->topLevelItem(2)->text(2).toUInt(), s3->id());
     QCOMPARE(cl.m_list->topLevelItem(3)->text(2).toUInt(), c4->id());
     QCOMPARE(cl.inputSource(VCCueList::nextInputSourceId), QLCInputSource(0, 1));
-    QCOMPARE(cl.nextKeySequence(), QKeySequence(QKeySequence::Undo));
+    QCOMPARE(cl.nextKeySequence(), QKeySequence(keySequenceD));
     QCOMPARE(cl.inputSource(VCCueList::previousInputSourceId), QLCInputSource(2, 3));
-    QCOMPARE(cl.previousKeySequence(), QKeySequence(QKeySequence::Paste));
+    QCOMPARE(cl.previousKeySequence(), QKeySequence(keySequenceC));
     QCOMPARE(cl.inputSource(VCCueList::stopInputSourceId), QLCInputSource(4, 5));
-    QCOMPARE(cl.stopKeySequence(), QKeySequence(QKeySequence::Cut));
+    QCOMPARE(cl.stopKeySequence(), QKeySequence(keySequenceA));
 
     QCOMPARE(cl.pos(), QPoint(3, 4));
     QCOMPARE(cl.size(), QSize(42, 69));
@@ -531,9 +535,9 @@ void VCCueList_Test::saveXML()
     cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
     cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
     cl.setInputSource(QLCInputSource(4, 5), VCCueList::stopInputSourceId);
-    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
-    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
-    cl.setStopKeySequence(QKeySequence(QKeySequence::Paste));
+    cl.setNextKeySequence(QKeySequence(keySequenceB));
+    cl.setPreviousKeySequence(QKeySequence(keySequenceA));
+    cl.setStopKeySequence(QKeySequence(keySequenceC));
 
     QDomDocument xmldoc;
     QDomElement root = xmldoc.createElement("TestRoot");
@@ -568,7 +572,7 @@ void VCCueList_Test::saveXML()
                 if (subtag.tagName() == "Key")
                 {
                     nextKey++;
-                    QCOMPARE(subtag.text(), QKeySequence(QKeySequence::Copy).toString());
+                    QCOMPARE(subtag.text(), QKeySequence(keySequenceB).toString());
                 }
                 else if (subtag.tagName() == "Input")
                 {
@@ -593,7 +597,7 @@ void VCCueList_Test::saveXML()
                 if (subtag.tagName() == "Key")
                 {
                     previousKey++;
-                    QCOMPARE(subtag.text(), QKeySequence(QKeySequence::Cut).toString());
+                    QCOMPARE(subtag.text(), QKeySequence(keySequenceA).toString());
                 }
                 else if (subtag.tagName() == "Input")
                 {
@@ -618,7 +622,7 @@ void VCCueList_Test::saveXML()
                 if (subtag.tagName() == "Key")
                 {
                     stopKey++;
-                    QCOMPARE(subtag.text(), QKeySequence(QKeySequence::Paste).toString());
+                    QCOMPARE(subtag.text(), QKeySequence(keySequenceC).toString());
                 }
                 else if (subtag.tagName() == "Input")
                 {
@@ -920,22 +924,22 @@ void VCCueList_Test::keyboardNextPrevious()
     cl.append(s2->id());
     cl.append(s3->id());
     cl.append(s4->id());
-    cl.setNextKeySequence(QKeySequence(QKeySequence::Copy));
-    cl.setPreviousKeySequence(QKeySequence(QKeySequence::Cut));
-    cl.setStopKeySequence(QKeySequence(QKeySequence::Undo));
+    cl.setNextKeySequence(QKeySequence(keySequenceB));
+    cl.setPreviousKeySequence(QKeySequence(keySequenceA));
+    cl.setStopKeySequence(QKeySequence(keySequenceD));
 
     // Switch mode
     m_doc->setMode(Doc::Operate);
     MasterTimer* timer = m_doc->masterTimer();
 
     // Next keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     // Next keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 1);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
@@ -947,25 +951,25 @@ void VCCueList_Test::keyboardNextPrevious()
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
 
     // Previous keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Cut));
+    cl.slotKeyPressed(QKeySequence(keySequenceA));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     // Previous keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Cut));
+    cl.slotKeyPressed(QKeySequence(keySequenceA));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 3);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
 
     // Next keyboard key
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Copy));
+    cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
 
     // Stop
-    cl.slotKeyPressed(QKeySequence(QKeySequence::Undo));
+    cl.slotKeyPressed(QKeySequence(keySequenceD));
     timer->timerTick();
     QVERIFY(cl.m_runner == NULL);
     QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), -1);

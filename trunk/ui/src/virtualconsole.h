@@ -341,7 +341,6 @@ signals:
 
 private:
     bool m_tapModifierDown;
-    int m_tapModifierKey;
 
     /*********************************************************************
      * Main application mode

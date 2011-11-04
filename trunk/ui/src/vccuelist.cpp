@@ -515,7 +515,7 @@ bool VCCueList::loadXML(const QDomElement* root)
                 }
                 else if (subTag.tagName() == KXMLQLCVCCueListKey)
                 {
-                    m_nextKeySequence = QKeySequence(subTag.text());
+                    m_nextKeySequence = stripKeySequence(QKeySequence(subTag.text()));
                 }
                 else
                 {
@@ -540,7 +540,7 @@ bool VCCueList::loadXML(const QDomElement* root)
                 }
                 else if (subTag.tagName() == KXMLQLCVCCueListKey)
                 {
-                    m_previousKeySequence = QKeySequence(subTag.text());
+                    m_previousKeySequence = stripKeySequence(QKeySequence(subTag.text()));
                 }
                 else
                 {
@@ -565,7 +565,7 @@ bool VCCueList::loadXML(const QDomElement* root)
                 }
                 else if (subTag.tagName() == KXMLQLCVCCueListKey)
                 {
-                    m_stopKeySequence = QKeySequence(subTag.text());
+                    m_stopKeySequence = stripKeySequence(QKeySequence(subTag.text()));
                 }
                 else
                 {

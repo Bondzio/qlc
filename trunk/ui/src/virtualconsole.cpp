@@ -131,7 +131,6 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_contents(NULL)
 
     , m_tapModifierDown(false)
-    , m_tapModifierKey(Qt::ControlModifier)
 {
     Q_ASSERT(s_instance == NULL);
     Q_ASSERT(doc != NULL);
@@ -1401,10 +1400,10 @@ void VirtualConsole::keyPressEvent(QKeyEvent* event)
         return;
     }
 
-    if ((event->modifiers() & m_tapModifierKey) != 0)
+    if ((event->modifiers() & Qt::ControlModifier) != 0)
         m_tapModifierDown = true;
 
-    QKeySequence seq(event->key() | (event->modifiers() & ~m_tapModifierKey));
+    QKeySequence seq(event->key() | (event->modifiers() & ~Qt::ControlModifier));
     emit keyPressed(seq);
 
     event->accept();
@@ -1418,7 +1417,7 @@ void VirtualConsole::keyReleaseEvent(QKeyEvent* event)
         return;
     }
 
-    if ((event->modifiers() & m_tapModifierKey) == 0)
+    if ((event->modifiers() & Qt::ControlModifier) == 0)
         m_tapModifierDown = false;
 
     QKeySequence seq(event->key() | event->modifiers());

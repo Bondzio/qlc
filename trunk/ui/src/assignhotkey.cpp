@@ -39,12 +39,10 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
     setupUi(this);
 
 #if defined(__APPLE__) || defined(WIN32)
-    QString ctrl(QKeySequence(Qt::Key_Control).toString(QKeySequence::NativeText));
     QString shift(QKeySequence(Qt::Key_Shift).toString(QKeySequence::NativeText));
     QString alt(QKeySequence(Qt::Key_Alt).toString(QKeySequence::NativeText));
     QString meta(QKeySequence(Qt::Key_Meta).toString(QKeySequence::NativeText));
 #else
-    QString ctrl("Ctrl");
     QString shift("Shift");
     QString alt("Alt");
     QString meta("Meta");
@@ -54,7 +52,7 @@ AssignHotKey::AssignHotKey(QWidget* parent, const QKeySequence& keySequence)
     str += QString("<H1>") + tr("Assign Key") + QString("</H1>");
     str += tr("Hit the key combination that you wish to assign. "
               "You may hit either a single key or a combination "
-              "using %1, %2, %3 and %4.").arg(ctrl).arg(shift).arg(alt).arg(meta);
+              "using %1, %2, and %3.").arg(shift).arg(alt).arg(meta);
     str += QString("</CENTER></BODY></HTML>");
 
     m_infoText->setText(str);
@@ -91,7 +89,7 @@ void AssignHotKey::keyPressEvent(QKeyEvent* event)
         key = 0;
     }
 
-    m_keySequence = QKeySequence(key | event->modifiers());
+    m_keySequence = QKeySequence(key | (event->modifiers() & ~Qt::ControlModifier));
     m_previewEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
 
     if (m_autoCloseCheckBox->isChecked() == true && key != 0)

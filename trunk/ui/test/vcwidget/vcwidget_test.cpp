@@ -374,6 +374,16 @@ void VCWidget_Test::copy()
     QVERIFY(copy.inputSource(2).isValid() == false);
 }
 
+void VCWidget_Test::stripKeySequence()
+{
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("P")), QKeySequence("P"));
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("CTRL+P")), QKeySequence("P"));
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("ALT+P")), QKeySequence("ALT+P"));
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("CTRL+ALT+P")), QKeySequence("ALT+P"));
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("CTRL+ALT")), QKeySequence("ALT"));
+    QCOMPARE(VCWidget::stripKeySequence(QKeySequence("SHIFT+CTRL+ALT+P")), QKeySequence("SHIFT+ALT+P"));
+}
+
 void VCWidget_Test::keyPress()
 {
     QWidget w;

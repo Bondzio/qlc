@@ -46,6 +46,7 @@ private slots:
     void frame();
     void inputSource();
     void copy();
+    void stripKeySequence();
     void keyPress();
     void loadInput();
     void loadAppearance();

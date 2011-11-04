@@ -118,9 +118,7 @@ void MonitorFixture::setFixture(quint32 fxi_id)
 
         /* Create a new fixture label and set the fixture name there */
         m_fixtureLabel = new QLabel(this);
-        m_fixtureLabel->setText(QString("<B>%1</B> <I>(Universe %2)</I>")
-                                .arg(fxi->name())
-                                .arg(fxi->universe() + 1));
+        m_fixtureLabel->setText(QString("<B>%1</B>").arg(fxi->name()));
 
         /* Set the fixture name to span all channels horizontally */
         lay->addWidget(m_fixtureLabel, 0, 0, 1, fxi->channels(),

@@ -39,7 +39,7 @@ RGBItem::~RGBItem()
 
 void RGBItem::setColor(QRgb rgb)
 {
-    m_oldColor = m_color;
+    m_oldColor = brush().color();
     m_color = QColor(rgb);
     m_elapsed = 0;
 }
@@ -51,11 +51,11 @@ QRgb RGBItem::color() const
 
 void RGBItem::draw(uint ms)
 {
-    if (m_elapsed >= ms)
+    if (ms == 0)
     {
         setBrush(m_color);
     }
-    else
+    else if (m_elapsed <= ms)
     {
         int red, green, blue;
         if (m_oldColor.red() < m_color.red())

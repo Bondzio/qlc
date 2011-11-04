@@ -43,16 +43,16 @@
    the global namespace. */
 namespace QLCArgs
 {
-/**
- * If true, switch to operate mode after ALL initialization is done.
- */
-bool operate;
+    /**
+     * If true, switch to operate mode after ALL initialization is done.
+     */
+    bool operate;
 
-/**
- * Specifies a workspace file name to load after all initialization
- * has been done, but before switching to operate mode (if applicable)
- */
-QString workspace;
+    /**
+     * Specifies a workspace file name to load after all initialization
+     * has been done, but before switching to operate mode (if applicable)
+     */
+    QString workspace;
 }
 
 /**
@@ -146,12 +146,6 @@ int main(int argc, char** argv)
 {
     /* Create the Qt core application object */
     QApplication qapp(argc, argv);
-    qapp.setAttribute(Qt::AA_DontShowIconsInMenus, false);
-
-#ifdef __linux__
-    // Disabled because Ubuntu Unity freaks out
-    qapp.setAttribute(Qt::AA_DontUseNativeMenuBar);
-#endif
 
 #ifdef __APPLE__
     /* Load plugins from within the bundle ONLY */
@@ -172,11 +166,6 @@ int main(int argc, char** argv)
 
     /* Load translation for main application */
     QLCi18n::loadTranslation("qlc");
-
-    /* Registering needed to pass signals with these types between
-       different contexts (threads) */
-    qRegisterMetaType <quint32>("quint32");
-    qRegisterMetaType <QHash<quint32,uchar> >("QHash<quint32,uchar>");
 
     /* Create and initialize the QLC application object */
     App app;

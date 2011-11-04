@@ -62,6 +62,12 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
 
     setupUi(this);
 
+    // Set a nice gradient backdrop
+    m_scene->setBackgroundBrush(Qt::darkGray);
+    QLinearGradient gradient(200, 200, 200, 2000);
+    gradient.setSpread(QGradient::ReflectSpread);
+    m_scene->setBackgroundBrush(gradient);
+
     QAction* action = new QAction(this);
     action->setShortcut(QKeySequence(QKeySequence::Close));
     connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));

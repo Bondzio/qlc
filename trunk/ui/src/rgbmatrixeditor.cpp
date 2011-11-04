@@ -55,6 +55,7 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     , m_scene(new QGraphicsScene(this))
     , m_previewTimer(new QTimer(this))
     , m_previewIterator(0)
+    , m_previewIncrement(MasterTimer::tick())
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(mtx != NULL);
@@ -266,7 +267,21 @@ void RGBMatrixEditor::slotPreviewTimeout()
     if (m_mtx->duration() <= 0)
         return;
 
-    m_previewIterator = (m_previewIterator + MasterTimer::tick()) % m_mtx->duration();
+    if (m_mtx->runOrder() == Function::PingPong)
+    {
+        m_previewIterator += m_previewIncrement;
+        if (m_previewIterator > m_mtx->duration())
+        {
+            m_previewIncrement = -(m_previewIncrement);
+            m_previewIterator += (m_previewIncrement * 4); // Why 4 times??
+        }
+    }
+    else
+    {
+        m_previewIncrement = MasterTimer::tick();
+        m_previewIterator = (m_previewIterator + m_previewIncrement) % m_mtx->duration();
+    }
+
     RGBMap map = m_mtx->colorMap(m_previewIterator, m_mtx->duration());
 
     for (int y = 0; y < map.size(); y++)

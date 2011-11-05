@@ -208,54 +208,44 @@ QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
     }
 }
 
-bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
+bool RGBMatrix::outwardBox(uint elapsed, uint duration, Function::Direction direction,
                            const QSize& size, QRgb color, RGBMap& map)
 {
-    qreal scale = 0;
-    if (duration > 0)
-        scale = elapsed / duration;
-
-    if (direction == Function::Backward)
-        scale = 1.0 - scale;
+    if (direction == Backward)
+        elapsed = duration - elapsed;
 
     // Make sure we don't go beyond $map's boundaries
-    qreal left   = ceil(qreal(size.width()) / qreal(2));
-    left         = left - (left * scale);
-    left         = CLAMP(left, 0, size.width() - 1);
+    uint hsteps = floor((qreal(size.width()) / qreal(2)) + 0.5);
+    uint hstep  = elapsed / (duration / hsteps);
+    uint left   = MIN(hsteps - hstep - 1, uint(size.width() - 1));
+    uint right  = MIN((size.width() - hsteps) + hstep, uint(size.width() - 1));
 
-    qreal right  = floor(qreal(size.width()) / qreal(2));
-    right        = right + ((size.width() - right) * scale);
-    right        = CLAMP(right, 0, size.width() - 1);
-
-    qreal top    = ceil(qreal(size.height()) / qreal(2));
-    top          = top - (top * scale);
-    top          = CLAMP(top, 0, size.height() - 1);
-
-    qreal bottom = floor(qreal(size.height()) / qreal(2));
-    bottom       = bottom + ((size.height() - bottom) * scale);
-    bottom       = CLAMP(bottom, 0, size.height() - 1);
+    uint vsteps = floor((qreal(size.height()) / qreal(2)) + 0.5);
+    uint vstep  = elapsed / (duration / vsteps);
+    uint top    = MIN(vsteps - vstep - 1, uint(size.height() - 1));
+    uint bottom = MIN((size.height() - vsteps) + vstep, uint(size.height() - 1));
 
     // Check if the new steps are different than the previous ones
-    if (m_stepW != int(left) || m_stepH != int(top))
+    if (m_stepW != left || m_stepH != top)
     {
         // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = left; i <= right; i++)
+        for (uint i = left; i <= right; i++)
         {
             map[top][i] = color;
             map[bottom][i] = color;
         }
 
-        for (int i = top; i <= bottom; i++)
+        for (uint i = top; i <= bottom; i++)
         {
             map[i][left] = color;
             map[i][right] = color;
         }
 
-        m_stepW = int(left);
-        m_stepH = int(top);
+        m_stepW = left;
+        m_stepH = top;
 
         return true;
     }
@@ -266,29 +256,31 @@ bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction di
     }
 }
 
-bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction direction,
+bool RGBMatrix::fullRows(uint elapsed, uint duration, Function::Direction direction,
                          const QSize& size, QRgb color, RGBMap& map)
 {
-    // Make sure we don't go beyond $map's boundaries
-    int left  = 0;
-    int right = size.width();
-    int top   = CLAMP(int(elapsed) / (int(duration) / size.height()), 0, size.height() - 1);
-    int bottom = top;
+    if (direction == Backward)
+        elapsed = duration - elapsed;
+
+    uint top    = MIN(elapsed / (duration / size.height()), uint(size.height() - 1));
+    uint bottom = top;
+    uint left   = 0;
+    uint right  = size.width();
 
     // Check if the new steps are different than the previous ones
-    if (m_stepH != int(top))
+    if (m_stepH != top)
     {
         // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = left; i < right; i++)
+        for (uint i = left; i < right; i++)
         {
             map[top][i] = color;
             map[bottom][i] = color;
         }
 
-        m_stepH = int(top);
+        m_stepH = top;
         return true;
     }
     else
@@ -298,29 +290,31 @@ bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
     }
 }
 
-bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
+bool RGBMatrix::fullColumns(uint elapsed, uint duration, Function::Direction direction,
                             const QSize& size, QRgb color, RGBMap& map)
 {
-    // Make sure we don't go beyond $map's boundaries
-    int left   = CLAMP(int(elapsed) / (int(duration) / size.width()), 0, size.width() - 1);
-    int right  = left;
-    int top    = 0;
-    int bottom = size.height();
+    if (direction == Backward)
+        elapsed = duration - elapsed;
+
+    uint left   = MIN(elapsed / (duration / size.width()), uint(size.width() - 1));
+    uint right  = left;
+    uint top    = 0;
+    uint bottom = size.height();
 
     // Check if the new steps are different than the previous ones
-    if (m_stepW != int(left))
+    if (m_stepW != left)
     {
         // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = top; i < bottom; i++)
+        for (uint i = top; i < bottom; i++)
         {
             map[i][left] = color;
             map[i][right] = color;
         }
 
-        m_stepW = int(left);
+        m_stepW = left;
         return true;
     }
     else
@@ -330,22 +324,24 @@ bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
     }
 }
 
-bool RGBMatrix::evenOddRows(qreal elapsed, qreal duration, Function::Direction direction,
+bool RGBMatrix::evenOddRows(uint elapsed, uint duration, Function::Direction direction,
                             const QSize& size, QRgb color, RGBMap& map)
 {
-    // Make sure we don't go beyond $map's boundaries
-    int left   = CLAMP(int(elapsed) / (int(duration) / size.width()), 0, size.width() - 1);
-    int right  = CLAMP(size.width() - 1 - left, 0, size.width() - 1);
-    int top    = 0;
-    int bottom = size.height();
+    if (direction == Backward)
+        elapsed = duration - elapsed;
 
-    if (m_stepW != int(left))
+    uint left   = MIN(elapsed / (duration / size.width()), uint(size.width() - 1));
+    uint right  = MIN(size.width() - 1 - left, uint(size.width() - 1));
+    uint top    = 0;
+    uint bottom = size.height();
+
+    if (m_stepW != left)
     {
         // Need to create a new colormap
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = top; i < bottom; i++)
+        for (uint i = top; i < bottom; i++)
         {
             if ((i % 2) == 0)
                 map[i][left] = color;
@@ -353,7 +349,7 @@ bool RGBMatrix::evenOddRows(qreal elapsed, qreal duration, Function::Direction d
                 map[i][right] = color;
         }
 
-        m_stepW = int(left);
+        m_stepW = left;
         return true;
     }
     else

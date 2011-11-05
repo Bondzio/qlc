@@ -91,20 +91,20 @@ public:
     static QString patternToString(RGBMatrix::Pattern pat);
 
 private:
-    bool outwardBox(qreal elapsed, qreal duration, Function::Direction direction,
+    bool outwardBox(uint elapsed, uint duration, Function::Direction direction,
                     const QSize& size, QRgb color, RGBMap& map);
-    bool fullRows(qreal elapsed, qreal duration, Function::Direction direction,
+    bool fullRows(uint elapsed, uint duration, Function::Direction direction,
                   const QSize& size, QRgb color, RGBMap& map);
-    bool fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
+    bool fullColumns(uint elapsed, uint duration, Function::Direction direction,
                      const QSize& size, QRgb color, RGBMap& map);
-    bool evenOddRows(qreal elapsed, qreal duration, Function::Direction direction,
+    bool evenOddRows(uint elapsed, uint duration, Function::Direction direction,
                      const QSize& size, QRgb color, RGBMap& map);
 
 private:
     Pattern m_pattern;
     RGBMap m_colorMap;
-    int m_stepH;
-    int m_stepW;
+    uint m_stepH;
+    uint m_stepW;
 
     /************************************************************************
      * Colour

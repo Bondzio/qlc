@@ -269,18 +269,11 @@ bool RGBMatrix::outwardBox(qreal elapsed, qreal duration, Function::Direction di
 bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction direction,
                          const QSize& size, QRgb color, RGBMap& map)
 {
-    qreal scale = 0;
-    if (duration > 0)
-        scale = elapsed / duration;
-
-    if (direction == Function::Backward)
-        scale = 1.0 - scale;
-
     // Make sure we don't go beyond $map's boundaries
-    qreal left   = qreal(0);
-    qreal right  = qreal(size.width() - 1);
-    qreal top    = MIN(scale * qreal(size.height()), qreal(size.height() - 1));
-    qreal bottom = top;
+    int left  = 0;
+    int right = size.width();
+    int top   = CLAMP(int(elapsed) / (int(duration) / size.height()), 0, size.height() - 1);
+    int bottom = top;
 
     // Check if the new steps are different than the previous ones
     if (m_stepH != int(top))
@@ -289,7 +282,7 @@ bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = left; i <= right; i++)
+        for (int i = left; i < right; i++)
         {
             map[top][i] = color;
             map[bottom][i] = color;
@@ -308,18 +301,11 @@ bool RGBMatrix::fullRows(qreal elapsed, qreal duration, Function::Direction dire
 bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
                             const QSize& size, QRgb color, RGBMap& map)
 {
-    qreal scale = 0;
-    if (duration > 0)
-        scale = elapsed / duration;
-
-    if (direction == Function::Backward)
-        scale = 1.0 - scale;
-
     // Make sure we don't go beyond $map's boundaries
-    qreal left   = MIN(scale * qreal(size.width()), qreal(size.width() - 1));
-    qreal right  = left;
-    qreal top    = qreal(0);
-    qreal bottom = qreal(size.height() - 1);
+    int left   = CLAMP(int(elapsed) / (int(duration) / size.width()), 0, size.width() - 1);
+    int right  = left;
+    int top    = 0;
+    int bottom = size.height();
 
     // Check if the new steps are different than the previous ones
     if (m_stepW != int(left))
@@ -328,7 +314,7 @@ bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
         for (int y = 0; y < map.size(); y++)
             map[y].fill(0, map[y].size());
 
-        for (int i = top; i <= bottom; i++)
+        for (int i = top; i < bottom; i++)
         {
             map[i][left] = color;
             map[i][right] = color;

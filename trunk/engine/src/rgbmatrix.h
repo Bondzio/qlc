@@ -72,10 +72,12 @@ private:
      * Pattern
      ************************************************************************/
 public:
-    enum Pattern {
+    enum Pattern
+    {
         OutwardBox,
         FullRows,
-        FullColumns
+        FullColumns,
+        EvenOddRows
     };
 
     static QStringList patternNames();
@@ -94,6 +96,8 @@ private:
     bool fullRows(qreal elapsed, qreal duration, Function::Direction direction,
                   const QSize& size, QRgb color, RGBMap& map);
     bool fullColumns(qreal elapsed, qreal duration, Function::Direction direction,
+                     const QSize& size, QRgb color, RGBMap& map);
+    bool evenOddRows(qreal elapsed, qreal duration, Function::Direction direction,
                      const QSize& size, QRgb color, RGBMap& map);
 
 private:

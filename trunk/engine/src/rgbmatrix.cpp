@@ -40,6 +40,7 @@
 #define KPatternOutwardBox  "Outward Box"
 #define KPatternFullRows    "Full Rows"
 #define KPatternFullColumns "Full Columns"
+#define KPatternEvenOddRows "Even/Odd Rows"
 
 /****************************************************************************
  * Initialization
@@ -117,6 +118,7 @@ QStringList RGBMatrix::patternNames()
     list << patternToString(RGBMatrix::OutwardBox);
     list << patternToString(RGBMatrix::FullRows);
     list << patternToString(RGBMatrix::FullColumns);
+    list << patternToString(RGBMatrix::EvenOddRows);
     return list;
 }
 
@@ -161,6 +163,10 @@ RGBMap RGBMatrix::colorMap(uint elapsed, uint duration, bool* changed)
         colorMapChanged = fullColumns(elapsed, duration, direction(), grp->size(),
                                       monoColor().rgba(), m_colorMap);
         break;
+    case EvenOddRows:
+        colorMapChanged = evenOddRows(elapsed, duration, direction(), grp->size(),
+                                      monoColor().rgba(), m_colorMap);
+        break;
     default:
         break;
     }
@@ -179,6 +185,8 @@ RGBMatrix::Pattern RGBMatrix::stringToPattern(const QString& str)
         return FullRows;
     else if (str == KPatternFullColumns)
         return FullColumns;
+    else if (str == KPatternEvenOddRows)
+        return EvenOddRows;
     else
         return OutwardBox;
 }
@@ -193,6 +201,8 @@ QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
         return KPatternFullRows;
     case RGBMatrix::FullColumns:
         return KPatternFullColumns;
+    case RGBMatrix::EvenOddRows:
+        return KPatternEvenOddRows;
     default:
         return KPatternOutwardBox;
     }
@@ -322,6 +332,39 @@ bool RGBMatrix::fullColumns(qreal elapsed, qreal duration, Function::Direction d
         {
             map[i][left] = color;
             map[i][right] = color;
+        }
+
+        m_stepW = int(left);
+        return true;
+    }
+    else
+    {
+        // No need to create a new colormap. The previous one applies.
+        return false;
+    }
+}
+
+bool RGBMatrix::evenOddRows(qreal elapsed, qreal duration, Function::Direction direction,
+                            const QSize& size, QRgb color, RGBMap& map)
+{
+    // Make sure we don't go beyond $map's boundaries
+    int left   = CLAMP(int(elapsed) / (int(duration) / size.width()), 0, size.width() - 1);
+    int right  = CLAMP(size.width() - 1 - left, 0, size.width() - 1);
+    int top    = 0;
+    int bottom = size.height();
+
+    if (m_stepW != int(left))
+    {
+        // Need to create a new colormap
+        for (int y = 0; y < map.size(); y++)
+            map[y].fill(0, map[y].size());
+
+        for (int i = top; i < bottom; i++)
+        {
+            if ((i % 2) == 0)
+                map[i][left] = color;
+            else
+                map[i][right] = color;
         }
 
         m_stepW = int(left);

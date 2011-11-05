@@ -132,33 +132,41 @@ RGBMatrix::Pattern RGBMatrix::pattern() const
     return m_pattern;
 }
 
-RGBMap RGBMatrix::colorMap(uint elapsed, uint duration)
+RGBMap RGBMatrix::colorMap(uint elapsed, uint duration, bool* changed)
 {
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
     if (grp == NULL)
         return RGBMap();
 
-    if (m_colorMap.size() != grp->size().height() || m_colorMap[0].size() != grp->size().width())
+    if (m_colorMap.size() != grp->size().height() ||
+        m_colorMap[0].size() != grp->size().width())
     {
         m_colorMap = RGBMap(grp->size().height());
         for (int y = 0; y < m_colorMap.size(); y++)
             m_colorMap[y].fill(0, grp->size().width());
     }
 
+    bool colorMapChanged = false;
     switch (pattern())
     {
     case OutwardBox:
-        outwardBox(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
+        colorMapChanged = outwardBox(elapsed, duration, direction(), grp->size(),
+                                     monoColor().rgba(), m_colorMap);
         break;
     case FullRows:
-        fullRows(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
+        colorMapChanged = fullRows(elapsed, duration, direction(), grp->size(),
+                                   monoColor().rgba(), m_colorMap);
         break;
     case FullColumns:
-        fullColumns(elapsed, duration, direction(), grp->size(), monoColor().rgba(), m_colorMap);
+        colorMapChanged = fullColumns(elapsed, duration, direction(), grp->size(),
+                                      monoColor().rgba(), m_colorMap);
         break;
     default:
         break;
     }
+
+    if (changed != NULL)
+        *changed = colorMapChanged;
 
     return m_colorMap;
 }
@@ -476,8 +484,53 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     if (grp == NULL)
         return;
 
-    RGBMap map = colorMap(elapsed() % duration(), duration());
+    // Get the color map for the next step
+    bool changed = false;
+    RGBMap map = colorMap(elapsed() % duration(), duration(), &changed);
 
+    // If the color map is identical to the one in the previous step (changed == false),
+    // we don't need to update fade channels; we're just fading existing channels in/out,
+    // while waiting for the next step.
+    if (changed == true)
+        updateMapChannels(map, grp);
+
+    // Run the generic fader that takes care of fading in/out individual channels
+    m_fader->write(universes);
+
+    // Check if we need to change direction or stop completely
+    if (elapsed() >= duration())
+    {
+        if (runOrder() == Function::PingPong)
+        {
+            if (m_direction == Function::Backward)
+                m_direction = Function::Forward;
+            else
+                m_direction = Function::Backward;
+        }
+        else if (runOrder() == Function::SingleShot)
+        {
+            stop();
+        }
+    }
+
+    incrementElapsed();
+}
+
+void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    Q_UNUSED(timer);
+    Q_UNUSED(universes);
+
+    Q_ASSERT(m_fader != NULL);
+    delete m_fader;
+    m_fader = NULL;
+
+    Function::postRun(timer, universes);
+}
+
+void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
+{
+    // Create/modify fade channels for ALL pixels in the color map.
     for (int y = 0; y < map.size(); y++)
     {
         for (int x = 0; x < map[y].size(); x++)
@@ -536,43 +589,15 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
             }
         }
     }
-
-    m_fader->write(universes);
-
-    if (elapsed() >= duration())
-    {
-        if (runOrder() == Function::PingPong)
-        {
-            if (m_direction == Function::Backward)
-                m_direction = Function::Forward;
-            else
-                m_direction = Function::Backward;
-        }
-        else if (runOrder() == Function::SingleShot)
-        {
-            stop();
-        }
-    }
-
-    incrementElapsed();
-}
-
-void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
-{
-    Q_UNUSED(timer);
-    Q_UNUSED(universes);
-
-    Q_ASSERT(m_fader != NULL);
-    delete m_fader;
-    m_fader = NULL;
-
-    Function::postRun(timer, universes);
 }
 
 void RGBMatrix::insertStartValues(FadeChannel& fc) const
 {
     Q_ASSERT(m_fader != NULL);
 
+    // To create a nice and smooth fade, get the starting value from
+    // m_fader's existing FadeChannel (if any). Otherwise just assume
+    // we're starting from zero.
     if (m_fader->channels().contains(fc) == true)
     {
         FadeChannel old = m_fader->channels()[fc];
@@ -585,8 +610,10 @@ void RGBMatrix::insertStartValues(FadeChannel& fc) const
         fc.setStart(0);
     }
 
+    // The channel is not ready yet
     fc.setReady(false);
 
+    // Fade in speed is used for all non-zero targets
     if (fc.target() == 0)
         fc.setFadeTime(fadeOutSpeed());
     else

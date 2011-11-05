@@ -32,6 +32,7 @@
 
 typedef QVector<QVector<QRgb> > RGBMap;
 
+class FixtureGroup;
 class GenericFader;
 class FadeChannel;
 
@@ -82,7 +83,7 @@ public:
     void setPattern(const Pattern& pat);
     Pattern pattern() const;
 
-    RGBMap colorMap(uint elapsed, uint duration);
+    RGBMap colorMap(uint elapsed, uint duration, bool* changed = NULL);
 
     static Pattern stringToPattern(const QString& str);
     static QString patternToString(RGBMatrix::Pattern pat);
@@ -135,6 +136,9 @@ public:
     void postRun(MasterTimer* timer, UniverseArray* universes);
 
 private:
+    /** Update new FadeChannels to m_fader when $map has changed since last time */
+    void updateMapChannels(const RGBMap& map, const FixtureGroup* grp);
+
     /** Grab starting values for a fade channel from $fader if available */
     void insertStartValues(FadeChannel& fc) const;
 

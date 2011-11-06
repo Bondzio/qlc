@@ -509,6 +509,9 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     if (grp == NULL)
         return;
 
+    if (duration() == 0)
+        return;
+
     // Get the color map for the next step
     bool changed = false;
     RGBMap map = colorMap(elapsed() % duration(), duration(), &changed);

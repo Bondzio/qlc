@@ -152,19 +152,23 @@ RGBMap RGBMatrix::colorMap(uint elapsed, uint duration, bool* changed)
     switch (pattern())
     {
     case OutwardBox:
-        colorMapChanged = outwardBox(elapsed, duration, direction(), grp->size(),
+        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
+        colorMapChanged = outwardBox(elapsed, duration, m_direction, grp->size(),
                                      monoColor().rgba(), m_colorMap);
         break;
     case FullRows:
-        colorMapChanged = fullRows(elapsed, duration, direction(), grp->size(),
+        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
+        colorMapChanged = fullRows(elapsed, duration, m_direction, grp->size(),
                                    monoColor().rgba(), m_colorMap);
         break;
     case FullColumns:
-        colorMapChanged = fullColumns(elapsed, duration, direction(), grp->size(),
+        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
+        colorMapChanged = fullColumns(elapsed, duration, m_direction, grp->size(),
                                       monoColor().rgba(), m_colorMap);
         break;
     case EvenOddRows:
-        colorMapChanged = evenOddRows(elapsed, duration, direction(), grp->size(),
+        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
+        colorMapChanged = evenOddRows(elapsed, duration, m_direction, grp->size(),
                                       monoColor().rgba(), m_colorMap);
         break;
     default:
@@ -509,12 +513,13 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
     if (grp == NULL)
         return;
 
+    // Well, there's no time to do anything.
     if (duration() == 0)
         return;
 
     // Get the color map for the next step
     bool changed = false;
-    RGBMap map = colorMap(elapsed() % duration(), duration(), &changed);
+    RGBMap map = colorMap(elapsed(), duration(), &changed);
 
     // If the color map is identical to the one in the previous step (changed == false),
     // we don't need to update fade channels; we're just fading existing channels in/out,
@@ -539,6 +544,8 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
         {
             stop();
         }
+
+        resetElapsed();
     }
 
     incrementElapsed();

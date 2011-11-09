@@ -6,7 +6,7 @@ LANGUAGE = C++
 TARGET   = qlcengine
 
 CONFIG  += qt
-QT      += core xml
+QT      += core xml script
 #QT      -= gui
 QTPLUGIN =
 
@@ -67,6 +67,7 @@ HEADERS += bus.h \
            palettegenerator.h \
            qlcpoint.h \
            rgbmatrix.h \
+           rgbscript.h \
            scene.h \
            scenevalue.h \
            script.h
@@ -108,6 +109,7 @@ SOURCES += bus.cpp \
            palettegenerator.cpp \
            qlcpoint.cpp \
            rgbmatrix.cpp \
+           rgbscript.cpp \
            scene.cpp \
            scenevalue.cpp \
            script.cpp
@@ -141,6 +143,8 @@ macx {
     conf.commands += echo \"$$LITERAL_HASH define INPUTPLUGINDIR \\\"$$INPUTPLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define OUTPUTPLUGINDIR \\\"$$OUTPUTPLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define RGBSCRIPTDIR \\\"$$RGBSCRIPTDIR\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define USERRGBSCRIPTDIR \\\"$$USERRGBSCRIPTDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 unix:!macx {
@@ -157,6 +161,8 @@ unix:!macx {
     conf.commands += echo \"$$LITERAL_HASH define INPUTPLUGINDIR \\\"$$INSTALLROOT/$$INPUTPLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define OUTPUTPLUGINDIR \\\"$$INSTALLROOT/$$OUTPUTPLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define RGBSCRIPTDIR \\\"$$INSTALLROOT/$$RGBSCRIPTDIR\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define USERRGBSCRIPTDIR \\\"$$USERRGBSCRIPTDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 win32 {
@@ -173,5 +179,7 @@ win32 {
     conf.commands += @echo $$LITERAL_HASH define INPUTPLUGINDIR \"$$INPUTPLUGINDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define OUTPUTPLUGINDIR \"$$OUTPUTPLUGINDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
+    conf.commands += @echo $$LITERAL_HASH define RGBSCRIPTDIR \"$$RGBSCRIPTDIR\" >> $$CONFIGFILE &&
+    conf.commands += @echo $$LITERAL_HASH define USERRGBSCRIPTDIR \"$$USERRGBSCRIPTDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH endif >> $$CONFIGFILE
 }

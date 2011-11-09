@@ -55,7 +55,6 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     , m_scene(new QGraphicsScene(this))
     , m_previewTimer(new QTimer(this))
     , m_previewIterator(0)
-    , m_previewIncrement(MasterTimer::tick())
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(mtx != NULL);
@@ -172,8 +171,8 @@ void RGBMatrixEditor::init()
 
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
-    connect(m_patternCombo, SIGNAL(activated(const QString&)),
-            this, SLOT(slotPatternActivated(const QString&)));
+    connect(m_patternCombo, SIGNAL(activated(int)),
+            this, SLOT(slotPatternActivated(int)));
     connect(m_fixtureGroupCombo, SIGNAL(activated(int)),
             this, SLOT(slotFixtureGroupActivated(int)));
     connect(m_colorButton, SIGNAL(clicked()),
@@ -203,10 +202,19 @@ void RGBMatrixEditor::init()
 
 void RGBMatrixEditor::fillPatternCombo()
 {
-    m_patternCombo->clear();
-    m_patternCombo->addItems(RGBMatrix::patternNames());
-    int index = m_patternCombo->findText(RGBMatrix::patternToString(m_mtx->pattern()));
-    m_patternCombo->setCurrentIndex(index);
+    m_scripts = RGBScript::scripts();
+    QListIterator <RGBScript> it(m_scripts);
+    while (it.hasNext() == true)
+    {
+        RGBScript script(it.next());
+        if (script.evaluate() == true && script.apiVersion() > 0 &&
+            script.name().isEmpty() == false)
+        {
+            m_patternCombo->addItem(script.name(), script.fileName());
+            if (script == m_mtx->script())
+                m_patternCombo->setCurrentIndex(m_patternCombo->count() - 1);
+        }
+    }
 }
 
 void RGBMatrixEditor::fillFixtureGroupCombo()
@@ -240,6 +248,8 @@ void RGBMatrixEditor::createPreviewItems()
         return;
     }
 
+    m_previewMaps = m_mtx->previewMaps();
+
     for (int x = 0; x < grp->size().width(); x++)
     {
         for (int y = 0; y < grp->size().height(); y++)
@@ -259,7 +269,7 @@ void RGBMatrixEditor::createPreviewItems()
                 m_previewHash[pt] = item;
 
                 QGraphicsBlurEffect* blur = new QGraphicsBlurEffect(m_scene);
-                blur->setBlurRadius(3);
+                blur->setBlurRadius(2);
                 item->setGraphicsEffect(blur);
             }
         }
@@ -273,22 +283,15 @@ void RGBMatrixEditor::slotPreviewTimeout()
     if (m_mtx->duration() <= 0)
         return;
 
-    if (m_mtx->runOrder() == Function::PingPong)
+    m_previewIterator = (m_previewIterator + MasterTimer::tick()) % m_mtx->duration();
+    if (m_previewIterator == 0)
     {
-        m_previewIterator += m_previewIncrement;
-        if (m_previewIterator > m_mtx->duration())
-        {
-            m_previewIncrement = -(m_previewIncrement);
-            m_previewIterator += (m_previewIncrement * 4); // Why 4 times??
-        }
-    }
-    else
-    {
-        m_previewIncrement = MasterTimer::tick();
-        m_previewIterator = (m_previewIterator + m_previewIncrement) % m_mtx->duration();
+        m_previewStep++;
+        if (m_previewStep >= m_previewMaps.size())
+            m_previewStep = 0;
     }
 
-    RGBMap map = m_mtx->colorMap(m_previewIterator, m_mtx->duration());
+    RGBMap map = m_previewMaps[m_previewStep];
 
     for (int y = 0; y < map.size(); y++)
     {
@@ -315,10 +318,21 @@ void RGBMatrixEditor::slotNameEdited(const QString& text)
     m_mtx->setName(text);
 }
 
-void RGBMatrixEditor::slotPatternActivated(const QString& text)
+void RGBMatrixEditor::slotPatternActivated(int index)
 {
-    m_mtx->setPattern(RGBMatrix::stringToPattern(text));
-    slotRestartTest();
+    QString fileName(m_patternCombo->itemData(index).toString());
+    QListIterator <RGBScript> it(m_scripts);
+    while (it.hasNext() == true)
+    {
+        const RGBScript& script(it.next());
+        if (script.fileName() == fileName)
+        {
+            m_mtx->setScript(script);
+            m_previewMaps = m_mtx->previewMaps();
+            slotRestartTest();
+            break;
+        }
+    }
 }
 
 void RGBMatrixEditor::slotColorButtonClicked()

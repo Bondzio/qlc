@@ -24,17 +24,18 @@
 
 #include <QVector>
 #include <QColor>
+#include <QList>
 #include <QSize>
 #include <QPair>
 #include <QMap>
 
+#include "rgbscript.h"
 #include "function.h"
-
-typedef QVector<QVector<QRgb> > RGBMap;
 
 class FixtureGroup;
 class GenericFader;
 class FadeChannel;
+class QDir;
 
 class RGBMatrix : public Function
 {
@@ -69,42 +70,24 @@ private:
     quint32 m_fixtureGroup;
 
     /************************************************************************
-     * Pattern
+     * Scripts
      ************************************************************************/
 public:
-    enum Pattern
-    {
-        OutwardBox,
-        FullRows,
-        FullColumns,
-        EvenOddRows
-    };
+    /** Set the script that is used for this RGBMatrix function */
+    void setScript(const RGBScript& script);
 
-    static QStringList patternNames();
+    /** Get the script that is used for this RGBMatrix function */
+    RGBScript script() const;
 
-    void setPattern(const Pattern& pat);
-    Pattern pattern() const;
-
-    RGBMap colorMap(uint elapsed, uint duration, bool* changed = NULL);
-
-    static Pattern stringToPattern(const QString& str);
-    static QString patternToString(RGBMatrix::Pattern pat);
+    /** Get a list of RGBMap steps for preview purposes */
+    QList <RGBMap> previewMaps();
 
 private:
-    bool outwardBox(uint elapsed, uint duration, Function::Direction direction,
-                    const QSize& size, QRgb color, RGBMap& map);
-    bool fullRows(uint elapsed, uint duration, Function::Direction direction,
-                  const QSize& size, QRgb color, RGBMap& map);
-    bool fullColumns(uint elapsed, uint duration, Function::Direction direction,
-                     const QSize& size, QRgb color, RGBMap& map);
-    bool evenOddRows(uint elapsed, uint duration, Function::Direction direction,
-                     const QSize& size, QRgb color, RGBMap& map);
+    /** Attempt to load a script from user or system scripts */
+    void loadScript(const QString& fileName);
 
 private:
-    Pattern m_pattern;
-    RGBMap m_colorMap;
-    uint m_stepH;
-    uint m_stepW;
+    RGBScript m_script;
 
     /************************************************************************
      * Colour
@@ -140,6 +123,9 @@ public:
     void postRun(MasterTimer* timer, UniverseArray* universes);
 
 private:
+    /** Check what should be done when elapsed() >= duration() */
+    void roundCheck(const QSize& size);
+
     /** Update new FadeChannels to m_fader when $map has changed since last time */
     void updateMapChannels(const RGBMap& map, const FixtureGroup* grp);
 
@@ -149,6 +135,7 @@ private:
 private:
     Function::Direction m_direction;
     GenericFader* m_fader;
+    int m_step;
 };
 
 #endif

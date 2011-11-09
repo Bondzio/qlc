@@ -15,7 +15,7 @@ LIBS         += -lqlcui
 SOURCES      += main.cpp
 win32:RC_FILE = main.rc
 
-QT += xml gui core
+QT += xml gui core script
 
 macx {
     # This must be after "TARGET = " and before target installation so that

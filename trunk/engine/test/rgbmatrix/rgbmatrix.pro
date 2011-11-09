@@ -3,7 +3,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = rgbmatrix_test
 
-QT      += testlib xml
+QT      += testlib xml script
 CONFIG  -= app_bundle
 
 INCLUDEPATH  += ../../../plugins/interfaces

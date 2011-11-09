@@ -19,12 +19,14 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QCoreApplication>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
 #include <QDomText>
 #include <QDebug>
 #include <cmath>
+#include <QDir>
 
 #include "fixturegroup.h"
 #include "genericfader.h"
@@ -33,14 +35,9 @@
 #include "qlcmacros.h"
 #include "doc.h"
 
-#define KXMLQLCRGBMatrixPattern "Pattern"
+#define KXMLQLCRGBMatrixScript "Script"
 #define KXMLQLCRGBMatrixMonoColor "MonoColor"
 #define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
-
-#define KPatternOutwardBox  "Outward Box"
-#define KPatternFullRows    "Full Rows"
-#define KPatternFullColumns "Full Columns"
-#define KPatternEvenOddRows "Even/Odd Rows"
 
 /****************************************************************************
  * Initialization
@@ -49,14 +46,14 @@
 RGBMatrix::RGBMatrix(Doc* doc)
     : Function(doc, Function::RGBMatrix)
     , m_fixtureGroup(FixtureGroup::invalidId())
-    , m_pattern(RGBMatrix::OutwardBox)
-    , m_stepH(-1)
-    , m_stepW(-1)
     , m_monoColor(Qt::red)
     , m_fader(NULL)
+    , m_step(0)
 {
     setName(tr("New RGB Matrix"));
-    setDuration(5 * 1000);
+    setDuration(1000);
+    m_script.load(RGBScript::systemScriptDirectory(), "fullcolumns.js");
+    m_script.evaluate();
 }
 
 RGBMatrix::~RGBMatrix()
@@ -88,7 +85,7 @@ bool RGBMatrix::copyFrom(const Function* function)
         return false;
 
     m_fixtureGroup = mtx->m_fixtureGroup;
-    m_pattern = mtx->m_pattern;
+    m_script = mtx->m_script;
     m_monoColor = mtx->m_monoColor;
 
     return Function::copyFrom(function);
@@ -109,258 +106,55 @@ quint32 RGBMatrix::fixtureGroup() const
 }
 
 /****************************************************************************
- * Pattern
+ * Scripts
  ****************************************************************************/
 
-QStringList RGBMatrix::patternNames()
+void RGBMatrix::setScript(const RGBScript& script)
 {
-    QStringList list;
-    list << patternToString(RGBMatrix::OutwardBox);
-    list << patternToString(RGBMatrix::FullRows);
-    list << patternToString(RGBMatrix::FullColumns);
-    list << patternToString(RGBMatrix::EvenOddRows);
-    return list;
+    m_script = script;
+    m_script.evaluate();
+    qDebug() << "New script:" << m_script.name();
 }
 
-void RGBMatrix::setPattern(const RGBMatrix::Pattern& pat)
+RGBScript RGBMatrix::script() const
 {
-    m_pattern = pat;
-    m_stepH = -1;
-    m_stepW = -1;
+    return m_script;
 }
 
-RGBMatrix::Pattern RGBMatrix::pattern() const
+void RGBMatrix::loadScript(const QString& fileName)
 {
-    return m_pattern;
+    QList <QDir> dirs;
+#ifndef WIN32
+    dirs << RGBScript::userScriptDirectory();
+#endif
+    dirs << RGBScript::systemScriptDirectory();
+
+    QListIterator <QDir> it(dirs);
+    while (it.hasNext() == true)
+    {
+        QDir dir(it.next());
+        if (dir.entryList().contains(fileName) == true)
+        {
+            if (m_script.load(dir, fileName) == true)
+                m_script.evaluate();
+            break;
+        }
+    }
 }
 
-RGBMap RGBMatrix::colorMap(uint elapsed, uint duration, bool* changed)
+QList <RGBMap> RGBMatrix::previewMaps()
 {
+    qDebug() << Q_FUNC_INFO;
+    QList <RGBMap> steps;
+
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
-    if (grp == NULL)
-        return RGBMap();
-
-    if (m_colorMap.size() != grp->size().height() ||
-        m_colorMap[0].size() != grp->size().width())
+    if (grp != NULL && m_script.apiVersion() > 0)
     {
-        m_colorMap = RGBMap(grp->size().height());
-        for (int y = 0; y < m_colorMap.size(); y++)
-            m_colorMap[y].fill(0, grp->size().width());
+        for (int i = 0; i < m_script.rgbMapStepCount(grp->size()); i++)
+            steps << m_script.rgbMap(grp->size(), monoColor().rgb(), i);
     }
 
-    bool colorMapChanged = false;
-    switch (pattern())
-    {
-    case OutwardBox:
-        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
-        colorMapChanged = outwardBox(elapsed, duration, m_direction, grp->size(),
-                                     monoColor().rgba(), m_colorMap);
-        break;
-    case FullRows:
-        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
-        colorMapChanged = fullRows(elapsed, duration, m_direction, grp->size(),
-                                   monoColor().rgba(), m_colorMap);
-        break;
-    case FullColumns:
-        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
-        colorMapChanged = fullColumns(elapsed, duration, m_direction, grp->size(),
-                                      monoColor().rgba(), m_colorMap);
-        break;
-    case EvenOddRows:
-        // Use RGBMatrix::m_direction instead of Function::direction() because pingpong uses it!
-        colorMapChanged = evenOddRows(elapsed, duration, m_direction, grp->size(),
-                                      monoColor().rgba(), m_colorMap);
-        break;
-    default:
-        break;
-    }
-
-    if (changed != NULL)
-        *changed = colorMapChanged;
-
-    return m_colorMap;
-}
-
-RGBMatrix::Pattern RGBMatrix::stringToPattern(const QString& str)
-{
-    if (str == KPatternOutwardBox)
-        return OutwardBox;
-    else if (str == KPatternFullRows)
-        return FullRows;
-    else if (str == KPatternFullColumns)
-        return FullColumns;
-    else if (str == KPatternEvenOddRows)
-        return EvenOddRows;
-    else
-        return OutwardBox;
-}
-
-QString RGBMatrix::patternToString(RGBMatrix::Pattern pat)
-{
-    switch (pat)
-    {
-    case RGBMatrix::OutwardBox:
-        return KPatternOutwardBox;
-    case RGBMatrix::FullRows:
-        return KPatternFullRows;
-    case RGBMatrix::FullColumns:
-        return KPatternFullColumns;
-    case RGBMatrix::EvenOddRows:
-        return KPatternEvenOddRows;
-    default:
-        return KPatternOutwardBox;
-    }
-}
-
-bool RGBMatrix::outwardBox(uint elapsed, uint duration, Function::Direction direction,
-                           const QSize& size, QRgb color, RGBMap& map)
-{
-    if (direction == Backward)
-        elapsed = duration - elapsed;
-
-    // Make sure we don't go beyond $map's boundaries
-    uint hsteps = floor((qreal(size.width()) / qreal(2)) + 0.5);
-    uint hstep  = elapsed / (duration / hsteps);
-    uint left   = MIN(hsteps - hstep - 1, uint(size.width() - 1));
-    uint right  = MIN((size.width() - hsteps) + hstep, uint(size.width() - 1));
-
-    uint vsteps = floor((qreal(size.height()) / qreal(2)) + 0.5);
-    uint vstep  = elapsed / (duration / vsteps);
-    uint top    = MIN(vsteps - vstep - 1, uint(size.height() - 1));
-    uint bottom = MIN((size.height() - vsteps) + vstep, uint(size.height() - 1));
-
-    // Check if the new steps are different than the previous ones
-    if (m_stepW != left || m_stepH != top)
-    {
-        // Need to create a new colormap
-        for (int y = 0; y < map.size(); y++)
-            map[y].fill(0, map[y].size());
-
-        for (uint i = left; i <= right; i++)
-        {
-            map[top][i] = color;
-            map[bottom][i] = color;
-        }
-
-        for (uint i = top; i <= bottom; i++)
-        {
-            map[i][left] = color;
-            map[i][right] = color;
-        }
-
-        m_stepW = left;
-        m_stepH = top;
-
-        return true;
-    }
-    else
-    {
-        // No need to create a new colormap. The previous one applies.
-        return false;
-    }
-}
-
-bool RGBMatrix::fullRows(uint elapsed, uint duration, Function::Direction direction,
-                         const QSize& size, QRgb color, RGBMap& map)
-{
-    if (direction == Backward)
-        elapsed = duration - elapsed;
-
-    uint top    = MIN(elapsed / (duration / size.height()), uint(size.height() - 1));
-    uint bottom = top;
-    uint left   = 0;
-    uint right  = size.width();
-
-    // Check if the new steps are different than the previous ones
-    if (m_stepH != top)
-    {
-        // Need to create a new colormap
-        for (int y = 0; y < map.size(); y++)
-            map[y].fill(0, map[y].size());
-
-        for (uint i = left; i < right; i++)
-        {
-            map[top][i] = color;
-            map[bottom][i] = color;
-        }
-
-        m_stepH = top;
-        return true;
-    }
-    else
-    {
-        // No need to create a new colormap. The previous one applies.
-        return false;
-    }
-}
-
-bool RGBMatrix::fullColumns(uint elapsed, uint duration, Function::Direction direction,
-                            const QSize& size, QRgb color, RGBMap& map)
-{
-    if (direction == Backward)
-        elapsed = duration - elapsed;
-
-    uint left   = MIN(elapsed / (duration / size.width()), uint(size.width() - 1));
-    uint right  = left;
-    uint top    = 0;
-    uint bottom = size.height();
-
-    // Check if the new steps are different than the previous ones
-    if (m_stepW != left)
-    {
-        // Need to create a new colormap
-        for (int y = 0; y < map.size(); y++)
-            map[y].fill(0, map[y].size());
-
-        for (uint i = top; i < bottom; i++)
-        {
-            map[i][left] = color;
-            map[i][right] = color;
-        }
-
-        m_stepW = left;
-        return true;
-    }
-    else
-    {
-        // No need to create a new colormap. The previous one applies.
-        return false;
-    }
-}
-
-bool RGBMatrix::evenOddRows(uint elapsed, uint duration, Function::Direction direction,
-                            const QSize& size, QRgb color, RGBMap& map)
-{
-    if (direction == Backward)
-        elapsed = duration - elapsed;
-
-    uint left   = MIN(elapsed / (duration / size.width()), uint(size.width() - 1));
-    uint right  = MIN(size.width() - 1 - left, uint(size.width() - 1));
-    uint top    = 0;
-    uint bottom = size.height();
-
-    if (m_stepW != left)
-    {
-        // Need to create a new colormap
-        for (int y = 0; y < map.size(); y++)
-            map[y].fill(0, map[y].size());
-
-        for (uint i = top; i < bottom; i++)
-        {
-            if ((i % 2) == 0)
-                map[i][left] = color;
-            else
-                map[i][right] = color;
-        }
-
-        m_stepW = left;
-        return true;
-    }
-    else
-    {
-        // No need to create a new colormap. The previous one applies.
-        return false;
-    }
+    return steps;
 }
 
 /****************************************************************************
@@ -410,9 +204,9 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         {
             loadXMLSpeed(tag);
         }
-        else if (tag.tagName() == KXMLQLCRGBMatrixPattern)
+        else if (tag.tagName() == KXMLQLCRGBMatrixScript)
         {
-            setPattern(stringToPattern(tag.text()));
+            loadScript(tag.text());
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixFixtureGroup)
         {
@@ -468,10 +262,10 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     /* Run order */
     saveXMLRunOrder(doc, &root);
 
-    /* Pattern */
-    tag = doc->createElement(KXMLQLCRGBMatrixPattern);
+    /* Script */
+    tag = doc->createElement(KXMLQLCRGBMatrixScript);
     root.appendChild(tag);
-    text = doc->createTextNode(patternToString(pattern()));
+    text = doc->createTextNode(m_script.fileName());
     tag.appendChild(text);
 
     /* Mono Color */
@@ -496,10 +290,20 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 void RGBMatrix::preRun(MasterTimer* timer)
 {
     Q_UNUSED(timer);
-    m_direction = direction();
 
-    Q_ASSERT(m_fader == NULL);
-    m_fader = new GenericFader(doc());
+    FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
+    if (grp != NULL)
+    {
+        m_direction = direction();
+
+        Q_ASSERT(m_fader == NULL);
+        m_fader = new GenericFader(doc());
+
+        if (m_direction == Forward)
+            m_step = 0;
+        else
+            m_step = m_script.rgbMapStepCount(grp->size());
+    }
 
     Function::preRun(timer);
 }
@@ -511,44 +315,36 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
 
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
     if (grp == NULL)
+    {
+        // No fixture group to control
+        stop();
         return;
+    }
 
-    // Well, there's no time to do anything.
+    // No time to do anything.
     if (duration() == 0)
         return;
 
-    // Get the color map for the next step
-    bool changed = false;
-    RGBMap map = colorMap(elapsed(), duration(), &changed);
+    // Invalid/nonexistent script
+    if (m_script.apiVersion() == 0)
+        return;
 
-    // If the color map is identical to the one in the previous step (changed == false),
-    // we don't need to update fade channels; we're just fading existing channels in/out,
-    // while waiting for the next step.
-    if (changed == true)
+    // Get new map every time when elapsed is reset to zero
+    if (elapsed() == 0)
+    {
+        RGBMap map = m_script.rgbMap(grp->size(), monoColor().rgb(), m_step);
         updateMapChannels(map, grp);
+    }
 
     // Run the generic fader that takes care of fading in/out individual channels
     m_fader->write(universes);
 
-    // Check if we need to change direction or stop completely
-    if (elapsed() >= duration())
-    {
-        if (runOrder() == Function::PingPong)
-        {
-            if (m_direction == Function::Backward)
-                m_direction = Function::Forward;
-            else
-                m_direction = Function::Backward;
-        }
-        else if (runOrder() == Function::SingleShot)
-        {
-            stop();
-        }
-
-        resetElapsed();
-    }
-
+    // Increment elapsed time
     incrementElapsed();
+
+    // Check if we need to change direction, stop completely or go to next step
+    if (elapsed() >= duration())
+        roundCheck(grp->size());
 }
 
 void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
@@ -561,6 +357,59 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
     m_fader = NULL;
 
     Function::postRun(timer, universes);
+}
+
+void RGBMatrix::roundCheck(const QSize& size)
+{
+    if (runOrder() == PingPong)
+    {
+        if (m_direction == Forward && m_step >= m_script.rgbMapStepCount(size))
+        {
+            m_direction = Backward;
+            m_step = m_script.rgbMapStepCount(size) - 2;
+        }
+        else if (m_direction == Backward && m_step <= 0)
+        {
+            m_direction = Forward;
+            m_step = 1;
+        }
+        else
+        {
+            if (m_direction == Forward)
+                m_step++;
+            else
+                m_step--;
+        }
+    }
+    else if (runOrder() == SingleShot)
+    {
+        if (m_direction == Forward)
+        {
+            if (m_step >= m_script.rgbMapStepCount(size) - 1)
+                stop();
+            else
+                m_step++;
+        }
+    }
+    else
+    {
+        if (m_direction == Forward)
+        {
+            if (m_step >= m_script.rgbMapStepCount(size) - 1)
+                m_step = 0;
+            else
+                m_step++;
+        }
+        else
+        {
+            if (m_step <= 0)
+                m_step = m_script.rgbMapStepCount(size) - 1;
+            else
+                m_step--;
+        }
+    }
+
+    resetElapsed();
 }
 
 void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)

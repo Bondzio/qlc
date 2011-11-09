@@ -61,7 +61,7 @@ private:
 private slots:
     void slotPreviewTimeout();
     void slotNameEdited(const QString& text);
-    void slotPatternActivated(const QString& text);
+    void slotPatternActivated(int index);
     void slotFixtureGroupActivated(int index);
     void slotColorButtonClicked();
 
@@ -84,6 +84,9 @@ private:
     RGBMatrix* m_original;
     RGBMatrix* m_mtx;
 
+    QList <RGBScript> m_scripts;
+    QList <RGBMap> m_previewMaps;
+
     SpeedSpinBox* m_fadeInSpin;
     SpeedSpinBox* m_fadeOutSpin;
     SpeedSpinBox* m_durationSpin;
@@ -91,7 +94,7 @@ private:
     QGraphicsScene* m_scene;
     QTimer* m_previewTimer;
     int m_previewIterator;
-    int m_previewIncrement;
+    int m_previewStep;
     QHash <QLCPoint,QGraphicsItem*> m_previewHash;
 };
 

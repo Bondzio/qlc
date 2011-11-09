@@ -7,6 +7,7 @@ SUBDIRS      += ui
 SUBDIRS      += main
 SUBDIRS      += fixtures
 SUBDIRS      += inputprofiles
+SUBDIRS      += rgbscripts
 SUBDIRS      += fixtureeditor
 SUBDIRS      += etc
 SUBDIRS      += docs

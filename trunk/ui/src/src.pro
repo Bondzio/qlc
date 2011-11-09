@@ -6,7 +6,7 @@ LANGUAGE = C++
 TARGET   = qlcui
 
 CONFIG += qt
-QT     += core xml gui
+QT     += core xml gui script
 
 # Engine
 INCLUDEPATH     += ../../engine/src

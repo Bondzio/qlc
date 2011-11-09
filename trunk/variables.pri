@@ -96,3 +96,13 @@ macx:OUTPUTPLUGINDIR       = $$PLUGINDIR/Output
 win32:TRANSLATIONDIR      =
 unix:!macx:TRANSLATIONDIR = $$DATADIR/translations
 macx:TRANSLATIONDIR       = $$DATADIR/Translations
+
+# RGB Scripts
+win32:RGBSCRIPTDIR      = RGBScripts
+unix:!macx:RGBSCRIPTDIR = $$DATADIR/rgbscripts
+macx:RGBSCRIPTDIR       = $$DATADIR/RGBScripts
+
+# User RGB Scripts
+win32:USERRGBSCRIPTDIR      = RGBScripts
+unix:!macx:USERRGBSCRIPTDIR = .qlc/rgbscripts
+macx:USERRGBSCRIPTDIR       = "Library/Application Support/QLC/RGBScripts"

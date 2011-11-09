@@ -51,7 +51,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_step(0)
 {
     setName(tr("New RGB Matrix"));
-    setDuration(1000);
+    setDuration(500);
     m_script.load(RGBScript::systemScriptDirectory(), "fullcolumns.js");
     m_script.evaluate();
 }
@@ -113,7 +113,6 @@ void RGBMatrix::setScript(const RGBScript& script)
 {
     m_script = script;
     m_script.evaluate();
-    qDebug() << "New script:" << m_script.name();
 }
 
 RGBScript RGBMatrix::script() const
@@ -144,7 +143,6 @@ void RGBMatrix::loadScript(const QString& fileName)
 
 QList <RGBMap> RGBMatrix::previewMaps()
 {
-    qDebug() << Q_FUNC_INFO;
     QList <RGBMap> steps;
 
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
@@ -424,50 +422,60 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
             if (fxi == NULL)
                 continue;
 
-            QList <quint32> channels = fxi->rgbChannels();
-            if (channels.isEmpty() == false)
+            QList <quint32> rgb = fxi->rgbChannels();
+            QList <quint32> cmy = fxi->cmyChannels();
+            if (rgb.isEmpty() == false)
             {
+                // RGB color mixing
                 FadeChannel fc;
                 fc.setFixture(fxi->id());
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(rgb.takeFirst());
                 fc.setTarget(qRed(map[y][x]));
                 insertStartValues(fc);
                 m_fader->add(fc);
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(rgb.takeFirst());
                 fc.setTarget(qGreen(map[y][x]));
                 insertStartValues(fc);
                 m_fader->add(fc);
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(rgb.takeFirst());
                 fc.setTarget(qBlue(map[y][x]));
                 insertStartValues(fc);
                 m_fader->add(fc);
             }
-            else
+            else if (cmy.isEmpty() == false)
             {
-                channels = fxi->cmyChannels();
-                if (channels.isEmpty() == true)
-                    continue;
-
+                // CMY color mixing
                 QColor col(map[y][x]);
 
                 FadeChannel fc;
                 fc.setFixture(fxi->id());
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(cmy.takeFirst());
                 fc.setTarget(col.cyan());
                 insertStartValues(fc);
                 m_fader->add(fc);
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(cmy.takeFirst());
                 fc.setTarget(col.magenta());
                 insertStartValues(fc);
                 m_fader->add(fc);
 
-                fc.setChannel(channels.takeFirst());
+                fc.setChannel(cmy.takeFirst());
                 fc.setTarget(col.yellow());
+                insertStartValues(fc);
+                m_fader->add(fc);
+            }
+            else if (fxi->masterIntensityChannel() != QLCChannel::invalid())
+            {
+                // Simple intensity (dimmer) channel
+                QColor col(map[y][x]);
+                FadeChannel fc;
+                fc.setFixture(fxi->id());
+                fc.setChannel(fxi->masterIntensityChannel());
+                fc.setTarget(col.value());
                 insertStartValues(fc);
                 m_fader->add(fc);
             }

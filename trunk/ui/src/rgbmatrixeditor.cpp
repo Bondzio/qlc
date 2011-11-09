@@ -55,6 +55,7 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     , m_scene(new QGraphicsScene(this))
     , m_previewTimer(new QTimer(this))
     , m_previewIterator(0)
+    , m_previewStep(0)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(mtx != NULL);
@@ -291,7 +292,9 @@ void RGBMatrixEditor::slotPreviewTimeout()
             m_previewStep = 0;
     }
 
-    RGBMap map = m_previewMaps[m_previewStep];
+    RGBMap map;
+    if (m_previewStep < m_previewMaps.size())
+        map = m_previewMaps[m_previewStep];
 
     for (int y = 0; y < map.size(); y++)
     {
@@ -328,7 +331,6 @@ void RGBMatrixEditor::slotPatternActivated(int index)
         if (script.fileName() == fileName)
         {
             m_mtx->setScript(script);
-            m_previewMaps = m_mtx->previewMaps();
             slotRestartTest();
             break;
         }
@@ -417,6 +419,8 @@ void RGBMatrixEditor::slotTestClicked()
 
 void RGBMatrixEditor::slotRestartTest()
 {
+    m_previewMaps = m_mtx->previewMaps();
+
     if (m_testButton->isChecked() == true)
     {
         // Toggle off, toggle on. Duh.

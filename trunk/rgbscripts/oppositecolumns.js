@@ -23,7 +23,7 @@
                     }
                     else
                     {
-                        if (y == (height - step))
+                        if (y == ((height - 1) - step))
                             map[y][x] = rgb;
                         else
                             map[y][x] = 0;
@@ -36,7 +36,7 @@
 
         algo.rgbMapStepCount = function(width, height)
         {
-            return width;
+            return height;
         }
 
         return algo;

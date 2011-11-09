@@ -23,7 +23,7 @@
                     }
                     else
                     {
-                        if (x == (width - step))
+                        if (x == ((width - 1) - step))
                             map[y][x] = rgb;
                         else
                             map[y][x] = 0;

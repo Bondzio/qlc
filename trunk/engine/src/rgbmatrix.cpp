@@ -84,9 +84,9 @@ bool RGBMatrix::copyFrom(const Function* function)
     if (mtx == NULL)
         return false;
 
-    m_fixtureGroup = mtx->m_fixtureGroup;
-    m_script = mtx->m_script;
-    m_monoColor = mtx->m_monoColor;
+    setFixtureGroup(mtx->fixtureGroup());
+    setScript(mtx->script());
+    setMonoColor(mtx->monoColor());
 
     return Function::copyFrom(function);
 }

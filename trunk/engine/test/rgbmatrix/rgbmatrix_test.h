@@ -23,9 +23,11 @@
 #define RGBMATRIX_TEST_H
 
 #include <QObject>
+#include <QList>
+
+#include "rgbscript.h"
 
 class Doc;
-
 class RGBMatrix_Test : public QObject
 {
     Q_OBJECT
@@ -34,9 +36,15 @@ private slots:
     void cleanupTestCase();
 
     void initial();
+    void group();
+    void color();
+    void copy();
+    void save();
+    void load();
 
 private:
     Doc* m_doc;
+    QList <RGBScript> m_scripts;
 };
 
 #endif

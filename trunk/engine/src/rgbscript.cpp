@@ -27,6 +27,7 @@ RGBScript::RGBScript(const RGBScript& s)
     , m_contents(s.m_contents)
     , m_apiVersion(0)
 {
+    evaluate();
 }
 
 RGBScript::~RGBScript()

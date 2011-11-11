@@ -77,7 +77,7 @@ void MonitorFixture_Test::fixture()
     mof.setFixture(fxi->id());
     QCOMPARE(mof.fixture(), fxi->id());
     QVERIFY(mof.m_fixtureLabel != NULL);
-    QCOMPARE(mof.m_fixtureLabel->text(), QString("<B>Foobar</B> <I>(Universe 1)</I>"));
+    QCOMPARE(mof.m_fixtureLabel->text(), QString("<B>Foobar</B>"));
     QCOMPARE(mof.m_channelLabels.size(), 6);
     QCOMPARE(mof.m_valueLabels.size(), 6);
     for (int i = 0; i < mof.m_channelLabels.size(); i++)

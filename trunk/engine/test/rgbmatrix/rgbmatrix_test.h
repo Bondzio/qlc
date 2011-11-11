@@ -39,8 +39,8 @@ private slots:
     void group();
     void color();
     void copy();
-    void save();
-    void load();
+    void previewMaps();
+    void loadSave();
 
 private:
     Doc* m_doc;

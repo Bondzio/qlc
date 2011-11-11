@@ -55,9 +55,10 @@ void RGBMatrix_Test::initTestCase()
 
     FixtureGroup* grp = new FixtureGroup(m_doc);
     grp->setName("Test Group");
+    grp->setSize(QSize(5, 5));
     m_doc->addFixtureGroup(grp);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 25; i++)
     {
         Fixture* fxi = new Fixture(m_doc);
         fxi->setFixtureDefinition(def, mode);
@@ -71,6 +72,8 @@ void RGBMatrix_Test::initTestCase()
     scrDir.setNameFilters(QStringList() << QString("*.js"));
     m_scripts = RGBScript::scripts(scrDir);
     QVERIFY(m_scripts.size() > 0);
+    foreach(RGBScript scr, m_scripts)
+        QVERIFY(scr.fileName().isEmpty() == false);
 }
 
 void RGBMatrix_Test::cleanupTestCase()
@@ -128,13 +131,46 @@ void RGBMatrix_Test::copy()
     QCOMPARE(copyMtx->script(), m_scripts.last());
 }
 
-void RGBMatrix_Test::save()
+void RGBMatrix_Test::previewMaps()
+{
+    RGBMatrix mtx(m_doc);
+    mtx.setMonoColor(Qt::white);
+    QCOMPARE(mtx.script().fileName(), QString("fullcolumns.js"));
+
+    QList <RGBMap> maps = mtx.previewMaps();
+    QCOMPARE(maps.size(), 0); // No fixture group
+
+    mtx.setFixtureGroup(0);
+    maps = mtx.previewMaps();
+    QCOMPARE(maps.size(), 5);
+    for (int z = 0; z < 5; z++)
+    {
+        for (int y = 0; y < 5; y++)
+        {
+            for (int x = 0; x < 5; x++)
+            {
+                if (x == z)
+                    QCOMPARE(maps[z][y][x], QColor(Qt::white).rgb());
+                else
+                    QCOMPARE(maps[z][y][x], uint(0));
+            }
+        }
+    }
+}
+
+void RGBMatrix_Test::loadSave()
 {
     RGBMatrix* mtx = new RGBMatrix(m_doc);
-    mtx->setName("Xyzzy");
     mtx->setMonoColor(Qt::magenta);
     mtx->setFixtureGroup(42);
     mtx->setScript(m_scripts.last());
+
+    mtx->setName("Xyzzy");
+    mtx->setDirection(Function::Backward);
+    mtx->setRunOrder(Function::PingPong);
+    mtx->setDuration(1200);
+    mtx->setFadeInSpeed(10);
+    mtx->setFadeOutSpeed(20);
     m_doc->addFunction(mtx);
 
     QDomDocument doc;
@@ -152,19 +188,41 @@ void RGBMatrix_Test::save()
     {
         QDomElement tag = node.toElement();
         if (tag.tagName() == "Speed")
+        {
+            QCOMPARE(tag.attribute("FadeIn"), QString("10"));
+            QCOMPARE(tag.attribute("FadeOut"), QString("20"));
+            QCOMPARE(tag.attribute("Duration"), QString("1200"));
             speed++;
+        }
         else if (tag.tagName() == "Direction")
+        {
+            QCOMPARE(tag.text(), QString("Backward"));
             dir++;
+        }
         else if (tag.tagName() == "RunOrder")
+        {
+            QCOMPARE(tag.text(), QString("PingPong"));
             run++;
+        }
         else if (tag.tagName() == "Script")
+        {
+            QCOMPARE(tag.text(), m_scripts.last().fileName());
             script++;
+        }
         else if (tag.tagName() == "MonoColor")
+        {
+            QCOMPARE(tag.text().toUInt(), QColor(Qt::magenta).rgb());
             monocolor++;
+        }
         else if (tag.tagName() == "FixtureGroup")
+        {
+            QCOMPARE(tag.text(), QString("42"));
             grp++;
+        }
         else
+        {
             QFAIL(QString("Unexpected tag: ").arg(tag.tagName()).toUtf8().constData());
+        }
 
         node = node.nextSibling();
     }
@@ -175,10 +233,26 @@ void RGBMatrix_Test::save()
     QCOMPARE(script, 1);
     QCOMPARE(monocolor, 1);
     QCOMPARE(grp, 1);
-}
 
-void RGBMatrix_Test::load()
-{
+    // Put some extra garbage in
+    QDomNode parent = node.parentNode();
+    QDomElement foo = doc.createElement("Foo");
+    root.firstChild().appendChild(foo);
+
+    RGBMatrix mtx2(m_doc);
+    QVERIFY(mtx2.loadXML(&root.firstChild().toElement()) == true);
+    QCOMPARE(mtx2.direction(), Function::Backward);
+    QCOMPARE(mtx2.runOrder(), Function::PingPong);
+    QCOMPARE(mtx2.monoColor(), QColor(Qt::magenta));
+    QCOMPARE(mtx2.fixtureGroup(), uint(42));
+    QCOMPARE(mtx2.script(), mtx->script());
+    QCOMPARE(mtx2.duration(), uint(1200));
+    QCOMPARE(mtx2.fadeInSpeed(), uint(10));
+    QCOMPARE(mtx2.fadeOutSpeed(), uint(20));
+
+    QVERIFY(mtx2.loadXML(&root.toElement()) == false); // Not a function node
+    root.firstChild().toElement().setAttribute("Type", "Scene");
+    QVERIFY(mtx2.loadXML(&root.firstChild().toElement()) == false); // Not an RGBMatrix node
 }
 
 QTEST_MAIN(RGBMatrix_Test)

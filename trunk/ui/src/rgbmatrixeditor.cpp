@@ -275,6 +275,11 @@ void RGBMatrixEditor::createPreviewItems()
             }
         }
     }
+
+    if (m_mtx->direction() == Function::Forward)
+        m_previewStep = 0;
+    else
+        m_previewStep = m_previewMaps.size() - 1;
 }
 
 void RGBMatrixEditor::slotPreviewTimeout()
@@ -287,9 +292,18 @@ void RGBMatrixEditor::slotPreviewTimeout()
     m_previewIterator = (m_previewIterator + MasterTimer::tick()) % m_mtx->duration();
     if (m_previewIterator == 0)
     {
-        m_previewStep++;
-        if (m_previewStep >= m_previewMaps.size())
-            m_previewStep = 0;
+        if (m_mtx->direction() == Function::Forward)
+        {
+            m_previewStep++;
+            if (m_previewStep >= m_previewMaps.size())
+                m_previewStep = 0;
+        }
+        else
+        {
+            m_previewStep--;
+            if (m_previewStep < 0)
+                m_previewStep = m_previewMaps.size() - 1;
+        }
     }
 
     RGBMap map;

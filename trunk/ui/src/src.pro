@@ -35,6 +35,7 @@ HEADERS += aboutbox.h \
            collectioneditor.h \
            consolechannel.h \
            docbrowser.h \
+           dmxslider.h \
            efxeditor.h \
            efxpreviewarea.h \
            fixtureconsole.h \
@@ -59,6 +60,8 @@ HEADERS += aboutbox.h \
            sceneeditor.h \
            scripteditor.h \
            selectinputchannel.h \
+           simpledesk.h \
+           simpledeskengine.h \
            speedspinbox.h \
            vcbutton.h \
            vcbuttonproperties.h \
@@ -99,6 +102,7 @@ FORMS += aboutbox.ui \
          inputpatcheditor.ui \
          outputpatcheditor.ui \
          rgbmatrixeditor.ui \
+         simpledesk.ui \
          sceneeditor.ui \
          scripteditor.ui \
          selectinputchannel.ui \
@@ -121,6 +125,7 @@ SOURCES += aboutbox.cpp \
            collectioneditor.cpp \
            consolechannel.cpp \
            docbrowser.cpp \
+           dmxslider.cpp \
            efxeditor.cpp \
            efxpreviewarea.cpp \
            fixtureconsole.cpp \
@@ -145,6 +150,8 @@ SOURCES += aboutbox.cpp \
            sceneeditor.cpp \
            scripteditor.cpp \
            selectinputchannel.cpp \
+           simpledesk.cpp \
+           simpledeskengine.cpp \
            speedspinbox.cpp \
            vcbutton.cpp \
            vcbuttonproperties.cpp \

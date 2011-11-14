@@ -69,6 +69,10 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     m_nameLabel->setText(tr("Grand<BR>Master"));
     layout()->addWidget(m_nameLabel);
 
+    /* Listen to GM value changes */
+    connect(m_outputMap, SIGNAL(grandMasterValueChanged(uchar)),
+            this, SLOT(slotGrandMasterValueChanged(uchar)));
+
     /* External input connection */
     connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
@@ -107,21 +111,13 @@ void GrandMasterSlider::refreshProperties()
     setToolTip(tooltip);
 
     /* Set properties to UniverseArray */
-    UniverseArray* uni = m_outputMap->claimUniverses();
-    //uni->setGMChannelMode(VirtualConsole::properties().grandMasterChannelMode());
-    //uni->setGMValueMode(VirtualConsole::properties().grandMasterValueMode());
-    uchar value = uni->gMValue();
-    m_outputMap->releaseUniverses();
-
-    m_slider->setValue(value);
+    m_slider->setValue(m_outputMap->grandMasterValue());
 }
 
 void GrandMasterSlider::slotValueChanged(int value)
 {
     // Write new grand master value to universes
-    UniverseArray* uni = m_outputMap->claimUniverses();
-    uni->setGMValue(value);
-    m_outputMap->releaseUniverses();
+    m_outputMap->setGrandMasterValue(value);
 
     // Display value
     QString str;
@@ -138,12 +134,16 @@ void GrandMasterSlider::slotValueChanged(int value)
     m_valueLabel->setText(str);
 }
 
+void GrandMasterSlider::slotGrandMasterValueChanged(uchar value)
+{
+    m_slider->setValue(value);
+}
+
 /*****************************************************************************
  * External input
  *****************************************************************************/
 
-void GrandMasterSlider::slotInputValueChanged(quint32 universe, quint32 channel,
-                                              uchar value)
+void GrandMasterSlider::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
     if (universe == VirtualConsole::instance()->properties().grandMasterInputUniverse() &&
         channel == VirtualConsole::instance()->properties().grandMasterInputChannel())

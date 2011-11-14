@@ -205,12 +205,20 @@ bool Doc::addFixture(Fixture* fixture, quint32 id)
     }
     else
     {
+        fixture->setID(id);
+        m_fixtures[id] = fixture;
+
         /* Patch fixture change signals thru Doc */
         connect(fixture, SIGNAL(changed(quint32)),
                 this, SLOT(slotFixtureChanged(quint32)));
 
-        fixture->setID(id);
-        m_fixtures[id] = fixture;
+        /* Keep track of fixture addresses */
+        for (uint i = fixture->universeAddress();
+             i < fixture->universeAddress() + fixture->channels(); i++)
+        {
+            m_addresses[i] = id;
+        }
+
         emit fixtureAdded(id);
         setModified();
 
@@ -224,6 +232,15 @@ bool Doc::deleteFixture(quint32 id)
     {
         Fixture* fxi = m_fixtures.take(id);
         Q_ASSERT(fxi != NULL);
+
+        /* Keep track of fixture addresses */
+        QMutableHashIterator <uint,uint> it(m_addresses);
+        while (it.hasNext() == true)
+        {
+            it.next();
+            if (it.value() == id)
+                it.remove();
+        }
 
         emit fixtureRemoved(id);
         setModified();
@@ -249,6 +266,14 @@ Fixture* Doc::fixture(quint32 id) const
         return m_fixtures[id];
     else
         return NULL;
+}
+
+quint32 Doc::fixtureForAddress(quint32 universeAddress) const
+{
+    if (m_addresses.contains(universeAddress) == true)
+        return m_addresses[universeAddress];
+    else
+        return Fixture::invalidId();
 }
 
 int Doc::totalPowerConsumption(int& fuzzy) const
@@ -284,6 +309,13 @@ int Doc::totalPowerConsumption(int& fuzzy) const
 
 void Doc::slotFixtureChanged(quint32 id)
 {
+    /* Keep track of fixture addresses */
+    Fixture* fxi = fixture(id);
+    for (uint i = fxi->universeAddress(); i < fxi->universeAddress() + fxi->channels(); i++)
+    {
+        m_addresses[i] = id;
+    }
+
     setModified();
     emit fixtureChanged(id);
 }

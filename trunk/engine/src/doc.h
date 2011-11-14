@@ -171,6 +171,15 @@ public:
     QList <Fixture*> fixtures() const;
 
     /**
+     * Get the fixture that occupies the given DMX address. If multiple fixtures
+     * occupy the same address, the one that has been last modified is returned.
+     *
+     * @param universeAddress The universe & address of the fixture to look for
+     * @return The fixture ID or Fixture::invalidId() if not found
+     */
+    quint32 fixtureForAddress(quint32 universeAddress) const;
+
+    /**
      * Get the total power consumption of all fixtures in the current
      * workspace.
      *
@@ -202,6 +211,9 @@ private slots:
 protected:
     /** Fixtures */
     QMap <quint32,Fixture*> m_fixtures;
+
+    /** Addresses occupied by fixtures */
+    QHash <quint32,quint32> m_addresses;
 
     /** Latest assigned fixture ID */
     quint32 m_latestFixtureId;

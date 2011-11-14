@@ -169,6 +169,30 @@ void OutputMap::releaseUniverses(bool changed)
     m_universeMutex.unlock();
 }
 
+void OutputMap::setGrandMasterValue(uchar value)
+{
+    bool changed = false;
+
+    UniverseArray* ua = claimUniverses();
+    if (ua->gMValue() != value)
+    {
+        ua->setGMValue(value);
+        changed = true;
+    }
+    releaseUniverses(changed);
+
+    if (changed == true)
+        emit grandMasterValueChanged(value);
+}
+
+uchar OutputMap::grandMasterValue()
+{
+    UniverseArray* ua = claimUniverses();
+    uchar value = ua->gMValue();
+    releaseUniverses(false);
+    return value;
+}
+
 void OutputMap::dumpUniverses()
 {
     QByteArray ba;

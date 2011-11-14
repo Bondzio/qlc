@@ -30,6 +30,7 @@
 #include "outputmanager.h"
 #include "inputmanager.h"
 #include "mastertimer.h"
+#include "simpledesk.h"
 #include "docbrowser.h"
 #include "outputmap.h"
 #include "inputmap.h"
@@ -168,6 +169,7 @@ void App::init()
     FixtureManager::createAndShow(centralWidget(), m_doc);
     FunctionManager::createAndShow(centralWidget(), m_doc);
     VirtualConsole::createAndShow(centralWidget(), m_doc);
+    SimpleDesk::createAndShow(centralWidget(), m_doc);
     OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
     InputManager::createAndShow(centralWidget(), m_doc->inputMap());
 

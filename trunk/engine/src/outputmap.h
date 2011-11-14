@@ -132,6 +132,16 @@ public:
     virtual void releaseUniverses(bool changed = true);
 
     /**
+     * Set grand master value (0-255)
+     */
+    void setGrandMasterValue(uchar value);
+
+    /**
+     * Get grand master value (0-255)
+     */
+    uchar grandMasterValue();
+
+    /**
      * Write current universe array data to plugins, each universe within
      * the array to its assigned plugin.
      */
@@ -144,6 +154,7 @@ public:
 
 signals:
     void universesWritten(const QByteArray& universes);
+    void grandMasterValueChanged(uchar value);
 
 protected:
     /** The values of all universes */

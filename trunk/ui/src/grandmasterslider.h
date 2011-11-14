@@ -42,6 +42,7 @@ public:
 
 protected slots:
     void slotValueChanged(int value);
+    void slotGrandMasterValueChanged(uchar value);
 
 protected:
     QLabel* m_valueLabel;

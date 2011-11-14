@@ -157,6 +157,10 @@ void SimpleDesk::slotUniversePageChanged(int page)
                     pal.setColor(QPalette::WindowText, QColor(channel->colour()));
                     slider->setPalette(pal);
                 }
+                else
+                {
+                    slider->setPalette(this->palette());
+                }
             }
         }
         else

@@ -95,6 +95,10 @@ void SimpleDesk::initUniverseSliders()
         m_universeSliders << slider;
         connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotUniverseSliderValueChanged(uchar)));
     }
+
+    connect(m_doc, SIGNAL(fixtureAdded(quint32)), this, SLOT(slotUpdateUniverseSliders()));
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)), this, SLOT(slotUpdateUniverseSliders()));
+    connect(m_doc, SIGNAL(fixtureChanged(quint32)), this, SLOT(slotUpdateUniverseSliders()));
 }
 
 void SimpleDesk::initUniversePager()
@@ -127,17 +131,42 @@ void SimpleDesk::slotUniversePageChanged(int page)
         Q_ASSERT(slider != NULL);
         if ((start + i) < 512)
         {
-            slider->setLabel(QString::number(start + i + 1));
+            slider->setEnabled(true);
             slider->setProperty(PROP_ADDRESS, start + i);
             slider->setValue(m_engine->value(start + i));
-            slider->setEnabled(true);
+            slider->setLabel(QString::number(start + i + 1));
+
+            Fixture* fxi = m_doc->fixture(m_doc->fixtureForAddress(start + i));
+            if (fxi == NULL || fxi->isDimmer() == true)
+            {
+                slider->setVerticalLabel(tr("Intensity"));
+                slider->setPalette(this->palette());
+            }
+            else
+            {
+                uint ch = (start + i) - fxi->universeAddress();
+                const QLCChannel* channel = fxi->channel(ch);
+                if (channel != NULL)
+                    slider->setVerticalLabel(channel->name());
+                else
+                    slider->setVerticalLabel(tr("Intensity"));
+
+                if (channel->colour() != QLCChannel::NoColour)
+                {
+                    QPalette pal(slider->palette());
+                    pal.setColor(QPalette::WindowText, QColor(channel->colour()));
+                    slider->setPalette(pal);
+                }
+            }
         }
         else
         {
-            slider->setLabel("---");
+            slider->setEnabled(false);
+            slider->setVerticalLabel(QString());
             slider->setProperty(PROP_ADDRESS, QVariant());
             slider->setValue(0);
-            slider->setEnabled(false);
+            slider->setLabel("---");
+            slider->setPalette(this->palette());
         }
     }
 }
@@ -147,6 +176,11 @@ void SimpleDesk::slotUniverseSliderValueChanged(uchar value)
     QVariant var(sender()->property(PROP_ADDRESS));
     if (var.isValid() == true) // Not true with disabled sliders
         m_engine->setValue(var.toUInt(), value);
+}
+
+void SimpleDesk::slotUpdateUniverseSliders()
+{
+    slotUniversePageChanged(m_universePageSpin->value());
 }
 
 /****************************************************************************

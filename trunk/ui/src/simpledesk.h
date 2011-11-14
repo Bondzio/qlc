@@ -72,6 +72,7 @@ private slots:
     void slotUniversePageDownClicked();
     void slotUniversePageChanged(int page);
     void slotUniverseSliderValueChanged(uchar value);
+    void slotUpdateUniverseSliders();
 
 private:
     QList <DMXSlider*> m_universeSliders;

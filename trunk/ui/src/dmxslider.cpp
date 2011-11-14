@@ -50,14 +50,17 @@ DMXSlider::DMXSlider(QWidget* parent)
     layout()->setAlignment(m_edit, Qt::AlignHCenter);
     connect(m_edit, SIGNAL(textEdited(QString)), this, SLOT(slotValueEdited(QString)));
 
+    QHBoxLayout* hbox = new QHBoxLayout;
+    layout()->addItem(hbox);
+    hbox->addStretch(1);
+
     /* Value slider */
     m_slider = new QSlider(this);
     m_slider->setRange(0, 255);
     m_slider->setTickInterval(16);
     m_slider->setTickPosition(QSlider::TicksBothSides);
     m_slider->setStyle(AppUtil::saneStyle());
-    layout()->addWidget(m_slider);
-    layout()->setAlignment(m_slider, Qt::AlignHCenter);
+    hbox->addWidget(m_slider);
     connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderChanged(int)));
 
     /* Label */
@@ -93,6 +96,17 @@ QString DMXSlider::label() const
     return m_label->text();
 }
 
+void DMXSlider::setVerticalLabel(const QString& text)
+{
+    m_verticalText = text;
+    update();
+}
+
+QString DMXSlider::verticalLabel() const
+{
+    return m_verticalText;
+}
+
 void DMXSlider::slotValueEdited(const QString& text)
 {
     setValue(text.toInt());
@@ -102,4 +116,11 @@ void DMXSlider::slotSliderChanged(int value)
 {
     m_edit->setText(QString::number(value));
     emit valueChanged(value);
+}
+
+void DMXSlider::paintEvent(QPaintEvent* e)
+{
+    QPainter p(this);
+    p.rotate(270);
+    p.drawText(-(height() - 20), 20, verticalLabel());
 }

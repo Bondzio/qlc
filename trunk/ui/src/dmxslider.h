@@ -39,8 +39,11 @@ public:
     void setValue(uchar value);
     uchar value() const;
 
-    void setLabel(const QString& lbl);
+    void setLabel(const QString& text);
     QString label() const;
+
+    void setVerticalLabel(const QString& text);
+    QString verticalLabel() const;
 
 signals:
     void valueChanged(uchar value);
@@ -49,10 +52,14 @@ private slots:
     void slotValueEdited(const QString& text);
     void slotSliderChanged(int value);
 
+protected:
+    void paintEvent(QPaintEvent* e);
+
 private:
     QLineEdit* m_edit;
     QSlider* m_slider;
     QLabel* m_label;
+    QString m_verticalText;
 };
 
 #endif

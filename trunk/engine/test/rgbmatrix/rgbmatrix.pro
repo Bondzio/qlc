@@ -6,6 +6,7 @@ TARGET   = rgbmatrix_test
 QT      += testlib xml script
 CONFIG  -= app_bundle
 
+DEPENDPATH   += ../../src
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../mastertimer
 INCLUDEPATH  += ../../src

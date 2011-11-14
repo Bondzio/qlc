@@ -6,6 +6,7 @@ TARGET   = chaser_test
 QT      += testlib xml
 CONFIG  -= app_bundle
 
+DEPENDPATH   += ../../src
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../mastertimer
 INCLUDEPATH  += ../../src

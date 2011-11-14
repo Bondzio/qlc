@@ -6,6 +6,7 @@ TARGET   = genericfader_test
 QT      += testlib
 CONFIG  -= app_bundle
 
+DEPENDPATH   += ../../src
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../../src
 QMAKE_LIBDIR += ../../src

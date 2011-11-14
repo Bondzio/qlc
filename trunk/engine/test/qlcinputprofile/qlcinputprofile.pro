@@ -6,6 +6,7 @@ TARGET   = qlcinputprofile_test
 QT      += testlib xml
 CONFIG  -= app_bundle
 
+DEPENDPATH   += ../../src
 INCLUDEPATH  += ../../../plugins/interfaces
 INCLUDEPATH  += ../../src
 QMAKE_LIBDIR += ../../src

@@ -6,6 +6,7 @@ TARGET   = outputpluginstub
 
 CONFIG      += plugin
 INCLUDEPATH += ../../../plugins/interfaces
+DEPENDPATH  += ../../../plugins/interfaces
 
 HEADERS += outputpluginstub.h \
            ../../../plugins/interfaces/qlcoutplugin.h

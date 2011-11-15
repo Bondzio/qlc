@@ -19,34 +19,33 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "universearray.h"
-#include "mastertimer.h"
+#include "qlcmacros.h"
 #include "cuestack.h"
-#include "doc.h"
+#include "cue.h"
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-CueStack::CueStack(Doc* doc)
-    : QObject(doc)
-    , m_fader(NULL)
-    , m_fadeInSpeed(0)
+CueStack::CueStack()
+    : m_fadeInSpeed(0)
     , m_fadeOutSpeed(0)
     , m_duration(1000)
+    , m_currentIndex(-1)
+{
+}
+
+CueStack::CueStack(const CueStack& cs)
+    : m_fadeInSpeed(cs.fadeInSpeed())
+    , m_fadeOutSpeed(cs.fadeOutSpeed())
+    , m_duration(cs.duration())
+    , m_cues(cs.cues())
+    , m_currentIndex(cs.currentIndex())
 {
 }
 
 CueStack::~CueStack()
 {
-    if (m_fader != NULL)
-        delete m_fader;
-    m_fader = NULL;
-}
-
-Doc* CueStack::doc() const
-{
-    return qobject_cast<Doc*> (parent());
 }
 
 /****************************************************************************
@@ -55,7 +54,7 @@ Doc* CueStack::doc() const
 
 void CueStack::setFadeInSpeed(uint ms)
 {
-    m_fadeInSpeed = ms
+    m_fadeInSpeed = ms;
 }
 
 uint CueStack::fadeInSpeed() const
@@ -87,14 +86,15 @@ uint CueStack::duration() const
  * Cues
  ****************************************************************************/
 
-void CueStack::clear()
-{
-    m_cues.clear();
-}
-
 void CueStack::addCue(const Cue& c)
 {
     m_cues.append(c);
+}
+
+void CueStack::removeCue(int index)
+{
+    if (index >= 0 && index < m_cues.size())
+        m_cues.removeAt(index);
 }
 
 QList <Cue> CueStack::cues() const
@@ -102,12 +102,15 @@ QList <Cue> CueStack::cues() const
     return m_cues;
 }
 
-/****************************************************************************
- * DMXSource
- ****************************************************************************/
-
-void CueStack::writeDMX(MasterTimer* timer, UniverseArray* ua)
+void CueStack::setCurrentIndex(int index)
 {
-    Q_UNUSED(timer);
-    Q_UNUSED(ua);
+    if (m_cues.size() > 0)
+        m_currentIndex = CLAMP(index, 0, m_cues.size());
+    else
+        m_currentIndex = -1;
+}
+
+int CueStack::currentIndex() const
+{
+    return m_currentIndex;
 }

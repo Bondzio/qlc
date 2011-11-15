@@ -23,27 +23,28 @@
 #define CUE_H
 
 #include <QString>
-#include <QList>
+#include <QHash>
 
 #include "scenevalue.h"
 
 class Cue
 {
 public:
-    Cue();
+    Cue(const QString& name = QString());
+    Cue(const Cue& cue);
     ~Cue();
 
     void setName(const QString& str);
     QString name() const;
 
-    void setValue(const SceneValue& value);
-    SceneValue value(quint32 fxi, quint32 ch);
+    void setValue(uint channel, uchar value);
+    uchar value(uint channel) const;
 
-    QList <SceneValue> values() const;
+    QHash <uint,uchar> values() const;
 
 private:
     QString m_name;
-    QList <SceneValue> m_values;
+    QHash <uint,uchar> m_values;
 };
 
 #endif

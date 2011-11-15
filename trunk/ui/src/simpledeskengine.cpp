@@ -25,6 +25,7 @@
 #include "universearray.h"
 #include "mastertimer.h"
 #include "outputmap.h"
+#include "cuestack.h"
 #include "doc.h"
 
 SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
@@ -37,6 +38,10 @@ SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
 SimpleDeskEngine::~SimpleDeskEngine()
 {
     m_doc->masterTimer()->unregisterDMXSource(this);
+
+    foreach (CueStack* cs, m_cueStacks.values())
+        delete cs;
+    m_cueStacks.clear();
 }
 
 void SimpleDeskEngine::setValue(uint channel, uchar value)
@@ -53,6 +58,18 @@ uchar SimpleDeskEngine::value(uint channel) const
         return m_values[channel];
     else
         return 0;
+}
+
+QHash <uint,uchar> SimpleDeskEngine::values() const
+{
+    return m_values;
+}
+
+CueStack* SimpleDeskEngine::cueStack(uint pb)
+{
+    if (m_cueStacks.contains(pb) == false)
+        m_cueStacks[pb] = new CueStack;
+    return m_cueStacks[pb];
 }
 
 void SimpleDeskEngine::writeDMX(MasterTimer* timer, UniverseArray* ua)

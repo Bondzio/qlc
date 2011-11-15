@@ -19,12 +19,16 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef CUE_H
-#define CUE_H
-
 #include "cue.h"
 
-Cue::Cue()
+Cue::Cue(const QString& name)
+    : m_name(name)
+{
+}
+
+Cue::Cue(const Cue& cue)
+    : m_name(cue.name())
+    , m_values(cue.values())
 {
 }
 
@@ -42,24 +46,20 @@ QString Cue::name() const
     return m_name;
 }
 
-void Cue::setValue(const SceneValue& value)
+void Cue::setValue(uint channel, uchar value)
 {
-    if (m_values.contains(value) == false)
-        m_values.append(value);
-    qSort(m_values.begin(), m_values.end());
+    m_values[channel] = value;
 }
 
-SceneValue Cue::value(quint32 fxi, quint32 ch)
+uchar Cue::value(uint channel) const
 {
-    SceneValue val(fxi, ch);
-    int index = m_values.indexOf(val);
-    if (index != -1)
-        return m_values[index];
+    if (m_values.contains(channel) == true)
+        return m_values[channel];
     else
-        return SceneValue();
+        return 0;
 }
 
-QList <SceneValue> Cue::values() const
+QHash <uint,uchar> Cue::values() const
 {
     return m_values;
 }

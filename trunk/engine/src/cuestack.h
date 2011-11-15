@@ -25,25 +25,17 @@
 #include <QObject>
 #include <QList>
 
-#include "dmxsource.h"
 #include "cue.h"
 
-class UniverseArray;
-class MasterTimer;
-class Doc;
-
-class CueStack : public QObject, public DMXSource
+class CueStack
 {
-    Q_OBJECT
-
     /************************************************************************
      * Initialization
      ************************************************************************/
 public:
-    CueStack(Doc* doc);
+    CueStack();
+    CueStack(const CueStack& cs);
     ~CueStack();
-
-    Doc* doc() const;
 
     /************************************************************************
      * Speed
@@ -67,22 +59,17 @@ private:
      * Cues
      ************************************************************************/
 public:
-    void clear();
     void addCue(const Cue& c);
+    void removeCue(int index);
+
     QList <Cue> cues() const;
+
+    void setCurrentIndex(int index);
+    int currentIndex() const;
 
 private:
     QList <Cue> m_cues;
-
-    /************************************************************************
-     * DMXSource
-     ************************************************************************/
-public:
-    /** @reimp */
-    void writeDMX(MasterTimer* timer, UniverseArray* ua);
-
-private:
-    GenericFader* m_fader;
+    int m_currentIndex;
 };
 
 #endif

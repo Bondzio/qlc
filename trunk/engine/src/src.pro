@@ -49,6 +49,8 @@ HEADERS += bus.h \
            chaserrunner.h \
            chaserstep.h \
            collection.h \
+           cue.h \
+           cuestack.h \
            doc.h \
            efx.h \
            efxfixture.h \
@@ -91,6 +93,8 @@ SOURCES += bus.cpp \
            chaserrunner.cpp \
            chaserstep.cpp \
            collection.cpp \
+           cue.cpp \
+           cuestack.cpp \
            doc.cpp \
            efx.cpp \
            efxfixture.cpp \

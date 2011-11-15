@@ -30,9 +30,12 @@
 
 class GrandMasterSlider;
 class SimpleDeskEngine;
+class PlaybackSlider;
 class SimpleDesk;
 class DMXSlider;
+class CueStack;
 class Doc;
+class Cue;
 
 class SimpleDesk : public QWidget, public Ui_SimpleDesk
 {
@@ -85,6 +88,36 @@ private:
 
 private:
     GrandMasterSlider* m_grandMasterSlider;
+
+    /*********************************************************************
+     * Playback sliders
+     *********************************************************************/
+private:
+    void initPlaybackSliders();
+
+private slots:
+    void slotPlaybackSelected();
+    void slotSelectPlayback(int pb);
+    void slotPlaybackValueChanged(uchar value);
+
+private:
+    QList <PlaybackSlider*> m_playbackSliders;
+    int m_selectedPlayback;
+
+    /*********************************************************************
+     * Cue Stack controls
+     *********************************************************************/
+private:
+    void initCueStack();
+    void updateCueItem(QTreeWidgetItem* item, const Cue& cue);
+
+private slots:
+    void slotPreviousCueClicked();
+    void slotNextCueClicked();
+    void slotStopCueStackClicked();
+    void slotConfigureCueStackClicked();
+    void slotStoreCueClicked();
+    void slotRecordCueClicked();
 };
 
 #endif

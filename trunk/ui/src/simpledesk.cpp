@@ -24,12 +24,20 @@
 
 #include "grandmasterslider.h"
 #include "simpledeskengine.h"
+#include "playbackslider.h"
 #include "simpledesk.h"
 #include "dmxslider.h"
+#include "cuestack.h"
+#include "cue.h"
 #include "doc.h"
 
 #define PAGE_CHANNELS 12
+#define PAGE_PLAYBACKS 12
 #define PROP_ADDRESS "address"
+#define PROP_PLAYBACK "playback"
+
+#define COL_NUM  0
+#define COL_NAME 1
 
 SimpleDesk* SimpleDesk::s_instance = NULL;
 
@@ -41,6 +49,7 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_engine(new SimpleDeskEngine(doc))
     , m_doc(doc)
+    , m_selectedPlayback(-1)
 {
     Q_ASSERT(doc != NULL);
     setupUi(this);
@@ -48,6 +57,8 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     initUniverseSliders();
     initUniversePager();
     initGrandMaster();
+    initPlaybackSliders();
+    initCueStack();
 }
 
 SimpleDesk::~SimpleDesk()
@@ -147,19 +158,22 @@ void SimpleDesk::slotUniversePageChanged(int page)
                 uint ch = (start + i) - fxi->universeAddress();
                 const QLCChannel* channel = fxi->channel(ch);
                 if (channel != NULL)
-                    slider->setVerticalLabel(channel->name());
-                else
-                    slider->setVerticalLabel(tr("Intensity"));
-
-                if (channel->colour() != QLCChannel::NoColour)
                 {
-                    QPalette pal(slider->palette());
-                    pal.setColor(QPalette::WindowText, QColor(channel->colour()));
-                    slider->setPalette(pal);
+                    slider->setVerticalLabel(channel->name());
+                    if (channel->colour() != QLCChannel::NoColour)
+                    {
+                        QPalette pal(slider->palette());
+                        pal.setColor(QPalette::WindowText, QColor(channel->colour()));
+                        slider->setPalette(pal);
+                    }
+                    else
+                    {
+                        slider->setPalette(this->palette());
+                    }
                 }
                 else
                 {
-                    slider->setPalette(this->palette());
+                    slider->setVerticalLabel(tr("Intensity"));
                 }
             }
         }
@@ -196,6 +210,121 @@ void SimpleDesk::initGrandMaster()
     new QVBoxLayout(m_grandMasterContainer);
     m_grandMasterSlider = new GrandMasterSlider(m_grandMasterContainer, m_doc->outputMap(),
                                                 m_doc->inputMap());
+    m_grandMasterContainer->layout()->setMargin(0);
     m_grandMasterContainer->layout()->addWidget(m_grandMasterSlider);
     m_grandMasterSlider->refreshProperties();
+}
+
+/****************************************************************************
+ * Playback Sliders
+ ****************************************************************************/
+
+void SimpleDesk::initPlaybackSliders()
+{
+    new QHBoxLayout(m_playbackGroup);
+    for (int i = 0; i < PAGE_PLAYBACKS; i++)
+    {
+        PlaybackSlider* slider = new PlaybackSlider(m_playbackGroup);
+        m_playbackGroup->layout()->addWidget(slider);
+        slider->setLabel(QString::number(i + 1));
+        slider->setProperty(PROP_PLAYBACK, i);
+        m_playbackSliders << slider;
+        connect(slider, SIGNAL(selected()), this, SLOT(slotPlaybackSelected()));
+        connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotPlaybackValueChanged(uchar)));
+    }
+
+    slotSelectPlayback(0);
+}
+
+void SimpleDesk::slotPlaybackSelected()
+{
+    int pb = sender()->property(PROP_PLAYBACK).toInt();
+    if (m_selectedPlayback == pb)
+        return;
+
+    slotSelectPlayback(pb);
+}
+
+void SimpleDesk::slotSelectPlayback(int pb)
+{
+    if (m_selectedPlayback != -1)
+        m_playbackSliders[m_selectedPlayback]->setSelected(false);
+
+    if (pb != -1)
+        m_playbackSliders[pb]->setSelected(true);
+    m_selectedPlayback = pb;
+
+    m_cueList->clear();
+
+    CueStack* cueStack = m_engine->cueStack(pb);
+    Q_ASSERT(cueStack != NULL);
+    foreach (const Cue& cue, cueStack->cues())
+        updateCueItem(new QTreeWidgetItem(m_cueList), cue);
+}
+
+void SimpleDesk::slotPlaybackValueChanged(uchar value)
+{
+    PlaybackSlider* slider = qobject_cast<PlaybackSlider*> (sender());
+    Q_ASSERT(slider != NULL);
+}
+
+/****************************************************************************
+ * Cue Stack controls
+ ****************************************************************************/
+
+void SimpleDesk::initCueStack()
+{
+    connect(m_previousCueButton, SIGNAL(clicked()), this, SLOT(slotPreviousCueClicked()));
+    connect(m_nextCueButton, SIGNAL(clicked()), this, SLOT(slotNextCueClicked()));
+    connect(m_stopCueStackButton, SIGNAL(clicked()), this, SLOT(slotStopCueStackClicked()));
+    connect(m_configureCueStackButton, SIGNAL(clicked()), this, SLOT(slotConfigureCueStackClicked()));
+    connect(m_storeCueButton, SIGNAL(clicked()), this, SLOT(slotStoreCueClicked()));
+    connect(m_recordCueButton, SIGNAL(clicked()), this, SLOT(slotRecordCueClicked()));
+}
+
+void SimpleDesk::updateCueItem(QTreeWidgetItem* item, const Cue& cue)
+{
+    Q_ASSERT(item != NULL);
+    int index = m_cueList->indexOfTopLevelItem(item);
+    item->setText(COL_NUM, QString::number(index + 1));
+    item->setText(COL_NAME, cue.name());
+}
+
+void SimpleDesk::slotPreviousCueClicked()
+{
+}
+
+void SimpleDesk::slotNextCueClicked()
+{
+}
+
+void SimpleDesk::slotStopCueStackClicked()
+{
+}
+
+void SimpleDesk::slotConfigureCueStackClicked()
+{
+}
+
+void SimpleDesk::slotStoreCueClicked()
+{
+}
+
+void SimpleDesk::slotRecordCueClicked()
+{
+    Q_ASSERT(m_selectedPlayback != -1);
+
+    Cue cue;
+    QHashIterator <uint,uchar> it(m_engine->values());
+    while (it.hasNext() == true)
+    {
+        it.next();
+        cue.setValue(it.key(), it.value());
+    }
+
+    CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
+    Q_ASSERT(cueStack != NULL);
+    cue.setName(tr("Cue %1").arg(m_cueList->topLevelItemCount() + 1));
+    cueStack->addCue(cue);
+    updateCueItem(new QTreeWidgetItem(m_cueList), cue);
 }

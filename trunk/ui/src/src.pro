@@ -55,6 +55,7 @@ HEADERS += aboutbox.h \
            monitorlayout.h \
            outputmanager.h \
            outputpatcheditor.h \
+           playbackslider.h \
            rgbmatrixeditor.h \
            rgbitem.h \
            sceneeditor.h \
@@ -145,6 +146,7 @@ SOURCES += aboutbox.cpp \
            monitorlayout.cpp \
            outputmanager.cpp \
            outputpatcheditor.cpp \
+           playbackslider.cpp \
            rgbmatrixeditor.cpp \
            rgbitem.cpp \
            sceneeditor.cpp \

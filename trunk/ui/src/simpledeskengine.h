@@ -23,10 +23,12 @@
 #define SIMPLEDESKENGINE_H
 
 #include <QHash>
+#include <QList>
 #include "dmxsource.h"
 
 class UniverseArray;
 class MasterTimer;
+class CueStack;
 class Doc;
 
 class SimpleDeskEngine : public DMXSource
@@ -38,13 +40,18 @@ public:
     void setValue(uint channel, uchar value);
     uchar value(uint channel) const;
 
+    /** Get current universe contents (as seen by the engine) */
+    QHash <uint,uchar> values() const;
+
+    CueStack* cueStack(uint pb);
+
     /** @reimpl */
     void writeDMX(MasterTimer* timer, UniverseArray* ua);
 
 private:
     Doc* m_doc;
     QHash <uint,uchar> m_values;
-    QHash <uint,uint> m_fixtures;
+    QHash <uint,CueStack*> m_cueStacks;
 };
 
 #endif

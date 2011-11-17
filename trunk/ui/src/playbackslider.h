@@ -49,6 +49,8 @@ signals:
     void selected();
     void flashing(bool on);
     void valueChanged(uchar value);
+    void started();
+    void stopped();
 
 private slots:
     void slotSliderChanged(int value);
@@ -61,6 +63,7 @@ private:
     QSlider* m_slider;
     QLabel* m_label;
     QToolButton* m_flash;
+    int m_previousValue;
 };
 
 #endif

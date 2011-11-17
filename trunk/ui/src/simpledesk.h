@@ -97,12 +97,14 @@ private:
 
 private slots:
     void slotPlaybackSelected();
-    void slotSelectPlayback(int pb);
+    void slotSelectPlayback(uint pb);
+    void slotPlaybackStarted();
+    void slotPlaybackStopped();
     void slotPlaybackValueChanged(uchar value);
 
 private:
     QList <PlaybackSlider*> m_playbackSliders;
-    int m_selectedPlayback;
+    uint m_selectedPlayback;
 
     /*********************************************************************
      * Cue Stack controls
@@ -110,8 +112,12 @@ private:
 private:
     void initCueStack();
     void updateCueItem(QTreeWidgetItem* item, const Cue& cue);
+    void markCurrentCue();
 
 private slots:
+    void slotCueStackStarted(uint stack);
+    void slotCueStackStopped(uint stack);
+    void slotCurrentCueChanged(uint playback, int index);
     void slotPreviousCueClicked();
     void slotNextCueClicked();
     void slotStopCueStackClicked();

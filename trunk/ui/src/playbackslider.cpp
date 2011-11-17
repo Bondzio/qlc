@@ -41,6 +41,7 @@ PlaybackSlider::PlaybackSlider(QWidget* parent)
     , m_slider(NULL)
     , m_label(NULL)
     , m_flash(NULL)
+    , m_previousValue(0)
 {
     new QVBoxLayout(this);
     layout()->setSpacing(1);
@@ -122,6 +123,7 @@ void PlaybackSlider::setSelected(bool sel)
         pal.setColor(QPalette::Window, pal.color(QPalette::Highlight));
         setPalette(pal);
         setAutoFillBackground(true);
+        m_slider->setFocus(Qt::MouseFocusReason);
     }
     else
     {
@@ -132,7 +134,17 @@ void PlaybackSlider::setSelected(bool sel)
 
 void PlaybackSlider::slotSliderChanged(int value)
 {
+    if (value == m_previousValue)
+        return;
+
     m_value->setText(QString::number(value));
+
+    if (value == 0)
+        emit stopped();
+    else if (value > 0 && m_previousValue == 0)
+        emit started();
+
+    m_previousValue = value;
     emit valueChanged(value);
 }
 

@@ -120,6 +120,9 @@ App::~App()
     if (VirtualConsole::instance() != NULL)
         delete VirtualConsole::instance();
 
+    if (SimpleDesk::instance() != NULL)
+        delete SimpleDesk::instance();
+
     // Delete doc
     if (m_doc != NULL)
         delete m_doc;

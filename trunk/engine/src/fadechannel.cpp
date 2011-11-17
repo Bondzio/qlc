@@ -82,10 +82,14 @@ quint32 FadeChannel::channel() const
 
 quint32 FadeChannel::address(const Doc* doc) const
 {
+    if (fixture() == Fixture::invalidId())
+        return channel(); // No fixture, assume absolute DMX address
+
     Fixture* fxi = doc->fixture(fixture());
     if (fxi == NULL)
         return QLCChannel::invalid();
-    return (fxi->universeAddress() + channel());
+    else
+        return (fxi->universeAddress() + channel());
 }
 
 QLCChannel::Group FadeChannel::group(const Doc* doc) const

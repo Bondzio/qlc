@@ -14,6 +14,7 @@
         <file alias="configure.png">../../gfx/configure.png</file>
         <file alias="console.png">../../gfx/console.png</file>
         <file alias="cuelist.png">../../gfx/cuelist.png</file>
+        <file alias="current.png">../../gfx/current.png</file>
         <file alias="design.png">../../gfx/design.png</file>
         <file alias="detach.png">../../gfx/detach.png</file>
         <file alias="down.png">../../gfx/down.png</file>

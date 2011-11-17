@@ -27,15 +27,25 @@
 
 #include "cue.h"
 
-class CueStack
+class UniverseArray;
+class GenericFader;
+class MasterTimer;
+class FadeChannel;
+class Doc;
+
+class CueStack : public QObject
 {
+    Q_OBJECT
+
     /************************************************************************
      * Initialization
      ************************************************************************/
 public:
-    CueStack();
-    CueStack(const CueStack& cs);
+    CueStack(Doc* doc);
     ~CueStack();
+
+private:
+    Doc* doc() const;
 
     /************************************************************************
      * Speed
@@ -59,17 +69,61 @@ private:
      * Cues
      ************************************************************************/
 public:
-    void addCue(const Cue& c);
+    void appendCue(const Cue& c);
     void removeCue(int index);
 
     QList <Cue> cues() const;
 
     void setCurrentIndex(int index);
     int currentIndex() const;
+    void previousCue();
+    void nextCue();
 
 private:
     QList <Cue> m_cues;
     int m_currentIndex;
+
+    /************************************************************************
+     * Running
+     ************************************************************************/
+public:
+    void start();
+    void stop();
+    bool isRunning() const;
+
+    void adjustIntensity(qreal fraction);
+    qreal intensity() const;
+
+signals:
+    void started();
+    void stopped();
+    void currentCueChanged(int index);
+
+private:
+    bool m_running;
+    qreal m_intensity;
+
+    /************************************************************************
+     * Writing
+     ************************************************************************/
+public:
+    bool isStarted() const;
+
+    void preRun();
+    void write(UniverseArray* ua);
+    void postRun(MasterTimer* timer);
+
+private:
+    int next();
+    int previous();
+    void switchCue(int index, const UniverseArray* ua);
+    void insertStartValue(FadeChannel& fc, const UniverseArray* ua);
+
+private:
+    GenericFader* m_fader;
+    uint m_elapsed;
+    bool m_previous;
+    bool m_next;
 };
 
 #endif

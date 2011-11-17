@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QVariant>
 #include <QDebug>
 
 #include "simpledeskengine.h"
@@ -28,20 +29,29 @@
 #include "cuestack.h"
 #include "doc.h"
 
+#define PROP_ID "id"
+
 SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
-    : m_doc(doc)
+    : QObject(doc)
 {
     Q_ASSERT(doc != NULL);
-    m_doc->masterTimer()->registerDMXSource(this);
+    doc->masterTimer()->registerDMXSource(this);
 }
 
 SimpleDeskEngine::~SimpleDeskEngine()
 {
-    m_doc->masterTimer()->unregisterDMXSource(this);
+    doc()->masterTimer()->unregisterDMXSource(this);
 
+    m_mutex.lock();
     foreach (CueStack* cs, m_cueStacks.values())
         delete cs;
     m_cueStacks.clear();
+    m_mutex.unlock();
+}
+
+Doc* SimpleDeskEngine::doc() const
+{
+    return qobject_cast<Doc*> (parent());
 }
 
 void SimpleDeskEngine::setValue(uint channel, uchar value)
@@ -65,11 +75,40 @@ QHash <uint,uchar> SimpleDeskEngine::values() const
     return m_values;
 }
 
-CueStack* SimpleDeskEngine::cueStack(uint pb)
+CueStack* SimpleDeskEngine::cueStack(uint stack)
 {
-    if (m_cueStacks.contains(pb) == false)
-        m_cueStacks[pb] = new CueStack;
-    return m_cueStacks[pb];
+    if (m_cueStacks.contains(stack) == false)
+    {
+        m_cueStacks[stack] = new CueStack(doc());
+        m_cueStacks[stack]->setProperty(PROP_ID, stack);
+        connect(m_cueStacks[stack], SIGNAL(currentCueChanged(int)),
+                this, SLOT(slotCurrentCueChanged(int)));
+        connect(m_cueStacks[stack], SIGNAL(started()), this, SLOT(slotCueStackStarted()));
+        connect(m_cueStacks[stack], SIGNAL(stopped()), this, SLOT(slotCueStackStopped()));
+    }
+
+    return m_cueStacks[stack];
+}
+
+void SimpleDeskEngine::slotCurrentCueChanged(int index)
+{
+    Q_ASSERT(sender() != NULL);
+    uint stack = sender()->property(PROP_ID).toUInt();
+    emit currentCueChanged(stack, index);
+}
+
+void SimpleDeskEngine::slotCueStackStarted()
+{
+    Q_ASSERT(sender() != NULL);
+    uint stack = sender()->property(PROP_ID).toUInt();
+    emit cueStackStarted(stack);
+}
+
+void SimpleDeskEngine::slotCueStackStopped()
+{
+    Q_ASSERT(sender() != NULL);
+    uint stack = sender()->property(PROP_ID).toUInt();
+    emit cueStackStopped(stack);
 }
 
 void SimpleDeskEngine::writeDMX(MasterTimer* timer, UniverseArray* ua)
@@ -79,7 +118,7 @@ void SimpleDeskEngine::writeDMX(MasterTimer* timer, UniverseArray* ua)
     {
         it.next();
 
-        Fixture* fxi = m_doc->fixture(m_doc->fixtureForAddress(it.key()));
+        Fixture* fxi = doc()->fixture(doc()->fixtureForAddress(it.key()));
         if (fxi == NULL || fxi->isDimmer() == true)
         {
             ua->write(it.key(), it.value(), QLCChannel::Intensity);
@@ -95,4 +134,22 @@ void SimpleDeskEngine::writeDMX(MasterTimer* timer, UniverseArray* ua)
             ua->write(it.key(), it.value(), grp);
         }
     }
+
+    m_mutex.lock();
+    foreach (CueStack* cueStack, m_cueStacks)
+    {
+        if (cueStack->isRunning() == true)
+        {
+            if (cueStack->isStarted() == false)
+                cueStack->preRun();
+
+            cueStack->write(ua);
+        }
+        else
+        {
+            if (cueStack->isStarted() == true)
+                cueStack->postRun(timer);
+        }
+    }
+    m_mutex.unlock();
 }

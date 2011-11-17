@@ -22,6 +22,8 @@
 #ifndef SIMPLEDESKENGINE_H
 #define SIMPLEDESKENGINE_H
 
+#include <QObject>
+#include <QMutex>
 #include <QHash>
 #include <QList>
 #include "dmxsource.h"
@@ -31,8 +33,10 @@ class MasterTimer;
 class CueStack;
 class Doc;
 
-class SimpleDeskEngine : public DMXSource
+class SimpleDeskEngine : public QObject, public DMXSource
 {
+    Q_OBJECT
+
 public:
     SimpleDeskEngine(Doc* doc);
     virtual ~SimpleDeskEngine();
@@ -43,15 +47,28 @@ public:
     /** Get current universe contents (as seen by the engine) */
     QHash <uint,uchar> values() const;
 
-    CueStack* cueStack(uint pb);
+    CueStack* cueStack(uint stack);
 
     /** @reimpl */
     void writeDMX(MasterTimer* timer, UniverseArray* ua);
 
+signals:
+    void currentCueChanged(uint stack, int index);
+    void cueStackStarted(uint stack);
+    void cueStackStopped(uint stack);
+
+private slots:
+    void slotCurrentCueChanged(int index);
+    void slotCueStackStarted();
+    void slotCueStackStopped();
+
 private:
-    Doc* m_doc;
+    Doc* doc() const;
+
+private:
     QHash <uint,uchar> m_values;
     QHash <uint,CueStack*> m_cueStacks;
+    QMutex m_mutex;
 };
 
 #endif

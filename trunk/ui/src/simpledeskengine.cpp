@@ -25,6 +25,7 @@
 #include "simpledeskengine.h"
 #include "universearray.h"
 #include "mastertimer.h"
+#include "fadechannel.h"
 #include "outputmap.h"
 #include "cuestack.h"
 #include "doc.h"
@@ -56,7 +57,12 @@ Doc* SimpleDeskEngine::doc() const
 
 void SimpleDeskEngine::setValue(uint channel, uchar value)
 {
-    if (value == 0 && m_values.contains(channel) == true)
+    // Use FadeChannel's reverse-lookup to dig up the channel's group
+    FadeChannel fc;
+    fc.setChannel(channel);
+    QLCChannel::Group group = fc.group(doc());
+
+    if (value == 0 && group == QLCChannel::Intensity)
         m_values.remove(channel);
     else
         m_values[channel] = value;

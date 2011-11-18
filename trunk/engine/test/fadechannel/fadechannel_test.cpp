@@ -21,13 +21,18 @@
 
 #include <QtTest>
 
-#include "qlcmacros.h"
-#include "qlcchannel.h"
 #include "fadechannel_test.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
+#include "qlcchannel.h"
+#include "qlcmacros.h"
+#include "qlcfile.h"
 
 #define private public
 #include "fadechannel.h"
 #undef private
+
+#define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void FadeChannel_Test::address()
 {
@@ -38,9 +43,14 @@ void FadeChannel_Test::address()
     doc.addFixture(fxi);
 
     FadeChannel fc;
-    fc.setFixture(fxi->id());
     fc.setChannel(2);
+    QCOMPARE(fc.address(&doc), quint32(2));
+
+    fc.setFixture(fxi->id());
     QCOMPARE(fc.address(&doc), quint32(402));
+
+    fc.setFixture(12345);
+    QCOMPARE(fc.address(&doc), QLCChannel::invalid());
 }
 
 void FadeChannel_Test::comparison()
@@ -64,12 +74,51 @@ void FadeChannel_Test::comparison()
 void FadeChannel_Test::group()
 {
     Doc doc(this);
+
+    FadeChannel fc;
+
+    // Only a channel given, no fixture at the address -> intensity
+    fc.setChannel(2);
+    QCOMPARE(fc.group(&doc), QLCChannel::Intensity);
+
     Fixture* fxi = new Fixture(&doc);
+    fxi->setAddress(10);
     fxi->setChannels(5);
     doc.addFixture(fxi);
 
-    FadeChannel fc;
+    // Fixture and channel given, fixture is a dimmer -> intensity
     fc.setFixture(fxi->id());
+    QCOMPARE(fc.group(&doc), QLCChannel::Intensity);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(doc.fixtureDefCache()->load(dir) == true);
+
+    const QLCFixtureDef* def = doc.fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+
+    fxi = new Fixture(&doc);
+    fxi->setAddress(0);
+    fxi->setFixtureDefinition(def, mode);
+    doc.addFixture(fxi);
+
+    // Fixture and channel given, but channel is beyond fixture's channels -> intensity
+    fc.setFixture(fxi->id());
+    fc.setChannel(50);
+    QCOMPARE(fc.group(&doc), QLCChannel::Intensity);
+
+    // Only a channel given, no fixture given but a fixture occupies the address.
+    // Check that reverse address -> fixture lookup works.
+    fc.setFixture(Fixture::invalidId());
+    fc.setChannel(2);
+    QCOMPARE(fc.group(&doc), QLCChannel::Colour);
+
+    // Fixture and channel given, but fixture doesn't exist -> intensity
+    fc.setFixture(12345);
     fc.setChannel(2);
     QCOMPARE(fc.group(&doc), QLCChannel::Intensity);
 }
@@ -175,6 +224,33 @@ void FadeChannel_Test::nextStep()
     QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(150));
     QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(200));
     QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(250));
+
+    // Maximum elapsed() reached
+    fc.setCurrent(0);
+    fc.setTarget(255);
+    fc.setReady(false);
+    fc.setElapsed(UINT_MAX);
+    fc.setFadeTime(5 * MasterTimer::tick());
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), UINT_MAX);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), UINT_MAX);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), UINT_MAX);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), UINT_MAX);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), UINT_MAX);
+
+    // Channel marked as ready
+    fc.setReady(true);
+    fc.setElapsed(0);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), MasterTimer::tick() * 1);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), MasterTimer::tick() * 2);
+    QCOMPARE(fc.nextStep(MasterTimer::tick()), uchar(255));
+    QCOMPARE(fc.elapsed(), MasterTimer::tick() * 3);
 }
 
 void FadeChannel_Test::calculateCurrent()

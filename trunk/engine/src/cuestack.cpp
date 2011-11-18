@@ -151,15 +151,11 @@ void CueStack::nextCue()
 
 void CueStack::start()
 {
-    qDebug() << Q_FUNC_INFO;
-
     m_running = true;
 }
 
 void CueStack::stop()
 {
-    qDebug() << Q_FUNC_INFO;
-
     m_running = false;
 }
 
@@ -194,8 +190,6 @@ bool CueStack::isStarted() const
 
 void CueStack::preRun()
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_ASSERT(m_fader == NULL);
     m_fader = new GenericFader(doc());
     m_fader->adjustIntensity(intensity());
@@ -243,8 +237,6 @@ void CueStack::write(UniverseArray* ua)
 
 void CueStack::postRun(MasterTimer* timer)
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_ASSERT(timer != NULL);
     Q_ASSERT(m_fader != NULL);
 
@@ -276,8 +268,6 @@ void CueStack::postRun(MasterTimer* timer)
 
 int CueStack::previous()
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_ASSERT(m_fader != NULL);
 
     m_currentIndex--;
@@ -289,8 +279,6 @@ int CueStack::previous()
 
 int CueStack::next()
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_ASSERT(m_fader != NULL);
     if (m_cues.size() == 0)
         return -1;
@@ -304,8 +292,6 @@ int CueStack::next()
 
 void CueStack::switchCue(int index, const UniverseArray* ua)
 {
-    qDebug() << Q_FUNC_INFO;
-
     QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)
     {
@@ -345,8 +331,6 @@ void CueStack::switchCue(int index, const UniverseArray* ua)
 
 void CueStack::insertStartValue(FadeChannel& fc, const UniverseArray* ua)
 {
-    qDebug() << Q_FUNC_INFO;
-
     const QHash <FadeChannel,FadeChannel>& channels(m_fader->channels());
     if (channels.contains(fc) == true)
     {

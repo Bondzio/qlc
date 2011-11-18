@@ -297,7 +297,7 @@ void SimpleDesk::slotPlaybackValueChanged(uchar value)
     CueStack* cueStack = m_engine->cueStack(pb);
     Q_ASSERT(cueStack != NULL);
 
-    cueStack->adjustIntensity(value);
+    cueStack->adjustIntensity(qreal(value) / qreal(UCHAR_MAX));
 }
 
 /****************************************************************************

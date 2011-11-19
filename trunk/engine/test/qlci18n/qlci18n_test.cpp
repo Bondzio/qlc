@@ -41,21 +41,21 @@ void QLCi18n_Test::translationFilePath()
 void QLCi18n_Test::loadTranslation()
 {
     QLCi18n::setDefaultLocale(QString());
-    QLCi18n::setTranslationFilePath("../../../ui/src");
+    QLCi18n::setTranslationFilePath(".");
 
     // Since QLocale::system() is different for people using such locales that
     // don't have QLC translation yet, we just have to accept a failure on those
     // cases.
     QDir dir(QLCi18n::translationFilePath());
     QStringList entries(dir.entryList(QStringList() << QString("*.qm"), QDir::Files));
-    QString qm(QString("%1_%2.qm").arg("qlc").arg(QLocale::system().name()));
+    QString qm(QString("%1_%2.qm").arg("qlci18n").arg(QLocale::system().name()));
     if (entries.contains(qm) == false)
-        QEXPECT_FAIL(0, "No translation for this locale. Fail is OK.", Continue);
-    QVERIFY(QLCi18n::loadTranslation("qlc") == true);
+        QEXPECT_FAIL("", "No translation for this locale. Fail is OK.", Continue);
+    QCOMPARE(QLCi18n::loadTranslation("qlci18n"), true);
 
-    // qlc_fi_FI.qm SHOULD be there.
+    // qlci18n_fi_FI.qm SHOULD be there.
     QLCi18n::setDefaultLocale("fi_FI");
-    QVERIFY(QLCi18n::loadTranslation("qlc") == true);
+    QVERIFY(QLCi18n::loadTranslation("qlci18n") == true);
 }
 
 QTEST_MAIN(QLCi18n_Test)

@@ -12,5 +12,7 @@ INCLUDEPATH  += ../../src
 QMAKE_LIBDIR += ../../src
 LIBS         += -lqlcengine
 
+TRANSLATIONS += qlci18n_fi_FI.ts
+
 SOURCES += qlci18n_test.cpp
 HEADERS += qlci18n_test.h

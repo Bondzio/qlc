@@ -11,6 +11,8 @@
 #include "rgbscript.h"
 #include "qlcconfig.h"
 
+QDir RGBScript::s_customScriptDirectory = QDir();
+
 /****************************************************************************
  * Initialization
  ****************************************************************************/
@@ -69,7 +71,7 @@ bool RGBScript::load(const QDir& dir, const QString& fileName)
     QScriptSyntaxCheckResult result = QScriptEngine::checkSyntax(m_contents);
     if (result.state() == QScriptSyntaxCheckResult::Valid)
     {
-        return true;
+        return evaluate();
     }
     else
     {
@@ -207,11 +209,25 @@ int RGBScript::apiVersion() const
  * System & User Scripts
  ****************************************************************************/
 
+RGBScript RGBScript::script(const QString& name)
+{
+    QListIterator <RGBScript> it(scripts());
+    while (it.hasNext() == true)
+    {
+        RGBScript script(it.next());
+        if (script.name() == name)
+            return script;
+    }
+
+    return RGBScript();
+}
+
 QList <RGBScript> RGBScript::scripts()
 {
     QList <RGBScript> list;
     list << scripts(userScriptDirectory());
     list << scripts(systemScriptDirectory());
+    list << scripts(customScriptDirectory());
     return list;
 }
 
@@ -278,3 +294,15 @@ QDir RGBScript::userScriptDirectory()
     return dir;
 }
 
+void RGBScript::setCustomScriptDirectory(const QString& path)
+{
+    QDir dir(path);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*.js"));
+    s_customScriptDirectory = dir;
+}
+
+QDir RGBScript::customScriptDirectory()
+{
+    return s_customScriptDirectory;
+}

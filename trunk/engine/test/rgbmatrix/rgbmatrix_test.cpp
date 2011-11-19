@@ -67,13 +67,8 @@ void RGBMatrix_Test::initTestCase()
         grp->assignFixture(fxi->id());
     }
 
-    QDir scrDir(INTERNAL_SCRIPTDIR);
-    scrDir.setFilter(QDir::Files);
-    scrDir.setNameFilters(QStringList() << QString("*.js"));
-    m_scripts = RGBScript::scripts(scrDir);
-    QVERIFY(m_scripts.size() > 0);
-    foreach(RGBScript scr, m_scripts)
-        QVERIFY(scr.fileName().isEmpty() == false);
+    RGBScript::setCustomScriptDirectory(INTERNAL_SCRIPTDIR);
+    QVERIFY(RGBScript::scripts().size() != 0);
 }
 
 void RGBMatrix_Test::cleanupTestCase()
@@ -92,6 +87,7 @@ void RGBMatrix_Test::initial()
     QCOMPARE(mtx.name(), tr("New RGB Matrix"));
     QCOMPARE(mtx.duration(), uint(500));
     QCOMPARE(mtx.script().fileName(), QString("fullcolumns.js"));
+    QCOMPARE(mtx.script().name(), QString("Full Columns"));
 }
 
 void RGBMatrix_Test::group()
@@ -122,20 +118,19 @@ void RGBMatrix_Test::copy()
     RGBMatrix mtx(m_doc);
     mtx.setMonoColor(Qt::magenta);
     mtx.setFixtureGroup(0);
-    mtx.setScript(m_scripts.last());
+    mtx.setScript(RGBScript::scripts().last());
 
     RGBMatrix* copyMtx = qobject_cast<RGBMatrix*> (mtx.createCopy(m_doc));
     QVERIFY(copyMtx != NULL);
     QCOMPARE(copyMtx->monoColor(), QColor(Qt::magenta));
     QCOMPARE(copyMtx->fixtureGroup(), uint(0));
-    QCOMPARE(copyMtx->script(), m_scripts.last());
+    QCOMPARE(copyMtx->script(), RGBScript::scripts().last());
 }
 
 void RGBMatrix_Test::previewMaps()
 {
     RGBMatrix mtx(m_doc);
-    mtx.setMonoColor(Qt::white);
-    QCOMPARE(mtx.script().fileName(), QString("fullcolumns.js"));
+    QCOMPARE(mtx.script().name(), QString("Full Columns"));
 
     QList <RGBMap> maps = mtx.previewMaps();
     QCOMPARE(maps.size(), 0); // No fixture group
@@ -150,7 +145,7 @@ void RGBMatrix_Test::previewMaps()
             for (int x = 0; x < 5; x++)
             {
                 if (x == z)
-                    QCOMPARE(maps[z][y][x], QColor(Qt::white).rgb());
+                    QCOMPARE(maps[z][y][x], QColor(Qt::red).rgb());
                 else
                     QCOMPARE(maps[z][y][x], uint(0));
             }
@@ -163,7 +158,7 @@ void RGBMatrix_Test::loadSave()
     RGBMatrix* mtx = new RGBMatrix(m_doc);
     mtx->setMonoColor(Qt::magenta);
     mtx->setFixtureGroup(42);
-    mtx->setScript(m_scripts.last());
+    mtx->setScript(RGBScript::script("Full Columns"));
 
     mtx->setName("Xyzzy");
     mtx->setDirection(Function::Backward);
@@ -206,7 +201,7 @@ void RGBMatrix_Test::loadSave()
         }
         else if (tag.tagName() == "Script")
         {
-            QCOMPARE(tag.text(), m_scripts.last().fileName());
+            QCOMPARE(tag.text(), QString("fullcolumns.js"));
             script++;
         }
         else if (tag.tagName() == "MonoColor")

@@ -44,7 +44,6 @@ private slots:
 
 private:
     Doc* m_doc;
-    QList <RGBScript> m_scripts;
 };
 
 #endif

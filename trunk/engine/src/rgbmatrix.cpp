@@ -52,8 +52,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
 {
     setName(tr("New RGB Matrix"));
     setDuration(500);
-    m_script.load(RGBScript::systemScriptDirectory(), "fullcolumns.js");
-    m_script.evaluate();
+    m_script = RGBScript::script("Full Columns");
 }
 
 RGBMatrix::~RGBMatrix()

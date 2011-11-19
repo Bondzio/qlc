@@ -70,6 +70,9 @@ private:
      * System & User Scripts
      ************************************************************************/
 public:
+    /** Get a script by its public name */
+    static RGBScript script(const QString& name);
+
     /**
      * Get all available (user & system) RGB Scripts. The returned scripts
      * have not been evaluated for validity.
@@ -87,6 +90,13 @@ public:
 
     /** The user RGBScript directory */
     static QDir userScriptDirectory();
+
+    /** Custom RGBScript directory */
+    static void setCustomScriptDirectory(const QString& path);
+    static QDir customScriptDirectory();
+
+private:
+    static QDir s_customScriptDirectory;
 };
 
 #endif

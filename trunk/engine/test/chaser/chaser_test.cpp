@@ -883,4 +883,4 @@ void Chaser_Test::adjustIntensity()
     c->adjustIntensity(1.0);
 }
 
-QTEST_APPLESS_MAIN(Chaser_Test)
+QTEST_MAIN(Chaser_Test)

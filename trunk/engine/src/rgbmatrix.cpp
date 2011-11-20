@@ -119,27 +119,6 @@ RGBScript RGBMatrix::script() const
     return m_script;
 }
 
-void RGBMatrix::loadScript(const QString& fileName)
-{
-    QList <QDir> dirs;
-#ifndef WIN32
-    dirs << RGBScript::userScriptDirectory();
-#endif
-    dirs << RGBScript::systemScriptDirectory();
-
-    QListIterator <QDir> it(dirs);
-    while (it.hasNext() == true)
-    {
-        QDir dir(it.next());
-        if (dir.entryList().contains(fileName) == true)
-        {
-            if (m_script.load(dir, fileName) == true)
-                m_script.evaluate();
-            break;
-        }
-    }
-}
-
 QList <RGBMap> RGBMatrix::previewMaps()
 {
     QList <RGBMap> steps;
@@ -203,7 +182,7 @@ bool RGBMatrix::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixScript)
         {
-            loadScript(tag.text());
+            setScript(RGBScript::script(tag.text()));
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixFixtureGroup)
         {
@@ -262,7 +241,7 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     /* Script */
     tag = doc->createElement(KXMLQLCRGBMatrixScript);
     root.appendChild(tag);
-    text = doc->createTextNode(m_script.fileName());
+    text = doc->createTextNode(m_script.name());
     tag.appendChild(text);
 
     /* Mono Color */

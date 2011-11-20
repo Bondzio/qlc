@@ -201,7 +201,7 @@ void RGBMatrix_Test::loadSave()
         }
         else if (tag.tagName() == "Script")
         {
-            QCOMPARE(tag.text(), QString("fullcolumns.js"));
+            QCOMPARE(tag.text(), QString("Full Columns"));
             script++;
         }
         else if (tag.tagName() == "MonoColor")

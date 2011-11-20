@@ -11,7 +11,9 @@
 #include "rgbscript.h"
 #include "qlcconfig.h"
 
-QDir RGBScript::s_customScriptDirectory = QDir();
+QDir RGBScript::s_customScriptDirectory = QDir(QString(), QString("*.js"),
+                                               QDir::Name | QDir::IgnoreCase,
+                                               QDir::Files);
 
 /****************************************************************************
  * Initialization
@@ -296,10 +298,7 @@ QDir RGBScript::userScriptDirectory()
 
 void RGBScript::setCustomScriptDirectory(const QString& path)
 {
-    QDir dir(path);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*.js"));
-    s_customScriptDirectory = dir;
+    s_customScriptDirectory.setPath(path);
 }
 
 QDir RGBScript::customScriptDirectory()

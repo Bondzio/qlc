@@ -114,6 +114,7 @@ void RGBScript_Test::script()
 
 void RGBScript_Test::evaluateException()
 {
+    // Should be    function()
     QString code("( function { return 5; } )()");
     RGBScript s;
     s.m_contents = code;
@@ -122,22 +123,27 @@ void RGBScript_Test::evaluateException()
 
 void RGBScript_Test::evaluateNoRgbMapFunction()
 {
+    // No rgbMap() function present
     QString code("( function() { return 5; } )()");
     RGBScript s;
     s.m_contents = code;
     QCOMPARE(s.evaluate(), false);
+    QCOMPARE(s.rgbMap(QSize(5, 5), 1, 0), RGBMap());
 }
 
 void RGBScript_Test::evaluateNoRgbMapStepCountFunction()
 {
+    // No rgbMapStepCount() function present
     QString code("( function() { var foo = new Object; foo.rgbMap = function() { return 0; }; return foo; } )()");
     RGBScript s;
     s.m_contents = code;
     QCOMPARE(s.evaluate(), false);
+    QCOMPARE(s.rgbMapStepCount(QSize(5, 5)), -1);
 }
 
 void RGBScript_Test::evaluateInvalidApiVersion()
 {
+    // No apiVersion property
     QString code("( function() { var foo = new Object; foo.rgbMap = function() { return 0; }; foo.rgbMapStepCount = function(width, height) { return 0; }; return foo; } )()");
     RGBScript s;
     s.m_contents = code;

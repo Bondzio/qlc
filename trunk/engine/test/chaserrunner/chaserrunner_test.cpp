@@ -208,10 +208,10 @@ void ChaserRunner_Test::roundCheckSingleShotForward()
     QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == false);
-    cr.m_currentStep = 4;
+    cr.m_currentStep = 4; // Over list.size
     QVERIFY(cr.roundCheck() == false);
-    cr.m_currentStep = -1;
-    QVERIFY(cr.roundCheck() == true);
+    cr.m_currentStep = -1; // Under list.size
+    QVERIFY(cr.roundCheck() == false);
 
     cr.reset();
     QCOMPARE(cr.currentStep(), 0);
@@ -229,12 +229,10 @@ void ChaserRunner_Test::roundCheckSingleShotBackward()
     QVERIFY(cr.roundCheck() == true);
     cr.m_currentStep = 0;
     QVERIFY(cr.roundCheck() == true);
-    cr.m_currentStep = -1;
+    cr.m_currentStep = 3; // Over list.size
     QVERIFY(cr.roundCheck() == false);
-    cr.m_currentStep = -2;
+    cr.m_currentStep = -1; // Under list.size
     QVERIFY(cr.roundCheck() == false);
-    cr.m_currentStep = 3;
-    QVERIFY(cr.roundCheck() == true);
 
     cr.reset();
     QCOMPARE(cr.currentStep(), 2);
@@ -313,7 +311,7 @@ void ChaserRunner_Test::roundCheckLoopBackward()
 void ChaserRunner_Test::roundCheckPingPongForward()
 {
     QList <Function*> steps;
-    steps << m_scene1 << m_scene2 << m_scene3;
+    steps << m_scene1 << m_scene2 << m_scene3 << m_scene1;
     ChaserRunner cr(m_doc, chaserSteps(steps), 10, 20, 30, Function::Forward, Function::PingPong);
 
     QCOMPARE(cr.currentStep(), 0);
@@ -332,42 +330,17 @@ void ChaserRunner_Test::roundCheckPingPongForward()
 
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.currentStep(), 1);
-    QCOMPARE(cr.m_direction, Function::Backward);
-
-    cr.m_currentStep = 0;
-    QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.currentStep(), 0);
-    QCOMPARE(cr.m_direction, Function::Backward);
-
-    cr.m_currentStep = -1;
-    QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.currentStep(), 1);
+    QCOMPARE(cr.currentStep(), 3);
     QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 4;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 2;
     QVERIFY(cr.roundCheck() == true);
     QCOMPARE(cr.currentStep(), 2);
-    QCOMPARE(cr.m_direction, Function::Forward);
-
-    cr.m_currentStep = 3;
-    QVERIFY(cr.roundCheck() == true);
-    QCOMPARE(cr.currentStep(), 1);
-    QCOMPARE(cr.m_direction, Function::Backward);
-
-    cr.reset();
-    QCOMPARE(cr.currentStep(), 0);
-    QCOMPARE(cr.m_direction, Function::Forward);
-}
-
-void ChaserRunner_Test::roundCheckPingPongBackward()
-{
-    QList <Function*> steps;
-    steps << m_scene1 << m_scene2 << m_scene3;
-    ChaserRunner cr(m_doc, chaserSteps(steps), 10, 20, 30, Function::Backward, Function::PingPong);
-
-    QCOMPARE(cr.currentStep(), 2);
-    QVERIFY(cr.roundCheck() == true);
     QCOMPARE(cr.m_direction, Function::Backward);
 
     cr.m_currentStep = 1;
@@ -392,6 +365,66 @@ void ChaserRunner_Test::roundCheckPingPongBackward()
 
     cr.m_currentStep = 3;
     QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 3);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 4;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.reset();
+    QCOMPARE(cr.currentStep(), 0);
+    QCOMPARE(cr.m_direction, Function::Forward);
+}
+
+void ChaserRunner_Test::roundCheckPingPongBackward()
+{
+    QList <Function*> steps;
+    steps << m_scene1 << m_scene2 << m_scene3 << m_scene1;
+    ChaserRunner cr(m_doc, chaserSteps(steps), 10, 20, 30, Function::Backward, Function::PingPong);
+
+    QCOMPARE(cr.currentStep(), 3);
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 1);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 0;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 0);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = -1;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 1);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 2;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 3;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 3);
+    QCOMPARE(cr.m_direction, Function::Forward);
+
+    cr.m_currentStep = 4;
+    QVERIFY(cr.roundCheck() == true);
+    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.m_direction, Function::Backward);
+
+    cr.m_currentStep = 1;
+    QVERIFY(cr.roundCheck() == true);
     QCOMPARE(cr.currentStep(), 1);
     QCOMPARE(cr.m_direction, Function::Backward);
 
@@ -406,7 +439,7 @@ void ChaserRunner_Test::roundCheckPingPongBackward()
     QCOMPARE(cr.m_direction, Function::Forward);
 
     cr.reset();
-    QCOMPARE(cr.currentStep(), 2);
+    QCOMPARE(cr.currentStep(), 3);
     QCOMPARE(cr.m_direction, Function::Backward);
 }
 

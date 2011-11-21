@@ -281,7 +281,7 @@ bool ChaserRunner::roundCheck()
             if (m_currentStep >= m_steps.size())
                 m_currentStep = m_steps.size() - 2;
             else
-                m_currentStep = 1;
+                m_currentStep = 1; // In case of manual next/previous
             m_direction = Function::Backward;
         }
         else // Backwards
@@ -289,7 +289,7 @@ bool ChaserRunner::roundCheck()
             if (m_currentStep < 0)
                 m_currentStep = 1;
             else
-                m_currentStep = m_steps.size() - 2;
+                m_currentStep = m_steps.size() - 2; // In case of manual next/previous
             m_direction = Function::Forward;
         }
 

@@ -241,20 +241,7 @@ bool ChaserRunner::roundCheck()
 
     if (m_runOrder == Function::SingleShot)
     {
-        if (m_direction == Function::Forward)
-        {
-            if (m_currentStep >= m_steps.size())
-                return false; // Forwards SingleShot has been completed.
-            else
-                m_currentStep = 0; // No wrapping
-        }
-        else // Backwards
-        {
-            if (m_currentStep < 0)
-                return false; // Backwards SingleShot has been completed.
-            else
-                m_currentStep = m_steps.size() - 1; // No wrapping
-        }
+        return false; // Forwards or Backwards SingleShot has been completed.
     }
     else if (m_runOrder == Function::Loop)
     {
@@ -263,7 +250,7 @@ bool ChaserRunner::roundCheck()
             if (m_currentStep >= m_steps.size())
                 m_currentStep = 0;
             else
-                m_currentStep = m_steps.size() - 1;
+                m_currentStep = m_steps.size() - 1; // Used by CueList with manual prev
         }
         else // Backwards
         {
@@ -278,18 +265,12 @@ bool ChaserRunner::roundCheck()
         // Change direction, but don't run the first/last step twice.
         if (m_direction == Function::Forward)
         {
-            if (m_currentStep >= m_steps.size())
-                m_currentStep = m_steps.size() - 2;
-            else
-                m_currentStep = 1; // In case of manual next/previous
+            m_currentStep = m_steps.size() - 2;
             m_direction = Function::Backward;
         }
         else // Backwards
         {
-            if (m_currentStep < 0)
-                m_currentStep = 1;
-            else
-                m_currentStep = m_steps.size() - 2; // In case of manual next/previous
+            m_currentStep = 1;
             m_direction = Function::Forward;
         }
 

@@ -49,7 +49,7 @@ void RGBScript_Test::directories()
 #elif WIN32
     QVERIFY(dir.path().endsWith("RGBScripts"));
 #else
-    QVERIFY(dir.path().endsWith("qlc/rgbcripts"));
+    QVERIFY(dir.path().endsWith("qlc/rgbscripts"));
 #endif
 
     dir = RGBScript::userScriptDirectory();
@@ -60,7 +60,7 @@ void RGBScript_Test::directories()
 #elif WIN32
     QVERIFY(dir.path().endsWith("RGBScripts"));
 #else
-    QVERIFY(dir.path().endsWith(".qlc/rgbcripts"));
+    QVERIFY(dir.path().endsWith(".qlc/rgbscripts"));
 #endif
 
     dir = RGBScript::customScriptDirectory();

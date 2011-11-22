@@ -28,7 +28,11 @@
 #include <QList>
 #include "dmxsource.h"
 
+#define KXMLQLCSimpleDeskEngine "Engine"
+
 class UniverseArray;
+class QDomDocument;
+class QDomElement;
 class MasterTimer;
 class CueStack;
 class Doc;
@@ -37,25 +41,56 @@ class SimpleDeskEngine : public QObject, public DMXSource
 {
     Q_OBJECT
 
+    /************************************************************************
+     * Initialization
+     ************************************************************************/
 public:
     SimpleDeskEngine(Doc* doc);
     virtual ~SimpleDeskEngine();
 
+private:
+    /** Get the parent Doc object */
+    Doc* doc() const;
+
+    /************************************************************************
+     * Universe Values
+     ************************************************************************/
+public:
+    /** Set the value of a single channel */
     void setValue(uint channel, uchar value);
+
+    /** Get the value of a single channel */
     uchar value(uint channel) const;
 
-    /** Get current universe contents (as seen by the engine) */
+    /**
+     * Get current universe contents as seen by the engine. HTP channels
+     * with zero as their value are not present in this map.
+     */
     QHash <uint,uchar> values() const;
 
+private:
+    QHash <uint,uchar> m_values;
+
+    /************************************************************************
+     * Cue Stacks
+     ************************************************************************/
+public:
+    /** Get (and create if necessary) a cue stack with the given stack ID */
     CueStack* cueStack(uint stack);
 
-    /** @reimpl */
-    void writeDMX(MasterTimer* timer, UniverseArray* ua);
-
 signals:
+    /** Tells that the current cue within cuestack $stack has changed to $index */
     void currentCueChanged(uint stack, int index);
+
+    /** Tells that the cuestack $stack was started */
     void cueStackStarted(uint stack);
+
+    /** Tells that the cuestack $stack was stopped */
     void cueStackStopped(uint stack);
+
+private:
+    CueStack* createCueStack();
+    void replaceCueStack(uint stack, CueStack* cs);
 
 private slots:
     void slotCurrentCueChanged(int index);
@@ -63,12 +98,26 @@ private slots:
     void slotCueStackStopped();
 
 private:
-    Doc* doc() const;
-
-private:
-    QHash <uint,uchar> m_values;
     QHash <uint,CueStack*> m_cueStacks;
     QMutex m_mutex;
+
+    /************************************************************************
+     * Save & Load
+     ************************************************************************/
+public:
+    /** Load SimpleDeskEngine contents from the given XML $root tag */
+    bool loadXML(const QDomElement& root);
+
+    /** Save SimpleDeskEngine content to the given XML $doc, under $wksp_root */
+    bool saveXML(QDomDocument* doc, QDomElement* wksp_root) const;
+
+    /************************************************************************
+     * DMXSource
+     ************************************************************************/
+public:
+    /** @reimpl */
+    void writeDMX(MasterTimer* timer, UniverseArray* ua);
+
 };
 
 #endif

@@ -19,6 +19,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDebug>
+
 #include "cue.h"
 
 Cue::Cue(const QString& name)
@@ -62,4 +66,59 @@ uchar Cue::value(uint channel) const
 QHash <uint,uchar> Cue::values() const
 {
     return m_values;
+}
+
+bool Cue::loadXML(const QDomElement& root)
+{
+    if (root.tagName() != KXMLQLCCue)
+    {
+        qWarning() << Q_FUNC_INFO << "Cue node not found";
+        return false;
+    }
+
+    setName(root.attribute(KXMLQLCCueName));
+
+    QDomNode node = root.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == KXMLQLCCueValue)
+        {
+            QString ch = tag.attribute(KXMLQLCCueValueChannel);
+            QString val = tag.text();
+            if (ch.isEmpty() == false && val.isEmpty() == false)
+                setValue(ch.toUInt(), uchar(val.toUInt()));
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unrecognized Cue tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
+}
+
+bool Cue::saveXML(QDomDocument* doc, QDomElement* stack_root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(stack_root != NULL);
+
+    QDomElement root = doc->createElement(KXMLQLCCue);
+    root.setAttribute(KXMLQLCCueName, name());
+    stack_root->appendChild(root);
+
+    QHashIterator <uint,uchar> it(values());
+    while (it.hasNext() == true)
+    {
+        it.next();
+        QDomElement e = doc->createElement(KXMLQLCCueValue);
+        e.setAttribute(KXMLQLCCueValueChannel, it.key());
+        QDomText t = doc->createTextNode(QString::number(it.value()));
+        e.appendChild(t);
+        root.appendChild(e);
+    }
+
+    return true;
 }

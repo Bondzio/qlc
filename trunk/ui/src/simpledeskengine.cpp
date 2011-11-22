@@ -19,6 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDomDocument>
+#include <QDomElement>
 #include <QVariant>
 #include <QDebug>
 
@@ -31,6 +33,10 @@
 #include "doc.h"
 
 #define PROP_ID "id"
+
+/****************************************************************************
+ * Initialization
+ ****************************************************************************/
 
 SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
     : QObject(doc)
@@ -54,6 +60,10 @@ Doc* SimpleDeskEngine::doc() const
 {
     return qobject_cast<Doc*> (parent());
 }
+
+/****************************************************************************
+ * Universe Values
+ ****************************************************************************/
 
 void SimpleDeskEngine::setValue(uint channel, uchar value)
 {
@@ -81,19 +91,38 @@ QHash <uint,uchar> SimpleDeskEngine::values() const
     return m_values;
 }
 
+/****************************************************************************
+ * Cue Stacks
+ ****************************************************************************/
+
 CueStack* SimpleDeskEngine::cueStack(uint stack)
 {
     if (m_cueStacks.contains(stack) == false)
     {
-        m_cueStacks[stack] = new CueStack(doc());
+        m_cueStacks[stack] = createCueStack();
         m_cueStacks[stack]->setProperty(PROP_ID, stack);
-        connect(m_cueStacks[stack], SIGNAL(currentCueChanged(int)),
-                this, SLOT(slotCurrentCueChanged(int)));
-        connect(m_cueStacks[stack], SIGNAL(started()), this, SLOT(slotCueStackStarted()));
-        connect(m_cueStacks[stack], SIGNAL(stopped()), this, SLOT(slotCueStackStopped()));
     }
 
     return m_cueStacks[stack];
+}
+
+CueStack* SimpleDeskEngine::createCueStack()
+{
+    CueStack* cs = new CueStack(doc());
+    Q_ASSERT(cs != NULL);
+    connect(cs, SIGNAL(currentCueChanged(int)), this, SLOT(slotCurrentCueChanged(int)));
+    connect(cs, SIGNAL(started()), this, SLOT(slotCueStackStarted()));
+    connect(cs, SIGNAL(stopped()), this, SLOT(slotCueStackStopped()));
+    return cs;
+}
+
+void SimpleDeskEngine::replaceCueStack(uint stack, CueStack* cs)
+{
+    Q_ASSERT(cs != NULL);
+
+    if (m_cueStacks.contains(stack) == true)
+        delete m_cueStacks[stack];
+    m_cueStacks[stack] = cs;
 }
 
 void SimpleDeskEngine::slotCurrentCueChanged(int index)
@@ -116,6 +145,64 @@ void SimpleDeskEngine::slotCueStackStopped()
     uint stack = sender()->property(PROP_ID).toUInt();
     emit cueStackStopped(stack);
 }
+
+/************************************************************************
+ * Save & Load
+ ************************************************************************/
+
+bool SimpleDeskEngine::loadXML(const QDomElement& root)
+{
+    if (root.tagName() != KXMLQLCSimpleDeskEngine)
+    {
+        qWarning() << Q_FUNC_INFO << "Simple Desk Engine node not found";
+        return false;
+    }
+
+    QDomNode node = root.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == KXMLQLCCueStack)
+        {
+            uint id = 0;
+            CueStack* cs = createCueStack();
+            if (cs->loadXML(tag, id) == true)
+                replaceCueStack(id, cs);
+            else
+                delete cs;
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unrecognized Simple Desk Engine tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
+}
+
+bool SimpleDeskEngine::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(wksp_root != NULL);
+
+    QDomElement root = doc->createElement(KXMLQLCSimpleDeskEngine);
+    wksp_root->appendChild(root);
+
+    QHashIterator <uint,CueStack*> it(m_cueStacks);
+    while (it.hasNext() == true)
+    {
+        it.next();
+        it.value()->saveXML(doc, &root, it.key());
+    }
+
+    return true;
+}
+
+/****************************************************************************
+ * DMXSource
+ ****************************************************************************/
 
 void SimpleDeskEngine::writeDMX(MasterTimer* timer, UniverseArray* ua)
 {

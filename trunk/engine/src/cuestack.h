@@ -27,8 +27,17 @@
 
 #include "cue.h"
 
+#define KXMLQLCCueStack "CueStack"
+#define KXMLQLCCueStackID "ID"
+#define KXMLQLCCueStackSpeed "Speed"
+#define KXMLQLCCueStackSpeedFadeIn "FadeIn"
+#define KXMLQLCCueStackSpeedFadeOut "FadeOut"
+#define KXMLQLCCueStackSpeedDuration "Duration"
+
 class UniverseArray;
 class GenericFader;
+class QDomDocument;
+class QDomElement;
 class MasterTimer;
 class FadeChannel;
 class Doc;
@@ -82,6 +91,13 @@ public:
 private:
     QList <Cue> m_cues;
     int m_currentIndex;
+
+    /************************************************************************
+     * Load & Save
+     ************************************************************************/
+public:
+    bool loadXML(const QDomElement& root, uint& id);
+    bool saveXML(QDomDocument* doc, QDomElement* root, uint id) const;
 
     /************************************************************************
      * Running

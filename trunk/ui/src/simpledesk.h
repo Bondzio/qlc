@@ -28,9 +28,13 @@
 
 #include "ui_simpledesk.h"
 
+#define KXMLQLCSimpleDesk "SimpleDesk"
+
 class GrandMasterSlider;
 class SimpleDeskEngine;
 class PlaybackSlider;
+class QDomDocument;
+class QDomElement;
 class SimpleDesk;
 class DMXSlider;
 class CueStack;
@@ -124,6 +128,13 @@ private slots:
     void slotConfigureCueStackClicked();
     void slotStoreCueClicked();
     void slotRecordCueClicked();
+
+    /*********************************************************************
+     * Load & Save
+     *********************************************************************/
+public:
+    bool loadXML(const QDomElement& root);
+    bool saveXML(QDomDocument* doc, QDomElement* wksp_root) const;
 };
 
 #endif

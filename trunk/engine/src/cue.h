@@ -27,6 +27,14 @@
 
 #include "scenevalue.h"
 
+#define KXMLQLCCue "Cue"
+#define KXMLQLCCueName "Name"
+#define KXMLQLCCueValue "Value"
+#define KXMLQLCCueValueChannel "Channel"
+
+class QDomDocument;
+class QDomElement;
+
 class Cue
 {
 public:
@@ -41,6 +49,9 @@ public:
     uchar value(uint channel) const;
 
     QHash <uint,uchar> values() const;
+
+    bool loadXML(const QDomElement& root);
+    bool saveXML(QDomDocument* doc, QDomElement* stack_root) const;
 
 private:
     QString m_name;

@@ -20,7 +20,10 @@
 */
 
 #include <QMdiSubWindow>
+#include <QDomDocument>
+#include <QDomElement>
 #include <QMdiArea>
+#include <QDebug>
 
 #include "grandmasterslider.h"
 #include "simpledeskengine.h"
@@ -396,7 +399,7 @@ void SimpleDesk::slotStoreCueClicked()
 
 void SimpleDesk::slotRecordCueClicked()
 {
-    Q_ASSERT(m_selectedPlayback < m_playbackSliders.size());
+    Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
 
     Cue cue;
     QHashIterator <uint,uchar> it(m_engine->values());
@@ -412,3 +415,49 @@ void SimpleDesk::slotRecordCueClicked()
     cueStack->appendCue(cue);
     updateCueItem(new QTreeWidgetItem(m_cueList), cue);
 }
+
+/****************************************************************************
+ * Load & Save
+ ****************************************************************************/
+
+bool SimpleDesk::loadXML(const QDomElement& root)
+{
+    Q_ASSERT(m_engine != NULL);
+
+    if (root.tagName() != KXMLQLCSimpleDesk)
+    {
+        qWarning() << Q_FUNC_INFO << "Simple Desk node not found";
+        return false;
+    }
+
+    QDomNode node = root.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == KXMLQLCSimpleDeskEngine)
+        {
+            m_engine->loadXML(tag);
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unrecognized Simple Desk node:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
+}
+
+bool SimpleDesk::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(wksp_root != NULL);
+    Q_ASSERT(m_engine != NULL);
+
+    QDomElement root = doc->createElement(KXMLQLCSimpleDesk);
+    wksp_root->appendChild(root);
+
+    return m_engine->saveXML(doc, &root);
+}
+

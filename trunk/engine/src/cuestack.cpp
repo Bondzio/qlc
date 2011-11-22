@@ -19,6 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDomDocument>
+#include <QDomElement>
 #include <QDebug>
 #include <QHash>
 
@@ -143,6 +145,71 @@ void CueStack::nextCue()
     m_next = true;
     if (isRunning() == false)
         start();
+}
+
+/****************************************************************************
+ * Save & Load
+ ****************************************************************************/
+
+bool CueStack::loadXML(const QDomElement& root, uint& id)
+{
+    if (root.tagName() != KXMLQLCCueStack)
+    {
+        qWarning() << Q_FUNC_INFO << "CueStack node not found";
+        return false;
+    }
+
+    if (root.attribute(KXMLQLCCueStackID).isEmpty() == false)
+        id = root.attribute(KXMLQLCCueStackID).toUInt();
+    else
+        return false;
+
+    QDomNode node = root.firstChild();
+    while (node.isNull() == false)
+    {
+        QDomElement tag = node.toElement();
+        if (tag.tagName() == KXMLQLCCue)
+        {
+            Cue cue;
+            if (cue.loadXML(tag) == true)
+                appendCue(cue);
+        }
+        else if (tag.tagName() == KXMLQLCCueStackSpeed)
+        {
+            setFadeInSpeed(tag.attribute(KXMLQLCCueStackSpeedFadeIn).toUInt());
+            setFadeOutSpeed(tag.attribute(KXMLQLCCueStackSpeedFadeOut).toUInt());
+            setDuration(tag.attribute(KXMLQLCCueStackSpeedDuration).toUInt());
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unrecognized CueStack tag:" << tag.tagName();
+        }
+
+        node = node.nextSibling();
+    }
+
+    return true;
+}
+
+bool CueStack::saveXML(QDomDocument* doc, QDomElement* wksp_root, uint id) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(wksp_root != NULL);
+
+    QDomElement root = doc->createElement(KXMLQLCCueStack);
+    root.setAttribute(KXMLQLCCueStackID, id);
+    wksp_root->appendChild(root);
+
+    QDomElement speed = doc->createElement(KXMLQLCCueStackSpeed);
+    speed.setAttribute(KXMLQLCCueStackSpeedFadeIn, fadeInSpeed());
+    speed.setAttribute(KXMLQLCCueStackSpeedFadeOut, fadeOutSpeed());
+    speed.setAttribute(KXMLQLCCueStackSpeedDuration, duration());
+    root.appendChild(speed);
+
+    foreach (Cue cue, cues())
+        cue.saveXML(doc, &root);
+
+    return true;
 }
 
 /****************************************************************************

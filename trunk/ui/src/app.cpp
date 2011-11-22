@@ -844,6 +844,10 @@ bool App::loadXML(const QDomDocument* doc)
         {
             VirtualConsole::instance()->loadXML(tag);
         }
+        else if (tag.tagName() == KXMLQLCSimpleDesk)
+        {
+            SimpleDesk::instance()->loadXML(tag);
+        }
         else if (tag.tagName() == KXMLFixture)
         {
             /* Legacy support code, nowadays in Doc */
@@ -898,6 +902,9 @@ QFile::FileError App::saveXML(const QString& fileName)
 
         /* Write virtual console to the XML document */
         VirtualConsole::instance()->saveXML(&doc, &root);
+
+        /* Write Simple Desk to the XML document */
+        SimpleDesk::instance()->saveXML(&doc, &root);
 
         /* Write the XML document to the stream (=file) */
         stream << doc.toString() << "\n";

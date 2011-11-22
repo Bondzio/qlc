@@ -33,6 +33,8 @@ private slots:
     void name();
     void value();
     void copy();
+    void save();
+    void load();
 };
 
 #endif

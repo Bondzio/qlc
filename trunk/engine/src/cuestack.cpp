@@ -39,9 +39,9 @@
 
 CueStack::CueStack(Doc* doc)
     : QObject(doc)
-    , m_fadeInSpeed(500)
-    , m_fadeOutSpeed(500)
-    , m_duration(1000)
+    , m_fadeInSpeed(0)
+    , m_fadeOutSpeed(0)
+    , m_duration(UINT_MAX)
     , m_currentIndex(-1)
     , m_running(false)
     , m_intensity(1.0)
@@ -335,8 +335,6 @@ void CueStack::postRun(MasterTimer* timer)
 
 int CueStack::previous()
 {
-    Q_ASSERT(m_fader != NULL);
-
     m_currentIndex--;
     if (m_currentIndex < 0)
         m_currentIndex = m_cues.size() - 1;
@@ -346,7 +344,6 @@ int CueStack::previous()
 
 int CueStack::next()
 {
-    Q_ASSERT(m_fader != NULL);
     if (m_cues.size() == 0)
         return -1;
 

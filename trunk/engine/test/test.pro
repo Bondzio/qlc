@@ -5,6 +5,7 @@ SUBDIRS += chaserrunner
 SUBDIRS += chaserstep
 SUBDIRS += collection
 SUBDIRS += cue
+SUBDIRS += cuestack
 SUBDIRS += doc
 SUBDIRS += efx
 SUBDIRS += efxfixture

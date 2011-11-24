@@ -94,29 +94,40 @@ quint32 FadeChannel::address(const Doc* doc) const
 
 QLCChannel::Group FadeChannel::group(const Doc* doc) const
 {
+    uint chnum = QLCChannel::invalid();
     Fixture* fxi = NULL;
+
     if (fixture() == Fixture::invalidId())
     {
-        // Do a reverse lookup; which fixture occupies channel(),
+        // Do a reverse lookup; which fixture occupies channel()
         // which is now treated as an absolute DMX address.
         quint32 id = doc->fixtureForAddress(channel());
         if (id == Fixture::invalidId())
             return QLCChannel::Intensity;
+
         fxi = doc->fixture(id);
+        if (fxi == NULL)
+            return QLCChannel::Intensity;
+
+        // Convert channel() to a relative channel number
+        chnum = channel() - fxi->universeAddress();
     }
     else
     {
+        // This FadeChannel contains a valid fixture ID
         fxi = doc->fixture(fixture());
+        if (fxi == NULL)
+            return QLCChannel::Intensity;
+
+        // channel() is already a relative channel number
+        chnum = channel();
     }
 
-    if (fxi == NULL)
-        return QLCChannel::Intensity;
-
-    const QLCChannel* ch = fxi->channel(channel());
+    const QLCChannel* ch = fxi->channel(chnum);
     if (ch == NULL)
         return QLCChannel::Intensity;
-
-    return ch->group();
+    else
+        return ch->group();
 }
 
 void FadeChannel::setStart(uchar value)

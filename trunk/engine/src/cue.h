@@ -46,6 +46,7 @@ public:
     QString name() const;
 
     void setValue(uint channel, uchar value);
+    void unsetValue(uint channel);
     uchar value(uint channel) const;
 
     QHash <uint,uchar> values() const;

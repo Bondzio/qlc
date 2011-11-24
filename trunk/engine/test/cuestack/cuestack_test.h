@@ -32,6 +32,8 @@ class CueStack_Test : public QObject
 private slots:
     void initTestCase();
     void cleanupTestCase();
+    void init();
+
     void initial();
     void speeds();
     void appendCue();
@@ -39,10 +41,14 @@ private slots:
     void removeCue();
     void load();
     void save();
+    void startStop();
     void preRun();
     void intensity();
     void nextPrevious();
     void insertStartValue();
+    void switchCue();
+    void postRun();
+    void write();
 
 private:
     Doc* m_doc;

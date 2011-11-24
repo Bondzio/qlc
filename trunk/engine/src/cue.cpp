@@ -55,6 +55,12 @@ void Cue::setValue(uint channel, uchar value)
     m_values[channel] = value;
 }
 
+void Cue::unsetValue(uint channel)
+{
+    if (m_values.contains(channel) == true)
+        m_values.remove(channel);
+}
+
 uchar Cue::value(uint channel) const
 {
     if (m_values.contains(channel) == true)

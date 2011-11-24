@@ -30,6 +30,7 @@
 #include "universearray.h"
 #include "genericfader.h"
 #include "fadechannel.h"
+#include "mastertimer.h"
 #include "cuestack.h"
 #include "fixture.h"
 #include "qlcfile.h"
@@ -51,6 +52,11 @@ void CueStack_Test::initTestCase()
 void CueStack_Test::cleanupTestCase()
 {
     delete m_doc;
+}
+
+void CueStack_Test::init()
+{
+    m_doc->clearContents();
 }
 
 void CueStack_Test::initial()
@@ -347,6 +353,18 @@ void CueStack_Test::preRun()
     QCOMPARE(cs.isStarted(), true);
 }
 
+void CueStack_Test::startStop()
+{
+    CueStack cs(m_doc);
+    QCOMPARE(cs.isRunning(), false);
+    cs.start();
+    QCOMPARE(cs.isRunning(), true);
+    cs.stop();
+    QCOMPARE(cs.isRunning(), false);
+    cs.start();
+    QCOMPARE(cs.isRunning(), true);
+}
+
 void CueStack_Test::intensity()
 {
     CueStack cs(m_doc);
@@ -431,6 +449,315 @@ void CueStack_Test::insertStartValue()
     cs.insertStartValue(fc, &ua);
     QCOMPARE(fc.start(), uchar(192));
     QCOMPARE(fc.current(), uchar(192));
+}
+
+void CueStack_Test::switchCue()
+{
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setFixtureDefinition(def, mode);
+    fxi->setName("Test Scanner");
+    fxi->setAddress(10);
+    fxi->setUniverse(0);
+    m_doc->addFixture(fxi);
+
+    UniverseArray ua(512);
+    CueStack cs(m_doc);
+    cs.setFadeInSpeed(100);
+    cs.setFadeOutSpeed(200);
+    cs.setDuration(300);
+
+    Cue cue;
+    cue.setName("One");
+    cue.setValue(0, 255);
+    cue.setValue(1, 255);
+    cue.setValue(500, 255);
+    cue.setValue(10, 255); // LTP
+    cue.setValue(11, 255); // LTP
+    cs.appendCue(cue);
+
+    cue = Cue();
+
+    cue.setName("Two");
+    cue.setValue(500, 255);
+    cue.setValue(3, 255);
+    cue.setValue(4, 255);
+    cue.setValue(11, 255); // LTP
+    cs.appendCue(cue);
+
+    cs.preRun();
+
+    // Do nothing with invalid cue indices
+    cs.switchCue(-1, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 0);
+    cs.switchCue(3, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 0);
+
+    // Switch to cue one
+    cs.switchCue(0, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 5);
+
+    FadeChannel fc;
+    fc.setChannel(0);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(0));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(1);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(1));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(10);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(10));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(11);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(11));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(500);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(500));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(3);
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), QLCChannel::invalid());
+    fc.setChannel(4);
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), QLCChannel::invalid());
+
+    fc.setChannel(0);
+    cs.m_fader->m_channels[fc].setCurrent(127);
+    fc.setChannel(1);
+    cs.m_fader->m_channels[fc].setCurrent(127);
+    fc.setChannel(10);
+    cs.m_fader->m_channels[fc].setCurrent(127);
+    fc.setChannel(11);
+    cs.m_fader->m_channels[fc].setCurrent(127);
+    fc.setChannel(500);
+    cs.m_fader->m_channels[fc].setCurrent(127);
+
+    // Switch to cue two
+    cs.switchCue(1, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 6);
+
+    fc.setChannel(0);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(0));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(1);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(1));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(10); // LTP channel no longer in fader
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), QLCChannel::invalid());
+
+    fc.setChannel(11); // LTP channel also in the next cue
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(11));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(500);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(500));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(3);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(3));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    fc.setChannel(4);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(4));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeInSpeed());
+
+    // Stop
+    cs.switchCue(-1, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 5);
+
+    fc.setChannel(0);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(0));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(1);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(1));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(500);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(127));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(500));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(3);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(3));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    fc.setChannel(4);
+    QCOMPARE(cs.m_fader->channels()[fc].start(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].current(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(4));
+    QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+}
+
+void CueStack_Test::postRun()
+{
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setFixtureDefinition(def, mode);
+    fxi->setName("Test Scanner");
+    fxi->setAddress(10);
+    fxi->setUniverse(0);
+    m_doc->addFixture(fxi);
+
+    MasterTimer mt(m_doc);
+    UniverseArray ua(512);
+    CueStack cs(m_doc);
+    cs.setFadeInSpeed(100);
+    cs.setFadeOutSpeed(200);
+    cs.setDuration(300);
+
+    Cue cue;
+    cue.setName("One");
+    cue.setValue(0, 255);
+    cue.setValue(1, 255);
+    cue.setValue(500, 255);
+    cue.setValue(10, 255); // LTP
+    cue.setValue(11, 255); // LTP
+    cs.appendCue(cue);
+
+    cue = Cue();
+
+    cue.setName("Two");
+    cue.setValue(500, 255);
+    cue.setValue(3, 255);
+    cue.setValue(4, 255);
+    cue.setValue(11, 255); // LTP
+    cs.appendCue(cue);
+
+    cs.preRun();
+
+    // Switch to cue one
+    cs.switchCue(0, &ua);
+    QCOMPARE(cs.m_fader->channels().size(), 5);
+
+    QSignalSpy cueSpy(&cs, SIGNAL(currentCueChanged(int)));
+    QSignalSpy stopSpy(&cs, SIGNAL(stopped()));
+
+    cs.postRun(&mt);
+    QCOMPARE(cs.m_fader, (GenericFader*) NULL);
+    QCOMPARE(cs.m_currentIndex, -1);
+    QCOMPARE(cueSpy.size(), 1);
+    QCOMPARE(cueSpy.at(0).size(), 1);
+    QCOMPARE(cueSpy.at(0).at(0).toInt(), -1);
+    QCOMPARE(stopSpy.size(), 1);
+
+    // Only HTP channels go to MasterTimer's GenericFader
+    QCOMPARE(mt.m_fader->channels().size(), 3);
+    FadeChannel fc;
+    fc.setChannel(0);
+    QCOMPARE(mt.m_fader->channels().contains(fc), true);
+    fc.setChannel(1);
+    QCOMPARE(mt.m_fader->channels().contains(fc), true);
+    fc.setChannel(500);
+    QCOMPARE(mt.m_fader->channels().contains(fc), true);
+}
+
+void CueStack_Test::write()
+{
+    UniverseArray ua(512);
+
+    CueStack cs(m_doc);
+    cs.setFadeInSpeed(100);
+    cs.setFadeOutSpeed(200);
+    cs.setDuration(300);
+
+    Cue cue("One");
+    cue.setValue(0, 255);
+    cs.appendCue(cue);
+
+    cue = Cue("Two");
+    cue.setValue(1, 255);
+    cs.appendCue(cue);
+
+    cs.preRun();
+    QVERIFY(cs.m_fader != NULL);
+
+    cs.write(&ua);
+    QCOMPARE(cs.currentIndex(), -1);
+
+    cs.start();
+    cs.write(&ua);
+    QCOMPARE(cs.currentIndex(), -1);
+
+    cs.nextCue();
+    QCOMPARE(cs.currentIndex(), -1);
+    cs.write(&ua);
+    QCOMPARE(cs.currentIndex(), 0);
+    QCOMPARE(cs.m_fader->channels().size(), 1);
+    FadeChannel fc;
+    fc.setChannel(0);
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+
+    cs.previousCue();
+    QCOMPARE(cs.currentIndex(), 0);
+    cs.write(&ua);
+    QCOMPARE(cs.currentIndex(), 1);
+    fc.setChannel(0);
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(0));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
+    fc.setChannel(1);
+    QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(1));
+    QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
 }
 
 QTEST_APPLESS_MAIN(CueStack_Test)

@@ -106,6 +106,7 @@ void Doc::clearContents()
     m_latestFunctionId = 0;
     m_latestFixtureId = 0;
     m_latestFixtureGroupId = 0;
+    m_addresses.clear();
 }
 
 /*****************************************************************************

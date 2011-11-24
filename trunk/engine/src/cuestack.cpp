@@ -269,7 +269,7 @@ void CueStack::write(UniverseArray* ua)
     Q_ASSERT(m_fader != NULL);
     Q_ASSERT(ua != NULL);
 
-    if (m_cues.size() == 0)
+    if (m_cues.size() == 0 || isRunning() == false)
         return;
 
     if (m_previous == true)
@@ -356,6 +356,10 @@ int CueStack::next()
 
 void CueStack::switchCue(int index, const UniverseArray* ua)
 {
+    Cue cue;
+    if (index >= 0 && index < m_cues.size())
+        cue = m_cues[index];
+
     QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)
     {
@@ -370,12 +374,14 @@ void CueStack::switchCue(int index, const UniverseArray* ua)
             fc.setFadeTime(fadeOutSpeed());
             m_fader->add(fc);
         }
+        else
+        {
+            // Remove LTP channels that are no longer in the new cue
+            if (cue.values().contains(fc.channel()) == false)
+                m_fader->remove(fc);
+        }
     }
 
-    if (index < 0 || index >= m_cues.size())
-        return;
-
-    const Cue& cue = m_cues[index];
     QHashIterator <uint,uchar> cit(cue.values());
     while (cit.hasNext() == true)
     {

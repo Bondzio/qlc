@@ -26,7 +26,9 @@
 #include <QMutex>
 #include <QHash>
 #include <QList>
+
 #include "dmxsource.h"
+#include "cue.h"
 
 #define KXMLQLCSimpleDeskEngine "Engine"
 
@@ -65,11 +67,11 @@ public:
     /** Get the value of a single channel */
     uchar value(uint channel) const;
 
-    /**
-     * Get current universe contents as seen by the engine. HTP channels
-     * with zero as their value are not present in this map.
-     */
-    QHash <uint,uchar> values() const;
+    /** Set a complete cue to universe */
+    void setCue(const Cue& cue);
+
+    /** Get universe contents as a Cue */
+    Cue cue() const;
 
 private:
     QHash <uint,uchar> m_values;

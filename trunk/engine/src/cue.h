@@ -39,6 +39,7 @@ class Cue
 {
 public:
     Cue(const QString& name = QString());
+    Cue(const QHash <uint,uchar> values);
     Cue(const Cue& cue);
     ~Cue();
 

@@ -91,9 +91,14 @@ uchar SimpleDeskEngine::value(uint channel) const
         return 0;
 }
 
-QHash <uint,uchar> SimpleDeskEngine::values() const
+void SimpleDeskEngine::setCue(const Cue& cue)
 {
-    return m_values;
+    m_values = cue.values();
+}
+
+Cue SimpleDeskEngine::cue() const
+{
+    return Cue(m_values);
 }
 
 /****************************************************************************

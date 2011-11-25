@@ -30,6 +30,12 @@ Cue::Cue(const QString& name)
 {
 }
 
+Cue::Cue(const QHash <uint,uchar> values)
+    : m_name(QString())
+    , m_values(values)
+{
+}
+
 Cue::Cue(const Cue& cue)
     : m_name(cue.name())
     , m_values(cue.values())

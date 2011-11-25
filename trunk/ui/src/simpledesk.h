@@ -76,6 +76,8 @@ private:
 private:
     void initUniverseSliders();
     void initUniversePager();
+    void resetUniverseSliders();
+    void pushCueToUniverse(const Cue& cue);
 
 private slots:
     void slotUniversePageUpClicked();
@@ -130,6 +132,7 @@ private slots:
     void slotNextCueClicked();
     void slotStopCueStackClicked();
     void slotConfigureCueStackClicked();
+    void slotEditCueStackClicked();
     void slotStoreCueClicked();
     void slotRecordCueClicked();
     void slotCueStackCurrentItemChanged();

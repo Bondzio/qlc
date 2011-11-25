@@ -128,6 +128,7 @@ private slots:
     void slotConfigureCueStackClicked();
     void slotStoreCueClicked();
     void slotRecordCueClicked();
+    void slotCueListCurrentItemChanged(QTreeWidgetItem* item);
 
     /*********************************************************************
      * Load & Save

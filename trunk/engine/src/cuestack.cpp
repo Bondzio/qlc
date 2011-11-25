@@ -108,6 +108,18 @@ void CueStack::appendCue(const Cue& c)
     m_cues.append(c);
 }
 
+void CueStack::replaceCue(int index, const Cue& cue)
+{
+    if (index >= 0 && index < m_cues.size())
+    {
+        m_cues[index] = cue;
+    }
+    else
+    {
+        appendCue(cue);
+    }
+}
+
 void CueStack::removeCue(int index)
 {
     if (index >= 0 && index < m_cues.size())

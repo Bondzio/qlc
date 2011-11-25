@@ -79,6 +79,7 @@ private:
      ************************************************************************/
 public:
     void appendCue(const Cue& c);
+    void replaceCue(int index, const Cue& c);
     void removeCue(int index);
 
     QList <Cue> cues() const;

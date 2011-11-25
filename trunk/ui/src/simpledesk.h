@@ -58,6 +58,9 @@ public:
     /** Normal public destructor */
     ~SimpleDesk();
 
+    /** Start from scratch; clear everything */
+    void clearContents();
+
 private:
     /** Private constructor to prevent multiple instances. */
     SimpleDesk(QWidget* parent, Doc* doc);
@@ -117,6 +120,7 @@ private:
     void initCueStack();
     void updateCueItem(QTreeWidgetItem* item, const Cue& cue);
     void markCurrentCue();
+    void updateCueStackButtons();
 
 private slots:
     void slotCueStackStarted(uint stack);
@@ -128,7 +132,7 @@ private slots:
     void slotConfigureCueStackClicked();
     void slotStoreCueClicked();
     void slotRecordCueClicked();
-    void slotCueListCurrentItemChanged(QTreeWidgetItem* item);
+    void slotCueStackCurrentItemChanged();
 
     /*********************************************************************
      * Load & Save

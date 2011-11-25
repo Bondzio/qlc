@@ -279,6 +279,7 @@ void App::clearDocument()
     m_doc->clearContents();
     VirtualConsole::instance()->resetContents();
     m_doc->outputMap()->resetUniverses();
+    SimpleDesk::instance()->clearContents();
     setFileName(QString());
     m_doc->resetModified();
 }

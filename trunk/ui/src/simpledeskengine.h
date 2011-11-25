@@ -48,6 +48,9 @@ public:
     SimpleDeskEngine(Doc* doc);
     virtual ~SimpleDeskEngine();
 
+    /** Start from scratch; clear everything */
+    void clearContents();
+
 private:
     /** Get the parent Doc object */
     Doc* doc() const;

@@ -48,17 +48,22 @@ SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
 SimpleDeskEngine::~SimpleDeskEngine()
 {
     doc()->masterTimer()->unregisterDMXSource(this);
-
-    m_mutex.lock();
-    foreach (CueStack* cs, m_cueStacks.values())
-        delete cs;
-    m_cueStacks.clear();
-    m_mutex.unlock();
+    clearContents();
 }
 
 Doc* SimpleDeskEngine::doc() const
 {
     return qobject_cast<Doc*> (parent());
+}
+
+void SimpleDeskEngine::clearContents()
+{
+    m_mutex.lock();
+    foreach (CueStack* cs, m_cueStacks.values())
+        delete cs;
+    m_cueStacks.clear();
+    m_values.clear();
+    m_mutex.unlock();
 }
 
 /****************************************************************************

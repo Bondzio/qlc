@@ -103,21 +103,25 @@ uint CueStack::duration() const
  * Cues
  ****************************************************************************/
 
-void CueStack::appendCue(const Cue& c)
+void CueStack::appendCue(const Cue& cue)
 {
-    m_cues.append(c);
+    m_cues.append(cue);
+}
+
+void CueStack::insertCue(int index, const Cue& cue)
+{
+    if (index >= 0 && index < m_cues.size())
+        m_cues.insert(index, cue);
+    else
+        m_cues.append(cue);
 }
 
 void CueStack::replaceCue(int index, const Cue& cue)
 {
     if (index >= 0 && index < m_cues.size())
-    {
         m_cues[index] = cue;
-    }
     else
-    {
-        appendCue(cue);
-    }
+        m_cues.append(cue);
 }
 
 void CueStack::removeCue(int index)

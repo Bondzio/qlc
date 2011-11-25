@@ -78,15 +78,31 @@ private:
      * Cues
      ************************************************************************/
 public:
-    void appendCue(const Cue& c);
-    void replaceCue(int index, const Cue& c);
+    /** Append $cue at the end of the cue stack */
+    void appendCue(const Cue& cue);
+
+    /** Insert $cue at the given $index */
+    void insertCue(int index, const Cue& cue);
+
+    /** Replace the cue at the given $index with $cue */
+    void replaceCue(int index, const Cue& cue);
+
+    /** Remove the cue at the given $index */
     void removeCue(int index);
 
+    /** Get a list of all cues */
     QList <Cue> cues() const;
 
+    /** Set the currently-running cue index */
     void setCurrentIndex(int index);
+
+    /** Get the currently running cue index (-1 if not running) */
     int currentIndex() const;
+
+    /** Skip to the previous cue (and start the cuestack if needed) */
     void previousCue();
+
+    /** Skip to the next cue (and start the cuestack if needed) */
     void nextCue();
 
 private:

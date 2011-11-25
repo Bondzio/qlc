@@ -30,6 +30,7 @@
 #include "playbackslider.h"
 #include "simpledesk.h"
 #include "dmxslider.h"
+#include "qlcmacros.h"
 #include "cuestack.h"
 #include "cue.h"
 #include "doc.h"
@@ -470,12 +471,23 @@ void SimpleDesk::slotRecordCueClicked()
         cue.setValue(it.key(), it.value());
     }
 
+    int index = -1;
+    QTreeWidgetItem* item = m_cueList->currentItem();
+    if (item == NULL)
+        index = -1;
+    else
+        index = m_cueList->indexOfTopLevelItem(item) + 1; // Insert AFTER current item
+
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
     cue.setName(tr("Cue %1").arg(m_cueList->topLevelItemCount() + 1));
-    cueStack->appendCue(cue);
-    updateCueItem(new QTreeWidgetItem(m_cueList), cue);
-    updateCueStackButtons();
+    cueStack->insertCue(index, cue);
+    slotSelectPlayback(m_selectedPlayback);
+    index = CLAMP(index, 0, m_cueList->topLevelItemCount() - 1);
+    item = m_cueList->topLevelItem(index);
+    item->setSelected(true);
+    m_cueList->setCurrentItem(item);
+    m_cueList->setFocus();
 }
 
 void SimpleDesk::slotCueStackCurrentItemChanged()

@@ -46,9 +46,6 @@
         <string>DMX Page</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="margin">
-         <number>1</number>
-        </property>
         <item>
          <widget class="QToolButton" name="m_universePageDownButton">
           <property name="sizePolicy">

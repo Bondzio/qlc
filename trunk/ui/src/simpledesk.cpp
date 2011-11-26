@@ -66,7 +66,7 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     initPlaybackSliders();
     initCueStack();
 
-//    slotSelectPlayback(0);
+    slotSelectPlayback(0);
 }
 
 SimpleDesk::~SimpleDesk()
@@ -112,7 +112,7 @@ void SimpleDesk::clearContents()
     resetUniverseSliders();
     resetPlaybackSliders();
     m_engine->clearContents();
-    //slotSelectPlayback(0);
+    slotSelectPlayback(0);
 }
 
 void SimpleDesk::initEngine()
@@ -472,14 +472,22 @@ void SimpleDesk::slotRecordCueClicked()
 {
     Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
 
-    int index = m_cueStackView->selectionModel()->currentIndex().row() + 1;
-
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
+
+    QItemSelectionModel* model = m_cueStackView->selectionModel();
+    Q_ASSERT(model != NULL);
+    int index = 0;
+    if (model->hasSelection() == true)
+        index = model->currentIndex().row() + 1;
+    else
+        index = cueStack->cues().size();
 
     Cue cue = m_engine->cue();
     cue.setName(tr("Cue %1").arg(cueStack->cues().size() + 1));
     cueStack->insertCue(index, cue);
+
+    updateCueStackButtons();
 }
 
 /****************************************************************************

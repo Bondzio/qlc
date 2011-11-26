@@ -34,6 +34,7 @@ HEADERS += aboutbox.h \
            chasereditor.h \
            collectioneditor.h \
            consolechannel.h \
+           cuestackmodel.h \
            docbrowser.h \
            dmxslider.h \
            efxeditor.h \
@@ -125,6 +126,7 @@ SOURCES += aboutbox.cpp \
            chasereditor.cpp \
            collectioneditor.cpp \
            consolechannel.cpp \
+           cuestackmodel.cpp \
            docbrowser.cpp \
            dmxslider.cpp \
            efxeditor.cpp \

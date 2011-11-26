@@ -65,6 +65,9 @@ private:
     /** Private constructor to prevent multiple instances. */
     SimpleDesk(QWidget* parent, Doc* doc);
 
+    /** Initialize the simple desk engine */
+    void initEngine();
+
 private:
     static SimpleDesk* s_instance;
     SimpleDeskEngine* m_engine;
@@ -103,6 +106,7 @@ private:
      *********************************************************************/
 private:
     void initPlaybackSliders();
+    void resetPlaybackSliders();
 
 private slots:
     void slotPlaybackSelected();
@@ -120,14 +124,13 @@ private:
      *********************************************************************/
 private:
     void initCueStack();
-    void updateCueItem(QTreeWidgetItem* item, const Cue& cue);
-    void markCurrentCue();
     void updateCueStackButtons();
 
 private slots:
     void slotCueStackStarted(uint stack);
     void slotCueStackStopped(uint stack);
-    void slotCurrentCueChanged(uint playback, int index);
+    void slotCueStackCurrentItemChanged();
+
     void slotPreviousCueClicked();
     void slotNextCueClicked();
     void slotStopCueStackClicked();
@@ -135,7 +138,6 @@ private slots:
     void slotEditCueStackClicked();
     void slotStoreCueClicked();
     void slotRecordCueClicked();
-    void slotCueStackCurrentItemChanged();
 
     /*********************************************************************
      * Load & Save

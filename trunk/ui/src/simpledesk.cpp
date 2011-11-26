@@ -28,6 +28,7 @@
 #include "grandmasterslider.h"
 #include "simpledeskengine.h"
 #include "playbackslider.h"
+#include "cuestackmodel.h"
 #include "simpledesk.h"
 #include "dmxslider.h"
 #include "qlcmacros.h"
@@ -58,17 +59,14 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     Q_ASSERT(doc != NULL);
     setupUi(this);
 
+    initEngine();
     initUniverseSliders();
     initUniversePager();
     initGrandMaster();
     initPlaybackSliders();
     initCueStack();
 
-    connect(m_engine, SIGNAL(currentCueChanged(uint,int)), this, SLOT(slotCurrentCueChanged(uint,int)));
-    connect(m_engine, SIGNAL(cueStackStarted(uint)), this, SLOT(slotCueStackStarted(uint)));
-    connect(m_engine, SIGNAL(cueStackStopped(uint)), this, SLOT(slotCueStackStopped(uint)));
-
-    updateCueStackButtons();
+//    slotSelectPlayback(0);
 }
 
 SimpleDesk::~SimpleDesk()
@@ -107,9 +105,20 @@ void SimpleDesk::createAndShow(QWidget* parent, Doc* doc)
 
 void SimpleDesk::clearContents()
 {
+    CueStackModel* model = qobject_cast<CueStackModel*> (m_cueStackView->model());
+    Q_ASSERT(model != NULL);
+    model->setCueStack(NULL);
+
     resetUniverseSliders();
+    resetPlaybackSliders();
     m_engine->clearContents();
-    slotSelectPlayback(0);
+    //slotSelectPlayback(0);
+}
+
+void SimpleDesk::initEngine()
+{
+    connect(m_engine, SIGNAL(cueStackStarted(uint)), this, SLOT(slotCueStackStarted(uint)));
+    connect(m_engine, SIGNAL(cueStackStopped(uint)), this, SLOT(slotCueStackStopped(uint)));
 }
 
 /****************************************************************************
@@ -261,8 +270,13 @@ void SimpleDesk::initPlaybackSliders()
         connect(slider, SIGNAL(stopped()), this, SLOT(slotPlaybackStopped()));
         connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotPlaybackValueChanged(uchar)));
     }
+}
 
-    slotSelectPlayback(0);
+void SimpleDesk::resetPlaybackSliders()
+{
+    QListIterator <PlaybackSlider*> it(m_playbackSliders);
+    while (it.hasNext() == true)
+        it.next()->setValue(0);
 }
 
 void SimpleDesk::slotPlaybackSelected()
@@ -277,6 +291,8 @@ void SimpleDesk::slotPlaybackSelected()
 
 void SimpleDesk::slotSelectPlayback(uint pb)
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (m_selectedPlayback != UINT_MAX)
         m_playbackSliders[m_selectedPlayback]->setSelected(false);
 
@@ -284,12 +300,13 @@ void SimpleDesk::slotSelectPlayback(uint pb)
         m_playbackSliders[pb]->setSelected(true);
     m_selectedPlayback = pb;
 
-    m_cueList->clear();
-
     CueStack* cueStack = m_engine->cueStack(pb);
     Q_ASSERT(cueStack != NULL);
-    foreach (const Cue& cue, cueStack->cues())
-        updateCueItem(new QTreeWidgetItem(m_cueList), cue);
+
+    CueStackModel* model = qobject_cast<CueStackModel*> (m_cueStackView->model());
+    Q_ASSERT(model != NULL);
+    model->setCueStack(cueStack);
+
     updateCueStackButtons();
 }
 
@@ -328,6 +345,9 @@ void SimpleDesk::slotPlaybackValueChanged(uchar value)
 
 void SimpleDesk::initCueStack()
 {
+    CueStackModel* model = new CueStackModel(this);
+    m_cueStackView->setModel(model);
+
     connect(m_previousCueButton, SIGNAL(clicked()), this, SLOT(slotPreviousCueClicked()));
     connect(m_nextCueButton, SIGNAL(clicked()), this, SLOT(slotNextCueClicked()));
     connect(m_stopCueStackButton, SIGNAL(clicked()), this, SLOT(slotStopCueStackClicked()));
@@ -335,30 +355,6 @@ void SimpleDesk::initCueStack()
     connect(m_editCueStackButton, SIGNAL(clicked()), this, SLOT(slotEditCueStackClicked()));
     connect(m_storeCueButton, SIGNAL(clicked()), this, SLOT(slotStoreCueClicked()));
     connect(m_recordCueButton, SIGNAL(clicked()), this, SLOT(slotRecordCueClicked()));
-    connect(m_cueList, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            this, SLOT(slotCueStackCurrentItemChanged()));
-}
-
-void SimpleDesk::updateCueItem(QTreeWidgetItem* item, const Cue& cue)
-{
-    Q_ASSERT(item != NULL);
-    int index = m_cueList->indexOfTopLevelItem(item);
-    item->setText(COL_NUM, QString::number(index + 1));
-    item->setText(COL_NAME, cue.name());
-}
-
-void SimpleDesk::markCurrentCue()
-{
-    CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
-    Q_ASSERT(cueStack != NULL);
-
-    for (int i = 0; i < m_cueList->topLevelItemCount(); i++)
-    {
-        if (i != cueStack->currentIndex())
-            m_cueList->topLevelItem(i)->setIcon(COL_NUM, QIcon());
-        else
-            m_cueList->topLevelItem(i)->setIcon(COL_NUM, QIcon(":/current.png"));
-    }
 }
 
 void SimpleDesk::updateCueStackButtons()
@@ -371,15 +367,8 @@ void SimpleDesk::updateCueStackButtons()
     m_nextCueButton->setEnabled(cueStack->cues().size() > 0);
     m_previousCueButton->setEnabled(cueStack->cues().size() > 0);
 
-    QTreeWidgetItem* item = m_cueList->currentItem();
-    m_storeCueButton->setEnabled(item != NULL);
-}
-
-void SimpleDesk::slotCurrentCueChanged(uint playback, int index)
-{
-    Q_UNUSED(index);
-    if (playback == m_selectedPlayback)
-        markCurrentCue();
+    // QTreeWidgetItem* item = m_cueList->currentItem();
+    // m_storeCueButton->setEnabled(item != NULL);
 }
 
 void SimpleDesk::slotCueStackStarted(uint stack)
@@ -404,6 +393,26 @@ void SimpleDesk::slotCueStackStopped(uint stack)
     if (slider->value() != 0)
         slider->setValue(0);
     updateCueStackButtons();
+}
+
+void SimpleDesk::slotCueStackCurrentItemChanged()
+{
+    updateCueStackButtons();
+
+    if (m_editCueStackButton->isChecked() == true)
+    {
+        CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
+        Q_ASSERT(cueStack != NULL);
+/*
+        int index = m_cueList->indexOfTopLevelItem(m_cueList->currentItem());
+        if (index >= 0 && index < cueStack->cues().size())
+        {
+            Cue cue = cueStack->cues()[index];
+            m_engine->setCue(cue);
+            slotUniversePageChanged(m_universePageSpin->value());
+        }
+*/
+    }
 }
 
 void SimpleDesk::slotPreviousCueClicked()
@@ -440,20 +449,16 @@ void SimpleDesk::slotStoreCueClicked()
 {
     Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
 
-    QTreeWidgetItem* item = m_cueList->currentItem();
-    if (item == NULL)
-        return;
-    int index = m_cueList->indexOfTopLevelItem(item);
-
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
+
+    int index = m_cueStackView->selectionModel()->currentIndex().row();
 
     Cue cue = m_engine->cue();
     if (index >= cueStack->cues().size())
     {
-        cue.setName(tr("Cue %1").arg(m_cueList->topLevelItemCount() + 1));
+        cue.setName(tr("Cue %1").arg(cueStack->cues().size() + 1));
         cueStack->appendCue(cue);
-        updateCueItem(new QTreeWidgetItem(m_cueList), cue);
     }
     else
     {
@@ -467,43 +472,14 @@ void SimpleDesk::slotRecordCueClicked()
 {
     Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
 
-    int index = -1;
-    QTreeWidgetItem* item = m_cueList->currentItem();
-    if (item == NULL)
-        index = -1;
-    else
-        index = m_cueList->indexOfTopLevelItem(item) + 1; // Insert AFTER current item
+    int index = m_cueStackView->selectionModel()->currentIndex().row() + 1;
 
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
 
     Cue cue = m_engine->cue();
-    cue.setName(tr("Cue %1").arg(m_cueList->topLevelItemCount() + 1));
+    cue.setName(tr("Cue %1").arg(cueStack->cues().size() + 1));
     cueStack->insertCue(index, cue);
-    slotSelectPlayback(m_selectedPlayback);
-    index = CLAMP(index, 0, m_cueList->topLevelItemCount() - 1);
-    item = m_cueList->topLevelItem(index);
-    item->setSelected(true);
-    m_cueList->setCurrentItem(item);
-    m_cueList->setFocus();
-}
-
-void SimpleDesk::slotCueStackCurrentItemChanged()
-{
-    updateCueStackButtons();
-
-    if (m_editCueStackButton->isChecked() == true)
-    {
-        CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
-        Q_ASSERT(cueStack != NULL);
-        int index = m_cueList->indexOfTopLevelItem(m_cueList->currentItem());
-        if (index >= 0 && index < cueStack->cues().size())
-        {
-            Cue cue = cueStack->cues()[index];
-            m_engine->setCue(cue);
-            slotUniversePageChanged(m_universePageSpin->value());
-        }
-    }
 }
 
 /****************************************************************************
@@ -513,6 +489,8 @@ void SimpleDesk::slotCueStackCurrentItemChanged()
 bool SimpleDesk::loadXML(const QDomElement& root)
 {
     Q_ASSERT(m_engine != NULL);
+
+    clearContents();
 
     if (root.tagName() != KXMLQLCSimpleDesk)
     {

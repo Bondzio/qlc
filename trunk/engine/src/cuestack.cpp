@@ -42,9 +42,9 @@ CueStack::CueStack(Doc* doc)
     , m_fadeInSpeed(0)
     , m_fadeOutSpeed(0)
     , m_duration(UINT_MAX)
-    , m_currentIndex(-1)
     , m_running(false)
     , m_intensity(1.0)
+    , m_currentIndex(-1)
     , m_fader(NULL)
     , m_elapsed(0)
     , m_previous(false)
@@ -55,9 +55,9 @@ CueStack::CueStack(Doc* doc)
 
 CueStack::~CueStack()
 {
-    if (m_fader != NULL)
-        delete m_fader;
-    m_fader = NULL;
+    qDebug() << Q_FUNC_INFO;
+    Q_ASSERT(isStarted() == false);
+    m_cues.clear(); // Crashes without this, WTF?!
 }
 
 Doc* CueStack::doc() const
@@ -106,22 +106,33 @@ uint CueStack::duration() const
 void CueStack::appendCue(const Cue& cue)
 {
     m_cues.append(cue);
+    emit added(m_cues.size() - 1);
 }
 
 void CueStack::insertCue(int index, const Cue& cue)
 {
     if (index >= 0 && index < m_cues.size())
+    {
         m_cues.insert(index, cue);
+        emit added(index);
+    }
     else
-        m_cues.append(cue);
+    {
+        appendCue(cue);
+    }
 }
 
 void CueStack::replaceCue(int index, const Cue& cue)
 {
     if (index >= 0 && index < m_cues.size())
+    {
         m_cues[index] = cue;
+        emit changed(index);
+    }
     else
-        m_cues.append(cue);
+    {
+        appendCue(cue);
+    }
 }
 
 void CueStack::removeCue(int index)
@@ -129,8 +140,13 @@ void CueStack::removeCue(int index)
     if (index >= 0 && index < m_cues.size())
     {
         m_cues.removeAt(index);
-        if (index < m_currentIndex)
+        emit removed(index);
+
+        if (index < m_currentIndex && isRunning() == true)
+        {
             m_currentIndex--;
+            emit currentCueChanged(m_currentIndex);
+        }
     }
 }
 
@@ -273,6 +289,8 @@ bool CueStack::isStarted() const
 
 void CueStack::preRun()
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(m_fader == NULL);
     m_fader = new GenericFader(doc());
     m_fader->adjustIntensity(intensity());
@@ -282,6 +300,8 @@ void CueStack::preRun()
 
 void CueStack::write(UniverseArray* ua)
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(m_fader != NULL);
     Q_ASSERT(ua != NULL);
 
@@ -320,6 +340,8 @@ void CueStack::write(UniverseArray* ua)
 
 void CueStack::postRun(MasterTimer* timer)
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(timer != NULL);
     Q_ASSERT(m_fader != NULL);
 
@@ -341,10 +363,10 @@ void CueStack::postRun(MasterTimer* timer)
         }
     }
 
+    m_currentIndex = -1;
     delete m_fader;
     m_fader = NULL;
 
-    m_currentIndex = -1;
     emit currentCueChanged(m_currentIndex);
     emit stopped();
 }

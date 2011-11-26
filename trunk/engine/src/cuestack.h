@@ -93,21 +93,13 @@ public:
     /** Get a list of all cues */
     QList <Cue> cues() const;
 
-    /** Set the currently-running cue index */
-    void setCurrentIndex(int index);
-
-    /** Get the currently running cue index (-1 if not running) */
-    int currentIndex() const;
-
-    /** Skip to the previous cue (and start the cuestack if needed) */
-    void previousCue();
-
-    /** Skip to the next cue (and start the cuestack if needed) */
-    void nextCue();
+signals:
+    void added(int index);
+    void removed(int index);
+    void changed(int index);
 
 private:
     QList <Cue> m_cues;
-    int m_currentIndex;
 
     /************************************************************************
      * Load & Save
@@ -124,6 +116,12 @@ public:
     void stop();
     bool isRunning() const;
 
+    void setCurrentIndex(int index);
+    int currentIndex() const;
+
+    void previousCue();
+    void nextCue();
+
     void adjustIntensity(qreal fraction);
     qreal intensity() const;
 
@@ -135,6 +133,7 @@ signals:
 private:
     bool m_running;
     qreal m_intensity;
+    int m_currentIndex;
 
     /************************************************************************
      * Writing

@@ -47,8 +47,10 @@ SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
 
 SimpleDeskEngine::~SimpleDeskEngine()
 {
-    doc()->masterTimer()->unregisterDMXSource(this);
+    qDebug() << Q_FUNC_INFO;
+
     clearContents();
+    doc()->masterTimer()->unregisterDMXSource(this);
 }
 
 Doc* SimpleDeskEngine::doc() const
@@ -58,6 +60,15 @@ Doc* SimpleDeskEngine::doc() const
 
 void SimpleDeskEngine::clearContents()
 {
+    qDebug() << Q_FUNC_INFO;
+
+    // Stop all cuestacks and wait for each of them to stop
+    foreach (CueStack* cs, m_cueStacks.values())
+    {
+        cs->stop();
+        while (cs->isStarted() == true);
+    }
+
     m_mutex.lock();
     foreach (CueStack* cs, m_cueStacks.values())
         delete cs;
@@ -107,6 +118,8 @@ Cue SimpleDeskEngine::cue() const
 
 CueStack* SimpleDeskEngine::cueStack(uint stack)
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (m_cueStacks.contains(stack) == false)
     {
         m_cueStacks[stack] = createCueStack();
@@ -118,6 +131,8 @@ CueStack* SimpleDeskEngine::cueStack(uint stack)
 
 CueStack* SimpleDeskEngine::createCueStack()
 {
+    qDebug() << Q_FUNC_INFO;
+
     CueStack* cs = new CueStack(doc());
     Q_ASSERT(cs != NULL);
     connect(cs, SIGNAL(currentCueChanged(int)), this, SLOT(slotCurrentCueChanged(int)));
@@ -128,6 +143,8 @@ CueStack* SimpleDeskEngine::createCueStack()
 
 void SimpleDeskEngine::replaceCueStack(uint stack, CueStack* cs)
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(cs != NULL);
 
     if (m_cueStacks.contains(stack) == true)
@@ -137,21 +154,33 @@ void SimpleDeskEngine::replaceCueStack(uint stack, CueStack* cs)
 
 void SimpleDeskEngine::slotCurrentCueChanged(int index)
 {
-    Q_ASSERT(sender() != NULL);
+    qDebug() << Q_FUNC_INFO;
+
+    if (sender() == NULL)
+        return;
+
     uint stack = sender()->property(PROP_ID).toUInt();
     emit currentCueChanged(stack, index);
 }
 
 void SimpleDeskEngine::slotCueStackStarted()
 {
-    Q_ASSERT(sender() != NULL);
+    qDebug() << Q_FUNC_INFO;
+
+    if (sender() == NULL)
+        return;
+
     uint stack = sender()->property(PROP_ID).toUInt();
     emit cueStackStarted(stack);
 }
 
 void SimpleDeskEngine::slotCueStackStopped()
 {
-    Q_ASSERT(sender() != NULL);
+    qDebug() << Q_FUNC_INFO;
+
+    if (sender() == NULL)
+        return;
+
     uint stack = sender()->property(PROP_ID).toUInt();
     emit cueStackStopped(stack);
 }

@@ -297,6 +297,15 @@
         </item>
         <item row="1" column="0" colspan="10">
          <widget class="QTreeView" name="m_cueStackView">
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::InternalMove</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::MoveAction</enum>
+          </property>
           <property name="rootIsDecorated">
            <bool>false</bool>
           </property>

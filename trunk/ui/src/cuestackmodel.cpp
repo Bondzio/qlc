@@ -20,6 +20,9 @@
 */
 
 #include <QApplication>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QMimeData>
 #include <QPalette>
 #include <QBrush>
 #include <QDebug>
@@ -27,6 +30,8 @@
 
 #include "cuestackmodel.h"
 #include "cuestack.h"
+
+static int _dragIndex = -1;
 
 CueStackModel::CueStackModel(QObject* parent)
     : QAbstractItemModel(parent)
@@ -159,4 +164,90 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
     }
 
     return var;
+}
+
+QStringList CueStackModel::mimeTypes () const
+{
+    return QStringList() << QString("text/plain");
+}
+
+Qt::DropActions CueStackModel::supportedDropActions() const
+{
+    return Qt::MoveAction | Qt::CopyAction;
+}
+
+Qt::ItemFlags CueStackModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+    if (index.isValid() == true)
+        return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+    else
+        return Qt::ItemIsDropEnabled | defaultFlags;
+}
+
+bool CueStackModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
+                                int column, const QModelIndex& parent)
+{
+    qDebug() << Q_FUNC_INFO << parent.row();
+
+    if (m_cueStack == NULL)
+        return false;
+
+    if (data->hasText() == true)
+    {
+        Cue cue;
+        QDomDocument doc;
+        if (doc.setContent(data->text()) == true && cue.loadXML(doc.firstChild().firstChild().toElement()) == true)
+        {
+            int index = parent.row();
+            if (_dragIndex < index)
+                index++;
+            m_cueStack->insertCue(index, cue);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+QMimeData* CueStackModel::mimeData(const QModelIndexList& indexes) const
+{
+    if (m_cueStack == NULL)
+        return false;
+
+    QDomDocument doc;
+    QDomElement root = doc.createElement("MimeData");
+    doc.appendChild(root);
+
+    QModelIndex mi = indexes.first();
+    if (m_cueStack->cues().at(mi.row()).saveXML(&doc, &root) == true)
+    {
+        QMimeData* data = new QMimeData;
+        data->setText(doc.toString());
+        _dragIndex = mi.row();
+        return data;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+bool CueStackModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    qDebug() << Q_FUNC_INFO << row;
+
+    if (m_cueStack == NULL || parent.isValid() == true)
+        return false;
+
+    for (int i = 0; i < count; i++)
+        m_cueStack->removeCue(row);
+
+    return true;
 }

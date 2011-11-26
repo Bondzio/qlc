@@ -41,7 +41,7 @@ PlaybackSlider::PlaybackSlider(QWidget* parent)
     , m_slider(NULL)
     , m_label(NULL)
     , m_flash(NULL)
-    , m_previousValue(0)
+    , m_previousValue(-1)
 {
     new QVBoxLayout(this);
     layout()->setSpacing(1);

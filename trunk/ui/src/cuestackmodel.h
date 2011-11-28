@@ -23,6 +23,7 @@
 #define CUESTACKMODEL_H
 
 #include <QAbstractItemModel>
+#include <qglobal.h>
 
 class CueStack;
 class CueStackModel : public QAbstractItemModel
@@ -52,10 +53,12 @@ private slots:
      * QAbstractItemModel
      ************************************************************************/
 public:
+    int columnCount(const QModelIndex& index) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex& index) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
     QStringList mimeTypes () const;

@@ -37,9 +37,6 @@ CueStackModel::CueStackModel(QObject* parent)
     : QAbstractItemModel(parent)
     , m_cueStack(NULL)
 {
-    qDebug() << Q_FUNC_INFO;
-    setHeaderData(0, Qt::Horizontal, tr("Number"), Qt::DisplayRole);
-    setHeaderData(1, Qt::Horizontal, tr("Cue"), Qt::DisplayRole);
 }
 
 CueStackModel::~CueStackModel()
@@ -48,7 +45,7 @@ CueStackModel::~CueStackModel()
 
 void CueStackModel::setCueStack(CueStack* cs)
 {
-    qDebug() << Q_FUNC_INFO << "old:" << qulonglong(m_cueStack) << "new:" << qulonglong(cs);
+    qDebug() << Q_FUNC_INFO << "old:" << (void*)m_cueStack << "new:" << (void*) cs;
 
     if (m_cueStack != NULL)
     {
@@ -84,7 +81,6 @@ CueStack* CueStackModel::cueStack() const
 
 void CueStackModel::slotAdded(int index)
 {
-    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(m_cueStack != NULL);
     beginInsertRows(QModelIndex(), index, index);
     endInsertRows();
@@ -92,7 +88,6 @@ void CueStackModel::slotAdded(int index)
 
 void CueStackModel::slotRemoved(int index)
 {
-    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(m_cueStack != NULL);
     beginRemoveRows(QModelIndex(), index, index);
     endRemoveRows();
@@ -100,7 +95,6 @@ void CueStackModel::slotRemoved(int index)
 
 void CueStackModel::slotChanged(int index)
 {
-    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(m_cueStack != NULL);
     emit dataChanged(createIndex(index, 0, 0), createIndex(index, 1, 0));
 }
@@ -113,6 +107,28 @@ void CueStackModel::slotCurrentCueChanged(int index)
 /****************************************************************************
  * QAbstractItemModel
  ****************************************************************************/
+
+int CueStackModel::columnCount(const QModelIndex& index) const
+{
+    Q_UNUSED(index);
+    return 2;
+}
+
+QVariant CueStackModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
+        return QVariant();
+
+    switch(section)
+    {
+    case 0:
+        return tr("Number");
+        break;
+    case 1:
+        return tr("Cue");
+        break;
+    }
+}
 
 QModelIndex CueStackModel::index(int row, int column, const QModelIndex& parent) const
 {
@@ -134,14 +150,6 @@ int CueStackModel::rowCount(const QModelIndex& parent) const
         return 0;
     else
         return m_cueStack->cues().size();
-}
-
-int CueStackModel::columnCount(const QModelIndex& parent) const
-{
-    if (parent.isValid() == true) // No parents
-        return 0;
-    else
-        return 2;
 }
 
 QVariant CueStackModel::data(const QModelIndex& index, int role) const
@@ -188,8 +196,6 @@ Qt::ItemFlags CueStackModel::flags(const QModelIndex &index) const
 bool CueStackModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
                                 int column, const QModelIndex& parent)
 {
-    qDebug() << Q_FUNC_INFO << parent.row();
-
     if (m_cueStack == NULL)
         return false;
 
@@ -241,8 +247,6 @@ QMimeData* CueStackModel::mimeData(const QModelIndexList& indexes) const
 
 bool CueStackModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << Q_FUNC_INFO << row;
-
     if (m_cueStack == NULL || parent.isValid() == true)
         return false;
 

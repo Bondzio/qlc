@@ -50,6 +50,7 @@ CueStack::CueStack(Doc* doc)
     , m_previous(false)
     , m_next(false)
 {
+    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
 }
 
@@ -105,12 +106,14 @@ uint CueStack::duration() const
 
 void CueStack::appendCue(const Cue& cue)
 {
+    qDebug() << Q_FUNC_INFO;
     m_cues.append(cue);
     emit added(m_cues.size() - 1);
 }
 
 void CueStack::insertCue(int index, const Cue& cue)
 {
+    qDebug() << Q_FUNC_INFO;
     if (index >= 0 && index < m_cues.size())
     {
         m_cues.insert(index, cue);
@@ -124,6 +127,7 @@ void CueStack::insertCue(int index, const Cue& cue)
 
 void CueStack::replaceCue(int index, const Cue& cue)
 {
+    qDebug() << Q_FUNC_INFO;
     if (index >= 0 && index < m_cues.size())
     {
         m_cues[index] = cue;
@@ -137,6 +141,7 @@ void CueStack::replaceCue(int index, const Cue& cue)
 
 void CueStack::removeCue(int index)
 {
+    qDebug() << Q_FUNC_INFO;
     if (index >= 0 && index < m_cues.size())
     {
         m_cues.removeAt(index);
@@ -157,6 +162,7 @@ QList <Cue> CueStack::cues() const
 
 void CueStack::setCurrentIndex(int index)
 {
+    qDebug() << Q_FUNC_INFO;
     m_currentIndex = CLAMP(index, -1, m_cues.size() - 1);
 }
 
@@ -167,6 +173,7 @@ int CueStack::currentIndex() const
 
 void CueStack::previousCue()
 {
+    qDebug() << Q_FUNC_INFO;
     m_previous = true;
     if (isRunning() == false)
         start();
@@ -174,6 +181,7 @@ void CueStack::previousCue()
 
 void CueStack::nextCue()
 {
+    qDebug() << Q_FUNC_INFO;
     m_next = true;
     if (isRunning() == false)
         start();
@@ -185,6 +193,7 @@ void CueStack::nextCue()
 
 bool CueStack::loadXML(const QDomElement& root, uint& id)
 {
+    qDebug() << Q_FUNC_INFO;
     if (root.tagName() != KXMLQLCCueStack)
     {
         qWarning() << Q_FUNC_INFO << "CueStack node not found";
@@ -225,6 +234,7 @@ bool CueStack::loadXML(const QDomElement& root, uint& id)
 
 bool CueStack::saveXML(QDomDocument* doc, QDomElement* wksp_root, uint id) const
 {
+    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
     Q_ASSERT(wksp_root != NULL);
 
@@ -250,11 +260,13 @@ bool CueStack::saveXML(QDomDocument* doc, QDomElement* wksp_root, uint id) const
 
 void CueStack::start()
 {
+    qDebug() << Q_FUNC_INFO;
     m_running = true;
 }
 
 void CueStack::stop()
 {
+    qDebug() << Q_FUNC_INFO;
     m_running = false;
 }
 
@@ -300,8 +312,6 @@ void CueStack::preRun()
 
 void CueStack::write(UniverseArray* ua)
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_ASSERT(m_fader != NULL);
     Q_ASSERT(ua != NULL);
 
@@ -373,6 +383,7 @@ void CueStack::postRun(MasterTimer* timer)
 
 int CueStack::previous()
 {
+    qDebug() << Q_FUNC_INFO;
     m_currentIndex--;
     if (m_currentIndex < 0)
         m_currentIndex = m_cues.size() - 1;
@@ -382,6 +393,7 @@ int CueStack::previous()
 
 int CueStack::next()
 {
+    qDebug() << Q_FUNC_INFO;
     if (m_cues.size() == 0)
         return -1;
 
@@ -394,6 +406,7 @@ int CueStack::next()
 
 void CueStack::switchCue(int index, const UniverseArray* ua)
 {
+    qDebug() << Q_FUNC_INFO;
     Cue cue;
     if (index >= 0 && index < m_cues.size())
         cue = m_cues[index];
@@ -439,6 +452,7 @@ void CueStack::switchCue(int index, const UniverseArray* ua)
 
 void CueStack::insertStartValue(FadeChannel& fc, const UniverseArray* ua)
 {
+    qDebug() << Q_FUNC_INFO;
     const QHash <FadeChannel,FadeChannel>& channels(m_fader->channels());
     if (channels.contains(fc) == true)
     {

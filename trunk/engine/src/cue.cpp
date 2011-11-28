@@ -82,6 +82,8 @@ QHash <uint,uchar> Cue::values() const
 
 bool Cue::loadXML(const QDomElement& root)
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (root.tagName() != KXMLQLCCue)
     {
         qWarning() << Q_FUNC_INFO << "Cue node not found";
@@ -114,6 +116,7 @@ bool Cue::loadXML(const QDomElement& root)
 
 bool Cue::saveXML(QDomDocument* doc, QDomElement* stack_root) const
 {
+    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
     Q_ASSERT(stack_root != NULL);
 

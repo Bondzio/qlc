@@ -23,6 +23,7 @@
 #include <QTextStream>
 #include <QTranslator>
 #include <QMetaType>
+#include <QtGlobal>
 #include <QLocale>
 #include <QString>
 #include <QDebug>
@@ -46,13 +47,31 @@ namespace QLCArgs
     /**
      * If true, switch to operate mode after ALL initialization is done.
      */
-    bool operate;
+    bool operate = false;
 
     /**
      * Specifies a workspace file name to load after all initialization
      * has been done, but before switching to operate mode (if applicable)
      */
     QString workspace;
+
+    /**
+     * Debug output level
+     */
+    QtMsgType debugLevel = QtSystemMsg;
+}
+
+/**
+ * Suppresses debug messages
+ */
+void qlcMessageHandler(QtMsgType type, const char* msg)
+{
+    if (type >= QLCArgs::debugLevel)
+    {
+        fprintf(stderr, msg);
+        fprintf(stderr, "\n");
+        fflush(stderr);
+    }
 }
 
 /**
@@ -83,6 +102,7 @@ void printUsage()
     cout << "  -o or --open <file>\t\tOpen the specified workspace file" << endl;
     cout << "  -p or --operate\t\tStart in operate mode" << endl;
     cout << "  -l or --locale <locale>\tForce a locale for translation" << endl;
+    cout << "  -d or --debug <level>\t\tSet debug output level (0-3, see QtMsgType)" << endl;
     cout << "  -h or --help\t\t\tPrint this help" << endl;
     cout << "  -v or --version\t\tPrint version information" << endl;
     cout << endl;
@@ -131,6 +151,11 @@ bool parseArgs(int argc, char **argv)
         {
             QLCi18n::setDefaultLocale(QString(argv[++i]));
         }
+        else if (::strcmp(argv[i], "-d") == 0 ||
+                 ::strcmp(argv[i], "--debug") == 0)
+        {
+            QLCArgs::debugLevel = QtMsgType(QString(argv[++i]).toInt());
+        }
     }
 
     return true;
@@ -166,6 +191,9 @@ int main(int argc, char** argv)
 
     /* Load translation for main application */
     QLCi18n::loadTranslation("qlc");
+
+    /* Handle debug messages */
+    qInstallMsgHandler(qlcMessageHandler);
 
     /* Create and initialize the QLC application object */
     App app;

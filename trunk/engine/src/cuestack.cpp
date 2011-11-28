@@ -147,7 +147,7 @@ void CueStack::removeCue(int index)
         m_cues.removeAt(index);
         emit removed(index);
 
-        if (index < m_currentIndex && isRunning() == true)
+        if (index < m_currentIndex)
         {
             m_currentIndex--;
             emit currentCueChanged(m_currentIndex);

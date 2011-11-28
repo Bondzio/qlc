@@ -351,6 +351,9 @@ void CueStack_Test::preRun()
     QCOMPARE(cs.m_elapsed, uint(0));
     QCOMPARE(cs.m_fader->intensity(), qreal(1.0));
     QCOMPARE(cs.isStarted(), true);
+
+    MasterTimer mt(m_doc);
+    cs.postRun(&mt);
 }
 
 void CueStack_Test::startStop()
@@ -375,6 +378,8 @@ void CueStack_Test::intensity()
     cs.preRun();
     QCOMPARE(cs.intensity(), qreal(0.5));
     QCOMPARE(cs.m_fader->intensity(), qreal(0.5));
+    MasterTimer mt(m_doc);
+    cs.postRun(&mt);
 }
 
 void CueStack_Test::nextPrevious()
@@ -449,6 +454,9 @@ void CueStack_Test::insertStartValue()
     cs.insertStartValue(fc, &ua);
     QCOMPARE(fc.start(), uchar(192));
     QCOMPARE(fc.current(), uchar(192));
+
+    MasterTimer mt(m_doc);
+    cs.postRun(&mt);
 }
 
 void CueStack_Test::switchCue()
@@ -641,6 +649,9 @@ void CueStack_Test::switchCue()
     QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(0));
     QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(4));
     QCOMPARE(cs.m_fader->channels()[fc].fadeTime(), cs.fadeOutSpeed());
+
+    MasterTimer mt(m_doc);
+    cs.postRun(&mt);
 }
 
 void CueStack_Test::postRun()
@@ -758,6 +769,9 @@ void CueStack_Test::write()
     fc.setChannel(1);
     QCOMPARE(cs.m_fader->channels()[fc].channel(), uint(1));
     QCOMPARE(cs.m_fader->channels()[fc].target(), uchar(255));
+
+    MasterTimer mt(m_doc);
+    cs.postRun(&mt);
 }
 
 QTEST_APPLESS_MAIN(CueStack_Test)

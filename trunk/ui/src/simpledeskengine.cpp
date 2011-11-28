@@ -41,6 +41,7 @@
 SimpleDeskEngine::SimpleDeskEngine(Doc* doc)
     : QObject(doc)
 {
+    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
     doc->masterTimer()->registerDMXSource(this);
 }
@@ -104,6 +105,7 @@ uchar SimpleDeskEngine::value(uint channel) const
 
 void SimpleDeskEngine::setCue(const Cue& cue)
 {
+    qDebug() << Q_FUNC_INFO;
     m_values = cue.values();
 }
 
@@ -118,8 +120,6 @@ Cue SimpleDeskEngine::cue() const
 
 CueStack* SimpleDeskEngine::cueStack(uint stack)
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (m_cueStacks.contains(stack) == false)
     {
         m_cueStacks[stack] = createCueStack();
@@ -191,6 +191,7 @@ void SimpleDeskEngine::slotCueStackStopped()
 
 bool SimpleDeskEngine::loadXML(const QDomElement& root)
 {
+    qDebug() << Q_FUNC_INFO;
     if (root.tagName() != KXMLQLCSimpleDeskEngine)
     {
         qWarning() << Q_FUNC_INFO << "Simple Desk Engine node not found";
@@ -223,6 +224,7 @@ bool SimpleDeskEngine::loadXML(const QDomElement& root)
 
 bool SimpleDeskEngine::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
 {
+    qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
     Q_ASSERT(wksp_root != NULL);
 

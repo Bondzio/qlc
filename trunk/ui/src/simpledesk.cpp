@@ -191,8 +191,11 @@ void SimpleDesk::slotUniversePageChanged(int page)
         {
             slider->setEnabled(true);
             slider->setProperty(PROP_ADDRESS, start + i);
-            slider->setValue(m_engine->value(start + i));
             slider->setLabel(QString::number(start + i + 1));
+
+            disconnect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotUniverseSliderValueChanged(uchar)));
+            slider->setValue(m_engine->value(start + i));
+            connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotUniverseSliderValueChanged(uchar)));
 
             Fixture* fxi = m_doc->fixture(m_doc->fixtureForAddress(start + i));
             if (fxi == NULL || fxi->isDimmer() == true)

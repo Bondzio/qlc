@@ -240,7 +240,12 @@ void SimpleDesk::slotUniverseSliderValueChanged(uchar value)
 {
     QVariant var(sender()->property(PROP_ADDRESS));
     if (var.isValid() == true) // Not true with disabled sliders
+    {
         m_engine->setValue(var.toUInt(), value);
+
+        if (m_editCueStackButton->isChecked() == true)
+            replaceCurrentCue();
+    }
 }
 
 void SimpleDesk::slotUpdateUniverseSliders()
@@ -372,9 +377,11 @@ void SimpleDesk::initCueStack()
     connect(m_stopCueStackButton, SIGNAL(clicked()), this, SLOT(slotStopCueStackClicked()));
     connect(m_configureCueStackButton, SIGNAL(clicked()), this, SLOT(slotConfigureCueStackClicked()));
     connect(m_editCueStackButton, SIGNAL(clicked()), this, SLOT(slotEditCueStackClicked()));
-    connect(m_storeCueButton, SIGNAL(clicked()), this, SLOT(slotStoreCueClicked()));
     connect(m_recordCueButton, SIGNAL(clicked()), this, SLOT(slotRecordCueClicked()));
-    connect(m_cueStackView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(slotCueStackViewItemClicked(const QModelIndex&)));
+
+    connect(m_cueStackView->selectionModel(),
+            SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
+            this, SLOT(slotCueStackViewCurrentItemChanged(const QModelIndex&)));
 }
 
 void SimpleDesk::updateCueStackButtons()
@@ -389,9 +396,28 @@ void SimpleDesk::updateCueStackButtons()
     m_previousCueButton->setEnabled(cueStack->cues().size() > 0);
 
     if (m_cueStackView->currentIndex().isValid() == true)
-        m_storeCueButton->setEnabled(true);
+        m_editCueStackButton->setEnabled(true);
     else
-        m_storeCueButton->setEnabled(false);
+        m_editCueStackButton->setEnabled(false);
+}
+
+void SimpleDesk::replaceCurrentCue()
+{
+    qDebug() << Q_FUNC_INFO;
+    Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
+
+    CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
+    Q_ASSERT(cueStack != NULL);
+
+    QModelIndex index = m_cueStackView->currentIndex();
+    if (index.isValid() == true)
+    {
+        // Replace current cue values
+        QString name = cueStack->cues().at(index.row()).name();
+        Cue cue = m_engine->cue();
+        cue.setName(name);
+        cueStack->replaceCue(index.row(), cue);
+    }
 }
 
 void SimpleDesk::slotCueStackStarted(uint stack)
@@ -420,7 +446,7 @@ void SimpleDesk::slotCueStackStopped(uint stack)
     updateCueStackButtons();
 }
 
-void SimpleDesk::slotCueStackViewItemClicked(const QModelIndex& index)
+void SimpleDesk::slotCueStackViewCurrentItemChanged(const QModelIndex& index)
 {
     qDebug() << Q_FUNC_INFO;
     updateCueStackButtons();
@@ -471,34 +497,9 @@ void SimpleDesk::slotConfigureCueStackClicked()
 void SimpleDesk::slotEditCueStackClicked()
 {
     qDebug() << Q_FUNC_INFO;
-    slotCueStackViewItemClicked(m_cueStackView->currentIndex());
+    slotCueStackViewCurrentItemChanged(m_cueStackView->currentIndex());
     if (m_editCueStackButton->isChecked() == false)
         resetUniverseSliders();
-}
-
-void SimpleDesk::slotStoreCueClicked()
-{
-    qDebug() << Q_FUNC_INFO;
-    Q_ASSERT(m_selectedPlayback < uint(m_playbackSliders.size()));
-
-    CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
-    Q_ASSERT(cueStack != NULL);
-
-    QModelIndex index = m_cueStackView->currentIndex();
-    if (index.isValid() == false)
-    {
-        // Append a new cue
-        Cue cue(QString("Cue %1").arg(cueStack->cues().size() + 1));
-        cueStack->appendCue(cue);
-    }
-    else
-    {
-        // Replace current cue values
-        QString name = cueStack->cues().at(index.row()).name();
-        Cue cue = m_engine->cue();
-        cue.setName(name);
-        cueStack->replaceCue(index.row(), cue);
-    }
 }
 
 void SimpleDesk::slotRecordCueClicked()

@@ -125,11 +125,12 @@ private:
 private:
     void initCueStack();
     void updateCueStackButtons();
+    void replaceCurrentCue();
 
 private slots:
     void slotCueStackStarted(uint stack);
     void slotCueStackStopped(uint stack);
-    void slotCueStackViewItemClicked(const QModelIndex& index);
+    void slotCueStackViewCurrentItemChanged(const QModelIndex& index);
 
     void slotPreviousCueClicked();
     void slotNextCueClicked();

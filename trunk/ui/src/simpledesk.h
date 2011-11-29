@@ -137,7 +137,6 @@ private slots:
     void slotStopCueStackClicked();
     void slotConfigureCueStackClicked();
     void slotEditCueStackClicked();
-    void slotStoreCueClicked();
     void slotRecordCueClicked();
 
     /*********************************************************************

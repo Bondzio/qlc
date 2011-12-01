@@ -534,6 +534,11 @@ void SimpleDesk::slotRecordCueClicked()
     cue.setName(tr("Cue %1").arg(cueStack->cues().size() + 1));
     cueStack->insertCue(index, cue);
 
+    // Select the newly-created Cue
+    QItemSelection sel(model->model()->index(index, 0), model->model()->index(index, 1));
+    model->select(sel, QItemSelectionModel::ClearAndSelect);
+    model->setCurrentIndex(model->model()->index(index, 0), QItemSelectionModel::Current);
+
     updateCueStackButtons();
 }
 

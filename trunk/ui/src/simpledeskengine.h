@@ -73,6 +73,9 @@ public:
     /** Get universe contents as a Cue */
     Cue cue() const;
 
+    /** Reset all universe values to zero */
+    void resetUniverse();
+
 private:
     QHash <uint,uchar> m_values;
 

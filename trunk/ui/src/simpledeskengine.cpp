@@ -114,6 +114,12 @@ Cue SimpleDeskEngine::cue() const
     return Cue(m_values);
 }
 
+void SimpleDeskEngine::resetUniverse()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_values.clear();
+}
+
 /****************************************************************************
  * Cue Stacks
  ****************************************************************************/

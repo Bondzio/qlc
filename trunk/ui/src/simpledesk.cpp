@@ -155,6 +155,7 @@ void SimpleDesk::initUniversePager()
     connect(m_universePageUpButton, SIGNAL(clicked()), this, SLOT(slotUniversePageUpClicked()));
     connect(m_universePageDownButton, SIGNAL(clicked()), this, SLOT(slotUniversePageDownClicked()));
     connect(m_universePageSpin, SIGNAL(valueChanged(int)), this, SLOT(slotUniversePageChanged(int)));
+    connect(m_universeResetButton, SIGNAL(clicked()), this, SLOT(slotUniverseResetClicked()));
 
     slotUniversePageChanged(m_universePageSpin->minimum());
 }
@@ -237,6 +238,14 @@ void SimpleDesk::slotUniversePageChanged(int page)
             slider->setPalette(this->palette());
         }
     }
+}
+
+void SimpleDesk::slotUniverseResetClicked()
+{
+    qDebug() << Q_FUNC_INFO;
+    resetUniverseSliders();
+    m_engine->resetUniverse();
+    slotUniversePageChanged(1);
 }
 
 void SimpleDesk::slotUniverseSliderValueChanged(uchar value)

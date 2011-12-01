@@ -86,6 +86,7 @@ private slots:
     void slotUniversePageUpClicked();
     void slotUniversePageDownClicked();
     void slotUniversePageChanged(int page);
+    void slotUniverseResetClicked();
     void slotUniverseSliderValueChanged(uchar value);
     void slotUpdateUniverseSliders();
 

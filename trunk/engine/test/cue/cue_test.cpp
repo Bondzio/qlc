@@ -34,6 +34,17 @@ void Cue_Test::initial()
     cue = Cue("Foo");
     QCOMPARE(cue.name(), QString("Foo"));
     QCOMPARE(cue.values().size(), 0);
+
+    QHash <uint,uchar> values;
+    values[0] = 14;
+    values[932] = 5;
+    values[5] = 255;
+    cue = Cue(values);
+    QCOMPARE(cue.name(), QString());
+    QCOMPARE(cue.values().size(), 3);
+    QCOMPARE(cue.values()[0], uchar(14));
+    QCOMPARE(cue.values()[932], uchar(5));
+    QCOMPARE(cue.values()[5], uchar(255));
 }
 
 void Cue_Test::name()
@@ -61,6 +72,14 @@ void Cue_Test::value()
     cue.setValue(UINT_MAX, 42);
     QCOMPARE(cue.values().size(), 2);
     QCOMPARE(cue.value(0), uchar(15));
+    QCOMPARE(cue.value(UINT_MAX), uchar(42));
+
+    cue.unsetValue(0);
+    QCOMPARE(cue.values().size(), 1);
+    QCOMPARE(cue.value(UINT_MAX), uchar(42));
+
+    cue.unsetValue(0);
+    QCOMPARE(cue.values().size(), 1);
     QCOMPARE(cue.value(UINT_MAX), uchar(42));
 }
 

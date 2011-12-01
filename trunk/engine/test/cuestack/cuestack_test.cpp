@@ -248,13 +248,11 @@ void CueStack_Test::load()
     QDomElement root = doc.createElement("CueStack");
     doc.appendChild(root);
 
-    uint id = 0;
     CueStack cs(m_doc);
-    QCOMPARE(cs.loadXML(root, id), false);
-
+    QCOMPARE(CueStack::loadXMLID(root), UINT_MAX);
     root.setAttribute("ID", 15);
-    QCOMPARE(cs.loadXML(root, id), true);
-    QCOMPARE(id, uint(15));
+    QCOMPARE(CueStack::loadXMLID(root), uint(15));
+    QCOMPARE(cs.loadXML(root), true);
     QCOMPARE(cs.cues().size(), 0);
 
     QDomElement speed = doc.createElement("Speed");
@@ -279,15 +277,15 @@ void CueStack_Test::load()
     QDomElement foo = doc.createElement("Foo");
     root.appendChild(foo);
 
-    id = 0;
-    QCOMPARE(cs.loadXML(root, id), true);
-    QCOMPARE(id, uint(15));
+    QCOMPARE(CueStack::loadXMLID(root), uint(15));
+    QCOMPARE(cs.loadXML(root), true);
     QCOMPARE(cs.cues().size(), 3);
     QCOMPARE(cs.cues().at(0).name(), QString("First"));
     QCOMPARE(cs.cues().at(1).name(), QString("Second"));
     QCOMPARE(cs.cues().at(2).name(), QString("Third"));
 
-    QCOMPARE(cs.loadXML(foo, id), false);
+    QCOMPARE(CueStack::loadXMLID(foo), UINT_MAX);
+    QCOMPARE(cs.loadXML(foo), false);
 }
 
 void CueStack_Test::save()

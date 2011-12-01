@@ -50,13 +50,13 @@ CueStack::CueStack(Doc* doc)
     , m_previous(false)
     , m_next(false)
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO << (void*) this;
     Q_ASSERT(doc != NULL);
 }
 
 CueStack::~CueStack()
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO << (void*) this;
     Q_ASSERT(isStarted() == false);
     m_cues.clear(); // Crashes without this, WTF?!
 }
@@ -191,19 +191,33 @@ void CueStack::nextCue()
  * Save & Load
  ****************************************************************************/
 
-bool CueStack::loadXML(const QDomElement& root, uint& id)
+uint CueStack::loadXMLID(const QDomElement& root)
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (root.tagName() != KXMLQLCCueStack)
+    {
+        qWarning() << Q_FUNC_INFO << "CueStack node not found";
+        return UINT_MAX;
+    }
+
+    if (root.attribute(KXMLQLCCueStackID).isEmpty() == false)
+        return root.attribute(KXMLQLCCueStackID).toUInt();
+    else
+        return UINT_MAX;
+}
+
+bool CueStack::loadXML(const QDomElement& root)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_cues.clear();
+
     if (root.tagName() != KXMLQLCCueStack)
     {
         qWarning() << Q_FUNC_INFO << "CueStack node not found";
         return false;
     }
-
-    if (root.attribute(KXMLQLCCueStackID).isEmpty() == false)
-        id = root.attribute(KXMLQLCCueStackID).toUInt();
-    else
-        return false;
 
     QDomNode node = root.firstChild();
     while (node.isNull() == false)

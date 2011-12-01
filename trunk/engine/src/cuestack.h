@@ -105,7 +105,8 @@ private:
      * Load & Save
      ************************************************************************/
 public:
-    bool loadXML(const QDomElement& root, uint& id);
+    static uint loadXMLID(const QDomElement& root);
+    bool loadXML(const QDomElement& root);
     bool saveXML(QDomDocument* doc, QDomElement* root, uint id) const;
 
     /************************************************************************

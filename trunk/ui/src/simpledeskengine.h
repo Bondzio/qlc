@@ -98,7 +98,6 @@ signals:
 
 private:
     CueStack* createCueStack();
-    void replaceCueStack(uint stack, CueStack* cs);
 
 private slots:
     void slotCurrentCueChanged(int index);

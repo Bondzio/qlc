@@ -238,8 +238,12 @@ void FixtureGroupEditor::slotCellActivated(int row, int column)
 
 void FixtureGroupEditor::slotCellChanged(int row, int column)
 {
+    qDebug() << Q_FUNC_INFO << row << column;
     if (row < 0 || column < 0)
+    {
+        updateTable();
         return;
+    }
 
     QHash <QLCPoint,quint32> hash = m_grp->fixtureHash();
     QLCPoint from(m_column, m_row);

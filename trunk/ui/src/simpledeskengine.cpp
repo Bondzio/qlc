@@ -147,17 +147,6 @@ CueStack* SimpleDeskEngine::createCueStack()
     return cs;
 }
 
-void SimpleDeskEngine::replaceCueStack(uint stack, CueStack* cs)
-{
-    qDebug() << Q_FUNC_INFO;
-
-    Q_ASSERT(cs != NULL);
-
-    if (m_cueStacks.contains(stack) == true)
-        delete m_cueStacks[stack];
-    m_cueStacks[stack] = cs;
-}
-
 void SimpleDeskEngine::slotCurrentCueChanged(int index)
 {
     qDebug() << Q_FUNC_INFO;
@@ -210,12 +199,16 @@ bool SimpleDeskEngine::loadXML(const QDomElement& root)
         QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCCueStack)
         {
-            uint id = 0;
-            CueStack* cs = createCueStack();
-            if (cs->loadXML(tag, id) == true)
-                replaceCueStack(id, cs);
+            uint id = CueStack::loadXMLID(tag);
+            if (id != UINT_MAX)
+            {
+                CueStack* cs = cueStack(id);
+                cs->loadXML(tag);
+            }
             else
-                delete cs;
+            {
+                qWarning() << Q_FUNC_INFO << "Missing CueStack ID!";
+            }
         }
         else
         {
@@ -241,7 +234,11 @@ bool SimpleDeskEngine::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
     while (it.hasNext() == true)
     {
         it.next();
-        it.value()->saveXML(doc, &root, it.key());
+
+        // Save CueStack only if it contains something
+        const CueStack* cs = it.value();
+        if (cs->cues().size() > 0)
+            cs->saveXML(doc, &root, it.key());
     }
 
     return true;

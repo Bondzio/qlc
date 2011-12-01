@@ -37,6 +37,8 @@ private slots:
     void initial();
     void speeds();
     void appendCue();
+    void insertCue();
+    void replaceCue();
     void currentIndex();
     void removeCue();
     void load();

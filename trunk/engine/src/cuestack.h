@@ -23,6 +23,7 @@
 #define CUESTACK_H
 
 #include <QObject>
+#include <QMutex>
 #include <QList>
 
 #include "cue.h"
@@ -100,6 +101,7 @@ signals:
 
 private:
     QList <Cue> m_cues;
+    QMutex m_mutex;
 
     /************************************************************************
      * Load & Save

@@ -117,6 +117,117 @@ void CueStack_Test::appendCue()
     QCOMPARE(cs.cues().at(3).name(), QString("Four"));
 }
 
+void CueStack_Test::insertCue()
+{
+    CueStack cs(m_doc);
+    QCOMPARE(cs.cues().size(), 0);
+
+    QSignalSpy spy(&cs, SIGNAL(currentCueChanged(int)));
+    cs.insertCue(0, Cue("One"));
+    QCOMPARE(cs.cues().size(), 1);
+    QCOMPARE(cs.cues()[0].name(), QString("One"));
+    QCOMPARE(cs.currentIndex(), -1);
+    QCOMPARE(spy.size(), 0);
+
+    cs.insertCue(0, Cue("Two"));
+    QCOMPARE(cs.cues().size(), 2);
+    QCOMPARE(cs.cues()[0].name(), QString("Two"));
+    QCOMPARE(cs.cues()[1].name(), QString("One"));
+    QCOMPARE(cs.currentIndex(), -1);
+    QCOMPARE(spy.size(), 0);
+
+    cs.setCurrentIndex(1);
+    cs.insertCue(2, Cue("Three"));
+    QCOMPARE(cs.cues().size(), 3);
+    QCOMPARE(cs.cues()[0].name(), QString("Two"));
+    QCOMPARE(cs.cues()[1].name(), QString("One"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.currentIndex(), 1);
+    QCOMPARE(spy.size(), 0);
+
+    cs.setCurrentIndex(1);
+    cs.insertCue(20, Cue("Four"));
+    QCOMPARE(cs.cues().size(), 4);
+    QCOMPARE(cs.cues()[0].name(), QString("Two"));
+    QCOMPARE(cs.cues()[1].name(), QString("One"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.cues()[3].name(), QString("Four"));
+    QCOMPARE(cs.currentIndex(), 1);
+    QCOMPARE(spy.size(), 0);
+
+    cs.setCurrentIndex(1);
+    cs.insertCue(1, Cue("Five"));
+    QCOMPARE(cs.cues().size(), 5);
+    QCOMPARE(cs.cues()[0].name(), QString("Two"));
+    QCOMPARE(cs.cues()[1].name(), QString("Five"));
+    QCOMPARE(cs.cues()[2].name(), QString("One"));
+    QCOMPARE(cs.cues()[3].name(), QString("Three"));
+    QCOMPARE(cs.cues()[4].name(), QString("Four"));
+    QCOMPARE(cs.currentIndex(), 2);
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy.at(0).at(0).toInt(), 2);
+
+    cs.insertCue(-1, Cue("Six"));
+    QCOMPARE(cs.cues().size(), 6);
+    QCOMPARE(cs.cues()[0].name(), QString("Two"));
+    QCOMPARE(cs.cues()[1].name(), QString("Five"));
+    QCOMPARE(cs.cues()[2].name(), QString("One"));
+    QCOMPARE(cs.cues()[3].name(), QString("Three"));
+    QCOMPARE(cs.cues()[4].name(), QString("Four"));
+    QCOMPARE(cs.cues()[5].name(), QString("Six"));
+    QCOMPARE(cs.currentIndex(), 2);
+    QCOMPARE(spy.size(), 1);
+}
+
+void CueStack_Test::replaceCue()
+{
+    CueStack cs(m_doc);
+    QCOMPARE(cs.cues().size(), 0);
+    cs.appendCue(Cue("One"));
+    cs.appendCue(Cue("Two"));
+    cs.appendCue(Cue("Three"));
+    cs.appendCue(Cue("Four"));
+    cs.appendCue(Cue("Five"));
+    QCOMPARE(cs.cues().size(), 5);
+
+    cs.replaceCue(0, Cue("Six"));
+    QCOMPARE(cs.cues().size(), 5);
+    QCOMPARE(cs.cues()[0].name(), QString("Six"));
+    QCOMPARE(cs.cues()[1].name(), QString("Two"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.cues()[3].name(), QString("Four"));
+    QCOMPARE(cs.cues()[4].name(), QString("Five"));
+
+    cs.replaceCue(-1, Cue("Seven"));
+    QCOMPARE(cs.cues().size(), 6);
+    QCOMPARE(cs.cues()[0].name(), QString("Six"));
+    QCOMPARE(cs.cues()[1].name(), QString("Two"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.cues()[3].name(), QString("Four"));
+    QCOMPARE(cs.cues()[4].name(), QString("Five"));
+    QCOMPARE(cs.cues()[5].name(), QString("Seven"));
+
+    cs.replaceCue(20, Cue("Eight"));
+    QCOMPARE(cs.cues().size(), 7);
+    QCOMPARE(cs.cues()[0].name(), QString("Six"));
+    QCOMPARE(cs.cues()[1].name(), QString("Two"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.cues()[3].name(), QString("Four"));
+    QCOMPARE(cs.cues()[4].name(), QString("Five"));
+    QCOMPARE(cs.cues()[5].name(), QString("Seven"));
+    QCOMPARE(cs.cues()[6].name(), QString("Eight"));
+
+    cs.replaceCue(5, Cue("Nine"));
+    QCOMPARE(cs.cues().size(), 7);
+    QCOMPARE(cs.cues()[0].name(), QString("Six"));
+    QCOMPARE(cs.cues()[1].name(), QString("Two"));
+    QCOMPARE(cs.cues()[2].name(), QString("Three"));
+    QCOMPARE(cs.cues()[3].name(), QString("Four"));
+    QCOMPARE(cs.cues()[4].name(), QString("Five"));
+    QCOMPARE(cs.cues()[5].name(), QString("Nine"));
+    QCOMPARE(cs.cues()[6].name(), QString("Eight"));
+}
+
 void CueStack_Test::currentIndex()
 {
     CueStack cs(m_doc);

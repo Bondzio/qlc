@@ -107,20 +107,36 @@ uint CueStack::duration() const
 void CueStack::appendCue(const Cue& cue)
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_mutex.lock();
     m_cues.append(cue);
-    emit added(m_cues.size() - 1);
+    int index = m_cues.size() - 1;
+    m_mutex.unlock();
+
+    emit added(index);
 }
 
 void CueStack::insertCue(int index, const Cue& cue)
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_mutex.lock();
     if (index >= 0 && index < m_cues.size())
     {
         m_cues.insert(index, cue);
         emit added(index);
+
+        if (m_currentIndex >= index)
+        {
+            m_currentIndex++;
+            emit currentCueChanged(m_currentIndex);
+        }
+
+        m_mutex.unlock();
     }
     else
     {
+        m_mutex.unlock();
         appendCue(cue);
     }
 }
@@ -128,13 +144,17 @@ void CueStack::insertCue(int index, const Cue& cue)
 void CueStack::replaceCue(int index, const Cue& cue)
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_mutex.lock();
     if (index >= 0 && index < m_cues.size())
     {
         m_cues[index] = cue;
+        m_mutex.unlock();
         emit changed(index);
     }
     else
     {
+        m_mutex.unlock();
         appendCue(cue);
     }
 }
@@ -142,6 +162,8 @@ void CueStack::replaceCue(int index, const Cue& cue)
 void CueStack::removeCue(int index)
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_mutex.lock();
     if (index >= 0 && index < m_cues.size())
     {
         m_cues.removeAt(index);
@@ -153,6 +175,7 @@ void CueStack::removeCue(int index)
             emit currentCueChanged(m_currentIndex);
         }
     }
+    m_mutex.unlock();
 }
 
 QList <Cue> CueStack::cues() const
@@ -163,7 +186,10 @@ QList <Cue> CueStack::cues() const
 void CueStack::setCurrentIndex(int index)
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_mutex.lock();
     m_currentIndex = CLAMP(index, -1, m_cues.size() - 1);
+    m_mutex.unlock();
 }
 
 int CueStack::currentIndex() const
@@ -398,9 +424,15 @@ void CueStack::postRun(MasterTimer* timer)
 int CueStack::previous()
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (m_cues.size() == 0)
+        return -1;
+
+    m_mutex.lock();
     m_currentIndex--;
     if (m_currentIndex < 0)
         m_currentIndex = m_cues.size() - 1;
+    m_mutex.unlock();
 
     return m_currentIndex;
 }
@@ -408,12 +440,15 @@ int CueStack::previous()
 int CueStack::next()
 {
     qDebug() << Q_FUNC_INFO;
+
     if (m_cues.size() == 0)
         return -1;
 
+    m_mutex.lock();
     m_currentIndex++;
     if (m_currentIndex >= m_cues.size())
         m_currentIndex = 0;
+    m_mutex.unlock();
 
     return m_currentIndex;
 }
@@ -421,9 +456,12 @@ int CueStack::next()
 void CueStack::switchCue(int index, const UniverseArray* ua)
 {
     qDebug() << Q_FUNC_INFO;
+
     Cue cue;
+    m_mutex.lock();
     if (index >= 0 && index < m_cues.size())
         cue = m_cues[index];
+    m_mutex.unlock();
 
     QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
     while (it.hasNext() == true)

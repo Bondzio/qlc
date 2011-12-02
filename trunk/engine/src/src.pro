@@ -35,6 +35,7 @@ HEADERS += qlccapability.h \
            qlcfile.h \
            qlcfixturedef.h \
            qlcfixturedefcache.h \
+           qlcfixturehead.h \
            qlcfixturemode.h \
            qlci18n.h \
            qlcinputchannel.h \
@@ -80,6 +81,7 @@ SOURCES += qlccapability.cpp \
            qlcfile.cpp \
            qlcfixturedef.cpp \
            qlcfixturedefcache.cpp \
+           qlcfixturehead.cpp \
            qlcfixturemode.cpp \
            qlci18n.cpp \
            qlcinputchannel.cpp \

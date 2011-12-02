@@ -26,6 +26,7 @@ SUBDIRS += qlcchannel
 SUBDIRS += qlcfile
 SUBDIRS += qlcfixturedef
 SUBDIRS += qlcfixturedefcache
+SUBDIRS += qlcfixturehead
 SUBDIRS += qlcfixturemode
 SUBDIRS += qlci18n
 SUBDIRS += qlcinputchannel

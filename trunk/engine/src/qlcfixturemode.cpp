@@ -26,6 +26,7 @@
 #include <QtXml>
 
 #include "qlcfixturemode.h"
+#include "qlcfixturehead.h"
 #include "qlcfixturedef.h"
 #include "qlcchannel.h"
 #include "qlcphysical.h"
@@ -352,6 +353,36 @@ void QLCFixtureMode::cacheChannels()
     m_channelsCached = true;
 }
 
+/*****************************************************************************
+ * Heads
+ *****************************************************************************/
+
+void QLCFixtureMode::insertHead(int index, const QLCFixtureHead& head)
+{
+    if (index < 0 || index >= m_heads.size())
+        m_heads.append(head);
+    else
+        m_heads.insert(index, head);
+}
+
+void QLCFixtureMode::removeHead(int index)
+{
+    m_heads.removeAt(index);
+}
+
+void QLCFixtureMode::replaceHead(int index, const QLCFixtureHead& head)
+{
+    if (index >= 0 && index < m_heads.size())
+        m_heads[index] = head;
+    else
+        insertHead(index, head);
+}
+
+QList <QLCFixtureHead> QLCFixtureMode::heads() const
+{
+    return m_heads;
+}
+
 /****************************************************************************
  * Physical
  ****************************************************************************/
@@ -411,6 +442,13 @@ bool QLCFixtureMode::loadXML(const QDomElement* root)
             insertChannel(m_fixtureDef->channel(tag.text()),
                           str.toInt());
         }
+        else if (tag.tagName() == KXMLQLCFixtureHead)
+        {
+            /* Head */
+            QLCFixtureHead head;
+            if (head.loadXML(tag) == true)
+                insertHead(-1, head);
+        }
         else if (tag.tagName() == KXMLQLCPhysical)
         {
             /* Physical */
@@ -424,6 +462,22 @@ bool QLCFixtureMode::loadXML(const QDomElement* root)
         }
 
         node = node.nextSibling();
+    }
+
+    // If there is no head entries in the file, create one that contains all channels
+    if (m_heads.size() == 0)
+    {
+        QLCFixtureHead head;
+        for (int i = 0; i < m_channels.size(); i++)
+            head.addChannel(i++);
+        insertHead(-1, head);
+    }
+
+    // Cache all head channels
+    for (int i = 0; i < m_heads.size(); i++)
+    {
+        QLCFixtureHead& head = m_heads[i];
+        head.cacheChannels(this);
     }
 
     return true;
@@ -460,6 +514,11 @@ bool QLCFixtureMode::saveXML(QDomDocument* doc, QDomElement* root)
         text = doc->createTextNode(it.next()->name());
         chtag.appendChild(text);
     }
+
+    /* Heads */
+    QListIterator <QLCFixtureHead> hit(m_heads);
+    while (hit.hasNext() == true)
+        hit.next().saveXML(doc, &tag);
 
     return true;
 }

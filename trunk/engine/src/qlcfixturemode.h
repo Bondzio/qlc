@@ -36,6 +36,7 @@
 
 class QDomDocument;
 class QDomElement;
+class QLCFixtureHead;
 class QLCFixtureMode;
 class QLCFixtureDef;
 class QLCPhysical;
@@ -250,6 +251,19 @@ protected:
 
     /** The CMY mix intensity channels */
     QList <quint32> m_cmyChannels;
+
+    /*********************************************************************
+     * Heads
+     *********************************************************************/
+public:
+    void insertHead(int index, const QLCFixtureHead& head);
+    void replaceHead(int index, const QLCFixtureHead& head);
+    void removeHead(int index);
+
+    QList <QLCFixtureHead> heads() const;
+
+private:
+    QList <QLCFixtureHead> m_heads;
 
     /*********************************************************************
      * Physical

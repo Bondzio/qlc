@@ -39,6 +39,7 @@ QLCFixtureHead::QLCFixtureHead()
 
 QLCFixtureHead::QLCFixtureHead(const QLCFixtureHead& head)
     : m_channelsCached(head.m_channelsCached)
+    , m_channels(head.m_channels)
     , m_panMsbChannel(head.m_panMsbChannel)
     , m_tiltMsbChannel(head.m_tiltMsbChannel)
     , m_panLsbChannel(head.m_panLsbChannel)

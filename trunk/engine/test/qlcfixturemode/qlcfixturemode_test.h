@@ -43,15 +43,13 @@ private slots:
     void channelByIndex();
     void channels();
     void channelNumber();
+    void insertHead();
     void copy();
 
     void load();
     void loadWrongRoot();
     void loadNoName();
     void save();
-    void cacheChannelsRgbMaster();
-    void cacheChannelsCmyMaster();
-    void cacheChannelsPanTilt();
 
     void cleanupTestCase();
 

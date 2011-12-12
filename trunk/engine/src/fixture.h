@@ -248,26 +248,26 @@ public:
                     Qt::CaseSensitivity cs = Qt::CaseSensitive,
                     QLCChannel::Group group = QLCChannel::NoGroup) const;
 
-    /** @see QLCFixtureMode */
-    quint32 panMsbChannel() const;
+    /** @see QLCFixtureHead */
+    quint32 panMsbChannel(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    quint32 tiltMsbChannel() const;
+    /** @see QLCFixtureHead */
+    quint32 tiltMsbChannel(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    quint32 panLsbChannel() const;
+    /** @see QLCFixtureHead */
+    quint32 panLsbChannel(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    quint32 tiltLsbChannel() const;
+    /** @see QLCFixtureHead */
+    quint32 tiltLsbChannel(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    quint32 masterIntensityChannel() const;
+    /** @see QLCFixtureHead */
+    quint32 masterIntensityChannel(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    QList <quint32> rgbChannels() const;
+    /** @see QLCFixtureHead */
+    QList <quint32> rgbChannels(int head = 0) const;
 
-    /** @see QLCFixtureMode */
-    QList <quint32> cmyChannels() const;
+    /** @see QLCFixtureHead */
+    QList <quint32> cmyChannels(int head = 0) const;
 
 protected:
     /** Create a generic intensity channel */

@@ -25,6 +25,7 @@
 
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
+#include "qlcfixturehead.h"
 #include "qlcfixturedef.h"
 #include "qlccapability.h"
 #include "qlcchannel.h"
@@ -265,60 +266,109 @@ QSet <quint32> Fixture::channels(const QString& name, Qt::CaseSensitivity cs,
     return set;
 }
 
-quint32 Fixture::panMsbChannel() const
+quint32 Fixture::panMsbChannel(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->panMsbChannel();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).panMsbChannel();
+        else
+            return QLCChannel::invalid();
+    }
     else
+    {
         return QLCChannel::invalid();
+    }
 }
 
-quint32 Fixture::tiltMsbChannel() const
+quint32 Fixture::tiltMsbChannel(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->tiltMsbChannel();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).tiltMsbChannel();
+        else
+            return QLCChannel::invalid();
+    }
     else
+    {
         return QLCChannel::invalid();
+    }
 }
 
-quint32 Fixture::panLsbChannel() const
+quint32 Fixture::panLsbChannel(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->panLsbChannel();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).panLsbChannel();
+        else
+            return QLCChannel::invalid();
+    }
     else
+    {
         return QLCChannel::invalid();
+    }
 }
 
-quint32 Fixture::tiltLsbChannel() const
+quint32 Fixture::tiltLsbChannel(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->tiltLsbChannel();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).tiltLsbChannel();
+        else
+            return QLCChannel::invalid();
+    }
     else
+    {
         return QLCChannel::invalid();
+    }
 }
 
-quint32 Fixture::masterIntensityChannel() const
+quint32 Fixture::masterIntensityChannel(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->masterIntensityChannel();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).masterIntensityChannel();
+        else
+            return QLCChannel::invalid();
+    }
     else
+    {
         return QLCChannel::invalid();
+    }
 }
 
-QList <quint32> Fixture::rgbChannels() const
+QList <quint32> Fixture::rgbChannels(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->rgbChannels();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).rgbChannels();
+        else
+            return QList <quint32> ();
+    }
     else
+    {
         return QList <quint32> ();
+    }
 }
 
-QList <quint32> Fixture::cmyChannels() const
+QList <quint32> Fixture::cmyChannels(int head) const
 {
     if (m_fixtureMode != NULL)
-        return m_fixtureMode->cmyChannels();
+    {
+        if (head < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(head).cmyChannels();
+        else
+            return QList <quint32> ();
+    }
     else
+    {
         return QList <quint32> ();
+    }
 }
 
 void Fixture::createGenericChannel()
@@ -349,8 +399,6 @@ void Fixture::setFixtureDefinition(const QLCFixtureDef* fixtureDef,
         if (m_genericChannel != NULL)
             delete m_genericChannel;
         m_genericChannel = NULL;
-
-        const_cast<QLCFixtureMode*>(m_fixtureMode)->cacheChannels();
     }
     else
     {

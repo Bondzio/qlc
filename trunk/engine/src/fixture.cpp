@@ -376,7 +376,7 @@ const QLCFixtureMode* Fixture::fixtureMode() const
  * Load & Save
  *****************************************************************************/
 
-bool Fixture::loader(const QDomElement* root, Doc* doc)
+bool Fixture::loader(const QDomElement& root, Doc* doc)
 {
     bool result = false;
 
@@ -407,7 +407,7 @@ bool Fixture::loader(const QDomElement* root, Doc* doc)
     return result;
 }
 
-bool Fixture::loadXML(const QDomElement* root,
+bool Fixture::loadXML(const QDomElement& root,
                       const QLCFixtureDefCache* fixtureDefCache)
 {
     const QLCFixtureDef* fixtureDef = NULL;
@@ -421,21 +421,16 @@ bool Fixture::loadXML(const QDomElement* root,
     quint32 address = 0;
     quint32 channels = 0;
 
-    QDomElement tag;
-    QDomNode node;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLFixture)
+    if (root.tagName() != KXMLFixture)
     {
         qWarning() << Q_FUNC_INFO << "Fixture node not found";
         return false;
     }
 
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCFixtureDefManufacturer)
         {

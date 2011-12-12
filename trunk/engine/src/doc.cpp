@@ -510,7 +510,7 @@ bool Doc::loadXML(const QDomElement* root)
 
         if (tag.tagName() == KXMLFixture)
         {
-            Fixture::loader(&tag, this);
+            Fixture::loader(tag, this);
         }
         else if (tag.tagName() == KXMLQLCFunction)
         {

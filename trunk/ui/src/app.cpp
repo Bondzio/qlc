@@ -852,7 +852,7 @@ bool App::loadXML(const QDomDocument* doc)
         else if (tag.tagName() == KXMLFixture)
         {
             /* Legacy support code, nowadays in Doc */
-            Fixture::loader(&tag, m_doc);
+            Fixture::loader(tag, m_doc);
         }
         else if (tag.tagName() == KXMLQLCFunction)
         {

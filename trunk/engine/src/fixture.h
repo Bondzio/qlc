@@ -332,7 +332,7 @@ public:
      * @param root The Fixture node to load from
      * @param doc The doc that owns all fixtures
      */
-    static bool loader(const QDomElement* root, Doc* doc);
+    static bool loader(const QDomElement& root, Doc* doc);
 
     /**
      * Load a fixture's contents from the given XML node.
@@ -340,7 +340,7 @@ public:
      * @param root An XML subtree containing a single fixture instance
      * @return true if the fixture was loaded successfully, otherwise false
      */
-    bool loadXML(const QDomElement* root,
+    bool loadXML(const QDomElement& root,
                  const QLCFixtureDefCache* fixtureDefCache);
 
     /**

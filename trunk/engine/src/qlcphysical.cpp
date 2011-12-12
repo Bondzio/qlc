@@ -255,22 +255,19 @@ QString QLCPhysical::dmxConnector() const
  * Load & Save
  ****************************************************************************/
 
-bool QLCPhysical::loadXML(const QDomElement* root)
+bool QLCPhysical::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-    QString str;
-    QString ch;
-
-    if (root->tagName() != KXMLQLCPhysical)
+    if (root.tagName() != KXMLQLCPhysical)
+    {
+        qWarning() << Q_FUNC_INFO << "Physical node not found";
         return false;
+    }
 
     /* Subtags */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
-
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCPhysicalBulb)
         {
             m_bulbType = tag.attribute(KXMLQLCPhysicalBulbType);

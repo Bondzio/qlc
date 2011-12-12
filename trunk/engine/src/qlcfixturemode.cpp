@@ -59,22 +59,6 @@ QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef, const QLCFixtureMode* 
         *this = *mode;
 }
 
-QLCFixtureMode::QLCFixtureMode(QLCFixtureDef* fixtureDef, const QDomElement* tag)
-    : m_fixtureDef(fixtureDef)
-    , m_channelsCached(false)
-    , m_panMsbChannel(QLCChannel::invalid())
-    , m_tiltMsbChannel(QLCChannel::invalid())
-    , m_panLsbChannel(QLCChannel::invalid())
-    , m_tiltLsbChannel(QLCChannel::invalid())
-    , m_masterIntensityChannel(QLCChannel::invalid())
-{
-    Q_ASSERT(fixtureDef != NULL);
-    Q_ASSERT(tag != NULL);
-
-    if (tag != NULL)
-        loadXML(tag);
-}
-
 QLCFixtureMode::~QLCFixtureMode()
 {
 }
@@ -401,23 +385,16 @@ QLCPhysical QLCFixtureMode::physical() const
  * Load & Save
  ****************************************************************************/
 
-bool QLCFixtureMode::loadXML(const QDomElement* root)
+bool QLCFixtureMode::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-    QString str;
-    QString ch;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFixtureMode)
+    if (root.tagName() != KXMLQLCFixtureMode)
     {
         qWarning() << Q_FUNC_INFO << "Mode tag not found";
         return false;
     }
 
     /* Mode name */
-    str = root->attribute(KXMLQLCFixtureModeName);
+    QString str = root.attribute(KXMLQLCFixtureModeName);
     if (str.isEmpty() == true)
     {
         qWarning() << Q_FUNC_INFO << "Mode has no name";
@@ -429,11 +406,10 @@ bool QLCFixtureMode::loadXML(const QDomElement* root)
     }
 
     /* Subtags */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
-
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCFixtureModeChannel)
         {
             /* Channel */
@@ -453,7 +429,7 @@ bool QLCFixtureMode::loadXML(const QDomElement* root)
         {
             /* Physical */
             QLCPhysical physical;
-            physical.loadXML(&tag);
+            physical.loadXML(tag);
             setPhysical(physical);
         }
         else

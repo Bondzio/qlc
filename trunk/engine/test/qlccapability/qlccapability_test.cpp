@@ -170,7 +170,7 @@ void QLCCapability_Test::load()
     root.appendChild(name);
 
     QLCCapability cap;
-    QVERIFY(cap.loadXML(&root) == true);
+    QVERIFY(cap.loadXML(root) == true);
     QVERIFY(cap.name() == "Test1");
     QVERIFY(cap.min() == 13);
     QVERIFY(cap.max() == 19);
@@ -190,7 +190,7 @@ void QLCCapability_Test::loadWrongRoot()
     root.appendChild(name);
 
     QLCCapability cap;
-    QVERIFY(cap.loadXML(&root) == false);
+    QVERIFY(cap.loadXML(root) == false);
     QVERIFY(cap.name().isEmpty());
     QVERIFY(cap.min() == 0);
     QVERIFY(cap.max() == UCHAR_MAX);
@@ -209,7 +209,7 @@ void QLCCapability_Test::loadNoMin()
     root.appendChild(name);
 
     QLCCapability cap;
-    QVERIFY(cap.loadXML(&root) == false);
+    QVERIFY(cap.loadXML(root) == false);
     QVERIFY(cap.name().isEmpty());
     QVERIFY(cap.min() == 0);
     QVERIFY(cap.max() == UCHAR_MAX);
@@ -228,7 +228,7 @@ void QLCCapability_Test::loadNoMax()
     root.appendChild(name);
 
     QLCCapability cap;
-    QVERIFY(cap.loadXML(&root) == false);
+    QVERIFY(cap.loadXML(root) == false);
     QVERIFY(cap.name().isEmpty());
     QVERIFY(cap.min() == 0);
     QVERIFY(cap.max() == UCHAR_MAX);
@@ -248,7 +248,7 @@ void QLCCapability_Test::loadMinGreaterThanMax()
     root.appendChild(name);
 
     QLCCapability cap;
-    QVERIFY(cap.loadXML(&root) == false);
+    QVERIFY(cap.loadXML(root) == false);
     QVERIFY(cap.name().isEmpty());
     QVERIFY(cap.min() == 0);
     QVERIFY(cap.max() == UCHAR_MAX);

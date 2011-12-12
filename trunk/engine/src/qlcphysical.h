@@ -146,7 +146,7 @@ protected:
      ************************************************************************/
 public:
     /** Load physical values from the given QDomElement */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /** Save physical values to the given XML tag in the given document */
     bool saveXML(QDomDocument* doc, QDomElement* root);

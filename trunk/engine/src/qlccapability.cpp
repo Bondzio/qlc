@@ -154,22 +154,20 @@ bool QLCCapability::saveXML(QDomDocument* doc, QDomElement* root)
     return true;
 }
 
-bool QLCCapability::loadXML(const QDomElement* root)
+bool QLCCapability::loadXML(const QDomElement& root)
 {
-    uchar min;
-    uchar max;
+    uchar min = 0;
+    uchar max = 0;
     QString str;
 
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCCapability)
+    if (root.tagName() != KXMLQLCCapability)
     {
         qWarning() << Q_FUNC_INFO << "Capability node not found";
         return false;
     }
 
     /* Get low limit attribute (critical) */
-    str = root->attribute(KXMLQLCCapabilityMin);
+    str = root.attribute(KXMLQLCCapabilityMin);
     if (str.isEmpty() == true)
     {
         qWarning() << Q_FUNC_INFO << "Capability has no minimum limit.";
@@ -181,7 +179,7 @@ bool QLCCapability::loadXML(const QDomElement* root)
     }
 
     /* Get high limit attribute (critical) */
-    str = root->attribute(KXMLQLCCapabilityMax);
+    str = root.attribute(KXMLQLCCapabilityMax);
     if (str.isEmpty() == true)
     {
         qWarning() << Q_FUNC_INFO << "Capability has no maximum limit.";
@@ -194,7 +192,7 @@ bool QLCCapability::loadXML(const QDomElement* root)
 
     if (min <= max)
     {
-        setName(root->text());
+        setName(root.text());
         setMin(min);
         setMax(max);
         return true;

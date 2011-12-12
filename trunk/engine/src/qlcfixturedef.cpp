@@ -315,8 +315,7 @@ QFile::FileError QLCFixtureDef::loadXML(const QString& fileName)
     if (fileName.isEmpty() == true)
         return QFile::OpenError;
 
-    QDomDocument doc;
-    doc = QLCFile::readXML(fileName);
+    QDomDocument doc = QLCFile::readXML(fileName);
     if (doc.isNull() == true)
     {
         qWarning() << Q_FUNC_INFO << "Unable to read from" << fileName;
@@ -325,7 +324,7 @@ QFile::FileError QLCFixtureDef::loadXML(const QString& fileName)
 
     if (doc.doctype().name() == KXMLQLCFixtureDefDocument)
     {
-        if (loadXML(&doc) == true)
+        if (loadXML(doc) == true)
             error = QFile::NoError;
         else
             error = QFile::ReadError;
@@ -340,23 +339,17 @@ QFile::FileError QLCFixtureDef::loadXML(const QString& fileName)
     return error;
 }
 
-bool QLCFixtureDef::loadXML(const QDomDocument* doc)
+bool QLCFixtureDef::loadXML(const QDomDocument& doc)
 {
-    QDomElement root;
-    QDomNode node;
-    QDomElement tag;
     bool retval = false;
 
-    Q_ASSERT(doc);
-
-    root = doc->documentElement();
+    QDomElement root = doc.documentElement();
     if (root.tagName() == KXMLQLCFixtureDef)
     {
-        node = root.firstChild();
+        QDomNode node = root.firstChild();
         while (node.isNull() == false)
         {
-            tag = node.toElement();
-
+            QDomElement tag = node.toElement();
             if (tag.tagName() == KXMLQLCCreator)
             {
                 loadCreator(tag);
@@ -376,7 +369,7 @@ bool QLCFixtureDef::loadXML(const QDomDocument* doc)
             else if (tag.tagName() == KXMLQLCChannel)
             {
                 QLCChannel* ch = new QLCChannel();
-                if (ch->loadXML(&tag) == true)
+                if (ch->loadXML(tag) == true)
                 {
                     /* Loading succeeded */
                     if (addChannel(ch) == false)
@@ -394,7 +387,7 @@ bool QLCFixtureDef::loadXML(const QDomDocument* doc)
             else if (tag.tagName() == KXMLQLCFixtureMode)
             {
                 QLCFixtureMode* mode = new QLCFixtureMode(this);
-                if (mode->loadXML(&tag) == true)
+                if (mode->loadXML(tag) == true)
                 {
                     /* Loading succeeded */
                     if (addMode(mode) == false)

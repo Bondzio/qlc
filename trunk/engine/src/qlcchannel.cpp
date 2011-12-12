@@ -411,37 +411,30 @@ bool QLCChannel::saveXML(QDomDocument* doc, QDomElement* root) const
     return true;
 }
 
-bool QLCChannel::loadXML(const QDomElement* root)
+bool QLCChannel::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-    QString str;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCChannel)
+    if (root.tagName() != KXMLQLCChannel)
     {
         qWarning() << "Channel node not found.";
         return false;
     }
 
     /* Get channel name */
-    str = root->attribute(KXMLQLCChannelName);
+    QString str = root.attribute(KXMLQLCChannelName);
     if (str.isEmpty() == true)
         return false;
     setName(str);
 
     /* Subtags */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
-
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCCapability)
         {
             /* Create a new capability and attempt to load it */
             QLCCapability* cap = new QLCCapability();
-            if (cap->loadXML(&tag) == true)
+            if (cap->loadXML(tag) == true)
             {
                 /* Loading succeeded */
                 if (addCapability(cap) == false)

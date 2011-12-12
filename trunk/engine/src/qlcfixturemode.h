@@ -83,9 +83,6 @@ public:
      */
     QLCFixtureMode(QLCFixtureDef* fixtureDef, const QLCFixtureMode* mode);
 
-    /** Create contents from an XML tag */
-    QLCFixtureMode(QLCFixtureDef* fixtureDef, const QDomElement* tag);
-
     /** Destructor */
     virtual ~QLCFixtureMode();
 
@@ -292,7 +289,7 @@ protected:
      *********************************************************************/
 public:
     /** Load a mode's properties from an XML tag */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /** Save a mode to an XML document */
     bool saveXML(QDomDocument* doc, QDomElement* root);

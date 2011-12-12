@@ -96,7 +96,7 @@ public:
     bool saveXML(QDomDocument* doc, QDomElement* root);
 
     /** Load capability contents from an XML element */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 };
 
 #endif

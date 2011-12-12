@@ -382,7 +382,7 @@ void QLCFixtureMode_Test::load()
     QVERIFY(mode.physical().bulbLumens() != 18000);
     QVERIFY(mode.physical().bulbColourTemperature() != 6500);
 
-    QVERIFY(mode.loadXML(&root) == true);
+    QVERIFY(mode.loadXML(root) == true);
     QVERIFY(mode.physical().bulbType() == "LED");
     QVERIFY(mode.physical().bulbLumens() == 18000);
     QVERIFY(mode.physical().bulbColourTemperature() == 6500);
@@ -390,15 +390,6 @@ void QLCFixtureMode_Test::load()
     QVERIFY(mode.channels().size() == 2);
     QVERIFY(mode.channels()[0] == m_ch1);
     QVERIFY(mode.channels()[1] == m_ch3);
-
-    QLCFixtureMode mode2(m_fixtureDef, &root);
-    QVERIFY(mode2.physical().bulbType() == "LED");
-    QVERIFY(mode2.physical().bulbLumens() == 18000);
-    QVERIFY(mode2.physical().bulbColourTemperature() == 6500);
-
-    QVERIFY(mode2.channels().size() == 2);
-    QVERIFY(mode2.channels()[0] == m_ch1);
-    QVERIFY(mode2.channels()[1] == m_ch3);
 }
 
 void QLCFixtureMode_Test::loadWrongRoot()
@@ -429,7 +420,7 @@ void QLCFixtureMode_Test::loadWrongRoot()
     root.appendChild(ch3);
 
     QLCFixtureMode mode(m_fixtureDef);
-    QVERIFY(mode.loadXML(&root) == false);
+    QVERIFY(mode.loadXML(root) == false);
     QVERIFY(mode.channels().size() == 0);
 }
 
@@ -461,7 +452,7 @@ void QLCFixtureMode_Test::loadNoName()
     root.appendChild(ch3);
 
     QLCFixtureMode mode(m_fixtureDef);
-    QVERIFY(mode.loadXML(&root) == false);
+    QVERIFY(mode.loadXML(root) == false);
     QVERIFY(mode.channels().size() == 0);
 }
 

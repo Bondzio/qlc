@@ -218,7 +218,7 @@ public:
     bool saveXML(QDomDocument* doc, QDomElement* root) const;
 
     /** Load channel contents from an XML element */
-    bool loadXML(const QDomElement* tag);
+    bool loadXML(const QDomElement& tag);
 };
 
 #endif

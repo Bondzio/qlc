@@ -198,7 +198,7 @@ void QLCPhysical_Test::load()
     homer.setAttribute("PreferredBrand", "Duff");
     root.appendChild(homer);
 
-    QVERIFY(p.loadXML(&root) == true);
+    QVERIFY(p.loadXML(root) == true);
     QVERIFY(p.bulbType() == "LED");
     QVERIFY(p.bulbLumens() == 18000);
     QVERIFY(p.bulbColourTemperature() == 6500);
@@ -258,7 +258,7 @@ void QLCPhysical_Test::loadWrongRoot()
     technical.setAttribute("DmxConnector", "5-pin");
     root.appendChild(technical);
 
-    QVERIFY(p.loadXML(&root) == false);
+    QVERIFY(p.loadXML(root) == false);
 }
 
 void QLCPhysical_Test::save()

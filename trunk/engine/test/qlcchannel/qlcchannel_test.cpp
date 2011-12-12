@@ -471,7 +471,7 @@ void QLCChannel_Test::load()
     cap5.appendChild(cap5name);
 
     QLCChannel ch;
-    QVERIFY(ch.loadXML(&root) == true);
+    QVERIFY(ch.loadXML(root) == true);
     qDebug() << int(ch.colour());
     QVERIFY(ch.name() == "Channel1");
     QVERIFY(ch.group() == QLCChannel::Tilt);
@@ -519,7 +519,7 @@ void QLCChannel_Test::loadWrongRoot()
     cap3.appendChild(cap3name);
 
     QLCChannel ch;
-    QVERIFY(ch.loadXML(&root) == false);
+    QVERIFY(ch.loadXML(root) == false);
     QVERIFY(ch.name().isEmpty());
     QVERIFY(ch.group() == QLCChannel::Intensity);
     QVERIFY(ch.controlByte() == QLCChannel::MSB);

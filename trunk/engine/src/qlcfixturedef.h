@@ -178,7 +178,7 @@ public:
 
 protected:
     /** Load fixture contents from an XML document */
-    bool loadXML(const QDomDocument* doc);
+    bool loadXML(const QDomDocument& doc);
 
     /** Load <Creator> information */
     bool loadCreator(const QDomElement& creator);

@@ -857,7 +857,7 @@ bool App::loadXML(const QDomDocument* doc)
         else if (tag.tagName() == KXMLQLCFunction)
         {
             /* Legacy support code, nowadays in Doc */
-            Function::loader(&tag, m_doc);
+            Function::loader(tag, m_doc);
         }
         else if (tag.tagName() == KXMLQLCCreator)
         {

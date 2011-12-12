@@ -235,7 +235,7 @@ void RGBMatrix_Test::loadSave()
     root.firstChild().appendChild(foo);
 
     RGBMatrix mtx2(m_doc);
-    QVERIFY(mtx2.loadXML(&root.firstChild().toElement()) == true);
+    QVERIFY(mtx2.loadXML(root.firstChild().toElement()) == true);
     QCOMPARE(mtx2.direction(), Function::Backward);
     QCOMPARE(mtx2.runOrder(), Function::PingPong);
     QCOMPARE(mtx2.monoColor(), QColor(Qt::magenta));
@@ -245,9 +245,9 @@ void RGBMatrix_Test::loadSave()
     QCOMPARE(mtx2.fadeInSpeed(), uint(10));
     QCOMPARE(mtx2.fadeOutSpeed(), uint(20));
 
-    QVERIFY(mtx2.loadXML(&root.toElement()) == false); // Not a function node
+    QVERIFY(mtx2.loadXML(root.toElement()) == false); // Not a function node
     root.firstChild().toElement().setAttribute("Type", "Scene");
-    QVERIFY(mtx2.loadXML(&root.firstChild().toElement()) == false); // Not an RGBMatrix node
+    QVERIFY(mtx2.loadXML(root.firstChild().toElement()) == false); // Not an RGBMatrix node
 }
 
 QTEST_MAIN(RGBMatrix_Test)

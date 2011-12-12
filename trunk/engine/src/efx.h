@@ -422,12 +422,12 @@ protected:
      *********************************************************************/
 public:
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
     void postLoad();
 
 protected:
     /** Load an axis' contents from an XML document*/
-    bool loadXMLAxis(const QDomElement* root);
+    bool loadXMLAxis(const QDomElement& root);
 
     /*********************************************************************
      * Speed

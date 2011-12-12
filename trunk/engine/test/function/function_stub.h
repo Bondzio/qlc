@@ -37,7 +37,7 @@ public:
     Function* createCopy(Doc* parent);
 
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     void preRun(MasterTimer* timer);
     void write(MasterTimer* timer, UniverseArray* universes);

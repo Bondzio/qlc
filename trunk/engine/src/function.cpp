@@ -452,21 +452,18 @@ void Function::slotFixtureRemoved(quint32 fid)
  * Load & Save
  *****************************************************************************/
 
-bool Function::loader(const QDomElement* root, Doc* doc)
+bool Function::loader(const QDomElement& root, Doc* doc)
 {
-    Q_ASSERT(root != NULL);
-    Q_ASSERT(doc != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning("Function node not found!");
         return false;
     }
 
     /* Get common information from the tag's attributes */
-    quint32 id = root->attribute(KXMLQLCFunctionID).toInt();
-    QString name = root->attribute(KXMLQLCFunctionName);
-    Type type = Function::stringToType(root->attribute(KXMLQLCFunctionType));
+    quint32 id = root.attribute(KXMLQLCFunctionID).toInt();
+    QString name = root.attribute(KXMLQLCFunctionName);
+    Type type = Function::stringToType(root.attribute(KXMLQLCFunctionType));
 
     /* Check for ID validity before creating the function */
     if (id == Function::invalidId())

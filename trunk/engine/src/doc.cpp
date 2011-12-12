@@ -514,7 +514,7 @@ bool Doc::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFunction)
         {
-            Function::loader(&tag, this);
+            Function::loader(tag, this);
         }
         else if (tag.tagName() == KXMLQLCBus)
         {

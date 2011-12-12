@@ -151,30 +151,25 @@ QColor RGBMatrix::monoColor() const
  * Load & Save
  ****************************************************************************/
 
-bool RGBMatrix::loadXML(const QDomElement* root)
+bool RGBMatrix::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning() << Q_FUNC_INFO << "Function node not found";
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::RGBMatrix))
+    if (root.attribute(KXMLQLCFunctionType) != typeToString(Function::RGBMatrix))
     {
         qWarning() << Q_FUNC_INFO << "Function is not an RGB matrix";
         return false;
     }
 
     /* Load matrix contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCFunctionSpeed)
         {

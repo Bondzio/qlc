@@ -369,7 +369,7 @@ void Chaser_Test::loadSuccessLegacy()
     Bus::instance()->setValue(16, MasterTimer::frequency());
 
     Chaser c(m_doc);
-    QVERIFY(c.loadXML(&root) == true);
+    QVERIFY(c.loadXML(root) == true);
     QVERIFY(c.direction() == Chaser::Backward);
     QVERIFY(c.runOrder() == Chaser::SingleShot);
     QCOMPARE(c.steps().size(), 3);
@@ -441,7 +441,7 @@ void Chaser_Test::loadSuccess()
     root.appendChild(foo);
 
     Chaser c(m_doc);
-    QVERIFY(c.loadXML(&root) == true);
+    QVERIFY(c.loadXML(root) == true);
     QVERIFY(c.fadeInSpeed() == 42);
     QVERIFY(c.fadeOutSpeed() == 69);
     QVERIFY(c.duration() == 1337);
@@ -507,7 +507,7 @@ void Chaser_Test::loadWrongType()
     root.appendChild(s3);
 
     Chaser c(m_doc);
-    QVERIFY(c.loadXML(&root) == false);
+    QVERIFY(c.loadXML(root) == false);
 }
 
 void Chaser_Test::loadWrongRoot()
@@ -552,7 +552,7 @@ void Chaser_Test::loadWrongRoot()
     root.appendChild(s3);
 
     Chaser c(m_doc);
-    QVERIFY(c.loadXML(&root) == false);
+    QVERIFY(c.loadXML(root) == false);
 }
 
 void Chaser_Test::postLoad()
@@ -665,7 +665,7 @@ void Chaser_Test::postLoad()
     root.appendChild(foo);
 
     Chaser c(m_doc);
-    QCOMPARE(c.loadXML(&root), true);
+    QCOMPARE(c.loadXML(root), true);
     QCOMPARE(c.direction(), Chaser::Backward);
     QCOMPARE(c.runOrder(), Chaser::SingleShot);
     QCOMPARE(c.steps().size(), 9);

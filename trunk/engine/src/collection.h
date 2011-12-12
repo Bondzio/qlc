@@ -94,7 +94,7 @@ public:
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 
     /** Load function's contents from an XML document */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /** @reimp */
     void postLoad();

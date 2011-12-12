@@ -127,7 +127,7 @@ public:
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 
     /** @reimpl */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /** @reimpl */
     void postLoad();

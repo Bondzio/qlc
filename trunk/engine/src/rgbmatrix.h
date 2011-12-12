@@ -104,7 +104,7 @@ private:
      ************************************************************************/
 public:
     /** @reimpl */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /** @reimpl */
     bool saveXML(QDomDocument* doc, QDomElement* root);

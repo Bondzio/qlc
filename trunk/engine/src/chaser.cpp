@@ -183,31 +183,26 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     return true;
 }
 
-bool Chaser::loadXML(const QDomElement* root)
+bool Chaser::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning() << Q_FUNC_INFO << "Function node not found";
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::Chaser))
+    if (root.attribute(KXMLQLCFunctionType) != typeToString(Function::Chaser))
     {
-        qWarning() << Q_FUNC_INFO << root->attribute(KXMLQLCFunctionType)
+        qWarning() << Q_FUNC_INFO << root.attribute(KXMLQLCFunctionType)
                    << "is not a chaser";
         return false;
     }
 
     /* Load chaser contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCBus)
         {

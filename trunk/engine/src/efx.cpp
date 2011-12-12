@@ -665,36 +665,30 @@ bool EFX::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     return true;
 }
 
-bool EFX::loadXML(const QDomElement* root)
+bool EFX::loadXML(const QDomElement& root)
 {
-    QString str;
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning() << "Function node not found!";
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::EFX))
+    if (root.attribute(KXMLQLCFunctionType) != typeToString(Function::EFX))
     {
         qWarning("Function is not an EFX!");
         return false;
     }
 
     /* Load EFX contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCBus)
         {
             /* Bus */
-            str = tag.attribute(KXMLQLCBusRole);
+            QString str = tag.attribute(KXMLQLCBusRole);
             if (str == KXMLQLCBusFade)
                 m_legacyFadeBus = tag.text().toUInt();
             else if (str == KXMLQLCBusHold)
@@ -750,7 +744,7 @@ bool EFX::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCEFXAxis)
         {
             /* Axes */
-            loadXMLAxis(&tag);
+            loadXMLAxis(tag);
         }
         else
         {
@@ -763,50 +757,35 @@ bool EFX::loadXML(const QDomElement* root)
     return true;
 }
 
-bool EFX::loadXMLAxis(const QDomElement* root)
+bool EFX::loadXMLAxis(const QDomElement& root)
 {
     int frequency = 0;
     int offset = 0;
     int phase = 0;
     QString axis;
 
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCEFXAxis)
+    if (root.tagName() != KXMLQLCEFXAxis)
     {
         qWarning() << "EFX axis node not found!";
         return false;
     }
 
     /* Get the axis name */
-    axis = root->attribute(KXMLQLCFunctionName);
+    axis = root.attribute(KXMLQLCFunctionName);
 
     /* Load axis contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
-
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCEFXOffset)
-        {
             offset = tag.text().toInt();
-        }
         else if (tag.tagName() == KXMLQLCEFXFrequency)
-        {
             frequency = tag.text().toInt();
-        }
         else if (tag.tagName() == KXMLQLCEFXPhase)
-        {
             phase = tag.text().toInt();
-        }
         else
-        {
             qWarning() << "Unknown EFX axis tag:" << tag.tagName();
-        }
-
         node = node.nextSibling();
     }
 
@@ -815,7 +794,6 @@ bool EFX::loadXMLAxis(const QDomElement* root)
         setYOffset(offset);
         setYFrequency(frequency);
         setYPhase(phase);
-
         return true;
     }
     else if (axis == KXMLQLCEFXX)
@@ -823,13 +801,11 @@ bool EFX::loadXMLAxis(const QDomElement* root)
         setXOffset(offset);
         setXFrequency(frequency);
         setXPhase(phase);
-
         return true;
     }
     else
     {
         qWarning() << "Unknown EFX axis:" << axis;
-
         return false;
     }
 }

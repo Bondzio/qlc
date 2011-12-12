@@ -363,7 +363,7 @@ public:
      * @param doc An XML document to load from
      * @param root An XML root element of a function
      */
-    virtual bool loadXML(const QDomElement* root) = 0;
+    virtual bool loadXML(const QDomElement& root) = 0;
 
     /**
      * Load a new function from an XML tag and add it to the given doc
@@ -373,7 +373,7 @@ public:
      * @param doc The QLC document object, that owns all functions
      * @return true if successful, otherwise false
      */
-    static bool loader(const QDomElement* root, Doc* doc);
+    static bool loader(const QDomElement& root, Doc* doc);
 
     /**
      * Called for each Function-based object after everything has been loaded.

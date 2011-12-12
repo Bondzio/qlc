@@ -166,7 +166,7 @@ void Collection_Test::loadSuccess()
     root.appendChild(s3);
 
     Collection c(m_doc);
-    QVERIFY(c.loadXML(&root) == true);
+    QVERIFY(c.loadXML(root) == true);
     QVERIFY(c.functions().size() == 3);
     QVERIFY(c.functions().contains(50) == true);
     QVERIFY(c.functions().contains(12) == true);
@@ -196,7 +196,7 @@ void Collection_Test::loadWrongType()
     root.appendChild(s3);
 
     Collection c(m_doc);
-    QVERIFY(c.loadXML(&root) == false);
+    QVERIFY(c.loadXML(root) == false);
 }
 
 void Collection_Test::loadWrongRoot()
@@ -222,7 +222,7 @@ void Collection_Test::loadWrongRoot()
     root.appendChild(s3);
 
     Collection c(m_doc);
-    QVERIFY(c.loadXML(&root) == false);
+    QVERIFY(c.loadXML(root) == false);
 }
 
 void Collection_Test::loadWrongMemberTag()
@@ -248,7 +248,7 @@ void Collection_Test::loadWrongMemberTag()
     root.appendChild(s3);
 
     Collection c(m_doc);
-    QVERIFY(c.loadXML(&root) == true);
+    QVERIFY(c.loadXML(root) == true);
     QCOMPARE(c.functions().size(), 1);
 }
 
@@ -265,7 +265,7 @@ void Collection_Test::loadPostLoad()
     root.appendChild(s2);
 
     Collection c(m_doc);
-    QVERIFY(c.loadXML(&root) == true);
+    QVERIFY(c.loadXML(root) == true);
     QCOMPARE(c.functions().size(), 1);
     c.postLoad();
     QCOMPARE(c.functions().size(), 0);

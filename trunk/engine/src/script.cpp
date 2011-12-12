@@ -131,31 +131,26 @@ QString Script::data() const
  * Load & Save
  ****************************************************************************/
 
-bool Script::loadXML(const QDomElement* root)
+bool Script::loadXML(const QDomElement& root)
 {
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning() << Q_FUNC_INFO << "Function node not found";
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::Script))
+    if (root.attribute(KXMLQLCFunctionType) != typeToString(Function::Script))
     {
-        qWarning() << Q_FUNC_INFO << root->attribute(KXMLQLCFunctionType)
+        qWarning() << Q_FUNC_INFO << root.attribute(KXMLQLCFunctionType)
                    << "is not a script";
         return false;
     }
 
     /* Load script contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCFunctionSpeed)
         {

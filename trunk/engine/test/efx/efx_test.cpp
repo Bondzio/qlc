@@ -1692,7 +1692,7 @@ void EFX_Test::loadXAxis()
     ax.appendChild(foo);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXMLAxis(&ax) == true);
+    QVERIFY(e.loadXMLAxis(ax) == true);
 }
 
 void EFX_Test::loadYAxis()
@@ -1718,7 +1718,7 @@ void EFX_Test::loadYAxis()
     ax.appendChild(pha);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXMLAxis(&ax) == true);
+    QVERIFY(e.loadXMLAxis(ax) == true);
 }
 
 void EFX_Test::loadYAxisWrongRoot()
@@ -1744,7 +1744,7 @@ void EFX_Test::loadYAxisWrongRoot()
     ax.appendChild(pha);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXMLAxis(&ax) == false);
+    QVERIFY(e.loadXMLAxis(ax) == false);
 }
 
 void EFX_Test::loadAxisNoXY()
@@ -1770,7 +1770,7 @@ void EFX_Test::loadAxisNoXY()
     ax.appendChild(pha);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXMLAxis(&ax) == false);
+    QVERIFY(e.loadXMLAxis(ax) == false);
     QVERIFY(e.xOffset() != 1);
     QVERIFY(e.xFrequency() != 5);
     QVERIFY(e.xPhase() != 333);
@@ -1914,7 +1914,7 @@ void EFX_Test::loadSuccessLegacy()
     ef3.appendChild(ef3dir);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXML(&root) == true);
+    QVERIFY(e.loadXML(root) == true);
 
     QVERIFY(e.m_legacyFadeBus == 12);
     QVERIFY(e.m_legacyHoldBus == 13);
@@ -2083,7 +2083,7 @@ void EFX_Test::loadSuccess()
     ef3.appendChild(ef3dir);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXML(&root) == true);
+    QVERIFY(e.loadXML(root) == true);
     QVERIFY(e.direction() == EFX::Forward);
     QVERIFY(e.runOrder() == EFX::Loop);
 
@@ -2121,7 +2121,7 @@ void EFX_Test::loadWrongType()
     root.setAttribute("Type", "Chaser");
 
     EFX e(m_doc);
-    QVERIFY(e.loadXML(&root) == false);
+    QVERIFY(e.loadXML(root) == false);
 }
 
 void EFX_Test::loadWrongRoot()
@@ -2132,7 +2132,7 @@ void EFX_Test::loadWrongRoot()
     root.setAttribute("Type", "EFX");
 
     EFX e(m_doc);
-    QVERIFY(e.loadXML(&root) == false);
+    QVERIFY(e.loadXML(root) == false);
 }
 
 void EFX_Test::loadDuplicateFixture()
@@ -2171,7 +2171,7 @@ void EFX_Test::loadDuplicateFixture()
     ef2.appendChild(ef2dir);
 
     EFX e(m_doc);
-    QVERIFY(e.loadXML(&root) == true);
+    QVERIFY(e.loadXML(root) == true);
     QVERIFY(e.fixtures().size() == 1);
     QVERIFY(e.fixtures().at(0)->direction() == EFX::Forward);
 }

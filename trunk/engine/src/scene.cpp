@@ -177,32 +177,25 @@ bool Scene::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     return true;
 }
 
-bool Scene::loadXML(const QDomElement* root)
+bool Scene::loadXML(const QDomElement& root)
 {
-    QString str;
-
-    QDomNode node;
-    QDomElement tag;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFunction)
+    if (root.tagName() != KXMLQLCFunction)
     {
         qWarning() << Q_FUNC_INFO << "Function node not found";
         return false;
     }
 
-    if (root->attribute(KXMLQLCFunctionType) != typeToString(Function::Scene))
+    if (root.attribute(KXMLQLCFunctionType) != typeToString(Function::Scene))
     {
         qWarning() << Q_FUNC_INFO << "Function is not a scene";
         return false;
     }
 
     /* Load scene contents */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCBus)
         {

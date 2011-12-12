@@ -64,7 +64,7 @@ bool Function_Stub::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     return false;
 }
 
-bool Function_Stub::loadXML(const QDomElement* root)
+bool Function_Stub::loadXML(const QDomElement& root)
 {
     Q_UNUSED(root);
     return false;

@@ -328,7 +328,7 @@ void Function_Test::loaderWrongRoot()
     QDomDocument doc;
     QDomElement root = doc.createElement("Scene");
 
-    QVERIFY(Function::loader(&root, &d) == false);
+    QVERIFY(Function::loader(root, &d) == false);
     QVERIFY(d.functions().size() == 0);
 }
 
@@ -340,11 +340,11 @@ void Function_Test::loaderWrongID()
     QDomElement root = doc.createElement("Function");
     root.setAttribute("ID", QString("%1").arg(Function::invalidId()));
 
-    QVERIFY(Function::loader(&root, &d) == false);
+    QVERIFY(Function::loader(root, &d) == false);
     QVERIFY(d.functions().size() == 0);
 
     root.setAttribute("ID", "-4");
-    QVERIFY(Function::loader(&root, &d) == false);
+    QVERIFY(Function::loader(root, &d) == false);
     QVERIFY(d.functions().size() == 0);
 }
 
@@ -373,7 +373,7 @@ void Function_Test::loaderScene()
 
     /* Just verify that a Scene function gets loaded. The rest of Scene
        loading is tested in Scene_test. */
-    QVERIFY(Function::loader(&root, &d) == true);
+    QVERIFY(Function::loader(root, &d) == true);
     QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(15) != NULL);
     QVERIFY(d.function(15)->type() == Function::Scene);
@@ -427,7 +427,7 @@ void Function_Test::loaderChaser()
 
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
-    QVERIFY(Function::loader(&root, &d) == true);
+    QVERIFY(Function::loader(root, &d) == true);
     QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(1) != NULL);
     QVERIFY(d.function(1)->type() == Function::Chaser);
@@ -451,7 +451,7 @@ void Function_Test::loaderCollection()
 
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
-    QVERIFY(Function::loader(&root, &d) == true);
+    QVERIFY(Function::loader(root, &d) == true);
     QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(120) != NULL);
     QVERIFY(d.function(120)->type() == Function::Collection);
@@ -606,7 +606,7 @@ void Function_Test::loaderEFX()
 
     /* Just verify that a Chaser function gets loaded. The rest of Chaser
        loading is tested in Chaser_test. */
-    QVERIFY(Function::loader(&root, &d) == true);
+    QVERIFY(Function::loader(root, &d) == true);
     QVERIFY(d.functions().size() == 1);
     QVERIFY(d.function(0) != NULL);
     QVERIFY(d.function(0)->type() == Function::EFX);
@@ -625,7 +625,7 @@ void Function_Test::loaderUnknownType()
 
     /* Just verify that a Scene function gets loaded. The rest of Scene
        loading is tested in Scene_test. */
-    QVERIFY(Function::loader(&root, &d) == false);
+    QVERIFY(Function::loader(root, &d) == false);
     QVERIFY(d.functions().size() == 0);
     QVERIFY(d.function(15) == NULL);
 }

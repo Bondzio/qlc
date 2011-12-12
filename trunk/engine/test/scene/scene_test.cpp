@@ -224,7 +224,7 @@ void Scene_Test::loadSuccess()
     root.appendChild(foo);
 
     Scene s(m_doc);
-    QVERIFY(s.loadXML(&root) == true);
+    QVERIFY(s.loadXML(root) == true);
     QVERIFY(s.fadeInSpeed() == 500);
     QVERIFY(s.fadeOutSpeed() == 5000);
     QVERIFY(s.duration() == 50000);
@@ -261,7 +261,7 @@ void Scene_Test::loadWrongType()
     root.appendChild(v2);
 
     Scene s(m_doc);
-    QVERIFY(s.loadXML(&root) == false);
+    QVERIFY(s.loadXML(root) == false);
 }
 
 void Scene_Test::loadWrongRoot()
@@ -292,7 +292,7 @@ void Scene_Test::loadWrongRoot()
     root.appendChild(v2);
 
     Scene s(m_doc);
-    QVERIFY(s.loadXML(&root) == false);
+    QVERIFY(s.loadXML(root) == false);
 }
 
 void Scene_Test::save()

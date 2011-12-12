@@ -796,7 +796,7 @@ QFile::FileError App::loadXML(const QString& fileName)
     {
         if (doc.doctype().name() == KXMLQLCWorkspace)
         {
-            if (loadXML(&doc) == false)
+            if (loadXML(doc) == false)
             {
                 retval = QFile::ReadError;
             }
@@ -816,30 +816,25 @@ QFile::FileError App::loadXML(const QString& fileName)
     return retval;
 }
 
-bool App::loadXML(const QDomDocument* doc)
+bool App::loadXML(const QDomDocument& doc)
 {
-    QDomElement root;
-    QDomElement tag;
-    QDomNode node;
-
     Q_ASSERT(m_doc != NULL);
-    Q_ASSERT(doc != NULL);
 
-    root = doc->documentElement();
+    QDomElement root = doc.documentElement();
     if (root.tagName() != KXMLQLCWorkspace)
     {
         qWarning() << Q_FUNC_INFO << "Workspace node not found";
         return false;
     }
 
-    node = root.firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLQLCEngine)
         {
-            m_doc->loadXML(&tag);
+            m_doc->loadXML(tag);
         }
         else if (tag.tagName() == KXMLQLCVirtualConsole)
         {

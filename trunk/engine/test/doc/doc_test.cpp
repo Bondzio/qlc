@@ -462,7 +462,7 @@ void Doc_Test::load()
 
     QVERIFY(m_doc->fixtures().size() == 0);
     QVERIFY(m_doc->functions().size() == 0);
-    QVERIFY(m_doc->loadXML(&root) == true);
+    QVERIFY(m_doc->loadXML(root) == true);
     QVERIFY(m_doc->fixtures().size() == 3);
     QVERIFY(m_doc->functions().size() == 4);
     QVERIFY(Bus::instance()->value(0) == 1);
@@ -494,7 +494,7 @@ void Doc_Test::loadWrongRoot()
 
     root.appendChild(document.createElement("ExtraTag"));
 
-    QVERIFY(m_doc->loadXML(&root) == false);
+    QVERIFY(m_doc->loadXML(root) == false);
 }
 
 void Doc_Test::save()

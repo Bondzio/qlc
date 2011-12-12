@@ -341,7 +341,7 @@ public:
      * @param root The Engine XML root node to load from
      * @return true if successful, otherwise false
      */
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
 
     /**
      * Save contents to the given XML file.

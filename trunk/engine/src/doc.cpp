@@ -490,23 +490,18 @@ void Doc::slotFunctionChanged(quint32 fid)
  * Load & Save
  *****************************************************************************/
 
-bool Doc::loadXML(const QDomElement* root)
+bool Doc::loadXML(const QDomElement& root)
 {
-    QDomElement tag;
-    QDomNode node;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCEngine)
+    if (root.tagName() != KXMLQLCEngine)
     {
         qWarning() << Q_FUNC_INFO << "Engine node not found";
         return false;
     }
 
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
 
         if (tag.tagName() == KXMLFixture)
         {

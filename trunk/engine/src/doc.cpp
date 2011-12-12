@@ -513,7 +513,8 @@ bool Doc::loadXML(const QDomElement& root)
         }
         else if (tag.tagName() == KXMLQLCBus)
         {
-            Bus::instance()->loadXML(&tag);
+            /* LEGACY */
+            Bus::instance()->loadXML(tag);
         }
         else if (tag.tagName() == KXMLQLCFixtureGroup)
         {

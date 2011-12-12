@@ -19,8 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDomElement>
+#include <QStringList>
 #include <QDebug>
-#include <QtXml>
 
 #include "bus.h"
 
@@ -209,70 +210,32 @@ void Bus::tap(quint32 bus)
  * Load & Save
  ****************************************************************************/
 
-bool Bus::loadXML(const QDomElement* root)
+bool Bus::loadXML(const QDomElement& root)
 {
-    QDomElement tag;
-    QDomNode node;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCBus)
+    if (root.tagName() != KXMLQLCBus)
     {
         qWarning() << Q_FUNC_INFO << "Bus node not found!";
         return false;
     }
 
-    quint32 id = root->attribute(KXMLQLCBusID).toUInt();
+    quint32 id = root.attribute(KXMLQLCBusID).toUInt();
     if (id >= KBusCount)
     {
         qWarning() << Q_FUNC_INFO << "Bus ID" << id << "out of bounds.";
         return false;
     }
 
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCBusName)
             setName(id, tag.text());
         else if (tag.tagName() == KXMLQLCBusValue)
             setValue(id, tag.text().toULong());
         else
             qWarning() << Q_FUNC_INFO << "Unknown Bus tag:" << tag.tagName();
-
         node = node.nextSibling();
-    }
-
-    return true;
-}
-
-bool Bus::saveXML(QDomDocument* doc, QDomElement* wksp_root)
-{
-    QDomElement root;
-    QDomElement tag;
-    QDomText text;
-
-    Q_ASSERT(doc != NULL);
-    Q_ASSERT(wksp_root != NULL);
-
-    for (quint32 i = 0; i < KBusCount; i++)
-    {
-        /* Bus entry */
-        root = doc->createElement(KXMLQLCBus);
-        root.setAttribute(KXMLQLCBusID, QString("%1").arg(i));
-        wksp_root->appendChild(root);
-
-        /* Name */
-        tag = doc->createElement(KXMLQLCBusName);
-        root.appendChild(tag);
-        text = doc->createTextNode(m_buses[i]->name);
-        tag.appendChild(text);
-
-        /* Value */
-        tag = doc->createElement(KXMLQLCBusValue);
-        root.appendChild(tag);
-        text = doc->createTextNode(QString("%1").arg(m_buses[i]->value));
-        tag.appendChild(text);
     }
 
     return true;

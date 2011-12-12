@@ -26,7 +26,6 @@
 #include <QString>
 #include <QHash>
 
-class QDomDocument;
 class QDomElement;
 class BusEntry;
 
@@ -42,6 +41,8 @@ class BusEntry;
 #define KXMLQLCBusHold "Hold"
 
 /**
+ * WARNING! THIS CLASS IS DEPRECATED AND IS USED ONLY FOR LOADING LEGACY WORKSPACE FILES!
+ *
  * Bus is used by functions to get information on their desired running time.
  * The values that bus uses are (1 / MasterTimer::frequency())'ths of a second;
  * If frequency is 50, then a bus value of 25 means half a second, 50 a full
@@ -209,14 +210,11 @@ signals:
     void tapped(quint32 id);
 
     /********************************************************************
-     * Load & Save
+     * Load
      ********************************************************************/
 public:
     /** Load all buses from an XML document */
-    bool loadXML(const QDomElement* root);
-
-    /** Save all buses to an XML document */
-    bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
+    bool loadXML(const QDomElement& root);
 };
 
 #endif

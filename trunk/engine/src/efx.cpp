@@ -701,7 +701,7 @@ bool EFX::loadXML(const QDomElement& root)
         else if (tag.tagName() == KXMLQLCEFXFixture)
         {
             EFXFixture* ef = new EFXFixture(this);
-            ef->loadXML(&tag);
+            ef->loadXML(tag);
             if (ef->fixture() != Fixture::invalidId())
             {
                 if (addFixture(ef) == false)

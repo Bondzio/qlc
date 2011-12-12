@@ -167,7 +167,7 @@ void EFXFixture_Test::loadSuccess()
 
     EFX e(m_doc);
     EFXFixture ef(&e);
-    QVERIFY(ef.loadXML(&root) == true);
+    QVERIFY(ef.loadXML(root) == true);
     QVERIFY(ef.fixture() == 83);
     QVERIFY(ef.direction() == EFX::Backward);
     QVERIFY(ef.fadeIntensity() == 91);
@@ -191,7 +191,7 @@ void EFXFixture_Test::loadWrongRoot()
 
     EFX e(m_doc);
     EFXFixture ef(&e);
-    QVERIFY(ef.loadXML(&root) == false);
+    QVERIFY(ef.loadXML(root) == false);
     QVERIFY(ef.fixture() == Fixture::invalidId());
     QVERIFY(ef.direction() == EFX::Forward);
 }
@@ -214,7 +214,7 @@ void EFXFixture_Test::loadWrongDirection()
 
     EFX e(m_doc);
     EFXFixture ef(&e);
-    QVERIFY(ef.loadXML(&root) == true);
+    QVERIFY(ef.loadXML(root) == true);
     QVERIFY(ef.fixture() == 97);
     QVERIFY(ef.direction() == EFX::Forward);
 }
@@ -242,7 +242,7 @@ void EFXFixture_Test::loadExtraTag()
 
     EFX e(m_doc);
     EFXFixture ef(&e);
-    QVERIFY(ef.loadXML(&root) == true);
+    QVERIFY(ef.loadXML(root) == true);
     QVERIFY(ef.fixture() == 108);
     QVERIFY(ef.direction() == EFX::Forward);
 }

@@ -100,7 +100,7 @@ private:
      * Load & Save
      *************************************************************************/
 public:
-    bool loadXML(const QDomElement* root);
+    bool loadXML(const QDomElement& root);
     bool saveXML(QDomDocument* doc, QDomElement* efx_root) const;
 
     /*************************************************************************

@@ -125,25 +125,19 @@ bool EFXFixture::isValid() const
  * Load & Save
  *****************************************************************************/
 
-bool EFXFixture::loadXML(const QDomElement* root)
+bool EFXFixture::loadXML(const QDomElement& root)
 {
-    QDomElement tag;
-    QDomNode node;
-
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCEFXFixture)
+    if (root.tagName() != KXMLQLCEFXFixture)
     {
         qWarning("EFX Fixture node not found!");
         return false;
     }
 
     /* New file format contains sub tags */
-    node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
-        tag = node.toElement();
-
+        QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCEFXFixtureID)
         {
             /* Fixture ID */
@@ -152,8 +146,7 @@ bool EFXFixture::loadXML(const QDomElement* root)
         else if (tag.tagName() == KXMLQLCEFXFixtureDirection)
         {
             /* Direction */
-            Function::Direction dir;
-            dir = Function::stringToDirection(tag.text());
+            Function::Direction dir = Function::stringToDirection(tag.text());
             setDirection(dir);
         }
         else if (tag.tagName() == KXMLQLCEFXFixtureIntensity)
@@ -165,6 +158,7 @@ bool EFXFixture::loadXML(const QDomElement* root)
         {
             qWarning() << "Unknown EFX Fixture tag:" << tag.tagName();
         }
+
         node = node.nextSibling();
     }
 

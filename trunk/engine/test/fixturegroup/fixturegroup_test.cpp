@@ -435,10 +435,10 @@ void FixtureGroup_Test::load()
     QDomElement root = doc.createElement("Foo");
     QVERIFY(grp.saveXML(&doc, &root) == true);
 
-    QVERIFY(FixtureGroup::loader(&root, m_doc) == false);
+    QVERIFY(FixtureGroup::loader(root, m_doc) == false);
 
     QDomElement tag = root.firstChild().toElement();
-    QVERIFY(FixtureGroup::loader(&tag, m_doc) == true);
+    QVERIFY(FixtureGroup::loader(tag, m_doc) == true);
     QCOMPARE(m_doc->fixtureGroups().size(), 1);
     FixtureGroup* grp2 = m_doc->fixtureGroup(99);
     QVERIFY(grp2 != NULL);

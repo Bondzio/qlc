@@ -305,7 +305,7 @@ QSize FixtureGroup::size() const
  * Load & Save
  ****************************************************************************/
 
-bool FixtureGroup::loader(const QDomElement* root, Doc* doc)
+bool FixtureGroup::loader(const QDomElement& root, Doc* doc)
 {
     bool result = false;
 
@@ -327,28 +327,26 @@ bool FixtureGroup::loader(const QDomElement* root, Doc* doc)
     return result;
 }
 
-bool FixtureGroup::loadXML(const QDomElement* root)
+bool FixtureGroup::loadXML(const QDomElement& root)
 {
-    Q_ASSERT(root != NULL);
-
-    if (root->tagName() != KXMLQLCFixtureGroup)
+    if (root.tagName() != KXMLQLCFixtureGroup)
     {
         qWarning() << Q_FUNC_INFO << "Fixture group node not found";
         return false;
     }
 
     bool ok = false;
-    quint32 id = root->attribute(KXMLQLCFixtureGroupID).toUInt(&ok);
+    quint32 id = root.attribute(KXMLQLCFixtureGroupID).toUInt(&ok);
     if (ok == false)
     {
-        qWarning() << "Invalid FixtureGroup ID:" << root->attribute(KXMLQLCFixtureGroupID);
+        qWarning() << "Invalid FixtureGroup ID:" << root.attribute(KXMLQLCFixtureGroupID);
         return false;
     }
 
     // Assign the ID to myself
     m_id = id;
 
-    QDomNode node = root->firstChild();
+    QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
         QDomElement tag = node.toElement();

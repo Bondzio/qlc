@@ -522,7 +522,7 @@ bool Doc::loadXML(const QDomElement* root)
         }
         else if (tag.tagName() == KXMLQLCFixtureGroup)
         {
-            FixtureGroup::loader(&tag, this);
+            FixtureGroup::loader(tag, this);
         }
         else
         {

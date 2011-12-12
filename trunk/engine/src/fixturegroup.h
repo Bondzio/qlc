@@ -151,8 +151,8 @@ private:
      * Load & Save
      ************************************************************************/
 public:
-    static bool loader(const QDomElement* root, Doc* doc);
-    bool loadXML(const QDomElement* root);
+    static bool loader(const QDomElement& root, Doc* doc);
+    bool loadXML(const QDomElement& root);
     bool saveXML(QDomDocument* doc, QDomElement* wksp_root);
 };
 

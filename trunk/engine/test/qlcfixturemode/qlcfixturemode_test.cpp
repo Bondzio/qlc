@@ -254,7 +254,7 @@ void QLCFixtureMode_Test::channelNumber()
     delete mode;
 }
 
-void QLCFixtureMode_Test::insertHead()
+void QLCFixtureMode_Test::heads()
 {
     QLCFixtureMode* mode = new QLCFixtureMode(m_fixtureDef);
 
@@ -293,6 +293,29 @@ void QLCFixtureMode_Test::insertHead()
     QVERIFY(mode->m_heads[2].m_channels.contains(1) == true);
     QVERIFY(mode->m_heads[2].m_channels.contains(2) == true);
 
+    QLCFixtureHead head4;
+    head4.addChannel(15);
+    head4.addChannel(16);
+    mode->replaceHead(4, head4);
+    QCOMPARE(mode->heads().size(), 3);
+    QVERIFY(mode->m_heads[0].m_channels.contains(0) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(10) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(20) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(3) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(4) == true);
+    QVERIFY(mode->m_heads[2].m_channels.contains(1) == true);
+    QVERIFY(mode->m_heads[2].m_channels.contains(2) == true);
+
+    mode->replaceHead(2, head4);
+    QCOMPARE(mode->heads().size(), 3);
+    QVERIFY(mode->m_heads[0].m_channels.contains(0) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(10) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(20) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(3) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(4) == true);
+    QVERIFY(mode->m_heads[2].m_channels.contains(15) == true);
+    QVERIFY(mode->m_heads[2].m_channels.contains(16) == true);
+
     mode->removeHead(15);
     QCOMPARE(mode->heads().size(), 3);
 
@@ -301,13 +324,13 @@ void QLCFixtureMode_Test::insertHead()
     QVERIFY(mode->m_heads[0].m_channels.contains(0) == true);
     QVERIFY(mode->m_heads[0].m_channels.contains(10) == true);
     QVERIFY(mode->m_heads[0].m_channels.contains(20) == true);
-    QVERIFY(mode->m_heads[1].m_channels.contains(1) == true);
-    QVERIFY(mode->m_heads[1].m_channels.contains(2) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(15) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(16) == true);
 
     mode->removeHead(1);
     QCOMPARE(mode->heads().size(), 1);
-    QVERIFY(mode->m_heads[1].m_channels.contains(1) == true);
-    QVERIFY(mode->m_heads[1].m_channels.contains(2) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(15) == true);
+    QVERIFY(mode->m_heads[1].m_channels.contains(16) == true);
 
     mode->removeHead(0);
     QCOMPARE(mode->heads().size(), 0);

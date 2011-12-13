@@ -43,7 +43,7 @@ private slots:
     void channelByIndex();
     void channels();
     void channelNumber();
-    void insertHead();
+    void heads();
     void copy();
 
     void load();

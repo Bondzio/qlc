@@ -228,8 +228,6 @@ void QLCFixtureMode::replaceHead(int index, const QLCFixtureHead& head)
 {
     if (index >= 0 && index < m_heads.size())
         m_heads[index] = head;
-    else
-        insertHead(index, head);
 }
 
 QList <QLCFixtureHead> QLCFixtureMode::heads() const

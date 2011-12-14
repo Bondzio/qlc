@@ -28,12 +28,36 @@
 #include <QHash>
 
 #include "qlcpoint.h"
+#include "fixture.h"
 
 #define KXMLQLCFixtureGroup "FixtureGroup"
 
 class QDomDocument;
 class QDomElement;
 class Doc;
+
+/************************************************************************
+ * GroupHead
+ ************************************************************************/
+
+class GroupHead
+{
+public:
+    GroupHead(quint32 aFxi = Fixture::invalidId(), int aHead = -1);
+    GroupHead(const GroupHead& another);
+    ~GroupHead();
+
+    bool isValid() const;
+    bool operator==(const GroupHead& another) const;
+
+public:
+    quint32 fxi;
+    int head;
+};
+
+/************************************************************************
+ * FixtureGroup
+ ************************************************************************/
 
 class FixtureGroup : public QObject
 {
@@ -74,10 +98,11 @@ private:
 public:
     enum DisplayStyle
     {
-        DisplayIcon     = 1 << 0, //! Show an icon for each fixture
+        DisplayIcon     = 1 << 0, //! Show an icon for each head
         DisplayName     = 1 << 1, //! Show each fixture's name
         DisplayAddress  = 1 << 2, //! Show each fixture's DMX address
-        DisplayUniverse = 1 << 3  //! Show each fixture's DMX universe
+        DisplayUniverse = 1 << 3, //! Show each fixture's DMX universe
+        DisplayHead     = 1 << 4  //! Show each head number
     };
 
     /** Set the name of a fixture group */
@@ -104,35 +129,64 @@ private:
      ************************************************************************/
 public:
     /**
-     * Assign a fixture to a group at the given point. If point is null,
+     * Assign a fixture head to a group at the given point. If point is null,
      * then the fixture will be automatically placed to the next free slot.
-     * If the fixture is already present in the group, it is moved from its
-     * current position to the new position. If another fixture occupies the new
-     * point, the two fixtures will simply switch places.
+     * If the fixture head is already present in the group, it is moved from its
+     * current position to the new position. If another fixture head occupies the
+     * new point, the two fixture heads will simply switch places.
+     *
+     * @param pt The point to assign to
+     * @param head The fixture head to assign
+     */
+    void assignHead(const QLCPoint& pt, const GroupHead& head);
+
+    /**
+     * Legacy method for assigning the first fixture head at the given point.
+     *
+     * @param id Fixture ID
+     * @param point The point to assign to
      */
     void assignFixture(quint32 id, const QLCPoint& point = QLCPoint());
 
-    /** Resign a fixture from a group */
+    /**
+     * Resign a fixture, along with all of its heads from a group.
+     *
+     * @param id Fixture ID to remove
+     */
     void resignFixture(quint32 id);
 
-    /** Switch places with fixtures at two points a and b. */
+    /**
+     * Switch places with fixture heads at two points a and b.
+     *
+     * @param a First point
+     * @param b Second point
+     */
     void swap(const QLCPoint& a, const QLCPoint& b);
 
-    /** Get a fixture by its position in the group */
-    quint32 fixture(const QLCPoint& pt) const;
+    /**
+     * Get a fixture head by its position in the group. If nothing has been assigned
+     * at the given point, returns an invalid GroupHead.
+     *
+     * @param pt Get the fixture head at this point
+     * @return The fixture head at the given point or an invalid head
+     */
+    GroupHead head(const QLCPoint& pt) const;
 
     /** Get a list of fixtures assigned to a group */
-    QList <quint32> fixtureList() const;
+    QList <GroupHead> headList() const;
 
-    /** Get the fixture map */
-    QHash <QLCPoint,quint32> fixtureHash() const;
+    /** Get the fixture head hash */
+    QHash <QLCPoint,GroupHead> headHash() const;
+
+    /** Get a list of fixtures assigned to the group */
+    QList <quint32> fixtureList() const;
 
 private slots:
     /** Listens to Doc fixture removals */
     void slotFixtureRemoved(quint32 id);
 
 private:
-    QHash <QLCPoint,quint32> m_fixtures;
+    QHash <QLCPoint,GroupHead> m_heads;
 
     /************************************************************************
      * Size

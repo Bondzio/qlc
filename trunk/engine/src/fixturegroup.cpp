@@ -31,10 +31,46 @@
 #include "doc.h"
 
 #define KXMLQLCFixtureGroupID "ID"
-#define KXMLQLCFixtureGroupFixture "Fixture"
+#define KXMLQLCFixtureGroupHead "Head"
 #define KXMLQLCFixtureGroupSize "Size"
 #define KXMLQLCFixtureGroupName "Name"
 #define KXMLQLCFixtureGroupDisplayStyle "DisplayStyle"
+
+/****************************************************************************
+ * GroupHead
+ ****************************************************************************/
+
+GroupHead::GroupHead(quint32 aFxi, int aHead)
+    : fxi(aFxi)
+    , head(aHead)
+{
+}
+
+GroupHead::GroupHead(const GroupHead& another)
+    : fxi(another.fxi)
+    , head(another.head)
+{
+}
+
+GroupHead::~GroupHead()
+{
+}
+
+bool GroupHead::isValid() const
+{
+    if (fxi != Fixture::invalidId() && head >= 0)
+        return true;
+    else
+        return false;
+}
+
+bool GroupHead::operator==(const GroupHead& another) const
+{
+    if (fxi == another.fxi && head == another.head)
+        return true;
+    else
+        return false;
+}
 
 /****************************************************************************
  * Initialization
@@ -43,7 +79,7 @@
 FixtureGroup::FixtureGroup(Doc* parent)
     : QObject(parent)
     , m_id(FixtureGroup::invalidId())
-    , m_displayStyle(DisplayIcon | DisplayAddress)
+    , m_displayStyle(DisplayIcon | DisplayAddress | DisplayHead)
 {
     Q_ASSERT(parent != NULL);
 
@@ -61,7 +97,7 @@ void FixtureGroup::copyFrom(const FixtureGroup* grp)
     // Don't copy ID
     m_name = grp->name();
     m_size = grp->size();
-    m_fixtures = grp->fixtureHash();
+    m_heads = grp->headHash();
     m_displayStyle = grp->displayStyle();
 }
 
@@ -118,7 +154,7 @@ QString FixtureGroup::infoText() const
 
     info += "<TABLE COLS='3' WIDTH='100%'>";
     info += title.arg(tr("Fixture Group")).arg(name());
-    info += genInfo.arg(tr("Fixture count")).arg(fixtureList().size());
+    info += genInfo.arg(tr("Fixture count")).arg(headList().size());
     info += "</TABLE>";
 
     if (size().isValid() == true)
@@ -143,10 +179,12 @@ QString FixtureGroup::infoText() const
             for (int x = 0; x < size().width(); x++)
             {
                 QLCPoint pt(x, y);
-                if (m_fixtures.contains(pt) == true)
+                if (m_heads.contains(pt) == true)
                 {
-                    Fixture* fxi = doc()->fixture(m_fixtures[pt]);
+                    GroupHead head(m_heads[pt]);
+                    Fixture* fxi = doc()->fixture(head.fxi);
                     Q_ASSERT(fxi != NULL);
+
                     info += "<TD CLASS='tiny' ALIGN='center'>";
                     if (displayStyle() & DisplayIcon)
                         info += "<IMG SRC='qrc:/fixture.png'/>";
@@ -161,6 +199,8 @@ QString FixtureGroup::infoText() const
                         info += QString("A:%1 ").arg(fxi->address() + 1);
                     if (displayStyle() & DisplayUniverse)
                         info += QString("U:%1").arg(fxi->universe() + 1);
+                    if (displayStyle() & DisplayHead)
+                        info += QString("H:%1").arg(head.head + 1);
                     info += "</TD>";
                 }
                 else
@@ -184,9 +224,9 @@ QString FixtureGroup::infoText() const
  * Fixtures
  ****************************************************************************/
 
-void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
+void FixtureGroup::assignHead(const QLCPoint& pt, const GroupHead& head)
 {
-    if (m_fixtures.values().contains(id) == true)
+    if (m_heads.values().contains(head) == true)
         return;
 
     if (size().isValid() == false)
@@ -194,7 +234,7 @@ void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
 
     if (pt.isNull() == false)
     {
-        m_fixtures[pt] = id;
+        m_heads[pt] = head;
     }
     else
     {
@@ -211,9 +251,9 @@ void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
                 for (x = 0; x < xmax; x++)
                 {
                     QLCPoint tmp(x, y);
-                    if (m_fixtures.contains(tmp) == false)
+                    if (m_heads.contains(tmp) == false)
                     {
-                        m_fixtures[tmp] = id;
+                        m_heads[tmp] = head;
                         assigned = true;
                         break;
                     }
@@ -228,52 +268,65 @@ void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
     }
 }
 
+void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
+{
+    assignHead(pt, GroupHead(id, 0));
+}
+
 void FixtureGroup::resignFixture(quint32 id)
 {
-    foreach (QLCPoint pt, m_fixtures.keys())
+    foreach (QLCPoint pt, m_heads.keys())
     {
-        if (m_fixtures[pt] == id)
-            m_fixtures.remove(pt);
+        if (m_heads[pt].fxi == id)
+            m_heads.remove(pt);
     }
 }
 
 void FixtureGroup::swap(const QLCPoint& a, const QLCPoint& b)
 {
-    quint32 aId = Fixture::invalidId();
-    quint32 bId = Fixture::invalidId();;
+    GroupHead ah;
+    GroupHead bh;
 
-    if (m_fixtures.contains(a) == true)
-        aId = m_fixtures[a];
-    if (m_fixtures.contains(b) == true)
-        bId = m_fixtures[b];
+    if (m_heads.contains(a) == true)
+        ah = m_heads[a];
+    if (m_heads.contains(b) == true)
+        bh = m_heads[b];
 
-    if (aId != Fixture::invalidId())
-        m_fixtures[b] = aId;
+    if (ah.isValid() == true)
+        m_heads[b] = ah;
     else
-        m_fixtures.remove(b);
+        m_heads.remove(b);
 
-    if (bId != Fixture::invalidId())
-        m_fixtures[a] = bId;
+    if (bh.isValid() == true)
+        m_heads[a] = bh;
     else
-        m_fixtures.remove(a);
+        m_heads.remove(a);
 }
 
-quint32 FixtureGroup::fixture(const QLCPoint& pt) const
+GroupHead FixtureGroup::head(const QLCPoint& pt) const
 {
-    if (m_fixtures.contains(pt) == true)
-        return m_fixtures[pt];
+    if (m_heads.contains(pt) == true)
+        return m_heads[pt];
     else
-        return Fixture::invalidId();
+        return GroupHead();
+}
+
+QList <GroupHead> FixtureGroup::headList() const
+{
+    return m_heads.values();
+}
+
+QHash <QLCPoint,GroupHead> FixtureGroup::headHash() const
+{
+    return m_heads;
 }
 
 QList <quint32> FixtureGroup::fixtureList() const
 {
-    return m_fixtures.values();
-}
-
-QHash <QLCPoint,quint32> FixtureGroup::fixtureHash() const
-{
-    return m_fixtures;
+    QList <quint32> list;
+    foreach (GroupHead head, headList())
+        list << head.fxi;
+    return list;
 }
 
 Doc* FixtureGroup::doc() const
@@ -350,7 +403,7 @@ bool FixtureGroup::loadXML(const QDomElement& root)
     while (node.isNull() == false)
     {
         QDomElement tag = node.toElement();
-        if (tag.tagName() == KXMLQLCFixtureGroupFixture)
+        if (tag.tagName() == KXMLQLCFixtureGroupHead)
         {
             bool ok = false;
             int x = tag.attribute("X").toInt(&ok);
@@ -361,11 +414,15 @@ bool FixtureGroup::loadXML(const QDomElement& root)
             if (ok == false)
                 continue;
 
-            quint32 id = tag.text().toUInt(&ok);
+            quint32 id = tag.attribute("Fixture").toUInt(&ok);
             if (ok == false)
                 continue;
 
-            m_fixtures[QLCPoint(x, y)] = id;
+            int head = tag.text().toInt(&ok);
+            if (ok == false)
+                continue;
+
+            m_heads[QLCPoint(x, y)] = GroupHead(id, head);
         }
         else if (tag.tagName() == KXMLQLCFixtureGroupSize)
         {
@@ -431,15 +488,16 @@ bool FixtureGroup::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag.appendChild(text);
     root.appendChild(tag);
 
-    /* Fixtures */
-    QHashIterator <QLCPoint,quint32> it(m_fixtures);
+    /* Fixture heads */
+    QHashIterator <QLCPoint,GroupHead> it(m_heads);
     while (it.hasNext() == true)
     {
         it.next();
-        tag = doc->createElement(KXMLQLCFixtureGroupFixture);
-        tag.setAttribute("X", QString::number(it.key().x()));
-        tag.setAttribute("Y", QString::number(it.key().y()));
-        text = doc->createTextNode(QString::number(it.value()));
+        tag = doc->createElement(KXMLQLCFixtureGroupHead);
+        tag.setAttribute("X", it.key().x());
+        tag.setAttribute("Y", it.key().y());
+        tag.setAttribute("Fixture", it.value().fxi);
+        text = doc->createTextNode(QString::number(it.value().head));
         tag.appendChild(text);
         root.appendChild(tag);
     }

@@ -42,6 +42,7 @@ class QString;
 
 class QLCFixtureDefCache;
 class QLCFixtureMode;
+class QLCFixtureHead;
 class FixtureConsole;
 class QLCFixtureDef;
 class Doc;
@@ -313,6 +314,26 @@ public:
      * @return A QLCFixtureMode definition
      */
     const QLCFixtureMode* fixtureMode() const;
+
+    /**
+     * Return the number of heads used by the fixture. If the fixture is a
+     * generic dimmer, this returns the number of channels (assuming each one
+     * controls one lamp == head). Otherwise returns the number of heads defined
+     * in fixtureMode().
+     *
+     * @return Number of heads
+     */
+    int heads() const;
+
+    /**
+     * Get the fixture head at the given index. If $index is invalid, returns NULL.
+     * Each fixture has at least one head. Dimmer fixtures have no heads since each
+     * channel can be treated as a head.
+     *
+     * @param index The index of the head to return
+     * @return The head at the given index or NULL
+     */
+    QLCFixtureHead head(int index) const;
 
 protected:
     /** The fixture definition that this instance is based on */

@@ -133,6 +133,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="m_displayHeadCheck">
+          <property name="text">
+           <string>Head number</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>

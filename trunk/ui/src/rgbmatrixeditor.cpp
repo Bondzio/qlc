@@ -257,7 +257,7 @@ void RGBMatrixEditor::createPreviewItems()
         {
             QLCPoint pt(x, y);
 
-            if (grp->fixtureHash().contains(pt) == true)
+            if (grp->headHash().contains(pt) == true)
             {
                 RGBItem* item = new RGBItem;
                 item->setRect(x * RECT_SIZE + RECT_PADDING + ITEM_PADDING,

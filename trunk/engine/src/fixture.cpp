@@ -115,7 +115,7 @@ QString Fixture::type() const
 
 bool Fixture::isDimmer() const
 {
-    if (m_fixtureDef != NULL)
+    if (m_fixtureDef != NULL && m_fixtureMode != NULL)
         return false;
     else
         return true;
@@ -418,6 +418,22 @@ const QLCFixtureDef* Fixture::fixtureDef() const
 const QLCFixtureMode* Fixture::fixtureMode() const
 {
     return m_fixtureMode;
+}
+
+int Fixture::heads() const
+{
+    if (isDimmer() == true)
+        return 0;
+    else
+        return m_fixtureMode->heads().size();
+}
+
+QLCFixtureHead Fixture::head(int index) const
+{
+    if (isDimmer() == false && index < m_fixtureMode->heads().size())
+        return m_fixtureMode->heads().at(index);
+    else
+        return QLCFixtureHead();
 }
 
 /*****************************************************************************

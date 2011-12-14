@@ -37,6 +37,7 @@
 #define SETTINGS_GEOMETRY "fixturegroupeditor/geometry"
 
 #define PROP_FIXTURE Qt::UserRole
+#define PROP_HEAD Qt::UserRole + 1
 
 FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* parent)
     : QDialog(parent)
@@ -63,6 +64,8 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
         m_displayAddressCheck->setChecked(true);
     if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
         m_displayUniverseCheck->setChecked(true);
+    if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
+        m_displayHeadCheck->setChecked(true);
 
     connect(m_xSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotXSpinValueChanged(int)));
@@ -76,6 +79,8 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     connect(m_displayAddressCheck, SIGNAL(clicked()),
             this, SLOT(slotDisplayStyleChecked()));
     connect(m_displayUniverseCheck, SIGNAL(clicked()),
+            this, SLOT(slotDisplayStyleChecked()));
+    connect(m_displayHeadCheck, SIGNAL(clicked()),
             this, SLOT(slotDisplayStyleChecked()));
 
     connect(m_addButton, SIGNAL(clicked()),
@@ -125,13 +130,15 @@ void FixtureGroupEditor::updateTable()
     m_table->setRowCount(m_grp->size().height());
     m_table->setColumnCount(m_grp->size().width());
 
-    QHashIterator <QLCPoint,quint32> it(m_grp->fixtureHash());
+    QHashIterator <QLCPoint,GroupHead> it(m_grp->headHash());
     while (it.hasNext() == true)
     {
         it.next();
 
         QLCPoint pt(it.key());
-        Fixture* fxi = m_doc->fixture(it.value());
+
+        GroupHead head(it.value());
+        Fixture* fxi = m_doc->fixture(head.fxi);
         if (fxi == NULL)
             continue;
 
@@ -146,15 +153,18 @@ void FixtureGroupEditor::updateTable()
             && (m_grp->displayStyle() & FixtureGroup::DisplayName))
             str += "\n";
         if (m_grp->displayStyle() & FixtureGroup::DisplayAddress)
-            str += QString("DMX:%1 ").arg(fxi->address() + 1);
+            str += QString("A:%1 ").arg(fxi->address() + 1);
         if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
             str += QString("U:%1").arg(fxi->universe() + 1);
+        if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
+            str += QString("H:%1").arg(head.head + 1);
 
         QTableWidgetItem* item = new QTableWidgetItem(icon, str);
         QFont font = item->font();
         font.setPointSize(font.pointSize() - 2);
         item->setFont(font);
-        item->setData(PROP_FIXTURE, it.value());
+        item->setData(PROP_FIXTURE, head.fxi);
+        item->setData(PROP_HEAD, head.head);
 
         m_table->setItem(pt.y(), pt.x(), item);
     }
@@ -192,6 +202,8 @@ void FixtureGroupEditor::slotDisplayStyleChecked()
         style |= FixtureGroup::DisplayAddress;
     if (m_displayUniverseCheck->isChecked() == true)
         style |= FixtureGroup::DisplayUniverse;
+    if (m_displayHeadCheck->isChecked() == true)
+        style |= FixtureGroup::DisplayHead;
     m_grp->setDisplayStyle(style);
     updateTable();
 }
@@ -220,8 +232,7 @@ void FixtureGroupEditor::slotRemoveFixtureClicked()
     if (var.isValid() == false)
         return;
 
-    quint32 id = var.toUInt();
-    m_grp->resignFixture(id);
+    m_grp->resignFixture(var.toUInt());
     delete item;
 }
 
@@ -245,16 +256,16 @@ void FixtureGroupEditor::slotCellChanged(int row, int column)
         return;
     }
 
-    QHash <QLCPoint,quint32> hash = m_grp->fixtureHash();
+    QHash <QLCPoint,GroupHead> hash = m_grp->headHash();
     QLCPoint from(m_column, m_row);
     QLCPoint to(column, row);
-    quint32 fromId = Fixture::invalidId();
-    quint32 toId = Fixture::invalidId();
+    GroupHead fromHead;
+    GroupHead toHead;
 
     if (hash.contains(from) == true)
-        fromId = hash[from];
+        fromHead = hash[from];
     if (hash.contains(to) == true)
-        toId = hash[to];
+        toHead = hash[to];
 
     m_grp->swap(from, to);
 

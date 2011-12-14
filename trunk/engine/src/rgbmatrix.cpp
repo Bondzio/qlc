@@ -28,6 +28,7 @@
 #include <cmath>
 #include <QDir>
 
+#include "qlcfixturehead.h"
 #include "fixturegroup.h"
 #include "genericfader.h"
 #include "fadechannel.h"
@@ -391,12 +392,15 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
         for (int x = 0; x < map[y].size(); x++)
         {
             QLCPoint pt(x, y);
-            Fixture* fxi = doc()->fixture(grp->fixture(pt));
+            GroupHead grpHead(grp->head(pt));
+            Fixture* fxi = doc()->fixture(grpHead.fxi);
             if (fxi == NULL)
                 continue;
 
-            QList <quint32> rgb = fxi->rgbChannels();
-            QList <quint32> cmy = fxi->cmyChannels();
+            QLCFixtureHead head = fxi->head(grpHead.head);
+
+            QList <quint32> rgb = head.rgbChannels();
+            QList <quint32> cmy = head.cmyChannels();
             if (rgb.isEmpty() == false)
             {
                 // RGB color mixing

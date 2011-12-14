@@ -75,7 +75,7 @@ void FixtureGroup_Test::size()
 void FixtureGroup_Test::displayStyle()
 {
     FixtureGroup grp(m_doc);
-    QCOMPARE(grp.displayStyle(), FixtureGroup::DisplayIcon | FixtureGroup::DisplayAddress);
+    QCOMPARE(grp.displayStyle(), FixtureGroup::DisplayIcon | FixtureGroup::DisplayAddress | FixtureGroup::DisplayHead);
 
     grp.setDisplayStyle(FixtureGroup::DisplayName);
     QCOMPARE(grp.displayStyle(), int(FixtureGroup::DisplayName));
@@ -93,38 +93,38 @@ void FixtureGroup_Test::assignFixtureNoSize()
 {
     QLCPoint pt;
     FixtureGroup grp(m_doc);
-    QCOMPARE(grp.fixtureList().size(), 0);
+    QCOMPARE(grp.headList().size(), 0);
 
     grp.assignFixture(0);
-    QCOMPARE(grp.fixtureList().size(), 1);
+    QCOMPARE(grp.headList().size(), 1);
     QCOMPARE(grp.size(), QSize(1, 1));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(0));
+    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
 
     // Same fixture can't be at two places
     grp.assignFixture(0, QLCPoint(100, 100));
-    QCOMPARE(grp.fixtureList().size(), 1);
+    QCOMPARE(grp.headList().size(), 1);
     QCOMPARE(grp.size(), QSize(1, 1));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(0));
+    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
 
     grp.assignFixture(1);
-    QCOMPARE(grp.fixtureList().size(), 2);
+    QCOMPARE(grp.headList().size(), 2);
     QCOMPARE(grp.size(), QSize(1, 1));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(0));
+    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(1));
+    QVERIFY(grp.headHash()[pt] == GroupHead(1, 0));
 
     grp.assignFixture(2);
-    QCOMPARE(grp.fixtureList().size(), 3);
+    QCOMPARE(grp.headList().size(), 3);
     QCOMPARE(grp.size(), QSize(1, 1));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(0));
+    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(1));
+    QVERIFY(grp.headHash()[pt] == GroupHead(1, 0));
     pt = QLCPoint(0, 2);
-    QVERIFY(grp.fixtureHash()[pt] == quint32(2));
+    QVERIFY(grp.headHash()[pt] == GroupHead(2, 0));
 }
 
 void FixtureGroup_Test::assignFixture4x2()
@@ -132,164 +132,164 @@ void FixtureGroup_Test::assignFixture4x2()
     QLCPoint pt;
     FixtureGroup grp(m_doc);
     grp.setSize(QSize(4, 2));
-    QCOMPARE(grp.fixtureList().size(), 0);
+    QCOMPARE(grp.headList().size(), 0);
 
     grp.assignFixture(0);
-    QCOMPARE(grp.fixtureList().size(), 1);
+    QCOMPARE(grp.headList().size(), 1);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
 
     grp.assignFixture(1);
-    QCOMPARE(grp.fixtureList().size(), 2);
+    QCOMPARE(grp.headList().size(), 2);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
 
     grp.assignFixture(2);
-    QCOMPARE(grp.fixtureList().size(), 3);
+    QCOMPARE(grp.headList().size(), 3);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
 
     grp.assignFixture(3);
-    QCOMPARE(grp.fixtureList().size(), 4);
+    QCOMPARE(grp.headList().size(), 4);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
 
     grp.assignFixture(4);
-    QCOMPARE(grp.fixtureList().size(), 5);
+    QCOMPARE(grp.headList().size(), 5);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
 
     grp.assignFixture(5);
-    QCOMPARE(grp.fixtureList().size(), 6);
+    QCOMPARE(grp.headList().size(), 6);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
     pt = QLCPoint(1, 1);
-    QVERIFY(grp.fixture(pt) == quint32(5));
+    QVERIFY(grp.head(pt) == GroupHead(5, 0));
 
     grp.assignFixture(6);
-    QCOMPARE(grp.fixtureList().size(), 7);
+    QCOMPARE(grp.headList().size(), 7);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
     pt = QLCPoint(1, 1);
-    QVERIFY(grp.fixture(pt) == quint32(5));
+    QVERIFY(grp.head(pt) == GroupHead(5, 0));
     pt = QLCPoint(2, 1);
-    QVERIFY(grp.fixture(pt) == quint32(6));
+    QVERIFY(grp.head(pt) == GroupHead(6, 0));
 
     grp.assignFixture(7);
-    QCOMPARE(grp.fixtureList().size(), 8);
+    QCOMPARE(grp.headList().size(), 8);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
     pt = QLCPoint(1, 1);
-    QVERIFY(grp.fixture(pt) == quint32(5));
+    QVERIFY(grp.head(pt) == GroupHead(5, 0));
     pt = QLCPoint(2, 1);
-    QVERIFY(grp.fixture(pt) == quint32(6));
+    QVERIFY(grp.head(pt) == GroupHead(6, 0));
     pt = QLCPoint(3, 1);
-    QVERIFY(grp.fixture(pt) == quint32(7));
+    QVERIFY(grp.head(pt) == GroupHead(7, 0));
 
     // Now beyond size(); should continue to make a third row of 4 columns
     grp.assignFixture(8);
-    QCOMPARE(grp.fixtureList().size(), 9);
+    QCOMPARE(grp.headList().size(), 9);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
     pt = QLCPoint(1, 1);
-    QVERIFY(grp.fixture(pt) == quint32(5));
+    QVERIFY(grp.head(pt) == GroupHead(5, 0));
     pt = QLCPoint(2, 1);
-    QVERIFY(grp.fixture(pt) == quint32(6));
+    QVERIFY(grp.head(pt) == GroupHead(6, 0));
     pt = QLCPoint(3, 1);
-    QVERIFY(grp.fixture(pt) == quint32(7));
+    QVERIFY(grp.head(pt) == GroupHead(7, 0));
     pt = QLCPoint(0, 2);
-    QVERIFY(grp.fixture(pt) == quint32(8));
+    QVERIFY(grp.head(pt) == GroupHead(8, 0));
 
     grp.assignFixture(9);
-    QCOMPARE(grp.fixtureList().size(), 10);
+    QCOMPARE(grp.headList().size(), 10);
     QCOMPARE(grp.size(), QSize(4, 2));
     pt = QLCPoint(0, 0);
-    QVERIFY(grp.fixture(pt) == quint32(0));
+    QVERIFY(grp.head(pt) == GroupHead(0, 0));
     pt = QLCPoint(1, 0);
-    QVERIFY(grp.fixture(pt) == quint32(1));
+    QVERIFY(grp.head(pt) == GroupHead(1, 0));
     pt = QLCPoint(2, 0);
-    QVERIFY(grp.fixture(pt) == quint32(2));
+    QVERIFY(grp.head(pt) == GroupHead(2, 0));
     pt = QLCPoint(3, 0);
-    QVERIFY(grp.fixture(pt) == quint32(3));
+    QVERIFY(grp.head(pt) == GroupHead(3, 0));
     pt = QLCPoint(0, 1);
-    QVERIFY(grp.fixture(pt) == quint32(4));
+    QVERIFY(grp.head(pt) == GroupHead(4, 0));
     pt = QLCPoint(1, 1);
-    QVERIFY(grp.fixture(pt) == quint32(5));
+    QVERIFY(grp.head(pt) == GroupHead(5, 0));
     pt = QLCPoint(2, 1);
-    QVERIFY(grp.fixture(pt) == quint32(6));
+    QVERIFY(grp.head(pt) == GroupHead(6, 0));
     pt = QLCPoint(3, 1);
-    QVERIFY(grp.fixture(pt) == quint32(7));
+    QVERIFY(grp.head(pt) == GroupHead(7, 0));
     pt = QLCPoint(0, 2);
-    QVERIFY(grp.fixture(pt) == quint32(8));
+    QVERIFY(grp.head(pt) == GroupHead(8, 0));
     pt = QLCPoint(1, 2);
-    QVERIFY(grp.fixture(pt) == quint32(9));
+    QVERIFY(grp.head(pt) == GroupHead(9, 0));
 
     // Going waaay beyond size should be possible
     pt = QLCPoint(1024, 2048);
     grp.assignFixture(10, pt);
-    QVERIFY(grp.fixtureHash().contains(pt) == true);
-    QCOMPARE(grp.fixture(pt), quint32(10));
+    QVERIFY(grp.headHash().contains(pt) == true);
+    QCOMPARE(grp.head(pt), GroupHead(10, 0));
     QCOMPARE(grp.size(), QSize(4, 2));
 }
 
@@ -299,26 +299,26 @@ void FixtureGroup_Test::resignFixture()
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
         grp.assignFixture(id);
-    QCOMPARE(grp.fixtureList().size(), 16);
+    QCOMPARE(grp.headList().size(), 16);
 
     // Remove a fixture
     grp.resignFixture(13);
-    QCOMPARE(grp.fixtureList().size(), 15);
-    QVERIFY(grp.fixtureList().contains(13) == false);
-    QVERIFY(grp.fixtureHash().contains(QLCPoint(1, 3)) == false);
+    QCOMPARE(grp.headList().size(), 15);
+    QVERIFY(grp.headList().contains(13) == false);
+    QVERIFY(grp.headHash().contains(QLCPoint(1, 3)) == false);
 
     // Remove a nonexistent fixture
     grp.resignFixture(42);
-    QCOMPARE(grp.fixtureList().size(), 15);
-    QVERIFY(grp.fixtureList().contains(42) == false);
-    QVERIFY(grp.fixtureHash().contains(QLCPoint(1, 3)) == false);
+    QCOMPARE(grp.headList().size(), 15);
+    QVERIFY(grp.headList().contains(42) == false);
+    QVERIFY(grp.headHash().contains(QLCPoint(1, 3)) == false);
 
     // Test that the gap is again filled
     grp.assignFixture(42);
-    QCOMPARE(grp.fixtureList().size(), 16);
-    QVERIFY(grp.fixtureList().contains(42) == true);
-    QVERIFY(grp.fixtureHash().contains(QLCPoint(1, 3)) == true);
-    QCOMPARE(grp.fixtureHash()[QLCPoint(1, 3)], quint32(42));
+    QCOMPARE(grp.headList().size(), 16);
+    QVERIFY(grp.headList().contains(GroupHead(42, 0)) == true);
+    QVERIFY(grp.headHash().contains(QLCPoint(1, 3)) == true);
+    QCOMPARE(grp.headHash()[QLCPoint(1, 3)], GroupHead(42, 0));
 }
 
 void FixtureGroup_Test::fixtureRemoved()
@@ -327,7 +327,7 @@ void FixtureGroup_Test::fixtureRemoved()
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
         grp.assignFixture(id);
-    QCOMPARE(grp.fixtureList().size(), 16);
+    QCOMPARE(grp.headList().size(), 16);
 
     Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(5);
@@ -336,8 +336,8 @@ void FixtureGroup_Test::fixtureRemoved()
 
     // FixtureGroup should listen to Doc's fixtureRemoved() signal
     m_doc->deleteFixture(10);
-    QCOMPARE(grp.fixtureList().size(), 15);
-    QVERIFY(grp.fixtureHash().contains(QLCPoint(2, 2)) == false);
+    QCOMPARE(grp.headList().size(), 15);
+    QVERIFY(grp.headHash().contains(QLCPoint(2, 2)) == false);
 
     fxi = new Fixture(m_doc);
     fxi->setChannels(5);
@@ -346,7 +346,7 @@ void FixtureGroup_Test::fixtureRemoved()
 
     // Uninteresting fixture removed (not part of group)
     m_doc->deleteFixture(69);
-    QCOMPARE(grp.fixtureList().size(), 15);
+    QCOMPARE(grp.headList().size(), 15);
 }
 
 void FixtureGroup_Test::swap()
@@ -355,34 +355,34 @@ void FixtureGroup_Test::swap()
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
         grp.assignFixture(id);
-    QCOMPARE(grp.fixtureList().size(), 16);
+    QCOMPARE(grp.headList().size(), 16);
 
     QLCPoint pt1(0, 0);
     QLCPoint pt2(2, 1);
-    QVERIFY(grp.fixtureHash().contains(pt1) == true);
-    QVERIFY(grp.fixtureHash().contains(pt2) == true);
-    QCOMPARE(grp.fixtureHash()[pt1], quint32(0));
-    QCOMPARE(grp.fixtureHash()[pt2], quint32(6));
+    QVERIFY(grp.headHash().contains(pt1) == true);
+    QVERIFY(grp.headHash().contains(pt2) == true);
+    QCOMPARE(grp.headHash()[pt1], GroupHead(0, 0));
+    QCOMPARE(grp.headHash()[pt2], GroupHead(6, 0));
 
     // Switch places with two fixtures
     grp.swap(pt1, pt2);
-    QVERIFY(grp.fixtureHash().contains(pt1) == true);
-    QVERIFY(grp.fixtureHash().contains(pt2) == true);
-    QCOMPARE(grp.fixtureHash()[pt1], quint32(6));
-    QCOMPARE(grp.fixtureHash()[pt2], quint32(0));
+    QVERIFY(grp.headHash().contains(pt1) == true);
+    QVERIFY(grp.headHash().contains(pt2) == true);
+    QCOMPARE(grp.headHash()[pt1], GroupHead(6, 0));
+    QCOMPARE(grp.headHash()[pt2], GroupHead(0, 0));
 
     // Switch places with a fixture and an empty point
     pt2 = QLCPoint(500, 500);
     grp.swap(pt1, pt2);
-    QVERIFY(grp.fixtureHash().contains(pt1) == false);
-    QVERIFY(grp.fixtureHash().contains(pt2) == true);
-    QCOMPARE(grp.fixtureHash()[pt2], quint32(6));
+    QVERIFY(grp.headHash().contains(pt1) == false);
+    QVERIFY(grp.headHash().contains(pt2) == true);
+    QCOMPARE(grp.headHash()[pt2], GroupHead(6, 0));
 
     // ...and back again
     grp.swap(pt1, pt2);
-    QVERIFY(grp.fixtureHash().contains(pt1) == true);
-    QVERIFY(grp.fixtureHash().contains(pt2) == false);
-    QCOMPARE(grp.fixtureHash()[pt1], quint32(6));
+    QVERIFY(grp.headHash().contains(pt1) == true);
+    QVERIFY(grp.headHash().contains(pt2) == false);
+    QCOMPARE(grp.headHash()[pt1], GroupHead(6, 0));
 }
 
 void FixtureGroup_Test::copy()
@@ -446,7 +446,7 @@ void FixtureGroup_Test::load()
     QCOMPARE(grp2->name(), QString("Pertti Pasanen"));
     QCOMPARE(grp2->id(), quint32(99));
     QCOMPARE(grp2->displayStyle(), FixtureGroup::DisplayName | FixtureGroup::DisplayUniverse);
-    QCOMPARE(grp2->fixtureHash(), grp.fixtureHash());
+    QCOMPARE(grp2->headHash(), grp.headHash());
 }
 
 void FixtureGroup_Test::save()
@@ -489,11 +489,12 @@ void FixtureGroup_Test::save()
             QCOMPARE(tag.text().toInt(), FixtureGroup::DisplayIcon | FixtureGroup::DisplayUniverse);
             style++;
         }
-        else if (tag.tagName() == "Fixture")
+        else if (tag.tagName() == "Head")
         {
-            quint32 id = tag.text().toUInt();
+            quint32 id = tag.attribute("Fixture").toUInt();
+            int head = tag.text().toInt();
             QLCPoint pt(tag.attribute("X").toInt(), tag.attribute("Y").toInt());
-            QCOMPARE(grp.fixture(pt), id);
+            QCOMPARE(grp.head(pt), GroupHead(id, head));
             fixture++;
         }
         else

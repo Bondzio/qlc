@@ -129,24 +129,13 @@ private:
      ************************************************************************/
 public:
     /**
-     * Assign a fixture head to a group at the given point. If point is null,
-     * then the fixture will be automatically placed to the next free slot.
-     * If the fixture head is already present in the group, it is moved from its
-     * current position to the new position. If another fixture head occupies the
-     * new point, the two fixture heads will simply switch places.
+     * Assign the given fixture $id to a FixtureGroup by placing all of its
+     * heads in consecutive order, starting from point $pt.
      *
-     * @param pt The point to assign to
-     * @param head The fixture head to assign
+     * @param id The ID of the fixture to add
+     * @param point The point to start from
      */
-    void assignHead(const QLCPoint& pt, const GroupHead& head);
-
-    /**
-     * Legacy method for assigning the first fixture head at the given point.
-     *
-     * @param id Fixture ID
-     * @param point The point to assign to
-     */
-    void assignFixture(quint32 id, const QLCPoint& point = QLCPoint());
+    void assignFixture(quint32 id, const QLCPoint& pt = QLCPoint());
 
     /**
      * Resign a fixture, along with all of its heads from a group.
@@ -180,6 +169,19 @@ public:
 
     /** Get a list of fixtures assigned to the group */
     QList <quint32> fixtureList() const;
+
+private:
+    /**
+     * Assign a fixture head to a group at the given point. If point is null,
+     * then the fixture will be automatically placed to the next free slot.
+     * If the fixture head is already present in the group, it is moved from its
+     * current position to the new position. If another fixture head occupies the
+     * new point, the two fixture heads will simply switch places.
+     *
+     * @param pt The point to assign to
+     * @param head The fixture head to assign
+     */
+    void assignHead(const QLCPoint& pt, const GroupHead& head);
 
 private slots:
     /** Listens to Doc fixture removals */

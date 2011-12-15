@@ -101,6 +101,11 @@ void FixtureGroup::copyFrom(const FixtureGroup* grp)
     m_displayStyle = grp->displayStyle();
 }
 
+Doc* FixtureGroup::doc() const
+{
+    return qobject_cast<Doc*> (parent());
+}
+
 /****************************************************************************
  * ID
  ****************************************************************************/
@@ -224,53 +229,13 @@ QString FixtureGroup::infoText() const
  * Fixtures
  ****************************************************************************/
 
-void FixtureGroup::assignHead(const QLCPoint& pt, const GroupHead& head)
-{
-    if (m_heads.values().contains(head) == true)
-        return;
-
-    if (size().isValid() == false)
-        setSize(QSize(1, 1));
-
-    if (pt.isNull() == false)
-    {
-        m_heads[pt] = head;
-    }
-    else
-    {
-        bool assigned = false;
-        int y = 0;
-        int x = 0;
-        int xmax = size().width();
-        int ymax = size().height();
-
-        while (assigned == false)
-        {
-            for (; y < ymax; y++)
-            {
-                for (x = 0; x < xmax; x++)
-                {
-                    QLCPoint tmp(x, y);
-                    if (m_heads.contains(tmp) == false)
-                    {
-                        m_heads[tmp] = head;
-                        assigned = true;
-                        break;
-                    }
-                }
-
-                if (assigned == true)
-                    break;
-            }
-
-            ymax++;
-        }
-    }
-}
-
 void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
 {
-    assignHead(pt, GroupHead(id, 0));
+#warning This will not work correcly for multi-head fixtures (like dimmers)
+    Fixture* fxi = doc()->fixture(id);
+    Q_ASSERT(fxi != NULL);
+    for (int i = 0; i < fxi->heads(); i++)
+        assignHead(pt, GroupHead(fxi->id(), i));
 }
 
 void FixtureGroup::resignFixture(quint32 id)
@@ -329,9 +294,48 @@ QList <quint32> FixtureGroup::fixtureList() const
     return list;
 }
 
-Doc* FixtureGroup::doc() const
+void FixtureGroup::assignHead(const QLCPoint& pt, const GroupHead& head)
 {
-    return qobject_cast<Doc*> (parent());
+    if (m_heads.values().contains(head) == true)
+        return;
+
+    if (size().isValid() == false)
+        setSize(QSize(1, 1));
+
+    if (pt.isNull() == false)
+    {
+        m_heads[pt] = head;
+    }
+    else
+    {
+        bool assigned = false;
+        int y = 0;
+        int x = 0;
+        int xmax = size().width();
+        int ymax = size().height();
+
+        while (assigned == false)
+        {
+            for (; y < ymax; y++)
+            {
+                for (x = 0; x < xmax; x++)
+                {
+                    QLCPoint tmp(x, y);
+                    if (m_heads.contains(tmp) == false)
+                    {
+                        m_heads[tmp] = head;
+                        assigned = true;
+                        break;
+                    }
+                }
+
+                if (assigned == true)
+                    break;
+            }
+
+            ymax++;
+        }
+    }
 }
 
 void FixtureGroup::slotFixtureRemoved(quint32 id)

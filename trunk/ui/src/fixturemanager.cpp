@@ -929,6 +929,26 @@ void FixtureManager::editGroupProperties(QTreeWidgetItem* item)
     }
 }
 
+int FixtureManager::headCount(const QList <QTreeWidgetItem*>& items) const
+{
+    int count = 0;
+    QListIterator <QTreeWidgetItem*> it(items);
+    while (it.hasNext() == true)
+    {
+        QTreeWidgetItem* item = it.next();
+        Q_ASSERT(item != NULL);
+
+        QVariant var = item->data(KColumnName, PROP_FIXTURE);
+        if (var.isValid() == false)
+            continue;
+
+        Fixture* fxi = m_doc->fixture(var.toUInt());
+        count += fxi->heads();
+    }
+
+    return count;
+}
+
 void FixtureManager::slotProperties()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
@@ -1012,7 +1032,8 @@ void FixtureManager::slotGroupSelected(QAction* action)
             updateGroupMenu();
             ok = true;
 
-            qreal side = sqrt(m_tree->selectedItems().size());
+            qreal side = sqrt(headCount(m_tree->selectedItems()));
+            //qreal side = sqrt(m_tree->selectedItems().size());
             if (side != floor(side))
                 side += 1; // Fixture number doesn't provide a full square
             grp->setSize(QSize(side, side)); // Arrange fixtures into a grid

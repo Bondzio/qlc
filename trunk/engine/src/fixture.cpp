@@ -26,6 +26,7 @@
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturehead.h"
+#include "qlcdimmerhead.h"
 #include "qlcfixturedef.h"
 #include "qlccapability.h"
 #include "qlcchannel.h"
@@ -423,17 +424,27 @@ const QLCFixtureMode* Fixture::fixtureMode() const
 int Fixture::heads() const
 {
     if (isDimmer() == true)
-        return 0;
+        return channels();
     else
         return m_fixtureMode->heads().size();
 }
 
 QLCFixtureHead Fixture::head(int index) const
 {
-    if (isDimmer() == false && index < m_fixtureMode->heads().size())
-        return m_fixtureMode->heads().at(index);
+    if (isDimmer() == true)
+    {
+        if (index < channels())
+            return QLCDimmerHead(index);
+        else
+            return QLCFixtureHead();
+    }
     else
-        return QLCFixtureHead();
+    {
+        if (index < m_fixtureMode->heads().size())
+            return m_fixtureMode->heads().at(index);
+        else
+            return QLCFixtureHead();
+    }
 }
 
 /*****************************************************************************

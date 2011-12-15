@@ -405,7 +405,7 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
             {
                 // RGB color mixing
                 FadeChannel fc;
-                fc.setFixture(fxi->id());
+                fc.setFixture(grpHead.fxi);
 
                 fc.setChannel(rgb.takeFirst());
                 fc.setTarget(qRed(map[y][x]));
@@ -428,7 +428,7 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
                 QColor col(map[y][x]);
 
                 FadeChannel fc;
-                fc.setFixture(fxi->id());
+                fc.setFixture(grpHead.fxi);
 
                 fc.setChannel(cmy.takeFirst());
                 fc.setTarget(col.cyan());
@@ -445,13 +445,13 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
                 insertStartValues(fc);
                 m_fader->add(fc);
             }
-            else if (fxi->masterIntensityChannel() != QLCChannel::invalid())
+            else if (head.masterIntensityChannel() != QLCChannel::invalid())
             {
                 // Simple intensity (dimmer) channel
                 QColor col(map[y][x]);
                 FadeChannel fc;
-                fc.setFixture(fxi->id());
-                fc.setChannel(fxi->masterIntensityChannel());
+                fc.setFixture(grpHead.fxi);
+                fc.setChannel(head.masterIntensityChannel());
                 fc.setTarget(col.value());
                 insertStartValues(fc);
                 m_fader->add(fc);

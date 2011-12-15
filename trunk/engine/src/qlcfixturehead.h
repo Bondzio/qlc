@@ -29,6 +29,9 @@
 #define KXMLQLCFixtureHeadChannel   "Channel"
 
 class QLCFixtureMode;
+class QDomDocument;
+class QDomElement;
+
 class QLCFixtureHead
 {
 public:
@@ -113,7 +116,7 @@ public:
     /** Find some interesting channels from $mode and store their indices. */
     void cacheChannels(const QLCFixtureMode* mode);
 
-private:
+protected:
     /** Indicates, whether cacheChannels() has already been called */
     bool m_channelsCached;
 

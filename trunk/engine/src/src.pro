@@ -37,6 +37,7 @@ HEADERS += qlccapability.h \
            qlcfixturedefcache.h \
            qlcfixturehead.h \
            qlcfixturemode.h \
+           qlcdimmerhead.h \
            qlci18n.h \
            qlcinputchannel.h \
            qlcinputprofile.h \
@@ -83,6 +84,7 @@ SOURCES += qlccapability.cpp \
            qlcfixturedefcache.cpp \
            qlcfixturehead.cpp \
            qlcfixturemode.cpp \
+           qlcdimmerhead.cpp \
            qlci18n.cpp \
            qlcinputchannel.cpp \
            qlcinputprofile.cpp \

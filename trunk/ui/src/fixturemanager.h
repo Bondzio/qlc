@@ -152,6 +152,9 @@ protected:
     /** Edit properties for the fixture group represented by $item */
     void editGroupProperties(QTreeWidgetItem* item);
 
+    /** Count the number of heads in the list of fixture items */
+    int headCount(const QList <QTreeWidgetItem*>& items) const;
+
 protected slots:
     void slotAdd();
     void slotRemove();

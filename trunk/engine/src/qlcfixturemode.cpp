@@ -236,6 +236,26 @@ QList <QLCFixtureHead> QLCFixtureMode::heads() const
     return m_heads;
 }
 
+int QLCFixtureMode::headForChannel(quint32 chnum) const
+{
+    for (int i = 0; i < m_heads.size(); i++)
+    {
+        if (m_heads[i].channels().contains(chnum) == true)
+            return i;
+    }
+
+    return -1;
+}
+
+void QLCFixtureMode::cacheHeads()
+{
+    for (int i = 0; i < m_heads.size(); i++)
+    {
+        QLCFixtureHead& head(m_heads[i]);
+        head.cacheChannels(this);
+    }
+}
+
 /****************************************************************************
  * Physical
  ****************************************************************************/
@@ -309,21 +329,8 @@ bool QLCFixtureMode::loadXML(const QDomElement& root)
         node = node.nextSibling();
     }
 
-    // If there is no head entries in the file, create one that contains all channels
-    if (m_heads.size() == 0)
-    {
-        QLCFixtureHead head;
-        for (int i = 0; i < m_channels.size(); i++)
-            head.addChannel(i);
-        m_heads.append(head);
-    }
-
     // Cache all head channels
-    for (int i = 0; i < m_heads.size(); i++)
-    {
-        QLCFixtureHead& head(m_heads[i]);
-        head.cacheChannels(this);
-    }
+    cacheHeads();
 
     return true;
 }

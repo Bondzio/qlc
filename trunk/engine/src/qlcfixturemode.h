@@ -210,6 +210,19 @@ public:
      */
     QList <QLCFixtureHead> heads() const;
 
+    /**
+     * Find a head number for the given channel number
+     *
+     * @param chnum The number of the channel whose head to find
+     * @return The head number of -1 if the channel doesn't belong to any head
+     */
+    int headForChannel(quint32 chnum) const;
+
+    /**
+     * Cache all heads' channels
+     */
+    void cacheHeads();
+
 private:
     QList <QLCFixtureHead> m_heads;
 

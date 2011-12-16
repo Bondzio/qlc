@@ -28,6 +28,7 @@ HEADERS += ../ui/src/aboutbox.h \
            capabilitywizard.h \
            editcapability.h \
            editchannel.h \
+           edithead.h \
            editmode.h \
            fixtureeditor.h
 
@@ -35,6 +36,7 @@ FORMS += ../ui/src/aboutbox.ui \
          capabilitywizard.ui \
          editcapability.ui \
          editchannel.ui \
+         edithead.ui \
          editmode.ui \
          fixtureeditor.ui
 
@@ -45,6 +47,7 @@ SOURCES += ../ui/src/aboutbox.cpp \
            capabilitywizard.cpp \
            editcapability.cpp \
            editchannel.cpp \
+           edithead.cpp \
            editmode.cpp \
            fixtureeditor.cpp \
            main.cpp

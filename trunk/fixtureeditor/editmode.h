@@ -26,6 +26,7 @@
 #include "ui_editmode.h"
 
 class QLCFixtureMode;
+class QLCFixtureHead;
 class QLCFixtureDef;
 class QLCChannel;
 
@@ -59,9 +60,9 @@ public:
 private:
     QLCFixtureMode* m_mode;
 
-    /*********************************************************************
+    /*************************************************************************
      * Channels page
-     *********************************************************************/
+     *************************************************************************/
 protected slots:
     void slotAddChannelClicked();
     void slotRemoveChannelClicked();
@@ -72,6 +73,21 @@ protected:
     void refreshChannelList();
     QLCChannel* currentChannel();
     void selectChannel(const QString &name);
+
+    /************************************************************************
+     * Heads page
+     ************************************************************************/
+private slots:
+    void slotAddHeadClicked();
+    void slotRemoveHeadClicked();
+    void slotEditHeadClicked();
+    void slotRaiseHeadClicked();
+    void slotLowerHeadClicked();
+
+private:
+    void refreshHeadList();
+    QLCFixtureHead currentHead();
+    void selectHead(int index);
 
     /*********************************************************************
      * Accept

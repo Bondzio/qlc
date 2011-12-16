@@ -30,14 +30,17 @@
 #include <QSettings>
 #include <QSpinBox>
 #include <QPoint>
+#include <QDebug>
 #include <QSize>
 
 #include "qlcfixturemode.h"
+#include "qlcfixturehead.h"
 #include "qlcfixturedef.h"
 #include "qlcphysical.h"
 #include "qlcchannel.h"
 
 #include "editmode.h"
+#include "edithead.h"
 #include "app.h"
 
 #define KSettingsGeometry "editmode/geometry"
@@ -105,6 +108,21 @@ void EditMode::init()
     m_channelList->header()->setResizeMode(QHeaderView::ResizeToContents);
     refreshChannelList();
 
+    /* Heads page */
+    connect(m_addHeadButton, SIGNAL(clicked()),
+            this, SLOT(slotAddHeadClicked()));
+    connect(m_removeHeadButton, SIGNAL(clicked()),
+            this, SLOT(slotRemoveHeadClicked()));
+    connect(m_editHeadButton, SIGNAL(clicked()),
+            this, SLOT(slotEditHeadClicked()));
+    connect(m_raiseHeadButton, SIGNAL(clicked()),
+            this, SLOT(slotRaiseHeadClicked()));
+    connect(m_lowerHeadButton, SIGNAL(clicked()),
+            this, SLOT(slotLowerHeadClicked()));
+
+    m_headList->header()->setResizeMode(QHeaderView::ResizeToContents);
+    refreshHeadList();
+
     /* Physical page */
     m_bulbTypeCombo->setEditText(physical.bulbType());
     m_bulbLumensSpin->setValue(physical.bulbLumens());
@@ -128,7 +146,7 @@ void EditMode::init()
 }
 
 /****************************************************************************
- * Channels page functions
+ * Channels page
  ****************************************************************************/
 
 void EditMode::slotAddChannelClicked()
@@ -294,6 +312,141 @@ void EditMode::selectChannel(const QString &name)
 
         ++it;
     }
+}
+
+/****************************************************************************
+ * Heads page
+ ****************************************************************************/
+
+void EditMode::slotAddHeadClicked()
+{
+    EditHead eh(this, QLCFixtureHead(), m_mode);
+    if (eh.exec() == QDialog::Accepted)
+    {
+        m_mode->insertHead(-1, eh.head());
+        refreshHeadList();
+    }
+}
+
+void EditMode::slotRemoveHeadClicked()
+{
+    QTreeWidgetItem* item = m_headList->currentItem();
+    if (item == NULL)
+        return;
+
+    int index = m_headList->indexOfTopLevelItem(item);
+    m_mode->removeHead(index);
+    refreshHeadList();
+}
+
+void EditMode::slotEditHeadClicked()
+{
+    QTreeWidgetItem* item = m_headList->currentItem();
+    if (item == NULL)
+        return;
+
+    EditHead eh(this, currentHead(), m_mode);
+    if (eh.exec() == QDialog::Accepted)
+    {
+        int index = m_headList->indexOfTopLevelItem(item);
+        m_mode->replaceHead(index, eh.head());
+        refreshHeadList();
+    }
+}
+
+void EditMode::slotRaiseHeadClicked()
+{
+    QTreeWidgetItem* item = m_headList->currentItem();
+    if (item == NULL)
+        return;
+
+    int index = m_headList->indexOfTopLevelItem(item);
+
+    // Don't move beyond the beginning of the list
+    if ((index - 1) < 0)
+        return;
+
+    QLCFixtureHead head = currentHead();
+    m_mode->removeHead(index);
+    m_mode->insertHead(index - 1, head);
+
+    refreshHeadList();
+    selectHead(index - 1);
+}
+
+void EditMode::slotLowerHeadClicked()
+{
+    QTreeWidgetItem* item = m_headList->currentItem();
+    if (item == NULL)
+        return;
+
+    int index = m_headList->indexOfTopLevelItem(item);
+
+    // Don't move beyond the end of the list
+    if ((index + 1) >= m_mode->heads().size())
+        return;
+
+    QLCFixtureHead head = currentHead();
+    m_mode->removeHead(index);
+    m_mode->insertHead(index + 1, head);
+
+    refreshHeadList();
+    selectHead(index + 1);
+}
+
+void EditMode::refreshHeadList()
+{
+    m_headList->clear();
+
+    for (int i = 0; i < m_mode->heads().size(); i++)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_headList);
+
+        QLCFixtureHead head = m_mode->heads().at(i);
+
+        QList <quint32> channels(head.channels().toList());
+        qSort(channels.begin(), channels.end());
+
+        QString summary;
+
+        QListIterator <quint32> it(channels);
+        while (it.hasNext() == true)
+        {
+            quint32 chnum = it.next();
+            const QLCChannel* ch = m_mode->channel(chnum);
+            QTreeWidgetItem* chitem = new QTreeWidgetItem(item);
+            if (ch != NULL)
+                chitem->setText(0, QString("%1: %2").arg(chnum).arg(ch->name()));
+            else
+                chitem->setText(0, QString("%1: INVALID!"));
+            chitem->setFlags(0); // Disable channel selection inside heads
+
+            summary += QString::number(chnum);
+            if (it.hasNext() == true)
+                summary += QString(", ");
+        }
+
+        item->setText(0, QString("Head %1 (%2)").arg(i + 1).arg(summary));
+    }
+}
+
+QLCFixtureHead EditMode::currentHead()
+{
+    QTreeWidgetItem* item = m_headList->currentItem();
+    if (item == NULL)
+        return QLCFixtureHead();
+
+    int index = m_headList->indexOfTopLevelItem(item);
+    return m_mode->heads().at(index);
+}
+
+void EditMode::selectHead(int index)
+{
+    if (index >= m_headList->topLevelItemCount())
+        return;
+
+    QTreeWidgetItem* item = m_headList->topLevelItem(index);
+    m_headList->setCurrentItem(item);
 }
 
 /*****************************************************************************

@@ -397,6 +397,22 @@ void Fixture::setFixtureDefinition(const QLCFixtureDef* fixtureDef,
         m_fixtureDef = fixtureDef;
         m_fixtureMode = fixtureMode;
 
+        // If there are no head entries in the mode, create one that contains
+        // all channels. This const_cast is a bit heretic, but it's easier this
+        // way, than to change everything def & mode related non-const, which would
+        // be worse than one constness violation here.
+        QLCFixtureMode* mode = const_cast<QLCFixtureMode*> (fixtureMode);
+        if (mode->heads().size() == 0)
+        {
+            QLCFixtureHead head;
+            for (int i = 0; i < mode->channels().size(); i++)
+                head.addChannel(i);
+            mode->insertHead(-1, head);
+        }
+
+        // Cache all head channels
+        mode->cacheHeads();
+
         if (m_genericChannel != NULL)
             delete m_genericChannel;
         m_genericChannel = NULL;

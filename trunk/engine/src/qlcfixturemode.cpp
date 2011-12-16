@@ -57,6 +57,7 @@ QLCFixtureMode& QLCFixtureMode::operator=(const QLCFixtureMode& mode)
     {
         m_name = mode.m_name;
         m_physical = mode.m_physical;
+        m_heads = mode.m_heads;
 
         /* Clear the existing list of channels */
         m_channels.clear();

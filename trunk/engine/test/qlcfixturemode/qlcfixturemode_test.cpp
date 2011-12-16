@@ -348,6 +348,12 @@ void QLCFixtureMode_Test::copy()
     mode->insertChannel(m_ch3, 2);
     mode->insertChannel(m_ch4, 3);
 
+    QLCFixtureHead head;
+    head.addChannel(0);
+    head.addChannel(1);
+    head.addChannel(2);
+    mode->insertHead(-1, head);
+
     /* Create a copy of the mode to the same fixtureDef as the original */
     QLCFixtureMode* copy = new QLCFixtureMode(m_fixtureDef, mode);
     QVERIFY(copy != NULL);
@@ -358,6 +364,10 @@ void QLCFixtureMode_Test::copy()
     QVERIFY(copy->channel(1) == m_ch2);
     QVERIFY(copy->channel(2) == m_ch3);
     QVERIFY(copy->channel(3) == m_ch4);
+    QCOMPARE(copy->heads().size(), 1);
+    QVERIFY(copy->heads().at(0).channels().contains(0) == true);
+    QVERIFY(copy->heads().at(0).channels().contains(1) == true);
+    QVERIFY(copy->heads().at(0).channels().contains(2) == true);
     delete copy;
     copy = NULL;
 

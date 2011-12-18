@@ -575,6 +575,8 @@ bool SimpleDesk::loadXML(const QDomElement& root)
         node = node.nextSibling();
     }
 
+    slotSelectPlayback(0);
+
     return true;
 }
 

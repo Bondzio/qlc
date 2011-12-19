@@ -50,6 +50,8 @@
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
+#define PROP_NAME "name"
+#define KXMLQLCWorkspaceWindow "CurrentWindow"
 
 #define KModeTextOperate QObject::tr("Operate")
 #define KModeTextDesign QObject::tr("Design")
@@ -60,7 +62,9 @@
  * Initialization
  *****************************************************************************/
 
-App::App() : QMainWindow()
+App::App()
+    : QMainWindow()
+    , m_area(NULL)
     , m_progressDialog(NULL)
     , m_doc(NULL)
 
@@ -95,6 +99,9 @@ App::App() : QMainWindow()
 #ifdef __APPLE__
     destroyProgressDialog();
 #endif
+
+    // Activate FixtureManager
+    setActiveWindow(FixtureManager::staticMetaObject.className());
 }
 
 App::~App()
@@ -136,11 +143,11 @@ void App::init()
     setWindowIcon(QIcon(":/qlc.png"));
 
     /* MDI Area */
-    QMdiArea* area = new QMdiArea(this);
-    area->setViewMode(QMdiArea::TabbedView);
-    area->setTabPosition(QTabWidget::South);
-    //area->setDocumentMode(true);
-    setCentralWidget(area);
+    m_area = new QMdiArea(this);
+    m_area->setViewMode(QMdiArea::TabbedView);
+    m_area->setTabPosition(QTabWidget::South);
+    //m_area->setDocumentMode(true);
+    setCentralWidget(m_area);
 
     QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
@@ -176,12 +183,6 @@ void App::init()
     OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
     InputManager::createAndShow(centralWidget(), m_doc->inputMap());
 
-    // Activate FixtureManager
-    QMdiSubWindow* sub = area->subWindowList().first();
-    Q_ASSERT(sub != NULL);
-    area->setActiveSubWindow(sub);
-    sub->raise();
-
     // Listen to blackout changes and toggle m_controlBlackoutAction
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
 
@@ -191,6 +192,28 @@ void App::init()
 
     // Start up in non-modified state
     m_doc->resetModified();
+}
+
+void App::setActiveWindow(const QString& name)
+{
+    Q_ASSERT(m_area != NULL);
+
+    if (name.isEmpty() == true)
+        return;
+
+    QListIterator <QMdiSubWindow*> it(m_area->subWindowList());
+    while (it.hasNext() == true)
+    {
+        QMdiSubWindow* wnd(it.next());
+        Q_ASSERT(wnd != NULL);
+        Q_ASSERT(wnd->widget() != NULL);
+        if (wnd->widget()->metaObject()->className() == name)
+        {
+            m_area->setActiveSubWindow(wnd);
+            wnd->raise();
+            break;
+        }
+    }
 }
 
 void App::closeEvent(QCloseEvent* e)
@@ -827,6 +850,8 @@ bool App::loadXML(const QDomDocument& doc)
         return false;
     }
 
+    QString activeWindowName = root.attribute(KXMLQLCWorkspaceWindow);
+
     QDomNode node = root.firstChild();
     while (node.isNull() == false)
     {
@@ -869,6 +894,9 @@ bool App::loadXML(const QDomDocument& doc)
     // Perform post-load operations
     VirtualConsole::instance()->postLoad();
 
+    // Set the active window to what was saved in the workspace file
+    setActiveWindow(activeWindowName);
+
     return true;
 }
 
@@ -892,6 +920,11 @@ QFile::FileError App::saveXML(const QString& fileName)
 
         /* THE MASTER XML ROOT NODE */
         root = doc.documentElement();
+
+        /* Currently active window */
+        QMdiSubWindow* sub = m_area->activeSubWindow();
+        if (sub != NULL && sub->widget() != NULL)
+            root.setAttribute(KXMLQLCWorkspaceWindow, sub->widget()->metaObject()->className());
 
         /* Write engine components to the XML document */
         m_doc->saveXML(&doc, &root);

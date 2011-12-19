@@ -36,6 +36,7 @@ class QDomElement;
 class QMessageBox;
 class QToolButton;
 class QFileDialog;
+class QMdiArea;
 class QToolBar;
 class QPixmap;
 class QAction;
@@ -59,6 +60,10 @@ public:
 private:
     void init();
     void closeEvent(QCloseEvent*);
+    void setActiveWindow(const QString& name);
+
+private:
+    QMdiArea* m_area;
 
     /*********************************************************************
      * Progress dialog

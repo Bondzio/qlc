@@ -290,7 +290,10 @@ QList <quint32> FixtureGroup::fixtureList() const
 {
     QList <quint32> list;
     foreach (GroupHead head, headList())
-        list << head.fxi;
+    {
+        if (list.contains(head.fxi) == false)
+            list << head.fxi;
+    }
     return list;
 }
 

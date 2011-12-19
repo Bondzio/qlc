@@ -50,7 +50,6 @@
 #include "qlcfile.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
-#define PROP_NAME "name"
 #define KXMLQLCWorkspaceWindow "CurrentWindow"
 
 #define KModeTextOperate QObject::tr("Operate")

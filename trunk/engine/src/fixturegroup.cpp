@@ -412,37 +412,24 @@ bool FixtureGroup::loadXML(const QDomElement& root)
         QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCFixtureGroupHead)
         {
-            bool ok = false;
-            int x = tag.attribute("X").toInt(&ok);
-            if (ok == false)
-                continue;
-
-            int y = tag.attribute("Y").toInt(&ok);
-            if (ok == false)
-                continue;
-
-            quint32 id = tag.attribute("Fixture").toUInt(&ok);
-            if (ok == false)
-                continue;
-
-            int head = tag.text().toInt(&ok);
-            if (ok == false)
-                continue;
+            bool xok = false, yok = false, idok = false, headok = false;
+            int x = tag.attribute("X").toInt(&xok);
+            int y = tag.attribute("Y").toInt(&yok);
+            quint32 id = tag.attribute("Fixture").toUInt(&idok);
+            int head = tag.text().toInt(&headok);
 
             // Don't use assignFixture() here because it assigns complete fixtures at once
-            m_heads[QLCPoint(x, y)] = GroupHead(id, head);
+            if (xok == true && yok == true && idok == true && headok == true)
+                m_heads[QLCPoint(x, y)] = GroupHead(id, head);
         }
         else if (tag.tagName() == KXMLQLCFixtureGroupSize)
         {
-            bool ok = false;
-            int x = tag.attribute("X").toInt(&ok);
-            if (ok == false)
-                continue;
-            int y = tag.attribute("Y").toInt(&ok);
-            if (ok == false)
-                continue;
+            bool xok = false, yok = false;
+            int x = tag.attribute("X").toInt(&xok);
+            int y = tag.attribute("Y").toInt(&yok);
 
-            m_size = QSize(x, y);
+            if (xok == true && yok == true)
+                m_size = QSize(x, y);
         }
         else if (tag.tagName() == KXMLQLCFixtureGroupName)
         {

@@ -34,6 +34,7 @@ private slots:
     void cleanupTestCase();
     void init();
 
+    void groupHead();
     void id();
     void name();
     void size();
@@ -45,6 +46,8 @@ private slots:
     void swap();
     void copy();
     void infoText();
+    void loadWrongID();
+    void loadWrongHeadAttributes();
     void load();
     void save();
 

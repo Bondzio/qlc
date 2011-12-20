@@ -53,6 +53,42 @@ void FixtureGroup_Test::init()
     m_doc->clearContents();
 }
 
+void FixtureGroup_Test::groupHead()
+{
+    GroupHead gh;
+    QCOMPARE(gh.fxi, Fixture::invalidId());
+    QCOMPARE(gh.head, -1);
+    QVERIFY(gh.isValid() == false);
+
+    GroupHead gh2(10, 20);
+    QCOMPARE(gh2.fxi, quint32(10));
+    QCOMPARE(gh2.head, 20);
+    QVERIFY(gh2.isValid() == true);
+
+    QVERIFY((gh == gh2) == false);
+
+    gh = gh2;
+    QCOMPARE(gh.fxi, quint32(10));
+    QCOMPARE(gh.head, 20);
+    QVERIFY(gh.isValid() == true);
+
+    QVERIFY(gh == gh2);
+
+    GroupHead gh3(1);
+    QCOMPARE(gh3.fxi, quint32(1));
+    QCOMPARE(gh3.head, -1);
+    QVERIFY(gh3.isValid() == false);
+
+    QVERIFY((gh2 == gh3) == false);
+
+    GroupHead gh4(Fixture::invalidId(), 1);
+    QCOMPARE(gh4.fxi, Fixture::invalidId());
+    QCOMPARE(gh4.head, 1);
+    QVERIFY(gh4.isValid() == false);
+
+    QVERIFY((gh3 == gh4) == false);
+}
+
 void FixtureGroup_Test::id()
 {
     FixtureGroup grp(m_doc);
@@ -486,10 +522,12 @@ void FixtureGroup_Test::copy()
 void FixtureGroup_Test::infoText()
 {
     FixtureGroup grp(m_doc);
+    grp.setDisplayStyle((FixtureGroup::DisplayStyle) 0xFFFFFFFF);
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
     {
         Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
         m_doc->addFixture(fxi);
         grp.assignFixture(fxi->id());
     }
@@ -497,6 +535,60 @@ void FixtureGroup_Test::infoText()
     grp.resignFixture(0);
 
     QVERIFY(grp.infoText().isEmpty() == false);
+}
+
+void FixtureGroup_Test::loadWrongID()
+{
+    QDomDocument doc;
+    QDomElement root = doc.createElement("FixtureGroup");
+    root.setAttribute("ID", "Pertti");
+    doc.appendChild(root);
+
+    FixtureGroup grp(m_doc);
+    QVERIFY(grp.loadXML(root) == false);
+}
+
+void FixtureGroup_Test::loadWrongHeadAttributes()
+{
+    QDomDocument doc;
+    QDomElement root = doc.createElement("FixtureGroup");
+    root.setAttribute("ID", "12345");
+    doc.appendChild(root);
+
+    QDomElement head = doc.createElement("Head");
+    head.setAttribute("X", "Seppo");
+    head.setAttribute("Y", "0");
+    head.setAttribute("Fixture", "42");
+    QDomText headText = doc.createTextNode("0");
+    head.appendChild(headText);
+    root.appendChild(head);
+
+    FixtureGroup grp(m_doc);
+    QVERIFY(grp.loadXML(root) == true);
+    QCOMPARE(grp.headHash().size(), 0);
+
+    head.setAttribute("X", "0");
+    head.setAttribute("Y", "Pertti");
+
+    QVERIFY(grp.loadXML(root) == true);
+    QCOMPARE(grp.headHash().size(), 0);
+
+    head.setAttribute("Y", "0");
+    head.setAttribute("Fixture", "Jorma");
+
+    QVERIFY(grp.loadXML(root) == true);
+    QCOMPARE(grp.headHash().size(), 0);
+
+    head.setAttribute("Fixture", "42");
+    headText.setData("Esko");
+
+    QVERIFY(grp.loadXML(root) == true);
+    QCOMPARE(grp.headHash().size(), 0);
+
+    headText.setData("0");
+
+    QVERIFY(grp.loadXML(root) == true);
+    QCOMPARE(grp.headHash().size(), 1);
 }
 
 void FixtureGroup_Test::load()
@@ -517,6 +609,10 @@ void FixtureGroup_Test::load()
     QDomDocument doc;
     QDomElement root = doc.createElement("Foo");
     QVERIFY(grp.saveXML(&doc, &root) == true);
+
+    // Extra garbage
+    QDomElement bar = doc.createElement("Bar");
+    root.firstChild().appendChild(bar);
 
     QVERIFY(FixtureGroup::loader(root, m_doc) == false);
 

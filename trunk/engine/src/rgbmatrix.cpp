@@ -112,7 +112,6 @@ quint32 RGBMatrix::fixtureGroup() const
 void RGBMatrix::setScript(const RGBScript& script)
 {
     m_script = script;
-    m_script.evaluate();
 }
 
 RGBScript RGBMatrix::script() const

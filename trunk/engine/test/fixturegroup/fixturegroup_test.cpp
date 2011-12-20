@@ -23,12 +23,23 @@
 #include <QtXml>
 
 #include "fixturegroup_test.h"
+#include "qlcfixturehead.h"
+#include "qlcfixturemode.h"
+#include "qlcfixturedef.h"
 #include "fixturegroup.h"
+#include "qlcfile.h"
 #include "doc.h"
+
+#define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
 void FixtureGroup_Test::initTestCase()
 {
     m_doc = new Doc(this);
+
+    QDir dir(INTERNAL_FIXTUREDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QVERIFY(m_doc->fixtureDefCache()->load(dir) == true);
 }
 
 void FixtureGroup_Test::cleanupTestCase()
@@ -95,36 +106,73 @@ void FixtureGroup_Test::assignFixtureNoSize()
     FixtureGroup grp(m_doc);
     QCOMPARE(grp.headList().size(), 0);
 
-    grp.assignFixture(0);
-    QCOMPARE(grp.headList().size(), 1);
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(2);
+    m_doc->addFixture(fxi);
+
+    grp.assignFixture(fxi->id());
+    QCOMPARE(grp.headList().size(), 2);
     QCOMPARE(grp.size(), QSize(1, 1));
-    pt = QLCPoint(0, 0);
-    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 0)] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 1)] == GroupHead(0, 1));
 
     // Same fixture can't be at two places
     grp.assignFixture(0, QLCPoint(100, 100));
-    QCOMPARE(grp.headList().size(), 1);
-    QCOMPARE(grp.size(), QSize(1, 1));
-    pt = QLCPoint(0, 0);
-    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
-
-    grp.assignFixture(1);
     QCOMPARE(grp.headList().size(), 2);
     QCOMPARE(grp.size(), QSize(1, 1));
-    pt = QLCPoint(0, 0);
-    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
-    pt = QLCPoint(0, 1);
-    QVERIFY(grp.headHash()[pt] == GroupHead(1, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 0)] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 1)] == GroupHead(0, 1));
 
-    grp.assignFixture(2);
+    fxi = new Fixture(m_doc);
+    fxi->setChannels(1);
+    m_doc->addFixture(fxi);
+
+    grp.assignFixture(fxi->id());
     QCOMPARE(grp.headList().size(), 3);
     QCOMPARE(grp.size(), QSize(1, 1));
-    pt = QLCPoint(0, 0);
-    QVERIFY(grp.headHash()[pt] == GroupHead(0, 0));
-    pt = QLCPoint(0, 1);
-    QVERIFY(grp.headHash()[pt] == GroupHead(1, 0));
-    pt = QLCPoint(0, 2);
-    QVERIFY(grp.headHash()[pt] == GroupHead(2, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 0)] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 1)] == GroupHead(0, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 2)] == GroupHead(1, 0));
+
+    const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+    QVERIFY(def != NULL);
+    const QLCFixtureMode* mode = def->modes().first();
+    QVERIFY(mode != NULL);
+
+    fxi = new Fixture(m_doc);
+    fxi->setFixtureDefinition(def, mode);
+    m_doc->addFixture(fxi);
+
+    grp.assignFixture(fxi->id());
+    QCOMPARE(grp.headList().size(), 4);
+    QCOMPARE(grp.size(), QSize(1, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 0)] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 1)] == GroupHead(0, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 2)] == GroupHead(1, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 3)] == GroupHead(2, 0));
+
+    def = m_doc->fixtureDefCache()->fixtureDef("i-Pix", "BB4");
+    QVERIFY(def != NULL);
+    mode = def->modes().last();
+    QVERIFY(mode != NULL);
+    QCOMPARE(mode->heads().size(), 4);
+
+    fxi = new Fixture(m_doc);
+    fxi->setFixtureDefinition(def, mode);
+    m_doc->addFixture(fxi);
+
+    grp.assignFixture(fxi->id());
+    QCOMPARE(grp.headList().size(), 8);
+    QCOMPARE(grp.size(), QSize(1, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 0)] == GroupHead(0, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 1)] == GroupHead(0, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 2)] == GroupHead(1, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 3)] == GroupHead(2, 0));
+    // BB4 heads
+    QVERIFY(grp.headHash()[QLCPoint(0, 4)] == GroupHead(3, 0));
+    QVERIFY(grp.headHash()[QLCPoint(0, 5)] == GroupHead(3, 1));
+    QVERIFY(grp.headHash()[QLCPoint(0, 6)] == GroupHead(3, 2));
+    QVERIFY(grp.headHash()[QLCPoint(0, 7)] == GroupHead(3, 3));
 }
 
 void FixtureGroup_Test::assignFixture4x2()
@@ -133,6 +181,18 @@ void FixtureGroup_Test::assignFixture4x2()
     FixtureGroup grp(m_doc);
     grp.setSize(QSize(4, 2));
     QCOMPARE(grp.headList().size(), 0);
+
+    for (int i = 0; i < 11; i++)
+    {
+        const QLCFixtureDef* def = m_doc->fixtureDefCache()->fixtureDef("Futurelight", "DJScan250");
+        QVERIFY(def != NULL);
+        const QLCFixtureMode* mode = def->modes().first();
+        QVERIFY(mode != NULL);
+
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setFixtureDefinition(def, mode);
+        m_doc->addFixture(fxi);
+    }
 
     grp.assignFixture(0);
     QCOMPARE(grp.headList().size(), 1);
@@ -298,7 +358,12 @@ void FixtureGroup_Test::resignFixture()
     FixtureGroup grp(m_doc);
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
-        grp.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp.assignFixture(fxi->id());
+    }
     QCOMPARE(grp.headList().size(), 16);
 
     // Remove a fixture
@@ -314,6 +379,9 @@ void FixtureGroup_Test::resignFixture()
     QVERIFY(grp.headHash().contains(QLCPoint(1, 3)) == false);
 
     // Test that the gap is again filled
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(1);
+    m_doc->addFixture(fxi, 42);
     grp.assignFixture(42);
     QCOMPARE(grp.headList().size(), 16);
     QVERIFY(grp.headList().contains(GroupHead(42, 0)) == true);
@@ -326,20 +394,20 @@ void FixtureGroup_Test::fixtureRemoved()
     FixtureGroup grp(m_doc);
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
-        grp.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp.assignFixture(fxi->id());
+    }
     QCOMPARE(grp.headList().size(), 16);
-
-    Fixture* fxi = new Fixture(m_doc);
-    fxi->setChannels(5);
-    m_doc->addFixture(fxi, 10);
-    QCOMPARE(fxi->id(), quint32(10));
 
     // FixtureGroup should listen to Doc's fixtureRemoved() signal
     m_doc->deleteFixture(10);
     QCOMPARE(grp.headList().size(), 15);
     QVERIFY(grp.headHash().contains(QLCPoint(2, 2)) == false);
 
-    fxi = new Fixture(m_doc);
+    Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(5);
     m_doc->addFixture(fxi, 69);
     QCOMPARE(fxi->id(), quint32(69));
@@ -354,7 +422,12 @@ void FixtureGroup_Test::swap()
     FixtureGroup grp(m_doc);
     grp.setSize(QSize(4, 4));
     for (quint32 id = 0; id < 16; id++)
-        grp.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp.assignFixture(fxi->id());
+    }
     QCOMPARE(grp.headList().size(), 16);
 
     QLCPoint pt1(0, 0);
@@ -392,7 +465,12 @@ void FixtureGroup_Test::copy()
     grp1.setName("Pertti Pasanen");
     grp1.setId(99);
     for (quint32 id = 0; id < 16; id++)
-        grp1.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp1.assignFixture(fxi->id());
+    }
     QCOMPARE(grp1.fixtureList().size(), 16);
 
     FixtureGroup grp2(m_doc);
@@ -429,7 +507,12 @@ void FixtureGroup_Test::load()
     grp.setId(99);
     grp.setDisplayStyle(FixtureGroup::DisplayName | FixtureGroup::DisplayUniverse);
     for (quint32 id = 0; id < 32; id++)
-        grp.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp.assignFixture(fxi->id());
+    }
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Foo");
@@ -457,7 +540,12 @@ void FixtureGroup_Test::save()
     grp.setId(99);
     grp.setDisplayStyle(FixtureGroup::DisplayIcon | FixtureGroup::DisplayUniverse);
     for (quint32 id = 0; id < 32; id++)
-        grp.assignFixture(id);
+    {
+        Fixture* fxi = new Fixture(m_doc);
+        fxi->setChannels(1);
+        m_doc->addFixture(fxi);
+        grp.assignFixture(fxi->id());
+    }
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Foo");

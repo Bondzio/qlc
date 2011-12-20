@@ -429,6 +429,7 @@ bool FixtureGroup::loadXML(const QDomElement& root)
             if (ok == false)
                 continue;
 
+            // Don't use assignFixture() here because it assigns complete fixtures at once
             m_heads[QLCPoint(x, y)] = GroupHead(id, head);
         }
         else if (tag.tagName() == KXMLQLCFixtureGroupSize)

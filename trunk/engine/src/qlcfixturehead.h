@@ -152,4 +152,22 @@ public:
     bool saveXML(QDomDocument* doc, QDomElement* mode_root) const;
 };
 
+/**
+ * A small specialization class from QLCFixtureHead to be used for each
+ * Generic Dimmer channel to make them work as separate heads.
+ */
+class QLCDimmerHead : public QLCFixtureHead
+{
+public:
+    /**
+     * Construct a new QLCDimmerHead with the given $head number representing
+     * the relative channel number within the dimmer. The $head number is set
+     * as the head's masterIntensityChannel(), with all other cached channels
+     * left invalid.
+     *
+     * @param head The channel/head number to represent
+     */
+    QLCDimmerHead(int head);
+};
+
 #endif

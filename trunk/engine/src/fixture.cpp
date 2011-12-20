@@ -26,7 +26,6 @@
 #include "qlcfixturedefcache.h"
 #include "qlcfixturemode.h"
 #include "qlcfixturehead.h"
-#include "qlcdimmerhead.h"
 #include "qlcfixturedef.h"
 #include "qlccapability.h"
 #include "qlcchannel.h"
@@ -449,7 +448,7 @@ QLCFixtureHead Fixture::head(int index) const
 {
     if (isDimmer() == true)
     {
-        if (index < channels())
+        if (index < int(channels()))
             return QLCDimmerHead(index);
         else
             return QLCFixtureHead();

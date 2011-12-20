@@ -236,3 +236,15 @@ bool QLCFixtureHead::saveXML(QDomDocument* doc, QDomElement* mode_root) const
 
     return true;
 }
+
+/****************************************************************************
+ * QLCDimmerHead
+ ****************************************************************************/
+
+QLCDimmerHead::QLCDimmerHead(int head)
+    : QLCFixtureHead()
+{
+    m_masterIntensityChannel = head;
+    m_channelsCached = true;
+}
+

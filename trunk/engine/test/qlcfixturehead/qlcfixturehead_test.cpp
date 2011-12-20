@@ -284,6 +284,13 @@ void QLCFixtureHead_Test::cacheChannelsPanTilt()
     delete mode;
 }
 
+void QLCFixtureHead_Test::dimmerHead()
+{
+    QLCDimmerHead dh(5);
+    QCOMPARE(dh.masterIntensityChannel(), quint32(5));
+    QCOMPARE(dh.m_channelsCached, true);
+}
+
 void QLCFixtureHead_Test::cleanupTestCase()
 {
     QVERIFY(m_fixtureDef != NULL);

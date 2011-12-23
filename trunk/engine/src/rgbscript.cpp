@@ -22,6 +22,8 @@
 #include <QCoreApplication>
 #include <QScriptEngine>
 #include <QScriptValue>
+#include <QDomDocument>
+#include <QDomElement>
 #include <QTextStream>
 #include <QStringList>
 #include <QDebug>
@@ -65,6 +67,12 @@ bool RGBScript::operator==(const RGBScript& s) const
         return true;
     else
         return false;
+}
+
+RGBAlgorithm* RGBScript::clone() const
+{
+    RGBScript* script = new RGBScript(*this);
+    return static_cast<RGBAlgorithm*> (script);
 }
 
 /****************************************************************************
@@ -205,7 +213,7 @@ RGBMap RGBScript::rgbMap(const QSize& size, uint rgb, int step)
     return map;
 }
 
-QString RGBScript::name()
+QString RGBScript::name() const
 {
     QScriptValue name = m_script.property("name");
     if (name.isValid() == true)
@@ -214,7 +222,7 @@ QString RGBScript::name()
         return QString();
 }
 
-QString RGBScript::author()
+QString RGBScript::author() const
 {
     QScriptValue author = m_script.property("author");
     if (author.isValid() == true)
@@ -226,6 +234,32 @@ QString RGBScript::author()
 int RGBScript::apiVersion() const
 {
     return m_apiVersion;
+}
+
+RGBAlgorithm::Type RGBScript::type() const
+{
+    return RGBAlgorithm::Script;
+}
+
+bool RGBScript::saveXML(QDomDocument* doc, QDomElement* mtx_root) const
+{
+    Q_ASSERT(doc != NULL);
+    Q_ASSERT(mtx_root != NULL);
+
+    QDomElement root = doc->createElement(KXMLQLCRGBAlgorithm);
+    root.setAttribute(KXMLQLCRGBAlgorithmType, KXMLQLCRGBScript);
+    mtx_root->appendChild(root);
+
+    if (apiVersion() > 0 && name().isEmpty() == false)
+    {
+        QDomText text = doc->createTextNode(name());
+        root.appendChild(text);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /****************************************************************************

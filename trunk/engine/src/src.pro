@@ -6,8 +6,7 @@ LANGUAGE = C++
 TARGET   = qlcengine
 
 CONFIG  += qt
-QT      += core xml script
-#QT      -= gui
+QT      += core xml script gui
 QTPLUGIN =
 
 INCLUDEPATH += ../../plugins/interfaces
@@ -69,8 +68,10 @@ HEADERS += bus.h \
            outputpatch.h \
            palettegenerator.h \
            qlcpoint.h \
+           rgbalgorithm.h \
            rgbmatrix.h \
            rgbscript.h \
+           rgbtext.h \
            scene.h \
            scenevalue.h \
            script.h
@@ -114,8 +115,10 @@ SOURCES += bus.cpp \
            outputpatch.cpp \
            palettegenerator.cpp \
            qlcpoint.cpp \
+           rgbalgorithm.cpp \
            rgbmatrix.cpp \
            rgbscript.cpp \
+           rgbtext.cpp \
            scene.cpp \
            scenevalue.cpp \
            script.cpp

@@ -70,24 +70,20 @@ private:
     quint32 m_fixtureGroup;
 
     /************************************************************************
-     * Scripts
+     * Algorithm
      ************************************************************************/
 public:
-    /** Set the script that is used for this RGBMatrix function */
-    void setScript(const RGBScript& script);
+    /** Set the current RGB Algorithm. RGBMatrix takes ownership of the pointer. */
+    void setAlgorithm(RGBAlgorithm* algo);
 
-    /** Get the script that is used for this RGBMatrix function */
-    RGBScript script() const;
+    /** Get the current RGB Algorithm. */
+    RGBAlgorithm* algorithm() const;
 
-    /** Get a list of RGBMap steps for preview purposes */
+    /** Get a list of RGBMap steps for preview purposes, using the current algorithm. */
     QList <RGBMap> previewMaps();
 
 private:
-    /** Attempt to load a script from user or system scripts */
-    void loadScript(const QString& fileName);
-
-private:
-    RGBScript m_script;
+    RGBAlgorithm* m_algorithm;
 
     /************************************************************************
      * Colour

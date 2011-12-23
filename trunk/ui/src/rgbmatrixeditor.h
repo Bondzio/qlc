@@ -55,15 +55,19 @@ private:
 
     void fillPatternCombo();
     void fillFixtureGroupCombo();
+    void updateExtraOptions();
 
     void createPreviewItems();
 
 private slots:
     void slotPreviewTimeout();
     void slotNameEdited(const QString& text);
-    void slotPatternActivated(int index);
+    void slotPatternActivated(const QString& text);
     void slotFixtureGroupActivated(int index);
     void slotColorButtonClicked();
+
+    void slotTextEdited(const QString& text);
+    void slotFontButtonClicked();
 
     void slotLoopClicked();
     void slotPingPongClicked();

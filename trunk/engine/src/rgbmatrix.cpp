@@ -34,9 +34,9 @@
 #include "fadechannel.h"
 #include "rgbmatrix.h"
 #include "qlcmacros.h"
+#include "rgbtext.h"
 #include "doc.h"
 
-#define KXMLQLCRGBMatrixScript "Script"
 #define KXMLQLCRGBMatrixMonoColor "MonoColor"
 #define KXMLQLCRGBMatrixFixtureGroup "FixtureGroup"
 
@@ -47,17 +47,21 @@
 RGBMatrix::RGBMatrix(Doc* doc)
     : Function(doc, Function::RGBMatrix)
     , m_fixtureGroup(FixtureGroup::invalidId())
+    , m_algorithm(NULL)
     , m_monoColor(Qt::red)
     , m_fader(NULL)
     , m_step(0)
 {
     setName(tr("New RGB Matrix"));
     setDuration(500);
-    m_script = RGBScript::script("Full Columns");
+
+    RGBScript scr = RGBScript::script("Full Columns");
+    setAlgorithm(scr.clone());
 }
 
 RGBMatrix::~RGBMatrix()
 {
+    setAlgorithm(NULL);
 }
 
 /****************************************************************************
@@ -85,7 +89,10 @@ bool RGBMatrix::copyFrom(const Function* function)
         return false;
 
     setFixtureGroup(mtx->fixtureGroup());
-    setScript(mtx->script());
+    if (mtx->algorithm() != NULL)
+        setAlgorithm(mtx->algorithm()->clone());
+    else
+        setAlgorithm(NULL);
     setMonoColor(mtx->monoColor());
 
     return Function::copyFrom(function);
@@ -106,28 +113,33 @@ quint32 RGBMatrix::fixtureGroup() const
 }
 
 /****************************************************************************
- * Scripts
+ * Algorithm
  ****************************************************************************/
 
-void RGBMatrix::setScript(const RGBScript& script)
+void RGBMatrix::setAlgorithm(RGBAlgorithm* algo)
 {
-    m_script = script;
+    if (m_algorithm != NULL)
+        delete m_algorithm;
+    m_algorithm = algo;
 }
 
-RGBScript RGBMatrix::script() const
+RGBAlgorithm* RGBMatrix::algorithm() const
 {
-    return m_script;
+    return m_algorithm;
 }
 
 QList <RGBMap> RGBMatrix::previewMaps()
 {
     QList <RGBMap> steps;
 
+    if (m_algorithm == NULL)
+        return steps;
+
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
-    if (grp != NULL && m_script.apiVersion() > 0)
+    if (grp != NULL)
     {
-        for (int i = 0; i < m_script.rgbMapStepCount(grp->size()); i++)
-            steps << m_script.rgbMap(grp->size(), monoColor().rgb(), i);
+        for (int i = 0; i < m_algorithm->rgbMapStepCount(grp->size()); i++)
+            steps << m_algorithm->rgbMap(grp->size(), monoColor().rgb(), i);
     }
 
     return steps;
@@ -175,9 +187,9 @@ bool RGBMatrix::loadXML(const QDomElement& root)
         {
             loadXMLSpeed(tag);
         }
-        else if (tag.tagName() == KXMLQLCRGBMatrixScript)
+        else if (tag.tagName() == KXMLQLCRGBAlgorithm)
         {
-            setScript(RGBScript::script(tag.text()));
+            setAlgorithm(RGBAlgorithm::loader(tag));
         }
         else if (tag.tagName() == KXMLQLCRGBMatrixFixtureGroup)
         {
@@ -233,11 +245,9 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     /* Run order */
     saveXMLRunOrder(doc, &root);
 
-    /* Script */
-    tag = doc->createElement(KXMLQLCRGBMatrixScript);
-    root.appendChild(tag);
-    text = doc->createTextNode(m_script.name());
-    tag.appendChild(text);
+    /* Algorithm */
+    if (m_algorithm != NULL)
+        m_algorithm->saveXML(doc, &root);
 
     /* Mono Color */
     tag = doc->createElement(KXMLQLCRGBMatrixMonoColor);
@@ -263,7 +273,7 @@ void RGBMatrix::preRun(MasterTimer* timer)
     Q_UNUSED(timer);
 
     FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
-    if (grp != NULL)
+    if (grp != NULL && m_algorithm != NULL)
     {
         m_direction = direction();
 
@@ -273,7 +283,7 @@ void RGBMatrix::preRun(MasterTimer* timer)
         if (m_direction == Forward)
             m_step = 0;
         else
-            m_step = m_script.rgbMapStepCount(grp->size());
+            m_step = m_algorithm->rgbMapStepCount(grp->size());
     }
 
     Function::preRun(timer);
@@ -297,13 +307,13 @@ void RGBMatrix::write(MasterTimer* timer, UniverseArray* universes)
         return;
 
     // Invalid/nonexistent script
-    if (m_script.apiVersion() == 0)
+    if (m_algorithm == NULL || m_algorithm->apiVersion() == 0)
         return;
 
     // Get new map every time when elapsed is reset to zero
     if (elapsed() == 0)
     {
-        RGBMap map = m_script.rgbMap(grp->size(), monoColor().rgb(), m_step);
+        RGBMap map = m_algorithm->rgbMap(grp->size(), monoColor().rgb(), m_step);
         updateMapChannels(map, grp);
     }
 
@@ -332,12 +342,15 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
 
 void RGBMatrix::roundCheck(const QSize& size)
 {
+    if (m_algorithm == NULL)
+        return;
+
     if (runOrder() == PingPong)
     {
-        if (m_direction == Forward && m_step >= m_script.rgbMapStepCount(size))
+        if (m_direction == Forward && m_step >= m_algorithm->rgbMapStepCount(size))
         {
             m_direction = Backward;
-            m_step = m_script.rgbMapStepCount(size) - 2;
+            m_step = m_algorithm->rgbMapStepCount(size) - 2;
         }
         else if (m_direction == Backward && m_step <= 0)
         {
@@ -356,7 +369,7 @@ void RGBMatrix::roundCheck(const QSize& size)
     {
         if (m_direction == Forward)
         {
-            if (m_step >= m_script.rgbMapStepCount(size) - 1)
+            if (m_step >= m_algorithm->rgbMapStepCount(size) - 1)
                 stop();
             else
                 m_step++;
@@ -366,7 +379,7 @@ void RGBMatrix::roundCheck(const QSize& size)
     {
         if (m_direction == Forward)
         {
-            if (m_step >= m_script.rgbMapStepCount(size) - 1)
+            if (m_step >= m_algorithm->rgbMapStepCount(size) - 1)
                 m_step = 0;
             else
                 m_step++;
@@ -374,7 +387,7 @@ void RGBMatrix::roundCheck(const QSize& size)
         else
         {
             if (m_step <= 0)
-                m_step = m_script.rgbMapStepCount(size) - 1;
+                m_step = m_algorithm->rgbMapStepCount(size) - 1;
             else
                 m_step--;
         }

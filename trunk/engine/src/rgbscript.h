@@ -23,15 +23,15 @@
 #define RGBSCRIPT_H
 
 #include <QScriptValue>
-#include <QString>
+#include "rgbalgorithm.h"
 
 class QScriptEngine;
 class QSize;
 class QDir;
 
-typedef QVector<QVector<uint> > RGBMap;
+#define KXMLQLCRGBScript "Script"
 
-class RGBScript
+class RGBScript : public RGBAlgorithm
 {
     /************************************************************************
      * Initialization
@@ -43,6 +43,9 @@ public:
 
     /** Comparison operator. Uses simply fileName() == s.fileName(). */
     bool operator==(const RGBScript& s) const;
+
+    /** @reimp */
+    RGBAlgorithm* clone() const;
 
     /************************************************************************
      * Load & Evaluation
@@ -63,23 +66,32 @@ private:
     QString m_contents;             //! The file's contents
 
     /************************************************************************
-     * Script API
+     * RGBAlgorithm API
      ************************************************************************/
 public:
-    /** Maximum step count for rgbMap() function */
+    /** @reimp */
     int rgbMapStepCount(const QSize& size);
 
-    /** Get the RGBMap for the given step */
+    /** @reimp */
     RGBMap rgbMap(const QSize& size, uint rgb, int step);
 
-    /** Get the name of the script */
-    QString name();
+    /** @reimp */
+    QString name() const;
 
-    /** Get the name of the script's author */
-    QString author();
+    /** @reimp */
+    QString author() const;
 
-    /** Get the script's API version. 0 == invalid or unevaluated script. */
+    /** @reimp */
     int apiVersion() const;
+
+    /** @reimp */
+    RGBAlgorithm::Type type() const;
+
+    /** @reimp */
+    bool loadXML(const QDomElement& root);
+
+    /** @reimp */
+    bool saveXML(QDomDocument* doc, QDomElement* mtx_root) const;
 
 private:
     int m_apiVersion;               //! The API version that the script uses

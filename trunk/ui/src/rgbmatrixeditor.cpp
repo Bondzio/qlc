@@ -25,6 +25,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QColorDialog>
+#include <QFontDialog>
 #include <QGradient>
 #include <QSettings>
 #include <QTimer>
@@ -35,6 +36,7 @@
 #include "speedspinbox.h"
 #include "rgbmatrix.h"
 #include "rgbitem.h"
+#include "rgbtext.h"
 #include "apputil.h"
 #include "doc.h"
 
@@ -172,12 +174,16 @@ void RGBMatrixEditor::init()
 
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
-    connect(m_patternCombo, SIGNAL(activated(int)),
-            this, SLOT(slotPatternActivated(int)));
+    connect(m_patternCombo, SIGNAL(activated(const QString&)),
+            this, SLOT(slotPatternActivated(const QString&)));
     connect(m_fixtureGroupCombo, SIGNAL(activated(int)),
             this, SLOT(slotFixtureGroupActivated(int)));
     connect(m_colorButton, SIGNAL(clicked()),
             this, SLOT(slotColorButtonClicked()));
+    connect(m_textEdit, SIGNAL(textEdited(const QString&)),
+            this, SLOT(slotTextEdited(const QString&)));
+    connect(m_fontButton, SIGNAL(clicked()),
+            this, SLOT(slotFontButtonClicked()));
 
     connect(m_loop, SIGNAL(clicked()), this, SLOT(slotLoopClicked()));
     connect(m_pingPong, SIGNAL(clicked()), this, SLOT(slotPingPongClicked()));
@@ -203,19 +209,15 @@ void RGBMatrixEditor::init()
 
 void RGBMatrixEditor::fillPatternCombo()
 {
-    m_scripts = RGBScript::scripts();
-    QListIterator <RGBScript> it(m_scripts);
-    while (it.hasNext() == true)
+    m_patternCombo->addItems(RGBAlgorithm::algorithms());
+    if (m_mtx->algorithm() != NULL)
     {
-        RGBScript script(it.next());
-        if (script.evaluate() == true && script.apiVersion() > 0 &&
-            script.name().isEmpty() == false)
-        {
-            m_patternCombo->addItem(script.name(), script.fileName());
-            if (script == m_mtx->script())
-                m_patternCombo->setCurrentIndex(m_patternCombo->count() - 1);
-        }
+        int index = m_patternCombo->findText(m_mtx->algorithm()->name());
+        if (index >= 0)
+            m_patternCombo->setCurrentIndex(index);
     }
+
+    updateExtraOptions();
 }
 
 void RGBMatrixEditor::fillFixtureGroupCombo()
@@ -231,6 +233,25 @@ void RGBMatrixEditor::fillFixtureGroupCombo()
         m_fixtureGroupCombo->addItem(grp->name(), grp->id());
         if (m_mtx->fixtureGroup() == grp->id())
             m_fixtureGroupCombo->setCurrentIndex(m_fixtureGroupCombo->count() - 1);
+    }
+}
+
+void RGBMatrixEditor::updateExtraOptions()
+{
+    if (m_mtx->algorithm() == NULL || m_mtx->algorithm()->type() != RGBAlgorithm::Text)
+    {
+        m_textGroup->hide();
+        m_fontGroup->hide();
+    }
+    else
+    {
+        m_textGroup->show();
+        m_fontGroup->show();
+
+        RGBText* text = static_cast<RGBText*> (m_mtx->algorithm());
+        Q_ASSERT(text != NULL);
+        m_textEdit->setText(text->text());
+        m_fontEdit->setText(QString("%1-%2").arg(text->font().family()).arg(text->font().pointSize()));
     }
 }
 
@@ -335,20 +356,12 @@ void RGBMatrixEditor::slotNameEdited(const QString& text)
     m_mtx->setName(text);
 }
 
-void RGBMatrixEditor::slotPatternActivated(int index)
+void RGBMatrixEditor::slotPatternActivated(const QString& text)
 {
-    QString fileName(m_patternCombo->itemData(index).toString());
-    QListIterator <RGBScript> it(m_scripts);
-    while (it.hasNext() == true)
-    {
-        const RGBScript& script(it.next());
-        if (script.fileName() == fileName)
-        {
-            m_mtx->setScript(script);
-            slotRestartTest();
-            break;
-        }
-    }
+    RGBAlgorithm* algo = RGBAlgorithm::algorithm(text);
+    m_mtx->setAlgorithm(algo);
+    updateExtraOptions();
+    slotRestartTest();
 }
 
 void RGBMatrixEditor::slotColorButtonClicked()
@@ -362,6 +375,35 @@ void RGBMatrixEditor::slotColorButtonClicked()
         m_colorButton->setIcon(QIcon(pm));
 
         slotRestartTest();
+    }
+}
+
+void RGBMatrixEditor::slotTextEdited(const QString& text)
+{
+    if (m_mtx->algorithm() != NULL && m_mtx->algorithm()->type() == RGBAlgorithm::Text)
+    {
+        RGBText* algo = static_cast<RGBText*> (m_mtx->algorithm());
+        Q_ASSERT(algo != NULL);
+        algo->setText(text);
+        slotRestartTest();
+    }
+}
+
+void RGBMatrixEditor::slotFontButtonClicked()
+{
+    if (m_mtx->algorithm() != NULL && m_mtx->algorithm()->type() == RGBAlgorithm::Text)
+    {
+        RGBText* algo = static_cast<RGBText*> (m_mtx->algorithm());
+        Q_ASSERT(algo != NULL);
+
+        bool ok = false;
+        QFont font = QFontDialog::getFont(&ok, algo->font(), this);
+        if (ok == true)
+        {
+            algo->setFont(font);
+            m_fontEdit->setText(QString("%1-%2").arg(algo->font().family()).arg(algo->font().pointSize()));
+            slotRestartTest();
+        }
     }
 }
 

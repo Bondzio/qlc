@@ -86,8 +86,8 @@ void RGBMatrix_Test::initial()
     QCOMPARE(mtx.m_step, 0);
     QCOMPARE(mtx.name(), tr("New RGB Matrix"));
     QCOMPARE(mtx.duration(), uint(500));
-    QCOMPARE(mtx.script().fileName(), QString("fullcolumns.js"));
-    QCOMPARE(mtx.script().name(), QString("Full Columns"));
+    QVERIFY(mtx.algorithm() != NULL);
+    QCOMPARE(mtx.algorithm()->name(), QString("Full Columns"));
 }
 
 void RGBMatrix_Test::group()
@@ -118,19 +118,23 @@ void RGBMatrix_Test::copy()
     RGBMatrix mtx(m_doc);
     mtx.setMonoColor(Qt::magenta);
     mtx.setFixtureGroup(0);
-    mtx.setScript(RGBScript::scripts().last());
+    mtx.setAlgorithm(RGBAlgorithm::algorithm("Full Columns"));
+    QVERIFY(mtx.algorithm() != NULL);
 
     RGBMatrix* copyMtx = qobject_cast<RGBMatrix*> (mtx.createCopy(m_doc));
     QVERIFY(copyMtx != NULL);
     QCOMPARE(copyMtx->monoColor(), QColor(Qt::magenta));
     QCOMPARE(copyMtx->fixtureGroup(), uint(0));
-    QCOMPARE(copyMtx->script(), RGBScript::scripts().last());
+    QVERIFY(copyMtx->algorithm() != NULL);
+    QVERIFY(copyMtx->algorithm() != mtx.algorithm()); // Different object pointer!
+    QCOMPARE(copyMtx->algorithm()->name(), QString("Full Columns"));
 }
 
 void RGBMatrix_Test::previewMaps()
 {
     RGBMatrix mtx(m_doc);
-    QCOMPARE(mtx.script().name(), QString("Full Columns"));
+    QVERIFY(mtx.algorithm() != NULL);
+    QCOMPARE(mtx.algorithm()->name(), QString("Full Columns"));
 
     QList <RGBMap> maps = mtx.previewMaps();
     QCOMPARE(maps.size(), 0); // No fixture group
@@ -158,7 +162,9 @@ void RGBMatrix_Test::loadSave()
     RGBMatrix* mtx = new RGBMatrix(m_doc);
     mtx->setMonoColor(Qt::magenta);
     mtx->setFixtureGroup(42);
-    mtx->setScript(RGBScript::script("Full Columns"));
+    mtx->setAlgorithm(RGBAlgorithm::algorithm("Full Rows"));
+    QVERIFY(mtx->algorithm() != NULL);
+    QCOMPARE(mtx->algorithm()->name(), QString("Full Rows"));
 
     mtx->setName("Xyzzy");
     mtx->setDirection(Function::Backward);
@@ -176,7 +182,7 @@ void RGBMatrix_Test::loadSave()
     QCOMPARE(root.firstChild().toElement().attribute("ID"), QString::number(mtx->id()));
     QCOMPARE(root.firstChild().toElement().attribute("Name"), QString("Xyzzy"));
 
-    int speed = 0, dir = 0, run = 0, script = 0, monocolor = 0, grp = 0;
+    int speed = 0, dir = 0, run = 0, algo = 0, monocolor = 0, grp = 0;
 
     QDomNode node = root.firstChild().firstChild();
     while (node.isNull() == false)
@@ -199,10 +205,10 @@ void RGBMatrix_Test::loadSave()
             QCOMPARE(tag.text(), QString("PingPong"));
             run++;
         }
-        else if (tag.tagName() == "Script")
+        else if (tag.tagName() == "Algorithm")
         {
-            QCOMPARE(tag.text(), QString("Full Columns"));
-            script++;
+            // RGBAlgorithms take care of Algorithm tag's contents
+            algo++;
         }
         else if (tag.tagName() == "MonoColor")
         {
@@ -216,7 +222,7 @@ void RGBMatrix_Test::loadSave()
         }
         else
         {
-            QFAIL(QString("Unexpected tag: ").arg(tag.tagName()).toUtf8().constData());
+            QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
         }
 
         node = node.nextSibling();
@@ -225,7 +231,7 @@ void RGBMatrix_Test::loadSave()
     QCOMPARE(speed, 1);
     QCOMPARE(dir, 1);
     QCOMPARE(run, 1);
-    QCOMPARE(script, 1);
+    QCOMPARE(algo, 1);
     QCOMPARE(monocolor, 1);
     QCOMPARE(grp, 1);
 
@@ -240,7 +246,8 @@ void RGBMatrix_Test::loadSave()
     QCOMPARE(mtx2.runOrder(), Function::PingPong);
     QCOMPARE(mtx2.monoColor(), QColor(Qt::magenta));
     QCOMPARE(mtx2.fixtureGroup(), uint(42));
-    QCOMPARE(mtx2.script(), mtx->script());
+    QVERIFY(mtx2.algorithm() != NULL);
+    QCOMPARE(mtx2.algorithm()->name(), mtx->algorithm()->name());
     QCOMPARE(mtx2.duration(), uint(1200));
     QCOMPARE(mtx2.fadeInSpeed(), uint(10));
     QCOMPARE(mtx2.fadeOutSpeed(), uint(20));

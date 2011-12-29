@@ -138,6 +138,9 @@ bool QLCFTDI::open()
     }
     else
     {
+        status = FT_SetTimeouts(m_handle, 5000, 5000);
+        if (status != FT_OK)
+            qWarning() << Q_FUNC_INFO << "Unable to set R/W timeouts";
         return true;
     }
 }

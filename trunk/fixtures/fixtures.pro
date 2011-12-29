@@ -11,6 +11,7 @@ fixtures.files += American-DJ-Nucleus-LED.qxf
 fixtures.files += American-DJ-ProPAR-56RGB.qxf
 fixtures.files += American-DJ-Quad-Gem-DMX.qxf
 fixtures.files += American-DJ-Spherion-Tri-LED.qxf
+fixtures.files += American-DJ-Revo-3.qxf
 fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
 fixtures.files += Chauvet-200b.qxf

@@ -236,6 +236,7 @@ void ChaserEditor::slotAddClicked()
 
         m_list->setCurrentItem(item);
         updateStepNumbers();
+        updateChaserContents();
 
         updateClipboardButtons();
     }

@@ -2,7 +2,7 @@
 <FixtureDefinition>
  <Creator>
   <Name>Q Light Controller</Name>
-  <Version>3.1.0</Version>
+  <Version>3.3.0-r2741</Version>
   <Author>eklynx</Author>
  </Creator>
  <Manufacturer>American DJ</Manufacturer>
@@ -152,6 +152,21 @@
   <Channel Number="8">Blue 3</Channel>
   <Channel Number="9">Strobe Speed</Channel>
   <Channel Number="10">Dimmer Control</Channel>
+  <Head>
+   <Channel>0</Channel>
+   <Channel>1</Channel>
+   <Channel>2</Channel>
+  </Head>
+  <Head>
+   <Channel>3</Channel>
+   <Channel>4</Channel>
+   <Channel>5</Channel>
+  </Head>
+  <Head>
+   <Channel>6</Channel>
+   <Channel>7</Channel>
+   <Channel>8</Channel>
+  </Head>
  </Mode>
  <Mode Name="2 Channels">
   <Physical>

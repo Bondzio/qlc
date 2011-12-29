@@ -8,6 +8,7 @@ fixtures.files += American-DJ-Galaxian-3D.qxf
 fixtures.files += American-DJ-Mega-Bar-LED.qxf
 fixtures.files += American-DJ-Mega-Flash-DMX.qxf
 fixtures.files += American-DJ-Nucleus-LED.qxf
+fixtures.files += American-DJ-ProPAR-56RGB.qxf
 fixtures.files += American-DJ-Quad-Gem-DMX.qxf
 fixtures.files += American-DJ-Spherion-Tri-LED.qxf
 fixtures.files += American-DJ-Revo-4.qxf

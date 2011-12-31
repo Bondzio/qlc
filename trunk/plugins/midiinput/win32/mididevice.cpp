@@ -112,7 +112,7 @@ static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg,
         {
             if (channel == CHANNEL_OFFSET_MBC)
                 if (self->incrementMBCCount() == false)
-                    continue;
+                    return;
 
             MIDIInputEvent* event = new MIDIInputEvent(self, channel, value);
             QApplication::postEvent(self, event);

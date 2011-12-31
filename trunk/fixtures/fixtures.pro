@@ -88,6 +88,7 @@ fixtures.files += GLP-ImpressionXL.qxf
 fixtures.files += GLP-Junior-Scan-1.qxf
 fixtures.files += GLP-Junior-Scan-2.qxf
 fixtures.files += GLP-PocketScan.qxf
+fixtures.files += GLP-Volkslicht.qxf
 fixtures.files += GLP-YPOC250.qxf
 fixtures.files += GLP-YPOC250Pro.qxf
 fixtures.files += GLP-YPOC575.qxf

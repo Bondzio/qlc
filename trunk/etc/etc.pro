@@ -40,11 +40,13 @@ win32 {
     qtlibs.path  = $$INSTALLROOT/$$LIBSDIR
     release:qtlibs.files = $$(QTDIR)/bin/QtCore4.dll \
                            $$(QTDIR)/bin/QtGui4.dll \
-                           $$(QTDIR)/bin/QtXml4.dll
+                           $$(QTDIR)/bin/QtXml4.dll \
+                           $$(QTDIR)/bin/QtScript4.dll
 
     debug:qtlibs.files = $$(QTDIR)/bin/QtCored4.dll \
                          $$(QTDIR)/bin/QtGuid4.dll \
-                         $$(QTDIR)/bin/QtXmld4.dll
+                         $$(QTDIR)/bin/QtXmld4.dll \
+                         $$(QTDIR)/bin/QtScriptd4.dll
     INSTALLS += qtlibs
 
     # MinGW library

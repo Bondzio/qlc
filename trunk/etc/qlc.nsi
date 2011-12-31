@@ -56,6 +56,7 @@ Section
 	File QtGui4.dll
 	File QtXml4.dll
 	File QtNetwork4.dll
+    File QtScript4.dll
 	File Sample.qxw
 	File *.qm
 	File /r Documents
@@ -93,6 +94,7 @@ Section "Uninstall"
 	Delete $INSTDIR\QtGui4.dll
 	Delete $INSTDIR\QtXml4.dll
 	Delete $INSTDIR\QtNetwork4.dll
+    Delete $INSTDIR\QtScript4.dll
 	Delete $INSTDIR\Sample.qxw
 	Delete $INSTDIR\*.qm
 	RMDir /r $INSTDIR\Documents

@@ -49,24 +49,33 @@ void CueStackModel::setCueStack(CueStack* cs)
 
     if (m_cueStack != NULL)
     {
-        beginRemoveRows(QModelIndex(), 0, m_cueStack->cues().size() - 1);
+        // Don't attempt to remove anything if there's nothing to remove
+        int last = m_cueStack->cues().size() - 1;
+        if (last >= 0)
+            beginRemoveRows(QModelIndex(), 0, last);
+
         disconnect(m_cueStack, SIGNAL(added(int)), this, SLOT(slotAdded(int)));
         disconnect(m_cueStack, SIGNAL(removed(int)), this, SLOT(slotRemoved(int)));
         disconnect(m_cueStack, SIGNAL(changed(int)), this, SLOT(slotChanged(int)));
         disconnect(m_cueStack, SIGNAL(currentCueChanged(int)), this, SLOT(slotCurrentCueChanged(int)));
         m_cueStack = NULL;
-        endRemoveRows();
+
+        if (last >= 0)
+            endRemoveRows();
     }
 
     if (cs != NULL)
     {
-        beginInsertRows(QModelIndex(), 0, cs->cues().size() - 1);
+        // Don't attempt to insert anything if there's nothing to insert
+        if (cs->cues().size() > 0)
+            beginInsertRows(QModelIndex(), 0, cs->cues().size() - 1);
         m_cueStack = cs;
         connect(m_cueStack, SIGNAL(added(int)), this, SLOT(slotAdded(int)));
         connect(m_cueStack, SIGNAL(removed(int)), this, SLOT(slotRemoved(int)));
         connect(m_cueStack, SIGNAL(changed(int)), this, SLOT(slotChanged(int)));
         connect(m_cueStack, SIGNAL(currentCueChanged(int)), this, SLOT(slotCurrentCueChanged(int)));
-        endInsertRows();
+        if (cs->cues().size() > 0)
+            endInsertRows();
     }
 }
 
@@ -123,10 +132,10 @@ QVariant CueStackModel::headerData(int section, Qt::Orientation orientation, int
     {
     case 0:
         return tr("Number");
-        break;
     case 1:
         return tr("Cue");
-        break;
+    default:
+        return QVariant();
     }
 }
 

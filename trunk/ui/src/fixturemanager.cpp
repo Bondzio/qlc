@@ -634,20 +634,21 @@ void FixtureManager::initActions()
             this, SLOT(slotUnGroup()));
 
     m_newGroupAction = new QAction(tr("New Group..."), this);
-
-    updateGroupMenu();
 }
 
 void FixtureManager::updateGroupMenu()
 {
-    if (m_groupMenu != NULL)
+    if (m_groupMenu == NULL)
     {
-        m_groupAction->setMenu(NULL);
-        delete m_groupMenu;
+        m_groupMenu = new QMenu(this);
+        connect(m_groupMenu, SIGNAL(triggered(QAction*)),
+                this, SLOT(slotGroupSelected(QAction*)));
     }
 
-    // Put all known fixture groups to a menu
-    m_groupMenu = new QMenu(this);
+    foreach (QAction* a, m_groupMenu->actions())
+        m_groupMenu->removeAction(a);
+
+    // Put all known fixture groups to the menu
     foreach (FixtureGroup* grp, m_doc->fixtureGroups())
     {
         QAction* a = m_groupMenu->addAction(grp->name());
@@ -659,9 +660,6 @@ void FixtureManager::updateGroupMenu()
 
     // Put the group menu to the group action
     m_groupAction->setMenu(m_groupMenu);
-
-    connect(m_groupMenu, SIGNAL(triggered(QAction*)),
-            this, SLOT(slotGroupSelected(QAction*)));
 }
 
 void FixtureManager::initToolBar()
@@ -1009,37 +1007,31 @@ void FixtureManager::slotGroupSelected(QAction* action)
     if (action->data().isValid() == true)
     {
         // Existing group selected
-        grp = (FixtureGroup*) action->data().toULongLong();
+        grp = (FixtureGroup*) (action->data().toULongLong());
         Q_ASSERT(grp != NULL);
     }
     else
     {
         // New Group selected
         bool ok = false;
-        QString name;
+        QString name = QInputDialog::getText(this, tr("Create new group"), tr("Group name"),
+                                             QLineEdit::Normal, QString(), &ok);
+        if (ok == false)
+            return; // User pressed cancel
 
-        while (ok == false)
-        {
-            name = QInputDialog::getText(this, tr("Create new group"), tr("Group name"),
-                                         QLineEdit::Normal, name, &ok);
-            if (ok == false)
-                return; // User pressed cancel
+        grp = new FixtureGroup(m_doc);
+        Q_ASSERT(grp != NULL);
+        grp->setName(name);
+        m_doc->addFixtureGroup(grp);
+        updateGroupMenu();
 
-            grp = new FixtureGroup(m_doc);
-            Q_ASSERT(grp != NULL);
-            grp->setName(name);
-            m_doc->addFixtureGroup(grp);
-            updateGroupMenu();
-            ok = true;
-
-            qreal side = sqrt(headCount(m_tree->selectedItems()));
-            //qreal side = sqrt(m_tree->selectedItems().size());
-            if (side != floor(side))
-                side += 1; // Fixture number doesn't provide a full square
-            grp->setSize(QSize(side, side)); // Arrange fixtures into a grid
-        }
+        qreal side = sqrt(headCount(m_tree->selectedItems()));
+        if (side != floor(side))
+            side += 1; // Fixture number doesn't provide a full square
+        grp->setSize(QSize(side, side)); // Arrange fixtures into an equilateral grid
     }
 
+    // Assign selected fixture items to the group
     foreach (QTreeWidgetItem* item, m_tree->selectedItems())
     {
         QVariant var = item->data(KColumnName, PROP_FIXTURE);

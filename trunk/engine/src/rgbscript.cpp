@@ -31,6 +31,10 @@
 #include <QSize>
 #include <QDir>
 
+#ifdef WIN32
+#   include <windows.h>
+#endif
+
 #include "rgbscript.h"
 #include "qlcconfig.h"
 

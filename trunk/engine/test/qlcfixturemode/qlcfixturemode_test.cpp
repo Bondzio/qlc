@@ -327,10 +327,10 @@ void QLCFixtureMode_Test::heads()
     QVERIFY(mode->m_heads[1].m_channels.contains(15) == true);
     QVERIFY(mode->m_heads[1].m_channels.contains(16) == true);
 
-    mode->removeHead(1);
+    mode->removeHead(0);
     QCOMPARE(mode->heads().size(), 1);
-    QVERIFY(mode->m_heads[1].m_channels.contains(15) == true);
-    QVERIFY(mode->m_heads[1].m_channels.contains(16) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(15) == true);
+    QVERIFY(mode->m_heads[0].m_channels.contains(16) == true);
 
     mode->removeHead(0);
     QCOMPARE(mode->heads().size(), 0);

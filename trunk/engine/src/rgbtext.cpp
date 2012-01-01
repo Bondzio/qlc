@@ -28,12 +28,14 @@
 #include "rgbtext.h"
 
 RGBText::RGBText()
+    : RGBAlgorithm()
 {
     m_text = "Q L C  ";
 }
 
 RGBText::RGBText(const RGBText& t)
-    : m_text(t.text())
+    : RGBAlgorithm()
+    , m_text(t.text())
     , m_font(t.font())
 {
 }
@@ -102,9 +104,7 @@ RGBMap RGBText::rgbMap(const QSize& size, uint rgb, int step)
     {
         map[y].resize(size.width());
         for (int x = 0; x < size.width(); x++)
-        {
             map[y][x] = image.pixel(x, y);
-        }
     }
 
     return map;

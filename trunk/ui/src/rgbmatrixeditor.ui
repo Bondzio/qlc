@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>565</width>
-    <height>533</height>
+    <height>597</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -163,6 +163,18 @@
              </size>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="m_animationGroup">
+         <property name="title">
+          <string>Animation</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QComboBox" name="m_animationCombo"/>
           </item>
          </layout>
         </widget>

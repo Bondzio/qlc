@@ -27,9 +27,7 @@
 
 #include "rgbalgorithm.h"
 
-#define KXMLQLCRGBText        "Text"
-#define KXMLQLCRGBTextContent "Content"
-#define KXMLQLCRGBTextFont    "Font"
+#define KXMLQLCRGBText               "Text"
 
 class RGBText : public RGBAlgorithm
 {
@@ -60,6 +58,27 @@ public:
 private:
     QString m_text;
     QFont m_font;
+
+    /************************************************************************
+     * Animation
+     ************************************************************************/
+public:
+    enum AnimationStyle { StaticLetters, Horizontal, Vertical };
+
+    void setAnimationStyle(AnimationStyle ani);
+    AnimationStyle animationStyle() const;
+
+    static QString animationStyleToString(AnimationStyle ani);
+    static AnimationStyle stringToAnimationStyle(const QString& str);
+    static QStringList animationStyles();
+
+private:
+    int scrollingTextSteps(const QSize& size) const;
+    RGBMap renderScrollingText(const QSize& size, uint rgb, int step) const;
+    RGBMap renderStaticLetters(const QSize& size, uint rgb, int step) const;
+
+private:
+    AnimationStyle m_animationStyle;
 
     /************************************************************************
      * RGBAlgorithm

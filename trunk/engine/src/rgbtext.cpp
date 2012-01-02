@@ -27,16 +27,22 @@
 
 #include "rgbtext.h"
 
+#define KXMLQLCRGBTextContent        "Content"
+#define KXMLQLCRGBTextFont           "Font"
+#define KXMLQLCRGBTextAnimationStyle "Animation"
+
 RGBText::RGBText()
     : RGBAlgorithm()
+    , m_text(" Q LIGHT CONTROLLER ")
+    , m_animationStyle(Horizontal)
 {
-    m_text = "Q L C  ";
 }
 
 RGBText::RGBText(const RGBText& t)
     : RGBAlgorithm()
     , m_text(t.text())
     , m_font(t.font())
+    , m_animationStyle(t.animationStyle())
 {
 }
 
@@ -51,7 +57,7 @@ RGBAlgorithm* RGBText::clone() const
 }
 
 /****************************************************************************
- * RGBText
+ * Text & Font
  ****************************************************************************/
 
 void RGBText::setText(const QString& str)
@@ -75,16 +81,95 @@ QFont RGBText::font() const
 }
 
 /****************************************************************************
- * RGBAlgorithm
+ * Animation
  ****************************************************************************/
 
-int RGBText::rgbMapStepCount(const QSize& size)
+void RGBText::setAnimationStyle(RGBText::AnimationStyle ani)
 {
-    Q_UNUSED(size);
-    return m_text.length();
+    m_animationStyle = ani;
 }
 
-RGBMap RGBText::rgbMap(const QSize& size, uint rgb, int step)
+RGBText::AnimationStyle RGBText::animationStyle() const
+{
+    return m_animationStyle;
+}
+
+QString RGBText::animationStyleToString(RGBText::AnimationStyle ani)
+{
+    switch (ani)
+    {
+    default:
+    case StaticLetters:
+        return QString("Letters");
+    case Horizontal:
+        return QString("Horizontal");
+    case Vertical:
+        return QString("Vertical");
+    }
+}
+
+RGBText::AnimationStyle RGBText::stringToAnimationStyle(const QString& str)
+{
+    if (str == QString("Horizontal"))
+        return Horizontal;
+    else if (str == QString("Vertical"))
+        return Vertical;
+    else
+        return StaticLetters;
+}
+
+QStringList RGBText::animationStyles()
+{
+    QStringList list;
+    list << animationStyleToString(StaticLetters);
+    list << animationStyleToString(Horizontal);
+    list << animationStyleToString(Vertical);
+    return list;
+}
+
+int RGBText::scrollingTextSteps(const QSize& size) const
+{
+    // Estimate the text length in pixels. Available matrix size doesn't matter.
+    Q_UNUSED(size);
+    QFontMetrics fm(m_font);
+    return fm.width(m_text);
+}
+
+RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
+{
+    RGBMap map(size.height());
+
+    QImage image(scrollingTextSteps(size), size.height(), QImage::Format_RGB32);
+    image.fill(0);
+
+    QPainter p(&image);
+    p.setRenderHint(QPainter::TextAntialiasing, false);
+    p.setRenderHint(QPainter::Antialiasing, false);
+    p.setFont(m_font);
+    p.setPen(QColor(rgb));
+
+    // Draw the whole text each time
+    p.drawText(QRect(0, 0, image.width(), size.height()), Qt::AlignLeft | Qt::AlignVCenter, m_text);
+    p.end();
+
+    // Treat the RGBMap as a "window" on top of the fully-drawn text and pick the
+    // correct pixels according to $step.
+    for (int y = 0; y < size.height(); y++)
+    {
+        map[y].resize(size.width());
+        for (int x = 0; x < size.width(); x++)
+        {
+            if (step + x >= image.width())
+                map[y][x] = QRgb(0);
+            else
+                map[y][x] = image.pixel(step + x, y);
+        }
+    }
+
+    return map;
+}
+
+RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
 {
     RGBMap map(size.height());
 
@@ -108,6 +193,26 @@ RGBMap RGBText::rgbMap(const QSize& size, uint rgb, int step)
     }
 
     return map;
+}
+
+/****************************************************************************
+ * RGBAlgorithm
+ ****************************************************************************/
+
+int RGBText::rgbMapStepCount(const QSize& size)
+{
+    if (animationStyle() == StaticLetters)
+        return m_text.length();
+    else
+        return scrollingTextSteps(size);
+}
+
+RGBMap RGBText::rgbMap(const QSize& size, uint rgb, int step)
+{
+    if (animationStyle() == StaticLetters)
+        return renderStaticLetters(size, rgb, step);
+    else
+        return renderScrollingText(size, rgb, step);
 }
 
 QString RGBText::name() const
@@ -160,6 +265,10 @@ bool RGBText::loadXML(const QDomElement& root)
             else
                 qWarning() << Q_FUNC_INFO << "Invalid font:" << tag.text();
         }
+        else if (tag.tagName() == KXMLQLCRGBTextAnimationStyle)
+        {
+            setAnimationStyle(stringToAnimationStyle(tag.text()));
+        }
 
         node = node.nextSibling();
     }
@@ -185,6 +294,11 @@ bool RGBText::saveXML(QDomDocument* doc, QDomElement* mtx_root) const
     QDomText fontText = doc->createTextNode(m_font.toString());
     font.appendChild(fontText);
     root.appendChild(font);
+
+    QDomElement ani = doc->createElement(KXMLQLCRGBTextAnimationStyle);
+    QDomText aniText = doc->createTextNode(animationStyleToString(animationStyle()));
+    ani.appendChild(aniText);
+    root.appendChild(ani);
 
     return true;
 }

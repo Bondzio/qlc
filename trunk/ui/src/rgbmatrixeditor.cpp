@@ -163,6 +163,7 @@ void RGBMatrixEditor::init()
 
     fillPatternCombo();
     fillFixtureGroupCombo();
+    fillAnimationCombo();
 
     m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
     m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
@@ -184,6 +185,8 @@ void RGBMatrixEditor::init()
             this, SLOT(slotTextEdited(const QString&)));
     connect(m_fontButton, SIGNAL(clicked()),
             this, SLOT(slotFontButtonClicked()));
+    connect(m_animationCombo, SIGNAL(activated(const QString&)),
+            this, SLOT(slotAnimationActivated(const QString&)));
 
     connect(m_loop, SIGNAL(clicked()), this, SLOT(slotLoopClicked()));
     connect(m_pingPong, SIGNAL(clicked()), this, SLOT(slotPingPongClicked()));
@@ -205,6 +208,8 @@ void RGBMatrixEditor::init()
     createPreviewItems();
     m_preview->setScene(m_scene);
     m_previewTimer->start(MasterTimer::tick());
+
+    updateExtraOptions();
 }
 
 void RGBMatrixEditor::fillPatternCombo()
@@ -216,8 +221,6 @@ void RGBMatrixEditor::fillPatternCombo()
         if (index >= 0)
             m_patternCombo->setCurrentIndex(index);
     }
-
-    updateExtraOptions();
 }
 
 void RGBMatrixEditor::fillFixtureGroupCombo()
@@ -236,22 +239,37 @@ void RGBMatrixEditor::fillFixtureGroupCombo()
     }
 }
 
+void RGBMatrixEditor::fillAnimationCombo()
+{
+    m_animationCombo->addItems(RGBText::animationStyles());
+}
+
 void RGBMatrixEditor::updateExtraOptions()
 {
     if (m_mtx->algorithm() == NULL || m_mtx->algorithm()->type() != RGBAlgorithm::Text)
     {
         m_textGroup->hide();
         m_fontGroup->hide();
+        m_animationGroup->hide();
+
+        m_textEdit->setText(QString());
+        m_fontEdit->setText(QString());
+        m_animationCombo->clear();
     }
     else
     {
         m_textGroup->show();
         m_fontGroup->show();
+        m_animationGroup->show();
 
         RGBText* text = static_cast<RGBText*> (m_mtx->algorithm());
         Q_ASSERT(text != NULL);
         m_textEdit->setText(text->text());
         m_fontEdit->setText(QString("%1-%2").arg(text->font().family()).arg(text->font().pointSize()));
+
+        int index = m_animationCombo->findText(RGBText::animationStyleToString(text->animationStyle()));
+        if (index != -1)
+            m_animationCombo->setCurrentIndex(index);
     }
 }
 
@@ -364,6 +382,17 @@ void RGBMatrixEditor::slotPatternActivated(const QString& text)
     slotRestartTest();
 }
 
+void RGBMatrixEditor::slotFixtureGroupActivated(int index)
+{
+    QVariant var = m_fixtureGroupCombo->itemData(index);
+    if (var.isValid() == true)
+        m_mtx->setFixtureGroup(var.toUInt());
+    else
+        m_mtx->setFixtureGroup(FixtureGroup::invalidId());
+    createPreviewItems();
+    slotRestartTest();
+}
+
 void RGBMatrixEditor::slotColorButtonClicked()
 {
     QColor col = QColorDialog::getColor(m_mtx->monoColor());
@@ -407,15 +436,15 @@ void RGBMatrixEditor::slotFontButtonClicked()
     }
 }
 
-void RGBMatrixEditor::slotFixtureGroupActivated(int index)
+void RGBMatrixEditor::slotAnimationActivated(const QString& text)
 {
-    QVariant var = m_fixtureGroupCombo->itemData(index);
-    if (var.isValid() == true)
-        m_mtx->setFixtureGroup(var.toUInt());
-    else
-        m_mtx->setFixtureGroup(FixtureGroup::invalidId());
-    createPreviewItems();
-    slotRestartTest();
+    if (m_mtx->algorithm() != NULL && m_mtx->algorithm()->type() == RGBAlgorithm::Text)
+    {
+        RGBText* algo = static_cast<RGBText*> (m_mtx->algorithm());
+        Q_ASSERT(algo != NULL);
+        algo->setAnimationStyle(RGBText::stringToAnimationStyle(text));
+        slotRestartTest();
+    }
 }
 
 void RGBMatrixEditor::slotLoopClicked()

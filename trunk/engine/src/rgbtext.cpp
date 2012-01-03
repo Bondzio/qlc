@@ -30,6 +30,9 @@
 #define KXMLQLCRGBTextContent        "Content"
 #define KXMLQLCRGBTextFont           "Font"
 #define KXMLQLCRGBTextAnimationStyle "Animation"
+#define KXMLQLCRGBTextOffset         "Offset"
+#define KXMLQLCRGBTextOffsetX        "X"
+#define KXMLQLCRGBTextOffsetY        "Y"
 
 RGBText::RGBText()
     : RGBAlgorithm()
@@ -90,7 +93,10 @@ QFont RGBText::font() const
 
 void RGBText::setAnimationStyle(RGBText::AnimationStyle ani)
 {
-    m_animationStyle = ani;
+    if (ani >= StaticLetters && ani <= Vertical)
+        m_animationStyle = ani;
+    else
+        m_animationStyle = StaticLetters;
 }
 
 RGBText::AnimationStyle RGBText::animationStyle() const
@@ -230,6 +236,9 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 
 RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
 {
+    if (step >= m_text.length())
+        return RGBMap();
+
     QImage image(size, QImage::Format_RGB32);
     image.fill(0);
 
@@ -329,6 +338,32 @@ bool RGBText::loadXML(const QDomElement& root)
         {
             setAnimationStyle(stringToAnimationStyle(tag.text()));
         }
+        else if (tag.tagName() == KXMLQLCRGBTextOffset)
+        {
+            QString str;
+            int value;
+            bool ok;
+
+            str = tag.attribute(KXMLQLCRGBTextOffsetX);
+            ok = false;
+            value = str.toInt(&ok);
+            if (ok == true)
+                setXOffset(value);
+            else
+                qWarning() << Q_FUNC_INFO << "Invalid X offset:" << str;
+
+            str = tag.attribute(KXMLQLCRGBTextOffsetY);
+            ok = false;
+            value = str.toInt(&ok);
+            if (ok == true)
+                setYOffset(value);
+            else
+                qWarning() << Q_FUNC_INFO << "Invalid Y offset:" << str;
+        }
+        else
+        {
+            qWarning() << Q_FUNC_INFO << "Unknown RGBText tag:" << tag.tagName();
+        }
 
         node = node.nextSibling();
     }
@@ -359,6 +394,11 @@ bool RGBText::saveXML(QDomDocument* doc, QDomElement* mtx_root) const
     QDomText aniText = doc->createTextNode(animationStyleToString(animationStyle()));
     ani.appendChild(aniText);
     root.appendChild(ani);
+
+    QDomElement offset = doc->createElement(KXMLQLCRGBTextOffset);
+    offset.setAttribute(KXMLQLCRGBTextOffsetX, xOffset());
+    offset.setAttribute(KXMLQLCRGBTextOffsetY, yOffset());
+    root.appendChild(offset);
 
     return true;
 }

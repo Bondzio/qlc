@@ -36,6 +36,7 @@ SUBDIRS += qlcphysical
 SUBDIRS += qlcpoint
 SUBDIRS += rgbmatrix
 SUBDIRS += rgbscript
+SUBDIRS += rgbtext
 SUBDIRS += scene
 SUBDIRS += scenevalue
 SUBDIRS += script

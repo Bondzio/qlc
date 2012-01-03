@@ -70,6 +70,7 @@ private slots:
     void slotTextEdited(const QString& text);
     void slotFontButtonClicked();
     void slotAnimationActivated(const QString& text);
+    void slotOffsetSpinChanged();
 
     void slotLoopClicked();
     void slotPingPongClicked();

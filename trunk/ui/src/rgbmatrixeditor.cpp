@@ -187,6 +187,10 @@ void RGBMatrixEditor::init()
             this, SLOT(slotFontButtonClicked()));
     connect(m_animationCombo, SIGNAL(activated(const QString&)),
             this, SLOT(slotAnimationActivated(const QString&)));
+    connect(m_xOffsetSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotOffsetSpinChanged()));
+    connect(m_yOffsetSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotOffsetSpinChanged()));
 
     connect(m_loop, SIGNAL(clicked()), this, SLOT(slotLoopClicked()));
     connect(m_pingPong, SIGNAL(clicked()), this, SLOT(slotPingPongClicked()));
@@ -250,13 +254,13 @@ void RGBMatrixEditor::updateExtraOptions()
     {
         m_textGroup->hide();
         m_animationGroup->hide();
-
-        m_textEdit->setText(QString());
+        m_offsetGroup->hide();
     }
     else
     {
         m_textGroup->show();
         m_animationGroup->show();
+        m_offsetGroup->show();
 
         RGBText* text = static_cast<RGBText*> (m_mtx->algorithm());
         Q_ASSERT(text != NULL);
@@ -265,6 +269,9 @@ void RGBMatrixEditor::updateExtraOptions()
         int index = m_animationCombo->findText(RGBText::animationStyleToString(text->animationStyle()));
         if (index != -1)
             m_animationCombo->setCurrentIndex(index);
+
+        m_xOffsetSpin->setValue(text->xOffset());
+        m_yOffsetSpin->setValue(text->yOffset());
     }
 }
 
@@ -437,6 +444,18 @@ void RGBMatrixEditor::slotAnimationActivated(const QString& text)
         RGBText* algo = static_cast<RGBText*> (m_mtx->algorithm());
         Q_ASSERT(algo != NULL);
         algo->setAnimationStyle(RGBText::stringToAnimationStyle(text));
+        slotRestartTest();
+    }
+}
+
+void RGBMatrixEditor::slotOffsetSpinChanged()
+{
+    if (m_mtx->algorithm() != NULL && m_mtx->algorithm()->type() == RGBAlgorithm::Text)
+    {
+        RGBText* algo = static_cast<RGBText*> (m_mtx->algorithm());
+        Q_ASSERT(algo != NULL);
+        algo->setXOffset(m_xOffsetSpin->value());
+        algo->setYOffset(m_yOffsetSpin->value());
         slotRestartTest();
     }
 }

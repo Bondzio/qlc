@@ -35,6 +35,8 @@ RGBText::RGBText()
     : RGBAlgorithm()
     , m_text(" Q LIGHT CONTROLLER ")
     , m_animationStyle(Horizontal)
+    , m_xOffset(0)
+    , m_yOffset(0)
 {
 }
 
@@ -43,6 +45,8 @@ RGBText::RGBText(const RGBText& t)
     , m_text(t.text())
     , m_font(t.font())
     , m_animationStyle(t.animationStyle())
+    , m_xOffset(t.xOffset())
+    , m_yOffset(t.yOffset())
 {
 }
 
@@ -127,6 +131,26 @@ QStringList RGBText::animationStyles()
     return list;
 }
 
+void RGBText::setXOffset(int offset)
+{
+    m_xOffset = offset;
+}
+
+int RGBText::xOffset() const
+{
+    return m_xOffset;
+}
+
+void RGBText::setYOffset(int offset)
+{
+    m_yOffset = offset;
+}
+
+int RGBText::yOffset() const
+{
+    return m_yOffset;
+}
+
 int RGBText::scrollingTextSteps(const QSize& size) const
 {
     // Estimate the text length in pixels. Available matrix size doesn't matter.
@@ -162,7 +186,8 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 
         for (int i = 0; i < m_text.length(); i++)
         {
-            rect.setY(i * fm.ascent());
+            rect.setY((i * fm.ascent()) + yOffset());
+            rect.setX(xOffset());
             rect.setHeight(fm.ascent());
             p.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, m_text.mid(i, 1));
         }
@@ -170,8 +195,8 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
     else
     {
         // Draw the whole text each time
-        p.drawText(QRect(0, 0, image.width(), image.height()),
-                   Qt::AlignLeft | Qt::AlignVCenter, m_text);
+        QRect rect(xOffset(), yOffset(), image.width(), image.height());
+        p.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, m_text);
     }
     p.end();
 
@@ -214,7 +239,9 @@ RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
     p.setFont(m_font);
 
     p.setPen(QColor(rgb));
-    p.drawText(QRect(0, 0, size.width(), size.height()), Qt::AlignCenter, m_text.mid(step, 1));
+    // Draw one letter at a time
+    QRect rect(xOffset(), yOffset(), size.width(), size.height());
+    p.drawText(rect, Qt::AlignCenter, m_text.mid(step, 1));
     p.end();
 
     RGBMap map(size.height());

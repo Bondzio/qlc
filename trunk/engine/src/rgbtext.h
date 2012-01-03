@@ -72,6 +72,12 @@ public:
     static AnimationStyle stringToAnimationStyle(const QString& str);
     static QStringList animationStyles();
 
+    void setXOffset(int offset);
+    int xOffset() const;
+
+    void setYOffset(int offset);
+    int yOffset() const;
+
 private:
     int scrollingTextSteps(const QSize& size) const;
     RGBMap renderScrollingText(const QSize& size, uint rgb, int step) const;
@@ -79,6 +85,8 @@ private:
 
 private:
     AnimationStyle m_animationStyle;
+    int m_xOffset;
+    int m_yOffset;
 
     /************************************************************************
      * RGBAlgorithm

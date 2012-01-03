@@ -249,22 +249,18 @@ void RGBMatrixEditor::updateExtraOptions()
     if (m_mtx->algorithm() == NULL || m_mtx->algorithm()->type() != RGBAlgorithm::Text)
     {
         m_textGroup->hide();
-        m_fontGroup->hide();
         m_animationGroup->hide();
 
         m_textEdit->setText(QString());
-        m_fontEdit->setText(QString());
     }
     else
     {
         m_textGroup->show();
-        m_fontGroup->show();
         m_animationGroup->show();
 
         RGBText* text = static_cast<RGBText*> (m_mtx->algorithm());
         Q_ASSERT(text != NULL);
         m_textEdit->setText(text->text());
-        m_fontEdit->setText(QString("%1-%2").arg(text->font().family()).arg(text->font().pointSize()));
 
         int index = m_animationCombo->findText(RGBText::animationStyleToString(text->animationStyle()));
         if (index != -1)
@@ -429,7 +425,6 @@ void RGBMatrixEditor::slotFontButtonClicked()
         if (ok == true)
         {
             algo->setFont(font);
-            m_fontEdit->setText(QString("%1-%2").arg(algo->font().family()).arg(algo->font().pointSize()));
             slotRestartTest();
         }
     }

@@ -254,7 +254,6 @@ void RGBMatrixEditor::updateExtraOptions()
 
         m_textEdit->setText(QString());
         m_fontEdit->setText(QString());
-        m_animationCombo->clear();
     }
     else
     {

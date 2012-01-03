@@ -131,15 +131,22 @@ int RGBText::scrollingTextSteps(const QSize& size) const
 {
     // Estimate the text length in pixels. Available matrix size doesn't matter.
     Q_UNUSED(size);
+
     QFontMetrics fm(m_font);
-    return fm.width(m_text);
+    if (animationStyle() == Vertical)
+        return m_text.length() * fm.ascent();
+    else
+        return fm.width(m_text);
 }
 
 RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 {
-    RGBMap map(size.height());
+    QImage image;
 
-    QImage image(scrollingTextSteps(size), size.height(), QImage::Format_RGB32);
+    if (animationStyle() == Horizontal)
+        image = QImage(scrollingTextSteps(size), size.height(), QImage::Format_RGB32);
+    else
+        image = QImage(size.width(), scrollingTextSteps(size), QImage::Format_RGB32);
     image.fill(0);
 
     QPainter p(&image);
@@ -148,21 +155,48 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
     p.setFont(m_font);
     p.setPen(QColor(rgb));
 
-    // Draw the whole text each time
-    p.drawText(QRect(0, 0, image.width(), size.height()), Qt::AlignLeft | Qt::AlignVCenter, m_text);
+    if (animationStyle() == Vertical)
+    {
+        QFontMetrics fm(m_font);
+        QRect rect(0, 0, image.width(), image.height());
+
+        for (int i = 0; i < m_text.length(); i++)
+        {
+            rect.setY(i * fm.ascent());
+            rect.setHeight(fm.ascent());
+            p.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, m_text.mid(i, 1));
+        }
+    }
+    else
+    {
+        // Draw the whole text each time
+        p.drawText(QRect(0, 0, image.width(), image.height()),
+                   Qt::AlignLeft | Qt::AlignVCenter, m_text);
+    }
     p.end();
 
     // Treat the RGBMap as a "window" on top of the fully-drawn text and pick the
     // correct pixels according to $step.
+    RGBMap map(size.height());
     for (int y = 0; y < size.height(); y++)
     {
         map[y].resize(size.width());
         for (int x = 0; x < size.width(); x++)
         {
-            if (step + x >= image.width())
-                map[y][x] = QRgb(0);
+            if (animationStyle() == Horizontal)
+            {
+                if (step + x >= image.width())
+                    map[y][x] = QRgb(0);
+                else
+                    map[y][x] = image.pixel(step + x, y);
+            }
             else
-                map[y][x] = image.pixel(step + x, y);
+            {
+                if (step + y >= image.height())
+                    map[y][x] = QRgb(0);
+                else
+                    map[y][x] = image.pixel(x, step + y);
+            }
         }
     }
 
@@ -171,8 +205,6 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 
 RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
 {
-    RGBMap map(size.height());
-
     QImage image(size, QImage::Format_RGB32);
     image.fill(0);
 
@@ -185,6 +217,7 @@ RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
     p.drawText(QRect(0, 0, size.width(), size.height()), Qt::AlignCenter, m_text.mid(step, 1));
     p.end();
 
+    RGBMap map(size.height());
     for (int y = 0; y < size.height(); y++)
     {
         map[y].resize(size.width());

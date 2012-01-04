@@ -47,13 +47,15 @@ QDir RGBScript::s_customScriptDirectory = QDir(QString(), QString("*.js"),
  ****************************************************************************/
 
 RGBScript::RGBScript()
-    : m_engine(new QScriptEngine)
+    : RGBAlgorithm()
+    , m_engine(new QScriptEngine)
     , m_apiVersion(0)
 {
 }
 
 RGBScript::RGBScript(const RGBScript& s)
-    : m_engine(new QScriptEngine)
+    : RGBAlgorithm()
+    , m_engine(new QScriptEngine)
     , m_fileName(s.m_fileName)
     , m_contents(s.m_contents)
     , m_apiVersion(0)

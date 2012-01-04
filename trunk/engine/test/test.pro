@@ -34,6 +34,7 @@ SUBDIRS += qlcinputprofile
 SUBDIRS += qlcmacros
 SUBDIRS += qlcphysical
 SUBDIRS += qlcpoint
+SUBDIRS += rgbalgorithm
 SUBDIRS += rgbmatrix
 SUBDIRS += rgbscript
 SUBDIRS += rgbtext

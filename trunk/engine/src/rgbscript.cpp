@@ -283,6 +283,17 @@ RGBScript RGBScript::script(const QString& name)
     return RGBScript();
 }
 
+QStringList RGBScript::scriptNames()
+{
+    QStringList names;
+
+    QListIterator <RGBScript> it(scripts());
+    while (it.hasNext() == true)
+        names << it.next().name();
+
+    return names;
+}
+
 QList <RGBScript> RGBScript::scripts()
 {
     QList <RGBScript> list;

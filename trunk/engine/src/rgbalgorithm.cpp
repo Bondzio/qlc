@@ -35,13 +35,9 @@
 QStringList RGBAlgorithm::algorithms()
 {
     QStringList list;
-    QListIterator <RGBScript> it(RGBScript::scripts());
-    while (it.hasNext() == true)
-        list << it.next().name();
-
     RGBText text;
     list << text.name();
-
+    list << RGBScript::scriptNames();
     return list;
 }
 

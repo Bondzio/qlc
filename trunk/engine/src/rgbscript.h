@@ -106,16 +106,13 @@ public:
     /** Get a script by its public name */
     static RGBScript script(const QString& name);
 
-    /**
-     * Get all available (user & system) RGB Scripts. The returned scripts
-     * have not been evaluated for validity.
-     */
+    /** Get available (user, system and custom) script names */
+    static QStringList scriptNames();
+
+    /** Get available (user, system and custom) scripts */
     static QList <RGBScript> scripts();
 
-    /**
-     * Get available scripts from the given directory path. The returned
-     * scripts have not been evaluated for validity.
-     */
+    /** Get available scripts from the given directory path */
     static QList <RGBScript> scripts(const QDir& path);
 
     /** The system RGBScript directory */
@@ -124,8 +121,10 @@ public:
     /** The user RGBScript directory */
     static QDir userScriptDirectory();
 
-    /** Custom RGBScript directory */
+    /** Set the custom RGBScript directory */
     static void setCustomScriptDirectory(const QString& path);
+
+    /** Get the custom RGBScript directory */
     static QDir customScriptDirectory();
 
 private:

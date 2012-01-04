@@ -213,7 +213,7 @@ void ChaserEditor::slotNameEdited(const QString& text)
 void ChaserEditor::slotAddClicked()
 {
     FunctionSelection fs(this, m_doc);
-    fs.setDisabledFunctions(QList <quint32>() << m_chaser->id());
+    fs.setDisabledFunctions(QList <quint32>() << m_original->id());
 
     if (fs.exec() == QDialog::Accepted)
     {

@@ -220,9 +220,7 @@ void ChaserEditor::slotAddClicked()
         int insertionPoint = m_list->topLevelItemCount();
         QTreeWidgetItem* item = m_list->currentItem();
         if (item != NULL)
-            insertionPoint = m_list->indexOfTopLevelItem(item);
-
-#warning insert AFTER, not before
+            insertionPoint = m_list->indexOfTopLevelItem(item) + 1;
 
         /* Append selected functions */
         QListIterator <quint32> it(fs.selection());
@@ -362,18 +360,16 @@ void ChaserEditor::slotPasteClicked()
     if (m_clipboard.isEmpty() == true)
         return;
 
-#warning insert AFTER not before
-
     int insertionPoint = 0;
     QTreeWidgetItem* currentItem = m_list->currentItem();
     if (currentItem != NULL)
     {
-        insertionPoint = m_list->indexOfTopLevelItem(currentItem);
+        insertionPoint = m_list->indexOfTopLevelItem(currentItem) + 1;
         currentItem->setSelected(false);
     }
     else
     {
-        insertionPoint = CLAMP(0, 0, m_list->topLevelItemCount() - 1);
+        insertionPoint = m_list->topLevelItemCount();
     }
 
     QListIterator <ChaserStep> it(m_clipboard);

@@ -157,11 +157,8 @@ int RGBText::yOffset() const
     return m_yOffset;
 }
 
-int RGBText::scrollingTextSteps(const QSize& size) const
+int RGBText::scrollingTextStepCount() const
 {
-    // Estimate the text length in pixels. Available matrix size doesn't matter.
-    Q_UNUSED(size);
-
     QFontMetrics fm(m_font);
     if (animationStyle() == Vertical)
         return m_text.length() * fm.ascent();
@@ -172,12 +169,11 @@ int RGBText::scrollingTextSteps(const QSize& size) const
 RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 {
     QImage image;
-
     if (animationStyle() == Horizontal)
-        image = QImage(scrollingTextSteps(size), size.height(), QImage::Format_RGB32);
+        image = QImage(scrollingTextStepCount(), size.height(), QImage::Format_RGB32);
     else
-        image = QImage(size.width(), scrollingTextSteps(size), QImage::Format_RGB32);
-    image.fill(0);
+        image = QImage(size.width(), scrollingTextStepCount(), QImage::Format_RGB32);
+    image.fill(QRgb(0));
 
     QPainter p(&image);
     p.setRenderHint(QPainter::TextAntialiasing, false);
@@ -216,16 +212,12 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
         {
             if (animationStyle() == Horizontal)
             {
-                if (step + x >= image.width())
-                    map[y][x] = QRgb(0);
-                else
+                if (step + x < image.width())
                     map[y][x] = image.pixel(step + x, y);
             }
             else
             {
-                if (step + y >= image.height())
-                    map[y][x] = QRgb(0);
-                else
+                if (step + y < image.height())
                     map[y][x] = image.pixel(x, step + y);
             }
         }
@@ -236,11 +228,8 @@ RGBMap RGBText::renderScrollingText(const QSize& size, uint rgb, int step) const
 
 RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
 {
-    if (step >= m_text.length())
-        return RGBMap();
-
     QImage image(size, QImage::Format_RGB32);
-    image.fill(0);
+    image.fill(QRgb(0));
 
     QPainter p(&image);
     p.setRenderHint(QPainter::TextAntialiasing, false);
@@ -270,10 +259,11 @@ RGBMap RGBText::renderStaticLetters(const QSize& size, uint rgb, int step) const
 
 int RGBText::rgbMapStepCount(const QSize& size)
 {
+    Q_UNUSED(size);
     if (animationStyle() == StaticLetters)
         return m_text.length();
     else
-        return scrollingTextSteps(size);
+        return scrollingTextStepCount();
 }
 
 RGBMap RGBText::rgbMap(const QSize& size, uint rgb, int step)

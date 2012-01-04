@@ -38,6 +38,8 @@ private slots:
     void save();
     void load();
     void staticLetters();
+    void horizontalScroll();
+    void verticalScroll();
 };
 
 #endif

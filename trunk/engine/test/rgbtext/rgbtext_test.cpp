@@ -263,7 +263,8 @@ void RGBText_Test::staticLetters()
 
     // Since fonts and their rendering differs from installation to installation,
     // these tests are here only to check that nothing crashes. The end result is
-    // more or less OS, platform, HW and SW dependent and would be rather pointless.
+    // more or less OS, platform, HW and SW dependent and testing individual pixels
+    // would thus be rather pointless.
     RGBMap map = text.rgbMap(QSize(10, 10), color, 0);
     QCOMPARE(map.size(), 10);
     for (int i = 0; i < 10; i++)
@@ -281,7 +282,83 @@ void RGBText_Test::staticLetters()
 
     // Invalid step
     map = text.rgbMap(QSize(10, 10), color, 3);
-    QCOMPARE(map.size(), 0);
+    QCOMPARE(map.size(), 10);
+    for (int i = 0; i < 10; i++)
+    {
+        QCOMPARE(map[i].size(), 10);
+        for (int j = 0; j < 10; j++)
+        {
+            QCOMPARE(map[i][j], QColor(Qt::black).rgb());
+        }
+    }
+}
+
+void RGBText_Test::horizontalScroll()
+{
+    RGBText text;
+    text.setText("QLC");
+    text.setAnimationStyle(RGBText::Horizontal);
+
+    QFontMetrics fm(text.font());
+    QCOMPARE(text.rgbMapStepCount(QSize()), fm.width("QLC"));
+
+    // Since fonts and their rendering differs from installation to installation,
+    // these tests are here only to check that nothing crashes. The end result is
+    // more or less OS, platform, HW and SW dependent and testing individual pixels
+    // would thus be rather pointless.
+    for (int i = 0; i < fm.width("QLC"); i++)
+    {
+        RGBMap map = text.rgbMap(QSize(10, 10), QRgb(0xFFFFFFFF), i);
+        QCOMPARE(map.size(), 10);
+        for (int y = 0; y < 10; y++)
+            QCOMPARE(map[y].size(), 10);
+    }
+
+    // Invalid step
+    RGBMap map = text.rgbMap(QSize(10, 10), QRgb(0xFFFFFFFF), fm.width("QLC"));
+    QCOMPARE(map.size(), 10);
+    for (int i = 0; i < 10; i++)
+    {
+        QCOMPARE(map[i].size(), 10);
+        for (int j = 0; j < 10; j++)
+        {
+            QCOMPARE(map[i][j], QRgb(0));
+        }
+    }
+}
+
+void RGBText_Test::verticalScroll()
+{
+    RGBText text;
+    text.setText("QLC");
+    text.setAnimationStyle(RGBText::Vertical);
+
+    QFontMetrics fm(text.font());
+    QCOMPARE(text.rgbMapStepCount(QSize()), fm.ascent() * 3); // Q, L, C
+
+    // Since fonts and their rendering differs from installation to installation,
+    // these tests are here only to check that nothing crashes. The end result is
+    // more or less OS, platform, HW and SW dependent and testing individual pixels
+    // would thus be rather pointless.
+    for (int i = 0; i < fm.ascent() * 3; i++)
+    {
+        RGBMap map = text.rgbMap(QSize(10, 10), QRgb(0xFFFFFFFF), i);
+        QCOMPARE(map.size(), 10);
+        for (int y = 0; y < 10; y++)
+            QCOMPARE(map[y].size(), 10);
+    }
+
+    // Invalid step
+    RGBMap map = text.rgbMap(QSize(10, 10), QRgb(0xFFFFFFFF), fm.ascent() * 4);
+    QCOMPARE(map.size(), 10);
+    for (int i = 0; i < 10; i++)
+    {
+        QCOMPARE(map[i].size(), 10);
+        for (int j = 0; j < 10; j++)
+        {
+            QCOMPARE(map[i][j], QRgb(0));
+        }
+    }
 }
 
 QTEST_MAIN(RGBText_Test)

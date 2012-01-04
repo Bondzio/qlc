@@ -79,7 +79,7 @@ public:
     int yOffset() const;
 
 private:
-    int scrollingTextSteps(const QSize& size) const;
+    int scrollingTextStepCount() const;
     RGBMap renderScrollingText(const QSize& size, uint rgb, int step) const;
     RGBMap renderStaticLetters(const QSize& size, uint rgb, int step) const;
 

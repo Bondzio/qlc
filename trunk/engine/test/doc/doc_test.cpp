@@ -65,7 +65,18 @@ void Doc_Test::init()
 
 void Doc_Test::cleanup()
 {
+    QSignalSpy spy1(m_doc, SIGNAL(clearing()));
+    QSignalSpy spy2(m_doc, SIGNAL(cleared()));
     m_doc->clearContents();
+    QCOMPARE(spy1.size(), 1);
+    QCOMPARE(spy2.size(), 1);
+    QCOMPARE(m_doc->functions().size(), 0);
+    QCOMPARE(m_doc->fixtures().size(), 0);
+    QCOMPARE(m_doc->fixtureGroups().size(), 0);
+    QCOMPARE(m_doc->m_latestFunctionId, quint32(0));
+    QCOMPARE(m_doc->m_latestFixtureId, quint32(0));
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(0));
+    QCOMPARE(m_doc->m_addresses.size(), 0);
 }
 
 void Doc_Test::defaults()

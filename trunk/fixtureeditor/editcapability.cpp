@@ -36,6 +36,11 @@ EditCapability::EditCapability(QWidget* parent, const QLCCapability* cap)
 
     setupUi(this);
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     m_minSpin->setValue(m_capability->min());
     m_maxSpin->setValue(m_capability->max());
     m_descriptionEdit->setText(m_capability->name());

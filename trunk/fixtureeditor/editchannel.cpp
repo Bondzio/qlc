@@ -56,6 +56,11 @@ EditChannel::EditChannel(QWidget* parent, QLCChannel* channel)
     setupUi(this);
     init();
 
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
     QSettings settings;
     QVariant var = settings.value(KSettingsGeometry);
     if (var.isValid() == true)

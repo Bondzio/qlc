@@ -60,6 +60,11 @@ EditMode::EditMode(QWidget* parent, QLCFixtureMode* mode) : QDialog(parent)
     setupUi(this);
     init();
     loadDefaults();
+
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
 }
 
 EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef) : QDialog(parent)

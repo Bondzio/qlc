@@ -19,17 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QSpinBox>
 #include <QLineEdit>
 #include <QSettings>
+#include <QSpinBox>
 
 #include "qlccapability.h"
 #include "editcapability.h"
+#include "util.h"
 
 #define KSettingsGeometry "editcapability/geometry"
 
 EditCapability::EditCapability(QWidget* parent, const QLCCapability* cap)
-        : QDialog(parent)
+    : QDialog(parent)
 {
     m_capability = new QLCCapability(cap);
 
@@ -38,6 +39,7 @@ EditCapability::EditCapability(QWidget* parent, const QLCCapability* cap)
     m_minSpin->setValue(m_capability->min());
     m_maxSpin->setValue(m_capability->max());
     m_descriptionEdit->setText(m_capability->name());
+    m_descriptionEdit->setValidator(CAPS_VALIDATOR(this));
     m_minSpin->setFocus();
     m_minSpin->selectAll();
 

@@ -41,6 +41,7 @@
 
 #include "editmode.h"
 #include "edithead.h"
+#include "util.h"
 #include "app.h"
 
 #define KSettingsGeometry "editmode/geometry"
@@ -105,6 +106,7 @@ void EditMode::init()
             this, SLOT(slotLowerChannelClicked()));
 
     m_modeNameEdit->setText(m_mode->name());
+    m_modeNameEdit->setValidator(CAPS_VALIDATOR(this));
     m_channelList->header()->setResizeMode(QHeaderView::ResizeToContents);
     refreshChannelList();
 

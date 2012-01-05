@@ -52,11 +52,12 @@
 #include <errno.h>
 #endif
 
-#include "app.h"
-#include "fixtureeditor.h"
 #include "editcapability.h"
+#include "fixtureeditor.h"
 #include "editchannel.h"
 #include "editmode.h"
+#include "util.h"
+#include "app.h"
 
 extern App* _app;
 extern int errno;
@@ -116,10 +117,12 @@ void QLCFixtureEditor::init()
 {
     /* General page */
     m_manufacturerEdit->setText(m_fixtureDef->manufacturer());
+    m_manufacturerEdit->setValidator(CAPS_VALIDATOR(this));
     connect(m_manufacturerEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotManufacturerTextEdited(const QString&)));
 
     m_modelEdit->setText(m_fixtureDef->model());
+    m_modelEdit->setValidator(CAPS_VALIDATOR(this));
     connect(m_modelEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotModelTextEdited(const QString&)));
 

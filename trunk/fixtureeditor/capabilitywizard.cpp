@@ -24,20 +24,21 @@
 #include <QSpinBox>
 #include <QDialog>
 
+#include "capabilitywizard.h"
 #include "qlccapability.h"
 #include "qlcchannel.h"
-
-#include "capabilitywizard.h"
+#include "util.h"
 
 #define KSettingsGeometry "capabilitywizard/geometry"
 
 CapabilityWizard::CapabilityWizard(QWidget* parent, const QLCChannel* channel)
-        : QDialog(parent)
+    : QDialog(parent)
 {
     Q_ASSERT(channel != NULL);
     m_channel = channel;
 
     setupUi(this);
+    m_nameEdit->setValidator(CAPS_VALIDATOR(this));
     slotCreateCapabilities();
 
     QSettings settings;

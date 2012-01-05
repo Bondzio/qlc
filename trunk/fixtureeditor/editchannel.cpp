@@ -38,6 +38,7 @@
 #include "capabilitywizard.h"
 #include "editcapability.h"
 #include "editchannel.h"
+#include "util.h"
 #include "app.h"
 
 #define KSettingsGeometry "editchannel/geometry"
@@ -47,7 +48,8 @@
 #define KColumnName 2
 #define KColumnPointer 3
 
-EditChannel::EditChannel(QWidget* parent, QLCChannel* channel) : QDialog(parent)
+EditChannel::EditChannel(QWidget* parent, QLCChannel* channel)
+    : QDialog(parent)
 {
     m_channel = new QLCChannel(channel);
 
@@ -78,6 +80,7 @@ void EditChannel::init()
 
     /* Set name edit */
     m_nameEdit->setText(m_channel->name());
+    m_nameEdit->setValidator(CAPS_VALIDATOR(this));
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameChanged(const QString&)));
 

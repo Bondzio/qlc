@@ -30,7 +30,8 @@ HEADERS += ../ui/src/aboutbox.h \
            editchannel.h \
            edithead.h \
            editmode.h \
-           fixtureeditor.h
+           fixtureeditor.h \
+           util.h
 
 FORMS += ../ui/src/aboutbox.ui \
          capabilitywizard.ui \

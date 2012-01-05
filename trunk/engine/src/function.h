@@ -191,7 +191,7 @@ public:
      *
      * @param type The type to convert
      */
-    static QString typeToString(const Function::Type& type);
+    static QString typeToString(Function::Type type);
 
     /**
      * Convert a string to Type

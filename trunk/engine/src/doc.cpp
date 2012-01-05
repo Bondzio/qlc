@@ -76,6 +76,8 @@ Doc::~Doc()
 
 void Doc::clearContents()
 {
+    emit clearing();
+
     // Delete all function instances
     QListIterator <quint32> funcit(m_functions.keys());
     while (funcit.hasNext() == true)
@@ -107,6 +109,8 @@ void Doc::clearContents()
     m_latestFixtureId = 0;
     m_latestFixtureGroupId = 0;
     m_addresses.clear();
+
+    emit cleared();
 }
 
 /*****************************************************************************

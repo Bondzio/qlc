@@ -64,6 +64,13 @@ public:
     /** Remove all functions and fixtures from the doc, signalling each removal. */
     void clearContents();
 
+signals:
+    /** Emitted when clearContents() is called, before actually doing anything. */
+    void clearing();
+
+    /** Emitted when clearContents() has finished. */
+    void cleared();
+
     /*********************************************************************
      * Engine components
      *********************************************************************/

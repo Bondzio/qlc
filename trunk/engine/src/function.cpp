@@ -159,7 +159,7 @@ QString Function::typeString() const
     return Function::typeToString(type());
 }
 
-QString Function::typeToString(const Type& type)
+QString Function::typeToString(Type type)
 {
     switch (type)
     {

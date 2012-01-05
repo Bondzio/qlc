@@ -56,9 +56,7 @@
 #include "doc.h"
 #include "efx.h"
 
-#define KColumnName 0
-#define KColumnType 1
-#define KColumnID   2
+#define PROP_ID Qt::UserRole
 
 FunctionManager* FunctionManager::s_instance = NULL;
 
@@ -87,10 +85,9 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
             this, SLOT(slotModeChanged(Doc::Mode)));
     updateTree();
 
-    m_tree->sortItems(KColumnName, Qt::AscendingOrder);
+    m_tree->sortItems(0, Qt::AscendingOrder);
 
-    connect(m_doc, SIGNAL(functionRemoved(quint32)),
-            this, SLOT(slotFunctionRemoved(quint32)));
+    connect(m_doc, SIGNAL(clearing()), this, SLOT(slotDocClearing()));
 }
 
 FunctionManager::~FunctionManager()
@@ -134,18 +131,9 @@ void FunctionManager::slotModeChanged(Doc::Mode mode)
         setEnabled(true);
 }
 
-void FunctionManager::slotFunctionRemoved(quint32 fid)
+void FunctionManager::slotDocClearing()
 {
-    // This slot is used only when Doc::clearContents is called.
-    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = m_tree->topLevelItem(i);
-        if (item->text(KColumnID).toUInt() == fid)
-        {
-            delete item;
-            break;
-        }
-    }
+    m_tree->clear();
 }
 
 /*****************************************************************************
@@ -374,7 +362,7 @@ int FunctionManager::slotEdit()
     Q_ASSERT(item != NULL);
 
     // Find the selected function
-    function = m_doc->function(item->text(KColumnID).toUInt());
+    function = m_doc->function(itemFunctionId(item));
     if (function == NULL)
         return QDialog::Rejected;
 
@@ -390,7 +378,7 @@ void FunctionManager::slotClone()
 {
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
-        copyFunction(it.next()->text(KColumnID).toUInt());
+        copyFunction(itemFunctionId(it.next()));
 }
 
 void FunctionManager::slotDelete()
@@ -405,7 +393,7 @@ void FunctionManager::slotDelete()
 
     // Append functions' names to the message
     while (it.hasNext() == true)
-        msg += it.next()->text(KColumnName) + QString(", ");
+        msg += it.next()->text(0) + QString(", ");
 
     // Ask for user's confirmation
     if (QMessageBox::question(this, tr("Delete Functions"), msg,
@@ -459,15 +447,15 @@ void FunctionManager::initTree()
 
     // Add two columns for function and type
     QStringList labels;
-    labels << tr("Function") << tr("Type");
+    labels << tr("Function");
     m_tree->setHeaderLabels(labels);
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
-    m_tree->setRootIsDecorated(false);
+    m_tree->setRootIsDecorated(true);
     m_tree->setAllColumnsShowFocus(true);
     m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     m_tree->setSortingEnabled(true);
-    m_tree->sortByColumn(KColumnName, Qt::AscendingOrder);
+    m_tree->sortByColumn(0, Qt::AscendingOrder);
 
     // Catch selection changes
     connect(m_tree, SIGNAL(itemSelectionChanged()),
@@ -488,19 +476,50 @@ void FunctionManager::updateTree()
 {
     m_tree->clear();
     foreach (Function* function, m_doc->functions())
-        updateFunctionItem(new QTreeWidgetItem(m_tree), function);
+        updateFunctionItem(new QTreeWidgetItem(parentItem(function)), function);
 }
 
-void FunctionManager::updateFunctionItem(QTreeWidgetItem* item,
-        Function* function)
+void FunctionManager::updateFunctionItem(QTreeWidgetItem* item, const Function* function)
 {
     Q_ASSERT(item != NULL);
     Q_ASSERT(function != NULL);
+    item->setText(0, function->name());
+    item->setIcon(0, functionIcon(function));
+    item->setData(0, PROP_ID, function->id());
+}
 
-    item->setText(KColumnName, function->name());
-    item->setIcon(KColumnName, functionIcon(function));
-    item->setText(KColumnType, function->typeString());
-    item->setText(KColumnID, QString::number(function->id()));
+QTreeWidgetItem* FunctionManager::parentItem(const Function* function)
+{
+    Q_ASSERT(function != NULL);
+
+    // Search for a parent item for function->type()
+    for (int i = 0; i < m_tree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* item = m_tree->topLevelItem(i);
+        Q_ASSERT(item != NULL);
+        QVariant var = item->data(0, Qt::UserRole);
+        if (var.isValid() == false)
+            continue;
+        Function::Type type = (Function::Type) var.toInt();
+        if (type == function->type())
+            return item;
+    }
+
+    // Parent item for the given type doesn't exist yet so create one
+    QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
+    item->setText(0, Function::typeToString(function->type()));
+    item->setIcon(0, functionIcon(function));
+    item->setData(0, Qt::UserRole, function->type());
+    item->setFlags(Qt::ItemIsEnabled);
+    return item;
+}
+
+quint32 FunctionManager::itemFunctionId(const QTreeWidgetItem* item) const
+{
+    if (item == NULL || item->parent() == NULL)
+        return Function::invalidId();
+    else
+        return item->data(0, PROP_ID).toUInt();
 }
 
 QIcon FunctionManager::functionIcon(const Function* function) const
@@ -526,24 +545,18 @@ QIcon FunctionManager::functionIcon(const Function* function) const
 
 void FunctionManager::deleteSelectedFunctions()
 {
-    disconnect(m_doc, SIGNAL(functionRemoved(quint32)),
-               this, SLOT(slotFunctionRemoved(quint32)));
-
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
     {
-        QTreeWidgetItem* item;
-        quint32 fid;
-
-        item = it.next();
-        fid = item->text(KColumnID).toUInt();
+        QTreeWidgetItem* item(it.next());
+        quint32 fid = itemFunctionId(item);
         m_doc->deleteFunction(fid);
 
+        QTreeWidgetItem* parent = item->parent();
         delete item;
+        if (parent != NULL && parent->childCount() == 0)
+            delete parent;
     }
-
-    connect(m_doc, SIGNAL(functionRemoved(quint32)),
-            this, SLOT(slotFunctionRemoved(quint32)));
 }
 
 void FunctionManager::slotTreeSelectionChanged()
@@ -580,9 +593,10 @@ void FunctionManager::copyFunction(quint32 fid)
         copy->setName(tr("Copy of %1").arg(function->name()));
 
         /* Create a new item for the copied function */
-        QTreeWidgetItem* item;
-        item = new QTreeWidgetItem(m_tree);
+        QTreeWidgetItem* parent = parentItem(function);
+        QTreeWidgetItem* item = new QTreeWidgetItem(parent);
         updateFunctionItem(item, copy);
+        parent->setExpanded(true);
     }
     else
     {
@@ -593,13 +607,13 @@ void FunctionManager::copyFunction(quint32 fid)
 
 void FunctionManager::addFunction(Function* function)
 {
-    QTreeWidgetItem* item;
-
     Q_ASSERT(function != NULL);
 
     /* Create a new item for the function */
-    item = new QTreeWidgetItem(m_tree);
+    QTreeWidgetItem* parent = parentItem(function);
+    QTreeWidgetItem* item = new QTreeWidgetItem(parent);
     updateFunctionItem(item, function);
+    parent->setExpanded(true);
 
     /* Clear current selection and select only the new one */
     m_tree->clearSelection();
@@ -613,7 +627,7 @@ void FunctionManager::addFunction(Function* function)
     }
     else
     {
-        m_tree->sortItems(KColumnName, Qt::AscendingOrder);
+        m_tree->sortItems(0, Qt::AscendingOrder);
         m_tree->scrollToItem(item);
     }
 }

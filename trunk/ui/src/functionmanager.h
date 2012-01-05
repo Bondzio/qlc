@@ -62,7 +62,7 @@ protected:
 
 protected slots:
     void slotModeChanged(Doc::Mode mode);
-    void slotFunctionRemoved(quint32 fid);
+    void slotDocClearing();
 
 protected:
     static FunctionManager* s_instance;
@@ -79,8 +79,14 @@ protected:
     /** Init function tree view */
     void initTree();
 
-    /** Update the item's contents from the given function */
-    void updateFunctionItem(QTreeWidgetItem* item, Function* function);
+    /** Update $item's contents from the given $function */
+    void updateFunctionItem(QTreeWidgetItem* item, const Function* function);
+
+    /** Return a suitable parent item for the $function's type */
+    QTreeWidgetItem* parentItem(const Function* function);
+
+    /** Get the ID of the function represented by $item. */
+    quint32 itemFunctionId(const QTreeWidgetItem* item) const;
 
     /** Get an icon that represents the given function's type */
     QIcon functionIcon(const Function* function) const;

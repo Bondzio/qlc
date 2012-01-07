@@ -122,7 +122,7 @@
  </Channel>
  <Mode Name="8 channels">
   <Physical>
-   <Bulb Lumens="0" Type="HTI 150W" ColourTemperature="0"/>
+   <Bulb Lumens="0" Type="HTI 150W" ColourTemperature="5500"/>
    <Dimensions Width="276" Height="369" Weight="11.5" Depth="266"/>
    <Lens DegreesMax="14" Name="Other" DegreesMin="14"/>
    <Focus PanMax="540" Type="Head" TiltMax="270"/>
@@ -139,7 +139,7 @@
  </Mode>
  <Mode Name="13 channels">
   <Physical>
-   <Bulb Lumens="0" Type="HTI 150W" ColourTemperature="0"/>
+   <Bulb Lumens="0" Type="HTI 150W" ColourTemperature="5500"/>
    <Dimensions Width="276" Height="369" Weight="11.5" Depth="266"/>
    <Lens DegreesMax="14" Name="Other" DegreesMin="14"/>
    <Focus PanMax="540" Type="Head" TiltMax="270"/>

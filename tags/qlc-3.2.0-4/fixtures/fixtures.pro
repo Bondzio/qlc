@@ -3,6 +3,7 @@ include(../variables.pri)
 TEMPLATE = subdirs
 TARGET = fixtures
 
+fixtures.files += American-DJ-Accu-Spot-250-II.qxf
 fixtures.files += American-DJ-DJ-Spot-300.qxf
 fixtures.files += American-DJ-Galaxian-3D.qxf
 fixtures.files += American-DJ-Mega-Bar-LED.qxf
@@ -14,6 +15,7 @@ fixtures.files += American-DJ-Spherion-Tri-LED.qxf
 fixtures.files += American-DJ-Revo-3.qxf
 fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
+fixtures.files += Coemar-Stage-Lite-LED.qxf
 fixtures.files += Chauvet-200b.qxf
 fixtures.files += Chauvet-ColorStrip-Mini.qxf
 fixtures.files += Chauvet-COLORado-1-Tour.qxf

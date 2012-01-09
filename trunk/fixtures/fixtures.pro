@@ -14,6 +14,7 @@ fixtures.files += American-DJ-Spherion-Tri-LED.qxf
 fixtures.files += American-DJ-Revo-3.qxf
 fixtures.files += American-DJ-Revo-4.qxf
 fixtures.files += American-DJ-Vizi-LED-Spot.qxf
+fixtures.files += Coemar-Stage-Lite-LED.qxf
 fixtures.files += Chauvet-200b.qxf
 fixtures.files += Chauvet-ColorStrip-Mini.qxf
 fixtures.files += Chauvet-COLORado-1-Tour.qxf

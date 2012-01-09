@@ -37,12 +37,20 @@
 /** Common interface */
 #define PEPERONI_IFACE_EP0      0x00
 
+#define PEPERONI_CONF_TXONLY    0x01
+#define PEPERONI_CONF_TXRX      0x02
+#define PEPERONI_CONF_RXONLY    0x03
+
 /** CONTROL MSG: Control the internal DMX buffer */
 #define PEPERONI_TX_MEM_REQUEST  0x04
+/** CONTROL MSG: Set DMX startcode */
+#define PEPERONI_TX_STARTCODE    0x09
 /** CONTROL MSG: Block until the DMX frame has been completely transmitted */
 #define PEPERONI_TX_MEM_BLOCK    0x01
 /** CONTROL MSG: Do not block during DMX frame send */
 #define PEPERONI_TX_MEM_NONBLOCK 0x00
+/** CONTROL MSG: Oldest firmware version with blocking write support */
+#define PEPERONI_FW_BLOCKING_WRITE_SUPPORT 0x101
 
 /** BULK WRITE: Bulk out endpoint */
 #define PEPERONI_BULK_OUT_ENDPOINT 0x02
@@ -60,14 +68,19 @@
  ****************************************************************************/
 
 PeperoniDevice::PeperoniDevice(QObject* parent, struct usb_device* device)
-        : QObject(parent)
+    : QObject(parent)
+    , m_device(device)
+    , m_handle(NULL)
 {
     Q_ASSERT(device != NULL);
 
-    m_device = device;
-    m_handle = NULL;
-    m_firmwareVersion = 0;
-    m_bulkBuffer = QByteArray(512 + PEPERONI_OLD_BULK_HEADER_SIZE, 0);
+    /* Store fw version so we don't need to rely on libusb's volatile data */
+    m_firmwareVersion = m_device->descriptor.bcdDevice;
+
+    if (m_firmwareVersion < PEPERONI_FW_BLOCKING_WRITE_SUPPORT)
+        m_blockingControlWrite = PEPERONI_TX_MEM_NONBLOCK;
+    else
+        m_blockingControlWrite = PEPERONI_TX_MEM_BLOCK;
 
     extractName();
 }
@@ -92,10 +105,10 @@ bool PeperoniDevice::isPeperoniDevice(const struct usb_device* device)
         return false;
 
     if (device->descriptor.idProduct == PEPERONI_PID_RODIN1 ||
-            device->descriptor.idProduct == PEPERONI_PID_RODIN2 ||
-            device->descriptor.idProduct == PEPERONI_PID_RODINT ||
-            device->descriptor.idProduct == PEPERONI_PID_XSWITCH ||
-            device->descriptor.idProduct == PEPERONI_PID_USBDMX21)
+        device->descriptor.idProduct == PEPERONI_PID_RODIN2 ||
+        device->descriptor.idProduct == PEPERONI_PID_RODINT ||
+        device->descriptor.idProduct == PEPERONI_PID_XSWITCH ||
+        device->descriptor.idProduct == PEPERONI_PID_USBDMX21)
     {
         /* We need one interface */
         if (device->config->bNumInterfaces < 1)
@@ -134,9 +147,6 @@ void PeperoniDevice::extractName()
         m_name = QString(name);
     else
         m_name = tr("Unknown");
-
-    /* Store fw version so we don't need to rely on libusb's volatile data */
-    m_firmwareVersion = m_device->descriptor.bcdDevice;
 
     /* Close the device if it was opened for this function only. */
     if (needToClose == true)
@@ -182,24 +192,53 @@ void PeperoniDevice::open()
 {
     if (m_device != NULL && m_handle == NULL)
     {
+        int r = -1;
+        int configuration = PEPERONI_CONF_TXONLY;
+
         m_handle = usb_open(m_device);
         if (m_handle == NULL)
         {
-            qWarning() << "Unable to open Peperoni device!";
+            qWarning() << "Unable to open PeperoniDevice with idProduct:" << m_device->descriptor.idProduct;
             return;
         }
 
-        /* We must claim the interface before doing anything */
-        int r = usb_claim_interface(m_handle, PEPERONI_IFACE_EP0);
-        if (r < 0)
-        {
-            qWarning() << "PeperoniDevice:" << "Unable to claim interface EP0!";
-        }
+        /* Use configuration #2 on X-Switch */
+        if (m_device->descriptor.idProduct == PEPERONI_PID_XSWITCH)
+            configuration = PEPERONI_CONF_TXRX;
+        else
+            configuration = PEPERONI_CONF_TXONLY;
 
-        r = usb_clear_halt(m_handle, PEPERONI_BULK_OUT_ENDPOINT);
+        /* Set selected configuration */
+        r = usb_set_configuration(m_handle, configuration);
         if (r < 0)
+            qWarning() << "PeperoniDevice is unable to set configuration #" << configuration;
+
+        /* We must claim the interface before doing anything */
+        r = usb_claim_interface(m_handle, PEPERONI_IFACE_EP0);
+        if (r < 0)
+            qWarning() << "PeperoniDevice is unable to claim interface EP0!";
+
+        /* Set DMX startcode */
+        r = usb_control_msg(m_handle,
+                            USB_TYPE_VENDOR | USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
+                            PEPERONI_TX_STARTCODE,   // Set DMX startcode
+                            0,                       // Standard startcode is 0
+                            0,                       // No index
+                            NULL,                    // No data
+                            0,                       // Zero data length
+                            50);                     // Timeout (ms)
+        if (r < 0)
+            qWarning() << "PeperoniDevice is unable to set 0 as the DMX startcode!";
+
+        if (m_firmwareVersion >= PEPERONI_FW_BULK_SUPPORT)
         {
-            qWarning() << "PeperoniDevice:" << "Unable to reset endpoint";
+            /* Allocate space for bulk buffer */
+            m_bulkBuffer = QByteArray(512 + PEPERONI_OLD_BULK_HEADER_SIZE, 0);
+
+            /* Sometimes you need a little jolt to get the device on its feet. */
+            r = usb_clear_halt(m_handle, PEPERONI_BULK_OUT_ENDPOINT);
+            if (r < 0)
+                qWarning() << "PeperoniDevice" << name() << "is unable to reset bulk endpoint.";
         }
     }
 }
@@ -212,12 +251,13 @@ void PeperoniDevice::close()
         int r = usb_release_interface(m_handle, PEPERONI_IFACE_EP0);
         if (r < 0)
         {
-            qWarning() << "PeperoniDevice:"
-                       << "Unable to release interface EP0!";
+            qWarning() << "PeperoniDevice" << name()
+                       << "is unable to release interface EP0!";
         }
 
         usb_close(m_handle);
     }
+
     m_handle = NULL;
 }
 
@@ -249,14 +289,17 @@ void PeperoniDevice::outputDMX(const QByteArray& universe)
     if (m_firmwareVersion < PEPERONI_FW_BULK_SUPPORT)
     {
 #endif
-        r = usb_control_msg(m_handle, USB_TYPE_VENDOR |
-                            USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
-                            PEPERONI_TX_MEM_REQUEST, // We are WRITING data
-                            PEPERONI_TX_MEM_BLOCK,   // Block during frame send?
+        r = usb_control_msg(m_handle,
+                            USB_TYPE_VENDOR | USB_RECIP_INTERFACE | USB_ENDPOINT_OUT,
+                            PEPERONI_TX_MEM_REQUEST, // We are WRITING DMX data
+                            m_blockingControlWrite,  // Block during frame send?
                             0,                       // Start at DMX address 0
                             (char*) universe.data(), // The DMX universe data
                             universe.size(),         // Size of DMX universe
                             50);                     // Timeout (ms)
+
+        if (r < 0)
+            qWarning() << "PeperoniDevice" << name() << "failed control write:" << usb_strerror();
 #ifndef __APPLE__
     }
     else
@@ -267,7 +310,7 @@ void PeperoniDevice::outputDMX(const QByteArray& universe)
         m_bulkBuffer[2] = char(universe.size() & 0xFF);
         m_bulkBuffer[3] = char((universe.size() >> 8) & 0xFF);
 
-        /* Append universe data to the buffer */
+        /* Append universe data to the bulk buffer */
         m_bulkBuffer.replace(PEPERONI_OLD_BULK_HEADER_SIZE,
                              universe.size(), universe);
 
@@ -277,12 +320,15 @@ void PeperoniDevice::outputDMX(const QByteArray& universe)
                            m_bulkBuffer.data(),
                            m_bulkBuffer.size(),
                            50);
+
+        if (r < 0)
+        {
+            qWarning() << "PeperoniDevice" << name() << "failed bulk write:" << usb_strerror();
+            qWarning() << "Resetting bulk endpoint.";
+            r = usb_clear_halt(m_handle, PEPERONI_BULK_OUT_ENDPOINT);
+            if (r < 0)
+                qWarning() << "PeperoniDevice" << name() << "is unable to reset bulk endpoint.";
+        }
     }
 #endif
-
-    if (r < 0)
-    {
-        qWarning() << name() << "is unable to write DMX universe:"
-                   << usb_strerror();
-    }
 }

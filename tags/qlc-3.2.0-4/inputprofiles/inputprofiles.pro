@@ -4,6 +4,7 @@ TEMPLATE = subdirs
 TARGET = profiles
 
 profiles.files += Behringer-BCF2000.qxi
+profiles.files += Behringer-LC2412.qxi
 profiles.files += Enttec-PlaybackWing.qxi
 profiles.files += Enttec-ShortcutWing.qxi
 profiles.files += Korg-nanoKONTROL.qxi

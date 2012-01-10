@@ -488,17 +488,19 @@ void ConsoleChannel::slotValueEdited(const QString& text)
 
 void ConsoleChannel::slotValueChange(int value)
 {
+    // Regardless of whether the value has changed or not, write it to the edit field
+    m_valueEdit->setText(QString("%1").arg(value));
+
     if (m_value != value)
     {
-        m_value = value;
-        m_valueEdit->setText(QString("%1").arg(m_value));
-        emit valueChanged(m_channel, m_value, isEnabled());
-
-        /* Use a mutex for m_valueChanged so that the latest value
-           is really written. */
+        // Use a mutex for m_valueChanged so that the latest value
+        // is really written in writeDMX()
         m_valueChangedMutex.lock();
+        m_value = value;
         m_valueChanged = true;
         m_valueChangedMutex.unlock();
+
+        emit valueChanged(m_channel, m_value, isEnabled());
     }
 }
 

@@ -45,6 +45,7 @@ CueStack::CueStack(Doc* doc)
     , m_running(false)
     , m_intensity(1.0)
     , m_currentIndex(-1)
+    , m_flashing(false)
     , m_fader(NULL)
     , m_elapsed(0)
     , m_previous(false)
@@ -58,6 +59,7 @@ CueStack::~CueStack()
 {
     qDebug() << Q_FUNC_INFO << (void*) this;
     Q_ASSERT(isStarted() == false);
+    Q_ASSERT(isFlashing() == false);
     m_cues.clear(); // Crashes without this, WTF?!
 }
 
@@ -325,6 +327,44 @@ void CueStack::adjustIntensity(qreal fraction)
 qreal CueStack::intensity() const
 {
     return m_intensity;
+}
+
+/****************************************************************************
+ * Flashing
+ ****************************************************************************/
+
+void CueStack::setFlashing(bool enable)
+{
+    qDebug() << Q_FUNC_INFO;
+    if (m_flashing != enable && m_cues.size() > 0)
+    {
+        m_flashing = enable;
+        if (m_flashing == true)
+            doc()->masterTimer()->registerDMXSource(this);
+        else
+            doc()->masterTimer()->unregisterDMXSource(this);
+    }
+}
+
+bool CueStack::isFlashing() const
+{
+    return m_flashing;
+}
+
+void CueStack::writeDMX(MasterTimer* timer, UniverseArray* ua)
+{
+    if (isFlashing() == true && m_cues.size() > 0)
+    {
+        QHashIterator <uint,uchar> it(m_cues.first().values());
+        while (it.hasNext() == true)
+        {
+            it.next();
+            FadeChannel fc;
+            fc.setChannel(it.key());
+            fc.setTarget(it.value());
+            ua->write(fc.channel(), fc.target(), fc.group(doc()));
+        }
+    }
 }
 
 /****************************************************************************

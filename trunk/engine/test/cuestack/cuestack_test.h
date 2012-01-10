@@ -43,6 +43,7 @@ private slots:
     void removeCue();
     void load();
     void save();
+    void flash();
     void startStop();
     void preRun();
     void intensity();

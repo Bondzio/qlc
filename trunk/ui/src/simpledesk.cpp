@@ -299,6 +299,7 @@ void SimpleDesk::initPlaybackSliders()
         connect(slider, SIGNAL(selected()), this, SLOT(slotPlaybackSelected()));
         connect(slider, SIGNAL(started()), this, SLOT(slotPlaybackStarted()));
         connect(slider, SIGNAL(stopped()), this, SLOT(slotPlaybackStopped()));
+        connect(slider, SIGNAL(flashing(bool)), this, SLOT(slotPlaybackFlashing(bool)));
         connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotPlaybackValueChanged(uchar)));
     }
 }
@@ -363,6 +364,15 @@ void SimpleDesk::slotPlaybackStopped()
 
     if (cueStack->isRunning() == true)
         cueStack->stop();
+}
+
+void SimpleDesk::slotPlaybackFlashing(bool enabled)
+{
+    int pb = sender()->property(PROP_PLAYBACK).toUInt();
+    CueStack* cueStack = m_engine->cueStack(pb);
+    Q_ASSERT(cueStack != NULL);
+
+    cueStack->setFlashing(enabled);
 }
 
 void SimpleDesk::slotPlaybackValueChanged(uchar value)

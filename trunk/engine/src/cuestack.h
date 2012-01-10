@@ -26,6 +26,7 @@
 #include <QMutex>
 #include <QList>
 
+#include "dmxsource.h"
 #include "cue.h"
 
 #define KXMLQLCCueStack "CueStack"
@@ -43,7 +44,7 @@ class MasterTimer;
 class FadeChannel;
 class Doc;
 
-class CueStack : public QObject
+class CueStack : public QObject, public DMXSource
 {
     Q_OBJECT
 
@@ -137,6 +138,18 @@ private:
     bool m_running;
     qreal m_intensity;
     int m_currentIndex;
+
+    /************************************************************************
+     * Flashing
+     ************************************************************************/
+public:
+    void setFlashing(bool enable);
+    bool isFlashing() const;
+
+    void writeDMX(MasterTimer* timer, UniverseArray* ua);
+
+private:
+    bool m_flashing;
 
     /************************************************************************
      * Writing

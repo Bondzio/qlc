@@ -114,6 +114,7 @@ private slots:
     void slotSelectPlayback(uint pb);
     void slotPlaybackStarted();
     void slotPlaybackStopped();
+    void slotPlaybackFlashing(bool enabled);
     void slotPlaybackValueChanged(uchar value);
 
 private:

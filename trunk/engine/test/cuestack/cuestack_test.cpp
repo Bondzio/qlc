@@ -25,6 +25,7 @@
 #include "cuestack_test.h"
 
 #define private public
+#define protected public
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
 #include "universearray.h"
@@ -35,6 +36,7 @@
 #include "fixture.h"
 #include "qlcfile.h"
 #include "doc.h"
+#undef protected
 #undef private
 
 #define INTERNAL_FIXTUREDIR "../../../fixtures/"
@@ -70,6 +72,7 @@ void CueStack_Test::initial()
     QCOMPARE(cs.intensity(), qreal(1.0));
     QCOMPARE(cs.isRunning(), false);
     QCOMPARE(cs.isStarted(), false);
+    QCOMPARE(cs.isFlashing(), false);
     QCOMPARE(cs.m_fader, (GenericFader*) NULL);
     QCOMPARE(cs.m_elapsed, uint(0));
     QCOMPARE(cs.m_previous, false);
@@ -463,6 +466,55 @@ void CueStack_Test::preRun()
 
     MasterTimer mt(m_doc);
     cs.postRun(&mt);
+}
+
+void CueStack_Test::flash()
+{
+    CueStack cs(m_doc);
+    QCOMPARE(cs.isFlashing(), false);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
+
+    // Disable flashing when it's already disabled -> fail
+    cs.setFlashing(false);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
+    QCOMPARE(cs.isFlashing(), false);
+    cs.setFlashing(false);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
+    QCOMPARE(cs.isFlashing(), false);
+
+    // Enable flashing without cues -> fail
+    cs.setFlashing(true);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
+    QCOMPARE(cs.isFlashing(), false);
+
+    Cue cue;
+    cue.setValue(0, 255);
+    cue.setValue(128, 42);
+    cs.appendCue(cue);
+
+    UniverseArray ua(512);
+    cs.setFlashing(true);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 1);
+    QCOMPARE(cs.isFlashing(), true);
+    cs.writeDMX(m_doc->masterTimer(), &ua);
+    QCOMPARE(ua.preGMValues()[0], (char) 255);
+    QCOMPARE(ua.preGMValues()[128], (char) 42);
+    ua.zeroIntensityChannels();
+
+    cs.setFlashing(true);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 1);
+    cs.writeDMX(m_doc->masterTimer(), &ua);
+    QCOMPARE(ua.preGMValues()[0], (char) 255);
+    QCOMPARE(ua.preGMValues()[128], (char) 42);
+    ua.zeroIntensityChannels();
+
+    cs.setFlashing(false);
+    QCOMPARE(cs.isFlashing(), false);
+    QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
+    cs.writeDMX(m_doc->masterTimer(), &ua);
+    QCOMPARE(ua.preGMValues()[0], (char) 0);
+    QCOMPARE(ua.preGMValues()[128], (char) 0);
+    ua.zeroIntensityChannels();
 }
 
 void CueStack_Test::startStop()

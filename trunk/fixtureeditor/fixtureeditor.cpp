@@ -107,7 +107,7 @@ QLCFixtureEditor::QLCFixtureEditor(QWidget* parent,
 QLCFixtureEditor::~QLCFixtureEditor()
 {
     QSettings settings;
-    settings.setValue(KSettingsGeometry, saveGeometry());
+    settings.setValue(KSettingsGeometry, parentWidget()->saveGeometry());
 
     delete m_fixtureDef;
     m_fixtureDef = NULL;

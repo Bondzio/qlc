@@ -29,6 +29,7 @@
 
 #include "ui_efxeditor.h"
 #include "efx.h"
+#include "doc.h"
 
 class EFXPreviewArea;
 class SpeedSpinBox;
@@ -58,6 +59,7 @@ private:
 private slots:
     void slotTestClicked();
     void slotRestartTest();
+    void slotModeChanged(Doc::Mode mode);
 
 private:
     EFXPreviewArea* m_previewArea;

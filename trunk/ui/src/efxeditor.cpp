@@ -74,6 +74,7 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
     m_testTimer.setSingleShot(true);
     m_testTimer.setInterval(500);
     connect(&m_testTimer, SIGNAL(timeout()), this, SLOT(slotRestartTest()));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
 }
 
 EFXEditor::~EFXEditor()
@@ -284,6 +285,16 @@ void EFXEditor::slotRestartTest()
         // Toggle off, toggle on. Duh.
         m_testButton->click();
         m_testButton->click();
+    }
+}
+
+void EFXEditor::slotModeChanged(Doc::Mode mode)
+{
+    if (mode == Doc::Operate)
+    {
+        if (m_efx->stopped() == false)
+            m_efx->stopAndWait();
+        m_testButton->setChecked(false);
     }
 }
 

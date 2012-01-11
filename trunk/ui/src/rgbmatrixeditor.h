@@ -28,6 +28,7 @@
 #include "ui_rgbmatrixeditor.h"
 #include "rgbmatrix.h"
 #include "qlcpoint.h"
+#include "doc.h"
 
 class QGraphicsScene;
 class SpeedSpinBox;
@@ -82,6 +83,7 @@ private slots:
 
     void slotTestClicked();
     void slotRestartTest();
+    void slotModeChanged(Doc::Mode mode);
 
 private:
     Doc* m_doc;

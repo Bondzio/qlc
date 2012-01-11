@@ -71,6 +71,7 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     m_scene->setBackgroundBrush(gradient);
 
     connect(m_previewTimer, SIGNAL(timeout()), this, SLOT(slotPreviewTimeout()));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
 
     init();
 }
@@ -88,6 +89,7 @@ void RGBMatrixEditor::init()
     /* Name */
     m_nameEdit->setText(m_mtx->name());
     m_nameEdit->setSelection(0, m_mtx->name().length());
+    slotNameEdited(m_mtx->name());
 
     /* Running order */
     switch (m_mtx->runOrder())
@@ -347,7 +349,9 @@ void RGBMatrixEditor::slotPreviewTimeout()
 
 void RGBMatrixEditor::slotNameEdited(const QString& text)
 {
+    setWindowTitle(tr("RGB Matrix - %1").arg(text));
     m_mtx->setName(text);
+    m_doc->setModified();
 }
 
 void RGBMatrixEditor::slotPatternActivated(const QString& text)
@@ -498,5 +502,20 @@ void RGBMatrixEditor::slotRestartTest()
         // Toggle off, toggle on. Duh.
         m_testButton->click();
         m_testButton->click();
+    }
+}
+
+void RGBMatrixEditor::slotModeChanged(Doc::Mode mode)
+{
+    if (mode == Doc::Operate)
+    {
+        if (m_mtx->stopped() == false)
+            m_mtx->stopAndWait();
+        m_testButton->setChecked(false);
+        m_previewTimer->stop();
+    }
+    else
+    {
+        m_previewTimer->start();
     }
 }

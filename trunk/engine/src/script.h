@@ -39,7 +39,7 @@ class Script : public Function
     /************************************************************************
      * Script keywords
      ************************************************************************/
-private:
+public:
     static const QString startFunctionCmd;
     static const QString stopFunctionCmd;
 

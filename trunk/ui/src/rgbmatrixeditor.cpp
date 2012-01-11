@@ -229,13 +229,11 @@ void RGBMatrixEditor::updateExtraOptions()
     if (m_mtx->algorithm() == NULL || m_mtx->algorithm()->type() != RGBAlgorithm::Text)
     {
         m_textGroup->hide();
-        m_animationGroup->hide();
         m_offsetGroup->hide();
     }
     else
     {
         m_textGroup->show();
-        m_animationGroup->show();
         m_offsetGroup->show();
 
         RGBText* text = static_cast<RGBText*> (m_mtx->algorithm());

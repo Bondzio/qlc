@@ -22,7 +22,7 @@
 #ifndef COLLECTIONEDITOR_H
 #define COLLECTIONEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "ui_collectioneditor.h"
 
@@ -33,7 +33,7 @@ class OutputMap;
 class InputMap;
 class Doc;
 
-class CollectionEditor : public QDialog, public Ui_CollectionEditor
+class CollectionEditor : public QWidget, public Ui_CollectionEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(CollectionEditor)
@@ -44,19 +44,15 @@ public:
 
 private:
     Doc* m_doc;
+    Collection* m_fc; // The Collection being edited
 
-protected slots:
+private slots:
     void slotNameEdited(const QString& text);
     void slotAdd();
     void slotRemove();
-    void accept();
 
-protected:
+private:
     void updateFunctionList();
-
-protected:
-    Collection* m_fc;
-    Collection* m_original;
 };
 
 #endif

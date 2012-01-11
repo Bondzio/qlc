@@ -75,7 +75,10 @@ public:
     /** Update all functions to function tree */
     void updateTree();
 
-protected:
+private:
+    /** Init the splitter view */
+    void initSplitterView();
+
     /** Init function tree view */
     void initTree();
 
@@ -94,14 +97,15 @@ protected:
     /** Delete all currently selected functions */
     void deleteSelectedFunctions();
 
-protected slots:
+private slots:
     /** Function selection was changed */
     void slotTreeSelectionChanged();
 
     /** Right mouse button was clicked on function tree */
     void slotTreeContextMenuRequested(const QPoint& pos);
 
-protected:
+private:
+    QSplitter* m_splitter;
     QTreeWidget* m_tree;
 
     /*********************************************************************
@@ -160,6 +164,9 @@ protected:
 
     /** Open an editor for the given function */
     int editFunction(Function* function);
+
+    /** Get the currently-active editor (or NULL if one doesn't exist) */
+    QWidget* currentEditor() const;
 
 protected:
     /** Don't listen to Doc::functionAdded signal when this is true */

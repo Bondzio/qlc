@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ScriptEditor</class>
- <widget class="QDialog" name="ScriptEditor">
+ <widget class="QWidget" name="ScriptEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -42,6 +42,9 @@
    </item>
    <item row="1" column="3">
     <widget class="QToolButton" name="m_addButton">
+     <property name="toolTip">
+      <string>Add new command to cursor position</string>
+     </property>
      <property name="text">
       <string>...</string>
      </property>
@@ -170,54 +173,12 @@
      </property>
     </spacer>
    </item>
-   <item row="9" column="0" colspan="4">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources>
   <include location="qlcui.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>ScriptEditor</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>317</x>
-     <y>562</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>ScriptEditor</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>385</x>
-     <y>568</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>m_cutButton</sender>
    <signal>clicked()</signal>

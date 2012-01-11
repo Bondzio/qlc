@@ -37,7 +37,7 @@ class InputMap;
 class QAction;
 class Doc;
 
-class SceneEditor : public QDialog, public Ui_SceneEditor
+class SceneEditor : public QWidget, public Ui_SceneEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(SceneEditor)
@@ -51,19 +51,19 @@ public:
 
 private:
     Doc* m_doc;
+    Scene* m_scene; // The Scene that is being edited
 
 private:
     void init();
     void setSceneValue(const SceneValue& scv);
 
 private:
-    bool m_initializing;
+    bool m_initFinished;
 
     /*********************************************************************
      * Common
      *********************************************************************/
 private slots:
-    void accept();
     void slotTabChanged(int tab);
 
     void slotEnableCurrent();
@@ -122,17 +122,14 @@ private:
     void removeFixtureTab(Fixture* fixture);
     FixtureConsole* consoleTab(int tab);
 
+private slots:
+    void slotValueChanged(quint32 fxi, quint32 channel, uchar value);
+    void slotChecked(quint32 fxi, quint32 channel, bool state);
+
 private:
     int m_currentTab;
 
-    /*********************************************************************
-     * Scene
-     *********************************************************************/
-private:
-    Scene* m_scene;
-    Scene* m_original;
-
-    /** Values from a copied console */
+    /** Values from a copied console (i.e. clipboard) */
     QList <SceneValue> m_copy;
 };
 

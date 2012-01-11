@@ -163,6 +163,9 @@ void ConsoleChannel::init()
     connect(m_doc, SIGNAL(fixtureChanged(quint32)),
             this, SLOT(slotFixtureChanged(quint32)));
 
+    // Listen to internal checked state changes
+    connect(this, SIGNAL(toggled(bool)), this, SLOT(slotChecked(bool)));
+
     // Grab channel & group for writeDMX
     slotFixtureChanged(m_fixtureID);
 
@@ -498,7 +501,18 @@ void ConsoleChannel::slotValueChange(int value)
         m_valueChanged = true;
         m_value = value;
         m_valueChangedMutex.unlock();
+
+        emit valueChanged(m_fixtureID, m_channel, value);
     }
+}
+
+void ConsoleChannel::slotChecked(bool state)
+{
+    emit checked(m_fixtureID, m_channel, state);
+
+    // Emit the current value also when turning the channel back on
+    if (state == true)
+        emit valueChanged(m_fixtureID, m_channel, m_value);
 }
 
 /*****************************************************************************

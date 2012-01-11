@@ -60,36 +60,27 @@
 #define BLUE "blue"
 
 SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_doc(doc)
-    , m_original(scene)
+    , m_scene(scene)
+    , m_initFinished(false)
+    , m_currentTab(0)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(scene != NULL);
 
     m_currentTab = KTabGeneral;
 
-    /* Create a copy of the original scene so that we can freely modify it.
-       Keep also a pointer to the original so that we can move the
-       contents from the copied chaser to the original when OK is clicked */
-    m_scene = new Scene(doc);
-    m_scene->copyFrom(scene);
-    Q_ASSERT(m_scene != NULL);
-
     setupUi(this);
-
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
 
     init();
     slotTabChanged(KTabGeneral);
+
+    m_initFinished = true;
 }
 
 SceneEditor::~SceneEditor()
 {
-    delete m_scene;
 }
 
 void SceneEditor::init()
@@ -202,29 +193,6 @@ void SceneEditor::setSceneValue(const SceneValue& scv)
 /*****************************************************************************
  * Common
  *****************************************************************************/
-
-void SceneEditor::accept()
-{
-    m_scene->setName(m_nameEdit->text());
-    m_scene->clear();
-    for (int i = 1; i < m_tab->count(); i++)
-    {
-        FixtureConsole* fc = consoleTab(i);
-        if (fc != NULL)
-        {
-            QListIterator <SceneValue> it(fc->values());
-            while (it.hasNext() == true)
-            {
-                m_scene->setValue(it.next());
-            }
-        }
-    }
-
-    /* Copy the contents of the modified scene over the original scene */
-    m_original->copyFrom(m_scene);
-
-    QDialog::accept();
-}
 
 void SceneEditor::slotTabChanged(int tab)
 {
@@ -509,6 +477,7 @@ void SceneEditor::removeFixtureItem(Fixture* fixture)
 void SceneEditor::slotNameEdited(const QString& name)
 {
     setWindowTitle(tr("Scene - %1").arg(name));
+    m_scene->setName(m_nameEdit->text());
 }
 
 void SceneEditor::slotAddFixtureClicked()
@@ -631,6 +600,11 @@ void SceneEditor::addFixtureTab(Fixture* fixture)
 
     /* Start off with all channels disabled */
     console->enableAllChannels(false);
+
+    connect(console, SIGNAL(valueChanged(quint32,quint32,uchar)),
+            this, SLOT(slotValueChanged(quint32,quint32,uchar)));
+    connect(console, SIGNAL(checked(quint32,quint32,bool)),
+            this, SLOT(slotChecked(quint32,quint32,bool)));
 }
 
 void SceneEditor::removeFixtureTab(Fixture* fixture)
@@ -664,4 +638,29 @@ FixtureConsole* SceneEditor::consoleTab(int tab)
     Q_ASSERT(area != NULL);
 
     return qobject_cast<FixtureConsole*> (area->widget());
+}
+
+void SceneEditor::slotValueChanged(quint32 fxi, quint32 channel, uchar value)
+{
+    // Don't modify m_scene contents when doing initialization
+    if (m_initFinished == false)
+        return;
+
+    Q_ASSERT(m_scene != NULL);
+    m_scene->setValue(SceneValue(fxi, channel, value));
+    m_doc->setModified();
+}
+
+void SceneEditor::slotChecked(quint32 fxi, quint32 channel, bool state)
+{
+    // Don't modify m_scene contents when doing initialization
+    if (m_initFinished == false)
+        return;
+
+    // When a channel is enabled, its current value is emitted with valueChanged().
+    // So, state == true case doesn't need to be handled here.
+    Q_ASSERT(m_scene != NULL);
+    if (state == false)
+        m_scene->unsetValue(fxi, channel);
+    m_doc->setModified();
 }

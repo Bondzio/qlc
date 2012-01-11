@@ -50,23 +50,14 @@
 #define KColumnName   1
 
 ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_doc(doc)
-    , m_original(chaser)
+    , m_chaser(chaser)
 {
     Q_ASSERT(chaser != NULL);
     Q_ASSERT(doc != NULL);
 
     setupUi(this);
-
-    m_chaser = new Chaser(doc);
-    Q_ASSERT(m_chaser != NULL);
-    m_chaser->copyFrom(chaser);
-
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
 
     /* Resize columns to fit contents */
     m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -175,29 +166,11 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     while (it.hasNext() == true)
         updateItem(new QTreeWidgetItem(m_list), it.next());
 
-    /* Window position */
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
-
     updateClipboardButtons();
 }
 
 ChaserEditor::~ChaserEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
-    delete m_chaser;
-    m_chaser = NULL;
-}
-
-void ChaserEditor::accept()
-{
-    m_original->copyFrom(m_chaser);
-    QDialog::accept();
 }
 
 void ChaserEditor::slotNameEdited(const QString& text)
@@ -213,7 +186,7 @@ void ChaserEditor::slotNameEdited(const QString& text)
 void ChaserEditor::slotAddClicked()
 {
     FunctionSelection fs(this, m_doc);
-    fs.setDisabledFunctions(QList <quint32>() << m_original->id());
+    fs.setDisabledFunctions(QList <quint32>() << m_chaser->id());
 
     if (fs.exec() == QDialog::Accepted)
     {

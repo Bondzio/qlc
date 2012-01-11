@@ -61,9 +61,6 @@ public slots:
 
 private:
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /*********************************************************************
      * Multi-selection
@@ -99,7 +96,10 @@ private:
      * Disabled functions
      *********************************************************************/
 public:
+    /** Disable the given list of function IDs in the tree */
     void setDisabledFunctions(const QList <quint32>& ids);
+
+    /** Get a list of disabled functionIDs */
     QList <quint32> disabledFunctions() const;
 
 protected:
@@ -117,58 +117,14 @@ protected:
     QList <quint32> m_selection;
 
     /*********************************************************************
-     * Toolbar
-     *********************************************************************/
-protected slots:
-    void slotNewScene();
-    void slotNewChaser();
-    void slotNewEFX();
-    void slotNewCollection();
-    void slotNewScript();
-    void slotNewRGBMatrix();
-
-protected:
-    /** Create toolbar */
-    void initToolBar();
-
-protected:
-    QToolBar* m_toolbar;
-    QAction* m_addSceneAction;
-    QAction* m_addChaserAction;
-    QAction* m_addEFXAction;
-    QAction* m_addCollectionAction;
-    QAction* m_addScriptAction;
-    QAction* m_addRGBMatrixAction;
-
-    /*********************************************************************
      * Internal
      *********************************************************************/
 protected:
-    /** Add the given function to the tree and select it */
-    void addFunction(Function* function);
-
-    /** Display an error message if function creation failed */
-    void addFunctionErrorMessage();
-
     /** Update the contents of the given function to the tree item */
     void updateFunctionItem(QTreeWidgetItem* item, Function* function);
 
     /** Clear & (re)fill the tree */
     void refillTree();
-
-    /**
-     * Find a top-level item that matches the given fixture instance or
-     * create one if it doesn't exist.
-     *
-     * @param fxi_id The fixture ID to search for
-     * @param doc A QLC Doc* pointer that contains all fixture instances
-     */
-    QTreeWidgetItem* fixtureItem(quint32 fxi_id, Doc* doc);
-
-    /**
-     * Edit the given function with an editor dialog
-     */
-    int editFunction(Function* function);
 
 protected slots:
     void slotItemSelectionChanged();

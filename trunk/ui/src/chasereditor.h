@@ -22,7 +22,7 @@
 #ifndef CHASEREDITOR_H
 #define CHASEREDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 #include "ui_chasereditor.h"
 
 class Doc;
@@ -35,7 +35,7 @@ class MasterTimer;
 class SpeedSpinBox;
 class QTreeWidgetItem;
 
-class ChaserEditor : public QDialog, public Ui_ChaserEditor
+class ChaserEditor : public QWidget, public Ui_ChaserEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(ChaserEditor)
@@ -48,13 +48,11 @@ public:
     ~ChaserEditor();
 
 private slots:
-    void accept();
     void slotNameEdited(const QString& text);
 
 private:
     Doc* m_doc;
-    Chaser* m_original;
-    Chaser* m_chaser;
+    Chaser* m_chaser; // The Chaser being edited
 
     /************************************************************************
      * List manipulation

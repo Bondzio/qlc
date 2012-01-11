@@ -91,6 +91,10 @@ public:
         always number zero, so these are not DMX channels) */
     ConsoleChannel* channel(quint32 ch);
 
+signals:
+    void valueChanged(quint32 fxi, quint32 channel, uchar value);
+    void checked(quint32 fxi, quint32 channel, bool state);
+
 protected:
     bool m_channelsCheckable;
     QList<ConsoleChannel*> m_channels;

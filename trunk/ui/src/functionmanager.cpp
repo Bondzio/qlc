@@ -77,8 +77,7 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     initActions();
     initMenu();
     initToolbar();
-
-    initTree();
+    initSplitterView();
     updateActionStatus();
 
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
@@ -134,6 +133,8 @@ void FunctionManager::slotModeChanged(Doc::Mode mode)
 void FunctionManager::slotDocClearing()
 {
     m_tree->clear();
+    if (currentEditor() != NULL)
+        delete currentEditor();
 }
 
 /*****************************************************************************
@@ -402,6 +403,8 @@ void FunctionManager::slotDelete()
     {
         deleteSelectedFunctions();
         updateActionStatus();
+        if (currentEditor() != NULL)
+            delete currentEditor();
     }
 }
 
@@ -440,10 +443,18 @@ void FunctionManager::updateActionStatus()
  * Function tree
  ****************************************************************************/
 
+void FunctionManager::initSplitterView()
+{
+    m_splitter = new QSplitter(Qt::Horizontal, this);
+    layout()->addWidget(m_splitter);
+    initTree();
+}
+
 void FunctionManager::initTree()
 {
     m_tree = new QTreeWidget(this);
-    layout()->addWidget(m_tree);
+    Q_ASSERT(m_splitter != NULL);
+    m_splitter->addWidget(m_tree);
 
     // Add two columns for function and type
     QStringList labels;
@@ -638,35 +649,35 @@ int FunctionManager::editFunction(Function* function)
 
     Q_ASSERT(function != NULL);
 
+    // Destroy the existing editor, if it exists
+    QWidget* editor = currentEditor();
+    if (editor != NULL)
+        delete editor;
+    editor = NULL;
+    Q_ASSERT(m_splitter->count() == 1);
+
+    // Choose the editor by the selected function's type
     if (function->type() == Function::Scene)
-    {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
-        result = editor.exec();
-    }
+        editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
     else if (function->type() == Function::Chaser)
-    {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
-        result = editor.exec();
-    }
+        editor = new ChaserEditor(m_splitter, qobject_cast<Chaser*> (function), m_doc);
     else if (function->type() == Function::Collection)
-    {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
-        result = editor.exec();
-    }
+        editor = new CollectionEditor(m_splitter, qobject_cast<Collection*> (function), m_doc);
     else if (function->type() == Function::EFX)
-    {
-        EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
-        result = editor.exec();
-    }
+        editor = new EFXEditor(m_splitter, qobject_cast<EFX*> (function), m_doc);
     else if (function->type() == Function::RGBMatrix)
-    {
-        RGBMatrixEditor editor(this, qobject_cast<RGBMatrix*> (function), m_doc);
-        result = editor.exec();
-    }
+        editor = new RGBMatrixEditor(m_splitter, qobject_cast<RGBMatrix*> (function), m_doc);
     else if (function->type() == Function::Script)
+        editor = new ScriptEditor(m_splitter, qobject_cast<Script*> (function), m_doc);
+    else
+        editor = NULL;
+
+    // Show the editor
+    if (editor != NULL)
     {
-        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc);
-        result = editor.exec();
+        m_splitter->addWidget(editor);
+        editor->show();
+        result = QDialog::Accepted;
     }
     else
     {
@@ -674,4 +685,13 @@ int FunctionManager::editFunction(Function* function)
     }
 
     return result;
+}
+
+QWidget* FunctionManager::currentEditor() const
+{
+    Q_ASSERT(m_splitter != NULL);
+    if (m_splitter->count() < 2)
+        return NULL;
+    else
+        return m_splitter->widget(1);
 }

@@ -44,60 +44,41 @@
 #define KColumnFunctionID 1
 
 CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_doc(doc)
-    , m_original(fc)
+    , m_fc(fc)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(fc != NULL);
 
     setupUi(this);
 
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
-
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
     connect(m_add, SIGNAL(clicked()), this, SLOT(slotAdd()));
     connect(m_remove, SIGNAL(clicked()), this, SLOT(slotRemove()));
 
-    m_fc = new Collection(doc);
-    m_fc->copyFrom(fc);
-    Q_ASSERT(m_fc != NULL);
-
     m_nameEdit->setText(m_fc->name());
     slotNameEdited(m_fc->name());
 
     updateFunctionList();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
 }
 
 CollectionEditor::~CollectionEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
-    Q_ASSERT(m_fc != NULL);
-    delete m_fc;
-    m_fc = NULL;
 }
 
 void CollectionEditor::slotNameEdited(const QString& text)
 {
     setWindowTitle(tr("Collection - %1").arg(text));
+    m_fc->setName(m_nameEdit->text());
+    m_doc->setModified();
 }
 
 void CollectionEditor::slotAdd()
 {
     FunctionSelection fs(this, m_doc);
-    fs.setDisabledFunctions(QList <quint32>() << m_original->id());
+    fs.setDisabledFunctions(QList <quint32>() << m_fc->id());
 
     if (fs.exec() == QDialog::Accepted)
     {
@@ -111,6 +92,7 @@ void CollectionEditor::slotAdd()
         }
 
         updateFunctionList();
+        m_doc->setModified();
     }
 }
 
@@ -122,16 +104,8 @@ void CollectionEditor::slotRemove()
         quint32 id = item->text(KColumnFunctionID).toInt();
         m_fc->removeFunction(id);
         delete item;
+        m_doc->setModified();
     }
-}
-
-void CollectionEditor::accept()
-{
-    m_fc->setName(m_nameEdit->text());
-    m_original->copyFrom(m_fc);
-    m_doc->setModified();
-
-    QDialog::accept();
 }
 
 void CollectionEditor::updateFunctionList()

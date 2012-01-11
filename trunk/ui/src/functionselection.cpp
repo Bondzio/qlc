@@ -64,23 +64,12 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
 {
     Q_ASSERT(doc != NULL);
 
-    m_toolbar = NULL;
-    m_addSceneAction = NULL;
-    m_addChaserAction = NULL;
-    m_addEFXAction = NULL;
-    m_addCollectionAction = NULL;
-    m_addScriptAction = NULL;
-    m_addRGBMatrixAction = NULL;
-
     setupUi(this);
 
     QAction* action = new QAction(this);
     action->setShortcut(QKeySequence(QKeySequence::Close));
     connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
     addAction(action);
-
-    /* Create toolbar */
-    initToolBar();
 
     connect(m_sceneCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotSceneChecked(bool)));
@@ -104,22 +93,11 @@ FunctionSelection::FunctionSelection(QWidget* parent, Doc* doc)
 int FunctionSelection::exec()
 {
     m_sceneCheck->setChecked(m_filter & Function::Scene);
-    m_addSceneAction->setEnabled(m_filter & Function::Scene);
-
     m_chaserCheck->setChecked(m_filter & Function::Chaser);
-    m_addChaserAction->setEnabled(m_filter & Function::Chaser);
-
     m_efxCheck->setChecked(m_filter & Function::EFX);
-    m_addEFXAction->setEnabled(m_filter & Function::EFX);
-
     m_collectionCheck->setChecked(m_filter & Function::Collection);
-    m_addCollectionAction->setEnabled(m_filter & Function::Collection);
-
     m_scriptCheck->setChecked(m_filter & Function::Script);
-    m_addScriptAction->setEnabled(m_filter & Function::Script);
-
     m_rgbMatrixCheck->setChecked(m_filter & Function::RGBMatrix);
-    m_addRGBMatrixAction->setEnabled(m_filter & Function::RGBMatrix);
 
     if (m_constFilter == true)
     {
@@ -197,118 +175,8 @@ const QList <quint32> FunctionSelection::selection() const
 }
 
 /*****************************************************************************
- * Toolbar
- *****************************************************************************/
-
-void FunctionSelection::initToolBar()
-{
-    m_toolbar = new QToolBar(this);
-    layout()->setMenuBar(m_toolbar);
-
-    m_addSceneAction = m_toolbar->addAction(QIcon(":/scene.png"),
-                                            tr("New Scene"), this, SLOT(slotNewScene()));
-    m_addChaserAction = m_toolbar->addAction(QIcon(":/chaser.png"),
-                        tr("New Chaser"), this, SLOT(slotNewChaser()));
-    m_addEFXAction = m_toolbar->addAction(QIcon(":/efx.png"),
-                                          tr("New EFX"), this, SLOT(slotNewEFX()));
-    m_addCollectionAction = m_toolbar->addAction(QIcon(":/collection.png"),
-                            tr("New Collection"), this, SLOT(slotNewCollection()));
-    m_addScriptAction = m_toolbar->addAction(QIcon(":/script.png"),
-                            tr("New Script"), this, SLOT(slotNewScript()));
-    m_addRGBMatrixAction = m_toolbar->addAction(QIcon(":/rgbmatrix.png"),
-                            tr("New RGB Matrix"), this, SLOT(slotNewRGBMatrix()));
-}
-
-void FunctionSelection::slotNewScene()
-{
-    Function* function = new Scene(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-void FunctionSelection::slotNewChaser()
-{
-    Function* function = new Chaser(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-void FunctionSelection::slotNewEFX()
-{
-    Function* function = new EFX(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-void FunctionSelection::slotNewCollection()
-{
-    Function* function = new Collection(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-void FunctionSelection::slotNewScript()
-{
-    Function* function = new Script(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-void FunctionSelection::slotNewRGBMatrix()
-{
-    Function* function = new RGBMatrix(m_doc);
-    if (m_doc->addFunction(function) == true)
-        addFunction(function);
-    else
-        addFunctionErrorMessage();
-}
-
-/*****************************************************************************
  * Tree
  *****************************************************************************/
-
-void FunctionSelection::addFunction(Function* function)
-{
-    QTreeWidgetItem* item;
-
-    Q_ASSERT(function != NULL);
-
-    /* Create a new item for the function */
-    item = new QTreeWidgetItem(m_tree);
-    updateFunctionItem(item, function);
-
-    /* Append the new function to current selection */
-    item->setSelected(true);
-
-    if (editFunction(function) == QDialog::Rejected)
-    {
-        m_doc->deleteFunction(function->id());
-        delete item;
-    }
-    else
-    {
-        updateFunctionItem(item, function);
-        m_tree->sortItems(KColumnName, Qt::AscendingOrder);
-        m_tree->scrollToItem(item);
-        m_tree->setCurrentItem(item);
-    }
-}
-
-void FunctionSelection::addFunctionErrorMessage()
-{
-    QMessageBox::critical(this, tr("Function creation failed"),
-                          tr("Unable to create new function."));
-}
 
 void FunctionSelection::updateFunctionItem(QTreeWidgetItem* item, Function* function)
 {
@@ -372,7 +240,6 @@ void FunctionSelection::slotSceneChecked(bool state)
         m_filter = (m_filter | Function::Scene);
     else
         m_filter = (m_filter & ~Function::Scene);
-    m_addSceneAction->setEnabled(state);
     refillTree();
 }
 
@@ -382,7 +249,6 @@ void FunctionSelection::slotChaserChecked(bool state)
         m_filter = (m_filter | Function::Chaser);
     else
         m_filter = (m_filter & ~Function::Chaser);
-    m_addChaserAction->setEnabled(state);
     refillTree();
 }
 
@@ -392,7 +258,6 @@ void FunctionSelection::slotEFXChecked(bool state)
         m_filter = (m_filter | Function::EFX);
     else
         m_filter = (m_filter & ~Function::EFX);
-    m_addEFXAction->setEnabled(state);
     refillTree();
 }
 
@@ -402,7 +267,6 @@ void FunctionSelection::slotCollectionChecked(bool state)
         m_filter = (m_filter | Function::Collection);
     else
         m_filter = (m_filter & ~Function::Collection);
-    m_addCollectionAction->setEnabled(state);
     refillTree();
 }
 
@@ -412,7 +276,6 @@ void FunctionSelection::slotScriptChecked(bool state)
         m_filter = (m_filter | Function::Script);
     else
         m_filter = (m_filter & ~Function::Script);
-    m_addScriptAction->setEnabled(state);
     refillTree();
 }
 
@@ -422,54 +285,5 @@ void FunctionSelection::slotRGBMatrixChecked(bool state)
         m_filter = (m_filter | Function::RGBMatrix);
     else
         m_filter = (m_filter & ~Function::RGBMatrix);
-    m_addRGBMatrixAction->setEnabled(state);
     refillTree();
-}
-
-/*****************************************************************************
- * Helpers
- *****************************************************************************/
-
-int FunctionSelection::editFunction(Function* function)
-{
-    int result = QDialog::Rejected;
-
-    Q_ASSERT(function != NULL);
-
-    if (function->type() == Function::Scene)
-    {
-        SceneEditor editor(this, qobject_cast<Scene*> (function), m_doc);
-        result = editor.exec();
-    }
-    else if (function->type() == Function::Chaser)
-    {
-        ChaserEditor editor(this, qobject_cast<Chaser*> (function), m_doc);
-        result = editor.exec();
-    }
-    else if (function->type() == Function::Collection)
-    {
-        CollectionEditor editor(this, qobject_cast<Collection*> (function), m_doc);
-        result = editor.exec();
-    }
-    else if (function->type() == Function::EFX)
-    {
-        EFXEditor editor(this, qobject_cast<EFX*> (function), m_doc);
-        result = editor.exec();
-    }
-    else if (function->type() == Function::Script)
-    {
-        ScriptEditor editor(this, qobject_cast<Script*> (function), m_doc);
-        result = editor.exec();
-    }
-    else if (function->type() == Function::RGBMatrix)
-    {
-        RGBMatrixEditor editor(this, qobject_cast<RGBMatrix*> (function), m_doc);
-        result = editor.exec();
-    }
-    else
-    {
-        result = QDialog::Rejected;
-    }
-
-    return result;
 }

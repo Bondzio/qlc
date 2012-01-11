@@ -81,6 +81,10 @@ void FixtureConsole::setFixture(quint32 id)
         cc->setCheckable(m_channelsCheckable);
         layout()->addWidget(cc);
         m_channels.append(cc);
+        connect(cc, SIGNAL(valueChanged(quint32,quint32,uchar)),
+                this, SIGNAL(valueChanged(quint32,quint32,uchar)));
+        connect(cc, SIGNAL(checked(quint32,quint32,bool)),
+                this, SIGNAL(checked(quint32,quint32,bool)));
     }
 
     /* Make a spacer item eat excess space to justify channels left */

@@ -108,18 +108,25 @@ public:
     /** Emulate the user dragging the value slider */
     void setValue(uchar value);
 
-public slots:
+private slots:
     /** Value edit box was edited */
     void slotValueEdited(const QString& text);
 
     /** Slider value was changed */
     void slotValueChange(int value);
 
+    /** Check state has changed */
+    void slotChecked(bool state);
+
 protected:
     uchar m_value;
     bool m_valueChanged;
     QMutex m_valueChangedMutex;
     bool m_outputDMX;
+
+signals:
+    void valueChanged(quint32 fxi, quint32 channel, uchar value);
+    void checked(quint32 fxi, quint32 channel, bool state);
 
     /*********************************************************************
      * DMXSource

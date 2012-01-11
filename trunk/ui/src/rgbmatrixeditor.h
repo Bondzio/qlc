@@ -22,7 +22,7 @@
 #ifndef RGBMATRIXEDITOR_H
 #define RGBMATRIXEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 #include <QHash>
 
 #include "ui_rgbmatrixeditor.h"
@@ -35,7 +35,7 @@ class RGBMatrix;
 class QTimer;
 class Doc;
 
-class RGBMatrixEditor : public QDialog, public Ui_RGBMatrixEditor
+class RGBMatrixEditor : public QWidget, public Ui_RGBMatrixEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(RGBMatrixEditor)
@@ -46,9 +46,6 @@ class RGBMatrixEditor : public QDialog, public Ui_RGBMatrixEditor
 public:
     RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc);
     ~RGBMatrixEditor();
-
-public slots:
-    void accept();
 
 private:
     void init();
@@ -88,8 +85,7 @@ private slots:
 
 private:
     Doc* m_doc;
-    RGBMatrix* m_original;
-    RGBMatrix* m_mtx;
+    RGBMatrix* m_mtx; // The RGBMatrix being edited
 
     QList <RGBScript> m_scripts;
     QList <RGBMap> m_previewMaps;

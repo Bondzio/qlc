@@ -22,7 +22,7 @@
 #ifndef SCRIPTEDITOR_H
 #define SCRIPTEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 #include "ui_scripteditor.h"
 
 class QTextDocument;
@@ -34,7 +34,7 @@ class Script;
 class QMenu;
 class Doc;
 
-class ScriptEditor : public QDialog, public Ui_ScriptEditor
+class ScriptEditor : public QWidget, public Ui_ScriptEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(ScriptEditor)
@@ -61,6 +61,9 @@ private:
     void initAddMenu();
 
 private slots:
+    void slotNameEdited(const QString& text);
+    void slotContentsChanged();
+
     void slotAddStartFunction();
     void slotAddStopFunction();
     void slotAddWait();

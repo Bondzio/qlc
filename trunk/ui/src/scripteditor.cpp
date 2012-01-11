@@ -38,7 +38,7 @@
 #include "doc.h"
 
 ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_script(script)
     , m_doc(doc)
 {
@@ -47,6 +47,7 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
 
     /* Name */
     m_nameEdit->setText(m_script->name());
+    connect(m_nameEdit, SIGNAL(textEdited(const QString&)), this, SLOT(slotNameEdited(const QString&)));
 
     /* Document */
     m_document = new QTextDocument(m_script->data(), this);
@@ -59,19 +60,13 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
 #endif
 
     m_editor->moveCursor(QTextCursor::End);
+    connect(m_document, SIGNAL(contentsChanged()), this, SLOT(slotContentsChanged()));
 }
 
 ScriptEditor::~ScriptEditor()
 {
     delete m_document;
     m_document = NULL;
-}
-
-void ScriptEditor::accept()
-{
-    m_script->setName(m_nameEdit->text());
-    m_script->setData(m_document->toPlainText());
-    QDialog::accept();
 }
 
 void ScriptEditor::initAddMenu()
@@ -122,6 +117,20 @@ void ScriptEditor::initAddMenu()
     m_addMenu->addAction(m_addCommentAction);
 
     m_addButton->setMenu(m_addMenu);
+}
+
+void ScriptEditor::slotNameEdited(const QString& name)
+{
+    setWindowTitle(tr("Script - %1").arg(name));
+    m_script->setName(name);
+    m_doc->setModified();
+}
+
+void ScriptEditor::slotContentsChanged()
+{
+    //! @todo: this might become quite heavy if there's a lot of content
+    m_script->setData(m_document->toPlainText());
+    m_doc->setModified();
 }
 
 void ScriptEditor::slotAddStartFunction()

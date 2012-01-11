@@ -58,35 +58,17 @@
  *****************************************************************************/
 
 EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_doc(doc)
-    , m_original(efx)
+    , m_efx(efx)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(efx != NULL);
 
     setupUi(this);
 
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
-
-    /* Create a copy of the original scene so that we can freely modify it.
-       Keep also a pointer to the original so that we can move the
-       contents from the copied chaser to the original when OK is clicked */
-    m_efx = new EFX(doc);
-    m_efx->copyFrom(efx);
-    Q_ASSERT(m_efx != NULL);
-
     initGeneralPage();
     initMovementPage();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
 
     // Used for intensity changes
     m_testTimer.setSingleShot(true);
@@ -96,13 +78,8 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
 
 EFXEditor::~EFXEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
     if (m_efx->stopped() == false)
         m_efx->stopAndWait();
-
-    delete m_efx;
 }
 
 void EFXEditor::initGeneralPage()
@@ -292,16 +269,6 @@ void EFXEditor::initMovementPage()
     redrawPreview();
 }
 
-void EFXEditor::accept()
-{
-    m_efx->setName(m_nameEdit->text());
-
-    /* Copy the contents of the modified EFX over the original EFX */
-    m_original->copyFrom(m_efx);
-
-    QDialog::accept();
-}
-
 void EFXEditor::slotTestClicked()
 {
     if (m_testButton->isChecked() == true)
@@ -439,6 +406,8 @@ void EFXEditor::removeFixtureItem(EFXFixture* ef)
 void EFXEditor::slotNameEdited(const QString &text)
 {
     setWindowTitle(tr("EFX - %1").arg(text));
+    m_efx->setName(m_nameEdit->text());
+    m_doc->setModified();
 }
 
 void EFXEditor::slotFixtureItemChanged(QTreeWidgetItem* item, int column)

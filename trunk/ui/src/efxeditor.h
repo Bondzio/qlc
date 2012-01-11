@@ -23,6 +23,7 @@
 #define EFXEDITOR_H
 
 #include <QPolygon>
+#include <QWidget>
 #include <QFrame>
 #include <QTimer>
 
@@ -33,7 +34,7 @@ class EFXPreviewArea;
 class SpeedSpinBox;
 class Doc;
 
-class EFXEditor : public QDialog, public Ui_EFXEditor
+class EFXEditor : public QWidget, public Ui_EFXEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(EFXEditor)
@@ -47,14 +48,12 @@ public:
 
 private:
     Doc* m_doc;
+    EFX* m_efx; // The EFX being edited
 
 private:
     void initGeneralPage();
     void initMovementPage();
     void initInitializationPage();
-
-public slots:
-    void accept();
 
 private slots:
     void slotTestClicked();
@@ -63,10 +62,6 @@ private slots:
 private:
     EFXPreviewArea* m_previewArea;
     QPolygon* m_points;
-
-    EFX* m_efx;
-    EFX* m_original;
-
     QTimer m_testTimer;
 
     /*********************************************************************

@@ -51,9 +51,9 @@
  ****************************************************************************/
 
 RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_doc(doc)
-    , m_original(mtx)
+    , m_mtx(mtx)
     , m_scene(new QGraphicsScene(this))
     , m_previewTimer(new QTimer(this))
     , m_previewIterator(0)
@@ -70,20 +70,6 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     gradient.setSpread(QGradient::ReflectSpread);
     m_scene->setBackgroundBrush(gradient);
 
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
-
-    m_mtx = new RGBMatrix(doc);
-    m_mtx->copyFrom(m_original);
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
-
     connect(m_previewTimer, SIGNAL(timeout()), this, SLOT(slotPreviewTimeout()));
 
     init();
@@ -93,20 +79,8 @@ RGBMatrixEditor::~RGBMatrixEditor()
 {
     m_previewTimer->stop();
 
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
     if (m_mtx->stopped() == false)
         m_mtx->stopAndWait();
-
-    delete m_mtx;
-    m_mtx = NULL;
-}
-
-void RGBMatrixEditor::accept()
-{
-    m_original->copyFrom(m_mtx);
-    QDialog::accept();
 }
 
 void RGBMatrixEditor::init()

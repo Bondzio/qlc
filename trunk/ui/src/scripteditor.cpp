@@ -54,7 +54,11 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
     connect(m_document, SIGNAL(undoAvailable(bool)), m_undoButton, SLOT(setEnabled(bool)));
     m_document->setUndoRedoEnabled(false);
     m_document->setUndoRedoEnabled(true);
-    // m_document->clearUndoRedoStacks(); // Not present in Qt 4.6
+#if QT_VERSION >= 0x040700
+    m_document->clearUndoRedoStacks();
+#endif
+
+    m_editor->moveCursor(QTextCursor::End);
 }
 
 ScriptEditor::~ScriptEditor()
@@ -133,7 +137,9 @@ void ScriptEditor::slotAddStartFunction()
         {
             Function* function = m_doc->function(id);
             Q_ASSERT(function != NULL);
-            QString cmd = QString("startfunction:%1 // %2\n").arg(id).arg(function->name());
+            QString cmd = QString("%1: %2 // %3\n").arg(Script::startFunctionCmd)
+                                                   .arg(id)
+                                                   .arg(function->name());
             cursor.insertText(cmd);
             m_editor->moveCursor(QTextCursor::Down);
         }
@@ -153,7 +159,9 @@ void ScriptEditor::slotAddStopFunction()
         {
             Function* function = m_doc->function(id);
             Q_ASSERT(function != NULL);
-            QString cmd = QString("stopfunction:%1 // %2\n").arg(id).arg(function->name());
+            QString cmd = QString("%1:%2 // %3\n").arg(Script::stopFunctionCmd)
+                                                  .arg(id)
+                                                  .arg(function->name());
             cursor.insertText(cmd);
             m_editor->moveCursor(QTextCursor::Down);
         }
@@ -172,7 +180,7 @@ void ScriptEditor::slotAddWait()
     if (ok == true)
     {
         m_editor->moveCursor(QTextCursor::StartOfLine);
-        m_editor->textCursor().insertText(QString("wait:%1\n").arg(val));
+        m_editor->textCursor().insertText(QString("%1:%2\n").arg(Script::waitCmd).arg(val));
     }
 }
 
@@ -182,21 +190,23 @@ void ScriptEditor::slotAddWaitKey()
     if (ahk.exec() == QDialog::Accepted)
     {
         m_editor->moveCursor(QTextCursor::StartOfLine);
-        m_editor->textCursor().insertText(QString("waitkey:%1 // Not supported yet\n").arg(ahk.keySequence().toString()));
+        m_editor->textCursor().insertText(QString("%1:%2 // Not supported yet\n")
+                                                    .arg(Script::waitKeyCmd)
+                                                    .arg(ahk.keySequence().toString()));
     }
 }
 
 void ScriptEditor::slotAddSetHtp()
 {
     m_editor->moveCursor(QTextCursor::StartOfLine);
-    m_editor->textCursor().insertText(QString("sethtp:0 val:0 uni:1\n"));
+    m_editor->textCursor().insertText(QString("sethtp:0 val:0 uni:1 // Not supported yet\n"));
     m_editor->moveCursor(QTextCursor::EndOfLine);
 }
 
 void ScriptEditor::slotAddSetLtp()
 {
     m_editor->moveCursor(QTextCursor::StartOfLine);
-    m_editor->textCursor().insertText(QString("setltp:0 val:0 uni:1\n"));
+    m_editor->textCursor().insertText(QString("setltp:0 val:0 uni:1 // Not supported yet\n"));
     m_editor->moveCursor(QTextCursor::EndOfLine);
 }
 
@@ -211,7 +221,9 @@ void ScriptEditor::slotAddSetFixture()
             if (fxi != NULL)
             {
                 m_editor->moveCursor(QTextCursor::StartOfLine);
-                m_editor->textCursor().insertText(QString("setfixture:%1 ch:0 val:0 // %2\n").arg(fxi->id()).arg(fxi->name()));
+                m_editor->textCursor().insertText(QString("%1:%2 ch:0 val:0 // %2\n")
+                                                    .arg(Script::setFixtureCmd)
+                                                    .arg(fxi->id()).arg(fxi->name()));
                 m_editor->moveCursor(QTextCursor::Down);
             }
         }

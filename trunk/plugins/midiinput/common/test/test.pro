@@ -2,7 +2,7 @@ include(../../../../variables.pri)
 
 TEMPLATE = app
 LANGUAGE = C++
-TARGET   = test_common
+TARGET   = common_test
 
 CONFIG  += qtestlib
 QTPLUGIN =

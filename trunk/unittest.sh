@@ -97,7 +97,7 @@ fi
 pushd .
 cd plugins/midiinput/common/test
 DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./test_common
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./common_test
 RESULT=$?
 if [ $RESULT != 0 ]; then
     echo "MIDI Input common unit test failed ($RESULT). Please fix before commit."

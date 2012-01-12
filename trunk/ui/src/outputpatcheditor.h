@@ -22,7 +22,7 @@
 #ifndef OUTPUTPATCHEDITOR_H
 #define OUTPUTPATCHEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "ui_outputpatcheditor.h"
 
@@ -30,7 +30,7 @@ class QStringList;
 class OutputPatch;
 class OutputMap;
 
-class OutputPatchEditor : public QDialog, public Ui_OutputPatchEditor
+class OutputPatchEditor : public QWidget, public Ui_OutputPatchEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(OutputPatchEditor)
@@ -49,34 +49,28 @@ public:
     OutputPatchEditor(QWidget* parent, quint32 universe, OutputMap* outputMap);
     ~OutputPatchEditor();
 
-public slots:
-    void reject();
+signals:
+    /** Tells that the mapping settings have changed */
+    void mappingChanged();
 
-protected:
+private:
     QTreeWidgetItem* currentlyMappedItem() const;
     void fillTree();
     void fillPluginItem(const QString& pluginName, QTreeWidgetItem* pitem);
     QTreeWidgetItem* pluginItem(const QString& pluginName);
     void updateOutputInfo();
-    void storeDMXZeroBasedSetting(bool set);
+    OutputPatch* patch() const;
 
-protected slots:
+private slots:
     void slotCurrentItemChanged(QTreeWidgetItem* item);
     void slotItemChanged(QTreeWidgetItem* item);
     void slotConfigureClicked();
     void slotPluginConfigurationChanged(const QString& pluginName);
     void slotReconnectClicked();
-    void slotZeroBasedDMXClicked();
 
-protected:
+private:
     OutputMap* m_outputMap;
     int m_universe;
-
-    QString m_originalPluginName;
-    QString m_currentPluginName;
-    quint32 m_originalOutput;
-    quint32 m_currentOutput;
-    bool m_originalDMXZeroBasedSetting;
 };
 
 #endif /* OUTPUTPATCHEDITOR_H */

@@ -40,35 +40,20 @@
 #define SETTINGS_GEOMETRY "outputpatcheditor/geometry"
 
 OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMap* outputMap)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_outputMap(outputMap)
     , m_universe(universe)
 {
     Q_ASSERT(outputMap != NULL);
     Q_ASSERT(universe < outputMap->universes());
 
-    QSettings settings;
-    QVariant value;
-    QString key;
-
     setupUi(this);
-
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
 
     m_infoBrowser->setOpenExternalLinks(true);
     setWindowTitle(tr("Mapping properties for output universe %1").arg(universe + 1));
 
     OutputPatch* patch = outputMap->patch(m_universe);
     Q_ASSERT(patch != NULL);
-
-    m_originalPluginName = patch->pluginName();
-    m_currentPluginName = patch->pluginName();
-
-    m_originalOutput = patch->output();
-    m_currentOutput = patch->output();
 
     /* Selection changes */
     connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
@@ -82,40 +67,16 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMa
     connect(m_reconnectButton, SIGNAL(clicked()),
             this, SLOT(slotReconnectClicked()));
 
-    /* Zero-based DMX setting */
-    connect(m_zeroBasedDMXCheckBox, SIGNAL(clicked()),
-            this, SLOT(slotZeroBasedDMXClicked()));
-    m_zeroBasedDMXCheckBox->setChecked(patch->isDMXZeroBased());
-    m_originalDMXZeroBasedSetting = m_zeroBasedDMXCheckBox->isChecked();
-
     fillTree();
 
     /* Listen to plugin configuration changes */
     connect(m_outputMap,
             SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged(const QString&)));
-
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
 }
 
 OutputPatchEditor::~OutputPatchEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-}
-
-void OutputPatchEditor::reject()
-{
-    /* Revert changes to original values (stored when this dialog opens) */
-    m_outputMap->setPatch(m_universe, m_originalPluginName,
-                                m_originalOutput);
-
-    storeDMXZeroBasedSetting(m_originalDMXZeroBasedSetting);
-
-    QDialog::reject();
 }
 
 QTreeWidgetItem* OutputPatchEditor::currentlyMappedItem() const
@@ -125,9 +86,9 @@ QTreeWidgetItem* OutputPatchEditor::currentlyMappedItem() const
         QTreeWidgetItem* pluginItem = m_tree->topLevelItem(i);
         Q_ASSERT(pluginItem != NULL);
 
-        if (pluginItem->text(KColumnName) == m_currentPluginName)
+        if (pluginItem->text(KColumnName) == patch()->pluginName())
         {
-            QTreeWidgetItem* outputItem = pluginItem->child(m_currentOutput);
+            QTreeWidgetItem* outputItem = pluginItem->child(patch()->output());
             return outputItem;
         }
     }
@@ -151,7 +112,7 @@ void OutputPatchEditor::fillTree()
     pitem->setFlags(pitem->flags() | Qt::ItemIsUserCheckable);
 
     /* Set "Nothing" selected if there is no valid output selected */
-    if (m_currentOutput == QLCOutPlugin::invalidOutput())
+    if (patch()->output() == QLCOutPlugin::invalidOutput())
         pitem->setCheckState(KColumnName, Qt::Checked);
     else
         pitem->setCheckState(KColumnName, Qt::Unchecked);
@@ -190,7 +151,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
         iitem->setFlags(iitem->flags() | Qt::ItemIsUserCheckable);
 
         /* Select the currently mapped output and expand its parent node */
-        if (m_currentPluginName == pluginName && m_currentOutput == i)
+        if (patch()->pluginName() == pluginName && patch()->output() == i)
         {
             iitem->setCheckState(KColumnName, Qt::Checked);
             pitem->setExpanded(true);
@@ -235,6 +196,13 @@ QTreeWidgetItem* OutputPatchEditor::pluginItem(const QString& pluginName)
     }
 
     return NULL;
+}
+
+OutputPatch* OutputPatchEditor::patch() const
+{
+    OutputPatch* p = m_outputMap->patch(m_universe);
+    Q_ASSERT(p != NULL);
+    return p;
 }
 
 void OutputPatchEditor::slotCurrentItemChanged(QTreeWidgetItem* item)
@@ -315,21 +283,20 @@ void OutputPatchEditor::slotItemChanged(QTreeWidgetItem* item)
         item->setCheckState(KColumnName, Qt::Checked);
     }
 
-    /* Store the selected plugin name & input */
+    /* Apply the patch immediately so that input data can be used in the
+       input profile editor */
     if (item->parent() != NULL)
     {
-        m_currentPluginName = item->parent()->text(KColumnName);
-        m_currentOutput = item->text(KColumnOutput).toInt();
+        QString name(item->parent()->text(KColumnName));
+        quint32 output(item->text(KColumnOutput).toUInt());
+        m_outputMap->setPatch(m_universe, name, output);
     }
     else
     {
-        m_currentPluginName = QString();
-        m_currentOutput = QLCOutPlugin::invalidOutput();
+        m_outputMap->setPatch(m_universe, QString(), QLCOutPlugin::invalidOutput());
     }
 
-    /* Apply the patch immediately so that input data can be used in the
-       input profile editor */
-    m_outputMap->setPatch(m_universe, m_currentPluginName, m_currentOutput);
+    emit mappingChanged();
 }
 
 void OutputPatchEditor::slotPluginConfigurationChanged(const QString& pluginName)
@@ -383,24 +350,4 @@ void OutputPatchEditor::slotReconnectClicked()
             outputItem->parent()->setExpanded(true);
         m_tree->setCurrentItem(outputItem);
     }
-}
-
-void OutputPatchEditor::slotZeroBasedDMXClicked()
-{
-    storeDMXZeroBasedSetting(m_zeroBasedDMXCheckBox->isChecked());
-}
-
-void OutputPatchEditor::storeDMXZeroBasedSetting(bool set)
-{
-    OutputPatch* outputPatch = m_outputMap->patch(m_universe);
-    if (outputPatch != NULL)
-        outputPatch->setDMXZeroBased(set);
-
-    /* Update fixture manager so the setting is visible immediately */
-    if (FixtureManager::instance() != NULL)
-        FixtureManager::instance()->updateView();
-
-    /* Update monitor so the setting is visible immediately */
-    if (Monitor::instance() != NULL)
-        Monitor::instance()->updateFixtureLabelStyles();
 }

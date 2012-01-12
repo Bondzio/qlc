@@ -24,7 +24,7 @@
 #include <QTreeWidget>
 #include <QStringList>
 #include <QHeaderView>
-#include <QSettings>
+#include <QSplitter>
 #include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
@@ -54,20 +54,16 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
 {
     Q_ASSERT(outputMap != NULL);
 
-    /* Create a new layout for this widget */
     new QVBoxLayout(this);
     layout()->setMargin(1);
     layout()->setSpacing(1);
 
-    /* Toolbar */
-    m_toolbar = new QToolBar(tr("Output Manager"), this);
-    m_toolbar->addAction(QIcon(":/edit.png"), tr("Edit Mapping"),
-                         this, SLOT(slotEditClicked()));
-    layout()->addWidget(m_toolbar);
+    m_splitter = new QSplitter(this);
+    layout()->addWidget(m_splitter);
 
     /* Tree */
     m_tree = new QTreeWidget(this);
-    layout()->addWidget(m_tree);
+    m_splitter->addWidget(m_tree);
     m_tree->setRootIsDecorated(false);
     m_tree->setItemsExpandable(false);
     m_tree->setSortingEnabled(false);
@@ -78,11 +74,11 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
     columns << tr("Universe") << tr("Plugin") << tr("Output");
     m_tree->setHeaderLabels(columns);
 
-    connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+    connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
             this, SLOT(slotEditClicked()));
 
     connect(m_outputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
-            this, SLOT(slotPluginConfigurationChanged()));
+            this, SLOT(updateTree()));
 
     updateTree();
 }
@@ -118,10 +114,6 @@ void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
     sub->setSystemMenu(NULL);
 }
 
-/*****************************************************************************
- * Tree widget
- *****************************************************************************/
-
 void OutputManager::updateTree()
 {
     m_tree->clear();
@@ -142,23 +134,27 @@ void OutputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
     item->setText(KColumnOutput, QString::number(op->output() + 1));
 }
 
-void OutputManager::slotPluginConfigurationChanged()
-{
-    updateTree();
-}
-
-/****************************************************************************
- * Toolbar
- ****************************************************************************/
-
 void OutputManager::slotEditClicked()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
         return;
 
+    if (currentEditor() != NULL)
+        delete currentEditor();
+
     quint32 universe = item->text(KColumnUniverse).toUInt() - 1;
-    OutputPatchEditor ope(this, universe, m_outputMap);
-    if (ope.exec() == QDialog::Accepted)
-        updateTree();
+    QWidget* editor = new OutputPatchEditor(this, universe, m_outputMap);
+    m_splitter->addWidget(editor);
+    connect(editor, SIGNAL(mappingChanged()), this, SLOT(updateTree()));
+    editor->show();
+}
+
+QWidget* OutputManager::currentEditor() const
+{
+    Q_ASSERT(m_splitter != NULL);
+    if (m_splitter->count() < 2)
+        return NULL;
+    else
+        return m_splitter->widget(1);
 }

@@ -28,7 +28,7 @@ class QTreeWidgetItem;
 class QTreeWidget;
 class OutputPatch;
 class OutputMap;
-class QToolBar;
+class QSplitter;
 
 class OutputManager : public QWidget
 {
@@ -48,41 +48,38 @@ public:
     /** Normal public destructor */
     virtual ~OutputManager();
 
-protected:
+private:
     /** Protected constructor to prevent multiple instances. */
     OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFlags flags = 0);
 
-protected:
+private:
     static OutputManager* s_instance;
     OutputMap* m_outputMap;
 
     /*********************************************************************
-     * Tree widget
+     * Editor
      *********************************************************************/
-public:
+public slots:
     /** Update the output mapping tree */
     void updateTree();
 
-protected:
-    /** Update the contents of an OutputPatch to an item */
-    void updateItem(QTreeWidgetItem* item, quint32 universe);
-
-protected slots:
+private slots:
     /** Updates the mapping tree */
     void slotPluginConfigurationChanged();
 
-protected:
-    QTreeWidget* m_tree;
-
-    /*********************************************************************
-     * Toolbar
-     *********************************************************************/
-protected slots:
+    /** Launches the editor */
     void slotEditClicked();
 
-protected:
-    QToolBar* m_toolbar;
+private:
+    /** Update the contents of an OutputPatch to an item */
+    void updateItem(QTreeWidgetItem* item, quint32 universe);
 
+    /** Get the current Output Patch Editor (if any) */
+    QWidget* currentEditor() const;
+
+private:
+    QSplitter* m_splitter;
+    QTreeWidget* m_tree;
 };
 
 #endif

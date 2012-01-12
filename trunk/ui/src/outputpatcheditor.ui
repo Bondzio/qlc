@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>OutputPatchEditor</class>
- <widget class="QDialog" name="OutputPatchEditor">
+ <widget class="QWidget" name="OutputPatchEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -128,63 +128,10 @@
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QCheckBox" name="m_zeroBasedDMXCheckBox">
-     <property name="toolTip">
-      <string>Display 0-511 (instead of 1-512) as the DMX address space for this universe</string>
-     </property>
-     <property name="text">
-      <string>Display zero-based DMX addresses for this universe</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="m_buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources>
   <include location="qlcui.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>m_buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>OutputPatchEditor</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>266</x>
-     <y>454</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>OutputPatchEditor</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>334</x>
-     <y>454</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

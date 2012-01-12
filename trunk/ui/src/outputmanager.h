@@ -64,9 +64,6 @@ public slots:
     void updateTree();
 
 private slots:
-    /** Updates the mapping tree */
-    void slotPluginConfigurationChanged();
-
     /** Launches the editor */
     void slotEditClicked();
 

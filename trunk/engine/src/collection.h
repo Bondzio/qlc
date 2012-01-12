@@ -22,6 +22,7 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
+#include <QMutex>
 #include <QList>
 #include <QSet>
 
@@ -85,6 +86,7 @@ public slots:
 
 protected:
     QList <quint32> m_functions;
+    QMutex m_functionListMutex;
 
     /*********************************************************************
      * Save & Load
@@ -107,10 +109,10 @@ public:
     void preRun(MasterTimer* timer);
 
     /** @reimpl */
-    void postRun(MasterTimer* timer, UniverseArray* universes);
+    void write(MasterTimer* timer, UniverseArray* universes);
 
     /** @reimpl */
-    void write(MasterTimer* timer, UniverseArray* universes);
+    void postRun(MasterTimer* timer, UniverseArray* universes);
 
 protected slots:
     /** Called whenever one of this function's child functions stops */

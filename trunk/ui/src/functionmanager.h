@@ -139,6 +139,7 @@ protected:
 
     QToolBar* m_toolbar;
 
+    QActionGroup* m_actionGroup;
     QAction* m_addSceneAction;
     QAction* m_addChaserAction;
     QAction* m_addCollectionAction;

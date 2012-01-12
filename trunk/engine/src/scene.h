@@ -22,8 +22,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <QMutex>
 #include <QList>
-#include <QtXml>
 
 #include "genericfader.h"
 #include "fadechannel.h"
@@ -31,6 +31,9 @@
 #include "dmxsource.h"
 #include "function.h"
 #include "fixture.h"
+
+class QDomDocument;
+class QDomElement;
 
 /**
  * Scene encapsulates the values of selected channels from one or more fixture
@@ -112,6 +115,7 @@ public:
 
 protected:
     QList <SceneValue> m_values;
+    QMutex m_valueListMutex;
 
     /*********************************************************************
      * Fixtures

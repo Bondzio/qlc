@@ -19,7 +19,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,$
 */
 
+#include <QDomDocument>
+#include <QDomElement>
 #include <QtTest>
+
 #include "chaserstep_test.h"
 #include "chaserstep.h"
 #include "scene.h"

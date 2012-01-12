@@ -19,10 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QtDebug>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDebug>
 #include <QList>
 #include <QFile>
-#include <QtXml>
 
 #include "qlcfixturedef.h"
 #include "qlcmacros.h"
@@ -86,12 +87,14 @@ bool Scene::copyFrom(const Function* function)
 
 void Scene::setValue(const SceneValue& scv)
 {
+    m_valueListMutex.lock();
     int index = m_values.indexOf(scv);
     if (index == -1)
         m_values.append(scv);
     else
         m_values.replace(index, scv);
     qSort(m_values.begin(), m_values.end());
+    m_valueListMutex.unlock();
 
     emit changed(this->id());
 }
@@ -103,7 +106,10 @@ void Scene::setValue(quint32 fxi, quint32 ch, uchar value)
 
 void Scene::unsetValue(quint32 fxi, quint32 ch)
 {
+    m_valueListMutex.lock();
     m_values.removeAll(SceneValue(fxi, ch, 0));
+    m_valueListMutex.unlock();
+
     emit changed(this->id());
 }
 
@@ -316,6 +322,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* ua)
 
     if (elapsed() == 0)
     {
+        m_valueListMutex.lock();
         QListIterator <SceneValue> it(m_values);
         while (it.hasNext() == true)
         {
@@ -332,6 +339,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* ua)
             insertStartValue(fc, timer, ua);
             m_fader->add(fc);
         }
+        m_valueListMutex.unlock();
     }
 
     // Run the internal GenericFader

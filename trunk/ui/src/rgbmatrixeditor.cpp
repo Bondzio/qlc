@@ -511,9 +511,11 @@ void RGBMatrixEditor::slotModeChanged(Doc::Mode mode)
             m_mtx->stopAndWait();
         m_testButton->setChecked(false);
         m_previewTimer->stop();
+        m_testButton->setEnabled(false);
     }
     else
     {
         m_previewTimer->start();
+        m_testButton->setEnabled(true);
     }
 }

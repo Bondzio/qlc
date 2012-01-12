@@ -79,7 +79,7 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
 
 EFXEditor::~EFXEditor()
 {
-    if (m_efx->stopped() == false)
+    if (m_testButton->isChecked() == true)
         m_efx->stopAndWait();
 }
 
@@ -168,6 +168,10 @@ void EFXEditor::initGeneralPage()
         m_asymmetricRadio->setChecked(true);
     else
         m_parallelRadio->setChecked(true);
+
+    /* Disable test button if we're in operate mode */
+    if (m_doc->mode() == Doc::Operate)
+        m_testButton->setEnabled(false);
 }
 
 void EFXEditor::initMovementPage()
@@ -295,6 +299,36 @@ void EFXEditor::slotModeChanged(Doc::Mode mode)
         if (m_efx->stopped() == false)
             m_efx->stopAndWait();
         m_testButton->setChecked(false);
+        m_testButton->setEnabled(false);
+    }
+    else
+    {
+        m_testButton->setEnabled(true);
+    }
+}
+
+bool EFXEditor::interruptRunning()
+{
+    if (m_efx->stopped() == false)
+    {
+        m_efx->stopAndWait();
+        m_testButton->setChecked(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void EFXEditor::continueRunning(bool running)
+{
+    if (running == true)
+    {
+        if (m_doc->mode() == Doc::Operate)
+            m_efx->start(m_doc->masterTimer());
+        else
+            m_testButton->click();
     }
 }
 
@@ -493,13 +527,8 @@ void EFXEditor::slotAddFixtureClicked()
     FixtureSelection fs(this, m_doc, true, disabled);
     if (fs.exec() == QDialog::Accepted)
     {
-        // Stop test while adding fixtures
-        bool testing = false;
-        if (m_testButton->isChecked() == true)
-        {
-            m_testButton->click();
-            testing = true;
-        }
+        // Stop running while adding fixtures
+        bool running = interruptRunning();
 
         QListIterator <quint32> it(fs.selection);
         while (it.hasNext() == true)
@@ -513,9 +542,8 @@ void EFXEditor::slotAddFixtureClicked()
                 delete ef;
         }
 
-        // Restart test if appropriate
-        if (testing == true)
-            m_testButton->click();
+        // Continue running if appropriate
+        continueRunning(running);
     }
 }
 
@@ -526,15 +554,11 @@ void EFXEditor::slotRemoveFixtureClicked()
                 tr("Do you want to remove the selected fixture(s)?"),
                 QMessageBox::Yes, QMessageBox::No);
 
-    bool testing = false;
-    if (m_testButton->isChecked() == true)
-    {
-        m_testButton->click();
-        testing = true;
-    }
-
     if (r == QMessageBox::Yes)
     {
+        // Stop running while removing fixtures
+        bool running = interruptRunning();
+
         QListIterator <EFXFixture*> it(selectedFixtures());
         while (it.hasNext() == true)
         {
@@ -545,14 +569,17 @@ void EFXEditor::slotRemoveFixtureClicked()
             if (m_efx->removeFixture(ef) == true)
                 delete ef;
         }
-    }
 
-    if (testing == true)
-        m_testButton->click();
+        // Continue if appropriate
+        continueRunning(running);
+    }
 }
 
 void EFXEditor::slotRaiseFixtureClicked()
 {
+    // Stop running while moving fixtures
+    bool running = interruptRunning();
+
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item != NULL)
     {
@@ -575,10 +602,16 @@ void EFXEditor::slotRaiseFixtureClicked()
             updateIndices(index - 1, index);
         }
     }
+
+    // Continue running if appropriate
+    continueRunning(running);
 }
 
 void EFXEditor::slotLowerFixtureClicked()
 {
+    // Stop running while moving fixtures
+    bool running = interruptRunning();
+
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item != NULL)
     {
@@ -600,6 +633,9 @@ void EFXEditor::slotLowerFixtureClicked()
             updateIndices(index, index + 1);
         }
     }
+
+    // Continue running if appropriate
+    continueRunning(running);
 }
 
 void EFXEditor::slotParallelRadioToggled(bool state)

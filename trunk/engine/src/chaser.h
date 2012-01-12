@@ -22,7 +22,9 @@
 #ifndef CHASER_H
 #define CHASER_H
 
+#include <QMutex>
 #include <QList>
+
 #include "function.h"
 
 class QFile;
@@ -116,6 +118,7 @@ public slots:
 
 private:
     QList <ChaserStep> m_steps;
+    QMutex m_stepListMutex;
 
     /*********************************************************************
      * Save & Load

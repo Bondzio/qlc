@@ -56,6 +56,14 @@ private:
     void initMovementPage();
     void initInitializationPage();
 
+    /** If the EFX is currently running as a test or during operate mode, interrupt it
+        and return true. If it wasn't running, return false. */
+    bool interruptRunning();
+
+    /** Re-start the EFX if $running == true. If in Design mode, it is restarted as a test,
+        otherwise it is restarted as a normal EFX. */
+    void continueRunning(bool running);
+
 private slots:
     void slotTestClicked();
     void slotRestartTest();

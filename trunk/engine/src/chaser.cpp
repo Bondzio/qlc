@@ -95,10 +95,12 @@ bool Chaser::addStep(const ChaserStep& step, int index)
 {
     if (step.fid != this->id())
     {
+        m_stepListMutex.lock();
         if (index < 0)
             m_steps.append(step);
         else if (index <= m_steps.size())
             m_steps.insert(index, step);
+        m_stepListMutex.unlock();
 
         emit changed(this->id());
 
@@ -114,7 +116,10 @@ bool Chaser::removeStep(int index)
 {
     if (index >= 0 && index < m_steps.size())
     {
+        m_stepListMutex.lock();
         m_steps.removeAt(index);
+        m_stepListMutex.unlock();
+
         emit changed(this->id());
         return true;
     }
@@ -137,7 +142,9 @@ QList <ChaserStep> Chaser::steps() const
 
 void Chaser::slotFunctionRemoved(quint32 fid)
 {
+    m_stepListMutex.lock();
     m_steps.removeAll(ChaserStep(fid));
+    m_stepListMutex.unlock();
 }
 
 /*****************************************************************************
@@ -296,8 +303,11 @@ void Chaser::preRun(MasterTimer* timer)
     if (overrideDuration() != defaultSpeed())
         dur = overrideDuration();
 
+    m_stepListMutex.lock();
     m_runner = new ChaserRunner(doc(), steps(), fadeIn, fadeOut, dur,
                                 direction(), runOrder(), intensity());
+    m_stepListMutex.unlock();
+
     Function::preRun(timer);
 }
 

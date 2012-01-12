@@ -48,7 +48,9 @@ Collection::Collection(Doc* doc) : Function(doc, Function::Collection)
 
 Collection::~Collection()
 {
+    m_functionListMutex.lock();
     m_functions.clear();
+    m_functionListMutex.unlock();
 }
 
 /*****************************************************************************
@@ -89,7 +91,10 @@ bool Collection::addFunction(quint32 fid)
 {
     if (fid != this->id() && m_functions.contains(fid) == false)
     {
+        m_functionListMutex.lock();
         m_functions.append(fid);
+        m_functionListMutex.unlock();
+
         emit changed(this->id());
         return true;
     }
@@ -101,7 +106,11 @@ bool Collection::addFunction(quint32 fid)
 
 bool Collection::removeFunction(quint32 fid)
 {
-    if (m_functions.removeAll(fid) > 0)
+    m_functionListMutex.lock();
+    int num = m_functions.removeAll(fid);
+    m_functionListMutex.unlock();
+
+    if (num > 0)
     {
         emit changed(this->id());
         return true;
@@ -223,25 +232,6 @@ void Collection::preRun(MasterTimer* timer)
     Function::preRun(timer);
 }
 
-void Collection::postRun(MasterTimer* timer, UniverseArray* universes)
-{
-    Doc* doc = qobject_cast <Doc*> (parent());
-    Q_ASSERT(doc != NULL);
-
-    /** Stop the member functions only if they have been started by this
-        collection. */
-    QSetIterator <quint32> it(m_runningChildren);
-    while (it.hasNext() == true)
-    {
-        Function* function = doc->function(it.next());
-        Q_ASSERT(function != NULL);
-        function->stop();
-    }
-
-    m_runningChildren.clear();
-    Function::postRun(timer, universes);
-}
-
 void Collection::write(MasterTimer* timer, UniverseArray* universes)
 {
     Q_UNUSED(universes);
@@ -251,6 +241,7 @@ void Collection::write(MasterTimer* timer, UniverseArray* universes)
         Doc* doc = qobject_cast <Doc*> (parent());
         Q_ASSERT(doc != NULL);
 
+        m_functionListMutex.lock();
         QListIterator <quint32> it(m_functions);
         while (it.hasNext() == true)
         {
@@ -269,12 +260,32 @@ void Collection::write(MasterTimer* timer, UniverseArray* universes)
 
             function->start(timer, true, overrideFadeInSpeed(), overrideFadeOutSpeed(), overrideDuration());
         }
+        m_functionListMutex.unlock();
     }
 
     incrementElapsed();
 
     if (m_runningChildren.size() == 0)
         stop();
+}
+
+void Collection::postRun(MasterTimer* timer, UniverseArray* universes)
+{
+    Doc* doc = qobject_cast <Doc*> (parent());
+    Q_ASSERT(doc != NULL);
+
+    /** Stop the member functions only if they have been started by this
+        collection. */
+    QSetIterator <quint32> it(m_runningChildren);
+    while (it.hasNext() == true)
+    {
+        Function* function = doc->function(it.next());
+        Q_ASSERT(function != NULL);
+        function->stop();
+    }
+
+    m_runningChildren.clear();
+    Function::postRun(timer, universes);
 }
 
 void Collection::slotChildStopped(quint32 fid)

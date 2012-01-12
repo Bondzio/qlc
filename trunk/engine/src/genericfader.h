@@ -23,6 +23,7 @@
 #define GENERICFADER
 
 #include <QList>
+#include <QHash>
 
 class UniverseArray;
 class FadeChannel;

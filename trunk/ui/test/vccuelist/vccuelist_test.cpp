@@ -20,6 +20,8 @@
 */
 
 #include <QTreeWidgetItem>
+#include <QDomDocument>
+#include <QDomElement>
 #include <QTreeWidget>
 #include <QMdiArea>
 #include <QtTest>

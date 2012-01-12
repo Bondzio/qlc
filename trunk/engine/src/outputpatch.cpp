@@ -37,7 +37,6 @@ OutputPatch::OutputPatch(QObject* parent) : QObject(parent)
 
     m_plugin = NULL;
     m_output = QLCOutPlugin::invalidOutput();
-    m_dmxZeroBased = false;
 }
 
 OutputPatch::~OutputPatch()
@@ -94,16 +93,6 @@ quint32 OutputPatch::output() const
         return m_output;
     else
         return QLCOutPlugin::invalidOutput();
-}
-
-void OutputPatch::setDMXZeroBased(bool set)
-{
-    m_dmxZeroBased = set;
-}
-
-bool OutputPatch::isDMXZeroBased() const
-{
-    return m_dmxZeroBased;
 }
 
 /*****************************************************************************

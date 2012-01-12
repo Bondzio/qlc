@@ -164,18 +164,9 @@ void AddFixture_Test::initialNoFixture()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
-    {
-        QCOMPARE(af.m_addressSpin->value(), 0);
-        QCOMPARE(af.m_addressSpin->minimum(), 0);
-        QCOMPARE(af.m_addressSpin->maximum(), 511);
-    }
-    else
-    {
-        QCOMPARE(af.m_addressSpin->value(), 1);
-        QCOMPARE(af.m_addressSpin->minimum(), 1);
-        QCOMPARE(af.m_addressSpin->maximum(), 512);
-    }
+    QCOMPARE(af.m_addressSpin->value(), 1);
+    QCOMPARE(af.m_addressSpin->minimum(), 1);
+    QCOMPARE(af.m_addressSpin->maximum(), 512);
 
     QVERIFY(af.m_channelsSpin->isEnabled() == true);
     QCOMPARE(af.m_channelsSpin->value(), 1);
@@ -254,18 +245,9 @@ void AddFixture_Test::initialDimmer()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
-    {
-        QCOMPARE(af.m_addressSpin->value(), 484);
-        QCOMPARE(af.m_addressSpin->minimum(), 0);
-        QCOMPARE(af.m_addressSpin->maximum(), int(512 - fxi->channels()));
-    }
-    else
-    {
-        QCOMPARE(af.m_addressSpin->value(), 485);
-        QCOMPARE(af.m_addressSpin->minimum(), 1);
-        QCOMPARE(af.m_addressSpin->maximum(), int(513 - fxi->channels()));
-    }
+    QCOMPARE(af.m_addressSpin->value(), 485);
+    QCOMPARE(af.m_addressSpin->minimum(), 1);
+    QCOMPARE(af.m_addressSpin->maximum(), int(513 - fxi->channels()));
 
     QVERIFY(af.m_channelsSpin->isEnabled() == true);
     QCOMPARE(af.m_channelsSpin->value(), 6);
@@ -353,14 +335,7 @@ void AddFixture_Test::initialScanner()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
-    {
-        QCOMPARE(af.m_addressSpin->value(), 484);
-    }
-    else
-    {
-        QCOMPARE(af.m_addressSpin->value(), 485);
-    }
+    QCOMPARE(af.m_addressSpin->value(), 485);
 
     QVERIFY(af.m_channelsSpin->isEnabled() == false);
     QCOMPARE(af.m_channelsSpin->value(), (int) fxi->channels());
@@ -402,18 +377,9 @@ void AddFixture_Test::selectionNothing()
     QCOMPARE(af.m_universeCombo->count(), 4);
 
     QVERIFY(af.m_addressSpin->isEnabled() == false);
-    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
-    {
-        QCOMPARE(af.m_addressSpin->value(), 0);
-        QCOMPARE(af.m_addressSpin->minimum(), 0);
-        QCOMPARE(af.m_addressSpin->maximum(), 511);
-    }
-    else
-    {
-        QCOMPARE(af.m_addressSpin->value(), 1);
-        QCOMPARE(af.m_addressSpin->minimum(), 1);
-        QCOMPARE(af.m_addressSpin->maximum(), 512);
-    }
+    QCOMPARE(af.m_addressSpin->value(), 1);
+    QCOMPARE(af.m_addressSpin->minimum(), 1);
+    QCOMPARE(af.m_addressSpin->maximum(), 512);
 
     QVERIFY(af.m_channelsSpin->isEnabled() == false);
     QCOMPARE(af.m_channelsSpin->value(), 1);
@@ -454,18 +420,9 @@ void AddFixture_Test::selectionGeneric()
     QVERIFY(af.universe() == 0);
 
     QVERIFY(af.m_addressSpin->isEnabled() == true);
-    if (m_doc->outputMap()->patch(0)->isDMXZeroBased() == true)
-    {
-        QCOMPARE(af.m_addressSpin->value(), 0);
-        QCOMPARE(af.m_addressSpin->minimum(), 0);
-        QCOMPARE(af.m_addressSpin->maximum(), 511);
-    }
-    else
-    {
-        QCOMPARE(af.m_addressSpin->value(), 1);
-        QCOMPARE(af.m_addressSpin->minimum(), 1);
-        QCOMPARE(af.m_addressSpin->maximum(), 512);
-    }
+    QCOMPARE(af.m_addressSpin->value(), 1);
+    QCOMPARE(af.m_addressSpin->minimum(), 1);
+    QCOMPARE(af.m_addressSpin->maximum(), 512);
     QVERIFY(af.address() == 0);
 
     QVERIFY(af.m_channelsSpin->isEnabled() == true);

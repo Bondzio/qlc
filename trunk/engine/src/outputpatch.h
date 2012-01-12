@@ -60,13 +60,9 @@ public:
     quint32 output() const;
     QString outputName() const;
 
-    void setDMXZeroBased(bool set);
-    bool isDMXZeroBased() const;
-
 protected:
     QLCOutPlugin* m_plugin;
     quint32 m_output;
-    bool m_dmxZeroBased;
 
     /********************************************************************
      * Value dump

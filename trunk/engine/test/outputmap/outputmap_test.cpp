@@ -396,11 +396,11 @@ void OutputMap_Test::pluginStatus()
 {
     OutputMap om(this, 4);
 
-    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidOutput()).contains("No plugin"));
-    QVERIFY(om.pluginStatus("Bar", 0).contains("No plugin"));
-    QVERIFY(om.pluginStatus("Baz", 1).contains("No plugin"));
-    QVERIFY(om.pluginStatus("Xyzzy", 2).contains("No plugin"));
-    QVERIFY(om.pluginStatus("AYBABTU", 3).contains("No plugin"));
+    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidOutput()).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("Bar", 0).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("Baz", 1).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("Xyzzy", 2).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("AYBABTU", 3).contains("Nothing selected"));
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);

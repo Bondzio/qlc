@@ -347,10 +347,7 @@ QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
     {
         QString info;
         info += QString("<HTML><HEAD></HEAD><BODY>");
-        info += QString("<H3>%1</H3>").arg(tr("No plugin selected"));
-        info += QString("<P>%1 ").arg(tr("You can download plugins from"));
-        info += QString("<A HREF=\"http://www.sourceforge.net/projects/qlc/files\">");
-        info += QString("http://www.sourceforge.net/projects/qlc/files</A></P>.");
+        info += QString("<H3>%1</H3>").arg(tr("Nothing selected"));
         info += QString("</BODY></HTML>");
         return info;
     }
@@ -426,12 +423,6 @@ void OutputMap::loadDefaults()
 
     for (quint32 i = 0; i < universes(); i++)
     {
-        /* Zero-based addressing */
-        key = QString("/outputmap/universe%1/dmxzerobased").arg(i);
-        QVariant value = settings.value(key);
-        if (value.isValid() == true)
-            m_patch[i]->setDMXZeroBased(value.toBool());
-
         /* Plugin name */
         key = QString("/outputmap/universe%2/plugin/").arg(i);
         plugin = settings.value(key).toString();
@@ -461,10 +452,6 @@ void OutputMap::saveDefaults()
     {
         OutputPatch* outputPatch = patch(i);
         Q_ASSERT(outputPatch != NULL);
-
-        /* Zero-based DMX addressing */
-        key = QString("/outputmap/universe%1/dmxzerobased").arg(i);
-        settings.setValue(key, outputPatch->isDMXZeroBased());
 
         /* Plugin name */
         key = QString("/outputmap/universe%2/plugin/").arg(i);

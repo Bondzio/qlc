@@ -164,18 +164,9 @@ void MonitorFixture::slotChannelStyleChanged(Monitor::ChannelStyle style)
 
     /* Start channel numbering from this fixture's address */
     if (style == Monitor::DMXChannels)
-        i = fxi->address();
+        i = fxi->address() + 1;
     else
         i = 1;
-
-    /* +1 if addresses should be shown 1-based */
-    OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
-    if (op != NULL && op->isDMXZeroBased() == false &&
-        style == Monitor::DMXChannels)
-    {
-        /* 1-based addresses */
-        i = i + 1;
-    }
 
     QListIterator <QLabel*> it(m_channelLabels);
     while (it.hasNext() == true)

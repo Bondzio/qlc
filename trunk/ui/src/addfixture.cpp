@@ -106,10 +106,7 @@ AddFixture::AddFixture(QWidget* parent, const Doc* doc, const Fixture* fxi)
         slotUniverseActivated(fxi->universe());
 
         OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
-        if (op != NULL && op->isDMXZeroBased() == true)
-            m_addressSpin->setValue(fxi->address());
-        else
-            m_addressSpin->setValue(fxi->address() + 1);
+        m_addressSpin->setValue(fxi->address() + 1);
         m_addressValue = fxi->address();
 
         m_multipleGroup->setEnabled(false);
@@ -303,10 +300,7 @@ void AddFixture::findAddress()
         m_universeCombo->setCurrentIndex(address >> 9);
 
         OutputPatch* op = m_doc->outputMap()->patch(m_universeValue);
-        if (op != NULL && op->isDMXZeroBased() == true)
-            m_addressSpin->setValue(address & 0x01FF);
-        else
-            m_addressSpin->setValue((address & 0x01FF) + 1);
+        m_addressSpin->setValue((address & 0x01FF) + 1);
     }
 }
 
@@ -403,41 +397,15 @@ void AddFixture::slotModeActivated(const QString& modeName)
 
 void AddFixture::slotUniverseActivated(int universe)
 {
-    int value = m_addressSpin->value();
-    bool zeroBaseChanged = true;
-
-    OutputPatch* op1 = m_doc->outputMap()->patch(m_universeValue);
-    OutputPatch* op2 = m_doc->outputMap()->patch(universe);
-    if (op1 != NULL && op2 != NULL &&
-        op1->isDMXZeroBased() == op2->isDMXZeroBased())
-    {
-        zeroBaseChanged = false;
-    }
-
     m_universeValue = universe;
 
     /* Adjust the available address range */
     slotChannelsChanged(m_channelsValue);
-
-    /* If the zero-based setting is changed, change also the current address
-       setting accordingly (e.g. x in 0-511 is x+1 in 1-512 & vice versa) */
-    if (zeroBaseChanged == true)
-    {
-        OutputPatch* op = m_doc->outputMap()->patch(universe);
-        if (op != NULL && op->isDMXZeroBased() == true)
-            m_addressSpin->setValue(value - 1);
-        else
-            m_addressSpin->setValue(value + 1);
-    }
 }
 
 void AddFixture::slotAddressChanged(int value)
 {
-    OutputPatch* op = m_doc->outputMap()->patch(m_universeCombo->currentIndex());
-    if (op != NULL && op->isDMXZeroBased() == true)
-        m_addressValue = value;
-    else
-        m_addressValue = value - 1;
+    m_addressValue = value - 1;
 
     /* Set the maximum number of fixtures */
     updateMaximumAmount();
@@ -449,11 +417,7 @@ void AddFixture::slotChannelsChanged(int value)
 
     /* Set the maximum possible address so that channels cannot overflow
        beyond DMX's range of 512 channels */
-    OutputPatch* op = m_doc->outputMap()->patch(m_universeValue);
-    if (op != NULL && op->isDMXZeroBased() == true)
-        m_addressSpin->setRange(0, 512 - value);
-    else
-        m_addressSpin->setRange(1, 513 - value);
+    m_addressSpin->setRange(1, 513 - value);
 
     /* Set the maximum number of fixtures */
     updateMaximumAmount();

@@ -391,14 +391,8 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
     // Universe column
     item->setText(KColumnUniverse, QString("%1").arg(fxi->universe() + 1));
 
-    // Address column, show 0-based or 1-based DMX addresses
-    OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
-    if (op != NULL && op->isDMXZeroBased() == true)
-        s.sprintf("%.3d - %.3d", fxi->address(),
-                  fxi->address() + fxi->channels() - 1);
-    else
-        s.sprintf("%.3d - %.3d", fxi->address() + 1,
-                  fxi->address() + fxi->channels());
+    // Address column
+    s.sprintf("%.3d - %.3d", fxi->address() + 1, fxi->address() + fxi->channels());
 
     item->setText(KColumnAddress, s);
 

@@ -723,7 +723,7 @@ QString Fixture::status() const
 
     QString title("<TR><TD CLASS='hilite' COLSPAN='3'>%1</TD></TR>");
     QString subTitle("<TR><TD CLASS='subhi' COLSPAN='3'>%1</TD></TR>");
-    QString genInfo("<TR><TD CLASS='emphasis' COLSPAN='2'>%1</TD><TD>%2</TD></TR>");
+    QString genInfo("<TR><TD CLASS='emphasis'>%1</TD><TD COLSPAN='2'>%2</TD></TR>");
 
     /********************************************************************
      * General info
@@ -751,7 +751,11 @@ QString Fixture::status() const
     info += genInfo.arg(tr("Universe")).arg(universe() + 1);
 
     // Address
-    info += genInfo.arg(tr("Address")).arg(address() + channels());
+    QString range = QString("%1 - %2").arg(address() + 1).arg(address() + channels() + 1);
+    info += genInfo.arg(tr("Address Range")).arg(range);
+
+    // Channels
+    info += genInfo.arg(tr("Channels")).arg(channels());
 
     // Binary address
     info += genInfo.arg(tr("Binary Address (DIP)"))

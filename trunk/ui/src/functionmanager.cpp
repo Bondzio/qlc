@@ -369,29 +369,17 @@ void FunctionManager::slotWizard()
         updateTree();
 }
 
-int FunctionManager::slotEdit()
+void FunctionManager::slotEdit()
 {
-    QTreeWidgetItem* item;
-    Function* function;
-    int result;
+    QTreeWidgetItem* item = m_tree->currentItem();
+    if (item == NULL)
+        return;
 
-    if (m_tree->selectedItems().isEmpty() == true)
-        return QDialog::Rejected;
-
-    item = m_tree->selectedItems().first();
-    Q_ASSERT(item != NULL);
-
-    // Find the selected function
-    function = m_doc->function(itemFunctionId(item));
-    if (function == NULL)
-        return QDialog::Rejected;
-
-    // Edit the selected function
-    result = editFunction(function);
-
-    updateFunctionItem(item, function);
-
-    return result;
+    Function* function = m_doc->function(itemFunctionId(item));
+    if (function == NULL && currentEditor() != NULL)
+        delete currentEditor();
+    else
+        editFunction(function);
 }
 
 void FunctionManager::slotClone()
@@ -404,12 +392,10 @@ void FunctionManager::slotClone()
 void FunctionManager::slotDelete()
 {
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
-    QString msg;
-
     if (it.hasNext() == false)
         return;
 
-    msg = tr("Do you want to DELETE functions:") + QString("\n");
+    QString msg = tr("Do you want to DELETE functions:") + QString("\n");
 
     // Append functions' names to the message
     while (it.hasNext() == true)
@@ -647,27 +633,17 @@ void FunctionManager::addFunction(Function* function)
 
     /* Clear current selection and select only the new one */
     m_tree->clearSelection();
+    m_tree->setCurrentItem(item);
     item->setSelected(true);
 
     /* Start editing immediately */
-    if (slotEdit() == QDialog::Rejected)
-    {
-        /* Edit dialog was rejected -> delete function */
-        deleteSelectedFunctions();
-    }
-    else
-    {
-        m_tree->sortItems(0, Qt::AscendingOrder);
-        m_tree->scrollToItem(item);
-    }
+    slotEdit();
+    m_tree->sortItems(0, Qt::AscendingOrder);
+    m_tree->scrollToItem(item);
 }
 
-int FunctionManager::editFunction(Function* function)
+void FunctionManager::editFunction(Function* function)
 {
-    int result = QDialog::Rejected;
-
-    Q_ASSERT(function != NULL);
-
     // Destroy the existing editor, if it exists
     QWidget* editor = currentEditor();
     if (editor != NULL)
@@ -676,7 +652,9 @@ int FunctionManager::editFunction(Function* function)
     Q_ASSERT(m_splitter->count() == 1);
 
     // Choose the editor by the selected function's type
-    if (function->type() == Function::Scene)
+    if (function == NULL)
+        editor = NULL;
+    else if (function->type() == Function::Scene)
         editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
     else if (function->type() == Function::Chaser)
         editor = new ChaserEditor(m_splitter, qobject_cast<Chaser*> (function), m_doc);
@@ -696,14 +674,7 @@ int FunctionManager::editFunction(Function* function)
     {
         m_splitter->addWidget(editor);
         editor->show();
-        result = QDialog::Accepted;
     }
-    else
-    {
-        result = QDialog::Rejected;
-    }
-
-    return result;
 }
 
 QWidget* FunctionManager::currentEditor() const

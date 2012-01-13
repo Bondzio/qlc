@@ -125,7 +125,7 @@ protected slots:
     void slotAddScript();
     void slotWizard();
 
-    int slotEdit();
+    void slotEdit();
     void slotClone();
     void slotDelete();
     void slotSelectAll();
@@ -164,17 +164,10 @@ protected:
     void addFunction(Function* function);
 
     /** Open an editor for the given function */
-    int editFunction(Function* function);
+    void editFunction(Function* function);
 
     /** Get the currently-active editor (or NULL if one doesn't exist) */
     QWidget* currentEditor() const;
-
-protected:
-    /** Don't listen to Doc::functionAdded signal when this is true */
-    bool m_blockAddFunctionSignal;
-
-    /** Don't listen to Doc::functionRemoved signal when this is true */
-    bool m_blockRemoveFunctionSignal;
 };
 
 #endif

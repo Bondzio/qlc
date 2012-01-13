@@ -41,9 +41,9 @@
 #include "doc.h"
 
 #define SETTINGS_GEOMETRY "rgbmatrixeditor/geometry"
-#define RECT_SIZE 40
+#define RECT_SIZE 30
 #define RECT_PADDING 0
-#define ITEM_SIZE 38
+#define ITEM_SIZE 28
 #define ITEM_PADDING 2
 
 /****************************************************************************
@@ -283,10 +283,6 @@ void RGBMatrixEditor::createPreviewItems()
                 item->draw(0);
                 m_scene->addItem(item);
                 m_previewHash[pt] = item;
-
-                QGraphicsBlurEffect* blur = new QGraphicsBlurEffect(m_scene);
-                blur->setBlurRadius(2);
-                item->setGraphicsEffect(blur);
             }
         }
     }

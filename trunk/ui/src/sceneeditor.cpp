@@ -74,7 +74,13 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
     setupUi(this);
 
     init();
-    slotTabChanged(KTabGeneral);
+
+    // Start new (==empty) scenes from the first tab and ones with something in them
+    // on the first fixture page.
+    if (m_tab->count() == 0)
+        slotTabChanged(KTabGeneral);
+    else
+        m_tab->setCurrentIndex(KTabFirstFixture);
 
     m_initFinished = true;
 }

@@ -492,7 +492,7 @@ void FunctionManager::initTree()
             this, SLOT(slotTreeSelectionChanged()));
 
     // Catch mouse double clicks
-    connect(m_tree,	SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+    connect(m_tree,	SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
             this, SLOT(slotEdit()));
 
     // Catch right-mouse clicks

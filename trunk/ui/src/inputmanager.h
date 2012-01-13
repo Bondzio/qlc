@@ -26,7 +26,7 @@
 
 class QTreeWidgetItem;
 class QTreeWidget;
-class QToolBar;
+class QSplitter;
 class QTimer;
 
 class InputPatch;
@@ -50,29 +50,29 @@ public:
     /** Normal public destructor */
     virtual ~InputManager();
 
-protected:
-    /** Protected constructor to prevent multiple instances. */
+private:
+    /** Private constructor to prevent multiple instances. */
     InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags flags = 0);
 
-protected:
+private:
     static InputManager* s_instance;
     InputMap* m_inputMap;
 
     /*************************************************************************
      * Tree widget
      *************************************************************************/
-public:
+public slots:
     /** Update the input mapping tree */
     void updateTree();
 
-protected:
+private:
     /** Update the contents of an input patch to an item */
     void updateItem(QTreeWidgetItem* item, InputPatch* patch, quint32 universe);
 
-protected slots:
-    /** Updates the tree whwn plugin configuration changes */
-    void slotPluginConfigurationChanged();
+    /** Get the currently opened editor (if any) */
+    QWidget* currentEditor() const;
 
+private slots:
     /** Listens to input data and displays a small icon to indicate a
         working connection between a plugin and an input device. */
     void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
@@ -80,18 +80,13 @@ protected slots:
     /** Hides the small icon after a while ^^ */
     void slotTimerTimeout();
 
-protected:
-    QTreeWidget* m_tree;
-    QTimer* m_timer;
-
-    /*************************************************************************
-     * Toolbar
-     *************************************************************************/
-protected slots:
+    /** Displays the InputPatchEditor for currently selected universe */
     void slotEditClicked();
 
-protected:
-    QToolBar* m_toolbar;
+private:
+    QSplitter* m_splitter;
+    QTreeWidget* m_tree;
+    QTimer* m_timer;
 };
 
 #endif

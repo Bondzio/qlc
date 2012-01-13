@@ -27,17 +27,16 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSplitter>
 #include <QMdiArea>
-#include <QToolBar>
 #include <QAction>
 #include <QTimer>
 #include <QDebug>
 #include <QIcon>
 
-#include "qlcinplugin.h"
-
 #include "inputpatcheditor.h"
 #include "inputmanager.h"
+#include "qlcinplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "apputil.h"
@@ -67,15 +66,12 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
     layout()->setMargin(1);
     layout()->setSpacing(1);
 
-    /* Toolbar */
-    m_toolbar = new QToolBar(tr("Input Manager"), this);
-    m_toolbar->addAction(QIcon(":/edit.png"), tr("Edit Mapping"),
-                         this, SLOT(slotEditClicked()));
-    layout()->addWidget(m_toolbar);
+    m_splitter = new QSplitter(Qt::Horizontal, this);
+    layout()->addWidget(m_splitter);
 
     /* Tree */
     m_tree = new QTreeWidget(this);
-    layout()->addWidget(m_tree);
+    m_splitter->addWidget(m_tree);
     m_tree->setRootIsDecorated(false);
     m_tree->setItemsExpandable(false);
     m_tree->setSortingEnabled(false);
@@ -87,7 +83,7 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
             << tr("Editor universe");
     m_tree->setHeaderLabels(columns);
 
-    connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+    connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
             this, SLOT(slotEditClicked()));
 
     /* Timer that clears the input data icon after a while */
@@ -101,7 +97,7 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
 
     /* Listen to plugin configuration changes */
     connect(m_inputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
-            this, SLOT(slotPluginConfigurationChanged()));
+            this, SLOT(updateTree()));
 
     updateTree();
 }
@@ -172,13 +168,16 @@ void InputManager::updateItem(QTreeWidgetItem* item, InputPatch* ip,
     item->setText(KColumnInputNum, QString("%1").arg(ip->input() + 1));
 }
 
-void InputManager::slotPluginConfigurationChanged()
+QWidget* InputManager::currentEditor() const
 {
-    updateTree();
+    Q_ASSERT(m_splitter != NULL);
+    if (m_splitter->count() < 2)
+        return NULL;
+    else
+        return m_splitter->widget(1);
 }
 
-void InputManager::slotInputValueChanged(quint32 universe, quint32 channel,
-                                         uchar value)
+void InputManager::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
     Q_UNUSED(channel);
     Q_UNUSED(value);
@@ -205,18 +204,18 @@ void InputManager::slotTimerTimeout()
     }
 }
 
-/****************************************************************************
- * Toolbar
- ****************************************************************************/
-
 void InputManager::slotEditClicked()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
         return;
 
+    if (currentEditor() != NULL)
+        delete currentEditor();
+
     quint32 universe = item->text(KColumnUniverse).toInt() - 1;
-    InputPatchEditor ipe(this, universe, m_inputMap);
-    if (ipe.exec() == QDialog::Accepted)
-        updateTree();
+    QWidget* editor = new InputPatchEditor(this, universe, m_inputMap);
+    m_splitter->addWidget(editor);
+    connect(editor, SIGNAL(mappingChanged()), this, SLOT(updateTree()));
+    editor->show();
 }

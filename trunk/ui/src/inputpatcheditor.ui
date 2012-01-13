@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>InputPatchEditor</class>
- <widget class="QDialog" name="InputPatchEditor">
+ <widget class="QWidget" name="InputPatchEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -211,16 +211,6 @@
      </widget>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QDialogButtonBox" name="m_buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0">
     <widget class="QRadioButton" name="m_editorUniverseRadio">
      <property name="toolTip">
@@ -237,38 +227,6 @@
   <include location="qlcui.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>m_buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>InputPatchEditor</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>424</x>
-     <y>454</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>InputPatchEditor</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>424</x>
-     <y>454</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>m_mapTree</sender>
    <signal>doubleClicked(QModelIndex)</signal>

@@ -54,19 +54,14 @@
 #define KProfileColumnName 0
 
 InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* inputMap)
-    : QDialog(parent)
-    , m_universe(universe)
+    : QWidget(parent)
     , m_inputMap(inputMap)
+    , m_universe(universe)
 {
     Q_ASSERT(universe < m_inputMap->universes());
     Q_ASSERT(inputMap != NULL);
 
     setupUi(this);
-
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
 
     m_infoBrowser->setOpenExternalLinks(true);
     setWindowTitle(tr("Mapping properties for input universe %1")
@@ -76,16 +71,9 @@ InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* 
     Q_ASSERT(inputPatch != NULL);
 
     /* Copy these so they can be applied if the user cancels */
-    m_originalPluginName = inputPatch->pluginName();
     m_currentPluginName = inputPatch->pluginName();
-
-    m_originalInput = inputPatch->input();
     m_currentInput = inputPatch->input();
-
-    m_originalProfileName = inputPatch->profileName();
     m_currentProfileName = inputPatch->profileName();
-
-    m_originalFeedbackEnabled = inputPatch->feedbackEnabled();
     m_currentFeedbackEnabled = inputPatch->feedbackEnabled();
 
     /* Setup UI controls */
@@ -96,43 +84,24 @@ InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* 
     m_mapTree->setCurrentItem(m_mapTree->topLevelItem(0));
 
     /* Listen to plugin configuration changes */
-    connect(m_inputMap,
-            SIGNAL(pluginConfigurationChanged(const QString&)),
+    connect(m_inputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(slotPluginConfigurationChanged(const QString&)));
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
 }
 
 InputPatchEditor::~InputPatchEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-}
-
-void InputPatchEditor::reject()
-{
-    m_inputMap->setPatch(m_universe, m_originalPluginName,
-                               m_originalInput, m_originalFeedbackEnabled,
-                               m_originalProfileName);
-
-    QDialog::reject();
-}
-
-void InputPatchEditor::accept()
-{
-    if (m_editorUniverseRadio->isChecked() == true)
-        m_inputMap->setEditorUniverse(m_universe);
-
-    QDialog::accept();
 }
 
 /****************************************************************************
  * Mapping page
  ****************************************************************************/
+
+InputPatch* InputPatchEditor::patch() const
+{
+    InputPatch* p = m_inputMap->patch(m_universe);
+    Q_ASSERT(p != NULL);
+    return p;
+}
 
 QTreeWidgetItem* InputPatchEditor::currentlyMappedItem() const
 {
@@ -141,9 +110,9 @@ QTreeWidgetItem* InputPatchEditor::currentlyMappedItem() const
         QTreeWidgetItem* pluginItem = m_mapTree->topLevelItem(i);
         Q_ASSERT(pluginItem != NULL);
 
-        if (pluginItem->text(KMapColumnName) == m_originalPluginName)
+        if (pluginItem->text(KMapColumnName) == patch()->pluginName())
         {
-            QTreeWidgetItem* inputItem = pluginItem->child(m_originalInput);
+            QTreeWidgetItem* inputItem = pluginItem->child(patch()->input());
             return inputItem;
         }
     }
@@ -172,6 +141,8 @@ void InputPatchEditor::setupMappingPage()
     /* Prevent the editor uni radio button from being unchecked manually */
     QButtonGroup* group = new QButtonGroup(this);
     group->addButton(m_editorUniverseRadio);
+    connect(m_editorUniverseRadio, SIGNAL(toggled(bool)),
+            this, SLOT(slotEditorUniverseRadioToggled(bool)));
 
     m_feedbackEnabledCheck->setChecked(m_currentFeedbackEnabled);
 
@@ -367,8 +338,9 @@ void InputPatchEditor::slotMapItemChanged(QTreeWidgetItem* item)
     /* Apply the patch immediately so that input data can be used in the
        input profile editor */
     m_inputMap->setPatch(m_universe, m_currentPluginName,
-                               m_currentInput, m_currentFeedbackEnabled,
-                               m_currentProfileName);
+                         m_currentInput, m_currentFeedbackEnabled,
+                         m_currentProfileName);
+    emit mappingChanged();
 }
 
 void InputPatchEditor::slotConfigureInputClicked()
@@ -415,6 +387,13 @@ void InputPatchEditor::slotFeedbackToggled(bool enable)
     m_inputMap->setPatch(m_universe, m_currentPluginName,
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
+    emit mappingChanged();
+}
+
+void InputPatchEditor::slotEditorUniverseRadioToggled(bool state)
+{
+    if (state == true)
+        m_inputMap->setEditorUniverse(m_universe);
 }
 
 void InputPatchEditor::slotPluginConfigurationChanged(const QString& pluginName)
@@ -493,8 +472,7 @@ void InputPatchEditor::fillProfileTree()
     }
 }
 
-void InputPatchEditor::updateProfileItem(const QString& name,
-        QTreeWidgetItem* item)
+void InputPatchEditor::updateProfileItem(const QString& name, QTreeWidgetItem* item)
 {
     Q_ASSERT(item != NULL);
 
@@ -559,6 +537,7 @@ void InputPatchEditor::slotProfileItemChanged(QTreeWidgetItem* item)
     m_inputMap->setPatch(m_universe, m_currentPluginName,
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
+    emit mappingChanged();
 }
 
 void InputPatchEditor::slotAddProfileClicked()

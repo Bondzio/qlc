@@ -22,7 +22,7 @@
 #ifndef INPUTPATCHEDITOR_H
 #define INPUTPATCHEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "ui_inputpatcheditor.h"
 #include "qlcinputprofile.h"
@@ -31,7 +31,7 @@
 class QStringList;
 class InputMap;
 
-class InputPatchEditor : public QDialog, public Ui_InputPatchEditor
+class InputPatchEditor : public QWidget, public Ui_InputPatchEditor
 {
     Q_OBJECT
     Q_DISABLE_COPY(InputPatchEditor)
@@ -50,40 +50,33 @@ public:
     InputPatchEditor(QWidget* parent, quint32 universe, InputMap* inputMap);
     ~InputPatchEditor();
 
-public slots:
-    void reject();
-    void accept();
-
-protected:
-    /** The input universe that is being edited */
-    quint32 m_universe;
-
-    QString m_originalPluginName;
-    QString m_currentPluginName;
-
-    quint32 m_originalInput;
-    quint32 m_currentInput;
-
-    QString m_originalProfileName;
-    QString m_currentProfileName;
-
-    bool m_originalFeedbackEnabled;
-    bool m_currentFeedbackEnabled;
+signals:
+    /** Tells that the mapping settings have changed */
+    void mappingChanged();
 
 private:
     InputMap* m_inputMap;
 
+    quint32 m_universe; //! The input universe that is being edited
+
+    QString m_currentPluginName;
+    quint32 m_currentInput;
+    QString m_currentProfileName;
+    bool m_currentFeedbackEnabled;
+
     /************************************************************************
      * Mapping page
      ************************************************************************/
-protected:
+private:
+    InputPatch* patch() const;
     QTreeWidgetItem* currentlyMappedItem() const;
     void setupMappingPage();
     void fillMappingTree();
     void fillPluginItem(const QString& pluginName, QTreeWidgetItem* item);
     QTreeWidgetItem* pluginItem(const QString& pluginName);
 
-protected slots:
+private slots:
+    void slotEditorUniverseRadioToggled(bool state);
     void slotMapCurrentItemChanged(QTreeWidgetItem* item);
     void slotMapItemChanged(QTreeWidgetItem* item);
     void slotConfigureInputClicked();
@@ -94,13 +87,13 @@ protected slots:
     /************************************************************************
      * Profile page
      ************************************************************************/
-protected:
+private:
     void setupProfilePage();
     void fillProfileTree();
     void updateProfileItem(const QString& name, QTreeWidgetItem* item);
     QString fullProfilePath(const QString& manufacturer, const QString& model) const;
 
-protected slots:
+private slots:
     void slotProfileItemChanged(QTreeWidgetItem* item);
     void slotAddProfileClicked();
     void slotRemoveProfileClicked();

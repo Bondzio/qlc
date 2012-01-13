@@ -105,7 +105,6 @@ AddFixture::AddFixture(QWidget* parent, const Doc* doc, const Fixture* fxi)
         m_universeCombo->setCurrentIndex(fxi->universe());
         slotUniverseActivated(fxi->universe());
 
-        OutputPatch* op = m_doc->outputMap()->patch(fxi->universe());
         m_addressSpin->setValue(fxi->address() + 1);
         m_addressValue = fxi->address();
 
@@ -298,8 +297,6 @@ void AddFixture::findAddress()
     if (address != QLCChannel::invalid())
     {
         m_universeCombo->setCurrentIndex(address >> 9);
-
-        OutputPatch* op = m_doc->outputMap()->patch(m_universeValue);
         m_addressSpin->setValue((address & 0x01FF) + 1);
     }
 }

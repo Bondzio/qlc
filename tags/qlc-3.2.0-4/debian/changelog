@@ -2,6 +2,7 @@ qlc (3.2.0-4) stable; urgency=low
 
   * Fixed ChaserRunner's PingPong bug
   * Improved Peperoni plugin's compatibility issues with legacy devices
+  * EFX retains pattern proportions when scaling & rotating
   * New fixture definitions
   * New input profile for Behringer LC2412
 

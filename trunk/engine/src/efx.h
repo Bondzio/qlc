@@ -225,6 +225,21 @@ protected:
      */
     int m_rotation;
 
+    /**
+     * cached cos(m_rotation) to speed up computation
+     */
+    qreal m_cosR;
+
+    /**
+     * cached sin(m_rotation) to speed up computation
+     */
+    qreal m_sinR;
+
+    /**
+     * Update m_cosR and m_sinR after m_rotation change
+     */
+    void updateRotationCache();
+
     /*********************************************************************
      * Offset
      *********************************************************************/

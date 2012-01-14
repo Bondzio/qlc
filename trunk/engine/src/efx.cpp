@@ -52,6 +52,8 @@ EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
     m_xOffset = 127;
     m_yOffset = 127;
     m_rotation = 0;
+    
+    updateRotationCache();
 
     m_xFrequency = 2;
     m_yFrequency = 3;
@@ -120,6 +122,8 @@ bool EFX::copyFrom(const Function* function)
     m_xOffset = efx->m_xOffset;
     m_yOffset = efx->m_yOffset;
     m_rotation = efx->m_rotation;
+
+    updateRotationCache();
 
     m_xFrequency = efx->m_xFrequency;
     m_yFrequency = efx->m_yFrequency;
@@ -257,14 +261,12 @@ void EFX::rotateAndScale(qreal* x, qreal* y) const
 {
     qreal xx;
     qreal yy;
-    qreal r;
 
     xx = *x;
     yy = *y;
 
-    r = M_PI/180 * m_rotation;
-    *x = m_xOffset + (xx * cos(r) + yy  * sin(r)) * m_width;
-    *y = m_yOffset + (-xx * sin(r) + yy * cos(r))  * m_height;
+    *x = m_xOffset + xx * m_cosR * m_width + yy * m_sinR * m_height;
+    *y = m_yOffset + -xx * m_sinR * m_width + yy * m_cosR * m_height;
 }
 
 /*****************************************************************************
@@ -304,12 +306,20 @@ int EFX::height() const
 void EFX::setRotation(int rot)
 {
     m_rotation = static_cast<int> (CLAMP(rot, 0, 359));
+    updateRotationCache();
     emit changed(this->id());
 }
 
 int EFX::rotation() const
 {
     return static_cast<int> (m_rotation);
+}
+
+void EFX::updateRotationCache()
+{
+    qreal r = M_PI/180 * m_rotation;
+    m_cosR = cos(r);
+    m_sinR = sin(r);
 }
 
 /*****************************************************************************

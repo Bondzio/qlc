@@ -52,7 +52,7 @@ EFX::EFX(Doc* doc) : Function(doc, Function::EFX)
     m_xOffset = 127;
     m_yOffset = 127;
     m_rotation = 0;
-    
+
     updateRotationCache();
 
     m_xFrequency = 2;

@@ -31,7 +31,6 @@ EFXPreviewArea::EFXPreviewArea(QWidget* parent)
     : QWidget(parent)
     , m_timer(this)
     , m_iter(0)
-    , m_reverse(false)
 {
     QPalette p = palette();
     p.setColor(QPalette::Window, p.color(QPalette::Base));
@@ -56,21 +55,8 @@ void EFXPreviewArea::draw(int timerInterval)
 {
     m_timer.stop();
 
-    if (m_reverse == true)
-        m_iter = m_points.size() - 1;
-    else
-        m_iter = 0;
+    m_iter = 0;
     m_timer.start(timerInterval);
-}
-
-void EFXPreviewArea::setReverse(bool reverse)
-{
-    m_reverse = reverse;
-}
-
-bool EFXPreviewArea::isReverse() const
-{
-    return m_reverse;
 }
 
 void EFXPreviewArea::slotTimeout()
@@ -114,9 +100,7 @@ void EFXPreviewArea::paintEvent(QPaintEvent* e)
     painter.drawLine(width() >> 1, 0, width() >> 1, height());
     painter.drawLine(0, height() >> 1, width(), height() >> 1);
 
-    if (m_reverse == true && m_iter >= 0)
-        m_iter--;
-    else if (m_reverse == false && m_iter < m_points.size())
+    if (m_iter < m_points.size())
         m_iter++;
 
     /* Plain points with text color */

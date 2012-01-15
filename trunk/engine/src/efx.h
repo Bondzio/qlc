@@ -121,19 +121,22 @@ public:
      * roughly the path of the pattern on a flat surface directly in front
      * of a moving (head/mirror) fixture.
      *
+     * @param direction Forward or Backward
      * @param polygon The polygon to fill with preview points
      */
-    bool preview(QVector <QPoint>& polygon) const;
+    bool preview(Function::Direction direction, QVector <QPoint>& polygon) const;
 
+private:
     /**
      * Calculate a single point with the currently selected algorithm,
      * based on the value of iterator (which is basically a step number).
      *
+     * @param direction Forward or Backward (input)
      * @param iterator Step number (input)
      * @param x Used to store the calculated X coordinate (output)
      * @param y Used to store the calculated Y coordinate (output)
      */
-    void calculatePoint(qreal iterator, qreal* x, qreal* y) const;
+    void calculatePoint(Function::Direction direction, qreal iterator, qreal* x, qreal* y) const;
 
     /**
      * Rotate a point of the pattern by rot degrees and scale the point
@@ -149,7 +152,25 @@ public:
      */
     void rotateAndScale(qreal *x, qreal *y) const;
 
-protected:
+    /**
+     * Calculate a single point with the currently selected algorithm,
+     * based on the value of iterator (which is basically a step number).
+     *
+     * @param iterator Step number (input)
+     * @param x Used to store the calculated X coordinate (output)
+     * @param y Used to store the calculated Y coordinate (output)
+     */
+    void calculatePoint(qreal iterator, qreal* x, qreal* y) const;
+
+    /**
+     * Recalculate iterator depending on direction
+     *
+     * @param direction Forward or Backward
+     * @param iterator Step number (input)
+     */
+    qreal calculateDirection(Function::Direction direction, qreal iterator) const;
+
+private:
     /** Current algorithm used by the EFX */
     Algorithm m_algorithm;
 
@@ -171,7 +192,7 @@ public:
      */
     int width() const;
 
-protected:
+private:
     /**
      * Pattern width, see setWidth()
      */
@@ -195,7 +216,7 @@ public:
      */
     int height() const;
 
-protected:
+private:
     /**
      * Pattern height, see setHeight()
      */
@@ -219,7 +240,13 @@ public:
      */
     int rotation() const;
 
-protected:
+private:
+    /**
+     * Update m_cosR and m_sinR after m_rotation change
+     */
+    void updateRotationCache();
+
+private:
     /**
      * Pattern rotation, see setRotation()
      */
@@ -234,11 +261,6 @@ protected:
      * cached sin(m_rotation) to speed up computation
      */
     qreal m_sinR;
-
-    /**
-     * Update m_cosR and m_sinR after m_rotation change
-     */
-    void updateRotationCache();
 
     /*********************************************************************
      * Offset
@@ -272,7 +294,7 @@ public:
      */
     int yOffset() const;
 
-protected:
+private:
     /**
      * Pattern X offset, see setXOffset()
      */
@@ -320,7 +342,7 @@ public:
      */
     bool isFrequencyEnabled();
 
-protected:
+private:
     /**
      * Lissajous pattern X frequency, see setXFrequency()
      */
@@ -368,7 +390,7 @@ public:
      */
     bool isPhaseEnabled() const;
 
-protected:
+private:
     /**
      * Lissajous pattern X phase, see setXPhase()
      */
@@ -402,7 +424,7 @@ public slots:
     /** Slot that captures Doc::fixtureRemoved signals */
     void slotFixtureRemoved(quint32 fxi_id);
 
-protected:
+private:
     QList <EFXFixture*> m_fixtures;
     GenericFader* m_fader;
 
@@ -429,7 +451,7 @@ public:
     /** Convert a string to a propagation mode setting */
     static PropagationMode stringToPropagationMode(QString str);
 
-protected:
+private:
     PropagationMode m_propagationMode;
 
     /*********************************************************************
@@ -440,7 +462,7 @@ public:
     bool loadXML(const QDomElement& root);
     void postLoad();
 
-protected:
+private:
     /** Load an axis' contents from an XML document*/
     bool loadXMLAxis(const QDomElement& root);
 

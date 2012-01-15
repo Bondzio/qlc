@@ -57,19 +57,6 @@ public:
      */
     void draw(int timerInterval = 20);
 
-    /**
-     * Set the preview area to draw the pattern in reverse or normal
-     * order.
-     *
-     * @param reverse if true, the pattern is reversed
-     */
-    void setReverse(bool reverse);
-
-    /**
-     * Check, whether the preview are is drawing a reversed pattern
-     */
-    bool isReverse() const;
-
     /** Scale the points in the given polygon of size [0, 255] to the given target size */
     static QPolygon scale(const QPolygon& poly, const QSize& target);
 
@@ -94,9 +81,6 @@ private:
 
     /** Animation position */
     int m_iter;
-
-    /** Reverse or normal order */
-    bool m_reverse;
 };
 
 #endif

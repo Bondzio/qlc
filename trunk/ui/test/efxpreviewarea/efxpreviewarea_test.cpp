@@ -31,10 +31,8 @@
 void EFXPreviewArea_Test::initial()
 {
     EFXPreviewArea area(NULL);
-    QCOMPARE(area.m_reverse, false);
     QCOMPARE(area.m_iter, 0);
     QCOMPARE(area.m_timer.parent(), &area);
-    QCOMPARE(area.isReverse(), false);
     QCOMPARE(area.m_timer.isActive(), false);
 }
 
@@ -71,15 +69,6 @@ void EFXPreviewArea_Test::setPoints()
     QCOMPARE(area.m_points[4], QPoint(200, 200));
 }
 
-void EFXPreviewArea_Test::reverse()
-{
-    EFXPreviewArea area(NULL);
-    area.setReverse(true);
-    QCOMPARE(area.isReverse(), true);
-    area.setReverse(false);
-    QCOMPARE(area.isReverse(), false);
-}
-
 void EFXPreviewArea_Test::draw()
 {
     EFXPreviewArea area(NULL);
@@ -100,16 +89,6 @@ void EFXPreviewArea_Test::draw()
 
     QTest::qWait(200);
     QVERIFY(area.m_iter >= 5);
-    QCOMPARE(area.m_timer.isActive(), false);
-
-    area.setReverse(true);
-    area.draw(10);
-    QCOMPARE(area.m_iter, 4);
-    QCOMPARE(area.m_timer.isActive(), true);
-    QCOMPARE(area.m_timer.interval(), 10);
-
-    QTest::qWait(400);
-    QCOMPARE(area.m_iter, -1);
     QCOMPARE(area.m_timer.isActive(), false);
 }
 

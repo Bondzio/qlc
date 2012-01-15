@@ -815,24 +815,20 @@ void EFXEditor::slotForwardClicked()
 {
     Q_ASSERT(m_efx != NULL);
     m_efx->setDirection(Function::Forward);
-
-    m_previewArea->setReverse(false);
-    m_previewArea->draw();
+    redrawPreview();
 }
 
 void EFXEditor::slotBackwardClicked()
 {
     Q_ASSERT(m_efx != NULL);
     m_efx->setDirection(Function::Backward);
-
-    m_previewArea->setReverse(true);
-    m_previewArea->draw();
+    redrawPreview();
 }
 
 void EFXEditor::redrawPreview()
 {
     QVector <QPoint> points;
-    m_efx->preview(points);
+    m_efx->preview(m_efx->direction(), points);
     m_previewArea->setPoints(points);
     m_previewArea->draw();
 }

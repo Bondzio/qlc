@@ -197,7 +197,7 @@ EFX::Algorithm EFX::stringToAlgorithm(const QString& str)
         return EFX::Circle;
 }
 
-bool EFX::preview(QVector <QPoint>& polygon) const
+bool EFX::preview(Function::Direction direction, QVector <QPoint>& polygon) const
 {
     bool retval = true;
     int stepCount = 128;
@@ -214,12 +214,47 @@ bool EFX::preview(QVector <QPoint>& polygon) const
     /* Draw a preview of a circle */
     for (step = 0; step < stepCount; step++)
     {
-        calculatePoint(i, &x, &y);
+        calculatePoint(direction, i, &x, &y);
         polygon[step] = QPoint(int(x), int(y));
         i += stepSize;
     }
 
     return retval;
+}
+
+void EFX::calculatePoint(Function::Direction direction, qreal iterator, qreal* x, qreal* y) const
+{
+    calculatePoint(calculateDirection(direction, iterator), x, y);
+}
+
+void EFX::rotateAndScale(qreal* x, qreal* y) const
+{
+    qreal xx;
+    qreal yy;
+
+    xx = *x;
+    yy = *y;
+
+    *x = m_xOffset + xx * m_cosR * m_width + yy * m_sinR * m_height;
+    *y = m_yOffset + -xx * m_sinR * m_width + yy * m_cosR * m_height;
+}
+
+qreal EFX::calculateDirection(Function::Direction direction, qreal iterator) const
+{
+    if (direction == Function::Forward)
+        return iterator;
+
+    switch (algorithm())
+    {
+    default:
+    case Circle:
+    case Eight:
+    case Diamond:
+    case Lissajous:
+        return (M_PI * 2.0) - iterator;
+    case Line:
+        return (iterator > M_PI) ? (iterator - M_PI) : (iterator + M_PI);
+    }
 }
 
 void EFX::calculatePoint(qreal iterator, qreal* x, qreal* y) const
@@ -238,7 +273,6 @@ void EFX::calculatePoint(qreal iterator, qreal* x, qreal* y) const
         break;
 
     case Line:
-        /* @todo It's a simple line, do we really need cos()? :) */
         *x = cos(iterator);
         *y = cos(iterator);
         break;
@@ -255,18 +289,6 @@ void EFX::calculatePoint(qreal iterator, qreal* x, qreal* y) const
     }
 
     rotateAndScale(x, y);
-}
-
-void EFX::rotateAndScale(qreal* x, qreal* y) const
-{
-    qreal xx;
-    qreal yy;
-
-    xx = *x;
-    yy = *y;
-
-    *x = m_xOffset + xx * m_cosR * m_width + yy * m_sinR * m_height;
-    *y = m_yOffset + -xx * m_sinR * m_width + yy * m_cosR * m_height;
 }
 
 /*****************************************************************************

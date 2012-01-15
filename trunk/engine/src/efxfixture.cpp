@@ -284,10 +284,7 @@ void EFXFixture::nextStep(MasterTimer* timer, UniverseArray* universes)
         m_elapsed < (m_parent->duration() + timeOffset()))
         || m_elapsed < m_parent->duration())
     {
-        if (m_runTimeDirection == Function::Forward)
-            m_parent->calculatePoint(iterator, &pan, &tilt);
-        else
-            m_parent->calculatePoint((M_PI * 2.0) - iterator, &pan, &tilt);
+        m_parent->calculatePoint(m_runTimeDirection, iterator, &pan, &tilt);
 
         /* Write this fixture's data to universes. */
         setPoint(universes, pan, tilt);

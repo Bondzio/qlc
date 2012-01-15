@@ -31,7 +31,6 @@ class EFXPreviewArea_Test : public QObject
 private slots:
     void initial();
     void setPoints();
-    void reverse();
     void draw();
 };
 

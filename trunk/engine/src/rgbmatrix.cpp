@@ -413,7 +413,7 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
 
             QList <quint32> rgb = head.rgbChannels();
             QList <quint32> cmy = head.cmyChannels();
-            if (rgb.isEmpty() == false)
+            if (rgb.size() == 3)
             {
                 // RGB color mixing
                 FadeChannel fc;
@@ -434,7 +434,7 @@ void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup* grp)
                 insertStartValues(fc);
                 m_fader->add(fc);
             }
-            else if (cmy.isEmpty() == false)
+            else if (cmy.size() == 3)
             {
                 // CMY color mixing
                 QColor col(map[y][x]);

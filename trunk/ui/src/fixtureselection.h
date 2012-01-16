@@ -28,6 +28,7 @@
 #include "ui_fixtureselection.h"
 
 class QTreeWidgetItem;
+class GroupHead;
 class QWidget;
 class Doc;
 
@@ -51,11 +52,15 @@ private:
      * Selected fixtures
      ************************************************************************/
 public:
-    /** List of selected fixture IDs */
+    /** List of selected fixtures (valid only in Fixture Selection Mode) */
     QList <quint32> selection() const;
+
+    /** Get a list of selected fixture heads (valid only in Head Selection Mode) */
+    QList <GroupHead> selectedHeads() const;
 
 private:
     QList <quint32> m_selection;
+    QList <GroupHead> m_selectedHeads;
 
     /************************************************************************
      * Multi-selection
@@ -65,14 +70,27 @@ public:
     void setMultiSelection(bool multi);
 
     /************************************************************************
+     * Selection mode
+     ************************************************************************/
+public:
+    enum SelectionMode { Fixtures, Heads };
+    void setSelectionMode(SelectionMode mode);
+
+private:
+    SelectionMode m_selectionMode;
+
+    /************************************************************************
      * Disabled fixtures
      ************************************************************************/
 public:
     /** Disable (==prevent selection of) a list of fixtures */
     void setDisabledFixtures(const QList <quint32>& disabled);
 
+    void setDisabledHeads(const QList <GroupHead>& disabled);
+
 private:
     QList <quint32> m_disabledFixtures;
+    QList <GroupHead> m_disabledHeads;
 
     /************************************************************************
      * Tree

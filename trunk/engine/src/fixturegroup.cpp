@@ -37,42 +37,6 @@
 #define KXMLQLCFixtureGroupDisplayStyle "DisplayStyle"
 
 /****************************************************************************
- * GroupHead
- ****************************************************************************/
-
-GroupHead::GroupHead(quint32 aFxi, int aHead)
-    : fxi(aFxi)
-    , head(aHead)
-{
-}
-
-GroupHead::GroupHead(const GroupHead& another)
-    : fxi(another.fxi)
-    , head(another.head)
-{
-}
-
-GroupHead::~GroupHead()
-{
-}
-
-bool GroupHead::isValid() const
-{
-    if (fxi != Fixture::invalidId() && head >= 0)
-        return true;
-    else
-        return false;
-}
-
-bool GroupHead::operator==(const GroupHead& another) const
-{
-    if (fxi == another.fxi && head == another.head)
-        return true;
-    else
-        return false;
-}
-
-/****************************************************************************
  * Initialization
  ****************************************************************************/
 

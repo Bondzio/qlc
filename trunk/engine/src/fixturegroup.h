@@ -27,6 +27,7 @@
 #include <QSize>
 #include <QHash>
 
+#include "grouphead.h"
 #include "qlcpoint.h"
 #include "fixture.h"
 
@@ -35,29 +36,6 @@
 class QDomDocument;
 class QDomElement;
 class Doc;
-
-/************************************************************************
- * GroupHead
- ************************************************************************/
-
-class GroupHead
-{
-public:
-    GroupHead(quint32 aFxi = Fixture::invalidId(), int aHead = -1);
-    GroupHead(const GroupHead& another);
-    ~GroupHead();
-
-    bool isValid() const;
-    bool operator==(const GroupHead& another) const;
-
-public:
-    quint32 fxi;
-    int head;
-};
-
-/************************************************************************
- * FixtureGroup
- ************************************************************************/
 
 class FixtureGroup : public QObject
 {
@@ -170,7 +148,6 @@ public:
     /** Get a list of fixtures assigned to the group */
     QList <quint32> fixtureList() const;
 
-private:
     /**
      * Assign a fixture head to a group at the given point. If point is null,
      * then the fixture will be automatically placed to the next free slot.

@@ -59,6 +59,7 @@ HEADERS += bus.h \
            fixturegroup.h \
            function.h \
            genericfader.h \
+           grouphead.h \
            inputmap.h \
            inputpatch.h \
            intensitygenerator.h \
@@ -106,6 +107,7 @@ SOURCES += bus.cpp \
            fixturegroup.cpp \
            function.cpp \
            genericfader.cpp \
+           grouphead.cpp \
            inputmap.cpp \
            inputpatch.cpp \
            intensitygenerator.cpp \

@@ -250,9 +250,8 @@ void EFX::calculatePoint(qreal iterator, qreal* x, qreal* y) const
         break;
 
     case Line:
-        /* @todo It's a simple line, do we really need cos()? :) */
-        *x = cos(iterator);
-        *y = cos(iterator);
+        *x = sin(iterator);
+        *y = sin(iterator);
         break;
 
     case Diamond:

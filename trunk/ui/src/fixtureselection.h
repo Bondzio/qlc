@@ -58,7 +58,10 @@ public:
 
 private slots:
     /** Item double clicks */
-    void slotItemDoubleClicked(QTreeWidgetItem* item);
+    void slotItemDoubleClicked();
+
+    /** Tree selection changes */
+    void slotSelectionChanged();
 
     /** OK button click */
     void accept();

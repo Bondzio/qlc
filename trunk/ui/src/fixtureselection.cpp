@@ -56,7 +56,10 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
         m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
 
     connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*)));
+            this, SLOT(slotItemDoubleClicked()));
+
+    connect(m_tree, SIGNAL(itemSelectionChanged()),
+            this, SLOT(slotSelectionChanged()));
 
     /* Fill the tree */
     foreach (Fixture* fixture, doc->fixtures())
@@ -96,18 +99,26 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
         m_tree->sortItems(KColumnName, Qt::AscendingOrder);
         m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
     }
+
+    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 }
 
 FixtureSelection::~FixtureSelection()
 {
 }
 
-void FixtureSelection::slotItemDoubleClicked(QTreeWidgetItem* item)
+void FixtureSelection::slotItemDoubleClicked()
 {
-    if (item == NULL)
-        return;
+    if (m_tree->selectedItems().isEmpty() == false)
+        accept();
+}
 
-    accept();
+void FixtureSelection::slotSelectionChanged()
+{
+    if (m_tree->selectedItems().size() > 0)
+        m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    else
+        m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 }
 
 void FixtureSelection::accept()

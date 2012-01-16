@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     /********************************************************************
      * Fixture metadata
      ********************************************************************/
-#if 0
+
     QLCMacros_Test macros;
     r = QTest::qExec(&macros, argc, argv);
     if (r != 0)
@@ -202,12 +202,12 @@ int main(int argc, char** argv)
     r = QTest::qExec(&efxfixture, argc, argv);
     if (r != 0)
         return r;
-#endif
+
     EFX_Test efx;
     r = QTest::qExec(&efx, argc, argv);
     if (r != 0)
         return r;
-#if 0
+
     MasterTimer_Test mt;
     r = QTest::qExec(&mt, argc, argv);
     if (r != 0)
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
     r = QTest::qExec(&gf, argc, argv);
     if (r != 0)
         return r;
-#endif
+
     return 0;
 }
 

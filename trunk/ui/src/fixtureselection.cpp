@@ -32,13 +32,14 @@
 #include "doc.h"
 
 #define KColumnName         0
-#define KColumnManufacturer 1
-#define KColumnModel        2
-#define KColumnID           3
+#define KColumnHeads        1
+#define KColumnManufacturer 2
+#define KColumnModel        3
+#define KColumnID           4
 
-FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
-                                   QList <quint32> disabled)
+FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc)
     : QDialog(parent)
+    , m_doc(doc)
 {
     Q_ASSERT(doc != NULL);
 
@@ -49,24 +50,67 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
     connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
     addAction(action);
 
-    /* Multiple/single selection */
-    if (multiple == true)
-        m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    else
-        m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
-
     connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
             this, SLOT(slotItemDoubleClicked()));
 
     connect(m_tree, SIGNAL(itemSelectionChanged()),
             this, SLOT(slotSelectionChanged()));
+}
 
-    /* Fill the tree */
-    foreach (Fixture* fixture, doc->fixtures())
+FixtureSelection::~FixtureSelection()
+{
+}
+
+int FixtureSelection::exec()
+{
+    fillTree();
+    return QDialog::exec();
+}
+
+/****************************************************************************
+ * Selected fixtures
+ ****************************************************************************/
+
+QList <quint32> FixtureSelection::selection() const
+{
+    return m_selection;
+}
+
+/****************************************************************************
+ * Multi-selection
+ ****************************************************************************/
+
+void FixtureSelection::setMultiSelection(bool multi)
+{
+    if (multi == true)
+        m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    else
+        m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+}
+
+/****************************************************************************
+ * Disabled fixtures
+ ****************************************************************************/
+
+void FixtureSelection::setDisabledFixtures(const QList <quint32>& disabled)
+{
+    m_disabledFixtures = disabled;
+}
+
+/****************************************************************************
+ * Tree
+ ****************************************************************************/
+
+void FixtureSelection::fillTree()
+{
+    m_tree->clear();
+
+    foreach (Fixture* fixture, m_doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
         QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
         item->setText(KColumnName, fixture->name());
+        item->setText(KColumnHeads, QString::number(fixture->heads()));
         item->setText(KColumnID, QString::number(fixture->id()));
 
         if (fixture->fixtureDef() == NULL)
@@ -80,7 +124,7 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
             item->setText(KColumnModel, fixture->fixtureDef()->model());
         }
 
-        if (disabled.contains(fixture->id()) == true)
+        if (m_disabledFixtures.contains(fixture->id()) == true)
             item->setFlags(0); // Disables the item
     }
 
@@ -92,19 +136,14 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
         QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
         item->setText(0, tr("Go to the Fixture Manager and add some fixtures first."));
         m_tree->setEnabled(false);
-        m_buttonBox->setStandardButtons(QDialogButtonBox::Close);
+        m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
     }
     else
     {
         m_tree->sortItems(KColumnName, Qt::AscendingOrder);
         m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+        m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
     }
-
-    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
-}
-
-FixtureSelection::~FixtureSelection()
-{
 }
 
 void FixtureSelection::slotItemDoubleClicked()
@@ -123,13 +162,11 @@ void FixtureSelection::slotSelectionChanged()
 
 void FixtureSelection::accept()
 {
-    selection.clear();
+    m_selection.clear();
 
-    /* TODO: Check, whether some items are disabled items. If they are,
-       don't put them into selection list. See above Qt::ItemIsEnabled. */
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
     while (it.hasNext() == true)
-        selection.append(it.next()->text(KColumnID).toUInt());
+        m_selection << it.next()->text(KColumnID).toUInt();
 
     QDialog::accept();
 }

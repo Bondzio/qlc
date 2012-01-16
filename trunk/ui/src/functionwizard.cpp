@@ -63,10 +63,12 @@ FunctionWizard::~FunctionWizard()
 
 void FunctionWizard::slotAddClicked()
 {
-    FixtureSelection fs(this, m_doc, true, fixtureIds());
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(true);
+    fs.setDisabledFixtures(fixtureIds());
     if (fs.exec() == QDialog::Accepted)
     {
-        QListIterator <quint32> it(fs.selection);
+        QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
             addFixture(it.next());
     }

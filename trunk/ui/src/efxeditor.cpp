@@ -524,13 +524,15 @@ void EFXEditor::slotAddFixtureClicked()
     }
 
     /* Get a list of new fixtures to add to the scene */
-    FixtureSelection fs(this, m_doc, true, disabled);
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(true);
+    fs.setDisabledFixtures(disabled);
     if (fs.exec() == QDialog::Accepted)
     {
         // Stop running while adding fixtures
         bool running = interruptRunning();
 
-        QListIterator <quint32> it(fs.selection);
+        QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
         {
             EFXFixture* ef = new EFXFixture(m_efx);

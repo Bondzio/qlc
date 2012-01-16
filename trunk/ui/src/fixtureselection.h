@@ -29,7 +29,6 @@
 
 class QTreeWidgetItem;
 class QWidget;
-class Fixture;
 class Doc;
 
 class FixtureSelection : public QDialog, public Ui_FixtureSelection
@@ -38,23 +37,49 @@ class FixtureSelection : public QDialog, public Ui_FixtureSelection
     Q_DISABLE_COPY(FixtureSelection)
 
 public:
-    /**
-     * Constructor
-     *
-     * @param parent The parent widget
-     * @param doc The Doc* object holding all fixtures
-     * @param multiple Set true to enable multiple selection
-     * @param disabled List of fixture IDs to disable (already present
-     *                 fixtures etc...)
-     */
-    FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
-                     QList <quint32> disabled = QList <quint32> ());
-
-    /** Destructor */
+    FixtureSelection(QWidget* parent, Doc* doc);
     ~FixtureSelection();
 
+public slots:
+    /** @reimp */
+    int exec();
+
+private:
+    Doc* m_doc;
+
+    /************************************************************************
+     * Selected fixtures
+     ************************************************************************/
+public:
     /** List of selected fixture IDs */
-    QList <quint32> selection;
+    QList <quint32> selection() const;
+
+private:
+    QList <quint32> m_selection;
+
+    /************************************************************************
+     * Multi-selection
+     ************************************************************************/
+public:
+     /** Enable or disable multi-selection */
+    void setMultiSelection(bool multi);
+
+    /************************************************************************
+     * Disabled fixtures
+     ************************************************************************/
+public:
+    /** Disable (==prevent selection of) a list of fixtures */
+    void setDisabledFixtures(const QList <quint32>& disabled);
+
+private:
+    QList <quint32> m_disabledFixtures;
+
+    /************************************************************************
+     * Tree
+     ************************************************************************/
+private:
+    /** Fill the tree */
+    void fillTree();
 
 private slots:
     /** Item double clicks */

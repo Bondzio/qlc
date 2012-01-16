@@ -499,12 +499,14 @@ void SceneEditor::slotAddFixtureClicked()
     }
 
     /* Get a list of new fixtures to add to the scene */
-    FixtureSelection fs(this, m_doc, true, disabled);
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(true);
+    fs.setDisabledFixtures(disabled);
     if (fs.exec() == QDialog::Accepted)
     {
         Fixture* fixture;
 
-        QListIterator <quint32> it(fs.selection);
+        QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
         {
             fixture = m_doc->fixture(it.next());

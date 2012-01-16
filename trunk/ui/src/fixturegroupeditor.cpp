@@ -211,12 +211,14 @@ void FixtureGroupEditor::slotDisplayStyleChecked()
 
 void FixtureGroupEditor::slotAddFixtureClicked()
 {
-    FixtureSelection fs(this, m_doc, false, m_grp->fixtureList());
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(false);
+    fs.setDisabledFixtures(m_grp->fixtureList());
     if (fs.exec() == QDialog::Accepted)
     {
         int row = m_row;
         int col = m_column;
-        m_grp->assignFixture(fs.selection.first(), QLCPoint(col, row));
+        m_grp->assignFixture(fs.selection().first(), QLCPoint(col, row));
         updateTable();
         m_table->setCurrentCell(row, col);
     }

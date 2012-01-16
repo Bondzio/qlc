@@ -221,10 +221,11 @@ void ScriptEditor::slotAddSetLtp()
 
 void ScriptEditor::slotAddSetFixture()
 {
-    FixtureSelection fs(this, m_doc, true);
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(true);
     if (fs.exec() == QDialog::Accepted)
     {
-        foreach (quint32 id, fs.selection)
+        foreach (quint32 id, fs.selection())
         {
             Fixture* fxi = m_doc->fixture(id);
             if (fxi != NULL)

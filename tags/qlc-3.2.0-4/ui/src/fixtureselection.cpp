@@ -56,7 +56,7 @@ FixtureSelection::FixtureSelection(QWidget* parent, Doc* doc, bool multiple,
         m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
 
     connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*)));
+            this, SLOT(slotItemDoubleClicked()));
 
     /* Fill the tree */
     foreach (Fixture* fixture, doc->fixtures())
@@ -108,12 +108,10 @@ FixtureSelection::~FixtureSelection()
 {
 }
 
-void FixtureSelection::slotItemDoubleClicked(QTreeWidgetItem* item)
+void FixtureSelection::slotItemDoubleClicked()
 {
-    if (item == NULL)
-        return;
-
-    accept();
+    if (m_tree->selectedItems().isEmpty() == false)
+        accept();
 }
 
 void FixtureSelection::accept()

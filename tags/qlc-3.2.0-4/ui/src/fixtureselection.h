@@ -66,7 +66,7 @@ protected slots:
     /**
      * Item double clicks
      */
-    void slotItemDoubleClicked(QTreeWidgetItem* item);
+    void slotItemDoubleClicked();
 
     /**
      * OK button click

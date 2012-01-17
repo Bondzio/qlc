@@ -339,7 +339,7 @@ bool Doc::addFixtureGroup(FixtureGroup* grp, quint32 id)
 
     if (m_fixtureGroups.contains(id) == true || id == FixtureGroup::invalidId())
     {
-        qWarning() << Q_FUNC_INFO << "a fixture with ID" << id << "already exists!";
+        qWarning() << Q_FUNC_INFO << "a fixture group with ID" << id << "already exists!";
         return false;
     }
     else

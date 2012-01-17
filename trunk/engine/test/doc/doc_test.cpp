@@ -93,6 +93,21 @@ void Doc_Test::defaults()
     QVERIFY(m_doc->m_functions.size() == 0);
 }
 
+void Doc_Test::mode()
+{
+    QSignalSpy spy(m_doc, SIGNAL(modeChanged(Doc::Mode)));
+    QCOMPARE(m_doc->mode(), Doc::Design);
+
+    m_doc->setMode(Doc::Operate);
+    QCOMPARE(spy.size(), 1);
+    m_doc->setMode(Doc::Operate);
+    QCOMPARE(spy.size(), 1);
+    m_doc->setMode(Doc::Design);
+    QCOMPARE(spy.size(), 2);
+    m_doc->setMode(Doc::Design);
+    QCOMPARE(spy.size(), 2);
+}
+
 void Doc_Test::createFixtureId()
 {
     for (quint32 i = 0; i < 16384; i++)
@@ -344,6 +359,86 @@ void Doc_Test::totalPowerConsumption()
     QVERIFY(fuzzy == 2);
 }
 
+void Doc_Test::addFixtureGroup()
+{
+    QSignalSpy spy(m_doc, SIGNAL(fixtureGroupAdded(quint32)));
+
+    QCOMPARE(m_doc->fixtureGroups().size(), 0);
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(0));
+
+    FixtureGroup* grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp), true);
+    QCOMPARE(grp->id(), quint32(0));
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(0));
+    QCOMPARE(m_doc->fixtureGroups().size(), 1);
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0].size(), 1);
+    QCOMPARE(spy[0][0].toUInt(), quint32(0));
+
+    QCOMPARE(m_doc->addFixtureGroup(grp, 0), false);
+    QCOMPARE(m_doc->fixtureGroups().size(), 1);
+
+    grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp, 0), false);
+    QCOMPARE(m_doc->addFixtureGroup(grp, 15), true);
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(0));
+    QCOMPARE(m_doc->fixtureGroups().size(), 2);
+    QCOMPARE(spy.size(), 2);
+    QCOMPARE(spy[1].size(), 1);
+    QCOMPARE(spy[1][0].toUInt(), quint32(15));
+
+    grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp), true);
+    QCOMPARE(grp->id(), quint32(1));
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(1));
+    QCOMPARE(m_doc->fixtureGroups().size(), 3);
+    QCOMPARE(spy.size(), 3);
+    QCOMPARE(spy[2].size(), 1);
+    QCOMPARE(spy[2][0].toUInt(), quint32(1));
+}
+
+void Doc_Test::removeFixtureGroup()
+{
+    QSignalSpy spy(m_doc, SIGNAL(fixtureGroupRemoved(quint32)));
+    QCOMPARE(m_doc->fixtureGroups().size(), 0);
+    QCOMPARE(m_doc->m_latestFixtureGroupId, quint32(0));
+
+    QCOMPARE(m_doc->deleteFixtureGroup(0), false);
+    QCOMPARE(spy.size(), 0);
+
+    FixtureGroup* grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp), true);
+    grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp), true);
+    grp = new FixtureGroup(m_doc);
+    QCOMPARE(m_doc->addFixtureGroup(grp), true);
+    QCOMPARE(m_doc->fixtureGroups().size(), 3);
+    QVERIFY(m_doc->fixtureGroup(0) != NULL);
+    QVERIFY(m_doc->fixtureGroup(1) != NULL);
+    QVERIFY(m_doc->fixtureGroup(2) != NULL);
+
+    QCOMPARE(m_doc->deleteFixtureGroup(0), true);
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0].size(), 1);
+    QCOMPARE(spy[0][0].toUInt(), quint32(0));
+    QCOMPARE(m_doc->fixtureGroups().size(), 2);
+    QVERIFY(m_doc->fixtureGroup(0) == NULL);
+    QVERIFY(m_doc->fixtureGroup(1) != NULL);
+    QVERIFY(m_doc->fixtureGroup(2) != NULL);
+
+    QCOMPARE(m_doc->deleteFixtureGroup(0), false);
+    QCOMPARE(spy.size(), 1);
+
+    QCOMPARE(m_doc->deleteFixtureGroup(1), true);
+    QCOMPARE(spy.size(), 2);
+    QCOMPARE(spy[1].size(), 1);
+    QCOMPARE(spy[1][0].toUInt(), quint32(1));
+    QCOMPARE(m_doc->fixtureGroups().size(), 1);
+    QVERIFY(m_doc->fixtureGroup(0) == NULL);
+    QVERIFY(m_doc->fixtureGroup(1) == NULL);
+    QVERIFY(m_doc->fixtureGroup(2) != NULL);
+}
+
 void Doc_Test::addFunction()
 {
     QVERIFY(m_doc->functions().size() == 0);
@@ -458,6 +553,10 @@ void Doc_Test::load()
     root.appendChild(createFixtureNode(document, 72));
     root.appendChild(createFixtureNode(document, 15));
 
+    root.appendChild(createFixtureGroupNode(document, 0));
+    root.appendChild(createFixtureGroupNode(document, 42));
+    root.appendChild(createFixtureGroupNode(document, 72));
+
     root.appendChild(createCollectionNode(document, 5));
     root.appendChild(createCollectionNode(document, 9));
     root.appendChild(createCollectionNode(document, 1));
@@ -476,6 +575,7 @@ void Doc_Test::load()
     QVERIFY(m_doc->loadXML(root) == true);
     QVERIFY(m_doc->fixtures().size() == 3);
     QVERIFY(m_doc->functions().size() == 4);
+    QVERIFY(m_doc->fixtureGroups().size() == 3);
     QVERIFY(Bus::instance()->value(0) == 1);
     QVERIFY(Bus::instance()->value(7) == 2);
     QVERIFY(Bus::instance()->value(12) == 3);
@@ -491,6 +591,10 @@ void Doc_Test::loadWrongRoot()
     root.appendChild(createFixtureNode(document, 0));
     root.appendChild(createFixtureNode(document, 72));
     root.appendChild(createFixtureNode(document, 15));
+
+    root.appendChild(createFixtureGroupNode(document, 0));
+    root.appendChild(createFixtureGroupNode(document, 42));
+    root.appendChild(createFixtureGroupNode(document, 72));
 
     root.appendChild(createCollectionNode(document, 5));
     root.appendChild(createCollectionNode(document, 9));
@@ -543,6 +647,14 @@ void Doc_Test::save()
     EFX* e = new EFX(m_doc);
     m_doc->addFunction(e);
 
+    FixtureGroup* grp = new FixtureGroup(m_doc);
+    grp->setName("Group 1");
+    m_doc->addFixtureGroup(grp);
+
+    grp = new FixtureGroup(m_doc);
+    grp->setName("Group 2");
+    m_doc->addFixtureGroup(grp);
+
     QVERIFY(m_doc->isModified() == true);
 
     QDomDocument document;
@@ -550,10 +662,12 @@ void Doc_Test::save()
 
     QVERIFY(m_doc->saveXML(&document, &root) == true);
 
-    uint fixtures = 0, functions = 0;
+    uint fixtures = 0, groups = 0, functions = 0;
     QDomNode node = root.firstChild();
     QVERIFY(node.toElement().tagName() == "Engine");
 
+    // Merely tests that the start of each hierarchy is found from the XML document.
+    // Their contents are tested individually in their own separate tests.
     node = node.firstChild();
     while (node.isNull() == false)
     {
@@ -562,6 +676,8 @@ void Doc_Test::save()
             fixtures++;
         else if (tag.tagName() == "Function")
             functions++;
+        else if (tag.tagName() == "FixtureGroup")
+            groups++;
         else if (tag.tagName() == "Bus")
             QFAIL("Bus tags should not be saved anymore!");
         else
@@ -572,6 +688,7 @@ void Doc_Test::save()
     }
 
     QVERIFY(fixtures == 3);
+    QVERIFY(groups == 2);
     QVERIFY(functions == 4);
 
     /* Saving doesn't implicitly reset modified status */
@@ -622,6 +739,20 @@ QDomElement Doc_Test::createFixtureNode(QDomDocument& doc, quint32 id)
     QDomText addrText = doc.createTextNode("21");
     addr.appendChild(addrText);
     root.appendChild(addr);
+
+    return root;
+}
+
+QDomElement Doc_Test::createFixtureGroupNode(QDomDocument& doc, quint32 id)
+{
+    QDomElement root = doc.createElement("FixtureGroup");
+    root.setAttribute("ID", id);
+    doc.appendChild(root);
+
+    QDomElement name = doc.createElement("Name");
+    QDomText nameText = doc.createTextNode(QString("Group with ID %1").arg(id));
+    name.appendChild(nameText);
+    root.appendChild(name);
 
     return root;
 }

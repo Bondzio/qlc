@@ -36,12 +36,16 @@ private slots:
     void cleanup();
 
     void defaults();
+    void mode();
 
     void createFixtureId();
     void addFixture();
     void deleteFixture();
     void fixture();
     void totalPowerConsumption();
+
+    void addFixtureGroup();
+    void removeFixtureGroup();
 
     void addFunction();
     void deleteFunction();
@@ -53,6 +57,7 @@ private slots:
 
 private:
     QDomElement createFixtureNode(QDomDocument& doc, quint32 id);
+    QDomElement createFixtureGroupNode(QDomDocument& doc, quint32 id);
     QDomElement createCollectionNode(QDomDocument& doc, quint32 id);
     QDomElement createBusNode(QDomDocument& doc, quint32 id, quint32 value);
 

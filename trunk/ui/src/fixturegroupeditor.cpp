@@ -121,6 +121,10 @@ void FixtureGroupEditor::accept()
 
 void FixtureGroupEditor::updateTable()
 {
+    // Store these since they might get reset
+    int savedRow = m_row;
+    int savedCol = m_column;
+
     disconnect(m_table, SIGNAL(cellChanged(int,int)),
                this, SLOT(slotCellChanged(int,int)));
     disconnect(m_table, SIGNAL(cellPressed(int,int)),
@@ -175,9 +179,18 @@ void FixtureGroupEditor::updateTable()
     connect(m_table, SIGNAL(cellChanged(int,int)),
             this, SLOT(slotCellChanged(int,int)));
 
-    m_row = 0;
-    m_column = 0;
-    m_table->setCurrentCell(0, 0);
+    if (savedRow < m_table->rowCount() && savedCol < m_table->columnCount())
+    {
+        m_row = savedRow;
+        m_column = savedCol;
+    }
+    else
+    {
+        m_row = 0;
+        m_column = 0;
+    }
+
+    m_table->setCurrentCell(m_row, m_column);
 }
 
 void FixtureGroupEditor::slotXSpinValueChanged(int value)
@@ -255,7 +268,6 @@ void FixtureGroupEditor::slotCellActivated(int row, int column)
 
 void FixtureGroupEditor::slotCellChanged(int row, int column)
 {
-    qDebug() << Q_FUNC_INFO << row << column;
     if (row < 0 || column < 0)
     {
         updateTable();

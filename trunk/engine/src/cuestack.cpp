@@ -353,6 +353,7 @@ bool CueStack::isFlashing() const
 
 void CueStack::writeDMX(MasterTimer* timer, UniverseArray* ua)
 {
+    Q_UNUSED(timer);
     if (isFlashing() == true && m_cues.size() > 0)
     {
         QHashIterator <uint,uchar> it(m_cues.first().values());

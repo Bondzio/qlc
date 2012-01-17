@@ -583,6 +583,8 @@ void VCSlider::writeDMXLevel(MasterTimer* timer, UniverseArray* universes)
 
 void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* ua)
 {
+    Q_UNUSED(ua);
+
     Function* function = m_doc->function(m_playbackFunction);
     if (function == NULL || mode() == Doc::Design)
         return;
@@ -591,57 +593,24 @@ void VCSlider::writeDMXPlayback(MasterTimer* timer, UniverseArray* ua)
     m_playbackValueMutex.lock();
     uchar value = m_playbackValue;
     bool changed = m_playbackValueChanged;
-
     qreal intensity = qreal(value) / qreal(UCHAR_MAX);
-
-    switch(function->type())
-    {
-    case Function::Scene:
-    {
-        Scene* scene = qobject_cast<Scene*> (function);
-        Q_ASSERT(scene != NULL);
-
-        foreach (const SceneValue& sv, scene->values())
-        {
-            FadeChannel fc;
-            fc.setFixture(sv.fxi);
-            fc.setChannel(sv.channel);
-            fc.setCurrent(sv.value);
-            QLCChannel::Group grp = fc.group(m_doc);
-
-            /* When the value has changed recently (= slider moved since last writeDMX cycle)
-               write both HTP & LTP channels. Otherwise write only HTP channel values. */
-            if (changed == true || grp == QLCChannel::Intensity)
-            {
-                if (grp == QLCChannel::Intensity)
-                    ua->write(fc.address(m_doc), fc.current(intensity), grp);
-                else if (intensity > 0)
-                    ua->write(fc.address(m_doc), fc.current(), grp);
-            }
-        }
-    }
-    break;
-
-    default:
-        if (changed == true)
-        {
-            if (value == 0)
-            {
-                if (function->stopped() == false)
-                    function->stop();
-            }
-            else
-            {
-                if (function->stopped() == true)
-                    function->start(timer);
-                function->adjustIntensity(intensity);
-            }
-        }
-        break;
-    }
-
     m_playbackValueChanged = false;
     m_playbackValueMutex.unlock();
+
+    if (changed == true)
+    {
+        if (value == 0)
+        {
+            if (function->stopped() == false)
+                function->stop();
+        }
+        else
+        {
+            if (function->stopped() == true)
+                function->start(timer);
+            function->adjustIntensity(intensity);
+        }
+    }
 }
 
 /*****************************************************************************

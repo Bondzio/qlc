@@ -619,10 +619,8 @@ void VCSlider::slotPlaybackFunctionRunning(quint32 fid)
 
 void VCSlider::slotPlaybackFunctionStopped(quint32 fid)
 {
-    m_externalMovement = true;
     if (fid == playbackFunction())
         m_slider->setValue(0);
-    m_externalMovement = false;
 }
 
 void VCSlider::slotPlaybackFunctionIntensityChanged(qreal fraction)

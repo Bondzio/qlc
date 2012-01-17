@@ -40,17 +40,14 @@
 #define PROP_HEAD Qt::UserRole + 1
 
 FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* parent)
-    : QDialog(parent)
-    , m_original(grp)
+    : QWidget(parent)
+    , m_grp(grp)
     , m_doc(doc)
 {
     Q_ASSERT(grp != NULL);
     Q_ASSERT(doc != NULL);
 
     setupUi(this);
-
-    m_grp = new FixtureGroup(doc);
-    m_grp->copyFrom(m_original);
 
     m_nameEdit->setText(m_grp->name());
     m_xSpin->setValue(m_grp->size().width());
@@ -67,6 +64,8 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
         m_displayHeadCheck->setChecked(true);
 
+    connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
+            this, SLOT(slotNameEdited(const QString&)));
     connect(m_xSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotXSpinValueChanged(int)));
     connect(m_ySpin, SIGNAL(valueChanged(int)),
@@ -92,31 +91,10 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     m_table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 
     updateTable();
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
-    AppUtil::ensureWidgetIsVisible(this);
 }
 
 FixtureGroupEditor::~FixtureGroupEditor()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-}
-
-void FixtureGroupEditor::accept()
-{
-    Q_ASSERT(m_original != NULL);
-    Q_ASSERT(m_grp != NULL);
-
-    m_grp->setName(m_nameEdit->text());
-
-    m_original->copyFrom(m_grp);
-    delete m_grp;
-
-    QDialog::accept();
 }
 
 void FixtureGroupEditor::updateTable()
@@ -160,7 +138,7 @@ void FixtureGroupEditor::updateTable()
         if (m_grp->displayStyle() & FixtureGroup::DisplayAddress)
             str += QString("A:%1 ").arg(fxi->address() + 1);
         if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
-            str += QString("U:%1").arg(fxi->universe() + 1);
+            str += QString("U:%1 ").arg(fxi->universe() + 1);
         if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
             str += QString("H:%1").arg(head.head + 1);
 
@@ -191,6 +169,11 @@ void FixtureGroupEditor::updateTable()
     }
 
     m_table->setCurrentCell(m_row, m_column);
+}
+
+void FixtureGroupEditor::slotNameEdited(const QString& text)
+{
+    m_grp->setName(text);
 }
 
 void FixtureGroupEditor::slotXSpinValueChanged(int value)
@@ -246,13 +229,8 @@ void FixtureGroupEditor::slotRemoveFixtureClicked()
     if (item == NULL)
         return;
 
-    // In case an empty cell was selected
-    QVariant var = item->data(PROP_FIXTURE);
-    if (var.isValid() == false)
-        return;
-
-    m_grp->resignFixture(var.toUInt());
-    delete item;
+    if (m_grp->resignHead(QLCPoint(m_column, m_row)) == true)
+        delete item;
 }
 
 void FixtureGroupEditor::slotCellActivated(int row, int column)

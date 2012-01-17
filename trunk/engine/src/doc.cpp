@@ -347,6 +347,10 @@ bool Doc::addFixtureGroup(FixtureGroup* grp, quint32 id)
         grp->setId(id);
         m_fixtureGroups[id] = grp;
 
+        /* Patch fixture group change signals thru Doc */
+        connect(grp, SIGNAL(changed(quint32)),
+                this, SLOT(slotFixtureGroupChanged(quint32)));
+
         emit fixtureGroupAdded(id);
         setModified();
 
@@ -399,6 +403,12 @@ quint32 Doc::createFixtureGroupId()
     }
 
     return m_latestFixtureGroupId;
+}
+
+void Doc::slotFixtureGroupChanged(quint32 id)
+{
+    setModified();
+    emit fixtureGroupChanged(id);
 }
 
 /*****************************************************************************

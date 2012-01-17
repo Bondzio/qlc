@@ -249,6 +249,10 @@ signals:
     void fixtureGroupRemoved(quint32 id);
     void fixtureGroupChanged(quint32 id);
 
+private slots:
+    /** Catch fixture group property changes */
+    void slotFixtureGroupChanged(quint32 id);
+
 private:
     /** Create a new fixture group ID */
     quint32 createFixtureGroupId();

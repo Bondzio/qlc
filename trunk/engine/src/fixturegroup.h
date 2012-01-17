@@ -51,6 +51,10 @@ public:
     /** Copy properties from $grp to this */
     void copyFrom(const FixtureGroup* grp);
 
+signals:
+    /** Emitted whenever a fixture group's properties are changed */
+    void changed(quint32 id);
+
 private:
     Doc* doc() const;
 
@@ -116,11 +120,32 @@ public:
     void assignFixture(quint32 id, const QLCPoint& pt = QLCPoint());
 
     /**
+     * Assign a fixture head to a group at the given point. If point is null,
+     * then the fixture will be automatically placed to the next free slot.
+     * If the fixture head is already present in the group, it is moved from its
+     * current position to the new position. If another fixture head occupies the
+     * new point, the two fixture heads will simply switch places.
+     *
+     * @param pt The point to assign to
+     * @param head The fixture head to assign
+     */
+    void assignHead(const QLCPoint& pt, const GroupHead& head);
+
+    /**
      * Resign a fixture, along with all of its heads from a group.
      *
      * @param id Fixture ID to remove
      */
     void resignFixture(quint32 id);
+
+    /**
+     * Remove the head assignment at the given point. If the point doesn't
+     * exist in the group, nothing is done and this returns false.
+     *
+     * @param pt The point to clear
+     * @return true if successful (cleared), otherwise false (no such point)
+     */
+    bool resignHead(const QLCPoint& pt);
 
     /**
      * Switch places with fixture heads at two points a and b.
@@ -147,18 +172,6 @@ public:
 
     /** Get a list of fixtures assigned to the group */
     QList <quint32> fixtureList() const;
-
-    /**
-     * Assign a fixture head to a group at the given point. If point is null,
-     * then the fixture will be automatically placed to the next free slot.
-     * If the fixture head is already present in the group, it is moved from its
-     * current position to the new position. If another fixture head occupies the
-     * new point, the two fixture heads will simply switch places.
-     *
-     * @param pt The point to assign to
-     * @param head The fixture head to assign
-     */
-    void assignHead(const QLCPoint& pt, const GroupHead& head);
 
 private slots:
     /** Listens to Doc fixture removals */

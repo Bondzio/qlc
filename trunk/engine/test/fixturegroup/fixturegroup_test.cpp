@@ -92,30 +92,39 @@ void FixtureGroup_Test::groupHead()
 void FixtureGroup_Test::id()
 {
     FixtureGroup grp(m_doc);
+    QSignalSpy spy(&grp, SIGNAL(changed(quint32)));
     QCOMPARE(grp.id(), FixtureGroup::invalidId());
     grp.setId(69);
     QCOMPARE(grp.id(), quint32(69));
+    QCOMPARE(spy.size(), 0);
     grp.setId(42);
     QCOMPARE(grp.id(), quint32(42));
+    QCOMPARE(spy.size(), 0);
 }
 
 void FixtureGroup_Test::name()
 {
     FixtureGroup grp(m_doc);
+    QSignalSpy spy(&grp, SIGNAL(changed(quint32)));
     QCOMPARE(grp.name(), QString());
     grp.setName("Esko Mörkö");
+    QCOMPARE(spy.size(), 1);
     QCOMPARE(grp.name(), QString("Esko Mörkö"));
     grp.setName("Pertti Pasanen");
+    QCOMPARE(spy.size(), 2);
     QCOMPARE(grp.name(), QString("Pertti Pasanen"));
 }
 
 void FixtureGroup_Test::size()
 {
     FixtureGroup grp(m_doc);
+    QSignalSpy spy(&grp, SIGNAL(changed(quint32)));
     QCOMPARE(grp.size(), QSize());
     grp.setSize(QSize(10, 10));
+    QCOMPARE(spy.size(), 1);
     QCOMPARE(grp.size(), QSize(10, 10));
     grp.setSize(QSize(20, 30));
+    QCOMPARE(spy.size(), 2);
     QCOMPARE(grp.size(), QSize(20, 30));
 }
 
@@ -423,6 +432,56 @@ void FixtureGroup_Test::resignFixture()
     QVERIFY(grp.headList().contains(GroupHead(42, 0)) == true);
     QVERIFY(grp.headHash().contains(QLCPoint(1, 3)) == true);
     QCOMPARE(grp.headHash()[QLCPoint(1, 3)], GroupHead(42, 0));
+}
+
+void FixtureGroup_Test::resignHead()
+{
+    FixtureGroup grp(m_doc);
+    grp.setSize(QSize(4, 4));
+    Fixture* fxi = new Fixture(m_doc);
+    fxi->setChannels(16);
+    m_doc->addFixture(fxi);
+
+    for (quint32 id = 0; id < 16; id++)
+        grp.assignFixture(fxi->id());
+    QCOMPARE(grp.headList().size(), 16);
+
+    QSignalSpy spy(&grp, SIGNAL(changed(quint32)));
+    QCOMPARE(grp.resignHead(QLCPoint(0, 0)), true);
+    QCOMPARE(grp.headList().size(), 15);
+    QCOMPARE(grp.headHash().contains(QLCPoint(0, 0)), false);
+    QCOMPARE(spy.size(), 1);
+
+    QCOMPARE(grp.resignHead(QLCPoint(0, 0)), false);
+    QCOMPARE(grp.headList().size(), 15);
+    QCOMPARE(grp.headHash().contains(QLCPoint(0, 0)), false);
+    QCOMPARE(spy.size(), 1);
+
+    QCOMPARE(grp.resignHead(QLCPoint(15, 0)), false);
+    QCOMPARE(grp.headList().size(), 15);
+    QCOMPARE(grp.headHash().contains(QLCPoint(15, 0)), false);
+    QCOMPARE(grp.headHash().contains(QLCPoint(0, 0)), false);
+    QCOMPARE(spy.size(), 1);
+
+    // Assign the head back to 0, 0
+    grp.assignHead(QLCPoint(0, 0), GroupHead(fxi->id(), 0));
+    QCOMPARE(spy.size(), 2);
+
+    // Verify that head & fixtures work properly
+    for (int x = 0; x < 4; x++)
+    {
+        for (int y = 0; y < 4; y++)
+        {
+            QLCPoint pt(x, y);
+            QCOMPARE(grp.resignHead(pt), true);
+            if (x == 3 && y == 3)
+                QCOMPARE(grp.fixtureList().size(), 0);
+            else
+                QCOMPARE(grp.fixtureList().size(), 1);
+        }
+    }
+
+    QCOMPARE(spy.size(), 18);
 }
 
 void FixtureGroup_Test::fixtureRemoved()

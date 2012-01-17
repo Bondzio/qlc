@@ -22,27 +22,26 @@
 #ifndef FIXTUREGROUPEDITOR_H
 #define FIXTUREGROUPEDITOR_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "ui_fixturegroupeditor.h"
 
 class FixtureGroup;
 class Doc;
 
-class FixtureGroupEditor : public QDialog, public Ui_FixtureGroupEditor
+class FixtureGroupEditor : public QWidget, public Ui_FixtureGroupEditor
 {
     Q_OBJECT
+
 public:
     FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* parent);
     ~FixtureGroupEditor();
-
-public slots:
-    void accept();
 
 private:
     void updateTable();
 
 private slots:
+    void slotNameEdited(const QString& text);
     void slotXSpinValueChanged(int value);
     void slotYSpinValueChanged(int value);
 
@@ -55,11 +54,10 @@ private slots:
     void slotCellChanged(int row, int column);
 
 private:
-    FixtureGroup* m_grp;
-    FixtureGroup* m_original;
-    Doc* m_doc;
-    int m_row;
-    int m_column;
+    FixtureGroup* m_grp; //! The group being edited
+    Doc* m_doc;          //! The QLC engine object
+    int m_row;           //! Currently selected row
+    int m_column;        //! Currently selected column
 };
 
 #endif

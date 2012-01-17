@@ -29,8 +29,8 @@
 #include "doc.h"
 
 class QLCFixtureDefCache;
+class FixtureGroupEditor;
 class QTreeWidgetItem;
-class FixtureConsole;
 class QTextBrowser;
 class QTreeWidget;
 class QTabWidget;
@@ -58,11 +58,11 @@ public:
     static void createAndShow(QWidget* parent, Doc* doc);
     ~FixtureManager();
 
-protected:
+private:
     /** Protected constructor to prevent multiple instances. */
     FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
-protected:
+private:
     /** The singleton FixtureManager instance */
     static FixtureManager* s_instance;
 
@@ -70,9 +70,6 @@ protected:
      * Doc signal handlers
      ********************************************************************/
 public slots:
-    /** Callback for Doc::fixtureAdded() signals */
-    void slotFixtureAdded(quint32 id);
-
     /** Callback for Doc::fixtureRemoved() signals */
     void slotFixtureRemoved(quint32 id);
 
@@ -81,6 +78,9 @@ public slots:
 
     /** Callback that listens to fixture group removals */
     void slotFixtureGroupRemoved(quint32 id);
+
+    /** Callback that listens to fixture group modifications */
+    void slotFixtureGroupChanged(quint32 id);
 
 private:
     Doc* m_doc;
@@ -92,18 +92,21 @@ public:
     /** Update the list of fixtures */
     void updateView();
 
-protected:
+private:
     /** Get a QTreeWidgetItem whose fixture ID is $id */
     QTreeWidgetItem* fixtureItem(quint32 id) const;
+
+    /** Get a QTreeWidgetItem whose group ID is $id */
+    QTreeWidgetItem* groupItem(quint32 id) const;
 
     /** Construct the list view and data view */
     void initDataView();
 
     /** Update a single fixture's data into a QTreeWidgetItem */
-    void updateItem(QTreeWidgetItem* item, Fixture* fxt);
+    void updateFixtureItem(QTreeWidgetItem* item, const Fixture* fxi);
 
-    /** Copy the given function into the given fixture */
-    void copyFunction(Function* function, Fixture* fxt);
+    /** Update a group's data to and under $item */
+    void updateGroupItem(QTreeWidgetItem* item, const FixtureGroup* grp);
 
     /** Display an error message if fixture add fails */
     void addFixtureErrorMessage();
@@ -111,32 +114,37 @@ protected:
     /** Handle single fixture selection */
     void fixtureSelected(quint32 id);
 
-protected slots:
+    /** Handle fixture group selection */
+    void fixtureGroupSelected(FixtureGroup* grp);
+
+    /** Create the text browser for displaying information */
+    void createInfo();
+
+private slots:
     /** Callback for fixture list selection changes */
     void slotSelectionChanged();
 
     /** Callback for mouse double clicks */
     void slotDoubleClicked(QTreeWidgetItem* item);
 
-protected:
+private:
     /** Select a fixture group */
     void selectGroup(quint32 id);
 
     /** Get a CSS style sheet & HTML header for fixture info */
     QString fixtureInfoStyleSheetHeader();
 
-protected:
+private:
     QSplitter* m_splitter;
     QTreeWidget* m_tree;
 
-    QTabWidget* m_tab;
     QTextBrowser* m_info;
-    FixtureConsole* m_console;
+    FixtureGroupEditor* m_groupEditor;
 
     /********************************************************************
      * Menu & Toolbar & Actions
      ********************************************************************/
-protected:
+private:
     /** Construct actions for toolbar & context menu */
     void initActions();
 
@@ -149,13 +157,10 @@ protected:
     /** Edit properties for the fixture represented by $item */
     void editFixtureProperties(QTreeWidgetItem* item);
 
-    /** Edit properties for the fixture group represented by $item */
-    void editGroupProperties(QTreeWidgetItem* item);
-
     /** Count the number of heads in the list of fixture items */
     int headCount(const QList <QTreeWidgetItem*>& items) const;
 
-protected slots:
+private slots:
     void slotAdd();
     void slotRemove();
     void slotProperties();
@@ -165,7 +170,7 @@ protected slots:
     /** Callback for right mouse button clicks over a fixture item */
     void slotContextMenuRequested(const QPoint& pos);
 
-protected:
+private:
     QAction* m_addAction;
     QAction* m_removeAction;
     QAction* m_propertiesAction;

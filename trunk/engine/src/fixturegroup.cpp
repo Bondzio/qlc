@@ -96,6 +96,7 @@ quint32 FixtureGroup::invalidId()
 void FixtureGroup::setName(const QString& name)
 {
     m_name = name;
+    emit changed(this->id());
 }
 
 QString FixtureGroup::name() const
@@ -202,65 +203,6 @@ void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
         assignHead(pt, GroupHead(fxi->id(), i));
 }
 
-void FixtureGroup::resignFixture(quint32 id)
-{
-    foreach (QLCPoint pt, m_heads.keys())
-    {
-        if (m_heads[pt].fxi == id)
-            m_heads.remove(pt);
-    }
-}
-
-void FixtureGroup::swap(const QLCPoint& a, const QLCPoint& b)
-{
-    GroupHead ah;
-    GroupHead bh;
-
-    if (m_heads.contains(a) == true)
-        ah = m_heads[a];
-    if (m_heads.contains(b) == true)
-        bh = m_heads[b];
-
-    if (ah.isValid() == true)
-        m_heads[b] = ah;
-    else
-        m_heads.remove(b);
-
-    if (bh.isValid() == true)
-        m_heads[a] = bh;
-    else
-        m_heads.remove(a);
-}
-
-GroupHead FixtureGroup::head(const QLCPoint& pt) const
-{
-    if (m_heads.contains(pt) == true)
-        return m_heads[pt];
-    else
-        return GroupHead();
-}
-
-QList <GroupHead> FixtureGroup::headList() const
-{
-    return m_heads.values();
-}
-
-QHash <QLCPoint,GroupHead> FixtureGroup::headHash() const
-{
-    return m_heads;
-}
-
-QList <quint32> FixtureGroup::fixtureList() const
-{
-    QList <quint32> list;
-    foreach (GroupHead head, headList())
-    {
-        if (list.contains(head.fxi) == false)
-            list << head.fxi;
-    }
-    return list;
-}
-
 void FixtureGroup::assignHead(const QLCPoint& pt, const GroupHead& head)
 {
     if (m_heads.values().contains(head) == true)
@@ -303,6 +245,85 @@ void FixtureGroup::assignHead(const QLCPoint& pt, const GroupHead& head)
             ymax++;
         }
     }
+
+    emit changed(this->id());
+}
+
+void FixtureGroup::resignFixture(quint32 id)
+{
+    foreach (QLCPoint pt, m_heads.keys())
+    {
+        if (m_heads[pt].fxi == id)
+            m_heads.remove(pt);
+    }
+
+    emit changed(this->id());
+}
+
+bool FixtureGroup::resignHead(const QLCPoint& pt)
+{
+    if (m_heads.contains(pt) == true)
+    {
+        m_heads.remove(pt);
+        emit changed(this->id());
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void FixtureGroup::swap(const QLCPoint& a, const QLCPoint& b)
+{
+    GroupHead ah;
+    GroupHead bh;
+
+    if (m_heads.contains(a) == true)
+        ah = m_heads[a];
+    if (m_heads.contains(b) == true)
+        bh = m_heads[b];
+
+    if (ah.isValid() == true)
+        m_heads[b] = ah;
+    else
+        m_heads.remove(b);
+
+    if (bh.isValid() == true)
+        m_heads[a] = bh;
+    else
+        m_heads.remove(a);
+
+    emit changed(this->id());
+}
+
+GroupHead FixtureGroup::head(const QLCPoint& pt) const
+{
+    if (m_heads.contains(pt) == true)
+        return m_heads[pt];
+    else
+        return GroupHead();
+}
+
+QList <GroupHead> FixtureGroup::headList() const
+{
+    return m_heads.values();
+}
+
+QHash <QLCPoint,GroupHead> FixtureGroup::headHash() const
+{
+    return m_heads;
+}
+
+QList <quint32> FixtureGroup::fixtureList() const
+{
+    QList <quint32> list;
+    foreach (GroupHead head, headList())
+    {
+        if (list.contains(head.fxi) == false)
+            list << head.fxi;
+    }
+    return list;
 }
 
 void FixtureGroup::slotFixtureRemoved(quint32 id)
@@ -318,6 +339,7 @@ void FixtureGroup::slotFixtureRemoved(quint32 id)
 void FixtureGroup::setSize(const QSize& sz)
 {
     m_size = sz;
+    emit changed(this->id());
 }
 
 QSize FixtureGroup::size() const

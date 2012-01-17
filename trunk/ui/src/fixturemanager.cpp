@@ -28,7 +28,6 @@
 #include <QScrollArea>
 #include <QMessageBox>
 #include <QToolButton>
-#include <QTabWidget>
 #include <QSplitter>
 #include <QMdiArea>
 #include <QToolBar>
@@ -46,7 +45,6 @@
 #include "qlcfile.h"
 
 #include "fixturegroupeditor.h"
-#include "fixtureconsole.h"
 #include "fixturemanager.h"
 #include "universearray.h"
 #include "mastertimer.h"
@@ -69,14 +67,6 @@
 #define KColumnUniverse 1
 #define KColumnAddress  2
 
-// Tab widget tabs
-#define KTabInformation 0
-#define KTabConsole     1
-
-// Default window size
-#define KDefaultWidth  600
-#define KDefaultHeight 300
-
 FixtureManager* FixtureManager::s_instance = NULL;
 
 /*****************************************************************************
@@ -86,6 +76,17 @@ FixtureManager* FixtureManager::s_instance = NULL;
 FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
+    , m_splitter(NULL)
+    , m_tree(NULL)
+    , m_info(NULL)
+    , m_groupEditor(NULL)
+    , m_addAction(NULL)
+    , m_removeAction(NULL)
+    , m_propertiesAction(NULL)
+    , m_groupAction(NULL)
+    , m_unGroupAction(NULL)
+    , m_newGroupAction(NULL)
+    , m_groupMenu(NULL)
 {
     Q_ASSERT(doc != NULL);
 
@@ -93,18 +94,12 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     layout()->setMargin(1);
     layout()->setSpacing(1);
 
-    m_console = NULL;
-    m_groupMenu = NULL;
-
     initActions();
     initToolBar();
     initDataView();
     updateView();
 
     /* Connect fixture list change signals from the new document object */
-    connect(m_doc, SIGNAL(fixtureAdded(quint32)),
-            this, SLOT(slotFixtureAdded(quint32)));
-
     connect(m_doc, SIGNAL(fixtureRemoved(quint32)),
             this, SLOT(slotFixtureRemoved(quint32)));
 
@@ -113,6 +108,9 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
 
     connect(m_doc, SIGNAL(fixtureGroupRemoved(quint32)),
             this, SLOT(slotFixtureGroupRemoved(quint32)));
+
+    connect(m_doc, SIGNAL(fixtureGroupChanged(quint32)),
+            this, SLOT(slotFixtureGroupChanged(quint32)));
 
     slotModeChanged(m_doc->mode());
 }
@@ -153,12 +151,6 @@ void FixtureManager::createAndShow(QWidget* parent, Doc* doc)
 /*****************************************************************************
  * Doc signal handlers
  *****************************************************************************/
-
-void FixtureManager::slotFixtureAdded(quint32 id)
-{
-    Q_UNUSED(id);
-    // Don't do anything here. Groups go wacko.
-}
 
 void FixtureManager::slotFixtureRemoved(quint32 id)
 {
@@ -214,10 +206,7 @@ void FixtureManager::slotModeChanged(Doc::Mode mode)
             // Group selected
             m_addAction->setEnabled(true);
             m_removeAction->setEnabled(true);
-            if (selected == 1)
-                m_propertiesAction->setEnabled(true);
-            else
-                m_propertiesAction->setEnabled(false);
+            m_propertiesAction->setEnabled(false);
             m_groupAction->setEnabled(false);
             m_unGroupAction->setEnabled(false);
         }
@@ -253,6 +242,17 @@ void FixtureManager::slotFixtureGroupRemoved(quint32 id)
     }
 
     updateGroupMenu();
+}
+
+void FixtureManager::slotFixtureGroupChanged(quint32 id)
+{
+    QTreeWidgetItem* item = groupItem(id);
+    if (item == NULL)
+        return;
+
+    FixtureGroup* grp = m_doc->fixtureGroup(id);
+    Q_ASSERT(grp != NULL);
+    updateGroupItem(item, grp);
 }
 
 /*****************************************************************************
@@ -291,13 +291,8 @@ void FixtureManager::initDataView()
     connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(slotContextMenuRequested(const QPoint&)));
 
-    /* Create a tab widget to the right part of the splitter */
-    m_tab = new QTabWidget(this);
-    m_splitter->addWidget(m_tab);
-
     /* Create the text view */
-    m_info = new QTextBrowser(this);
-    m_tab->addTab(m_info, tr("Information"));
+    createInfo();
 
     m_splitter->setStretchFactor(0, 1);
     m_splitter->setStretchFactor(1, 0);
@@ -324,30 +319,23 @@ void FixtureManager::updateView()
     // Clear the view
     m_tree->clear();
 
+    // Insert known fixture groups and their children
     foreach (FixtureGroup* grp, m_doc->fixtureGroups())
     {
         QTreeWidgetItem* grpItem = new QTreeWidgetItem(m_tree);
-        grpItem->setText(KColumnName, grp->name());
-        grpItem->setData(KColumnName, PROP_GROUP, grp->id());
-
-        foreach (quint32 id, grp->fixtureList())
-        {
-            QTreeWidgetItem* item = new QTreeWidgetItem(grpItem);
-            updateItem(item, m_doc->fixture(id));
-        }
+        updateGroupItem(grpItem, grp);
     }
 
+    // Insert the "All fixtures group"
     QTreeWidgetItem* grpItem = new QTreeWidgetItem(m_tree);
     grpItem->setText(KColumnName, tr("All fixtures"));
 
-    // Add all fixtures
+    // Add all fixtures under "All fixture group"
     foreach (Fixture* fixture, m_doc->fixtures())
     {
         Q_ASSERT(fixture != NULL);
-
-        // Update fixture information to the item
         QTreeWidgetItem* item = new QTreeWidgetItem(grpItem);
-        updateItem(item, fixture);
+        updateFixtureItem(item, fixture);
     }
 
     // Reopen groups that were open before update
@@ -381,7 +369,22 @@ QTreeWidgetItem* FixtureManager::fixtureItem(quint32 id) const
     return NULL;
 }
 
-void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
+QTreeWidgetItem* FixtureManager::groupItem(quint32 id) const
+{
+    QTreeWidgetItemIterator it(m_tree);
+    while (*it != NULL)
+    {
+        QTreeWidgetItem* item(*it);
+        QVariant var = item->data(KColumnName, PROP_GROUP);
+        if (var.isValid() == true && var.toUInt() == id)
+            return item;
+        ++it;
+    }
+
+    return NULL;
+}
+
+void FixtureManager::updateFixtureItem(QTreeWidgetItem* item, const Fixture* fxi)
 {
     QString s;
 
@@ -403,39 +406,90 @@ void FixtureManager::updateItem(QTreeWidgetItem* item, Fixture* fxi)
     item->setData(KColumnName, PROP_FIXTURE, fxi->id());
 }
 
+void FixtureManager::updateGroupItem(QTreeWidgetItem* item, const FixtureGroup* grp)
+{
+    Q_ASSERT(item != NULL);
+    Q_ASSERT(grp != NULL);
+
+    item->setText(KColumnName, grp->name());
+    item->setData(KColumnName, PROP_GROUP, grp->id());
+
+    // This should be a safe check because simultaneous add/removal is not possible,
+    // which could result in changes in fixtures but with the same fixture count.
+    if (item->childCount() != grp->fixtureList().size())
+    {
+        // Remove existing children
+        while (item->childCount() > 0)
+            delete item->child(0);
+
+        // Add group's children
+        foreach (quint32 id, grp->fixtureList())
+        {
+            QTreeWidgetItem* grpItem = new QTreeWidgetItem(item);
+            updateFixtureItem(grpItem, m_doc->fixture(id));
+        }
+    }
+}
+
 void FixtureManager::fixtureSelected(quint32 id)
 {
     Fixture* fxi = m_doc->fixture(id);
     if (fxi == NULL)
         return;
 
+    if (m_info == NULL)
+        createInfo();
+
     m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
                     .arg(fixtureInfoStyleSheetHeader())
                     .arg(fxi->status()));
 
-    /* Mark the current tab widget page */
-    int page = m_tab->currentIndex();
-
-    /* Delete existing scroll area and console */
-    delete m_console;
-    delete m_tab->widget(KTabConsole);
-
-    /* Create a new console for the selected fixture */
-    m_console = new FixtureConsole(this, m_doc);
-    m_console->setFixture(id);
-    m_console->setChannelsCheckable(false);
-
-    /* Put the console inside a scroll area */
-    QScrollArea* scrollArea = new QScrollArea(this);
-    scrollArea->setWidget(m_console);
-    scrollArea->setWidgetResizable(true);
-    m_tab->addTab(scrollArea, tr("Console"));
-
-    /* Recall the same tab widget page */
-    m_tab->setCurrentIndex(page);
-
     // Enable/disable actions
     slotModeChanged(m_doc->mode());
+}
+
+void FixtureManager::fixtureGroupSelected(FixtureGroup* grp)
+{
+    QByteArray state = m_splitter->saveState();
+
+    if (m_info != NULL)
+    {
+        delete m_info;
+        m_info = NULL;
+    }
+
+    if (m_groupEditor != NULL)
+    {
+        delete m_groupEditor;
+        m_groupEditor = NULL;
+    }
+
+    m_groupEditor = new FixtureGroupEditor(grp, m_doc, this);
+    m_splitter->addWidget(m_groupEditor);
+
+    m_splitter->restoreState(state);
+}
+
+void FixtureManager::createInfo()
+{
+    QByteArray state = m_splitter->saveState();
+
+    if (m_info != NULL)
+    {
+        delete m_info;
+        m_info = NULL;
+    }
+
+    if (m_groupEditor != NULL)
+    {
+        delete m_groupEditor;
+        m_groupEditor = NULL;
+    }
+
+    m_info = new QTextBrowser(this);
+    m_splitter->addWidget(m_info);
+
+    m_splitter->restoreState(state);
 }
 
 void FixtureManager::slotSelectionChanged()
@@ -458,31 +512,14 @@ void FixtureManager::slotSelectionChanged()
         {
             FixtureGroup* grp = m_doc->fixtureGroup(grpvar.toUInt());
             Q_ASSERT(grp != NULL);
-
-            m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
-                            .arg(fixtureInfoStyleSheetHeader())
-                            .arg(grp->infoText()));
-
-            // Selected a group
-            if (m_console != NULL)
-            {
-                delete m_console;
-                m_console = NULL;
-                m_tab->removeTab(KTabConsole);
-            }
+            fixtureGroupSelected(grp);
         }
         else
         {
             QString info("<HTML><BODY><H1>%1</H1><P>%2</P></BODY></HTML>");
+            if (m_info == NULL)
+                createInfo();
             m_info->setText(info.arg(tr("All fixtures")).arg(tr("This group contains all fixtures.")));
-
-            // Selected "All fixtures" group
-            if (m_console != NULL)
-            {
-                delete m_console;
-                m_console = NULL;
-                m_tab->removeTab(KTabConsole);
-            }
         }
     }
     else
@@ -522,14 +559,9 @@ void FixtureManager::slotSelectionChanged()
             }
         }
 
+        if (m_info == NULL)
+            createInfo();
         m_info->setText(info);
-
-        if (m_console != NULL)
-        {
-            delete m_console;
-            m_console = NULL;
-            m_tab->removeTab(KTabConsole);
-        }
     }
 
     // Enable/disable actions
@@ -894,30 +926,8 @@ void FixtureManager::editFixtureProperties(QTreeWidgetItem* item)
             fxi->setChannels(af.channels());
         }
 
-        updateItem(item, fxi);
+        updateFixtureItem(item, fxi);
         slotSelectionChanged();
-    }
-}
-
-void FixtureManager::editGroupProperties(QTreeWidgetItem* item)
-{
-    Q_ASSERT(item != NULL);
-
-    QVariant var = item->data(KColumnName, PROP_GROUP);
-    if (var.isValid() == false)
-        return;
-
-    quint32 id = var.toUInt();
-    FixtureGroup* grp = m_doc->fixtureGroup(id);
-    if (grp == NULL)
-        return;
-
-    FixtureGroupEditor fge(grp, m_doc, this);
-    if (fge.exec() == QDialog::Accepted)
-    {
-        updateView();
-        selectGroup(id);
-        m_doc->setModified();
     }
 }
 
@@ -949,15 +959,7 @@ void FixtureManager::slotProperties()
 
     QVariant var = item->data(KColumnName, PROP_FIXTURE);
     if (var.isValid() == true)
-    {
         editFixtureProperties(item);
-    }
-    else
-    {
-        var = item->data(KColumnName, PROP_GROUP);
-        if (var.isValid() == true)
-            editGroupProperties(item);
-    }
 }
 
 void FixtureManager::slotUnGroup()

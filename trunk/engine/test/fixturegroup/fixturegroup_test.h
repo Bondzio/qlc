@@ -42,6 +42,7 @@ private slots:
     void assignFixtureNoSize();
     void assignFixture4x2();
     void resignFixture();
+    void resignHead();
     void fixtureRemoved();
     void swap();
     void copy();

@@ -4,6 +4,7 @@ qlc (3.2.0-4) stable; urgency=low
   * Improved Peperoni plugin's compatibility issues with legacy devices
   * EFX retains pattern proportions when scaling & rotating
   * Fixed line reverse issue in EFX
+  * Fixed a bug in the communication between a playback-mode VCSlider and VCButton
   * New fixture definitions
   * New input profile for Behringer LC2412
 

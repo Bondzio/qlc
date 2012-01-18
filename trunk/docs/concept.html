@@ -29,38 +29,6 @@ have been set to them manually. When blackout is turned off, <U>current
 values</U> of all channels are set to each universe.
 </P>
 
-<A NAME="Buses" HREF="#Buses"><H3>Buses</H3></A>
-
-<P>
-Buses provide different speed settings to the various <A HREF="#Functions">
-functions</A> that the user creates. One bus may control the <I>fading</i>
-speed for a group of scenes, another the time it takes for an <A HREF="#EFX">
-EFX</A> function to complete a full circle, etc..
-</P>
-
-<P>
-Functions have speed buses that are set by users. A maximum of 32 different
-speed settings called buses, are possible. One function can have exactly one
-bus and many functions can share one bus. The speed setting of each bus can be
-changed at any time with a resolution of 1/64th of second. Any of the buses can
-be assigned in <A HREF="#Modes">design mode</A> to any function. The only
-exception to this is made by <A HREF="#Collection">collection</A> functions,
-which don't have a speed setting at all.
-</P>
-
-<P>
-Each bus can have a name set by the user can for convenience and to help in
-identification. The name of the first bus is, "Fade" (unless you have already
-changed it) and it is assigned to all newly-created <A HREF="#Scene">Scenes</A>
-and <A HREF="#EFX">EFXs</A>. The second bus, named "Hold" by default, is assigned
-to all newly-created Chasers.
-</P>
-
-<P>
-Buses can also send special "tap" signals, that can be used, for example, to
-manually synchronize chaser stepping to match tempo.
-</P>
-
 <A NAME="Capabilities" HREF="#Capabilities"><H3>Capabilities</H3></A>
 
 <P>
@@ -84,7 +52,7 @@ three properties:
 A chaser <A HREF="#Functions">function</A> encapsulates multiple scenes that are
 run in serial, one after the other, when the chaser function is started. The
 next function is run only after the previous has finished. Any number of
-<A HREF="#Scene">scenes</A> can be inserted to a chaser.
+<A HREF="#Functions">functions</A> can be inserted to a chaser.
 </P>
 
 <P>
@@ -96,21 +64,16 @@ be stopped manually.
 </P>
 
 <P>
-<A HREF="#Buses">Bus</A> number 2 (Default Hold) is assigned to all
-newly-created chasers by default. The bus value specifies step duration for
-chasers. If the speed setting of a chaser's members scene is higher (slower)
-than the chaser's speed setting, the scene won't have enough time to fade to
-its target value before the chaser triggers the next step. Respectively, if
-a member scene's speed setting is lower (faster) than the chaser's speed
-setting, the chaser will wait after the scene has finished before it triggers
-the next step.
+As of version 3.3.0, each chaser has their own speed settings:
+<LI><B>Fade In:</B> Overrides the fade in speed of all steps</LI>
+<LI><B>Fade Out:</B> Overrides the fade out speed of all steps</LI>
+<LI><B>Duration:</B> The duration of the current step</LI>
 </P>
 
 <P>
 Copies of chaser functions can be created with the <A HREF="functionmanager.html">
 Function Manager</A>. The scenes inside a chaser are not duplicated when a chaser
-is copied. Only run order, direction, bus and the order of scenes are copied to the
-new chaser.
+is copied. Only the order and direction are copied to the new one.
 </P>
 
 <A NAME="Collection" HREF="#Collection"><H3>Collection</H3></A>
@@ -123,8 +86,8 @@ only once and a collection cannot be a direct member of itself.
 </P>
 
 <P>
-<A HREF="#Buses">Speed setting</A> has no effect on collections. Each member
-function's speed is set individually thru their own buses.
+Collections have no speed settings. Each member function's speed is set individually
+thru their own editors.
 </P>
 
 <P>
@@ -160,31 +123,20 @@ part in an EFX function.</B>
 </P>
 
 <P>
-<A HREF="#Buses">Bus</A> number 1 (Default Fade) is assigned to all newly
-created EFX's by default. The bus value is used as the overall time for the EFX
-algorithm to complete one cycle. In other words, with a circle algorithm, the
-bus value is understood as the time available to complete a full 360 degree
-circle.
+As of version 3.3.0, each EFX has their own speed settings:
+<LI><B>Fade In:</B> The time it takes for the fixtures in the EFX to fade their intensity channels up</LI>
+<LI><B>Fade Out:</B> The time it takes for the fixtures in the EFX to fade their intensity channels back to zero</LI>
+<LI><B>Duration:</B> The duration of one full round using the selected pattern</LI>
 </P>
 
 <P>
-EFX functions can have special start and stop <A HREF="#Scene">scenes</A>, that
-are run just before the EFX is started and immediately after the EFX stops.
-These scenes are not, however, faded as would happen with a normal scene.
-Instead, their values are set immediately, as if their speed setting was zero.
+Fixtures taking part in an EFX function can be set to follow the algorithm in certain order:
 </P>
-
-<P>
-Fixtures taking part in an EFX function can be set to follow the algorithm
-either in parallel or serial:
-</P>
-<UL>
-<LI>Parallel: all fixtures follow the same pattern synchronously</LI>
-<LI>Serial: fixtures start following the pattern one after the other, with a
-little in-between delay, creating a more lively, wave-like effect. To see the
-effect, you need at least two similar moving fixtures, preferably four.</LI>
-</UL>
-
+<LI><B>Parallel:</B> all fixtures follow the same pattern synchronously</LI>
+<LI><B>Serial:</B> fixtures start following the pattern one after the other, with a
+little delay between each of them.</LI>
+<LI><B>Asymmetric:</B> all fixtures start moving simultaneously, but with similar offset as
+in the Serial mode.</LI>
 
 <P>
 EFX functions' direction can be reversed for all fixtures at once or on a
@@ -252,6 +204,16 @@ dimmer racks. Users can create instances of these generic dimmer entities just b
 defining the number of channels each one of them should have.
 </P>
 
+<A NAME="FixtureGroup" HREF="#FixtureGroup"><H3>Fixture Group</H3></A>
+
+<P>
+A fixture group is, as the name says, a group of <A HREF="concept.html#Fixtures">fixtures</A>.
+They also define (in a rather basic level) the actual physical, real world arrangement of
+these fixtures. This knowledge can be used for example in the RGB Matrix to produce a
+wall of RGB-mixable lights that can act as individual pixels in a graphic pattern or
+scrolling text.
+</P>
+
 <A NAME="FixtureMode" HREF="#FixtureMode"><H3>Fixture Mode</H3></A>
 
 <P>
@@ -278,6 +240,7 @@ The function types are:
 <LI><A HREF="#Scene">Scene</A></LI>
 <LI><A HREF="#Chaser">Chaser</A></LI>
 <LI><A HREF="#EFX">EFX</A></LI>
+<LI><A HREF="#RGBMatrix">RGB Matrix</A></LI>
 <LI><A HREF="#Collection">Collection</A></LI>
 </UL>
 
@@ -285,6 +248,13 @@ The function types are:
 Each function can be named and although the name is not used to uniquely identify
 individual functions, users are encouraged to name their functions in some systematic
 and concise way to help identify each of them. For your own comfort.
+</P>
+
+<P>
+As of version 3.3.0, each function has their own speed settings:
+<LI><B>Fade In:</B> The time used to fade HTP (in Scenes also LTP) channels to their target value</LI>
+<LI><B>Fade Out:</B> The time used to fade HTP/intensity channels back to zero</LI>
+<LI><B>Duration:</B> The duration of the current step (not applicable on Scenes)</LI>
 </P>
 
 <A NAME="GrandMaster" HREF="#GrandMaster"><H3>Grand Master</H3></A>
@@ -308,6 +278,31 @@ affected channels being reduced to 50% of their <B>current</B> values.</LI>
 the Grand Master slider. For example, Grand Master at 127 will result in all
 affected channel's maximum values being limited at exactly 127.</LI>
 </UL>
+
+<A NAME="Head" HREF="#Head"><H3>Head</H3></A>
+
+<P>
+A head represents an individual light output device in a fixture. Usually, a single fixture
+contains exactly one output, like the lens, the bulb, or a set of LEDs. There is, however,
+an increasing amount of fixtures in the market that are treated as a single fixture, but
+they have multiple light output devices, i.e. heads.
+</P>
+
+<P>
+For example, you might have a RGB LED bar fixture that is packed into a single chassis, and
+as such it appears as a single fixture with one DMX input and one DMX output, but that
+actually comprises of four separate RGB LED "fixtures". These separate fixtures are treated
+in QLC as heads; they share some common properties with their sibling heads, they
+can be controlled individually, but they might also have a master intensity control that
+controls the light output of all the heads together.
+</P>
+
+<P>
+Each head belongs to a <A HREF="concept.html#FixtureMode">Fixture Mode</A> because in one
+mode, a fixture might provide enough channels to control each of its heads individually
+while in another mode, only a handful of channels might be provided for controlling all
+heads simultaneously.
+</P>
 
 <A NAME="HTP" HREF="#HTP"><H3>HTP (Highest Takes Precedence)</H3></A>
 
@@ -395,18 +390,35 @@ dubbed <u>output</u> to separate it from QLC's internal universes. You could
 think of them as individual XLR output connectors in your DMX hardware.
 </P>
 
+<A NAME="RGBMatrix" HREF="#RGBMatrix"><H3>RGB Matrix</H3></A>
+
+<P>
+An RGB matrix <A HREF="#Functions">function</A> can be used to impose simple graphics
+and text on a matrix (a grid or a wall) of RGB and/or monochrome fixture <A HREF="#Head">heads</A>.
+The RGB matrix function has been designed to be extendable with <A HREF="concept.html#RGBScript">scripts</A>
+that can be written by users.
+</P>
+
+<A NAME="RGBScript" HREF="#RGBScript"><H3>RGB Script</H3></A>
+
+<P>
+An RGB script is a program written in <A HREF="http://www.ecmascript.org/">ECMAScript</A>
+(also known as JavaScript) that produces the necessary image data for <A HREF="#RGBMatrix">RGB Matrix</A>
+functions. Learn more from the <A HREF="rgbscriptapi.html">RGB Script API</A> page.
+</P>
+
 <A NAME="Scene" HREF="#Scene"><H3>Scene</H3></A>
 
 <P>
 A scene <A HREF="#Functions">function</A> encapsulates the values of selected
 channels owned by one or more fixture instances. When a scene is started, the
-duration it takes for its channels to reach their target values depends on the
-function's <A HREF="#Buses">speed setting</A>. Bus number 1 (Default Fade) is
-assigned to all newly created scenes by default. If the bus' value is 0 seconds,
-the scene values are set immediately and no fading occurs. Otherwise the values
-are always faded from what they currently are, to the target values defined in
-the scene. Channels that are not enabled in the scene will not be touched at
-all by the function.
+time it takes for its channels to reach their target values depends on the
+function's speed settings:
+
+<P>
+As of version 3.3.0, each function has their own speed settings:
+<LI><B>Fade In:</B> The time used to fade all channels to their target values, from whatever value they had</LI>
+<LI><B>Fade Out:</B> The time used to fade HTP/intensity channels back to zero. Note that ONLY <A HREF="#HTP">HTP</A> channels are affected by this setting.</LI>
 </P>
 
 <P>

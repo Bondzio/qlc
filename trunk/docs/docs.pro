@@ -6,7 +6,6 @@ docs.path = $$INSTALLROOT/$$DOCSDIR/html
 docs.files = \
              addeditfixtures.html \
              addvcbuttonmatrix.html \
-             busmanager.html \
              capabilityeditor.html \
              capabilitywizard.html \
              channeleditor.html \
@@ -18,10 +17,12 @@ docs.files = \
              enttecdmxusboutput.html \
              fixturedefinitioneditor.html \
              fixtureeditor.html \
+             fixturegroupeditor.html \
              fixturemanager.html \
              fixturemonitor.html \
              functionmanager.html \
              functionwizard.html \
+             headeditor.html \
              howto-add-fixtures.html \
              howto-input-devices.html \
              howto-input-mapping.html \

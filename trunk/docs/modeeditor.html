@@ -10,8 +10,8 @@
 <P>
 The Mode Editor is used to create and edit <A HREF="concept.html#FixtureMode">
 modes</A> by picking sets of <B>Channels</B> in certain order (as defined by
-the fixture's manufacturer). Each editor window is separated in two tabs:
-Channels and Physical.
+the fixture's manufacturer). Each editor window is divided into three tabs:
+Channels, Heads and Physical.
 </P>
 
 <H3>Controls - Channels Tab</H3>
@@ -41,7 +41,7 @@ has been configured in that particular mode.
  </TR>
  <TR>
   <TD>
-   <IMG SRC="edit_add.png"/>
+   <IMG SRC="qrc://edit_add.png"/>
   </TD>
   <TD>
    Add channels from the fixture's channel collection to the mode.
@@ -51,7 +51,7 @@ has been configured in that particular mode.
  </TR>
  <TR>
   <TD>
-   <IMG SRC="edit_remove.png"/>
+   <IMG SRC="qrc://edit_remove.png"/>
   </TD>
   <TD>
    Remove the selected channels from the mode. Other modes' channel selections
@@ -72,6 +72,78 @@ has been configured in that particular mode.
   </TD>
   <TD>
    Lower the selected channel down by one.
+  </TD>
+ </TR>
+</TABLE>
+
+<H3>Controls - Heads Tab</H3>
+
+<P>
+In the Heads tab you can define multiple <A HREF="concept.html#Head">heads</A> to a
+single fixture, so that QLC knows to treat each of them individually in certain
+situations (such as <A HREF="concept.html#FixtureGroup">Fixture Groups</A>). If a fixture
+contains only one head when it's configured to use the currently edited mode (i.e. all
+of the mode's channels control one head at a time) there is no need to define the head. If,
+however, the fixture has multiple heads that you wish to be able to control, you must define
+each head here.
+</P>
+
+<P>
+Heads don't have names as they can be thought of as simple "sub-fixtures" inside a fixture.
+Instead, they are automatically given index numbers. Heads' ordering should follow the
+physical fixture's configuration as closely as possible. So, if the heads go 1, 2, 3, 4 in
+the real world, don't define them as 4, 2, 1, 3 or something likewise annoying.
+</P>
+
+<TABLE BORDER="1">
+ <TR>
+  <TD>
+   <B>Head list</B>
+  </TD>
+  <TD>
+   Displays the list of heads currently defined for the fixture.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc://edit_add.png"/>
+  </TD>
+  <TD>
+   Add a new head to the fixture, using the <A HREF="headeditor.html">Head Editor</A>.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc://edit_remove.png"/>
+  </TD>
+  <TD>
+   Remove the selected head from the fixture.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc://edit.png"/>
+  </TD>
+  <TD>
+   Edit the selected head using the <A HREF="headeditor.html">Head Editor</A>.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc://up.png"/>
+  </TD>
+  <TD>
+   Raise the selected head upwards by one. You can use this to change the order of the heads
+   within the fixture.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc://down.png"/>
+  </TD>
+  <TD>
+   Lower the selected head downwards by one. You can use this to change the order of the
+   heads within the fixture.
   </TD>
  </TR>
 </TABLE>

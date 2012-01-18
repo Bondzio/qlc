@@ -53,34 +53,12 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     m_xSpin->setValue(m_grp->size().width());
     m_ySpin->setValue(m_grp->size().height());
 
-    if (m_grp->displayStyle() & FixtureGroup::DisplayIcon)
-        m_displayIconCheck->setChecked(true);
-    if (m_grp->displayStyle() & FixtureGroup::DisplayName)
-        m_displayNameCheck->setChecked(true);
-    if (m_grp->displayStyle() & FixtureGroup::DisplayAddress)
-        m_displayAddressCheck->setChecked(true);
-    if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
-        m_displayUniverseCheck->setChecked(true);
-    if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
-        m_displayHeadCheck->setChecked(true);
-
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
     connect(m_xSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotXSpinValueChanged(int)));
     connect(m_ySpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotYSpinValueChanged(int)));
-
-    connect(m_displayIconCheck, SIGNAL(clicked()),
-            this, SLOT(slotDisplayStyleChecked()));
-    connect(m_displayNameCheck, SIGNAL(clicked()),
-            this, SLOT(slotDisplayStyleChecked()));
-    connect(m_displayAddressCheck, SIGNAL(clicked()),
-            this, SLOT(slotDisplayStyleChecked()));
-    connect(m_displayUniverseCheck, SIGNAL(clicked()),
-            this, SLOT(slotDisplayStyleChecked()));
-    connect(m_displayHeadCheck, SIGNAL(clicked()),
-            this, SLOT(slotDisplayStyleChecked()));
 
     connect(m_addButton, SIGNAL(clicked()),
             this, SLOT(slotAddFixtureClicked()));
@@ -125,22 +103,11 @@ void FixtureGroupEditor::updateTable()
         if (fxi == NULL)
             continue;
 
-        QString str;
-        QIcon icon;
-        if (m_grp->displayStyle() & FixtureGroup::DisplayIcon)
-            icon = QIcon(":/fixture.png");
-        if (m_grp->displayStyle() & FixtureGroup::DisplayName)
-            str += fxi->name();
-        if (((m_grp->displayStyle() & FixtureGroup::DisplayAddress)
-             || (m_grp->displayStyle() & FixtureGroup::DisplayUniverse))
-            && (m_grp->displayStyle() & FixtureGroup::DisplayName))
-            str += "\n";
-        if (m_grp->displayStyle() & FixtureGroup::DisplayAddress)
-            str += QString("A:%1 ").arg(fxi->address() + 1);
-        if (m_grp->displayStyle() & FixtureGroup::DisplayUniverse)
-            str += QString("U:%1 ").arg(fxi->universe() + 1);
-        if (m_grp->displayStyle() & FixtureGroup::DisplayHead)
-            str += QString("H:%1").arg(head.head + 1);
+        QIcon icon = QIcon(":/fixture.png");
+        QString str = QString("%1 H:%2\nA:%3 U:%4").arg(fxi->name())
+                                               .arg(head.head + 1)
+                                               .arg(fxi->address() + 1)
+                                               .arg(fxi->universe() + 1);
 
         QTableWidgetItem* item = new QTableWidgetItem(icon, str);
         QFont font = item->font();
@@ -185,23 +152,6 @@ void FixtureGroupEditor::slotXSpinValueChanged(int value)
 void FixtureGroupEditor::slotYSpinValueChanged(int value)
 {
     m_grp->setSize(QSize(m_grp->size().width(), value));
-    updateTable();
-}
-
-void FixtureGroupEditor::slotDisplayStyleChecked()
-{
-    int style = 0;
-    if (m_displayIconCheck->isChecked() == true)
-        style |= FixtureGroup::DisplayIcon;
-    if (m_displayNameCheck->isChecked() == true)
-        style |= FixtureGroup::DisplayName;
-    if (m_displayAddressCheck->isChecked() == true)
-        style |= FixtureGroup::DisplayAddress;
-    if (m_displayUniverseCheck->isChecked() == true)
-        style |= FixtureGroup::DisplayUniverse;
-    if (m_displayHeadCheck->isChecked() == true)
-        style |= FixtureGroup::DisplayHead;
-    m_grp->setDisplayStyle(style);
     updateTable();
 }
 

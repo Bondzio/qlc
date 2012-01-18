@@ -38,7 +38,6 @@ private slots:
     void id();
     void name();
     void size();
-    void displayStyle();
     void assignFixtureNoSize();
     void assignFixture4x2();
     void resignFixture();
@@ -46,7 +45,6 @@ private slots:
     void fixtureRemoved();
     void swap();
     void copy();
-    void infoText();
     void loadWrongID();
     void loadWrongHeadAttributes();
     void load();

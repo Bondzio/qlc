@@ -128,23 +128,6 @@ void FixtureGroup_Test::size()
     QCOMPARE(grp.size(), QSize(20, 30));
 }
 
-void FixtureGroup_Test::displayStyle()
-{
-    FixtureGroup grp(m_doc);
-    QCOMPARE(grp.displayStyle(), FixtureGroup::DisplayIcon | FixtureGroup::DisplayAddress | FixtureGroup::DisplayHead);
-
-    grp.setDisplayStyle(FixtureGroup::DisplayName);
-    QCOMPARE(grp.displayStyle(), int(FixtureGroup::DisplayName));
-
-    grp.setDisplayStyle(FixtureGroup::DisplayName | FixtureGroup::DisplayIcon);
-    QCOMPARE(grp.displayStyle(), FixtureGroup::DisplayName | FixtureGroup::DisplayIcon);
-
-    grp.setDisplayStyle(FixtureGroup::DisplayName | FixtureGroup::DisplayIcon |
-                        FixtureGroup::DisplayAddress | FixtureGroup::DisplayUniverse);
-    QCOMPARE(grp.displayStyle(), FixtureGroup::DisplayName | FixtureGroup::DisplayIcon |
-                                 FixtureGroup::DisplayAddress | FixtureGroup::DisplayUniverse);
-}
-
 void FixtureGroup_Test::assignFixtureNoSize()
 {
     QLCPoint pt;
@@ -578,24 +561,6 @@ void FixtureGroup_Test::copy()
         QVERIFY(grp2.fixtureList().contains(id) == true);
 }
 
-void FixtureGroup_Test::infoText()
-{
-    FixtureGroup grp(m_doc);
-    grp.setDisplayStyle((FixtureGroup::DisplayStyle) 0xFFFFFFFF);
-    grp.setSize(QSize(4, 4));
-    for (quint32 id = 0; id < 16; id++)
-    {
-        Fixture* fxi = new Fixture(m_doc);
-        fxi->setChannels(1);
-        m_doc->addFixture(fxi);
-        grp.assignFixture(fxi->id());
-    }
-
-    grp.resignFixture(0);
-
-    QVERIFY(grp.infoText().isEmpty() == false);
-}
-
 void FixtureGroup_Test::loadWrongID()
 {
     QDomDocument doc;
@@ -656,7 +621,6 @@ void FixtureGroup_Test::load()
     grp.setSize(QSize(4, 5));
     grp.setName("Pertti Pasanen");
     grp.setId(99);
-    grp.setDisplayStyle(FixtureGroup::DisplayName | FixtureGroup::DisplayUniverse);
     for (quint32 id = 0; id < 32; id++)
     {
         Fixture* fxi = new Fixture(m_doc);
@@ -683,7 +647,6 @@ void FixtureGroup_Test::load()
     QCOMPARE(grp2->size(), QSize(4, 5));
     QCOMPARE(grp2->name(), QString("Pertti Pasanen"));
     QCOMPARE(grp2->id(), quint32(99));
-    QCOMPARE(grp2->displayStyle(), FixtureGroup::DisplayName | FixtureGroup::DisplayUniverse);
     QCOMPARE(grp2->headHash(), grp.headHash());
 }
 
@@ -693,7 +656,6 @@ void FixtureGroup_Test::save()
     grp.setSize(QSize(4, 5));
     grp.setName("Pertti Pasanen");
     grp.setId(99);
-    grp.setDisplayStyle(FixtureGroup::DisplayIcon | FixtureGroup::DisplayUniverse);
     for (quint32 id = 0; id < 32; id++)
     {
         Fixture* fxi = new Fixture(m_doc);
@@ -710,7 +672,7 @@ void FixtureGroup_Test::save()
     QCOMPARE(tag.tagName(), QString("FixtureGroup"));
     QCOMPARE(tag.attribute("ID"), QString("99"));
 
-    int size = 0, name = 0, fixture = 0, style = 0;
+    int size = 0, name = 0, fixture = 0;
 
     QDomNode node = tag.firstChild();
     while (node.isNull() == false)
@@ -726,11 +688,6 @@ void FixtureGroup_Test::save()
         {
             QCOMPARE(tag.text(), QString("Pertti Pasanen"));
             name++;
-        }
-        else if (tag.tagName() == "DisplayStyle")
-        {
-            QCOMPARE(tag.text().toInt(), FixtureGroup::DisplayIcon | FixtureGroup::DisplayUniverse);
-            style++;
         }
         else if (tag.tagName() == "Head")
         {
@@ -750,7 +707,6 @@ void FixtureGroup_Test::save()
 
     QCOMPARE(size, 1);
     QCOMPARE(name, 1);
-    QCOMPARE(style, 1);
     QCOMPARE(fixture, 32);
 }
 

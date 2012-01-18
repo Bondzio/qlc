@@ -34,7 +34,6 @@
 #define KXMLQLCFixtureGroupHead "Head"
 #define KXMLQLCFixtureGroupSize "Size"
 #define KXMLQLCFixtureGroupName "Name"
-#define KXMLQLCFixtureGroupDisplayStyle "DisplayStyle"
 
 /****************************************************************************
  * Initialization
@@ -43,7 +42,6 @@
 FixtureGroup::FixtureGroup(Doc* parent)
     : QObject(parent)
     , m_id(FixtureGroup::invalidId())
-    , m_displayStyle(DisplayIcon | DisplayAddress | DisplayHead)
 {
     Q_ASSERT(parent != NULL);
 
@@ -62,7 +60,6 @@ void FixtureGroup::copyFrom(const FixtureGroup* grp)
     m_name = grp->name();
     m_size = grp->size();
     m_heads = grp->headHash();
-    m_displayStyle = grp->displayStyle();
 }
 
 Doc* FixtureGroup::doc() const
@@ -90,7 +87,7 @@ quint32 FixtureGroup::invalidId()
 }
 
 /****************************************************************************
- * Information
+ * Name
  ****************************************************************************/
 
 void FixtureGroup::setName(const QString& name)
@@ -102,92 +99,6 @@ void FixtureGroup::setName(const QString& name)
 QString FixtureGroup::name() const
 {
     return m_name;
-}
-
-void FixtureGroup::setDisplayStyle(int s)
-{
-    m_displayStyle = s;
-}
-
-int FixtureGroup::displayStyle() const
-{
-    return m_displayStyle;
-}
-
-QString FixtureGroup::infoText() const
-{
-    QString info;
-
-    QString title("<TR><TD CLASS='hilite' COLSPAN='3'>%1: %2</TD></TR>");
-    QString subTitle("<TR><TD CLASS='subhi' COLSPAN='3'>%1</TD></TR>");
-    QString genInfo("<TR><TD CLASS='emphasis' COLSPAN='2'>%1</TD><TD>%2</TD></TR>");
-
-    info += "<TABLE COLS='3' WIDTH='100%'>";
-    info += title.arg(tr("Fixture Group")).arg(name());
-    info += genInfo.arg(tr("Fixture count")).arg(headList().size());
-    info += "</TABLE>";
-
-    if (size().isValid() == true)
-    {
-        info += QString("<TABLE ROWS='%1' COLS='%2' WIDTH='100%' BORDER='0'>").arg(size().height() + 1).arg(size().width() + 1);
-        QString subTitle("<TR><TD CLASS='subhi' COLSPAN='%1'>%2</TD></TR>");
-        info += subTitle.arg(size().width() + 1).arg(tr("Grid Placement"));
-
-        // Horizontal header
-        info += "<TR>";
-        info += "<TD></TD>"; // Empty corner
-        for (int x = 0; x < size().width(); x++)
-        {
-            info += QString("<TD CLASS='emphasis' ALIGN='center' VALIGN='center'>%1</TD>").arg(x + 1);
-        }
-        info += "</TR>";
-
-        for (int y = 0; y < size().height(); y++)
-        {
-            info += "<TR>";
-            info += QString("<TD CLASS='emphasis' ALIGN='center' VALIGN='center'>%1</TD>").arg(y + 1);
-            for (int x = 0; x < size().width(); x++)
-            {
-                QLCPoint pt(x, y);
-                if (m_heads.contains(pt) == true)
-                {
-                    GroupHead head(m_heads[pt]);
-                    Fixture* fxi = doc()->fixture(head.fxi);
-                    Q_ASSERT(fxi != NULL);
-
-                    info += "<TD CLASS='tiny' ALIGN='center'>";
-                    if (displayStyle() & DisplayIcon)
-                        info += "<IMG SRC='qrc:/fixture.png'/>";
-                    if (displayStyle() & DisplayName || displayStyle() & DisplayAddress ||
-                        displayStyle() & DisplayUniverse)
-                        info += "<BR/>";
-                    if (displayStyle() & DisplayName)
-                        info += QString("%1").arg(fxi->name());
-                    if (displayStyle() & DisplayName)
-                        info += "<BR/>";
-                    if (displayStyle() & DisplayAddress)
-                        info += QString("A:%1 ").arg(fxi->address() + 1);
-                    if (displayStyle() & DisplayUniverse)
-                        info += QString("U:%1").arg(fxi->universe() + 1);
-                    if (displayStyle() & DisplayHead)
-                        info += QString("H:%1").arg(head.head + 1);
-                    info += "</TD>";
-                }
-                else
-                {
-                    info += "<TD class='tiny' ALIGN='center' VALIGN='center'>";
-                    info += "<IMG SRC='qrc:/empty.png'/><BR/>";
-                    info += "---";
-                    info += "</TD>";
-                }
-            }
-            info += "</TR>";
-        }
-
-        info += "</TABLE>";
-    }
-
-    return info;
 }
 
 /****************************************************************************
@@ -421,11 +332,6 @@ bool FixtureGroup::loadXML(const QDomElement& root)
         {
             m_name = tag.text();
         }
-        else if (tag.tagName() == KXMLQLCFixtureGroupDisplayStyle)
-        {
-            if (tag.text().isEmpty() == false)
-                m_displayStyle = tag.text().toInt();
-        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown fixture group tag:" << tag.tagName();
@@ -461,12 +367,6 @@ bool FixtureGroup::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     tag = doc->createElement(KXMLQLCFixtureGroupSize);
     tag.setAttribute("X", size().width());
     tag.setAttribute("Y", size().height());
-    root.appendChild(tag);
-
-    /* Display style */
-    tag = doc->createElement(KXMLQLCFixtureGroupDisplayStyle);
-    text = doc->createTextNode(QString::number(displayStyle()));
-    tag.appendChild(text);
     root.appendChild(tag);
 
     /* Fixture heads */

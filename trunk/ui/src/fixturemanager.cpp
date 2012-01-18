@@ -971,29 +971,38 @@ void FixtureManager::slotUnGroup()
         return;
     }
 
+    // Because FixtureGroup::resignFixture() emits changed(), which makes the tree
+    // update its contents in the middle, invalidating m_tree->selectedItems(),
+    // we must pick the list of fixtures and groups first and then resign them in
+    // one big bunch.
+    QList <QPair<quint32,quint32> > resignList;
+
     foreach (QTreeWidgetItem* item, m_tree->selectedItems())
     {
-        QTreeWidgetItem* parentItem = item->parent();
-        if (parentItem == NULL)
+        if (item->parent() == NULL)
             continue;
 
-        QVariant var = parentItem->data(KColumnName, PROP_GROUP);
+        QVariant var = item->parent()->data(KColumnName, PROP_GROUP);
         if (var.isValid() == false)
             continue;
-
-        FixtureGroup* grp = m_doc->fixtureGroup(var.toUInt());
-        Q_ASSERT(grp != NULL);
+        quint32 grp = var.toUInt();
 
         var = item->data(KColumnName, PROP_FIXTURE);
         if (var.isValid() == false)
             continue;
+        quint32 fxi = var.toUInt();
 
-        quint32 id = var.toUInt();
-
-        grp->resignFixture(id);
+        resignList << QPair <quint32,quint32> (grp, fxi);
     }
 
-    updateView();
+    QListIterator <QPair<quint32,quint32> > it(resignList);
+    while (it.hasNext() == true)
+    {
+        QPair <quint32,quint32> pair(it.next());
+        FixtureGroup* grp = m_doc->fixtureGroup(pair.first);
+        Q_ASSERT(grp != NULL);
+        grp->resignFixture(pair.second);
+    }
 }
 
 void FixtureManager::slotGroupSelected(QAction* action)

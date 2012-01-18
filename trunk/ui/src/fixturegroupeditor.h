@@ -39,13 +39,15 @@ public:
 
 private:
     void updateTable();
+    void addFixtureHeads(Qt::ArrowType direction);
 
 private slots:
     void slotNameEdited(const QString& text);
     void slotXSpinValueChanged(int value);
     void slotYSpinValueChanged(int value);
 
-    void slotAddFixtureClicked();
+    void slotRightClicked();
+    void slotDownClicked();
     void slotRemoveFixtureClicked();
 
     void slotCellActivated(int row, int column);

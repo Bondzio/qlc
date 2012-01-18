@@ -60,8 +60,10 @@ FixtureGroupEditor::FixtureGroupEditor(FixtureGroup* grp, Doc* doc, QWidget* par
     connect(m_ySpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotYSpinValueChanged(int)));
 
-    connect(m_addButton, SIGNAL(clicked()),
-            this, SLOT(slotAddFixtureClicked()));
+    connect(m_rightButton, SIGNAL(clicked()),
+            this, SLOT(slotRightClicked()));
+    connect(m_downButton, SIGNAL(clicked()),
+            this, SLOT(slotDownClicked()));
     connect(m_removeButton, SIGNAL(clicked()),
             this, SLOT(slotRemoveFixtureClicked()));
 
@@ -155,22 +157,14 @@ void FixtureGroupEditor::slotYSpinValueChanged(int value)
     updateTable();
 }
 
-void FixtureGroupEditor::slotAddFixtureClicked()
+void FixtureGroupEditor::slotRightClicked()
 {
-    FixtureSelection fs(this, m_doc);
-    fs.setMultiSelection(true);
-    fs.setSelectionMode(FixtureSelection::Heads);
-    fs.setDisabledHeads(m_grp->headList());
-    if (fs.exec() == QDialog::Accepted)
-    {
-        int row = m_row;
-        int col = m_column;
-        foreach (GroupHead gh, fs.selectedHeads())
-            m_grp->assignHead(QLCPoint(col++, row), gh);
+    addFixtureHeads(Qt::RightArrow);
+}
 
-        updateTable();
-        m_table->setCurrentCell(row, col);
-    }
+void FixtureGroupEditor::slotDownClicked()
+{
+    addFixtureHeads(Qt::DownArrow);
 }
 
 void FixtureGroupEditor::slotRemoveFixtureClicked()
@@ -218,4 +212,28 @@ void FixtureGroupEditor::slotCellChanged(int row, int column)
     updateTable();
     m_table->setCurrentCell(row, column);
     slotCellActivated(row, column);
+}
+
+void FixtureGroupEditor::addFixtureHeads(Qt::ArrowType direction)
+{
+    FixtureSelection fs(this, m_doc);
+    fs.setMultiSelection(true);
+    fs.setSelectionMode(FixtureSelection::Heads);
+    fs.setDisabledHeads(m_grp->headList());
+    if (fs.exec() == QDialog::Accepted)
+    {
+        int row = m_row;
+        int col = m_column;
+        foreach (GroupHead gh, fs.selectedHeads())
+        {
+            m_grp->assignHead(QLCPoint(col, row), gh);
+            if (direction == Qt::RightArrow)
+                col++;
+            else
+                row++;
+        }
+
+        updateTable();
+        m_table->setCurrentCell(row, col);
+    }
 }

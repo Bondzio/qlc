@@ -149,7 +149,6 @@ protected:
     QAction* m_wizardAction;
 
     QAction* m_cloneAction;
-    QAction* m_editAction;
     QAction* m_deleteAction;
     QAction* m_selectAllAction;
 

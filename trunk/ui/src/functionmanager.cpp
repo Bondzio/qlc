@@ -202,13 +202,6 @@ void FunctionManager::initActions()
             this, SLOT(slotWizard()));
 
     /* Edit actions */
-    m_editAction = new QAction(QIcon(":/edit.png"),
-                               tr("&Edit"), this);
-    m_editAction->setShortcut(QKeySequence("CTRL+E"));
-    m_actionGroup->addAction(m_editAction);
-    connect(m_editAction, SIGNAL(triggered(bool)),
-            this, SLOT(slotEdit()));
-
     m_cloneAction = new QAction(QIcon(":/editcopy.png"),
                                 tr("&Clone"), this);
     m_cloneAction->setShortcut(QKeySequence("CTRL+C"));
@@ -247,9 +240,6 @@ void FunctionManager::initMenu()
 
     /* Edit menu */
     m_editMenu = new QMenu(this);
-    m_editMenu->setTitle(tr("&Edit"));
-    m_editMenu->addAction(m_editAction);
-    m_editMenu->addSeparator();
     m_editMenu->addAction(m_cloneAction);
     m_editMenu->addAction(m_selectAllAction);
     m_editMenu->addSeparator();
@@ -272,7 +262,6 @@ void FunctionManager::initToolbar()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_wizardAction);
     m_toolbar->addSeparator();
-    m_toolbar->addAction(m_editAction);
     m_toolbar->addAction(m_cloneAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_deleteAction);
@@ -427,18 +416,14 @@ void FunctionManager::updateActionStatus()
     {
         /* At least one function has been selected, so
            editing is possible. */
-        m_editAction->setEnabled(true);
         m_cloneAction->setEnabled(true);
-
         m_deleteAction->setEnabled(true);
         m_selectAllAction->setEnabled(true);
     }
     else
     {
         /* No functions selected */
-        m_editAction->setEnabled(false);
         m_cloneAction->setEnabled(false);
-
         m_deleteAction->setEnabled(false);
         m_selectAllAction->setEnabled(false);
     }

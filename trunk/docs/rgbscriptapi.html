@@ -29,15 +29,20 @@ features.
 Script files should be named after the script's name and must have a <B>.js</B> extension.
 Depending on platform, the files should be placed either in the QLC system script directory
 or, preferably, the user script directory:
-<LI><B>Linux user dir:</B> ~/.qlc/rgbscripts/</LI>
-<LI><B>Linux system dir:</B> /usr/share/qlc/rgbscripts/</LI>
-<BR>
-<LI><B>OSX user dir:</B> ~/Library/Application Support/QLC/RGBScripts</LI>
-<LI><B>OSX system dir:</B> /Applications/QLC.app/Contents/Resources/RGBScripts</LI>
-<BR>
-<LI><B>Windows user dir:</B> Not applicable</LI>
-<LI><B>Windows system dir:</B> C:\QLC\RGBScripts</LI>
-</P>
+<UL>
+ <LI><B>Linux user dir:</B> ~/.qlc/rgbscripts/</LI>
+ <LI><B>Linux system dir:</B> /usr/share/qlc/rgbscripts/</LI>
+</UL>
+
+<UL>
+ <LI><B>OSX user dir:</B> ~/Library/Application Support/QLC/RGBScripts</LI>
+ <LI><B>OSX system dir:</B> /Applications/QLC.app/Contents/Resources/RGBScripts</LI>
+</UL>
+
+<UL>
+ <LI><B>Windows user dir:</B> Not applicable</LI>
+ <LI><B>Windows system dir:</B> C:\QLC\RGBScripts</LI>
+</UL>
 
 <H1>RGB Script API</H1>
 
@@ -68,10 +73,12 @@ However, a script with nothing more than an empty object does nothing, no matter
 self-executing it might be. You must also declare some <B>properties</B> for the returned
 object so that QLC knows how to use the script and to show it to the user (you). So, you need
 to declare the following properties for the returned script object:
-<LI><B>apiVersion:</B> The API version that the script follows. Currently '1' is correct number. 0 will cause the script to be treated as invalid.</LI>
-<LI><B>name:</B> The name of your script. This name appears in the pattern selection box in the <A HREF="rgbmatrixeditor.html">RGB Matrix Editor</A></LI>
-<LI><B>author:</B> The name of the person who has written the script. <B>You.</B></LI>
 </P>
+<UL>
+ <LI><B>apiVersion:</B> The API version that the script follows. Currently '1' is correct number. 0 will cause the script to be treated as invalid.</LI>
+ <LI><B>name:</B> The name of your script. This name appears in the pattern selection box in the <A HREF="rgbmatrixeditor.html">RGB Matrix Editor</A></LI>
+ <LI><B>author:</B> The name of the person who has written the script. <B>You.</B></LI>
+</UL>
 
 <P>
 With this in mind we add declarations for these three properties to the script:
@@ -97,8 +104,10 @@ With this in mind we add declarations for these three properties to the script:
 <P>
 Now we are getting to the actual business of producing data for the <A HREF="concept.html#RGBMatrix">RGB Matrix</A>.
 The current API version uses two functions to achieve this:
-<LI>rgbMapStepCount(width, height)</LI>
-<LI>rgbMap(width, height, rgb, step)</LI>
+<UL>
+ <LI>rgbMapStepCount(width, height)</LI>
+ <LI>rgbMap(width, height, rgb, step)</LI>
+</UL>
 No assumptions on the calling order or argument immutability should be made, i.e. do not
 cache the values from either function and assume that they are valid until the worlds end.
 The parameters might change at any point (usually when the user changes the matrix size,
@@ -115,9 +124,11 @@ pixels. It must always return the same result when called with the same <B>width
 
 <P>
 <B>Parameters:</B>
-<LI><B>width: </B> The width of the grid</LI>
-<LI><B>height:</B> The height of the grid</LI>
-<LI><B>Return value:</B> Number of steps produced by rgbMap() with the given width and height parameters</LI>
+<UL>
+ <LI><B>width: </B> The width of the grid</LI>
+ <LI><B>height:</B> The height of the grid</LI>
+ <LI><B>Return value:</B> Number of steps produced by rgbMap() with the given width and height parameters</LI>
+</UL>
 </P>
 
 <P>
@@ -162,11 +173,13 @@ to be within (0, rgbMapStepCount(w, h) - 1).
 
 <P>
 <B>Parameters:</B>
-<LI><B>width: </B> The width of the grid</LI>
-<LI><B>height:</B> The height of the grid</LI>
-<LI><B>rgb:</B> The color selected by user</LI>
-<LI><B>step:</B> Current step number to produce (between 0 and rgbMapStepCount(w, h) - 1)</LI>
-<LI><B>Return value:</B> An array containing [height] arrays each containing [width] integers</LI>
+<UL>
+ <LI><B>width: </B> The width of the grid</LI>
+ <LI><B>height:</B> The height of the grid</LI>
+ <LI><B>rgb:</B> The color selected by user</LI>
+ <LI><B>step:</B> Current step number to produce (between 0 and rgbMapStepCount(w, h) - 1)</LI>
+ <LI><B>Return value:</B> An array containing [height] arrays each containing [width] integers</LI>
+</UL>
 </P>
 
 <P>

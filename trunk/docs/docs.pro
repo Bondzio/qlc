@@ -30,6 +30,8 @@ docs.files = \
              index.html \
              modeeditor.html \
              peperonioutput.html \
+             rgbmatrixeditor.html \
+             rgbscriptapi.html \
              sceneeditor.html \
              selectfunction.html \
              selectfixture.html \

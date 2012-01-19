@@ -9,23 +9,10 @@
 <H1>Virtual Console Slider</H1>
 <IMG SRC="qrc:/slider.png" ALIGN="absmiddle">
 <P>
-Sliders are used for two distinct purposes: <A HREF="concept.html#Buses">Bus</A>
-speed setting (<B>Bus</B> slider mode) and <A HREF="concept.html#Fixture">Fixture</A>
-channel level setting (<B>Level</B> slider mode). Every slider can operate on
-either of these modes and each mode has its own configuration options.
-</P>
-
-<P>
-Essentially, the slider sets directly the value for a bus or a collection of
-channels picked from fixtures in the workspace when the application is in
-<A HREF="concept.html#Modes">Operate Mode</A>.
-</P>
-
-<P> 
-When the slider has been set to operate on <B>Bus</B> mode, an additional
-<U>tap button</U> appears at the bottom of the slider; this button can be used
-to set the bus time by tapping the button in time with the beat of the currently
-playing song. The bus value is taken from the time between taps.
+Sliders are used for two distinct purposes: <A HREF="concept.html#Fixtures">Fixture</A>
+channel level setting and <A HREF="concept.html#Functions">Function</A> playback & intensity
+adjustment. Any slider can operate on either of these modes and each mode has its own
+configuration options.
 </P>
 
 <H3>Configuration</H3>
@@ -40,7 +27,7 @@ with the <B>Edit -&gt; Properties</B> menu item.
 
 <P>
 The General tab holds all of the sliders properties that are shared between
-<B>Bus</B> and <B>Level</B> modes.
+the slider's two modes.
 </P>
 
 <TABLE BORDER="1">
@@ -49,8 +36,7 @@ The General tab holds all of the sliders properties that are shared between
    <B>Slider name</B>
   </TD>
   <TD>
-   Set the slider's name. <B>NOTE:</B> In <U>level</U> mode this name is replaced
-   with the name of the bus that the slider is currently controlling.
+   Change the slider's name.
   </TD>
  </TR>
  <TR>
@@ -59,8 +45,8 @@ The General tab holds all of the sliders properties that are shared between
   </TD>
   <TD>
    <UL>
-    <LI>DMX/Time: Display absolute values (time in Bus mode; DMX values in Level mode)</LI>
-    <LI>Percentage: Display percentage values (0-100%) of the slider's maximum value</LI>
+    <LI>Actual: Display actual (DMX) values</LI>
+    <LI>Percentage: Display percentage values (0-100%)</LI>
    </UL>
   </TD>
  </TR>
@@ -71,9 +57,7 @@ The General tab holds all of the sliders properties that are shared between
   <TD>
    <UL>
     <LI>Normal: Values increase towards the top and decrease towards the bottom.</LI>
-    <LI>Inverted: Flip the slider upside down so that values increase towards
-    the bottom and decrease towards the top; useful in Bus mode when bigger values
-    mean slower speed.</LI>
+    <LI>Inverted: Flip the slider upside down so that values increase towards the bottom and decrease towards the top.</LI>
    </UL>
   </TD>
  </TR>
@@ -98,39 +82,6 @@ The General tab holds all of the sliders properties that are shared between
     <LI>Choose...: Shows the <A HREF="selectinputchannel.html">Select Input Channel</A>
     dialog that you can use to select an input channel manually.</LI>
    </UL>
-  </TD>
- </TR>
-</TABLE>
-
-<H3>Configuration - Bus Tab</H3>
-
-<P>
-If the slider is not currently in Bus mode, all you see is a button telling you
-to click it to switch the slider to Bus mode. Clicking it will also show the
-actual Bus mode properties.
-</P>
-
-<TABLE BORDER="1">
- <TR>
-  <TD>
-   <B>Value range</B>
-  </TD>
-  <TD>
-   <UL>
-    <LI>Low limit: The lowest value for the bus controlled by the slider
-    (in seconds)</LI>
-    <LI>High limit: The highest value for the bus controlled by the slider
-    (in seconds)</LI>
-   </UL>
-  </TD>
- </TR>
- <TR>
-  <TD>
-   <B>Bus</B>
-  </TD>
-  <TD>
-   Select the <A HREF="concept.html#Buses">Bus</A> that the slider should be
-   controlling.
   </TD>
  </TR>
 </TABLE>
@@ -206,6 +157,49 @@ actual Level mode properties.
    dialog will select ALL channels that belong to the selected group from
    ALL fixtures. This is particularly useful if you wish to have common control
    over, for example, all of your scanners' <I>intensity</I> channels.
+  </TD>
+ </TR>
+</TABLE>
+
+<H3>Configuration - Playback Tab</H3>
+
+<P>
+If the slider is not currently in Playback mode, all you see is a button telling you
+to click it to switch to Playback mode. Clicking it will also show the actual Playback
+mode properties.
+</P>
+
+<P>
+When the slider is in playback mode, the slider acts like a combined button and a slider;
+you start a function AND simultaneously control the function's intensity with the slider.
+When the slider is a zero, the function is stopped and any value above zero will start
+the function (unless already started) and simultaneously adjusts the function's intensity
+(if applicable).
+</P>
+
+<TABLE BORDER="1">
+ <TR>
+  <TD>
+   <B>Function</B>
+  </TD>
+  <TD>
+   Displays the function that is currently attached to the slider.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc:/attach.png"/>
+  </TD>
+  <TD>
+   Attach a function to the slider.
+  </TD>
+ </TR>
+ <TR>
+  <TD>
+   <IMG SRC="qrc:/detach.png"/>
+  </TD>
+  <TD>
+   Detach the currently-attached function.
   </TD>
  </TR>
 </TABLE>

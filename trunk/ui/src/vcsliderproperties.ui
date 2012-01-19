@@ -57,7 +57,7 @@
              <string>Show exact DMX values</string>
             </property>
             <property name="text">
-             <string>DMX / Time</string>
+             <string>Actual</string>
             </property>
             <property name="checked">
              <bool>true</bool>

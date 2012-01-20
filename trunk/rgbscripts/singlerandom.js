@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Development tool access
+var testAlgo;
+
 (
     /**
      * This algorithm produces RGB maps where exactly one pixel is lit at a time
@@ -136,6 +139,9 @@
             // script on a 5 * 5 grid is 25.
             return width * height;
         }
+
+        // Development tool access
+        testAlgo = algo;
 
         return algo;
     }

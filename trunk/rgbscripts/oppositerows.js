@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Development tool access
+var testAlgo;
+
 (
     /**
      * This algorithm produces opposite stepping rows, with odd rows starting from
@@ -81,6 +84,9 @@
             // $width number of steps to turn each pixel on.
             return width;
         }
+
+        // Development tool access
+        testAlgo = algo;
 
         return algo;
     }

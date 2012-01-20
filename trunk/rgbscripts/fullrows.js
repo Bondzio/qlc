@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Development tool access
+var testAlgo;
+
 (
     /**
      * This algorithm produces fully-lit rows, meaning all pixels on a single
@@ -70,6 +73,9 @@
             // in the map, the number of steps must be $height to light all rows per round.
             return height;
         }
+
+        // Development tool access
+        testAlgo = algo;
 
         return algo;
     }

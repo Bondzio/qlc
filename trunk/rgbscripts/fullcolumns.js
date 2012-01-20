@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Development tool access
+var testAlgo;
+
 (
     /**
      * This algorithm produces fully-lit columns, meaning all pixels on a single
@@ -71,6 +74,9 @@
             // columns per round.
             return width;
         }
+
+        // Development tool access
+        testAlgo = algo;
 
         return algo;
     }

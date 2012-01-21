@@ -65,7 +65,7 @@ var testAlgo;
          * one cell($sx, $sy) is colored with $rgb. Leave other cells
          * black (0).
          */
-        util.createStep = function(width, height, sx, sy, rgb)
+        util.createStep = function(width, height, sy, sx, rgb)
         {
             var map = new Array(height);
             for (var y = 0; y < height; y++)

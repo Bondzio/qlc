@@ -228,22 +228,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>m_mapTree</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>InputPatchEditor</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>200</x>
-     <y>116</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>430</x>
-     <y>129</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_feedbackEnabledCheck</sender>
    <signal>toggled(bool)</signal>
    <receiver>InputPatchEditor</receiver>

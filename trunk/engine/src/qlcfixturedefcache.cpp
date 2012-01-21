@@ -29,6 +29,7 @@
 #endif
 
 #include "qlcfixturedefcache.h"
+#include "avolitesd4parser.h"
 #include "qlcfixturedef.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
@@ -112,6 +113,8 @@ bool QLCFixtureDefCache::addFixtureDef(QLCFixtureDef* fixtureDef)
 
 bool QLCFixtureDefCache::load(const QDir& dir)
 {
+    qDebug() << Q_FUNC_INFO << dir;
+
     if (dir.exists() == false || dir.isReadable() == false)
         return false;
 
@@ -119,29 +122,14 @@ bool QLCFixtureDefCache::load(const QDir& dir)
     QStringListIterator it(dir.entryList());
     while (it.hasNext() == true)
     {
-        QLCFixtureDef* fxi;
-        QString path;
+        QString path(dir.absoluteFilePath(it.next()));
 
-        path = dir.absoluteFilePath(it.next());
-
-        fxi = new QLCFixtureDef();
-        Q_ASSERT(fxi != NULL);
-
-        QFile::FileError error = fxi->loadXML(path);
-        if (error == QFile::NoError)
-        {
-            /* Delete the def if it's a duplicate. */
-            if (addFixtureDef(fxi) == false)
-                delete fxi;
-            fxi = NULL;
-        }
+        if (path.toLower().endsWith(KExtFixture) == true)
+            loadQXF(path);
+        else if (path.toLower().endsWith(KExtAvolitesFixture) == true)
+            loadD4(path);
         else
-        {
-            qWarning() << Q_FUNC_INFO << "Fixture definition loading from"
-                       << path << "failed:" << QLCFile::errorString(error);
-            delete fxi;
-            fxi = NULL;
-        }
+            qWarning() << Q_FUNC_INFO << "Unrecognized fixture extension:" << path;
     }
 
     return true;
@@ -198,7 +186,61 @@ QDir QLCFixtureDefCache::userDefinitionDirectory()
         dir.mkpath(".");
 
     dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtFixture));
+    QStringList filters;
+    filters << QString("*%1").arg(KExtFixture);
+    filters << QString("*%1").arg(KExtAvolitesFixture);
+    dir.setNameFilters(filters);
 
     return dir;
+}
+
+void QLCFixtureDefCache::loadQXF(const QString& path)
+{
+    QLCFixtureDef* fxi = new QLCFixtureDef();
+    Q_ASSERT(fxi != NULL);
+
+    QFile::FileError error = fxi->loadXML(path);
+    if (error == QFile::NoError)
+    {
+        /* Delete the def if it's a duplicate. */
+        if (addFixtureDef(fxi) == false)
+            delete fxi;
+        fxi = NULL;
+    }
+    else
+    {
+        qWarning() << Q_FUNC_INFO << "Fixture definition loading from"
+                   << path << "failed:" << QLCFile::errorString(error);
+        delete fxi;
+        fxi = NULL;
+    }
+}
+
+void QLCFixtureDefCache::loadD4(const QString& path)
+{
+    AvolitesD4Parser parser;
+    if (parser.loadXML(path) == false)
+    {
+        qWarning() << Q_FUNC_INFO << "Unable to load D4 fixture from" << path
+                   << ":" << parser.lastError();
+        return;
+    }
+
+    QLCFixtureDef* fxi = new QLCFixtureDef();
+    Q_ASSERT(fxi != NULL);
+    if (parser.fillFixtureDef(fxi) == false)
+    {
+        qWarning() << Q_FUNC_INFO << "Unable to parse D4 fixture from" << path
+                   << ":" << parser.lastError();
+        delete fxi;
+        return;
+    }
+
+    /* Delete the def if it's a duplicate. */
+    if (addFixtureDef(fxi) == false)
+    {
+        qDebug() << Q_FUNC_INFO << "Deleting duplicate" << path;
+        delete fxi;
+    }
+    fxi = NULL;
 }

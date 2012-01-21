@@ -24,12 +24,15 @@
 
 #include <QMainWindow>
 
+class QLCFixtureDef;
+class QLCChannel;
 class QToolBar;
 class QAction;
 class QMenu;
-class QLCChannel;
 
-const QString KFixtureFilter ("Fixtures (*.qxf)");
+#define KAllFilter  "Fixture Definitions (*.qxf *.d4)"
+#define KQXFFilter  "QLC fixtures (*.qxf)"
+#define KD4Filter   "Avolites fixtures (*.d4)"
 
 class App : public QMainWindow
 {
@@ -49,6 +52,27 @@ public:
      * @param path The file path to open
      */
     void loadFixtureDefinition(const QString& path);
+
+private:
+    /**
+     * Load a native QLC fixture definition from $path.
+     *
+     * @param path The path to a .qxf file to load
+     * @param errorMsg An optional error message
+     * @return A newly-created QLCFixtureDef if successful, otherwise NULL.
+     *         Ownership of the pointer is transferred to the caller.
+     */
+    QLCFixtureDef* loadQXF(const QString& path, QString& errorMsg) const;
+
+    /**
+     * Load an Avolites Diamond 4 fixture definition from $path.
+     *
+     * @param path The path to a .d4 file to load
+     * @param errorMsg An optional error message
+     * @return A newly-created QLCFixtureDef if successful, otherwise NULL.
+     *         Ownership of the pointer is transferred to the caller.
+     */
+    QLCFixtureDef* loadD4(const QString& path, QString& errorMsg) const;
 
 protected:
     void closeEvent(QCloseEvent*);

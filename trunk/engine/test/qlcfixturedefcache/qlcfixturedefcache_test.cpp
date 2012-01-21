@@ -22,9 +22,9 @@
 #include <QtTest>
 #include <QtXml>
 
-#define protected public
+#define private public
 #include "qlcfixturedefcache.h"
-#undef protected
+#undef private
 
 #include "qlcfixturedefcache_test.h"
 #include "qlcfixturedef.h"

@@ -284,7 +284,7 @@ bool QLCFixtureEditor::saveAs()
     QFileDialog dialog(this);
     dialog.setWindowTitle(tr("Save fixture definition"));
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setNameFilter(KFixtureFilter);
+    dialog.setNameFilter(KQXFFilter);
 
     QString path;
     QDir dir = QLCFixtureDefCache::userDefinitionDirectory();

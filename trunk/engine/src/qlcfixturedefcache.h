@@ -125,7 +125,14 @@ public:
      */
     static QDir userDefinitionDirectory();
 
-protected:
+private:
+    /** Load a QLC native fixture definition from the file specified in $path */
+    void loadQXF(const QString& path);
+
+    /** Load an Avolites D4 fixture definition from the file specified in $path */
+    void loadD4(const QString& path);
+
+private:
     QList <QLCFixtureDef*> m_defs;
 };
 

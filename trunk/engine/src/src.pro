@@ -29,7 +29,8 @@ INSTALLS   += target
 #############################################################################
 
 # Fixture metadata
-HEADERS += qlccapability.h \
+HEADERS += avolitesd4parser.h \
+           qlccapability.h \
            qlcchannel.h \
            qlcfile.h \
            qlcfixturedef.h \
@@ -78,7 +79,8 @@ HEADERS += bus.h \
            script.h
 
 # Fixture metadata
-SOURCES += qlccapability.cpp \
+SOURCES += avolitesd4parser.cpp \
+           qlccapability.cpp \
            qlcchannel.cpp \
            qlcfile.cpp \
            qlcfixturedef.cpp \

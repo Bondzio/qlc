@@ -44,6 +44,7 @@
 #include "qlcchannel.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
+#include "avolitesd4parser.h"
 
 #include "app.h"
 #include "aboutbox.h"
@@ -108,18 +109,23 @@ QString App::version()
 
 void App::loadFixtureDefinition(const QString& path)
 {
-    /* Attempt to create a fixture definition from the selected file */
-    QLCFixtureDef* fixtureDef = new QLCFixtureDef();
-    QFile::FileError error = fixtureDef->loadXML(path);
-    if (error == QFile::NoError)
-    {
-        QLCFixtureEditor* editor;
-        QMdiSubWindow* sub;
+    QLCFixtureDef* fixtureDef = NULL;
 
+    /* Attempt to create a fixture definition from the selected file */
+    QString error(tr("Unrecognized file extension: %1").arg(path));
+    if (path.toLower().endsWith(KExtFixture) == true)
+        fixtureDef = loadQXF(path, error);
+    else if (path.toLower().endsWith(KExtAvolitesFixture) == true)
+        fixtureDef = loadD4(path, error);
+    else
+        fixtureDef = NULL;
+
+    if (fixtureDef != NULL)
+    {
         /* Create a new sub window and put a fixture editor widget
            in that sub window with the newly-created fixture def */
-        sub = new QMdiSubWindow(centralWidget());
-        editor = new QLCFixtureEditor(sub, fixtureDef, path);
+        QMdiSubWindow* sub = new QMdiSubWindow(centralWidget());
+        QLCFixtureEditor* editor = new QLCFixtureEditor(sub, fixtureDef, path);
 
         sub->setWidget(editor);
         sub->setAttribute(Qt::WA_DeleteOnClose);
@@ -130,11 +136,49 @@ void App::loadFixtureDefinition(const QString& path)
     }
     else
     {
-        delete fixtureDef;
         QMessageBox::warning(this, tr("Fixture loading failed"),
-                             tr("Unable to load fixture definition: ") +
-                             QLCFile::errorString(error));
+                             tr("Unable to load fixture definition: ") + error);
     }
+}
+
+QLCFixtureDef* App::loadQXF(const QString& path, QString& errorMsg) const
+{
+    QLCFixtureDef* fixtureDef = new QLCFixtureDef;
+    Q_ASSERT(fixtureDef != NULL);
+
+    QFile::FileError error = fixtureDef->loadXML(path);
+    if (error != QFile::NoError)
+    {
+        delete fixtureDef;
+        fixtureDef = NULL;
+        errorMsg = QLCFile::errorString(error);
+    }
+
+    return fixtureDef;
+}
+
+QLCFixtureDef* App::loadD4(const QString& path, QString& errorMsg) const
+{
+    QLCFixtureDef* fixtureDef = NULL;
+
+    AvolitesD4Parser parser;
+    if (parser.loadXML(path) == false)
+    {
+        errorMsg = parser.lastError();
+    }
+    else
+    {
+        fixtureDef = new QLCFixtureDef;
+        Q_ASSERT(fixtureDef != NULL);
+        if (parser.fillFixtureDef(fixtureDef) == false)
+        {
+            errorMsg = parser.lastError();
+            delete fixtureDef;
+            fixtureDef = NULL;
+        }
+    }
+
+    return fixtureDef;
 }
 
 void App::closeEvent(QCloseEvent* e)
@@ -308,7 +352,12 @@ void App::slotFileOpen()
     dialog.setWindowTitle(tr("Open a fixture definition"));
     dialog.setFileMode(QFileDialog::ExistingFiles);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setNameFilter(KFixtureFilter);
+
+    QStringList filters;
+    filters << KAllFilter;
+    filters << KQXFFilter;
+    filters << KD4Filter;
+    dialog.setNameFilters(filters);
 
     QVariant var = settings.value(SETTINGS_OPENDIALOGSTATE);
     if (var.isValid() == true)

@@ -30,6 +30,7 @@
 
 #include "cuestackmodel.h"
 #include "cuestack.h"
+#include "apputil.h"
 
 static int _dragIndex = -1;
 
@@ -120,7 +121,7 @@ void CueStackModel::slotCurrentCueChanged(int index)
 int CueStackModel::columnCount(const QModelIndex& index) const
 {
     Q_UNUSED(index);
-    return 2;
+    return CueStackModel::ColumnCount;
 }
 
 QVariant CueStackModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -130,10 +131,16 @@ QVariant CueStackModel::headerData(int section, Qt::Orientation orientation, int
 
     switch(section)
     {
-    case 0:
-        return tr("Number");
-    case 1:
+    case IndexColumn:
+        return tr("##");
+    case NameColumn:
         return tr("Cue");
+    case FadeInColumn:
+        return tr("In");
+    case FadeOutColumn:
+        return tr("Out");
+    case DurationColumn:
+        return tr("Dur");
     default:
         return QVariant();
     }
@@ -169,10 +176,45 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
     QVariant var;
     if (role == Qt::DisplayRole || role == Qt::ToolTipRole)
     {
-        if (index.column() == 0)
+        switch (index.column())
+        {
+        case IndexColumn:
             var = QVariant(index.row() + 1);
-        else if (index.column() == 1)
+            break;
+        case NameColumn:
             var = QVariant(m_cueStack->cues()[index.row()].name());
+            break;
+        case FadeInColumn:
+        {
+            uint ms = m_cueStack->cues()[index.row()].fadeInSpeed();
+            if (ms > 0)
+                var = QVariant(AppUtil::speedText(ms));
+            else
+                var = QVariant();
+            break;
+        }
+        case FadeOutColumn:
+        {
+            uint ms = m_cueStack->cues()[index.row()].fadeOutSpeed();
+            if (ms > 0)
+                var = QVariant(AppUtil::speedText(ms));
+            else
+                var = QVariant();
+            break;
+        }
+        case DurationColumn:
+        {
+            uint ms = m_cueStack->cues()[index.row()].duration();
+            if (ms > 0)
+                var = QVariant(AppUtil::speedText(ms));
+            else
+                var = QVariant();
+            break;
+        }
+        default:
+            var = QVariant();
+            break;
+        }
     }
     else if (role == Qt::DecorationRole)
     {
@@ -203,8 +245,12 @@ Qt::ItemFlags CueStackModel::flags(const QModelIndex &index) const
 }
 
 bool CueStackModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
-                                int column, const QModelIndex& parent)
+                                 int column, const QModelIndex& parent)
 {
+    Q_UNUSED(action);
+    Q_UNUSED(row);
+    Q_UNUSED(column);
+
     if (m_cueStack == NULL)
         return false;
 

@@ -32,6 +32,11 @@
 #define KXMLQLCCueValue "Value"
 #define KXMLQLCCueValueChannel "Channel"
 
+#define KXMLQLCCueSpeed         "Speed"
+#define KXMLQLCCueSpeedFadeIn   "FadeIn"
+#define KXMLQLCCueSpeedFadeOut  "FadeOut"
+#define KXMLQLCCueSpeedDuration "Duration"
+
 class QDomDocument;
 class QDomElement;
 
@@ -43,21 +48,57 @@ public:
     Cue(const Cue& cue);
     ~Cue();
 
+    /************************************************************************
+     * Name
+     ************************************************************************/
+public:
     void setName(const QString& str);
     QString name() const;
 
+private:
+    QString m_name;
+
+    /************************************************************************
+     * Values
+     ************************************************************************/
+public:
     void setValue(uint channel, uchar value);
     void unsetValue(uint channel);
     uchar value(uint channel) const;
 
     QHash <uint,uchar> values() const;
 
+private:
+    QHash <uint,uchar> m_values;
+
+    /************************************************************************
+     * Speed
+     ************************************************************************/
+public:
+    void setFadeInSpeed(uint ms);
+    uint fadeInSpeed() const;
+
+    void setFadeOutSpeed(uint ms);
+    uint fadeOutSpeed() const;
+
+    void setDuration(uint ms);
+    uint duration() const;
+
+private:
+    uint m_fadeInSpeed;
+    uint m_fadeOutSpeed;
+    uint m_duration;
+
+    /************************************************************************
+     * Load & Save
+     ************************************************************************/
+public:
     bool loadXML(const QDomElement& root);
     bool saveXML(QDomDocument* doc, QDomElement* stack_root) const;
 
 private:
-    QString m_name;
-    QHash <uint,uchar> m_values;
+    bool loadXMLSpeed(const QDomElement& speedRoot);
+    bool saveXMLSpeed(QDomDocument* doc, QDomElement* root) const;
 };
 
 #endif

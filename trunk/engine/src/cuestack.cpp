@@ -69,37 +69,79 @@ Doc* CueStack::doc() const
 }
 
 /****************************************************************************
+ * Name
+ ****************************************************************************/
+
+void CueStack::setName(const QString& name, int index)
+{
+    if (index < 0)
+        m_name = name;
+    else
+        m_cues[index].setName(name);
+    emit changed(index);
+}
+
+QString CueStack::name(int index) const
+{
+    if (index < 0)
+        return m_name;
+    else
+        return m_cues[index].name();
+}
+
+/****************************************************************************
  * Speed
  ****************************************************************************/
 
-void CueStack::setFadeInSpeed(uint ms)
+void CueStack::setFadeInSpeed(uint ms, int index)
 {
-    m_fadeInSpeed = ms;
+    if (index < 0)
+        m_fadeInSpeed = ms;
+    else
+        m_cues[index].setFadeInSpeed(ms);
+    emit changed(index);
 }
 
-uint CueStack::fadeInSpeed() const
+uint CueStack::fadeInSpeed(int index) const
 {
-    return m_fadeInSpeed;
+    if (index < 0)
+        return m_fadeInSpeed;
+    else
+        return m_cues[index].fadeInSpeed();
 }
 
-void CueStack::setFadeOutSpeed(uint ms)
+void CueStack::setFadeOutSpeed(uint ms, int index)
 {
-    m_fadeOutSpeed = ms;
+    if (index < 0)
+        m_fadeOutSpeed = ms;
+    else
+        m_cues[index].setFadeOutSpeed(ms);
+    emit changed(index);
 }
 
-uint CueStack::fadeOutSpeed() const
+uint CueStack::fadeOutSpeed(int index) const
 {
-    return m_fadeOutSpeed;
+    if (index < 0)
+        return m_fadeOutSpeed;
+    else
+        return m_cues[index].fadeOutSpeed();
 }
 
-void CueStack::setDuration(uint ms)
+void CueStack::setDuration(uint ms, int index)
 {
-    m_duration = ms;
+    if (index < 0)
+        m_duration = ms;
+    else
+        m_cues[index].setDuration(ms);
+    emit changed(index);
 }
 
-uint CueStack::duration() const
+uint CueStack::duration(int index) const
 {
-    return m_duration;
+    if (index < 0)
+        return m_duration;
+    else
+        return m_cues[index].duration();
 }
 
 /****************************************************************************
@@ -403,7 +445,9 @@ void CueStack::write(UniverseArray* ua)
     {
         // previousCue() was requested by user
         m_elapsed = 0;
-        switchCue(previous(), ua);
+        int from = m_currentIndex;
+        int to = previous();
+        switchCue(from, to, ua);
         m_previous = false;
         emit currentCueChanged(m_currentIndex);
     }
@@ -411,7 +455,9 @@ void CueStack::write(UniverseArray* ua)
     {
         // nextCue() was requested by user
         m_elapsed = 0;
-        switchCue(next(), ua);
+        int from = m_currentIndex;
+        int to = next();
+        switchCue(from, to, ua);
         m_next = false;
         emit currentCueChanged(m_currentIndex);
     }
@@ -494,50 +540,53 @@ int CueStack::next()
     return m_currentIndex;
 }
 
-void CueStack::switchCue(int index, const UniverseArray* ua)
+void CueStack::switchCue(int from, int to, const UniverseArray* ua)
 {
     qDebug() << Q_FUNC_INFO;
 
-    Cue cue;
+    Cue newCue;
+    Cue oldCue;
     m_mutex.lock();
-    if (index >= 0 && index < m_cues.size())
-        cue = m_cues[index];
+    if (to >= 0 && to < m_cues.size())
+        newCue = m_cues[to];
+    if (from >= 0 && from < m_cues.size())
+        oldCue = m_cues[from];
     m_mutex.unlock();
 
-    QHashIterator <FadeChannel,FadeChannel> it(m_fader->channels());
-    while (it.hasNext() == true)
+    // Fade out the HTP channels of the previous cue
+    QHashIterator <uint,uchar> oldit(oldCue.values());
+    while (oldit.hasNext() == true)
     {
-        it.next();
-        FadeChannel fc = it.value();
+        oldit.next();
+
+        FadeChannel fc;
+        fc.setFixture(Fixture::invalidId());
+        fc.setChannel(oldit.key());
+
         if (fc.group(doc()) == QLCChannel::Intensity)
         {
-            fc.setStart(fc.current());
-            fc.setTarget(0);
             fc.setElapsed(0);
             fc.setReady(false);
-            fc.setFadeTime(fadeOutSpeed());
+            fc.setTarget(0);
+            fc.setFadeTime(oldCue.fadeOutSpeed());
+            insertStartValue(fc, ua);
             m_fader->add(fc);
-        }
-        else
-        {
-            // Remove LTP channels that are no longer in the new cue
-            if (cue.values().contains(fc.channel()) == false)
-                m_fader->remove(fc);
         }
     }
 
-    QHashIterator <uint,uchar> cit(cue.values());
-    while (cit.hasNext() == true)
+    // Fade in all channels of the new cue
+    QHashIterator <uint,uchar> newit(newCue.values());
+    while (newit.hasNext() == true)
     {
-        cit.next();
+        newit.next();
         FadeChannel fc;
 
         fc.setFixture(Fixture::invalidId());
-        fc.setChannel(cit.key());
-        fc.setTarget(cit.value());
+        fc.setChannel(newit.key());
+        fc.setTarget(newit.value());
         fc.setElapsed(0);
         fc.setReady(false);
-        fc.setFadeTime(fadeInSpeed());
+        fc.setFadeTime(newCue.fadeInSpeed());
         insertStartValue(fc, ua);
         m_fader->add(fc);
     }

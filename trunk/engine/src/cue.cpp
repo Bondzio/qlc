@@ -27,24 +27,37 @@
 
 Cue::Cue(const QString& name)
     : m_name(name)
+    , m_fadeInSpeed(0)
+    , m_fadeOutSpeed(0)
+    , m_duration(0)
 {
 }
 
 Cue::Cue(const QHash <uint,uchar> values)
     : m_name(QString())
     , m_values(values)
+    , m_fadeInSpeed(0)
+    , m_fadeOutSpeed(0)
+    , m_duration(0)
 {
 }
 
 Cue::Cue(const Cue& cue)
     : m_name(cue.name())
     , m_values(cue.values())
+    , m_fadeInSpeed(cue.fadeInSpeed())
+    , m_fadeOutSpeed(cue.fadeOutSpeed())
+    , m_duration(cue.duration())
 {
 }
 
 Cue::~Cue()
 {
 }
+
+/****************************************************************************
+ * Name
+ ****************************************************************************/
 
 void Cue::setName(const QString& str)
 {
@@ -55,6 +68,10 @@ QString Cue::name() const
 {
     return m_name;
 }
+
+/****************************************************************************
+ * Values
+ ****************************************************************************/
 
 void Cue::setValue(uint channel, uchar value)
 {
@@ -80,6 +97,44 @@ QHash <uint,uchar> Cue::values() const
     return m_values;
 }
 
+/****************************************************************************
+ * Speed
+ ****************************************************************************/
+
+void Cue::setFadeInSpeed(uint ms)
+{
+    m_fadeInSpeed = ms;
+}
+
+uint Cue::fadeInSpeed() const
+{
+    return m_fadeInSpeed;
+}
+
+void Cue::setFadeOutSpeed(uint ms)
+{
+    m_fadeOutSpeed = ms;
+}
+
+uint Cue::fadeOutSpeed() const
+{
+    return m_fadeOutSpeed;
+}
+
+void Cue::setDuration(uint ms)
+{
+    m_duration = ms;
+}
+
+uint Cue::duration() const
+{
+    return m_duration;
+}
+
+/****************************************************************************
+ * Load & Save
+ ****************************************************************************/
+
 bool Cue::loadXML(const QDomElement& root)
 {
     qDebug() << Q_FUNC_INFO;
@@ -102,6 +157,10 @@ bool Cue::loadXML(const QDomElement& root)
             QString val = tag.text();
             if (ch.isEmpty() == false && val.isEmpty() == false)
                 setValue(ch.toUInt(), uchar(val.toUInt()));
+        }
+        else if (tag.tagName() == KXMLQLCCueSpeed)
+        {
+            loadXMLSpeed(tag);
         }
         else
         {
@@ -134,6 +193,33 @@ bool Cue::saveXML(QDomDocument* doc, QDomElement* stack_root) const
         e.appendChild(t);
         root.appendChild(e);
     }
+
+    saveXMLSpeed(doc, &root);
+
+    return true;
+}
+
+bool Cue::loadXMLSpeed(const QDomElement& speedRoot)
+{
+    if (speedRoot.tagName() != KXMLQLCCueSpeed)
+        return false;
+
+    m_fadeInSpeed = speedRoot.attribute(KXMLQLCCueSpeedFadeIn).toUInt();
+    m_fadeOutSpeed = speedRoot.attribute(KXMLQLCCueSpeedFadeOut).toUInt();
+    m_duration = speedRoot.attribute(KXMLQLCCueSpeedDuration).toUInt();
+
+    return true;
+}
+
+bool Cue::saveXMLSpeed(QDomDocument* doc, QDomElement* root) const
+{
+    QDomElement tag;
+
+    tag = doc->createElement(KXMLQLCCueSpeed);
+    tag.setAttribute(KXMLQLCCueSpeedFadeIn, QString::number(fadeInSpeed()));
+    tag.setAttribute(KXMLQLCCueSpeedFadeOut, QString::number(fadeOutSpeed()));
+    tag.setAttribute(KXMLQLCCueSpeedDuration, QString::number(duration()));
+    root->appendChild(tag);
 
     return true;
 }

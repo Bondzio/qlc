@@ -23,13 +23,12 @@
 #include <QStyleFactory>
 #include <QApplication>
 #include <QSettings>
+#include <QLocale>
 #include <QWidget>
 #include <QStyle>
 #include <QRect>
 
 #include "apputil.h"
-
-static QStyle* s_saneStyle = NULL;
 
 /****************************************************************************
  * Widget visibility helper
@@ -85,6 +84,8 @@ void AppUtil::ensureWidgetIsVisible(QWidget* widget)
 
 #define SETTINGS_SLIDERSTYLE "workspace/sliderstyle"
 
+static QStyle* s_saneStyle = NULL;
+
 QStyle* AppUtil::saneStyle()
 {
     if (s_saneStyle == NULL)
@@ -101,3 +102,11 @@ QStyle* AppUtil::saneStyle()
     return s_saneStyle;
 }
 
+/*****************************************************************************
+ * Conversion
+ *****************************************************************************/
+
+QString AppUtil::speedText(uint ms)
+{
+    return QLocale::system().toString(qreal(ms) / qreal(1000), 'f', 2);
+}

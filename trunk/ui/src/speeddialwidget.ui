@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SpeedDialWidget</class>
+ <widget class="QWidget" name="SpeedDialWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>146</width>
+    <height>478</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Fade In</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QDial" name="m_fadeInDial">
+        <property name="wrapping">
+         <bool>true</bool>
+        </property>
+        <property name="notchesVisible">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="m_fadeInContainer" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Fade Out</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QDial" name="m_fadeOutDial">
+        <property name="wrapping">
+         <bool>true</bool>
+        </property>
+        <property name="notchesVisible">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="m_fadeOutContainer" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Duration</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QDial" name="m_durationDial">
+        <property name="wrapping">
+         <bool>true</bool>
+        </property>
+        <property name="notchesVisible">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="m_durationContainer" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="m_optionalTextGroup">
+     <property name="title">
+      <string>Optional Text</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <widget class="QLineEdit" name="m_optionalTextEdit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>m_fadeInDial</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SpeedDialWidget</receiver>
+   <slot>slotFadeInDialChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_fadeOutDial</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SpeedDialWidget</receiver>
+   <slot>slotFadeOutDialChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>259</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_durationDial</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SpeedDialWidget</receiver>
+   <slot>slotDurationDialChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
+     <y>415</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>422</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotFadeInDialChanged(int)</slot>
+  <slot>slotFadeOutDialChanged(int)</slot>
+  <slot>slotDurationDialChanged(int)</slot>
+ </slots>
+</ui>

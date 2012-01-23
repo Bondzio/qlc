@@ -30,6 +30,9 @@ void Cue_Test::initial()
     Cue cue;
     QCOMPARE(cue.name(), QString());
     QCOMPARE(cue.values().size(), 0);
+    QCOMPARE(cue.fadeInSpeed(), uint(0));
+    QCOMPARE(cue.fadeOutSpeed(), uint(0));
+    QCOMPARE(cue.duration(), uint(0));
 
     cue = Cue("Foo");
     QCOMPARE(cue.name(), QString("Foo"));
@@ -89,6 +92,9 @@ void Cue_Test::copy()
     cue1.setValue(0, 1);
     cue1.setValue(1, 2);
     cue1.setValue(2, 3);
+    cue1.setFadeInSpeed(10);
+    cue1.setFadeOutSpeed(20);
+    cue1.setDuration(30);
 
     Cue cue2 = cue1;
     QCOMPARE(cue2.name(), QString("Foo"));
@@ -96,6 +102,9 @@ void Cue_Test::copy()
     QCOMPARE(cue2.value(0), uchar(1));
     QCOMPARE(cue2.value(1), uchar(2));
     QCOMPARE(cue2.value(2), uchar(3));
+    QCOMPARE(cue2.fadeInSpeed(), uint(10));
+    QCOMPARE(cue2.fadeOutSpeed(), uint(20));
+    QCOMPARE(cue2.duration(), uint(30));
 }
 
 void Cue_Test::save()
@@ -104,6 +113,9 @@ void Cue_Test::save()
     cue.setValue(0, 15);
     cue.setValue(31337, 255);
     cue.setValue(42, 127);
+    cue.setFadeInSpeed(10);
+    cue.setFadeOutSpeed(20);
+    cue.setDuration(30);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("Bar");
@@ -113,7 +125,7 @@ void Cue_Test::save()
     QCOMPARE(root.firstChild().toElement().tagName(), QString("Cue"));
     QCOMPARE(root.firstChild().toElement().attribute("Name"), QString("Foo"));
 
-    int value = 0;
+    int value = 0, speed = 0;
 
     QDomNode node = root.firstChild().firstChild();
     while (node.isNull() == false)
@@ -133,6 +145,13 @@ void Cue_Test::save()
             else
                 QFAIL(QString("Unexpected channel in value tag: %1").arg(ch).toUtf8().constData());
         }
+        else if (tag.tagName() == "Speed")
+        {
+            speed++;
+            QCOMPARE(tag.attribute("FadeIn").toInt(), 10);
+            QCOMPARE(tag.attribute("FadeOut").toInt(), 20);
+            QCOMPARE(tag.attribute("Duration").toInt(), 30);
+        }
         else
         {
             QFAIL(QString("Unexpected tag: %1").arg(tag.tagName()).toUtf8().constData());
@@ -141,6 +160,7 @@ void Cue_Test::save()
     }
 
     QCOMPARE(value, 3);
+    QCOMPARE(speed, 1);
 }
 
 void Cue_Test::load()
@@ -171,6 +191,12 @@ void Cue_Test::load()
     value.appendChild(valueText);
     root.appendChild(value);
 
+    QDomElement speed = doc.createElement("Speed");
+    speed.setAttribute("FadeIn", 100);
+    speed.setAttribute("FadeOut", 200);
+    speed.setAttribute("Duration", 300);
+    root.appendChild(speed);
+
     // Extra garbage
     value = doc.createElement("Foo");
     value.setAttribute("Channel", "69");
@@ -187,6 +213,9 @@ void Cue_Test::load()
     QCOMPARE(cue.value(1), uchar(127));
     QCOMPARE(cue.value(42), uchar(255));
     QCOMPARE(cue.value(69), uchar(0));
+    QCOMPARE(cue.fadeInSpeed(), uint(100));
+    QCOMPARE(cue.fadeOutSpeed(), uint(200));
+    QCOMPARE(cue.duration(), uint(300));
 }
 
 QTEST_APPLESS_MAIN(Cue_Test)

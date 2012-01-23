@@ -47,6 +47,12 @@ namespace AppUtil
      * sliders as well as buttons that don't obey background color setting.
      */
     QStyle* saneStyle();
+
+    /*********************************************************************
+     * Conversion
+     *********************************************************************/
+    /** Convert $ms milliseconds to QString(seconds.milliseconds) */
+    QString speedText(uint ms);
 };
 
 #endif

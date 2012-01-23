@@ -24,6 +24,7 @@
 
 #include "speedspinbox.h"
 #include "mastertimer.h"
+#include "apputil.h"
 
 #define SINGLESTEP int(MasterTimer::tick())
 #define DEFAULT (0 - SINGLESTEP)
@@ -68,7 +69,7 @@ QString SpeedSpinBox::textFromValue(int value) const
     else if (value == DEFAULT)
         return QString("Default");
     else
-        return locale().toString(qreal(value) / qreal(1000), 'f', 2);
+        return AppUtil::speedText(value);
 }
 
 void SpeedSpinBox::slotValueChanged(int value)

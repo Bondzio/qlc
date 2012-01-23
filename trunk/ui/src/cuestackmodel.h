@@ -53,6 +53,16 @@ private slots:
      * QAbstractItemModel
      ************************************************************************/
 public:
+    enum Columns
+    {
+        IndexColumn     = 0,
+        FadeInColumn    = 1,
+        FadeOutColumn   = 2,
+        DurationColumn  = 3,
+        NameColumn      = 4,
+        ColumnCount     = 5
+    };
+
     int columnCount(const QModelIndex& index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
@@ -68,6 +78,10 @@ public:
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
     QMimeData* mimeData(const QModelIndexList& indexes) const;
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
+
+private:
+    /** Convert $ms milliseconds to a nicer seconds.milliseconds figure */
+    QString speedText(uint ms) const;
 };
 
 #endif

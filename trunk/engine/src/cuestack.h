@@ -59,17 +59,27 @@ private:
     Doc* doc() const;
 
     /************************************************************************
+     * Name
+     ************************************************************************/
+public:
+    void setName(const QString& name, int index = -1);
+    QString name(int index = -1) const;
+
+private:
+    QString m_name;
+
+    /************************************************************************
      * Speed
      ************************************************************************/
 public:
-    void setFadeInSpeed(uint ms);
-    uint fadeInSpeed() const;
+    void setFadeInSpeed(uint ms, int index = -1);
+    uint fadeInSpeed(int index = -1) const;
 
-    void setFadeOutSpeed(uint ms);
-    uint fadeOutSpeed() const;
+    void setFadeOutSpeed(uint ms, int index = -1);
+    uint fadeOutSpeed(int index = -1) const;
 
-    void setDuration(uint ms);
-    uint duration() const;
+    void setDuration(uint ms, int index = -1);
+    uint duration(int index = -1) const;
 
 private:
     uint m_fadeInSpeed;
@@ -164,7 +174,7 @@ public:
 private:
     int next();
     int previous();
-    void switchCue(int index, const UniverseArray* ua);
+    void switchCue(int from, int to, const UniverseArray* ua);
     void insertStartValue(FadeChannel& fc, const UniverseArray* ua);
 
 private:

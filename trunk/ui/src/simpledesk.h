@@ -22,6 +22,7 @@
 #ifndef SIMPLEDESK_H
 #define SIMPLEDESK_H
 
+#include <QPointer>
 #include <QWidget>
 #include <QList>
 #include <QHash>
@@ -32,6 +33,7 @@
 
 class GrandMasterSlider;
 class SimpleDeskEngine;
+class SpeedDialWidget;
 class PlaybackSlider;
 class QDomDocument;
 class QDomElement;
@@ -128,6 +130,10 @@ private:
     void initCueStack();
     void updateCueStackButtons();
     void replaceCurrentCue();
+    void updateSpeedDials();
+
+    CueStack* currentCueStack() const;
+    int currentCueIndex() const;
 
 private slots:
     void slotCueStackStarted(uint stack);
@@ -137,9 +143,16 @@ private slots:
     void slotPreviousCueClicked();
     void slotNextCueClicked();
     void slotStopCueStackClicked();
-    void slotConfigureCueStackClicked();
     void slotEditCueStackClicked();
     void slotRecordCueClicked();
+
+    void slotFadeInDialChanged(uint ms);
+    void slotFadeOutDialChanged(uint ms);
+    void slotDurationDialChanged(uint ms);
+    void slotCueNameEdited(const QString& name);
+
+private:
+    QPointer<SpeedDialWidget> m_speedDials;
 
     /*********************************************************************
      * Load & Save

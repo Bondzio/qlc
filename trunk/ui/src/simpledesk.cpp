@@ -631,6 +631,8 @@ void SimpleDesk::slotEditCueStackClicked()
     }
     else
     {
+        resetUniverseSliders();
+
         if (m_speedDials != NULL)
             delete m_speedDials;
         m_speedDials = NULL;

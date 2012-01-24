@@ -133,15 +133,15 @@ QVariant CueStackModel::headerData(int section, Qt::Orientation orientation, int
     switch(section)
     {
     case IndexColumn:
-        return tr("##");
+        return tr("Number");
+    case FadeInColumn:
+        return tr("Fade In");
+    case FadeOutColumn:
+        return tr("Fade Out");
+    case DurationColumn:
+        return tr("Duration");
     case NameColumn:
         return tr("Cue");
-    case FadeInColumn:
-        return tr("In");
-    case FadeOutColumn:
-        return tr("Out");
-    case DurationColumn:
-        return tr("Dur");
     default:
         return QVariant();
     }

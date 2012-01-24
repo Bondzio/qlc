@@ -24,6 +24,12 @@
      </property>
      <item>
       <widget class="QGroupBox" name="m_universeGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Universe</string>
        </property>
@@ -31,6 +37,12 @@
      </item>
      <item>
       <widget class="QGroupBox" name="m_playbackGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Playback</string>
        </property>
@@ -42,6 +54,12 @@
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
       <widget class="QGroupBox" name="m_dmxPageGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>DMX Page</string>
        </property>
@@ -155,6 +173,12 @@
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="QGroupBox" name="m_cueStackGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Cue Stack</string>
        </property>
@@ -219,7 +243,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="6">
+        <item row="0" column="3" colspan="4">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -277,6 +301,12 @@
         </item>
         <item row="1" column="0" colspan="9">
          <widget class="QTreeView" name="m_cueStackView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="dragEnabled">
            <bool>true</bool>
           </property>

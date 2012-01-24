@@ -42,6 +42,8 @@ DMXSlider::DMXSlider(QWidget* parent)
 
     /* Value editor */
     m_edit = new QLineEdit(this);
+    m_edit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    m_edit->setMaxLength(3);
     m_edit->setAlignment(Qt::AlignHCenter);
     QIntValidator* validator = new QIntValidator(m_edit);
     validator->setRange(0, 255);

@@ -1,5 +1,5 @@
 /*
-  Q Light Controller - Fixture Definition Editor
+  Q Light Controller
   avolitesd4parser.h
 
   Copyright (C) Rui Barreiros
@@ -92,15 +92,28 @@ private:
     typedef QMap <QString,QLCChannel*> ChannelsMap;
 
 private:
+    /** Check if the given XML element contains an avolites function */
     bool isFunction(const QDomElement& elem) const;
-    bool is16Bit(const QDomElement& elem) const;
-    bool parseChannels(const QDomElement& elem, QLCFixtureDef *fixtureDef);
-    bool parseCapabilities(const QDomElement& elem, QLCChannel *chan, bool isFine = false);
-    bool parseModes(const QDomElement& elem, QLCFixtureDef *fixtureDef);
-    void parsePhysical(const QDomElement& elem, QLCFixtureMode *mode);
 
+    /** Check if the given XML element contains a 16bit function */
+    bool is16Bit(const QDomElement& elem) const;
+
+    /** Parse all channels from $elem into $fixtureDef */
+    bool parseChannels(const QDomElement& elem, QLCFixtureDef* fixtureDef);
+
+    /** Parse the capabilities from one channel contained in $elem into $chan (must exist) */
+    bool parseCapabilities(const QDomElement& elem, QLCChannel* chan, bool isFine = false);
+
+    /** Parse all modes contained under $elem into $fixtureDef */
+    bool parseModes(const QDomElement& elem, QLCFixtureDef* fixtureDef);
+
+    /** Parse the fixture's/mode's physical properties from $elem into $mode */
+    void parsePhysical(const QDomElement& elem, QLCFixtureMode* mode);
+
+    /** Convert string $attr into an Attributes enum */
     Attributes stringToAttributeEnum(const QString& attr);
 
+    /** Attempt to guess the fixture type from the channels/capabilities in $def */
     QString guessType(const QLCFixtureDef* def) const;
 
 private:
@@ -108,7 +121,7 @@ private:
     QDomDocument m_documentRoot;
     ChannelsMap m_channels;
 
-    static StringToEnumMap m_attributesMap;
+    static StringToEnumMap s_attributesMap;
 };
 
 #endif // AVOLITESD4PARSER_H

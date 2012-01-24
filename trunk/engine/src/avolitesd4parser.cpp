@@ -1,5 +1,5 @@
 /*
-  Q Light Controller - Fixture Definition Editor
+  Q Light Controller
   avolitesd4parser.cpp
 
   Copyright (C) Rui Barreiros
@@ -33,20 +33,92 @@
 #include "qlcchannel.h"
 #include "qlcfile.h"
 
-AvolitesD4Parser::StringToEnumMap AvolitesD4Parser::m_attributesMap;
+// Channel groups
+#define KD4GroupSpecial   "S"
+#define KD4GroupIntensity "I"
+#define KD4GroupPanTilt   "P"
+#define KD4GroupColour    "C"
+#define KD4GroupGobo      "G"
+#define KD4GroupBeam      "B"
+#define KD4GroupEffect    "E"
+
+// Channels
+#define KD4TagFixture   "Fixture"
+#define KD4TagName      "Name"
+#define KD4TagShortName "Shortname"
+#define KD4TagCompany   "Company"
+#define KD4TagControl   "Control"
+#define KD4TagID        "ID"
+#define KD4TagGroup     "Group"
+#define KD4TagSpeed     "Speed"
+#define KD4TagMacro     "Macro"
+#define KD4TagReserved  "Reserved"
+#define KD4TagShutter   "Shutter"
+#define KD4TagPan       "Pan"
+#define KD4TagTilt      "Tilt"
+#define KD4TagCyan      "Cyan"
+#define KD4TagMagenta   "Magenta"
+#define KD4TagYellow    "Yellow"
+#define KD4TagRed       "Red"
+#define KD4TagBlue      "Blue"
+#define KD4TagGreen     "Green"
+#define KD4TagPrism     "Prism"
+#define KD4TagEffect    "Effect"
+#define KD4TagAttribute "Attribute"
+#define KD4TagUpdate    "Update"
+
+// Capabilities
+#define KD4TagFunction                  "Function"
+#define KD4TagFunctionName              "Name"
+#define KD4TagFunctionDmx               "Dmx"
+#define KD4TagFunctionDmxValueSeparator '~'
+
+// Mode section
+#define KD4TagMode                 "Mode"
+#define KD4TagModeName             "Name"
+#define KD4TagModeInclude          "Include"
+#define KD4TagModeAttribute        "Attribute"
+#define KD4TagModeChannelOffset    "ChannelOffset"
+#define KD4TagModeID               "ID"
+#define KD4TagModeChannelSeparator ','
+
+// Physical section
+#define KD4TagPhysical                     "Physical"
+#define KD4TagPhysicalBulb                 "Bulb"
+#define KD4TagPhysicalBulbType             "Type"
+#define KD4TagPhysicalBulbLumens           "Lumens"
+#define KD4TagPhysicalBulbColourTemp       "ColourTemp"
+#define KD4TagPhysicalLens                 "Lens"
+#define KD4TagPhysicalLensName             "Name"
+#define KD4TagPhysicalLensDegrees          "Degrees"
+#define KD4TagPhysicalLensDegreesSeparator '~'
+#define KD4TagPhysicalWeight               "Wight"
+#define KD4TagPhysicalWeightKg             "Kg"
+#define KD4TagPhysicalSize                 "Size"
+#define KD4TagPhysicalSizeHeight           "Height"
+#define KD4TagPhysicalSizeWidth            "Width"
+#define KD4TagPhysicalSizeDepth            "Depth"
+#define KD4TagPhysicalFocus                "Focus"
+#define KD4TagPhysicalFocusType            "Type"
+#define KD4TagPhysicalFocusPanMax          "PanMax"
+#define KD4TagPhysicalFocusTiltMax         "TiltMax"
+
+// Static attibute map shared between instances of the parser, initialized only
+// once per application.
+AvolitesD4Parser::StringToEnumMap AvolitesD4Parser::s_attributesMap;
 
 AvolitesD4Parser::AvolitesD4Parser()
 {
-    if (m_attributesMap.isEmpty() == true)
+    if (s_attributesMap.isEmpty() == true)
     {
         // Setup our attribute mapping map helper
-        m_attributesMap.insert("S", AvolitesD4Parser::SPECIAL);
-        m_attributesMap.insert("I", AvolitesD4Parser::INTENSITY);
-        m_attributesMap.insert("P", AvolitesD4Parser::PANTILT);
-        m_attributesMap.insert("C", AvolitesD4Parser::COLOUR);
-        m_attributesMap.insert("G", AvolitesD4Parser::GOBO);
-        m_attributesMap.insert("B", AvolitesD4Parser::BEAM);
-        m_attributesMap.insert("E", AvolitesD4Parser::EFFECT);
+        s_attributesMap.insert(KD4GroupSpecial, AvolitesD4Parser::SPECIAL);
+        s_attributesMap.insert(KD4GroupIntensity, AvolitesD4Parser::INTENSITY);
+        s_attributesMap.insert(KD4GroupPanTilt, AvolitesD4Parser::PANTILT);
+        s_attributesMap.insert(KD4GroupColour, AvolitesD4Parser::COLOUR);
+        s_attributesMap.insert(KD4GroupGobo, AvolitesD4Parser::GOBO);
+        s_attributesMap.insert(KD4GroupBeam, AvolitesD4Parser::BEAM);
+        s_attributesMap.insert(KD4GroupEffect, AvolitesD4Parser::EFFECT);
     }
 }
 
@@ -74,9 +146,9 @@ bool AvolitesD4Parser::loadXML(const QString& path)
     }
 
     // check if the document has <Fixture></Fixture> if not then it's not a valid file
-    QDomElement el = m_documentRoot.namedItem("Fixture").toElement();
-    if (el.isNull() && (!el.hasAttribute("Name") ||
-        !el.hasAttribute("Shortname") || !el.hasAttribute("Company")))
+    QDomElement el = m_documentRoot.namedItem(KD4TagFixture).toElement();
+    if (el.isNull() && (!el.hasAttribute(KD4TagName) ||
+        !el.hasAttribute(KD4TagShortName) || !el.hasAttribute(KD4TagCompany)))
     {
         m_lastError = "wrong document format";
         return false;
@@ -98,17 +170,20 @@ bool AvolitesD4Parser::fillFixtureDef(QLCFixtureDef* fixtureDef)
     fixtureDef->setAuthor(copyright());
 
     // Parse all channels
-    if (!parseChannels(m_documentRoot.namedItem("Fixture").toElement().namedItem("Control").toElement(), fixtureDef))
+    if (!parseChannels(m_documentRoot.namedItem(KD4TagFixture).toElement().namedItem(KD4TagControl).toElement(), fixtureDef))
         return false;
 
     // Parse all modes
-    if (!parseModes(m_documentRoot.namedItem("Fixture").toElement(), fixtureDef))
+    if (!parseModes(m_documentRoot.namedItem(KD4TagFixture).toElement(), fixtureDef))
         return false;
 
     fixtureDef->setType(guessType(fixtureDef));
 
     // TODO TODO TODO
     // Maybe also import preset palettes and macros ?!?!?!?!
+    /**
+        Can't be done for now, as qxf files don't have any information on preset palettes or macros
+        for fixtures, they are automatically generated on the main application maybe in future... **/
 
     return true;
 }
@@ -123,7 +198,7 @@ QString AvolitesD4Parser::fixtureName() const
     if (m_documentRoot.isNull())
         return QString();
     else
-        return m_documentRoot.namedItem("Fixture").toElement().attribute("Name");
+        return m_documentRoot.namedItem(KD4TagFixture).toElement().attribute(KD4TagName);
 }
 
 QString AvolitesD4Parser::fixtureShortName() const
@@ -131,7 +206,7 @@ QString AvolitesD4Parser::fixtureShortName() const
     if (m_documentRoot.isNull())
         return QString();
     else
-        return m_documentRoot.namedItem("Fixture").toElement().attribute("ShortName");
+        return m_documentRoot.namedItem(KD4TagFixture).toElement().attribute(KD4TagShortName);
 }
 
 QString AvolitesD4Parser::fixtureCompany() const
@@ -139,7 +214,7 @@ QString AvolitesD4Parser::fixtureCompany() const
     if (m_documentRoot.isNull())
         return QString();
     else
-        return m_documentRoot.namedItem("Fixture").toElement().attribute("Company");
+        return m_documentRoot.namedItem(KD4TagFixture).toElement().attribute(KD4TagCompany);
 }
 
 QString AvolitesD4Parser::copyright() const
@@ -152,17 +227,17 @@ QLCChannel::Group AvolitesD4Parser::getGroupFromXML(const QDomElement& elem)
     if (elem.isNull())
         return QLCChannel::NoGroup;
 
-    switch (stringToAttributeEnum(elem.attribute("Group")))
+    switch (stringToAttributeEnum(elem.attribute(KD4TagGroup)))
     {
     case AvolitesD4Parser::SPECIAL:
-        if (elem.attribute("ID").contains("Speed", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Speed", Qt::CaseInsensitive))
+        if (elem.attribute(KD4TagID).contains(KD4TagSpeed, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagSpeed, Qt::CaseInsensitive))
             return QLCChannel::Speed;
-        else if (elem.attribute("ID").contains("Macro", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Macro", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagMacro, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagMacro, Qt::CaseInsensitive))
             return QLCChannel::Effect;
-        else if (elem.attribute("ID").contains("Reserved", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Reserved", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagReserved, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagReserved, Qt::CaseInsensitive))
             return QLCChannel::NoGroup;
         else
             return QLCChannel::Maintenance;
@@ -170,42 +245,42 @@ QLCChannel::Group AvolitesD4Parser::getGroupFromXML(const QDomElement& elem)
 
     default:
     case AvolitesD4Parser::INTENSITY:
-        if (elem.attribute("ID").contains("Shutter", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Shutter", Qt::CaseInsensitive))
+        if (elem.attribute(KD4TagID).contains(KD4TagShutter, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagShutter, Qt::CaseInsensitive))
             return QLCChannel::Shutter;
         else
             return QLCChannel::Intensity;
         break;
 
     case AvolitesD4Parser::PANTILT:
-        if (elem.attribute("ID").contains("Pan", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Pan", Qt::CaseInsensitive))
+        if (elem.attribute(KD4TagID).contains(KD4TagPan, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagPan, Qt::CaseInsensitive))
             return QLCChannel::Pan;
-        else if (elem.attribute("ID").contains("Tilt", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Tilt", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagTilt, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagTilt, Qt::CaseInsensitive))
             return QLCChannel::Tilt;
         else
             return QLCChannel::NoGroup;
         break;
 
     case AvolitesD4Parser::COLOUR:
-        if (elem.attribute("ID").contains("Cyan", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Cyan", Qt::CaseInsensitive))
+        if (elem.attribute(KD4TagID).contains(KD4TagCyan, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagCyan, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
-        else if (elem.attribute("ID").contains("Magenta", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Magenta", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagMagenta, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagMagenta, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
-        else if (elem.attribute("ID").contains("Yellow", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Yellow", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagYellow, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagYellow, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
-        else if (elem.attribute("ID").contains("Red", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Red", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagRed, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagRed, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
-        else if (elem.attribute("ID").contains("Green", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Gree", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagGreen, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagGreen, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
-        else if (elem.attribute("ID").contains("Blue", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Blue", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagBlue, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagBlue, Qt::CaseInsensitive))
             return QLCChannel::Intensity;
         else
             return QLCChannel::Colour;
@@ -220,11 +295,11 @@ QLCChannel::Group AvolitesD4Parser::getGroupFromXML(const QDomElement& elem)
         break;
 
     case AvolitesD4Parser::EFFECT:
-        if (elem.attribute("ID").contains("Prism", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Prism", Qt::CaseInsensitive))
+        if (elem.attribute(KD4TagID).contains(KD4TagPrism, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagPrism, Qt::CaseInsensitive))
             return QLCChannel::Prism;
-        else if (elem.attribute("ID").contains("Effect", Qt::CaseInsensitive)
-                || elem.attribute("Name").contains("Effect", Qt::CaseInsensitive))
+        else if (elem.attribute(KD4TagID).contains(KD4TagEffect, Qt::CaseInsensitive)
+                || elem.attribute(KD4TagName).contains(KD4TagEffect, Qt::CaseInsensitive))
             return QLCChannel::Effect;
         else
             return QLCChannel::NoGroup;
@@ -236,26 +311,26 @@ QLCChannel::Group AvolitesD4Parser::getGroupFromXML(const QDomElement& elem)
 
 QLCChannel::PrimaryColour AvolitesD4Parser::getColourFromXML(const QDomElement& elem)
 {
-    if (elem.attribute("Group").compare("C", Qt::CaseInsensitive) != 0)
+    if (elem.attribute(KD4TagGroup).compare(KD4GroupColour, Qt::CaseInsensitive) != 0)
         return QLCChannel::NoColour;
 
-    if (elem.attribute("ID").contains("Cyan", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Cyan", Qt::CaseInsensitive))
+    if (elem.attribute(KD4TagID).contains(KD4TagCyan, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagCyan, Qt::CaseInsensitive))
         return QLCChannel::Cyan;
-    else if (elem.attribute("ID").contains("Magenta", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Magenta", Qt::CaseInsensitive))
+    else if (elem.attribute(KD4TagID).contains(KD4TagMagenta, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagMagenta, Qt::CaseInsensitive))
         return QLCChannel::Magenta;
-    else if (elem.attribute("ID").contains("Yellow", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Yellow", Qt::CaseInsensitive))
+    else if (elem.attribute(KD4TagID).contains(KD4TagYellow, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagYellow, Qt::CaseInsensitive))
         return QLCChannel::Yellow;
-    else if (elem.attribute("ID").contains("Red", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Red", Qt::CaseInsensitive))
+    else if (elem.attribute(KD4TagID).contains(KD4TagRed, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagRed, Qt::CaseInsensitive))
         return QLCChannel::Red;
-    else if (elem.attribute("ID").contains("Green", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Green", Qt::CaseInsensitive))
+    else if (elem.attribute(KD4TagID).contains(KD4TagGreen, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagGreen, Qt::CaseInsensitive))
         return QLCChannel::Green;
-    else if (elem.attribute("ID").contains("Blue", Qt::CaseInsensitive)
-            || elem.attribute("Name").contains("Blue", Qt::CaseInsensitive))
+    else if (elem.attribute(KD4TagID).contains(KD4TagBlue, Qt::CaseInsensitive)
+            || elem.attribute(KD4TagName).contains(KD4TagBlue, Qt::CaseInsensitive))
         return QLCChannel::Blue;
     else
         return QLCChannel::NoColour;
@@ -263,10 +338,10 @@ QLCChannel::PrimaryColour AvolitesD4Parser::getColourFromXML(const QDomElement& 
 
 bool AvolitesD4Parser::isFunction(const QDomElement& elem) const
 {
-    QDomElement el = elem.firstChildElement("Function");
-    for (; !el.isNull(); el = el.nextSiblingElement("Function"))
+    QDomElement el = elem.firstChildElement(KD4TagFunction);
+    for (; !el.isNull(); el = el.nextSiblingElement(KD4TagFunction))
     {
-        if (!el.attribute("Update").isEmpty())
+        if (!el.attribute(KD4TagUpdate).isEmpty())
             return true;
     }
 
@@ -275,26 +350,42 @@ bool AvolitesD4Parser::isFunction(const QDomElement& elem) const
 
 bool AvolitesD4Parser::is16Bit(const QDomElement& elem) const
 {
-    QDomElement el = elem.firstChildElement("Function");
-    for (; !el.isNull(); el = el.nextSiblingElement("Function"))
+    QDomElement el = elem.firstChildElement(KD4TagFunction);
+    for (; !el.isNull(); el = el.nextSiblingElement(KD4TagFunction))
     {
-        QString dmx = el.attribute("Dmx");
-        QStringList dmxValues = dmx.split('~');
+        QString dmx = el.attribute(KD4TagFunctionDmx);
+        QStringList dmxValues = dmx.split(KD4TagFunctionDmxValueSeparator);
 
-        if (dmxValues.value(1).toInt() > 256)
+        if (dmxValues.isEmpty())
+            return false;
+
+        // I remember avolites sometimes switches the sides on dmx values, sometimes, the left of the ~
+        // is not always the lowest, better check both sides
+
+        if (dmxValues.value(0).toInt() > 256)
             return true;
+
+        // Is there aright side ? (there should always be something in the right side of the ~,
+        // or avolites desks won't parse the file, anyway, there should be a check, ir some smart
+        // dude will complain this crashes with his D4 file)
+
+        if (dmxValues.size() > 1)
+        {
+            if (dmxValues.value(1).toInt() > 256)
+                return true;
+        }
     }
 
     return false;
 }
 
-bool AvolitesD4Parser::parseChannels(const QDomElement &elem, QLCFixtureDef* fixtureDef)
+bool AvolitesD4Parser::parseChannels(const QDomElement& elem, QLCFixtureDef* fixtureDef)
 {
-    QDomElement el = elem.firstChildElement("Attribute");
-    for (; !el.isNull(); el = el.nextSiblingElement("Attribute"))
+    QDomElement el = elem.firstChildElement(KD4TagAttribute);
+    for (; !el.isNull(); el = el.nextSiblingElement(KD4TagAttribute))
     {
         // Small integrity check
-        if (el.attribute("ID").isEmpty())
+        if (el.attribute(KD4TagID).isEmpty())
             continue;
 
         // If this attribute is a function (i.e. an attribute used as a control variable for other attributes)
@@ -303,14 +394,14 @@ bool AvolitesD4Parser::parseChannels(const QDomElement &elem, QLCFixtureDef* fix
             continue;
 
         QLCChannel* chan = new QLCChannel();
-        chan->setName(el.attribute("Name"));
+        chan->setName(el.attribute(KD4TagName));
         chan->setGroup(getGroupFromXML(el));
         chan->setColour(getColourFromXML(el));
         chan->setControlByte(QLCChannel::MSB);
 
         // add channel to fixture definition
         fixtureDef->addChannel(chan);
-        m_channels.insert(el.attribute("ID"), chan);
+        m_channels.insert(el.attribute(KD4TagID), chan);
 
         // if this channel is a NoGroup then we don't need to continue
         // no capabilities nor 16 bit channel
@@ -320,17 +411,20 @@ bool AvolitesD4Parser::parseChannels(const QDomElement &elem, QLCFixtureDef* fix
         // parse capabilities
         if (!parseCapabilities(el, chan))
         {
-            m_channels.remove(el.attribute("ID"));
+            m_channels.remove(el.attribute(KD4TagID));
             delete chan;
             return false;
         }
 
         // If we have a DMX attribute higher than 255 means we have an attribute with a 16bit precision
         // so, we add another channel, with 'Fine' appended to it's name and set the LSB controlbyte
+
+        // NOTE: this can be changed in the future, pending the revamp over adding 16bit capabilities to any channel
+        // not only pan/tiltm, therefore I didn't add a constant for Fine and kept it as it.
         if (is16Bit(el))
         {
             QLCChannel* fchan = new QLCChannel();
-            fchan->setName(el.attribute("Name") + " Fine");
+            fchan->setName(el.attribute(KD4TagName) + " Fine");
             fchan->setGroup(getGroupFromXML(el));
             fchan->setColour(getColourFromXML(el));
             fchan->setControlByte(QLCChannel::LSB);
@@ -344,24 +438,31 @@ bool AvolitesD4Parser::parseChannels(const QDomElement &elem, QLCFixtureDef* fix
 
             // Finally add channel to fixture definition
             fixtureDef->addChannel(fchan);
-            m_channels.insert(el.attribute("ID") + " Fine", fchan);
+            m_channels.insert(el.attribute(KD4TagID) + " Fine", fchan);
         }
     }
 
     return true;
 }
 
-bool AvolitesD4Parser::parseCapabilities(const QDomElement &elem, QLCChannel* chan, bool isFine)
+bool AvolitesD4Parser::parseCapabilities(const QDomElement& elem, QLCChannel* chan, bool isFine)
 {
-    QDomElement el = elem.firstChildElement("Function");
-    for (; !el.isNull(); el = el.nextSiblingElement("Function"))
+    QDomElement el = elem.firstChildElement(KD4TagFunction);
+    for (; !el.isNull(); el = el.nextSiblingElement(KD4TagFunction))
     {
         // Small integrity check
-        if (el.attribute("Name").isEmpty())
+        if (el.attribute(KD4TagFunctionName).isEmpty())
             continue;
 
-        QString dmx = el.attribute("Dmx");
-        QStringList dmxValues = dmx.split('~');
+        QString dmx = el.attribute(KD4TagFunctionDmx);
+        QStringList dmxValues = dmx.split(KD4TagFunctionDmxValueSeparator);
+
+        // Here, instead of checking all the time for both dmxValues, it's more efficient to
+        // set a default value if it's missing
+        if (dmxValues.size() == 0)
+            dmxValues << QString("0") << QString("0");
+        else if (dmxValues.size() == 1)
+            dmxValues << QString("0");
 
         // if were trying to get capabilities from a 16bit channel, we need to change them to 8 bit
         int minValue = 0, maxValue = 0;
@@ -377,7 +478,7 @@ bool AvolitesD4Parser::parseCapabilities(const QDomElement &elem, QLCChannel* ch
             maxValue = dmxValues.value(1).toInt();
 
         // Guess what, I seen this happen, it seems min value is not always on the left of the ~
-        // sometimes they're switched!!!!!!!!!!!
+        // sometimes they're switched!
         if (minValue > maxValue)
         {
             int tmp = maxValue;
@@ -385,7 +486,7 @@ bool AvolitesD4Parser::parseCapabilities(const QDomElement &elem, QLCChannel* ch
             minValue = tmp;
         }
 
-        QString name = el.attribute("Name");
+        QString name = el.attribute(KD4TagFunctionName);
         if (isFine)
             name += " Fine";
 
@@ -400,43 +501,43 @@ bool AvolitesD4Parser::parseCapabilities(const QDomElement &elem, QLCChannel* ch
     return true;
 }
 
-bool AvolitesD4Parser::parseModes(const QDomElement &elem, QLCFixtureDef* fixtureDef)
+bool AvolitesD4Parser::parseModes(const QDomElement& elem, QLCFixtureDef* fixtureDef)
 {
-    QDomElement el = elem.firstChildElement("Mode");
-    for (; !el.isNull(); el = el.nextSiblingElement("Mode"))
+    QDomElement el = elem.firstChildElement(KD4TagMode);
+    for (; !el.isNull(); el = el.nextSiblingElement(KD4TagMode))
     {
-        if (el.attribute("Name").isEmpty())
+        if (el.attribute(KD4TagModeName).isEmpty())
             continue;
 
         QLCFixtureMode* mode = new QLCFixtureMode(fixtureDef);
-        mode->setName(el.attribute("Name"));
+        mode->setName(el.attribute(KD4TagModeName));
 
         // Parse physical
-        parsePhysical(el.namedItem("Physical").toElement(), mode);
+        parsePhysical(el.namedItem(KD4TagPhysical).toElement(), mode);
 
         QMap <int,QLCChannel*> channelList;
-        QDomElement e = el.namedItem("Include").toElement().firstChildElement("Attribute");
-        for (; !e.isNull(); e = e.nextSiblingElement("Attribute"))
+        QDomElement e = el.namedItem(KD4TagModeInclude).toElement().firstChildElement(KD4TagModeAttribute);
+        for (; !e.isNull(); e = e.nextSiblingElement(KD4TagModeAttribute))
         {
             // Some channels are conditionals not real channels
-            if (e.attribute("ChannelOffset").isEmpty())
+            if (e.attribute(KD4TagModeChannelOffset).isEmpty())
                 continue;
 
-            if (m_channels.contains(e.attribute("ID")))
+            if (m_channels.contains(e.attribute(KD4TagModeID)))
             {
                 // might be a 16 bit channel, so we have 2 DMX addresses
-                QString dmx = e.attribute("ChannelOffset");
-                if (dmx.contains(",", Qt::CaseInsensitive))
+                QString dmx = e.attribute(KD4TagModeChannelOffset);
+                if (dmx.contains(KD4TagModeChannelSeparator, Qt::CaseInsensitive))
                 {
                     // 16 bit address, we need to add 2 channels, this one, and we need the fine one
-                    QStringList dmxValues = dmx.split(",");
-                    // if there's more than 2 addresses, bail out, don't know how to handle this, shouldn't be
-                    if (dmxValues.count() > 2)
+                    QStringList dmxValues = dmx.split(KD4TagModeChannelSeparator);
+                    // if there's more than 2 addresses, or less than 2, bail out, don't know how to handle this, shouldn't happen ever.
+                    if (dmxValues.size() > 2 || dmxValues.size() < 2)
                         continue;
 
                     // Add this one
-                    channelList.insert(dmxValues.value(0).toInt(), m_channels.value(e.attribute("ID")));
-                    QString name = m_channels.value(e.attribute("ID"))->name();
+                    channelList.insert(dmxValues.value(0).toInt(), m_channels.value(e.attribute(KD4TagID)));
+                    QString name = m_channels.value(e.attribute(KD4TagModeID))->name();
 
                     // Search for the fine one
                     QMapIterator <QString,QLCChannel*> it(m_channels);
@@ -452,7 +553,7 @@ bool AvolitesD4Parser::parseModes(const QDomElement &elem, QLCFixtureDef* fixtur
                 }
                 else
                 {
-                    channelList.insert(dmx.toInt(), m_channels.value(e.attribute("ID")));
+                    channelList.insert(dmx.toInt(), m_channels.value(e.attribute(KD4TagModeID)));
                 }
             }
         }
@@ -472,27 +573,34 @@ bool AvolitesD4Parser::parseModes(const QDomElement &elem, QLCFixtureDef* fixtur
     return true;
 }
 
-void AvolitesD4Parser::parsePhysical(const QDomElement &el, QLCFixtureMode* mode)
+void AvolitesD4Parser::parsePhysical(const QDomElement& el, QLCFixtureMode* mode)
 {
     QLCPhysical phys;
-    phys.setBulbType(el.namedItem("Bulb").toElement().attribute("Type"));
-    phys.setBulbLumens(el.namedItem("Bulb").toElement().attribute("Lumens").toInt());
-    phys.setBulbColourTemperature(el.namedItem("Bulb").toElement().attribute("ColourTemp").toInt());
-    phys.setLensName(el.namedItem("Lens").toElement().attribute("Name"));
+    phys.setBulbType(el.namedItem(KD4TagPhysicalBulb).toElement().attribute(KD4TagPhysicalBulbType));
+    phys.setBulbLumens(el.namedItem(KD4TagPhysicalBulb).toElement().attribute(KD4TagPhysicalBulbLumens).toInt());
+    phys.setBulbColourTemperature(el.namedItem(KD4TagPhysicalBulb).toElement().attribute(KD4TagPhysicalBulbColourTemp).toInt());
+    phys.setLensName(el.namedItem(KD4TagPhysicalLens).toElement().attribute(KD4TagName));
 
-    QString degrees = el.namedItem("Lens").toElement().attribute("Degrees");
-    if (degrees.contains("~"))
+    QString degrees = el.namedItem(KD4TagPhysicalLens).toElement().attribute(KD4TagPhysicalLensDegrees);
+    if (degrees.contains(KD4TagPhysicalLensDegreesSeparator))
     {
-        QStringList deg = degrees.split('~');
-        if (deg.value(0).toInt() > deg.value(1).toInt())
+        QStringList deg = degrees.split(KD4TagPhysicalLensDegreesSeparator);
+        if (deg.size() == 2)
         {
-            phys.setLensDegreesMin(deg.value(1).toInt());
+            if (deg.value(0).toInt() > deg.value(1).toInt())
+            {
+                phys.setLensDegreesMin(deg.value(1).toInt());
+                phys.setLensDegreesMax(deg.value(0).toInt());
+            }
+            else
+            {
+                phys.setLensDegreesMin(deg.value(0).toInt());
+                phys.setLensDegreesMax(deg.value(1).toInt());
+            }
+        } else if (deg.size() == 1)
+        {
             phys.setLensDegreesMax(deg.value(0).toInt());
-        }
-        else
-        {
             phys.setLensDegreesMin(deg.value(0).toInt());
-            phys.setLensDegreesMax(deg.value(1).toInt());
         }
     }
     else if (!degrees.isEmpty())
@@ -501,15 +609,15 @@ void AvolitesD4Parser::parsePhysical(const QDomElement &el, QLCFixtureMode* mode
         phys.setLensDegreesMin(degrees.toInt());
     }
 
-    phys.setWeight(el.namedItem("Weight").toElement().attribute("Kg").toDouble());
+    phys.setWeight(el.namedItem(KD4TagPhysicalWeight).toElement().attribute(KD4TagPhysicalWeightKg).toDouble());
 
-    phys.setHeight((int)(el.namedItem("Size").toElement().attribute("Height").toDouble() * 1000));
-    phys.setWidth((int)(el.namedItem("Size").toElement().attribute("Width").toDouble() * 1000));
-    phys.setDepth((int)(el.namedItem("Size").toElement().attribute("Depth").toDouble() * 1000));
+    phys.setHeight((int)(el.namedItem(KD4TagPhysicalSize).toElement().attribute(KD4TagPhysicalSizeHeight).toDouble() * 1000));
+    phys.setWidth((int)(el.namedItem(KD4TagPhysicalSize).toElement().attribute(KD4TagPhysicalSizeWidth).toDouble() * 1000));
+    phys.setDepth((int)(el.namedItem(KD4TagPhysicalSize).toElement().attribute(KD4TagPhysicalSizeDepth).toDouble() * 1000));
 
-    phys.setFocusType(el.namedItem("Focus").toElement().attribute("Type"));
-    phys.setFocusPanMax(el.namedItem("Focus").toElement().attribute("PanMax").toInt());
-    phys.setFocusTiltMax(el.namedItem("Focus").toElement().attribute("TiltMax").toInt());
+    phys.setFocusType(el.namedItem(KD4TagPhysicalFocus).toElement().attribute(KD4TagPhysicalFocusType));
+    phys.setFocusPanMax(el.namedItem(KD4TagPhysicalFocus).toElement().attribute(KD4TagPhysicalFocusPanMax).toInt());
+    phys.setFocusTiltMax(el.namedItem(KD4TagPhysicalFocus).toElement().attribute(KD4TagPhysicalFocusTiltMax).toInt());
 
     mode->setPhysical(phys);
 }
@@ -520,8 +628,8 @@ AvolitesD4Parser::Attributes AvolitesD4Parser::stringToAttributeEnum(const QStri
     if (attr.isEmpty())
         return AvolitesD4Parser::SPECIAL;
 
-    if (m_attributesMap.value(attr.toUpper()))
-        return m_attributesMap.value(attr.toUpper());
+    if (s_attributesMap.value(attr.toUpper()))
+        return s_attributesMap.value(attr.toUpper());
     else
         return AvolitesD4Parser::SPECIAL;
 }

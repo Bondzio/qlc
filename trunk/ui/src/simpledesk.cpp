@@ -404,8 +404,8 @@ void SimpleDesk::initCueStack()
     connect(m_recordCueButton, SIGNAL(clicked()), this, SLOT(slotRecordCueClicked()));
 
     connect(m_cueStackView->selectionModel(),
-            SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
-            this, SLOT(slotCueStackViewCurrentItemChanged(const QModelIndex&)));
+            SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
+            this, SLOT(slotCueStackSelectionChanged()));
 }
 
 void SimpleDesk::updateCueStackButtons()
@@ -446,12 +446,31 @@ void SimpleDesk::updateSpeedDials()
     if (m_speedDials == NULL)
         return;
 
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
+
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
 
-    QModelIndex index = m_cueStackView->currentIndex();
-    if (index.row() >= 0 && index.row() < cueStack->cues().size())
+    if (selected.size() == 0)
     {
+        m_speedDials->setEnabled(false);
+
+        m_speedDials->setWindowTitle(tr("No selection"));
+        m_speedDials->setFadeInSpeed(0);
+        m_speedDials->setFadeOutSpeed(0);
+        m_speedDials->setDuration(0);
+
+        m_speedDials->setOptionalTextTitle(QString());
+        m_speedDials->setOptionalText(QString());
+    }
+    else if (selected.size() == 1)
+    {
+        m_speedDials->setEnabled(true);
+
+        QModelIndex index = selected.first();
+        Q_ASSERT(index.row() >= 0 && index.row() < cueStack->cues().size());
         Cue cue = cueStack->cues()[index.row()];
         m_speedDials->setWindowTitle(cue.name());
         m_speedDials->setFadeInSpeed(cue.fadeInSpeed());
@@ -463,7 +482,15 @@ void SimpleDesk::updateSpeedDials()
     }
     else
     {
-        m_speedDials->setWindowTitle(tr("Cuestack %1").arg(m_selectedPlayback + 1));
+        m_speedDials->setEnabled(true);
+
+        m_speedDials->setWindowTitle(tr("Multiple Cues"));
+        m_speedDials->setFadeInSpeed(0);
+        m_speedDials->setFadeOutSpeed(0);
+        m_speedDials->setDuration(0);
+
+        m_speedDials->setOptionalTextTitle(QString());
+        m_speedDials->setOptionalText(QString());
     }
 }
 
@@ -507,22 +534,47 @@ void SimpleDesk::slotCueStackStopped(uint stack)
     updateCueStackButtons();
 }
 
-void SimpleDesk::slotCueStackViewCurrentItemChanged(const QModelIndex& index)
+void SimpleDesk::slotCueStackSelectionChanged()
 {
     qDebug() << Q_FUNC_INFO;
+
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
+
     updateCueStackButtons();
 
     if (m_editCueStackButton->isChecked() == true)
     {
-        CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
-        Q_ASSERT(cueStack != NULL);
-
-        if (index.row() >= 0 && index.row() < cueStack->cues().size())
+        if (selected.size() == 0)
         {
-            Cue cue = cueStack->cues()[index.row()];
-            m_engine->setCue(cue);
-            slotUniversePageChanged(m_universePageSpin->value());
+            resetUniverseSliders();
+            m_universeGroup->setEnabled(false);
         }
+        else if (selected.size() == 1)
+        {
+            m_universeGroup->setEnabled(true);
+
+            CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
+            Q_ASSERT(cueStack != NULL);
+
+            QModelIndex index = selected.first();
+            if (index.row() >= 0 && index.row() < cueStack->cues().size())
+            {
+                Cue cue = cueStack->cues()[index.row()];
+                m_engine->setCue(cue);
+                slotUniversePageChanged(m_universePageSpin->value());
+            }
+        }
+        else
+        {
+            m_universeGroup->setEnabled(false);
+            resetUniverseSliders();
+        }
+    }
+    else
+    {
+        m_universeGroup->setEnabled(true);
     }
 
     updateSpeedDials();
@@ -555,7 +607,8 @@ void SimpleDesk::slotStopCueStackClicked()
 void SimpleDesk::slotEditCueStackClicked()
 {
     qDebug() << Q_FUNC_INFO;
-    slotCueStackViewCurrentItemChanged(m_cueStackView->currentIndex());
+
+    slotCueStackSelectionChanged();
     if (m_editCueStackButton->isChecked() == true)
     {
         if (m_speedDials == NULL)
@@ -578,8 +631,6 @@ void SimpleDesk::slotEditCueStackClicked()
     }
     else
     {
-        resetUniverseSliders();
-
         if (m_speedDials != NULL)
             delete m_speedDials;
         m_speedDials = NULL;
@@ -616,34 +667,42 @@ void SimpleDesk::slotRecordCueClicked()
 
 void SimpleDesk::slotFadeInDialChanged(uint ms)
 {
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
     CueStack* cueStack = currentCueStack();
-    int index = currentCueIndex();
-    if (index >= 0 && index < cueStack->cues().size())
-        cueStack->setFadeInSpeed(ms, index);
+    foreach (QModelIndex index, selected)
+        cueStack->setFadeInSpeed(ms, index.row());
 }
 
 void SimpleDesk::slotFadeOutDialChanged(uint ms)
 {
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
     CueStack* cueStack = currentCueStack();
-    int index = currentCueIndex();
-    if (index >= 0 && index < cueStack->cues().size())
-        cueStack->setFadeOutSpeed(ms, index);
+    foreach (QModelIndex index, selected)
+        cueStack->setFadeOutSpeed(ms, index.row());
 }
 
 void SimpleDesk::slotDurationDialChanged(uint ms)
 {
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
     CueStack* cueStack = currentCueStack();
-    int index = currentCueIndex();
-    if (index >= 0 && index < cueStack->cues().size())
-        cueStack->setDuration(ms, index);
+    foreach (QModelIndex index, selected)
+        cueStack->setDuration(ms, index.row());
 }
 
 void SimpleDesk::slotCueNameEdited(const QString& name)
 {
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
     CueStack* cueStack = currentCueStack();
-    int index = currentCueIndex();
-    if (index >= 0 && index < cueStack->cues().size())
-        cueStack->setName(name, index);
+    if (selected.size() == 1)
+        cueStack->setName(name, selected.first().row());
 }
 
 /****************************************************************************

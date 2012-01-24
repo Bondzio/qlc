@@ -138,7 +138,7 @@ private:
 private slots:
     void slotCueStackStarted(uint stack);
     void slotCueStackStopped(uint stack);
-    void slotCueStackViewCurrentItemChanged(const QModelIndex& index);
+    void slotCueStackSelectionChanged();
 
     void slotPreviousCueClicked();
     void slotNextCueClicked();

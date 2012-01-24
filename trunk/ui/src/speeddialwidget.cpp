@@ -34,6 +34,7 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     , m_fadeInPrev(0)
     , m_fadeOutPrev(0)
     , m_durationPrev(0)
+    , m_preventSignals(false)
 {
     setupUi(this);
 
@@ -81,7 +82,9 @@ SpeedDialWidget::~SpeedDialWidget()
 
 void SpeedDialWidget::setFadeInSpeed(uint ms)
 {
+    m_preventSignals = true;
     m_fadeInSpin->setValue(ms);
+    m_preventSignals = false;
 }
 
 uint SpeedDialWidget::fadeIn() const
@@ -91,7 +94,9 @@ uint SpeedDialWidget::fadeIn() const
 
 void SpeedDialWidget::setFadeOutSpeed(uint ms)
 {
+    m_preventSignals = true;
     m_fadeOutSpin->setValue(ms);
+    m_preventSignals = false;
 }
 
 uint SpeedDialWidget::fadeOut() const
@@ -101,7 +106,9 @@ uint SpeedDialWidget::fadeOut() const
 
 void SpeedDialWidget::setDuration(uint ms)
 {
+    m_preventSignals = true;
     m_durationSpin->setValue(ms);
+    m_preventSignals = false;
 }
 
 uint SpeedDialWidget::duration() const
@@ -171,16 +178,19 @@ void SpeedDialWidget::slotDurationDialChanged(int value)
 
 void SpeedDialWidget::slotFadeInSpinChanged(int value)
 {
-    emit fadeInChanged(uint(value));
+    if (m_preventSignals == false)
+        emit fadeInChanged(uint(value));
 }
 
 void SpeedDialWidget::slotFadeOutSpinChanged(int value)
 {
-    emit fadeOutChanged(uint(value));
+    if (m_preventSignals == false)
+        emit fadeOutChanged(uint(value));
 }
 
 void SpeedDialWidget::slotDurationSpinChanged(int value)
 {
-    emit durationChanged(uint(value));
+    if (m_preventSignals == false)
+        emit durationChanged(uint(value));
 }
 

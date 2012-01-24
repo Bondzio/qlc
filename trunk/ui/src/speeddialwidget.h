@@ -93,6 +93,8 @@ private:
     int m_fadeInPrev;
     int m_fadeOutPrev;
     int m_durationPrev;
+
+    bool m_preventSignals;
 };
 
 #endif

@@ -37,11 +37,6 @@
      <property name="allColumnsShowFocus">
       <bool>true</bool>
      </property>
-     <column>
-      <property name="text">
-       <string>Outputs</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item row="1" column="0" rowspan="3">

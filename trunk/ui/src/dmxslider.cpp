@@ -42,8 +42,8 @@ DMXSlider::DMXSlider(QWidget* parent)
 
     /* Value editor */
     m_edit = new QLineEdit(this);
-    m_edit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     m_edit->setMaxLength(3);
+    m_edit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     m_edit->setAlignment(Qt::AlignHCenter);
     QIntValidator* validator = new QIntValidator(m_edit);
     validator->setRange(0, 255);
@@ -52,17 +52,14 @@ DMXSlider::DMXSlider(QWidget* parent)
     layout()->setAlignment(m_edit, Qt::AlignHCenter);
     connect(m_edit, SIGNAL(textEdited(QString)), this, SLOT(slotValueEdited(QString)));
 
-    QHBoxLayout* hbox = new QHBoxLayout;
-    layout()->addItem(hbox);
-    hbox->addStretch(1);
-
     /* Value slider */
     m_slider = new QSlider(this);
-    m_slider->setRange(0, 255);
+    m_slider->setRange(0, UCHAR_MAX);
     m_slider->setTickInterval(16);
     m_slider->setTickPosition(QSlider::TicksBothSides);
     m_slider->setStyle(AppUtil::saneStyle());
-    hbox->addWidget(m_slider);
+    layout()->addWidget(m_slider);
+    layout()->setAlignment(m_slider, Qt::AlignRight);
     connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderChanged(int)));
 
     /* Label */

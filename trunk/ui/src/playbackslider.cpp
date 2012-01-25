@@ -64,7 +64,7 @@ PlaybackSlider::PlaybackSlider(QWidget* parent)
 
     /* Value slider */
     m_slider = new QSlider(this);
-    m_slider->setRange(0, 255);
+    m_slider->setRange(0, UCHAR_MAX);
     m_slider->setTickInterval(16);
     m_slider->setTickPosition(QSlider::TicksBothSides);
     m_slider->setStyle(AppUtil::saneStyle());

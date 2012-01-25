@@ -22,6 +22,12 @@
 #include <QMdiSubWindow>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QToolButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QGroupBox>
+#include <QTreeView>
+#include <QSpinBox>
 #include <QMdiArea>
 #include <QDebug>
 
@@ -45,6 +51,8 @@
 #define COL_NUM  0
 #define COL_NAME 1
 
+#define SETTINGS_SPLITTER "simpledesk/splitter"
+
 SimpleDesk* SimpleDesk::s_instance = NULL;
 
 /*****************************************************************************
@@ -60,9 +68,9 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
 {
     qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
-    setupUi(this);
 
     initEngine();
+    initView();
     initUniverseSliders();
     initUniversePager();
     initGrandMaster();
@@ -75,6 +83,10 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
 SimpleDesk::~SimpleDesk()
 {
     qDebug() << Q_FUNC_INFO;
+
+    QSettings settings;
+    settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
+
     Q_ASSERT(m_engine != NULL);
     delete m_engine;
     m_engine = NULL;
@@ -126,6 +138,123 @@ void SimpleDesk::initEngine()
     qDebug() << Q_FUNC_INFO;
     connect(m_engine, SIGNAL(cueStackStarted(uint)), this, SLOT(slotCueStackStarted(uint)));
     connect(m_engine, SIGNAL(cueStackStopped(uint)), this, SLOT(slotCueStackStopped(uint)));
+}
+
+void SimpleDesk::initView()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    new QHBoxLayout(this);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    m_splitter = new QSplitter(Qt::Horizontal, this);
+    layout()->addWidget(m_splitter);
+
+    initLeftSide();
+    initRightSide();
+
+    QSettings settings;
+    m_splitter->restoreState(settings.value(SETTINGS_SPLITTER).toByteArray());
+}
+
+void SimpleDesk::initLeftSide()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QWidget* leftSide = new QWidget(this);
+    QVBoxLayout* lay = new QVBoxLayout(leftSide);
+    lay->setContentsMargins(1, 1, 1, 1);
+    m_splitter->addWidget(leftSide);
+
+    m_universeGroup = new QGroupBox(this);
+    m_universeGroup->setTitle(tr("Universe"));
+    QHBoxLayout* grpLay = new QHBoxLayout(m_universeGroup);
+    grpLay->setContentsMargins(0, 6, 0, 0);
+    grpLay->setSpacing(1);
+    lay->addWidget(m_universeGroup);
+
+    QVBoxLayout* vbox = new QVBoxLayout;
+    vbox->setContentsMargins(0, 0, 0, 0);
+    m_universePageUpButton = new QToolButton(this);
+    m_universePageUpButton->setIcon(QIcon(":/forward.png"));
+    m_universePageUpButton->setIconSize(QSize(32, 32));
+    vbox->addWidget(m_universePageUpButton);
+
+    m_universePageSpin = new QSpinBox(this);
+    m_universePageSpin->setMaximumSize(QSize(40, 40));
+    m_universePageSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    m_universePageSpin->setWrapping(true);
+    vbox->addWidget(m_universePageSpin);
+
+    m_universePageDownButton = new QToolButton(this);
+    m_universePageDownButton->setIcon(QIcon(":/back.png"));
+    m_universePageDownButton->setIconSize(QSize(32, 32));
+    vbox->addWidget(m_universePageDownButton);
+
+    m_universeResetButton = new QToolButton(this);
+    m_universeResetButton->setIcon(QIcon(":/fileclose.png"));
+    m_universeResetButton->setIconSize(QSize(32, 32));
+    vbox->addWidget(m_universeResetButton);
+
+    m_grandMasterContainer = new QWidget(this);
+    vbox->addWidget(m_grandMasterContainer);
+    grpLay->addLayout(vbox);
+
+    m_playbackGroup = new QGroupBox(this);
+    m_playbackGroup->setTitle(tr("Playback"));
+    grpLay = new QHBoxLayout(m_playbackGroup);
+    grpLay->setContentsMargins(0, 6, 0, 0);
+    grpLay->setSpacing(1);
+    lay->addWidget(m_playbackGroup);
+}
+
+void SimpleDesk::initRightSide()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QWidget* rightSide = new QWidget(this);
+    QVBoxLayout* lay = new QVBoxLayout(rightSide);
+    lay->setContentsMargins(1, 1, 1, 1);
+    m_splitter->addWidget(rightSide);
+
+    m_cueStackGroup = new QGroupBox(this);
+    m_cueStackGroup->setTitle(tr("Cue Stack"));
+    QVBoxLayout* grpLay = new QVBoxLayout(m_cueStackGroup);
+    grpLay->setContentsMargins(0, 6, 0, 0);
+    lay->addWidget(m_cueStackGroup);
+
+    QHBoxLayout* hbox = new QHBoxLayout;
+    hbox->setContentsMargins(0, 0, 0, 0);
+    m_previousCueButton = new QToolButton(this);
+    m_previousCueButton->setIcon(QIcon(":/up.png"));
+    m_previousCueButton->setIconSize(QSize(32, 32));
+    hbox->addWidget(m_previousCueButton);
+
+    m_nextCueButton = new QToolButton(this);
+    m_nextCueButton->setIcon(QIcon(":/down.png"));
+    m_nextCueButton->setIconSize(QSize(32, 32));
+    hbox->addWidget(m_nextCueButton);
+
+    m_stopCueStackButton = new QToolButton(this);
+    m_stopCueStackButton->setIcon(QIcon(":/stop.png"));
+    m_stopCueStackButton->setIconSize(QSize(32, 32));
+    hbox->addWidget(m_stopCueStackButton);
+
+    hbox->addStretch();
+
+    m_editCueStackButton = new QToolButton(this);
+    m_editCueStackButton->setIcon(QIcon(":/edit.png"));
+    m_editCueStackButton->setIconSize(QSize(32, 32));
+    hbox->addWidget(m_editCueStackButton);
+
+    m_recordCueButton = new QToolButton(this);
+    m_recordCueButton->setIcon(QIcon(":/record.png"));
+    m_recordCueButton->setIconSize(QSize(32, 32));
+    hbox->addWidget(m_recordCueButton);
+
+    grpLay->addLayout(hbox);
+
+    m_cueStackView = new QTreeView(this);
+    m_cueStackGroup->layout()->addWidget(m_cueStackView);
 }
 
 /****************************************************************************
@@ -342,6 +471,8 @@ void SimpleDesk::slotSelectPlayback(uint pb)
     CueStackModel* model = qobject_cast<CueStackModel*> (m_cueStackView->model());
     Q_ASSERT(model != NULL);
     model->setCueStack(cueStack);
+
+    m_cueStackGroup->setTitle(tr("Cue Stack - Playback %1").arg(m_selectedPlayback + 1));
 
     updateCueStackButtons();
 }

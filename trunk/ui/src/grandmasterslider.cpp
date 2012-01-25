@@ -42,7 +42,10 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     Q_ASSERT(inputMap != NULL);
 
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+
+    setMinimumSize(QSize(40, 100));
+    setMaximumSize(QSize(40, INT_MAX));
 
     new QVBoxLayout(this);
     layout()->setMargin(2);
@@ -51,22 +54,20 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     m_valueLabel->setAlignment(Qt::AlignHCenter);
     layout()->addWidget(m_valueLabel);
 
-    QHBoxLayout* hbox = new QHBoxLayout;
-    hbox->setMargin(0);
-    hbox->addSpacing(1);
     m_slider = new QSlider(this);
-    hbox->addWidget(m_slider);
     m_slider->setRange(0, UCHAR_MAX);
     m_slider->setStyle(AppUtil::saneStyle());
+    m_slider->setMinimumSize(QSize(30, 50));
+    m_slider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+    layout()->addWidget(m_slider);
+    layout()->setAlignment(m_slider, Qt::AlignHCenter);
     connect(m_slider, SIGNAL(valueChanged(int)),
             this, SLOT(slotValueChanged(int)));
-    hbox->addSpacing(1);
-    layout()->addItem(hbox);
 
     m_nameLabel = new QLabel(this);
     m_nameLabel->setWordWrap(true);
     m_nameLabel->setAlignment(Qt::AlignHCenter);
-    m_nameLabel->setText(tr("Grand<BR>Master"));
+    m_nameLabel->setText(tr("GM"));
     layout()->addWidget(m_nameLabel);
 
     /* Listen to GM value changes */
@@ -89,10 +90,10 @@ void GrandMasterSlider::refreshProperties()
     switch (VirtualConsole::instance()->properties().grandMasterValueMode())
     {
         case UniverseArray::GMLimit:
-            tooltip += tr("Limits the maximum value of");
+            tooltip += tr("Grand Master <B>limits</B> the maximum value of");
             break;
         case UniverseArray::GMReduce:
-            tooltip += tr("Reduces the current value of");
+            tooltip += tr("Grand Master <B>reduces</B> the current value of");
             break;
     }
 
@@ -128,7 +129,7 @@ void GrandMasterSlider::slotValueChanged(int value)
     else
     {
         int p = floor(((double(value) / double(UCHAR_MAX)) * double(100)) + 0.5);
-        str = QString("%1%").arg(p, 3, 10, QChar('0'));
+        str = QString("%1").arg(p, 3, 10, QChar('0'));
     }
 
     m_valueLabel->setText(str);

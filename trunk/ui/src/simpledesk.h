@@ -27,8 +27,6 @@
 #include <QList>
 #include <QHash>
 
-#include "ui_simpledesk.h"
-
 #define KXMLQLCSimpleDesk "SimpleDesk"
 
 class GrandMasterSlider;
@@ -37,13 +35,18 @@ class SpeedDialWidget;
 class PlaybackSlider;
 class QDomDocument;
 class QDomElement;
+class QToolButton;
 class SimpleDesk;
+class QGroupBox;
+class QTreeView;
+class QSplitter;
 class DMXSlider;
+class QSpinBox;
 class CueStack;
 class Doc;
 class Cue;
 
-class SimpleDesk : public QWidget, public Ui_SimpleDesk
+class SimpleDesk : public QWidget
 {
     Q_OBJECT
 
@@ -70,9 +73,15 @@ private:
     /** Initialize the simple desk engine */
     void initEngine();
 
+    /** Initialize the simple desk view components */
+    void initView();
+    void initLeftSide();
+    void initRightSide();
+
 private:
     static SimpleDesk* s_instance;
     SimpleDeskEngine* m_engine;
+    QSplitter* m_splitter;
     Doc* m_doc;
 
     /*********************************************************************
@@ -93,6 +102,12 @@ private slots:
     void slotUpdateUniverseSliders();
 
 private:
+    QGroupBox* m_universeGroup;
+    QToolButton* m_universePageUpButton;
+    QSpinBox* m_universePageSpin;
+    QToolButton* m_universePageDownButton;
+    QToolButton* m_universeResetButton;
+    QWidget* m_grandMasterContainer;
     QList <DMXSlider*> m_universeSliders;
 
     /*********************************************************************
@@ -120,6 +135,7 @@ private slots:
     void slotPlaybackValueChanged(uchar value);
 
 private:
+    QGroupBox* m_playbackGroup;
     QList <PlaybackSlider*> m_playbackSliders;
     uint m_selectedPlayback;
 
@@ -152,6 +168,13 @@ private slots:
     void slotCueNameEdited(const QString& name);
 
 private:
+    QGroupBox* m_cueStackGroup;
+    QToolButton* m_previousCueButton;
+    QToolButton* m_nextCueButton;
+    QToolButton* m_stopCueStackButton;
+    QToolButton* m_editCueStackButton;
+    QToolButton* m_recordCueButton;
+    QTreeView* m_cueStackView;
     QPointer<SpeedDialWidget> m_speedDials;
 
     /*********************************************************************

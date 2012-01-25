@@ -105,7 +105,6 @@ FORMS += aboutbox.ui \
          inputpatcheditor.ui \
          outputpatcheditor.ui \
          rgbmatrixeditor.ui \
-         simpledesk.ui \
          sceneeditor.ui \
          scripteditor.ui \
          selectinputchannel.ui \

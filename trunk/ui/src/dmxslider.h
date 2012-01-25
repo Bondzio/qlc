@@ -27,6 +27,7 @@
 class QLineEdit;
 class QSlider;
 class QLabel;
+class QSize;
 
 class DMXSlider : public QWidget
 {

@@ -50,7 +50,6 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMa
     setupUi(this);
 
     m_infoBrowser->setOpenExternalLinks(true);
-    setWindowTitle(tr("Mapping properties for output universe %1").arg(universe + 1));
 
     OutputPatch* patch = outputMap->patch(m_universe);
     Q_ASSERT(patch != NULL);
@@ -103,6 +102,10 @@ void OutputPatchEditor::fillTree()
                this, SLOT(slotItemChanged(QTreeWidgetItem*)));
 
     m_tree->clear();
+
+    QStringList labels;
+    labels << tr("Mapping for output universe %1").arg(m_universe + 1);
+    m_tree->setHeaderLabels(labels);
 
     /* Add an empty item so that user can choose not to assign any plugin
        to an input universe */

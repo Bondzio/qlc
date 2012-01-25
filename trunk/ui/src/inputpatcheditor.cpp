@@ -64,8 +64,6 @@ InputPatchEditor::InputPatchEditor(QWidget* parent, quint32 universe, InputMap* 
     setupUi(this);
 
     m_infoBrowser->setOpenExternalLinks(true);
-    setWindowTitle(tr("Mapping properties for input universe %1")
-                   .arg(m_universe + 1));
 
     InputPatch* inputPatch = m_inputMap->patch(universe);
     Q_ASSERT(inputPatch != NULL);
@@ -158,6 +156,10 @@ void InputPatchEditor::fillMappingTree()
                this, SLOT(slotMapItemChanged(QTreeWidgetItem*)));
 
     m_mapTree->clear();
+
+    QStringList labels;
+    labels << tr("Mapping for input universe %1").arg(m_universe + 1);
+    m_mapTree->setHeaderLabels(labels);
 
     /* Add an empty item so that user can choose not to assign any plugin
        to an input universe */

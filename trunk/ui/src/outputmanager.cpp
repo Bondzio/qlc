@@ -55,8 +55,8 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
     Q_ASSERT(outputMap != NULL);
 
     new QVBoxLayout(this);
-    layout()->setMargin(1);
-    layout()->setSpacing(1);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->setSpacing(0);
 
     m_splitter = new QSplitter(this);
     layout()->addWidget(m_splitter);

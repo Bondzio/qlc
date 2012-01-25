@@ -6,127 +6,109 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>436</width>
-    <height>464</height>
+    <width>386</width>
+    <height>417</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Output patch editor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <item>
-    <widget class="QGroupBox" name="m_mappingGroup">
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
+   <item row="0" column="0" colspan="2">
+    <widget class="QTreeWidget" name="m_tree">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="title">
-      <string>Mapping</string>
+     <property name="allColumnsShowFocus">
+      <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QTreeWidget" name="m_tree">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="allColumnsShowFocus">
-         <bool>true</bool>
-        </property>
-        <column>
-         <property name="text">
-          <string>Plugins/Outputs</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
+     <column>
+      <property name="text">
+       <string>Outputs</string>
+      </property>
+     </column>
     </widget>
    </item>
-   <item>
-    <widget class="QGroupBox" name="m_infoGroup">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+   <item row="1" column="0" rowspan="3">
+    <widget class="QTextBrowser" name="m_infoBrowser">
+     <property name="toolTip">
+      <string>Information related to the currently selected plugin or output</string>
      </property>
-     <property name="title">
-      <string>Output Information</string>
+     <property name="openLinks">
+      <bool>false</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" rowspan="3">
-       <widget class="QTextBrowser" name="m_infoBrowser">
-        <property name="toolTip">
-         <string>Information related to the currently selected plugin or output</string>
-        </property>
-        <property name="openLinks">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QToolButton" name="m_configureButton">
-        <property name="toolTip">
-         <string>Configure the selected plugin/output</string>
-        </property>
-        <property name="text">
-         <string notr="true">...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="qlcui.qrc">
-          <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="1">
-       <widget class="QToolButton" name="m_reconnectButton">
-        <property name="toolTip">
-         <string>Attempt to re-connect the current plugin</string>
-        </property>
-        <property name="text">
-         <string notr="true">...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="qlcui.qrc">
-          <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QToolButton" name="m_configureButton">
+     <property name="toolTip">
+      <string>Configure the selected plugin/output</string>
+     </property>
+     <property name="text">
+      <string notr="true">...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="qlcui.qrc">
+       <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QToolButton" name="m_reconnectButton">
+     <property name="toolTip">
+      <string>Attempt to re-connect the current plugin</string>
+     </property>
+     <property name="text">
+      <string notr="true">...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="qlcui.qrc">
+       <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>17</width>
+       <height>106</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

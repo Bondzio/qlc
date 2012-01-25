@@ -63,8 +63,8 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
 
     /* Create a new layout for this widget */
     new QVBoxLayout(this);
-    layout()->setMargin(1);
-    layout()->setSpacing(1);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->setSpacing(0);
 
     m_splitter = new QSplitter(Qt::Horizontal, this);
     layout()->addWidget(m_splitter);

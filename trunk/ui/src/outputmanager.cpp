@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QStringList>
 #include <QHeaderView>
+#include <QSettings>
 #include <QSplitter>
 #include <QMdiArea>
 #include <QToolBar>
@@ -41,6 +42,8 @@
 #define KColumnPlugin     1
 #define KColumnOutputName 2
 #define KColumnOutput     3
+
+#define SETTINGS_SPLITTER "outputmanager/splitter"
 
 OutputManager* OutputManager::s_instance = NULL;
 
@@ -81,10 +84,20 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
             this, SLOT(updateTree()));
 
     updateTree();
+    m_tree->setCurrentItem(m_tree->topLevelItem(0));
+    slotEditClicked();
+
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_SPLITTER);
+    if (var.isValid() == true)
+        m_splitter->restoreState(var.toByteArray());
 }
 
 OutputManager::~OutputManager()
 {
+    QSettings settings;
+    settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
+
     OutputManager::s_instance = NULL;
 }
 

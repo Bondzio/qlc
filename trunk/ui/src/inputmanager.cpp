@@ -49,6 +49,8 @@
 #define KColumnEditor   4
 #define KColumnInputNum 5
 
+#define SETTINGS_SPLITTER "inputmanager/splitter"
+
 InputManager* InputManager::s_instance = NULL;
 
 /****************************************************************************
@@ -100,10 +102,20 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
             this, SLOT(updateTree()));
 
     updateTree();
+    m_tree->setCurrentItem(m_tree->topLevelItem(0));
+    slotEditClicked();
+
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_SPLITTER);
+    if (var.isValid() == true)
+        m_splitter->restoreState(var.toByteArray());
 }
 
 InputManager::~InputManager()
 {
+    QSettings settings;
+    settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
+
     InputManager::s_instance = NULL;
 }
 

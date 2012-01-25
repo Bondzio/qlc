@@ -37,7 +37,6 @@
 
 #define KColumnName   0
 #define KColumnOutput 1
-#define SETTINGS_GEOMETRY "outputpatcheditor/geometry"
 
 OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMap* outputMap)
     : QWidget(parent)

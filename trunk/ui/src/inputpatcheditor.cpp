@@ -44,8 +44,6 @@
 #include "inputmap.h"
 #include "apputil.h"
 
-#define SETTINGS_GEOMETRY "inputpatcheditor/geometry"
-
 /* Plugin column structure */
 #define KMapColumnName  0
 #define KMapColumnInput 1

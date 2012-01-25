@@ -107,17 +107,8 @@ private:
     QSpinBox* m_universePageSpin;
     QToolButton* m_universePageDownButton;
     QToolButton* m_universeResetButton;
-    QWidget* m_grandMasterContainer;
-    QList <DMXSlider*> m_universeSliders;
-
-    /*********************************************************************
-     * Grand Master
-     *********************************************************************/
-private:
-    void initGrandMaster();
-
-private:
     GrandMasterSlider* m_grandMasterSlider;
+    QList <DMXSlider*> m_universeSliders;
 
     /*********************************************************************
      * Playback sliders

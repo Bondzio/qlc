@@ -73,7 +73,6 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     initView();
     initUniverseSliders();
     initUniversePager();
-    initGrandMaster();
     initPlaybackSliders();
     initCueStack();
 
@@ -195,8 +194,10 @@ void SimpleDesk::initLeftSide()
     m_universeResetButton->setIconSize(QSize(32, 32));
     vbox->addWidget(m_universeResetButton);
 
-    m_grandMasterContainer = new QWidget(this);
-    vbox->addWidget(m_grandMasterContainer);
+    m_grandMasterSlider = new GrandMasterSlider(this, m_doc->outputMap(), m_doc->inputMap());
+    vbox->addWidget(m_grandMasterSlider);
+    m_grandMasterSlider->refreshProperties();
+
     grpLay->addLayout(vbox);
 
     m_playbackGroup = new QGroupBox(this);
@@ -264,7 +265,6 @@ void SimpleDesk::initRightSide()
 void SimpleDesk::initUniverseSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    new QHBoxLayout(m_universeGroup);
     for (int i = 0; i < PAGE_CHANNELS; i++)
     {
         DMXSlider* slider = new DMXSlider(m_universeGroup);
@@ -398,28 +398,12 @@ void SimpleDesk::slotUpdateUniverseSliders()
 }
 
 /****************************************************************************
- * Grand Master
- ****************************************************************************/
-
-void SimpleDesk::initGrandMaster()
-{
-    qDebug() << Q_FUNC_INFO;
-    new QVBoxLayout(m_grandMasterContainer);
-    m_grandMasterSlider = new GrandMasterSlider(m_grandMasterContainer, m_doc->outputMap(),
-                                                m_doc->inputMap());
-    m_grandMasterContainer->layout()->setMargin(0);
-    m_grandMasterContainer->layout()->addWidget(m_grandMasterSlider);
-    m_grandMasterSlider->refreshProperties();
-}
-
-/****************************************************************************
  * Playback Sliders
  ****************************************************************************/
 
 void SimpleDesk::initPlaybackSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    new QHBoxLayout(m_playbackGroup);
     for (int i = 0; i < PAGE_PLAYBACKS; i++)
     {
         PlaybackSlider* slider = new PlaybackSlider(m_playbackGroup);

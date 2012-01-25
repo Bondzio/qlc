@@ -91,8 +91,8 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     Q_ASSERT(doc != NULL);
 
     new QVBoxLayout(this);
-    layout()->setMargin(1);
-    layout()->setSpacing(1);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->setSpacing(0);
 
     initActions();
     initToolBar();
@@ -113,6 +113,13 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
             this, SLOT(slotFixtureGroupChanged(quint32)));
 
     slotModeChanged(m_doc->mode());
+
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_SPLITTER);
+    if (var.isValid() == true)
+        m_splitter->restoreState(var.toByteArray());
+    else
+        m_splitter->setSizes(QList <int> () << int(this->width() / 2) << int(this->width() / 2));
 }
 
 FixtureManager::~FixtureManager()
@@ -293,14 +300,6 @@ void FixtureManager::initDataView()
 
     /* Create the text view */
     createInfo();
-
-    m_splitter->setStretchFactor(0, 1);
-    m_splitter->setStretchFactor(1, 0);
-
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_SPLITTER);
-    if (var.isValid() == true)
-        m_splitter->restoreState(var.toByteArray());
 
     slotSelectionChanged();
 }

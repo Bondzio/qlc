@@ -58,6 +58,8 @@
 
 #define PROP_ID Qt::UserRole
 
+#define SETTINGS_SPLITTER "functionmanager/splitter"
+
 FunctionManager* FunctionManager::s_instance = NULL;
 
 /*****************************************************************************
@@ -71,8 +73,8 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     Q_ASSERT(doc != NULL);
 
     new QVBoxLayout(this);
-    layout()->setMargin(1);
-    layout()->setSpacing(1);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->setSpacing(0);
 
     initActions();
     initMenu();
@@ -87,10 +89,20 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     m_tree->sortItems(0, Qt::AscendingOrder);
 
     connect(m_doc, SIGNAL(clearing()), this, SLOT(slotDocClearing()));
+
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_SPLITTER);
+    if (var.isValid() == true)
+        m_splitter->restoreState(var.toByteArray());
+    else
+        m_splitter->setSizes(QList <int> () << int(this->width() / 2) << int(this->width() / 2));
 }
 
 FunctionManager::~FunctionManager()
 {
+    QSettings settings;
+    settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
+
     FunctionManager::s_instance = NULL;
 }
 

@@ -272,6 +272,7 @@ void SimpleDesk::initRightSide()
     grpLay->addLayout(hbox);
 
     m_cueStackView = new QTreeView(this);
+    m_cueStackView->setAllColumnsShowFocus(true);
     m_cueStackGroup->layout()->addWidget(m_cueStackView);
 }
 
@@ -787,11 +788,11 @@ void SimpleDesk::slotRecordCueClicked()
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
 
-    QItemSelectionModel* model = m_cueStackView->selectionModel();
-    Q_ASSERT(model != NULL);
+    QItemSelectionModel* selModel = m_cueStackView->selectionModel();
+    Q_ASSERT(selModel != NULL);
     int index = 0;
-    if (model->hasSelection() == true)
-        index = model->currentIndex().row() + 1;
+    if (selModel->hasSelection() == true)
+        index = selModel->currentIndex().row() + 1;
     else
         index = cueStack->cues().size();
 
@@ -799,10 +800,14 @@ void SimpleDesk::slotRecordCueClicked()
     cue.setName(tr("Cue %1").arg(cueStack->cues().size() + 1));
     cueStack->insertCue(index, cue);
 
-    // Select the newly-created Cue
-    QItemSelection sel(model->model()->index(index, 0), model->model()->index(index, 1));
-    model->select(sel, QItemSelectionModel::ClearAndSelect);
-    model->setCurrentIndex(model->model()->index(index, 0), QItemSelectionModel::Current);
+    // Select the newly-created Cue, all columns from 0 to last
+    const QAbstractItemModel* itemModel = selModel->model();
+    Q_ASSERT(itemModel != NULL);
+    int firstCol = 0;
+    int lastCol = itemModel->columnCount() - 1;
+    QItemSelection sel(itemModel->index(index, firstCol), itemModel->index(index, lastCol));
+    selModel->select(sel, QItemSelectionModel::ClearAndSelect);
+    selModel->setCurrentIndex(itemModel->index(index, firstCol), QItemSelectionModel::Current);
 
     updateCueStackButtons();
 }

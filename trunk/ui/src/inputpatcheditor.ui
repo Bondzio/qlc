@@ -38,6 +38,11 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
         </widget>
        </item>
        <item row="1" column="0" rowspan="3" colspan="2">
@@ -107,16 +112,6 @@
          </property>
          <property name="text">
           <string>Feedback enabled</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1" colspan="2">
-        <widget class="QRadioButton" name="m_editorUniverseRadio">
-         <property name="toolTip">
-          <string>Use this universe for e.g. scene channel value setting in scene editor</string>
-         </property>
-         <property name="text">
-          <string>Default editor universe</string>
          </property>
         </widget>
        </item>

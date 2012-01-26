@@ -76,7 +76,6 @@ private:
     QTreeWidgetItem* pluginItem(const QString& pluginName);
 
 private slots:
-    void slotEditorUniverseRadioToggled(bool state);
     void slotMapCurrentItemChanged(QTreeWidgetItem* item);
     void slotMapItemChanged(QTreeWidgetItem* item);
     void slotConfigureInputClicked();

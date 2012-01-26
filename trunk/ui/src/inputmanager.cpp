@@ -46,8 +46,7 @@
 #define KColumnPlugin   1
 #define KColumnInput    2
 #define KColumnProfile  3
-#define KColumnEditor   4
-#define KColumnInputNum 5
+#define KColumnInputNum 4
 
 #define SETTINGS_SPLITTER "inputmanager/splitter"
 
@@ -81,8 +80,7 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     QStringList columns;
-    columns << tr("Universe") << tr("Plugin") << tr("Input") << tr("Profile")
-            << tr("Editor universe");
+    columns << tr("Universe") << tr("Plugin") << tr("Input") << tr("Profile");
     m_tree->setHeaderLabels(columns);
 
     connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
@@ -172,11 +170,6 @@ void InputManager::updateItem(QTreeWidgetItem* item, InputPatch* ip,
     item->setText(KColumnPlugin, ip->pluginName());
     item->setText(KColumnInput, ip->inputName());
     item->setText(KColumnProfile, ip->profileName());
-    if (m_inputMap->editorUniverse() == universe)
-    {
-        item->setCheckState(KColumnEditor, Qt::Checked);
-        item->setFlags(item->flags() & ~Qt::ItemIsUserCheckable);
-    }
     item->setText(KColumnInputNum, QString("%1").arg(ip->input() + 1));
 }
 

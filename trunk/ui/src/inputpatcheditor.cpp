@@ -134,17 +134,7 @@ void InputPatchEditor::setupMappingPage()
     connect(m_reconnectButton, SIGNAL(clicked()),
             this, SLOT(slotReconnectClicked()));
 
-    /* Prevent the editor uni radio button from being unchecked manually */
-    QButtonGroup* group = new QButtonGroup(this);
-    group->addButton(m_editorUniverseRadio);
-    connect(m_editorUniverseRadio, SIGNAL(toggled(bool)),
-            this, SLOT(slotEditorUniverseRadioToggled(bool)));
-
     m_feedbackEnabledCheck->setChecked(m_currentFeedbackEnabled);
-
-    /* Set checked if the current universe is also the editor universe */
-    if (m_inputMap->editorUniverse() == m_universe)
-        m_editorUniverseRadio->setChecked(true);
 }
 
 void InputPatchEditor::fillMappingTree()
@@ -388,12 +378,6 @@ void InputPatchEditor::slotFeedbackToggled(bool enable)
                                m_currentInput, m_currentFeedbackEnabled,
                                m_currentProfileName);
     emit mappingChanged();
-}
-
-void InputPatchEditor::slotEditorUniverseRadioToggled(bool state)
-{
-    if (state == true)
-        m_inputMap->setEditorUniverse(m_universe);
 }
 
 void InputPatchEditor::slotPluginConfigurationChanged(const QString& pluginName)

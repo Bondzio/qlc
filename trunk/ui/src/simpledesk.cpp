@@ -312,13 +312,13 @@ void SimpleDesk::initUniversePager()
 {
     qDebug() << Q_FUNC_INFO;
     m_universePageSpin->setRange(1, int(512 / m_channelsPerPage) + 1);
+    m_universePageSpin->setValue(1);
+    slotUniversePageChanged(1);
 
     connect(m_universePageUpButton, SIGNAL(clicked()), this, SLOT(slotUniversePageUpClicked()));
     connect(m_universePageDownButton, SIGNAL(clicked()), this, SLOT(slotUniversePageDownClicked()));
     connect(m_universePageSpin, SIGNAL(valueChanged(int)), this, SLOT(slotUniversePageChanged(int)));
     connect(m_universeResetButton, SIGNAL(clicked()), this, SLOT(slotUniverseResetClicked()));
-
-    slotUniversePageChanged(m_universePageSpin->minimum());
 }
 
 void SimpleDesk::resetUniverseSliders()

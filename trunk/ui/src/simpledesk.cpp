@@ -192,22 +192,26 @@ void SimpleDesk::initLeftSide()
     m_universePageUpButton = new QToolButton(this);
     m_universePageUpButton->setIcon(QIcon(":/forward.png"));
     m_universePageUpButton->setIconSize(QSize(32, 32));
+    m_universePageUpButton->setToolTip(tr("Next page"));
     vbox->addWidget(m_universePageUpButton);
 
     m_universePageSpin = new QSpinBox(this);
     m_universePageSpin->setMaximumSize(QSize(40, 40));
     m_universePageSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
     m_universePageSpin->setWrapping(true);
+    m_universePageUpButton->setToolTip(tr("Current page"));
     vbox->addWidget(m_universePageSpin);
 
     m_universePageDownButton = new QToolButton(this);
     m_universePageDownButton->setIcon(QIcon(":/back.png"));
     m_universePageDownButton->setIconSize(QSize(32, 32));
+    m_universePageUpButton->setToolTip(tr("Previous page"));
     vbox->addWidget(m_universePageDownButton);
 
     m_universeResetButton = new QToolButton(this);
     m_universeResetButton->setIcon(QIcon(":/fileclose.png"));
     m_universeResetButton->setIconSize(QSize(32, 32));
+    m_universeResetButton->setToolTip(tr("Reset universe"));
     vbox->addWidget(m_universeResetButton);
 
     m_grandMasterSlider = new GrandMasterSlider(this, m_doc->outputMap(), m_doc->inputMap());
@@ -242,31 +246,36 @@ void SimpleDesk::initRightSide()
     QHBoxLayout* hbox = new QHBoxLayout;
     hbox->setContentsMargins(0, 0, 0, 0);
     m_previousCueButton = new QToolButton(this);
-    m_previousCueButton->setIcon(QIcon(":/up.png"));
+    m_previousCueButton->setIcon(QIcon(":/goprevious.png"));
     m_previousCueButton->setIconSize(QSize(32, 32));
+    m_previousCueButton->setToolTip(tr("Previous cue"));
     hbox->addWidget(m_previousCueButton);
-
-    m_nextCueButton = new QToolButton(this);
-    m_nextCueButton->setIcon(QIcon(":/down.png"));
-    m_nextCueButton->setIconSize(QSize(32, 32));
-    hbox->addWidget(m_nextCueButton);
 
     m_stopCueStackButton = new QToolButton(this);
     m_stopCueStackButton->setIcon(QIcon(":/stop.png"));
     m_stopCueStackButton->setIconSize(QSize(32, 32));
+    m_stopCueStackButton->setToolTip(tr("Stop cue stack"));
     hbox->addWidget(m_stopCueStackButton);
+
+    m_nextCueButton = new QToolButton(this);
+    m_nextCueButton->setIcon(QIcon(":/gonext.png"));
+    m_nextCueButton->setIconSize(QSize(32, 32));
+    m_nextCueButton->setToolTip(tr("Next cue"));
+    hbox->addWidget(m_nextCueButton);
 
     hbox->addStretch();
 
     m_editCueStackButton = new QToolButton(this);
     m_editCueStackButton->setIcon(QIcon(":/edit.png"));
     m_editCueStackButton->setIconSize(QSize(32, 32));
+    m_editCueStackButton->setToolTip(tr("Edit cue stack"));
     m_editCueStackButton->setCheckable(true);
     hbox->addWidget(m_editCueStackButton);
 
     m_recordCueButton = new QToolButton(this);
     m_recordCueButton->setIcon(QIcon(":/record.png"));
     m_recordCueButton->setIconSize(QSize(32, 32));
+    m_recordCueButton->setToolTip(tr("Record cue"));
     hbox->addWidget(m_recordCueButton);
 
     grpLay->addLayout(hbox);

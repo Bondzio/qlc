@@ -370,19 +370,6 @@ void FunctionManager::slotWizard()
         updateTree();
 }
 
-void FunctionManager::slotEdit()
-{
-    QTreeWidgetItem* item = m_tree->currentItem();
-    if (item == NULL)
-        return;
-
-    Function* function = m_doc->function(itemFunctionId(item));
-    if (function == NULL && currentEditor() != NULL)
-        delete currentEditor();
-    else
-        editFunction(function);
-}
-
 void FunctionManager::slotClone()
 {
     QListIterator <QTreeWidgetItem*> it(m_tree->selectedItems());
@@ -473,10 +460,6 @@ void FunctionManager::initTree()
     // Catch selection changes
     connect(m_tree, SIGNAL(itemSelectionChanged()),
             this, SLOT(slotTreeSelectionChanged()));
-
-    // Catch mouse double clicks
-    connect(m_tree,	SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            this, SLOT(slotEdit()));
 
     // Catch right-mouse clicks
     connect(m_tree,
@@ -575,6 +558,19 @@ void FunctionManager::deleteSelectedFunctions()
 void FunctionManager::slotTreeSelectionChanged()
 {
     updateActionStatus();
+
+    QList <QTreeWidgetItem*> selection(m_tree->selectedItems());
+    if (selection.size() == 1)
+    {
+        Function* function = m_doc->function(itemFunctionId(selection.first()));
+        if (function != NULL)
+            editFunction(function);
+    }
+    else
+    {
+        if (currentEditor() != NULL)
+            delete currentEditor();
+    }
 }
 
 void FunctionManager::slotTreeContextMenuRequested(const QPoint& point)
@@ -630,13 +626,13 @@ void FunctionManager::addFunction(Function* function)
 
     /* Clear current selection and select only the new one */
     m_tree->clearSelection();
+    m_tree->sortItems(0, Qt::AscendingOrder);
+    m_tree->scrollToItem(item);
     m_tree->setCurrentItem(item);
     item->setSelected(true);
 
     /* Start editing immediately */
-    slotEdit();
-    m_tree->sortItems(0, Qt::AscendingOrder);
-    m_tree->scrollToItem(item);
+    editFunction(function);
 }
 
 void FunctionManager::editFunction(Function* function)

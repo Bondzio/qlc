@@ -125,7 +125,6 @@ protected slots:
     void slotAddScript();
     void slotWizard();
 
-    void slotEdit();
     void slotClone();
     void slotDelete();
     void slotSelectAll();

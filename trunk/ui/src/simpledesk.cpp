@@ -273,6 +273,9 @@ void SimpleDesk::initRightSide()
 
     m_cueStackView = new QTreeView(this);
     m_cueStackView->setAllColumnsShowFocus(true);
+    m_cueStackView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_cueStackView->setDragEnabled(true);
+    m_cueStackView->setDragDropMode(QAbstractItemView::InternalMove);
     m_cueStackGroup->layout()->addWidget(m_cueStackView);
 }
 

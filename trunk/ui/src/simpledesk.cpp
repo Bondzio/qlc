@@ -261,6 +261,7 @@ void SimpleDesk::initRightSide()
     m_editCueStackButton = new QToolButton(this);
     m_editCueStackButton->setIcon(QIcon(":/edit.png"));
     m_editCueStackButton->setIconSize(QSize(32, 32));
+    m_editCueStackButton->setCheckable(true);
     hbox->addWidget(m_editCueStackButton);
 
     m_recordCueButton = new QToolButton(this);

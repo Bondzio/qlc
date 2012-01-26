@@ -188,7 +188,6 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="fixtureeditor.qrc"/>
   <include location="qlcui.qrc"/>
  </resources>
  <connections>

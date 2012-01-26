@@ -22,7 +22,6 @@
 #include <QTreeWidgetItem>
 #include <QMdiSubWindow>
 #include <QTextBrowser>
-#include <QInputDialog>
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QScrollArea>
@@ -44,6 +43,7 @@
 #include "qlcchannel.h"
 #include "qlcfile.h"
 
+#include "createfixturegroup.h"
 #include "fixturegroupeditor.h"
 #include "fixturemanager.h"
 #include "universearray.h"
@@ -1016,23 +1016,24 @@ void FixtureManager::slotGroupSelected(QAction* action)
     }
     else
     {
-        // New Group selected
-        bool ok = false;
-        QString name = QInputDialog::getText(this, tr("Create new group"), tr("Group name"),
-                                             QLineEdit::Normal, QString(), &ok);
-        if (ok == false)
+        // New Group selected.
+
+        // Suggest an equilateral grid
+        qreal side = sqrt(headCount(m_tree->selectedItems()));
+        if (side != floor(side))
+            side += 1; // Fixture number doesn't provide a full square
+
+        CreateFixtureGroup cfg(this);
+        cfg.setSize(QSize(side, side));
+        if (cfg.exec() != QDialog::Accepted)
             return; // User pressed cancel
 
         grp = new FixtureGroup(m_doc);
         Q_ASSERT(grp != NULL);
-        grp->setName(name);
+        grp->setName(cfg.name());
+        grp->setSize(cfg.size());
         m_doc->addFixtureGroup(grp);
         updateGroupMenu();
-
-        qreal side = sqrt(headCount(m_tree->selectedItems()));
-        if (side != floor(side))
-            side += 1; // Fixture number doesn't provide a full square
-        grp->setSize(QSize(side, side)); // Arrange fixtures into an equilateral grid
     }
 
     // Assign selected fixture items to the group

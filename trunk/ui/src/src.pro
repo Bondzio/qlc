@@ -34,6 +34,7 @@ HEADERS += aboutbox.h \
            chasereditor.h \
            collectioneditor.h \
            consolechannel.h \
+           createfixturegroup.h \
            cuestackmodel.h \
            docbrowser.h \
            dmxslider.h \
@@ -95,6 +96,7 @@ FORMS += aboutbox.ui \
          assignhotkey.ui \
          chasereditor.ui \
          collectioneditor.ui \
+         createfixturegroup.ui \
          efxeditor.ui \
          fixturegroupeditor.ui \
          fixtureselection.ui \
@@ -127,6 +129,7 @@ SOURCES += aboutbox.cpp \
            chasereditor.cpp \
            collectioneditor.cpp \
            consolechannel.cpp \
+           createfixturegroup.cpp \
            cuestackmodel.cpp \
            docbrowser.cpp \
            dmxslider.cpp \

@@ -91,7 +91,7 @@ private:
     void initUniverseSliders();
     void initUniversePager();
     void resetUniverseSliders();
-    void pushCueToUniverse(const Cue& cue);
+    void setChannelName(DMXSlider* slider, uint absch);
 
 private slots:
     void slotUniversePageUpClicked();
@@ -111,6 +111,7 @@ private:
 
     QList <DMXSlider*> m_universeSliders;
     uint m_channelsPerPage;
+    bool m_showChannelNames;
 
     /*********************************************************************
      * Playback sliders

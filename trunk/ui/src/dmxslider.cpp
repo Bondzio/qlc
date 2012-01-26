@@ -46,7 +46,7 @@ DMXSlider::DMXSlider(QWidget* parent)
     m_edit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     m_edit->setAlignment(Qt::AlignHCenter);
     QIntValidator* validator = new QIntValidator(m_edit);
-    validator->setRange(0, 255);
+    validator->setRange(0, UCHAR_MAX);
     m_edit->setValidator(validator);
     layout()->addWidget(m_edit);
     layout()->setAlignment(m_edit, Qt::AlignHCenter);
@@ -119,7 +119,12 @@ void DMXSlider::slotSliderChanged(int value)
 
 void DMXSlider::paintEvent(QPaintEvent* e)
 {
-    QPainter p(this);
-    p.rotate(270);
-    p.drawText(-(height() - 20), 20, verticalLabel());
+    QWidget::paintEvent(e);
+
+    if (verticalLabel().isEmpty() == false)
+    {
+        QPainter p(this);
+        p.rotate(270);
+        p.drawText(-(height() - 20), 20, verticalLabel());
+    }
 }

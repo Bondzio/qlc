@@ -49,6 +49,7 @@
 #define SETTINGS_SPLITTER       "simpledesk/splitter"
 #define SETTINGS_PAGE_CHANNELS  "simpledesk/channelsperpage"
 #define SETTINGS_PAGE_PLAYBACKS "simpledesk/playbacksperpage"
+#define SETTINGS_CHANNEL_NAMES  "simpledesk/showchannelnames"
 #define DEFAULT_PAGE_CHANNELS   12
 #define DEFAULT_PAGE_PLAYBACKS  12
 
@@ -62,10 +63,11 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_engine(new SimpleDeskEngine(doc))
     , m_doc(doc)
-    , m_selectedPlayback(UINT_MAX)
-    , m_speedDials(NULL)
     , m_channelsPerPage(DEFAULT_PAGE_CHANNELS)
+    , m_showChannelNames(true)
+    , m_selectedPlayback(UINT_MAX)
     , m_playbacksPerPage(DEFAULT_PAGE_PLAYBACKS)
+    , m_speedDials(NULL)
 {
     qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
@@ -78,6 +80,10 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     var = settings.value(SETTINGS_PAGE_PLAYBACKS);
     if (var.isValid() == true)
         m_playbacksPerPage = var.toUInt();
+
+    var = settings.value(SETTINGS_CHANNEL_NAMES);
+    if (var.isValid() == true)
+        m_showChannelNames = var.toBool();
 
     initEngine();
     initView();
@@ -275,7 +281,7 @@ void SimpleDesk::initRightSide()
 void SimpleDesk::initUniverseSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    for (int i = 0; i < m_channelsPerPage; i++)
+    for (uint i = 0; i < m_channelsPerPage; i++)
     {
         DMXSlider* slider = new DMXSlider(m_universeGroup);
         m_universeGroup->layout()->addWidget(slider);
@@ -309,6 +315,41 @@ void SimpleDesk::resetUniverseSliders()
         it.next()->setValue(0);
 }
 
+void SimpleDesk::setChannelName(DMXSlider* slider, uint absch)
+{
+    Q_ASSERT(slider != NULL);
+
+    const Fixture* fxi = m_doc->fixture(m_doc->fixtureForAddress(absch));
+    if (fxi == NULL || fxi->isDimmer() == true)
+    {
+        slider->setVerticalLabel(tr("Intensity"));
+        slider->setPalette(this->palette());
+    }
+    else
+    {
+        uint ch = absch - fxi->universeAddress();
+        const QLCChannel* channel = fxi->channel(ch);
+        if (channel != NULL)
+        {
+            slider->setVerticalLabel(channel->name());
+            if (channel->colour() != QLCChannel::NoColour)
+            {
+                QPalette pal(slider->palette());
+                pal.setColor(QPalette::WindowText, QColor(channel->colour()));
+                slider->setPalette(pal);
+            }
+            else
+            {
+                slider->setPalette(this->palette());
+            }
+        }
+        else
+        {
+            slider->setVerticalLabel(tr("Intensity"));
+        }
+    }
+}
+
 void SimpleDesk::slotUniversePageUpClicked()
 {
     qDebug() << Q_FUNC_INFO;
@@ -325,7 +366,7 @@ void SimpleDesk::slotUniversePageChanged(int page)
 {
     qDebug() << Q_FUNC_INFO;
     uint start = (page - 1) * m_channelsPerPage;
-    for (int i = 0; i < m_channelsPerPage; i++)
+    for (uint i = 0; i < m_channelsPerPage; i++)
     {
         DMXSlider* slider = m_universeSliders[i];
         Q_ASSERT(slider != NULL);
@@ -339,35 +380,8 @@ void SimpleDesk::slotUniversePageChanged(int page)
             slider->setValue(m_engine->value(start + i));
             connect(slider, SIGNAL(valueChanged(uchar)), this, SLOT(slotUniverseSliderValueChanged(uchar)));
 
-            Fixture* fxi = m_doc->fixture(m_doc->fixtureForAddress(start + i));
-            if (fxi == NULL || fxi->isDimmer() == true)
-            {
-                slider->setVerticalLabel(tr("Intensity"));
-                slider->setPalette(this->palette());
-            }
-            else
-            {
-                uint ch = (start + i) - fxi->universeAddress();
-                const QLCChannel* channel = fxi->channel(ch);
-                if (channel != NULL)
-                {
-                    slider->setVerticalLabel(channel->name());
-                    if (channel->colour() != QLCChannel::NoColour)
-                    {
-                        QPalette pal(slider->palette());
-                        pal.setColor(QPalette::WindowText, QColor(channel->colour()));
-                        slider->setPalette(pal);
-                    }
-                    else
-                    {
-                        slider->setPalette(this->palette());
-                    }
-                }
-                else
-                {
-                    slider->setVerticalLabel(tr("Intensity"));
-                }
-            }
+            if (m_showChannelNames == true)
+                setChannelName(slider, start + i);
         }
         else
         {
@@ -414,7 +428,7 @@ void SimpleDesk::slotUpdateUniverseSliders()
 void SimpleDesk::initPlaybackSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    for (int i = 0; i < m_playbacksPerPage; i++)
+    for (uint i = 0; i < m_playbacksPerPage; i++)
     {
         PlaybackSlider* slider = new PlaybackSlider(m_playbackGroup);
         m_playbackGroup->layout()->addWidget(slider);

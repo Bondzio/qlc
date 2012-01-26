@@ -45,7 +45,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
 
     setMinimumSize(QSize(40, 100));
-    setMaximumSize(QSize(40, INT_MAX));
+    setMaximumSize(QSize(40, USHRT_MAX));
 
     new QVBoxLayout(this);
     layout()->setMargin(2);

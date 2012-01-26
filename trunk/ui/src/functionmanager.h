@@ -102,7 +102,7 @@ private slots:
     void slotTreeSelectionChanged();
 
     /** Right mouse button was clicked on function tree */
-    void slotTreeContextMenuRequested(const QPoint& pos);
+    void slotTreeContextMenuRequested();
 
 private:
     QSplitter* m_splitter;
@@ -113,7 +113,6 @@ private:
      *********************************************************************/
 protected:
     void initActions();
-    void initMenu();
     void initToolbar();
 
 protected slots:
@@ -133,9 +132,6 @@ protected:
     void updateActionStatus();
 
 protected:
-    QMenu* m_addMenu;
-    QMenu* m_editMenu;
-
     QToolBar* m_toolbar;
 
     QActionGroup* m_actionGroup;

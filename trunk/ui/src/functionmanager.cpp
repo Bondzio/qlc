@@ -77,7 +77,6 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     layout()->setSpacing(0);
 
     initActions();
-    initMenu();
     initToolbar();
     initSplitterView();
     updateActionStatus();
@@ -234,28 +233,6 @@ void FunctionManager::initActions()
     m_actionGroup->addAction(m_selectAllAction);
     connect(m_selectAllAction, SIGNAL(triggered(bool)),
             this, SLOT(slotSelectAll()));
-}
-
-void FunctionManager::initMenu()
-{
-    /* Function menu */
-    m_addMenu = new QMenu(this);
-    m_addMenu->setTitle(tr("&Add"));
-    m_addMenu->addAction(m_addSceneAction);
-    m_addMenu->addAction(m_addChaserAction);
-    m_addMenu->addAction(m_addEFXAction);
-    m_addMenu->addAction(m_addCollectionAction);
-    m_addMenu->addAction(m_addRGBMatrixAction);
-    m_addMenu->addAction(m_addScriptAction);
-    m_addMenu->addSeparator();
-    m_addMenu->addAction(m_wizardAction);
-
-    /* Edit menu */
-    m_editMenu = new QMenu(this);
-    m_editMenu->addAction(m_cloneAction);
-    m_editMenu->addAction(m_selectAllAction);
-    m_editMenu->addSeparator();
-    m_editMenu->addAction(m_deleteAction);
 }
 
 void FunctionManager::initToolbar()
@@ -462,10 +439,8 @@ void FunctionManager::initTree()
             this, SLOT(slotTreeSelectionChanged()));
 
     // Catch right-mouse clicks
-    connect(m_tree,
-            SIGNAL(customContextMenuRequested(const QPoint&)),
-            this,
-            SLOT(slotTreeContextMenuRequested(const QPoint&)));
+    connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(slotTreeContextMenuRequested()));
 }
 
 void FunctionManager::updateTree()
@@ -573,17 +548,26 @@ void FunctionManager::slotTreeSelectionChanged()
     }
 }
 
-void FunctionManager::slotTreeContextMenuRequested(const QPoint& point)
+void FunctionManager::slotTreeContextMenuRequested()
 {
-    Q_UNUSED(point);
-
-    QMenu contextMenu(this);
-    contextMenu.addMenu(m_addMenu);
-    contextMenu.addMenu(m_editMenu);
+    QMenu menu(this);
+    menu.addAction(m_cloneAction);
+    menu.addAction(m_selectAllAction);
+    menu.addSeparator();
+    menu.addAction(m_deleteAction);
+    menu.addSeparator();
+    menu.addAction(m_addSceneAction);
+    menu.addAction(m_addChaserAction);
+    menu.addAction(m_addEFXAction);
+    menu.addAction(m_addCollectionAction);
+    menu.addAction(m_addRGBMatrixAction);
+    menu.addAction(m_addScriptAction);
+    menu.addSeparator();
+    menu.addAction(m_wizardAction);
 
     updateActionStatus();
 
-    contextMenu.exec(QCursor::pos());
+    menu.exec(QCursor::pos());
 }
 
 /*****************************************************************************

@@ -43,15 +43,14 @@
 #include "cue.h"
 #include "doc.h"
 
-#define PAGE_CHANNELS 12
-#define PAGE_PLAYBACKS 12
-#define PROP_ADDRESS "address"
-#define PROP_PLAYBACK "playback"
+#define PROP_ADDRESS    "address"
+#define PROP_PLAYBACK   "playback"
 
-#define COL_NUM  0
-#define COL_NAME 1
-
-#define SETTINGS_SPLITTER "simpledesk/splitter"
+#define SETTINGS_SPLITTER       "simpledesk/splitter"
+#define SETTINGS_PAGE_CHANNELS  "simpledesk/channelsperpage"
+#define SETTINGS_PAGE_PLAYBACKS "simpledesk/playbacksperpage"
+#define DEFAULT_PAGE_CHANNELS   12
+#define DEFAULT_PAGE_PLAYBACKS  12
 
 SimpleDesk* SimpleDesk::s_instance = NULL;
 
@@ -65,9 +64,20 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     , m_doc(doc)
     , m_selectedPlayback(UINT_MAX)
     , m_speedDials(NULL)
+    , m_channelsPerPage(DEFAULT_PAGE_CHANNELS)
+    , m_playbacksPerPage(DEFAULT_PAGE_PLAYBACKS)
 {
     qDebug() << Q_FUNC_INFO;
     Q_ASSERT(doc != NULL);
+
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_PAGE_CHANNELS);
+    if (var.isValid() == true)
+        m_channelsPerPage = var.toUInt();
+
+    var = settings.value(SETTINGS_PAGE_PLAYBACKS);
+    if (var.isValid() == true)
+        m_playbacksPerPage = var.toUInt();
 
     initEngine();
     initView();
@@ -265,7 +275,7 @@ void SimpleDesk::initRightSide()
 void SimpleDesk::initUniverseSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    for (int i = 0; i < PAGE_CHANNELS; i++)
+    for (int i = 0; i < m_channelsPerPage; i++)
     {
         DMXSlider* slider = new DMXSlider(m_universeGroup);
         m_universeGroup->layout()->addWidget(slider);
@@ -281,7 +291,7 @@ void SimpleDesk::initUniverseSliders()
 void SimpleDesk::initUniversePager()
 {
     qDebug() << Q_FUNC_INFO;
-    m_universePageSpin->setRange(1, int(512 / PAGE_CHANNELS) + 1);
+    m_universePageSpin->setRange(1, int(512 / m_channelsPerPage) + 1);
 
     connect(m_universePageUpButton, SIGNAL(clicked()), this, SLOT(slotUniversePageUpClicked()));
     connect(m_universePageDownButton, SIGNAL(clicked()), this, SLOT(slotUniversePageDownClicked()));
@@ -314,8 +324,8 @@ void SimpleDesk::slotUniversePageDownClicked()
 void SimpleDesk::slotUniversePageChanged(int page)
 {
     qDebug() << Q_FUNC_INFO;
-    uint start = (page - 1) * PAGE_CHANNELS;
-    for (int i = 0; i < PAGE_CHANNELS; i++)
+    uint start = (page - 1) * m_channelsPerPage;
+    for (int i = 0; i < m_channelsPerPage; i++)
     {
         DMXSlider* slider = m_universeSliders[i];
         Q_ASSERT(slider != NULL);
@@ -404,7 +414,7 @@ void SimpleDesk::slotUpdateUniverseSliders()
 void SimpleDesk::initPlaybackSliders()
 {
     qDebug() << Q_FUNC_INFO;
-    for (int i = 0; i < PAGE_PLAYBACKS; i++)
+    for (int i = 0; i < m_playbacksPerPage; i++)
     {
         PlaybackSlider* slider = new PlaybackSlider(m_playbackGroup);
         m_playbackGroup->layout()->addWidget(slider);

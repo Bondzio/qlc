@@ -108,7 +108,9 @@ private:
     QToolButton* m_universePageDownButton;
     QToolButton* m_universeResetButton;
     GrandMasterSlider* m_grandMasterSlider;
+
     QList <DMXSlider*> m_universeSliders;
+    uint m_channelsPerPage;
 
     /*********************************************************************
      * Playback sliders
@@ -129,6 +131,7 @@ private:
     QGroupBox* m_playbackGroup;
     QList <PlaybackSlider*> m_playbackSliders;
     uint m_selectedPlayback;
+    uint m_playbacksPerPage;
 
     /*********************************************************************
      * Cue Stack controls

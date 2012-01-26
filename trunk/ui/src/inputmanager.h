@@ -83,6 +83,9 @@ private slots:
     /** Displays the InputPatchEditor for currently selected universe */
     void slotEditClicked();
 
+    /** Updates the current item */
+    void slotMappingChanged();
+
 private:
     QSplitter* m_splitter;
     QTreeWidget* m_tree;

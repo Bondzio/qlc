@@ -228,6 +228,19 @@ void InputManager::slotEditClicked()
     quint32 universe = item->text(KColumnUniverse).toInt() - 1;
     QWidget* editor = new InputPatchEditor(this, universe, m_inputMap);
     m_splitter->addWidget(editor);
-    connect(editor, SIGNAL(mappingChanged()), this, SLOT(updateTree()));
+    connect(editor, SIGNAL(mappingChanged()), this, SLOT(slotMappingChanged()));
     editor->show();
+}
+
+void InputManager::slotMappingChanged()
+{
+    QTreeWidgetItem* item = m_tree->currentItem();
+    Q_ASSERT(item != NULL);
+
+    uint universe = item->text(KColumnUniverse).toUInt() - 1;
+
+    InputPatch* inputPatch = m_inputMap->patch(universe);
+    Q_ASSERT(inputPatch != NULL);
+
+    updateItem(item, inputPatch, universe);
 }

@@ -819,12 +819,6 @@ void FixtureManager::slotAdd()
     updateView();
 }
 
-void FixtureManager::addFixtureErrorMessage()
-{
-    QMessageBox::critical(this, tr("Fixture creation failed"),
-                          tr("Unable to create new fixture."));
-}
-
 void FixtureManager::slotRemove()
 {
     // Ask before deletion

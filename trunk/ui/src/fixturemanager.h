@@ -108,9 +108,6 @@ private:
     /** Update a group's data to and under $item */
     void updateGroupItem(QTreeWidgetItem* item, const FixtureGroup* grp);
 
-    /** Display an error message if fixture add fails */
-    void addFixtureErrorMessage();
-
     /** Handle single fixture selection */
     void fixtureSelected(quint32 id);
 

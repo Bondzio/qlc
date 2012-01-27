@@ -38,10 +38,7 @@
 #include "apputil.h"
 #include "doc.h"
 
-#define SETTINGS_GEOMETRY "collectioneditor/geometry"
-
-#define KColumnFunction 0
-#define KColumnFunctionID 1
+#define PROP_ID Qt::UserRole
 
 CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
     : QWidget(parent)
@@ -59,9 +56,12 @@ CollectionEditor::CollectionEditor(QWidget* parent, Collection* fc, Doc* doc)
     connect(m_remove, SIGNAL(clicked()), this, SLOT(slotRemove()));
 
     m_nameEdit->setText(m_fc->name());
-    slotNameEdited(m_fc->name());
+    m_nameEdit->setSelection(0, m_nameEdit->text().length());
 
     updateFunctionList();
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 CollectionEditor::~CollectionEditor()
@@ -70,9 +70,7 @@ CollectionEditor::~CollectionEditor()
 
 void CollectionEditor::slotNameEdited(const QString& text)
 {
-    setWindowTitle(tr("Collection - %1").arg(text));
-    m_fc->setName(m_nameEdit->text());
-    m_doc->setModified();
+    m_fc->setName(text);
 }
 
 void CollectionEditor::slotAdd()
@@ -82,17 +80,10 @@ void CollectionEditor::slotAdd()
 
     if (fs.exec() == QDialog::Accepted)
     {
-        quint32 fid;
-
         QListIterator <quint32> it(fs.selection());
         while (it.hasNext() == true)
-        {
-            fid = it.next();
-            m_fc->addFunction(fid);
-        }
-
+            m_fc->addFunction(it.next());
         updateFunctionList();
-        m_doc->setModified();
     }
 }
 
@@ -101,10 +92,9 @@ void CollectionEditor::slotRemove()
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item != NULL)
     {
-        quint32 id = item->text(KColumnFunctionID).toInt();
+        quint32 id = item->data(0, PROP_ID).toUInt();
         m_fc->removeFunction(id);
         delete item;
-        m_doc->setModified();
     }
 }
 
@@ -115,17 +105,11 @@ void CollectionEditor::updateFunctionList()
     QListIterator <quint32> it(m_fc->functions());
     while (it.hasNext() == true)
     {
-        QTreeWidgetItem* item;
-        Function* function;
-        quint32 fid;
-        QString s;
-
-        fid = it.next();
-        function = m_doc->function(fid);
+        Function* function = m_doc->function(it.next());
         Q_ASSERT(function != NULL);
 
-        item = new QTreeWidgetItem(m_tree);
-        item->setText(KColumnFunction, function->name());
-        item->setText(KColumnFunctionID, s.setNum(fid));
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
+        item->setText(0, function->name());
+        item->setData(0, PROP_ID, function->id());
     }
 }

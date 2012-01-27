@@ -74,6 +74,9 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
 
     init();
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 RGBMatrixEditor::~RGBMatrixEditor()
@@ -89,7 +92,6 @@ void RGBMatrixEditor::init()
     /* Name */
     m_nameEdit->setText(m_mtx->name());
     m_nameEdit->setSelection(0, m_mtx->name().length());
-    slotNameEdited(m_mtx->name());
 
     /* Running order */
     switch (m_mtx->runOrder())
@@ -343,9 +345,7 @@ void RGBMatrixEditor::slotPreviewTimeout()
 
 void RGBMatrixEditor::slotNameEdited(const QString& text)
 {
-    setWindowTitle(tr("RGB Matrix - %1").arg(text));
     m_mtx->setName(text);
-    m_doc->setModified();
 }
 
 void RGBMatrixEditor::slotPatternActivated(const QString& text)

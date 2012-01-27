@@ -47,6 +47,7 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
 
     /* Name */
     m_nameEdit->setText(m_script->name());
+    m_nameEdit->setSelection(0, m_nameEdit->text().length());
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)), this, SLOT(slotNameEdited(const QString&)));
 
     /* Document */
@@ -61,6 +62,9 @@ ScriptEditor::ScriptEditor(QWidget* parent, Script* script, Doc* doc)
 
     m_editor->moveCursor(QTextCursor::End);
     connect(m_document, SIGNAL(contentsChanged()), this, SLOT(slotContentsChanged()));
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 ScriptEditor::~ScriptEditor()
@@ -121,16 +125,13 @@ void ScriptEditor::initAddMenu()
 
 void ScriptEditor::slotNameEdited(const QString& name)
 {
-    setWindowTitle(tr("Script - %1").arg(name));
     m_script->setName(name);
-    m_doc->setModified();
 }
 
 void ScriptEditor::slotContentsChanged()
 {
     //! @todo: this might become quite heavy if there's a lot of content
     m_script->setData(m_document->toPlainText());
-    m_doc->setModified();
 }
 
 void ScriptEditor::slotAddStartFunction()

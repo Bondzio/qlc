@@ -80,7 +80,6 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     /* Name edit */
     m_nameEdit->setText(m_chaser->name());
     m_nameEdit->setSelection(0, m_nameEdit->text().length());
-    slotNameEdited(m_chaser->name());
 
     /* Speed */
     new QHBoxLayout(m_fadeInContainer);
@@ -167,6 +166,9 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
         updateItem(new QTreeWidgetItem(m_list), it.next());
 
     updateClipboardButtons();
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 ChaserEditor::~ChaserEditor()
@@ -176,7 +178,6 @@ ChaserEditor::~ChaserEditor()
 void ChaserEditor::slotNameEdited(const QString& text)
 {
     m_chaser->setName(text);
-    setWindowTitle(QString(tr("Chaser editor - %1")).arg(text));
 }
 
 /****************************************************************************

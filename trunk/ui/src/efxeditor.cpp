@@ -75,6 +75,9 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
     m_testTimer.setInterval(500);
     connect(&m_testTimer, SIGNAL(timeout()), this, SLOT(slotRestartTest()));
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 EFXEditor::~EFXEditor()
@@ -151,7 +154,7 @@ void EFXEditor::initGeneralPage()
 
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
-    slotNameEdited(m_efx->name());
+    m_nameEdit->setSelection(0, m_nameEdit->text().length());
 
     /* Resize columns to fit contents */
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -450,9 +453,7 @@ void EFXEditor::removeFixtureItem(EFXFixture* ef)
 
 void EFXEditor::slotNameEdited(const QString &text)
 {
-    setWindowTitle(tr("EFX - %1").arg(text));
     m_efx->setName(m_nameEdit->text());
-    m_doc->setModified();
 }
 
 void EFXEditor::slotFixtureItemChanged(QTreeWidgetItem* item, int column)

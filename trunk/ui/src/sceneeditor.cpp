@@ -83,6 +83,9 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
         m_tab->setCurrentIndex(KTabFirstFixture);
 
     m_initFinished = true;
+
+    // Set focus to the editor
+    m_nameEdit->setFocus();
 }
 
 SceneEditor::~SceneEditor()
@@ -141,9 +144,9 @@ void SceneEditor::init()
             this, SLOT(slotRemoveFixtureClicked()));
 
     m_nameEdit->setText(m_scene->name());
+    m_nameEdit->setSelection(0, m_nameEdit->text().length());
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
-    slotNameEdited(m_scene->name());
 
     /* Speeds */
     new QHBoxLayout(m_fadeInContainer);
@@ -482,7 +485,6 @@ void SceneEditor::removeFixtureItem(Fixture* fixture)
 
 void SceneEditor::slotNameEdited(const QString& name)
 {
-    setWindowTitle(tr("Scene - %1").arg(name));
     m_scene->setName(m_nameEdit->text());
 }
 
@@ -656,7 +658,6 @@ void SceneEditor::slotValueChanged(quint32 fxi, quint32 channel, uchar value)
 
     Q_ASSERT(m_scene != NULL);
     m_scene->setValue(SceneValue(fxi, channel, value));
-    m_doc->setModified();
 }
 
 void SceneEditor::slotChecked(quint32 fxi, quint32 channel, bool state)
@@ -670,5 +671,4 @@ void SceneEditor::slotChecked(quint32 fxi, quint32 channel, bool state)
     Q_ASSERT(m_scene != NULL);
     if (state == false)
         m_scene->unsetValue(fxi, channel);
-    m_doc->setModified();
 }

@@ -88,6 +88,7 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     m_tree->sortItems(0, Qt::AscendingOrder);
 
     connect(m_doc, SIGNAL(clearing()), this, SLOT(slotDocClearing()));
+    connect(m_doc, SIGNAL(functionChanged(quint32)), this, SLOT(slotFunctionChanged(quint32)));
 
     QSettings settings;
     QVariant var = settings.value(SETTINGS_SPLITTER);
@@ -152,6 +153,17 @@ void FunctionManager::slotDocClearing()
     m_tree->clear();
     if (currentEditor() != NULL)
         delete currentEditor();
+}
+
+void FunctionManager::slotFunctionChanged(quint32 id)
+{
+    Function* function = m_doc->function(id);
+    if (function == NULL)
+        return;
+
+    QTreeWidgetItem* item = functionItem(function);
+    if (item != NULL)
+        updateFunctionItem(item, function);
 }
 
 /*****************************************************************************
@@ -454,9 +466,17 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item, const Function* 
 {
     Q_ASSERT(item != NULL);
     Q_ASSERT(function != NULL);
-    item->setText(0, function->name());
-    item->setIcon(0, functionIcon(function));
-    item->setData(0, PROP_ID, function->id());
+
+    // This function is used to update the item whenever the function changes. Unless
+    // there's something to change from FunctionManager's point of view, don't do anything.
+    if (item->text(0) != function->name())
+        item->setText(0, function->name());
+
+    if (item->data(0, PROP_ID).toUInt() != function->id())
+    {
+        item->setIcon(0, functionIcon(function));
+        item->setData(0, PROP_ID, function->id());
+    }
 }
 
 QTreeWidgetItem* FunctionManager::parentItem(const Function* function)
@@ -491,6 +511,23 @@ quint32 FunctionManager::itemFunctionId(const QTreeWidgetItem* item) const
         return Function::invalidId();
     else
         return item->data(0, PROP_ID).toUInt();
+}
+
+QTreeWidgetItem* FunctionManager::functionItem(const Function* function)
+{
+    Q_ASSERT(function != NULL);
+
+    QTreeWidgetItem* parent = parentItem(function);
+    Q_ASSERT(parent != NULL);
+
+    for (int i = 0; i < parent->childCount(); i++)
+    {
+        QTreeWidgetItem* item = parent->child(i);
+        if (itemFunctionId(item) == function->id())
+            return item;
+    }
+
+    return NULL;
 }
 
 QIcon FunctionManager::functionIcon(const Function* function) const

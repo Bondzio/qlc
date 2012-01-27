@@ -63,6 +63,7 @@ protected:
 protected slots:
     void slotModeChanged(Doc::Mode mode);
     void slotDocClearing();
+    void slotFunctionChanged(quint32 id);
 
 protected:
     static FunctionManager* s_instance;
@@ -90,6 +91,9 @@ private:
 
     /** Get the ID of the function represented by $item. */
     quint32 itemFunctionId(const QTreeWidgetItem* item) const;
+
+    /** Get the item that represents the given function. */
+    QTreeWidgetItem* functionItem(const Function* function);
 
     /** Get an icon that represents the given function's type */
     QIcon functionIcon(const Function* function) const;

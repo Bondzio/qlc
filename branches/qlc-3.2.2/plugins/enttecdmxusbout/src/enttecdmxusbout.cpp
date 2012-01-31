@@ -27,6 +27,7 @@
 #include <QMessageBox>
 #include <QDebug>
 
+#include "enttecdmxusbconfig.h"
 #include "enttecdmxusbwidget.h"
 #include "enttecdmxusbopen.h"
 #include "enttecdmxusbpro.h"
@@ -170,11 +171,9 @@ void EnttecDMXUSBOut::outputDMX(quint32 output, const QByteArray& universe)
 
 void EnttecDMXUSBOut::configure()
 {
-    int r = QMessageBox::question(NULL, name(),
-                                  tr("Do you wish to re-scan your hardware?"),
-                                  QMessageBox::Yes, QMessageBox::No);
-    if (r == QMessageBox::Yes)
-        rescanWidgets();
+    EnttecDMXUSBConfig config(this);
+    config.exec();
+    rescanWidgets();
 }
 
 bool EnttecDMXUSBOut::canConfigure()
@@ -185,6 +184,11 @@ bool EnttecDMXUSBOut::canConfigure()
 /****************************************************************************
  * Enttec Widgets
  ****************************************************************************/
+
+QList <EnttecDMXUSBWidget*> EnttecDMXUSBOut::widgets() const
+{
+    return m_widgets;
+}
 
 bool EnttecDMXUSBOut::rescanWidgets()
 {

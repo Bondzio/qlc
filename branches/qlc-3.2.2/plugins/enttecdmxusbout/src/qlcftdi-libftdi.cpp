@@ -19,9 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <strings.h>
+#include <QSettings>
+#include <QVariant>
 #include <ftdi.h>
 #include <QDebug>
+#include <QMap>
 
 #include "enttecdmxusbwidget.h"
 #include "enttecdmxusbopen.h"
@@ -46,7 +48,6 @@ QLCFTDI::~QLCFTDI()
 
 QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
 {
-    int i = 0;
     QList <EnttecDMXUSBWidget*> widgetList;
     struct ftdi_device_list* list = 0;
     struct ftdi_context ftdi;
@@ -66,15 +67,33 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
                              name, sizeof(name),
                              serial, sizeof(serial));
 
-        if (QString(vendor).toUpper().contains("FTDI") == true)
+        QString ser(serial);
+        QString ven(vendor);
+        QMap <QString,QVariant> types(typeMap());
+
+        if (types.contains(ser) == true)
+        {
+            // Force a widget with a specific serial to either type
+            switch (EnttecDMXUSBWidget::Type(types[ser].toInt()))
+            {
+            case EnttecDMXUSBWidget::Open:
+                widgetList << new EnttecDMXUSBOpen(serial, name, 0);
+                break;
+            default:
+            case EnttecDMXUSBWidget::Pro:
+                widgetList << new EnttecDMXUSBPro(serial, name, 0);
+                break;
+            }
+        }
+        else if (ven.toUpper().contains("FTDI") == true)
         {
             /* This is probably an Open DMX USB widget */
-            widgetList << new EnttecDMXUSBOpen(serial, name, i);
+            widgetList << new EnttecDMXUSBOpen(serial, name, 0);
         }
         else
         {
             /* This is probably a DMX USB Pro widget */
-            widgetList << new EnttecDMXUSBPro(serial, name, i);
+            widgetList << new EnttecDMXUSBPro(serial, name, 0);
         }
 
         list = list->next;

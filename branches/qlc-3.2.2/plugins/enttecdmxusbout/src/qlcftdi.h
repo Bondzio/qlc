@@ -23,8 +23,10 @@
 #define QLCFTDI_H
 
 #include <QByteArray>
+#include <QSettings>
 #include <QString>
 #include <QList>
+#include <QMap>
 
 #ifdef FTD2XX
 #   ifdef WIN32
@@ -34,6 +36,8 @@
 #else
 #   include <ftdi.h>
 #endif
+
+#define SETTINGS_TYPE_MAP "qlcftdi/typemap"
 
 class EnttecDMXUSBWidget;
 
@@ -52,6 +56,26 @@ public:
      * @return A list of enttec-compabitble devices
      */
     static QList <EnttecDMXUSBWidget*> widgets();
+
+    /**
+     * Get a map of [serial = type] bindings that tells which serials should
+     * be used to force the plugin to use pro/open method on which widget.
+     */
+    static QMap <QString,QVariant> typeMap()
+    {
+        QMap <QString,QVariant> typeMap;
+        QSettings settings;
+        QVariant var(settings.value(SETTINGS_TYPE_MAP));
+        if (var.isValid() == true)
+            typeMap = var.toMap();
+        return typeMap;
+    }
+
+    static void storeTypeMap(const QMap <QString,QVariant> map)
+    {
+        QSettings settings;
+        settings.setValue(SETTINGS_TYPE_MAP, map);
+    }
 
     /************************************************************************
      * Construction & Generic Information

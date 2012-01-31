@@ -390,8 +390,22 @@ QLCOutPlugin* OutputMap::plugin(const QString& name)
 void OutputMap::slotConfigurationChanged()
 {
     QLCOutPlugin* plugin = qobject_cast<QLCOutPlugin*> (QObject::sender());
-    if (plugin != NULL)
-        emit pluginConfigurationChanged(plugin->name());
+    if (plugin == NULL) // The signal comes from a plugin that isn't guaranteed to behave
+        return;
+
+    for (quint32 i = 0; i < universes(); i++)
+    {
+        OutputPatch* op = patch(i);
+        Q_ASSERT(op != NULL);
+        if (op->plugin() == plugin)
+        {
+            m_universeMutex.lock();
+            op->reconnect();
+            m_universeMutex.unlock();
+        }
+    }
+
+    emit pluginConfigurationChanged(plugin->name());
 }
 
 QDir OutputMap::systemPluginDirectory()

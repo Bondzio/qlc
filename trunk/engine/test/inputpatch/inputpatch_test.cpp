@@ -93,6 +93,18 @@ void InputPatch_Test::patch()
     QVERIFY(ip->m_feedbackEnabled == true);
     QVERIFY(ip->feedbackEnabled() == true);
 
+    ip->reconnect();
+    QVERIFY(ip->m_plugin == stub);
+    QVERIFY(ip->m_input == 3);
+    QVERIFY(ip->m_profile == &prof2);
+    QVERIFY(ip->pluginName() == stub->name());
+    QVERIFY(ip->inputName() == stub->inputs()[3]);
+    QVERIFY(ip->profileName() == prof2.name());
+    QVERIFY(stub->m_openLines.size() == 1);
+    QVERIFY(stub->m_openLines.at(0) == 3);
+    QVERIFY(ip->m_feedbackEnabled == true);
+    QVERIFY(ip->feedbackEnabled() == true);
+
     delete ip;
     QVERIFY(stub->m_openLines.size() == 0);
 }

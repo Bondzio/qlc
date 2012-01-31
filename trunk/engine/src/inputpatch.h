@@ -77,6 +77,9 @@ public:
     void set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
              QLCInputProfile* profile);
 
+    /** Close & open the current plugin-input combination (if any) */
+    void reconnect();
+
     /** The plugin instance that has been assigned to a patch */
     QLCInPlugin* plugin() const;
 

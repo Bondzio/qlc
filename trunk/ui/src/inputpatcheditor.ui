@@ -45,7 +45,7 @@
          </column>
         </widget>
        </item>
-       <item row="1" column="0" rowspan="3" colspan="2">
+       <item row="1" column="0" rowspan="2" colspan="2">
         <widget class="QTextBrowser" name="m_infoBrowser">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -73,26 +73,6 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QToolButton" name="m_reconnectButton">
-         <property name="toolTip">
-          <string>Attempt to re-connect the current plugin</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -105,7 +85,7 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="0">
+       <item row="3" column="0">
         <widget class="QCheckBox" name="m_feedbackEnabledCheck">
          <property name="toolTip">
           <string>Send feedback data to the input universe for moving e.g. motorized sliders.</string>

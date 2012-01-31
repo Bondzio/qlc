@@ -37,9 +37,14 @@
      <property name="allColumnsShowFocus">
       <bool>true</bool>
      </property>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
     </widget>
    </item>
-   <item row="1" column="0" rowspan="3">
+   <item row="1" column="0" rowspan="2">
     <widget class="QTextBrowser" name="m_infoBrowser">
      <property name="toolTip">
       <string>Information related to the currently selected plugin or output</string>
@@ -70,26 +75,6 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QToolButton" name="m_reconnectButton">
-     <property name="toolTip">
-      <string>Attempt to re-connect the current plugin</string>
-     </property>
-     <property name="text">
-      <string notr="true">...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="qlcui.qrc">
-       <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

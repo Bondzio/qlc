@@ -68,6 +68,16 @@ void InputPatch::set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
         m_plugin->open(m_input);
 }
 
+void InputPatch::reconnect()
+{
+    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
+    {
+        m_plugin->close(m_input);
+        usleep(1000);
+        m_plugin->open(m_input);
+    }
+}
+
 QLCInPlugin* InputPatch::plugin() const
 {
     return m_plugin;

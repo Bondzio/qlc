@@ -61,10 +61,6 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMa
     connect(m_configureButton, SIGNAL(clicked()),
             this, SLOT(slotConfigureClicked()));
 
-    /* Reconnect button */
-    connect(m_reconnectButton, SIGNAL(clicked()),
-            this, SLOT(slotReconnectClicked()));
-
     fillTree();
 
     /* Listen to plugin configuration changes */
@@ -337,19 +333,4 @@ void OutputPatchEditor::slotConfigureClicked()
     /* Configure the plugin. Changes in plugin outputs are handled with
        slotPluginConfigurationChanged(). */
     m_outputMap->configurePlugin(plugin);
-}
-
-void OutputPatchEditor::slotReconnectClicked()
-{
-    OutputPatch* outputPatch = m_outputMap->patch(m_universe);
-    if (outputPatch != NULL)
-        outputPatch->set(outputPatch->plugin(), outputPatch->output());
-
-    QTreeWidgetItem* outputItem = currentlyMappedItem();
-    if (outputItem != NULL)
-    {
-        if (outputItem->parent() != NULL)
-            outputItem->parent()->setExpanded(true);
-        m_tree->setCurrentItem(outputItem);
-    }
 }

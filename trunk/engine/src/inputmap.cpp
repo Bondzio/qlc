@@ -146,8 +146,18 @@ bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
 void InputMap::slotConfigurationChanged()
 {
     QLCInPlugin* plugin = qobject_cast<QLCInPlugin*> (QObject::sender());
-    if (plugin != NULL)
-        emit pluginConfigurationChanged(plugin->name());
+    if (plugin == NULL) // The signal comes from a plugin that isn't guaranteed to behave
+        return;
+
+    for (quint32 i = 0; i < universes(); i++)
+    {
+        InputPatch* ip = patch(i);
+        Q_ASSERT(ip != NULL);
+        if (ip->plugin() == plugin)
+            ip->reconnect();
+    }
+
+    emit pluginConfigurationChanged(plugin->name());
 }
 
 /*****************************************************************************

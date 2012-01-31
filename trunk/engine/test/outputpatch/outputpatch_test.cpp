@@ -77,6 +77,14 @@ void OutputPatch_Test::patch()
     QVERIFY(stub->m_openLines.size() == 1);
     QVERIFY(stub->m_openLines.at(0) == 3);
 
+    op->reconnect();
+    QVERIFY(op->m_plugin == stub);
+    QVERIFY(op->m_output == 3);
+    QVERIFY(op->pluginName() == stub->name());
+    QVERIFY(op->outputName() == stub->outputs()[3]);
+    QVERIFY(stub->m_openLines.size() == 1);
+    QVERIFY(stub->m_openLines.at(0) == 3);
+
     delete op;
     QVERIFY(stub->m_openLines.size() == 0);
 }

@@ -79,7 +79,6 @@ private slots:
     void slotMapCurrentItemChanged(QTreeWidgetItem* item);
     void slotMapItemChanged(QTreeWidgetItem* item);
     void slotConfigureInputClicked();
-    void slotReconnectClicked();
     void slotFeedbackToggled(bool enable);
     void slotPluginConfigurationChanged(const QString& pluginName);
 

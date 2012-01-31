@@ -130,10 +130,6 @@ void InputPatchEditor::setupMappingPage()
     connect(m_configureButton, SIGNAL(clicked()),
             this, SLOT(slotConfigureInputClicked()));
 
-    /* Reconnect button */
-    connect(m_reconnectButton, SIGNAL(clicked()),
-            this, SLOT(slotReconnectClicked()));
-
     m_feedbackEnabledCheck->setChecked(m_currentFeedbackEnabled);
 }
 
@@ -350,22 +346,6 @@ void InputPatchEditor::slotConfigureInputClicked()
     /* Configure the plugin. Changes in plugin outputs are handled with
        slotPluginConfigurationChanged(). */
     m_inputMap->configurePlugin(plugin);
-}
-
-void InputPatchEditor::slotReconnectClicked()
-{
-    InputPatch* inputPatch = m_inputMap->patch(m_universe);
-    if (inputPatch != NULL)
-        inputPatch->set(inputPatch->plugin(), inputPatch->input(),
-                        inputPatch->feedbackEnabled(), inputPatch->profile());
-
-    QTreeWidgetItem* inputItem = currentlyMappedItem();
-    if (inputItem != NULL)
-    {
-        if (inputItem->parent() != NULL)
-            inputItem->parent()->setExpanded(true);
-        m_mapTree->setCurrentItem(inputItem);
-    }
 }
 
 void InputPatchEditor::slotFeedbackToggled(bool enable)

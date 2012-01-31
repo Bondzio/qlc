@@ -53,6 +53,7 @@ public:
      ********************************************************************/
 public:
     void set(QLCOutPlugin* plugin, quint32 output);
+    void reconnect();
 
     QLCOutPlugin* plugin() const;
     QString pluginName() const;

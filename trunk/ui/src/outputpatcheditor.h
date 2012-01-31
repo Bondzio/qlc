@@ -66,7 +66,6 @@ private slots:
     void slotItemChanged(QTreeWidgetItem* item);
     void slotConfigureClicked();
     void slotPluginConfigurationChanged(const QString& pluginName);
-    void slotReconnectClicked();
 
 private:
     OutputMap* m_outputMap;

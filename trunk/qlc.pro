@@ -2,6 +2,7 @@ include(variables.pri)
 
 TEMPLATE = subdirs
 
+SUBDIRS      += hotplugmonitor
 SUBDIRS      += engine
 SUBDIRS      += ui
 SUBDIRS      += main

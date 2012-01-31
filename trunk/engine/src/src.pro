@@ -11,6 +11,9 @@ QTPLUGIN =
 
 INCLUDEPATH += ../../plugins/interfaces
 
+#INCLUDEPATH += ../../hotplugmonitor/src
+#LIBS        += -L../../hotplugmonitor/src -lhotplugmonitor
+
 #############################################################################
 # Installation
 #############################################################################

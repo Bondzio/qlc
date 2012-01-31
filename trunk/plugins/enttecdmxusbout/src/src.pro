@@ -44,12 +44,14 @@ HEADERS += enttecdmxusbwidget.h \
            qlcftdi.h \
            enttecdmxusbout.h \
            enttecdmxusbpro.h \
-           enttecdmxusbopen.h
+           enttecdmxusbopen.h \
+           enttecdmxusbconfig.h
 
 SOURCES += enttecdmxusbwidget.cpp \
            enttecdmxusbout.cpp \
            enttecdmxusbpro.cpp \
-           enttecdmxusbopen.cpp
+           enttecdmxusbopen.cpp \
+           enttecdmxusbconfig.cpp
 
 CONFIG(ftd2xx) {
     SOURCES += qlcftdi-ftd2xx.cpp

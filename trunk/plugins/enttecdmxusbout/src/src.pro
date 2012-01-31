@@ -8,18 +8,31 @@ CONFIG      += plugin
 QT          += gui core
 INCLUDEPATH += ../../interfaces
 
+# Use FTD2XX by default only in Windows. Uncomment the two rows with curly
+# braces to use ftd2xx interface on unix.
+win32 {
+    CONFIG += ftd2xx
+}
+
 # FTD2XX is a proprietary interface by FTDI Ltd. and would therefore taint the
 # 100% FLOSS codebase of QLC if distributed along with QLC sources. Download
 # the latest driver package from http://www.ftdichip.com/Drivers/D2XX.htm and
-# extract its contents under FTD2XXDIR below to compile this plugin.
+# extract its contents under FTD2XXDIR below (unix: follow the instructions in
+# the package's README.dat to install under /usr/local/) before compiling this
+# plugin.
 #
 # Use forward slashes "/" instead of Windows backslashes "\" for paths here!
-#
-win32 {
-    # Windows target
-    FTD2XXDIR    = C:/CDM20814
-    LIBS        += -L$$FTD2XXDIR/i386 -lftd2xx
-    INCLUDEPATH += $$FTD2XXDIR
+CONFIG(ftd2xx) {
+    win32 {
+        # Windows target
+        FTD2XXDIR    = C:/CDM20814
+        LIBS        += -L$$FTD2XXDIR/i386 -lftd2xx
+        INCLUDEPATH += $$FTD2XXDIR
+    } else {
+        # Unix target
+        INCLUDEPATH += /usr/local/include
+        LIBS        += -lftd2xx -L/usr/local/lib
+    }
     DEFINES     += FTD2XX
 } else {
     CONFIG      += link_pkgconfig
@@ -38,7 +51,7 @@ SOURCES += enttecdmxusbwidget.cpp \
            enttecdmxusbpro.cpp \
            enttecdmxusbopen.cpp
 
-win32 {
+CONFIG(ftd2xx) {
     SOURCES += qlcftdi-ftd2xx.cpp
 } else {
     SOURCES += qlcftdi-libftdi.cpp

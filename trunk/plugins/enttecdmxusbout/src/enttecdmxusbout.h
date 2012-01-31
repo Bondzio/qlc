@@ -41,17 +41,17 @@ public:
     /** @reimp */
     void init();
 
+    /** @reimp */
+    QString name();
+
 #ifdef DBUS_ENABLED
-protected slots:
+private slots:
     /** Called when a USB device has been plugged in */
     void slotDeviceAdded(const QString& name);
 
     /** Called when a USB device has been plugged out */
     void slotDeviceRemoved(const QString& name);
 #endif
-
-    /** @reimp */
-    QString name();
 
     /************************************************************************
      * Outputs
@@ -89,7 +89,10 @@ public:
     /** Attempt to find all connected devices */
     bool rescanWidgets();
 
-protected:
+    /** Get a list of widgets */
+    QList <EnttecDMXUSBWidget*> widgets() const;
+
+private:
     /** Currently available devices */
     QList <EnttecDMXUSBWidget*> m_widgets;
 };

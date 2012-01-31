@@ -60,9 +60,6 @@ CONFIG(ftd2xx) {
 }
 
 unix:!macx {
-    QT      += dbus
-    DEFINES += DBUS_ENABLED
-
     # Rules to make ENTTEC devices readable & writable by normal users
     udev.path  = /etc/udev/rules.d
     udev.files = z65-enttec-dmxusb.rules

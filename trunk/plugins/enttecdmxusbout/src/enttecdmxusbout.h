@@ -44,15 +44,6 @@ public:
     /** @reimp */
     QString name();
 
-#ifdef DBUS_ENABLED
-private slots:
-    /** Called when a USB device has been plugged in */
-    void slotDeviceAdded(const QString& name);
-
-    /** Called when a USB device has been plugged out */
-    void slotDeviceRemoved(const QString& name);
-#endif
-
     /************************************************************************
      * Outputs
      ************************************************************************/

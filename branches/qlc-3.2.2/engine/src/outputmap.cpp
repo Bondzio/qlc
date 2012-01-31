@@ -320,9 +320,6 @@ QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
         QString info;
         info += QString("<HTML><HEAD></HEAD><BODY>");
         info += QString("<H3>%1</H3>").arg(tr("No plugin selected"));
-        info += QString("<P>%1 ").arg(tr("You can download plugins from"));
-        info += QString("<A HREF=\"http://www.sourceforge.net/projects/qlc/files\">");
-        info += QString("http://www.sourceforge.net/projects/qlc/files</A></P>.");
         info += QString("</BODY></HTML>");
         return info;
     }

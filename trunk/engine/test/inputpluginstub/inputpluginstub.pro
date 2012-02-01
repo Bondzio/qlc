@@ -1,3 +1,4 @@
+include(../../../variables.pri)
 include(../../variables.pri)
 
 TEMPLATE = lib

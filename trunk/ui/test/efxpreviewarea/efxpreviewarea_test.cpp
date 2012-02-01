@@ -40,9 +40,6 @@ void EFXPreviewArea_Test::setPoints()
 {
     EFXPreviewArea area(NULL);
     area.show();
-    QSize size(100, 100);
-    area.resize(size);
-    QCOMPARE(area.size(), size);
 
     QPolygon poly(5);
     poly.setPoint(0, QPoint(0, 0));
@@ -52,14 +49,8 @@ void EFXPreviewArea_Test::setPoints()
     poly.setPoint(4, QPoint(255, 255));
 
     area.setPoints(poly);
-    QCOMPARE(area.m_original, poly);
-    QCOMPARE(area.m_points[0], QPoint(0, 0));
-    QCOMPARE(area.m_points[1], QPoint(3, 3));
-    QCOMPARE(area.m_points[2], QPoint(7, 7));
-    QCOMPARE(area.m_points[3], QPoint(50, 50));
-    QCOMPARE(area.m_points[4], QPoint(100, 100));
 
-    size = QSize(200, 200);
+    QSize size = QSize(200, 200);
     area.resize(size);
     QCOMPARE(area.m_original, poly);
     QCOMPARE(area.m_points[0], QPoint(0, 0));

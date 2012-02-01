@@ -1,14 +1,15 @@
 @ECHO OFF
+SETLOCAL EnableDelayedExpansion
 
-pushd .
 REM Enttec wing test
+pushd .
 cd plugins\ewinginput\src
-..\test\test_ewing.exe
+..\test\ewing_test.exe
 IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
 popd
 
-pushd .
 REM Velleman test
+pushd .
 cd plugins\vellemanout\src
 SET OLDPATH=%PATH%
 PATH=%PATH%;C:\k8062d
@@ -18,56 +19,55 @@ IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
 SET PATH=%OLDPATH%
 popd
 
+REM Engine tests
 pushd .
-REM Engine test
 cd engine\test
 SET OLDPATH=%PATH%
-PATH=%PATH%;..\src
-test_engine.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
+PATH=%PATH%;..\..\src
+FOR /D %%G IN ("*") DO (
+    cd "%%G"
+
+    REM Do something
+    IF EXIST "test.bat" CALL "test.bat"
+
+    REM Execute test
+    IF EXIST "%%G_test.exe" (
+        %%G_test.exe
+    )
+
+    REM Check test result and act accordingly
+    IF !ERRORLEVEL! EQU 0 (
+        ECHO %%G test OK
+    ) else (
+        exit /B %ERRORLEVEL%
+    )
+    cd ..
+)
 SET PATH=%OLDPATH%
 popd
 
+REM UI tests
 pushd .
-REM UI test
 cd ui\test
 SET OLDPATH=%PATH%
-PATH=%PATH%;..\..\..\engine\src;..\..\..\ui\src
+PATH=%PATH%;..\..\src;..\..\..\engine\src
+FOR /D %%G IN ("*") DO (
+    cd "%%G"
 
-cd aboutbox
-aboutbox_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
+    REM Execute test
+    IF EXIST "%%G_test.exe" (
+        %%G_test.exe
+    )
 
-cd addfixture
-addfixture_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
-cd vcframe
-vcframe_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
-cd vclabel
-vclabel_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
-cd vcproperties
-vcproperties_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
-cd vcwidgetproperties
-vcwidgetproperties_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
-cd vcxypadfixture
-vcxypadfixture_test.exe
-IF NOT %ERRORLEVEL%==0 exit /B %ERRORLEVEL%
-cd ..
-
+    REM Check test result and act accordingly
+    IF !ERRORLEVEL! EQU 0 (
+        ECHO %%G test OK
+    ) else (
+        exit /B %ERRORLEVEL%
+    )
+    cd ..
+)
 SET PATH=%OLDPATH%
 popd
+
+ECHO All tests passed

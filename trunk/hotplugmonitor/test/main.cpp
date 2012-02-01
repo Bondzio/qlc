@@ -1,4 +1,3 @@
-#include <CoreFoundation/CoreFoundation.h>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QTimer>

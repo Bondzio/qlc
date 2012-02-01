@@ -204,18 +204,6 @@ HotPlugMonitor::~HotPlugMonitor()
     d_ptr = NULL;
 }
 
-void HotPlugMonitor::emitDeviceAdded(uint vid, uint pid)
-{
-    qDebug() << Q_FUNC_INFO << vid << pid;
-    emit deviceAdded();
-}
-
-void HotPlugMonitor::emitDeviceRemoved(uint vid, uint pid)
-{
-    qDebug() << Q_FUNC_INFO << vid << pid;
-    emit deviceAdded();
-}
-
 void HotPlugMonitor::stop()
 {
     qDebug() << Q_FUNC_INFO;

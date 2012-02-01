@@ -23,6 +23,7 @@
 #define HOTPLUGMONITOR_H
 
 #include <QThread>
+#include <QDebug>
 
 class HPMPrivate;
 
@@ -48,13 +49,15 @@ public:
     void stop();
 
 signals:
-    void deviceAdded();
-    void deviceRemoved();
+    void deviceAdded(uint vid, uint pid);
+    void deviceRemoved(uint vid, uint pid);
 
 private:
     void run();
-    void emitDeviceAdded(uint vid, uint pid);
-    void emitDeviceRemoved(uint vid, uint pid);
+    void emitDeviceAdded(uint vid, uint pid)
+        { qDebug() << Q_FUNC_INFO << vid << pid; emit deviceAdded(vid, pid); }
+    void emitDeviceRemoved(uint vid, uint pid)
+        { qDebug() << Q_FUNC_INFO << vid << pid; emit deviceRemoved(vid, pid); }
 
 private:
     HPMPrivate* d_ptr;

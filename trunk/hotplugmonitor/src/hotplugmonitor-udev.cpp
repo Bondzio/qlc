@@ -33,6 +33,8 @@
 #define UDEV_NETLINK_SOURCE  "udev"
 #define USB_SUBSYSTEM        "usb"
 #define USB_DEVICE_TYPE      "usb_device"
+#define PROPERTY_VID         "ID_VENDOR_ID"
+#define PROPERTY_PID         "ID_MODEL_ID"
 
 HotPlugMonitor::HotPlugMonitor(QObject* parent)
     : QThread(parent)
@@ -100,23 +102,33 @@ void HotPlugMonitor::run()
             udev_device* dev = udev_monitor_receive_device(mon);
             if (dev != NULL)
             {
-                QString action(udev_device_get_action(dev));
-                qDebug() << "Device" << action << "action";
-                if (action == DEVICE_ACTION_ADD)
+                const char* action = udev_device_get_action(dev);
+                const char* vendor = udev_device_get_property_value(dev, PROPERTY_VID);
+                const char* product = udev_device_get_property_value(dev, PROPERTY_PID);
+                if (action == NULL || vendor == NULL || product == NULL)
                 {
-                    emit deviceAdded();
+                    qWarning() << Q_FUNC_INFO << "Unable to get device properties"
+                               << (void*) dev;
                 }
-                else if (action == DEVICE_ACTION_REMOVE)
+                else if (strcmp(action, DEVICE_ACTION_ADD) == 0)
                 {
-                    emit deviceRemoved();
+                    uint vid = QString(vendor).toUInt(0, 16);
+                    uint pid = QString(product).toUInt(0, 16);
+                    emitDeviceAdded(vid, pid);
+                }
+                else if (strcmp(action, DEVICE_ACTION_REMOVE) == 0)
+                {
+                    uint vid = QString(vendor).toUInt(0, 16);
+                    uint pid = QString(product).toUInt(0, 16);
+                    emitDeviceRemoved(vid, pid);
+                }
+                else
+                {
+                    qWarning() << Q_FUNC_INFO << "Unhandled udev action:" << action;
                 }
 
                 udev_device_unref(dev);
             }
-        }
-        else
-        {
-            qDebug() << Q_FUNC_INFO << "timeout";
         }
     }
 

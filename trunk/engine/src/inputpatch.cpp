@@ -19,6 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifdef WIN32
+#   define WIN32_LEAN_AND_MEAN
+#   include <Windows.h>
+#endif
+
 #include <QObject>
 #include <QDebug>
 #include <QtXml>
@@ -27,6 +32,8 @@
 
 #include "inputpatch.h"
 #include "inputmap.h"
+
+#define GRACE_MS 1
 
 /*****************************************************************************
  * Initialization
@@ -73,7 +80,11 @@ void InputPatch::reconnect()
     if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
     {
         m_plugin->close(m_input);
-        usleep(1000);
+#ifdef WIN32
+        Sleep(GRACE_MS);
+#else
+        usleep(GRACE_MS * 1000);
+#endif
         m_plugin->open(m_input);
     }
 }

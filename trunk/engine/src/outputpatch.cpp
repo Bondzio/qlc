@@ -19,6 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifdef WIN32
+#   define WIN32_LEAN_AND_MEAN
+#   include <Windows.h>
+#endif
+
 #include <algorithm>
 #include <QObject>
 #include <QtXml>
@@ -26,6 +31,8 @@
 #include "qlcoutplugin.h"
 #include "outputpatch.h"
 #include "outputmap.h"
+
+#define GRACE_MS 1
 
 /*****************************************************************************
  * Initialization
@@ -66,7 +73,11 @@ void OutputPatch::reconnect()
     if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
     {
         m_plugin->close(m_output);
-        usleep(1000);
+#ifdef WIN32
+        Sleep(GRACE_MS);
+#else
+        usleep(GRACE_MS * 1000);
+#endif
         m_plugin->open(m_output);
     }
 }

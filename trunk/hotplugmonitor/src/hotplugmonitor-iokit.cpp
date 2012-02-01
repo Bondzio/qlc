@@ -34,19 +34,16 @@
 class HPMPrivate
 {
 public:
-    HPMPrivate(HotPlugMonitor* hpm);
+    HPMPrivate(HotPlugMonitor* parent);
 
-    kern_return_t extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid);
+    void extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid);
     void deviceAdded(io_iterator_t iterator);
     void deviceRemoved(io_iterator_t iterator);
 
 public:
-    HotPlugMonitor*         m_hpm;
+    HotPlugMonitor*         hpm;
 
     CFRunLoopRef            loop;
-    IONotificationPortRef   notifyPort;
-    io_iterator_t           rawAddedIter;
-    io_iterator_t           rawRemovedIter;
 };
 
 /****************************************************************************
@@ -55,8 +52,6 @@ public:
 
 static void onRawDeviceAdded(void* refCon, io_iterator_t iterator)
 {
-    qDebug() << Q_FUNC_INFO;
-
     HPMPrivate* d_ptr = (HPMPrivate*) refCon;
     Q_ASSERT(d_ptr != NULL);
     d_ptr->deviceAdded(iterator);
@@ -64,8 +59,6 @@ static void onRawDeviceAdded(void* refCon, io_iterator_t iterator)
 
 static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
 {
-    qDebug() << Q_FUNC_INFO;
-
     HPMPrivate* d_ptr = (HPMPrivate*) refCon;
     Q_ASSERT(d_ptr != NULL);
     d_ptr->deviceRemoved(iterator);
@@ -75,113 +68,51 @@ static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
  * HPMPrivate implementation
  ****************************************************************************/
 
-HPMPrivate::HPMPrivate(HotPlugMonitor* hpm)
-    : m_hpm(hpm)
+HPMPrivate::HPMPrivate(HotPlugMonitor* parent)
+    : hpm(parent)
     , loop(NULL)
-    , notifyPort(0)
-    , rawAddedIter(0)
-    , rawRemovedIter(0)
 {
-    qDebug() << Q_FUNC_INFO;
 }
 
-kern_return_t HPMPrivate::extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid)
+void HPMPrivate::extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid)
 {
-    qDebug() << Q_FUNC_INFO << (void*) usbDevice;
-
     Q_ASSERT(vid != NULL);
     Q_ASSERT(pid != NULL);
 
-    kern_return_t kr = 0;
-    SInt32 score = 0;
-    HRESULT result = 0;
-    IOCFPlugInInterface** plugInInterface = NULL;
-    IOUSBDeviceInterface** dev = NULL;
+    CFNumberRef number;
 
-    // Create an intermediate plug-in
-    kr = IOCreatePlugInInterfaceForService(usbDevice,
-                                           kIOUSBDeviceUserClientTypeID,
-                                           kIOCFPlugInInterfaceID,
-                                           &plugInInterface,
-                                           &score);
-    // Don't need the device object after intermediate plug-in is created
-    if (kr != kIOReturnSuccess || plugInInterface == NULL)
-    {
-        qWarning() << Q_FUNC_INFO << "Unable to create a plug-in:" << kr;
-        return kr;
-    }
+    number = (CFNumberRef) IORegistryEntryCreateCFProperty(usbDevice, CFSTR(kUSBVendorID),
+                                                           kCFAllocatorDefault, 0);
+    CFNumberGetValue(number, kCFNumberSInt16Type, vid);
+    CFRelease(number);
 
-    // Now create the device interface
-    result = (*plugInInterface)->QueryInterface(plugInInterface,
-                                                CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID),
-                                                (LPVOID*) &dev);
-    // Don't need the intermediate plug-in after device interface is created
-    (*plugInInterface)->Release(plugInInterface);
-    if (result != 0 || dev == NULL)
-    {
-        qWarning() << Q_FUNC_INFO << "Couldn't create a device interface:" << (int) result;
-        return result;
-    }
-
-    kr = (*dev)->GetDeviceVendor(dev, vid);
-    if (kr != kIOReturnSuccess)
-    {
-        qWarning() << Q_FUNC_INFO << "Unable to acquire Vendor ID:" << kr;
-        (void) (*dev)->Release(dev);
-        return kr;
-    }
-
-    kr = (*dev)->GetDeviceProduct(dev, pid);
-    if (kr != kIOReturnSuccess)
-    {
-        qWarning() << Q_FUNC_INFO << "Unable to acquire Product ID:" << kr;
-        (void) (*dev)->Release(dev);
-        return kr;
-    }
-
-    // Release the device
-    (void) (*dev)->Release(dev);
-
-    return kIOReturnSuccess;
+    number = (CFNumberRef) IORegistryEntryCreateCFProperty(usbDevice, CFSTR(kUSBProductID),
+                                                           kCFAllocatorDefault, 0);
+    CFNumberGetValue(number, kCFNumberSInt16Type, pid);
+    CFRelease(number);
 }
 
 void HPMPrivate::deviceAdded(io_iterator_t iterator)
 {
     io_service_t usbDevice;
-    kern_return_t kr;
-
     while ((usbDevice = IOIteratorNext(iterator)) != 0)
     {
-        qDebug() << "Device" << (void*) usbDevice << "added";
-
         UInt16 vid = 0, pid = 0;
-        kr = extractVidPid(usbDevice, &vid, &pid);
-        if (kr != kIOReturnSuccess)
-            continue;
-        else
-            m_hpm->emitDeviceAdded(vid, pid);
-
-        kr = IOObjectRelease(usbDevice);
+        extractVidPid(usbDevice, &vid, &pid);
+        hpm->emitDeviceAdded(vid, pid);
+        IOObjectRelease(usbDevice);
     }
 }
 
 void HPMPrivate::deviceRemoved(io_iterator_t iterator)
 {
     io_service_t usbDevice;
-    kern_return_t kr;
-
     while ((usbDevice = IOIteratorNext(iterator)))
     {
-        qDebug() << "Device" << (void*) usbDevice << "removed";
-
         UInt16 vid = 0, pid = 0;
-        kr = extractVidPid(usbDevice, &vid, &pid);
-        if (kr != kIOReturnSuccess)
-            continue;
-        else
-            m_hpm->emitDeviceRemoved(vid, pid);
-
-        kr = IOObjectRelease(usbDevice);
+        extractVidPid(usbDevice, &vid, &pid);
+        hpm->emitDeviceRemoved(vid, pid);
+        IOObjectRelease(usbDevice);
     }
 }
 
@@ -194,21 +125,16 @@ HotPlugMonitor::HotPlugMonitor(QObject* parent)
     , d_ptr(new HPMPrivate(this))
     , m_run(false)
 {
-    qDebug() << Q_FUNC_INFO;
 }
 
 HotPlugMonitor::~HotPlugMonitor()
 {
-    qDebug() << Q_FUNC_INFO;
     delete d_ptr;
     d_ptr = NULL;
 }
 
 void HotPlugMonitor::stop()
 {
-    qDebug() << Q_FUNC_INFO;
-
-    m_run = false;
     CFRunLoopStop(d_ptr->loop);
     while (isRunning() == true)
         usleep(10);
@@ -216,11 +142,12 @@ void HotPlugMonitor::stop()
 
 void HotPlugMonitor::run()
 {
-    qDebug() << Q_FUNC_INFO;
-    Q_ASSERT(m_run == false);
+    mach_port_t             masterPort = 0;
+    IONotificationPortRef   notifyPort = 0;
+    io_iterator_t           rawAddedIter = 0;
+    io_iterator_t           rawRemovedIter = 0;
 
     // Create an IOMasterPort for accessing IOKit
-    mach_port_t masterPort;
     kern_return_t kr = IOMasterPort(MACH_PORT_NULL, &masterPort);
     if (kr || !masterPort)
     {
@@ -237,61 +164,53 @@ void HotPlugMonitor::run()
         return;
     }
 
-    // Take an extra reference because IOServiceAddMatchingNotification consumes them
+    // Take an extra reference because IOServiceAddMatchingNotification consumes one
     matchingDict = (CFMutableDictionaryRef) CFRetain(matchingDict);
 
-/*
-    // Use these to get notifications of specific VID/PID combinations
-    SInt32 vid = 0x0403;
-    SInt32 pid = 0x6001;
-    CFDictionarySetValue(matchingDict, CFSTR(kUSBVendorID),
-                         CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vid));
-    CFDictionarySetValue(matchingDict, CFSTR(kUSBProductID),
-                         CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pid));
-*/
+    // Store the thread's run loop context
+    d_ptr->loop = CFRunLoopGetCurrent();
+    // New notification port
+    notifyPort = IONotificationPortCreate(masterPort);
 
-    d_ptr->loop = CFRunLoopGetCurrent(); // Store the thread's run loop context
-    d_ptr->notifyPort = IONotificationPortCreate(masterPort); // New notification port
-
-    CFRunLoopSourceRef runLoopSource = IONotificationPortGetRunLoopSource(d_ptr->notifyPort);
+    CFRunLoopSourceRef runLoopSource = IONotificationPortGetRunLoopSource(notifyPort);
     CFRunLoopAddSource(d_ptr->loop, runLoopSource, kCFRunLoopDefaultMode);
 
     // Listen to device add notifications
-    kr = IOServiceAddMatchingNotification(d_ptr->notifyPort,
+    kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOFirstMatchNotification,
                                           matchingDict,
                                           onRawDeviceAdded,
                                           (void*) d_ptr,
-                                          &d_ptr->rawAddedIter);
+                                          &rawAddedIter);
     if (kr != kIOReturnSuccess)
         qFatal("Unable to add notification for device additions");
 
     // Iterate over set of matching devices to access already-present devices
     // and to arm the notification.
-    onRawDeviceAdded(d_ptr, d_ptr->rawAddedIter);
+    onRawDeviceAdded(d_ptr, rawAddedIter);
 
     // Listen to device removal notifications
-    kr = IOServiceAddMatchingNotification(d_ptr->notifyPort,
+    kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOTerminatedNotification,
                                           matchingDict,
                                           onRawDeviceRemoved,
                                           (void*) d_ptr,
-                                          &d_ptr->rawRemovedIter);
+                                          &rawRemovedIter);
     if (kr != kIOReturnSuccess)
         qFatal("Unable to add notification for device termination");
 
     // Iterate over set of matching devices to release each one and to
     // arm the notification.
-    onRawDeviceRemoved(d_ptr, d_ptr->rawRemovedIter);
+    onRawDeviceRemoved(d_ptr, rawRemovedIter);
 
     // No longer needed
     mach_port_deallocate(mach_task_self(), masterPort);
     masterPort = 0;
 
-    // Start the run loop inside this thread
-    m_run = true;
-    qDebug() << Q_FUNC_INFO << "Start run loop";
+    // Start the run loop inside this thread. The thread "stops" here.
     CFRunLoopRun();
-    qDebug() << Q_FUNC_INFO << "Run loop terminated";
-    m_run = false;
+
+    // Destroy the notification port when the thread exits
+    IONotificationPortDestroy(notifyPort);
+    notifyPort = 0;
 }

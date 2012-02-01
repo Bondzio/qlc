@@ -46,6 +46,7 @@ public:
     HotPlugMonitor(QObject* parent = 0);
     ~HotPlugMonitor();
 
+public slots:
     void stop();
 
 signals:

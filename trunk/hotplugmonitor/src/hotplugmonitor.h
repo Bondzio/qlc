@@ -24,6 +24,8 @@
 
 #include <QThread>
 
+class HPMPrivate;
+
 /**
  * HotPlugMonitor monitors for USB subsystem hotplug events and emits either
  * deviceAdded() or deviceRemoved() signal, depending on which event has occurred.
@@ -37,11 +39,12 @@ class HotPlugMonitor : public QThread
 {
     Q_OBJECT
 
+    friend class HPMPrivate;
+
 public:
-    HotPlugMonitor(QObject* parent);
+    HotPlugMonitor(QObject* parent = 0);
     ~HotPlugMonitor();
 
-    void start();
     void stop();
 
 signals:
@@ -50,8 +53,11 @@ signals:
 
 private:
     void run();
+    void emitDeviceAdded(uint vid, uint pid);
+    void emitDeviceRemoved(uint vid, uint pid);
 
 private:
+    HPMPrivate* d_ptr;
     bool m_run;
 };
 

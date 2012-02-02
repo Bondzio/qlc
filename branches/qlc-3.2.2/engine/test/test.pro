@@ -14,6 +14,7 @@ INCLUDEPATH += ../../plugins/interfaces
 INCLUDEPATH += ../inputpluginstub ../outputpluginstub
 QMAKE_LIBDIR += ../src
 LIBS   += -lqlcengine
+win32:QMAKE_LFLAGS += -enable-auto-import
 
 # Fixture metadata
 HEADERS += qlcphysical_test.h \

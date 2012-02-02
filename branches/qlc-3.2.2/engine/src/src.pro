@@ -11,6 +11,7 @@ QT      -= gui
 QTPLUGIN =
 
 INCLUDEPATH += ../../plugins/interfaces
+win32:LIBS  += -lwinmm
 
 #############################################################################
 # Installation

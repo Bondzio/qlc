@@ -56,6 +56,9 @@ public:
     /** Get the timer tick frequency in Hertz */
     static quint32 frequency();
 
+    /** Get the length of one timer tick in milliseconds */
+    static uint tick();
+
     /** Get the output map object that MasterTimer uses for DMX output */
     OutputMap* outputMap() const;
 

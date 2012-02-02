@@ -21,7 +21,7 @@ win32 {
 #
 CONFIG(ftd2xx) {
     win32 {
-        FTD2XXDIR    = C:/CDM20812
+        FTD2XXDIR    = C:/CDM20817
         LIBS        += -L$$FTD2XXDIR/i386 -lftd2xx
         INCLUDEPATH += $$FTD2XXDIR
     } else {

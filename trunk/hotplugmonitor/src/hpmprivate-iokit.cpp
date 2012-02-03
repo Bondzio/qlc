@@ -28,14 +28,14 @@
  * Static callback functions for IOKit
  ****************************************************************************/
 
-static void onRawDeviceAdded(void* refCon, io_iterator_t iterator)
+void onHPMPrivateRawDeviceAdded(void* refCon, io_iterator_t iterator)
 {
     HPMPrivate* self = (HPMPrivate*) refCon;
     Q_ASSERT(self != NULL);
     self->deviceAdded(iterator);
 }
 
-static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
+void onHPMPrivateRawDeviceRemoved(void* refCon, io_iterator_t iterator)
 {
     HPMPrivate* self = (HPMPrivate*) refCon;
     Q_ASSERT(self != NULL);
@@ -48,7 +48,6 @@ static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
 
 HPMPrivate::HPMPrivate(HotPlugMonitor* parent)
     : QThread(parent)
-    , m_hpm(parent)
     , m_run(false)
     , loop(NULL)
 {
@@ -93,6 +92,8 @@ void HPMPrivate::deviceAdded(io_iterator_t iterator)
     {
         UInt16 vid = 0, pid = 0;
         extractVidPid(usbDevice, &vid, &pid);
+        HotPlugMonitor* hpm = qobject_cast<HotPlugMonitor*> (parent());
+        Q_ASSERT(hpm != NULL);
         hpm->emitDeviceAdded(vid, pid);
         IOObjectRelease(usbDevice);
     }
@@ -105,6 +106,8 @@ void HPMPrivate::deviceRemoved(io_iterator_t iterator)
     {
         UInt16 vid = 0, pid = 0;
         extractVidPid(usbDevice, &vid, &pid);
+        HotPlugMonitor* hpm = qobject_cast<HotPlugMonitor*> (parent());
+        Q_ASSERT(hpm != NULL);
         hpm->emitDeviceRemoved(vid, pid);
         IOObjectRelease(usbDevice);
     }
@@ -149,7 +152,7 @@ void HPMPrivate::run()
     kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOFirstMatchNotification,
                                           matchingDict,
-                                          onRawDeviceAdded,
+                                          onHPMPrivateRawDeviceAdded,
                                           (void*) this,
                                           &rawAddedIter);
     if (kr != kIOReturnSuccess)
@@ -157,13 +160,13 @@ void HPMPrivate::run()
 
     // Iterate over set of matching devices to access already-present devices
     // and to arm the notification.
-    onRawDeviceAdded(this, rawAddedIter);
+    onHPMPrivateRawDeviceAdded(this, rawAddedIter);
 
     // Listen to device removal notifications
     kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOTerminatedNotification,
                                           matchingDict,
-                                          onRawDeviceRemoved,
+                                          onHPMPrivateRawDeviceRemoved,
                                           (void*) this,
                                           &rawRemovedIter);
     if (kr != kIOReturnSuccess)
@@ -171,7 +174,7 @@ void HPMPrivate::run()
 
     // Iterate over set of matching devices to release each one and to
     // arm the notification.
-    onRawDeviceRemoved(this, rawRemovedIter);
+    onHPMPrivateRawDeviceRemoved(this, rawRemovedIter);
 
     // No longer needed
     mach_port_deallocate(mach_task_self(), masterPort);

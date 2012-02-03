@@ -35,8 +35,8 @@ class HPMPrivate : public QThread
 {
     Q_OBJECT
 
-    friend void onRawDeviceAdded(void* refCon, io_iterator_t iterator);
-    friend void onRawDeviceRemoved(void* refCon, io_iterator_t iterator);
+    friend void onHPMPrivateRawDeviceAdded(void* refCon, io_iterator_t iterator);
+    friend void onHPMPrivateRawDeviceRemoved(void* refCon, io_iterator_t iterator);
 
 public:
     HPMPrivate(HotPlugMonitor* parent);
@@ -52,7 +52,6 @@ private:
     void run();
 
 private:
-    HotPlugMonitor* m_hpm;
     bool m_run;
     CFRunLoopRef loop;
 };

@@ -16,4 +16,5 @@ CONFIG(iokit) {
     LIBS      += -framework IOKit -framework CoreFoundation
 }
 
-SOURCES += main.cpp
+SOURCES += main.cpp hpmtest.cpp
+HEADERS += hpmtest.h

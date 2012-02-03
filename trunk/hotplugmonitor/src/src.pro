@@ -17,6 +17,7 @@ CONFIG(iokit) {
 
 CONFIG(win32) {
     SOURCES += hotplugmonitor-win32.cpp
+    HEADERS += hpmprivate-win32.h
 }
 
 HEADERS += hotplugmonitor.h

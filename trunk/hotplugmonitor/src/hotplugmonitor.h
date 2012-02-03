@@ -33,8 +33,6 @@ class HPMPrivate;
  * This info can then be used by plugins to see if they need to update their
  * own device lists.
  *
- * @todo The signals should contain an ID that is usable by plugins so that
- *       every plugin doesn't need to do a complete rescan.
  */
 class HotPlugMonitor : public QThread
 {
@@ -43,22 +41,44 @@ class HotPlugMonitor : public QThread
     friend class HPMPrivate;
 
 public:
+    /** Create a new HotPlugMonitor for monitoring (USB) device additions/removals */
     HotPlugMonitor(QObject* parent = 0);
     ~HotPlugMonitor();
 
 public slots:
+    /** Stop sending hotplug notifications. */
     void stop();
 
+#ifdef WIN32
+    /**
+     * Start receiving notifications. A separate thread isn't needed in Windows
+     * so QThread::start() has been overwritten. The priority parameter is ignored.
+     */
+    void start(QThread::Priority priority = QThread::InheritPriority);
+#endif
+
 signals:
+    /** Emitted when a device with a specific VID/PID has been added to the system. */
     void deviceAdded(uint vid, uint pid);
+
+    /** Emitted when a device with a specific VID/PID has been removed from the system. */
     void deviceRemoved(uint vid, uint pid);
 
 private:
+    /** The thread itself */
     void run();
-    void emitDeviceAdded(uint vid, uint pid)
-        { qDebug() << Q_FUNC_INFO << vid << pid; emit deviceAdded(vid, pid); }
-    void emitDeviceRemoved(uint vid, uint pid)
-        { qDebug() << Q_FUNC_INFO << vid << pid; emit deviceRemoved(vid, pid); }
+
+    /** Helper for HPMPrivate classes to emit deviceAdded() signals */
+    void emitDeviceAdded(uint vid, uint pid) {
+        qDebug() << Q_FUNC_INFO << vid << pid;
+        emit deviceAdded(vid, pid);
+    }
+
+    /** Helper for HPMPrivate classes to emit deviceRemoved() signals */
+    void emitDeviceRemoved(uint vid, uint pid) {
+        qDebug() << Q_FUNC_INFO << vid << pid;
+        emit deviceRemoved(vid, pid);
+    }
 
 private:
     HPMPrivate* d_ptr;

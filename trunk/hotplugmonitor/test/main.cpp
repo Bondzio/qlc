@@ -1,16 +1,24 @@
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDebug>
 #include <QTimer>
 
 #include "hotplugmonitor.h"
+#include "hpmtest.h"
 
 int main(int argc, char** argv)
 {
-    QCoreApplication app(argc, argv);
-    HotPlugMonitor mon(NULL);
-    mon.start();
+    QApplication app(argc, argv);
 
-    //QTimer::singleShot(1000, &mon, SLOT(stop()));
+    HotPlugMonitor* mon = new HotPlugMonitor;
+    HPMTest* test = new HPMTest(mon);
+    test->show();
 
-    return app.exec();
+    mon->start();
+
+    int r = app.exec();
+
+    delete test;
+    delete mon;
+
+    return r;
 }

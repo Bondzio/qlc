@@ -15,21 +15,19 @@ class HPMPrivate : public QWidget
     Q_OBJECT
 
 public:
-    HPMPrivate(HotPlugMonitor* parent = 0);
+    HPMPrivate(HotPlugMonitor* parent);
     ~HPMPrivate();
 
-    void registerNotification();
-    void unregisterNotification();
-
-    static bool extractVidPid(const QString& deviceId, uint* vid, uint* pid);
+    void start();
+    void stop();
 
 protected:
     bool winEvent(MSG* message, long* result);
+    static bool extractVidPid(const QString& dbccName, uint* vid, uint* pid);
 
 private:
-    HotPlugMonitor* hpm;
-    HDEVNOTIFY hDeviceNotify;
-    static const GUID USBClassGUID;
+    HotPlugMonitor* m_hpm;
+    HDEVNOTIFY m_hDeviceNotify;
 };
 
 #endif

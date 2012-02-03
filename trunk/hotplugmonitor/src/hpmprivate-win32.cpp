@@ -1,6 +1,6 @@
 ﻿/*
   Q Light Controller
-  hotplugmonitor-win32.cpp
+  hpmprivate-win32.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -26,8 +26,8 @@
 #include <Windows.h>
 #include <Dbt.h>
 
-#include <QMessageBox>
 #include <QWidget>
+#include <QDebug>
 
 #include "hotplugmonitor.h"
 #include "hpmprivate-win32.h"
@@ -38,7 +38,7 @@
 #define DBCC_NAME_PID "PID_"
 #define DBCC_NAME_VIDPID_SEPARATOR "&"
 
-const GUID HPMPrivate::USBClassGUID =
+static const GUID USBClassGUID =
     { 0x25dbce51, 0x6c8f, 0x4a72, { 0x8a, 0x6d, 0xb5, 0x4c, 0x2b, 0x4f, 0xc8, 0x35 } };
 
 /****************************************************************************
@@ -47,16 +47,17 @@ const GUID HPMPrivate::USBClassGUID =
 
 HPMPrivate::HPMPrivate(HotPlugMonitor* parent)
     : QWidget(0) // This class has to be a widget to receive winEvent() events
-    , hpm(parent)
-    , hDeviceNotify(NULL)
+    , m_hpm(parent)
+    , m_hDeviceNotify(NULL)
 {
+    Q_ASSERT(parent != NULL);
 }
 
 HPMPrivate::~HPMPrivate()
 {
 }
 
-void HPMPrivate::registerNotification()
+void HPMPrivate::start()
 {
     DEV_BROADCAST_DEVICEINTERFACE notificationFilter;
 
@@ -65,27 +66,37 @@ void HPMPrivate::registerNotification()
     notificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
     notificationFilter.dbcc_classguid = USBClassGUID;
 
-    hDeviceNotify = RegisterDeviceNotification(winId(),
-                                               &notificationFilter,
-                                               DEVICE_NOTIFY_WINDOW_HANDLE |
-                                               DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
+    m_hDeviceNotify = RegisterDeviceNotification(winId(),
+                                                 &notificationFilter,
+                                                 DEVICE_NOTIFY_WINDOW_HANDLE |
+                                                 DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
 
-    if (hDeviceNotify == NULL)
+    if (m_hDeviceNotify == NULL)
         qWarning() << Q_FUNC_INFO << "Unable to register device notification.";
 }
 
-void HPMPrivate::unregisterNotification()
+void HPMPrivate::stop()
 {
-    if (hDeviceNotify == NULL)
+    if (m_hDeviceNotify == NULL)
         return;
-    else if (UnregisterDeviceNotification(hDeviceNotify) == FALSE)
+    else if (UnregisterDeviceNotification(m_hDeviceNotify) == FALSE)
         qWarning() << Q_FUNC_INFO << "Unable to unregister device notification.";
-    hDeviceNotify = NULL;
+    m_hDeviceNotify = NULL;
 }
 
-bool HPMPrivate::extractVidPid(const QString& deviceId, uint* vid, uint* pid)
+bool HPMPrivate::extractVidPid(const QString& dbccName, uint* vid, uint* pid)
 {
-    QStringList parts = deviceId.toUpper().split(DBCC_NAME_SEPARATOR);
+    Q_ASSERT(vid != NULL);
+    Q_ASSERT(pid != NULL);
+
+    // This function assumes $dbccName contains something like:
+    // "\\?\USB#Vid_xxxx&Pid_yyyy#zzzzzzzzz#{sssssssssssssssssss}"
+    // The string is first split into 3 parts at the hash marks (#),
+    // and the part starting with "Vid_" is taken into further inspection.
+    // That substring is again parsed into two parts at ampersand mark (&).
+    // Of those two strings, the leading "vid_" and "pid_" is removed, leaving
+    // only the hexadecimal values for VID and PID which are converted to uints.
+    QStringList parts = dbccName.toUpper().split(DBCC_NAME_SEPARATOR);
     for (int i = 0; i < parts.size(); i++)
     {
         if (parts[i].startsWith(DBCC_NAME_VID) == true)
@@ -96,7 +107,6 @@ bool HPMPrivate::extractVidPid(const QString& deviceId, uint* vid, uint* pid)
 
             QString v = vidpid[0].remove(DBCC_NAME_VID);
             QString p = vidpid[1].remove(DBCC_NAME_PID);
-
             *vid = v.toUInt(0, 16);
             *pid = p.toUInt(0, 16);
 
@@ -109,81 +119,52 @@ bool HPMPrivate::extractVidPid(const QString& deviceId, uint* vid, uint* pid)
 
 bool HPMPrivate::winEvent(MSG* message, long* RESULT)
 {
+    Q_ASSERT(message != NULL);
+
     UINT msg = message->message;
     WPARAM wParam = message->wParam;
     LPARAM lParam = message->lParam;
 
-    if (msg == WM_DEVICECHANGE)
-    {
-        PDEV_BROADCAST_HDR hdr = (PDEV_BROADCAST_HDR) lParam;
-        if (wParam == DBT_DEVICEARRIVAL)
-        {
-            Q_ASSERT(hdr != NULL);
+    // We're only interested in device change events
+    if (msg != WM_DEVICECHANGE)
+        return false;
 
-            if (hdr->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+    PDEV_BROADCAST_HDR hdr = (PDEV_BROADCAST_HDR) lParam;
+    if (wParam == DBT_DEVICEARRIVAL)
+    {
+        // A new device has been added to the system
+        Q_ASSERT(hdr != NULL);
+        if (hdr->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+        {
+            PDEV_BROADCAST_DEVICEINTERFACE dev = (PDEV_BROADCAST_DEVICEINTERFACE) hdr;
+            QString dbcc_name(QString::fromWCharArray(dev->dbcc_name));
+            if (dbcc_name.contains(DBCC_NAME_RAWDEVICE_USB_GUID) == true)
             {
-                PDEV_BROADCAST_DEVICEINTERFACE dev = (PDEV_BROADCAST_DEVICEINTERFACE) hdr;
-                QString name(QString::fromWCharArray(dev->dbcc_name));
-                if (name.contains(DBCC_NAME_RAWDEVICE_USB_GUID) == true)
-                {
-                    qDebug() << name;
-                    uint vid = 0, pid = 0;
-                    if (extractVidPid(name, &vid, &pid) == true)
-                        hpm->emitDeviceAdded(vid, pid);
-                }
+                // Emit only raw USB devices
+                uint vid = 0, pid = 0;
+                if (extractVidPid(dbcc_name, &vid, &pid) == true)
+                    m_hpm->emitDeviceAdded(vid, pid);
             }
         }
-        else if (wParam == DBT_DEVICEREMOVECOMPLETE)
+    }
+    else if (wParam == DBT_DEVICEREMOVECOMPLETE)
+    {
+        // An existing device has been removed from the system
+        Q_ASSERT(hdr != NULL);
+        if (hdr->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
         {
-            Q_ASSERT(hdr != NULL);
-
-            if (hdr->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+            PDEV_BROADCAST_DEVICEINTERFACE dev = (PDEV_BROADCAST_DEVICEINTERFACE) hdr;
+            QString dbccName(QString::fromWCharArray(dev->dbcc_name));
+            if (dbccName.contains(DBCC_NAME_RAWDEVICE_USB_GUID) == true)
             {
-                PDEV_BROADCAST_DEVICEINTERFACE dev = (PDEV_BROADCAST_DEVICEINTERFACE) hdr;
-                QString name(QString::fromWCharArray(dev->dbcc_name));
-                if (name.contains(DBCC_NAME_RAWDEVICE_USB_GUID) == true)
-                {
-                    uint vid = 0, pid = 0;
-                    if (extractVidPid(name, &vid, &pid) == true)
-                        hpm->emitDeviceRemoved(vid, pid);
-                }
+                // Emit only raw USB devices
+                uint vid = 0, pid = 0;
+                if (extractVidPid(dbccName, &vid, &pid) == true)
+                    m_hpm->emitDeviceRemoved(vid, pid);
             }
         }
     }
 
+    // Let Qt act on all events regardless of whether we recognize them or not
     return false;
-}
-
-/****************************************************************************
- * HotPlugMonitor
- ****************************************************************************/
-
-HotPlugMonitor::HotPlugMonitor(QObject* parent)
-    : QThread(parent)
-    , d_ptr(new HPMPrivate(this))
-    , m_run(false)
-{
-}
-
-HotPlugMonitor::~HotPlugMonitor()
-{
-    stop();
-    delete d_ptr;
-    d_ptr = NULL;
-}
-
-void HotPlugMonitor::stop()
-{
-    d_ptr->unregisterNotification();
-}
-
-void HotPlugMonitor::start(QThread::Priority priority)
-{
-    // Don't call QThread::start(priority) because the thread is not needed
-    d_ptr->registerNotification();
-}
-
-void HotPlugMonitor::run()
-{
-    /* NOP */
 }

@@ -27,6 +27,11 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <QDebug>
+
+#include "mastertimer-unix.h"
+#include "mastertimer.h"
+
 /****************************************************************************
  * MasterTimerPrivate
  ****************************************************************************/

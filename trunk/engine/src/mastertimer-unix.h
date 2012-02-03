@@ -22,7 +22,7 @@
 #ifndef MASTERTIMER_PRIVATE_H
 #define MASTERTIMER_PRIVATE_H
 
-#include <QObject>
+#include <QThread>
 
 class MasterTimer;
 

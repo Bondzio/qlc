@@ -22,10 +22,12 @@
 #ifndef MASTERTIMER_H
 #define MASTERTIMER_H
 
-#include <QThread>
+#include <QObject>
 #include <QMutex>
 #include <QList>
+#include <QTime>
 
+class MasterTimerPrivate;
 class UniverseArray;
 class GenericFader;
 class OutputMap;
@@ -33,10 +35,12 @@ class DMXSource;
 class Function;
 class Doc;
 
-class MasterTimer : public QThread
+class MasterTimer : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(MasterTimer)
+
+    friend class MasterTimerPrivate;
 
     /*************************************************************************
      * Initialization
@@ -53,13 +57,23 @@ public:
     /** Destroy a MasterTimer instance */
     virtual ~MasterTimer();
 
+    /** Start the MasterTimer */
+    void start();
+
+    /** Stop the MasterTimer */
+    void stop();
+
     /** Get the timer tick frequency in Hertz */
     static uint frequency();
 
     /** Get the length of one timer tick in milliseconds */
     static uint tick();
 
-protected:
+private:
+    /** Execute one timer tick (called by MasterTimerPrivate) */
+    void timerTick();
+
+private:
     /** An OutputMap instance that routes all values to correct plugins. */
     static const uint s_frequency;
 
@@ -67,20 +81,24 @@ protected:
      * Functions
      *********************************************************************/
 public:
-    /** Get the number of currently running functions */
-    int runningFunctions() const;
-
     /** Start running the given function */
     virtual void startFunction(Function* function);
 
     /** Stop all functions. Doesn't affect registered DMX sources. */
     void stopAllFunctions();
 
+    /** Get the number of currently running functions */
+    int runningFunctions() const;
+
 signals:
     /** Tells that the list of running functions has changed */
     void functionListChanged();
 
-protected:
+private:
+    /** Execute one timer tick for each registered Function */
+    void timerTickFunctions(UniverseArray* universes);
+
+private:
     /** List of currently running functions */
     QList <Function*> m_functionList;
 
@@ -111,7 +129,11 @@ public:
      */
     virtual void unregisterDMXSource(DMXSource* source);
 
-protected:
+private:
+    /** Execute one timer tick for each registered DMXSource */
+    void timerTickDMXSources(UniverseArray* universes);
+
+private:
     /** List of currently running functions */
     QList <DMXSource*> m_dmxSourceList;
 
@@ -130,37 +152,14 @@ public:
     GenericFader* fader() const;
 
 private:
-    void runFader(UniverseArray* universes);
+    /** Execute one timer tick for the GenericFader */
+    void timerTickFader(UniverseArray* universes);
 
 private:
     GenericFader* m_fader;
 
-    /*************************************************************************
-     * Main thread
-     *************************************************************************/
-public:
-    /** Start the timer */
-    void start(Priority priority = InheritPriority);
-
-    /** Stop this altogether. Functions cannot be run after this. */
-    void stop();
-
-protected:
-    /** The main thread function */
-    virtual void run();
-
-    /** Perform steps necessary for each timer tick */
-    void timerTick();
-
-    /** Execute one timer tick for each registered Function */
-    void runFunctions(UniverseArray* universes);
-
-    /** Execute one timer tick for each registered DMXSource */
-    void runDMXSources(UniverseArray* universes);
-
-protected:
-    /** Running status, telling, whether the MasterTimer has been started */
-    bool m_running;
+private:
+    MasterTimerPrivate* d_ptr;
 };
 
 #endif

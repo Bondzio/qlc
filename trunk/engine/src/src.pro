@@ -82,6 +82,9 @@ HEADERS += bus.h \
            scenevalue.h \
            script.h
 
+win32:HEADERS += mastertimer-win32.h
+unix:HEADERS  += mastertimer-unix.h
+
 # Fixture metadata
 SOURCES += avolitesd4parser.cpp \
            qlccapability.cpp \
@@ -130,6 +133,9 @@ SOURCES += bus.cpp \
            scene.cpp \
            scenevalue.cpp \
            script.cpp
+
+win32:SOURCES += mastertimer-win32.cpp
+unix:SOURCES  += mastertimer-unix.cpp
 
 # Interfaces
 HEADERS += ../../plugins/interfaces/qlcinplugin.h \

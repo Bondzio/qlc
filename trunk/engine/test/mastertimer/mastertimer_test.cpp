@@ -20,12 +20,8 @@
 */
 
 #include <QtTest>
-#ifdef WIN32
-#   include <windows.h>
-#   include <winbase.h>
-#endif
 
-#define protected public
+#define private public
 #include "mastertimer_test.h"
 #include "dmxsource_stub.h"
 #include "function_stub.h"
@@ -34,7 +30,7 @@
 #include "qlcchannel.h"
 #include "qlcfile.h"
 #include "doc.h"
-#undef protected
+#undef private
 
 #define INTERNAL_FIXTUREDIR "../../../fixtures/"
 
@@ -75,7 +71,7 @@ void MasterTimer_Test::initial()
     QVERIFY(mt->m_dmxSourceListMutex.tryLock() == true);
     mt->m_dmxSourceListMutex.unlock();
 
-    QVERIFY(mt->m_running == false);
+    //QVERIFY(mt->m_running == false);
     QVERIFY(mt->m_stopAllFunctions == false);
 }
 
@@ -84,27 +80,21 @@ void MasterTimer_Test::startStop()
     MasterTimer* mt = m_doc->masterTimer();
 
     mt->start();
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
+
     QVERIFY(mt->runningFunctions() == 0);
     QVERIFY(mt->m_functionList.size() == 0);
     QVERIFY(mt->m_dmxSourceList.size() == 0);
-    QVERIFY(mt->m_running == true);
+    // QVERIFY(mt->m_running == true);
     QVERIFY(mt->m_stopAllFunctions == false);
 
     mt->stop();
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
+
     QVERIFY(mt->runningFunctions() == 0);
     QVERIFY(mt->m_functionList.size() == 0);
     QVERIFY(mt->m_dmxSourceList.size() == 0);
-    QVERIFY(mt->m_running == false);
+    // QVERIFY(mt->m_running == false);
     QVERIFY(mt->m_stopAllFunctions == false);
 }
 
@@ -128,17 +118,9 @@ void MasterTimer_Test::startStopFunction()
     QVERIFY(mt->runningFunctions() == 1);
     QVERIFY(fs.startedAsChild() == false);
 
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
     fs.stop();
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
 
     QVERIFY(mt->runningFunctions() == 0);
 }
@@ -200,11 +182,7 @@ void MasterTimer_Test::interval()
     DMXSource_Stub dss;
 
     mt->start();
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
 
     fs.start(mt);
     QVERIFY(mt->runningFunctions() == 1);
@@ -213,22 +191,15 @@ void MasterTimer_Test::interval()
     QVERIFY(mt->m_dmxSourceList.size() == 1);
 
     /* Wait for one second */
-#ifdef WIN32
-    Sleep(1000);
-#else
-    usleep(1000000);
-#endif
+    QTest::qWait(1000);
+
     /* It's not guaranteed that context switch happens exactly after 50
        cycles, so we just have to estimate here... */
     QVERIFY(fs.m_writeCalls >= 49 && fs.m_writeCalls <= 51);
     QVERIFY(dss.m_writeCalls >= 49 && dss.m_writeCalls <= 51);
 
     fs.stop();
-#ifdef WIN32
-    Sleep(1000);
-#else
-    usleep(1000000);
-#endif
+    QTest::qWait(1000);
     QVERIFY(mt->runningFunctions() == 0);
 
     mt->unregisterDMXSource(&dss);
@@ -246,20 +217,13 @@ void MasterTimer_Test::functionInitiatedStop()
     QVERIFY(mt->runningFunctions() == 1);
 
     /* Wait a while so that the function starts running */
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
 
     /* Stop the function after it has been running for a while */
     fs.stop();
 
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    /* Wait a while so that the function stops */
+    QTest::qWait(100);
 
     /* Verify that the function is really stopped and the correct
        pre&post handlers have been called. */
@@ -287,22 +251,16 @@ void MasterTimer_Test::runMultipleFunctions()
     QVERIFY(mt->runningFunctions() == 3);
 
     /* Wait a while so that the functions start running */
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    QTest::qWait(100);
 
     /* Stop the functions after they have been running for a while */
     fs1.stop();
     fs2.stop();
     fs3.stop();
 
-#ifdef WIN32
-    Sleep(100);
-#else
-    usleep(100000);
-#endif
+    /* Wait a while so that the functions stop */
+    QTest::qWait(100);
+
     QVERIFY(mt->runningFunctions() == 0);
 }
 
@@ -354,7 +312,7 @@ void MasterTimer_Test::stop()
 
     mt->stop();
     QVERIFY(mt->runningFunctions() == 0);
-    QVERIFY(mt->m_running == false);
+    // QVERIFY(mt->m_running == false);
 }
 
 void MasterTimer_Test::restart()
@@ -377,7 +335,7 @@ void MasterTimer_Test::restart()
     QVERIFY(mt->m_functionList.size() == 0);
     QVERIFY(mt->m_functionListMutex.tryLock() == true);
     mt->m_functionListMutex.unlock();
-    QVERIFY(mt->m_running == false);
+    // QVERIFY(mt->m_running == false);
     QVERIFY(mt->m_stopAllFunctions == false);
 
     mt->start();
@@ -385,7 +343,7 @@ void MasterTimer_Test::restart()
     QVERIFY(mt->m_functionList.size() == 0);
     QVERIFY(mt->m_functionListMutex.tryLock() == true);
     mt->m_functionListMutex.unlock();
-    QVERIFY(mt->m_running == true);
+    // QVERIFY(mt->m_running == true);
     QVERIFY(mt->m_stopAllFunctions == false);
 
     mt->startFunction(&fs1);
@@ -396,4 +354,4 @@ void MasterTimer_Test::restart()
     mt->stopAllFunctions();
 }
 
-QTEST_APPLESS_MAIN(MasterTimer_Test)
+QTEST_MAIN(MasterTimer_Test)

@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  hotplugmonitor-udev.cpp
+  hpmprivate-udev.cpp
 
   Copyright (C) Heikki Junnila
 
@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "hpmprivate-udev.h"
 #include "hotplugmonitor.h"
 
 #define DEVICE_ACTION_ADD    "add"
@@ -36,26 +37,27 @@
 #define PROPERTY_VID         "ID_VENDOR_ID"
 #define PROPERTY_PID         "ID_MODEL_ID"
 
-HotPlugMonitor::HotPlugMonitor(QObject* parent)
+HPMPrivate::HPMPrivate(HotPlugMonitor* parent)
     : QThread(parent)
     , m_run(false)
 {
+    Q_ASSERT(parent != NULL);
 }
 
-HotPlugMonitor::~HotPlugMonitor()
+HPMPrivate::~HPMPrivate()
 {
     if (isRunning() == true)
         stop();
 }
 
-void HotPlugMonitor::stop()
+void HPMPrivate::stop()
 {
     m_run = false;
     while (isRunning() == true)
         usleep(10);
 }
 
-void HotPlugMonitor::run()
+void HPMPrivate::run()
 {
     udev* udev_ctx = udev_new();
     Q_ASSERT(udev_ctx != NULL);
@@ -114,13 +116,17 @@ void HotPlugMonitor::run()
                 {
                     uint vid = QString(vendor).toUInt(0, 16);
                     uint pid = QString(product).toUInt(0, 16);
-                    emitDeviceAdded(vid, pid);
+                    HotPlugMonitor* hpm = qobject_cast<HotPlugMonitor*> (parent());
+                    Q_ASSERT(hpm != NULL);
+                    hpm->emitDeviceAdded(vid, pid);
                 }
                 else if (strcmp(action, DEVICE_ACTION_REMOVE) == 0)
                 {
                     uint vid = QString(vendor).toUInt(0, 16);
                     uint pid = QString(product).toUInt(0, 16);
-                    emitDeviceRemoved(vid, pid);
+                    HotPlugMonitor* hpm = qobject_cast<HotPlugMonitor*> (parent());
+                    Q_ASSERT(hpm != NULL);
+                    hpm->emitDeviceRemoved(vid, pid);
                 }
                 else
                 {

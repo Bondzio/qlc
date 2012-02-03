@@ -8,11 +8,13 @@ CONFIG  += staticlib
 CONFIG(udev) {
     CONFIG    += link_pkgconfig
     PKGCONFIG += libudev
-    SOURCES   += hotplugmonitor-udev.cpp
+    SOURCES   += hpmprivate-udev.cpp
+    HEADERS   += hpmprivate-udev.h
 }
 
 CONFIG(iokit) {
-    SOURCES += hotplugmonitor-iokit.cpp
+    SOURCES   += hpmprivate-iokit.cpp
+    HEADERS   += hpmprivate-iokit.h
 }
 
 CONFIG(win32) {
@@ -20,4 +22,5 @@ CONFIG(win32) {
     HEADERS += hpmprivate-win32.h
 }
 
+SOURCES += hotplugmonitor.cpp
 HEADERS += hotplugmonitor.h

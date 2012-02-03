@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  hotplugmonitor-iokit.cpp
+  hpmprivate-iokit.cpp
 
   Copyright (C) Heikki Junnila
 
@@ -19,32 +19,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <IOKit/usb/IOUSBLib.h>
-#include <IOKit/IOCFPlugIn.h>
-#include <mach/mach_port.h>
 #include <QDebug>
 
+#include "hpmprivate-iokit.h"
 #include "hotplugmonitor.h"
-
-/****************************************************************************
- * HPMPrivate declaration
- ****************************************************************************/
-
-class HPMPrivate
-{
-public:
-    HPMPrivate(HotPlugMonitor* parent);
-
-    void extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid);
-    void deviceAdded(io_iterator_t iterator);
-    void deviceRemoved(io_iterator_t iterator);
-
-public:
-    HotPlugMonitor*         hpm;
-
-    CFRunLoopRef            loop;
-};
 
 /****************************************************************************
  * Static callback functions for IOKit
@@ -52,16 +30,16 @@ public:
 
 static void onRawDeviceAdded(void* refCon, io_iterator_t iterator)
 {
-    HPMPrivate* d_ptr = (HPMPrivate*) refCon;
-    Q_ASSERT(d_ptr != NULL);
-    d_ptr->deviceAdded(iterator);
+    HPMPrivate* self = (HPMPrivate*) refCon;
+    Q_ASSERT(self != NULL);
+    self->deviceAdded(iterator);
 }
 
 static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
 {
-    HPMPrivate* d_ptr = (HPMPrivate*) refCon;
-    Q_ASSERT(d_ptr != NULL);
-    d_ptr->deviceRemoved(iterator);
+    HPMPrivate* self = (HPMPrivate*) refCon;
+    Q_ASSERT(self != NULL);
+    self->deviceRemoved(iterator);
 }
 
 /****************************************************************************
@@ -69,9 +47,25 @@ static void onRawDeviceRemoved(void* refCon, io_iterator_t iterator)
  ****************************************************************************/
 
 HPMPrivate::HPMPrivate(HotPlugMonitor* parent)
-    : hpm(parent)
+    : QThread(parent)
+    , m_hpm(parent)
+    , m_run(false)
     , loop(NULL)
 {
+}
+
+HPMPrivate::~HPMPrivate()
+{
+    if (isRunning() == true)
+        stop();
+    loop = NULL;
+}
+
+void HPMPrivate::stop()
+{
+    CFRunLoopStop(loop);
+    while (isRunning() == true)
+        usleep(10);
 }
 
 void HPMPrivate::extractVidPid(io_service_t usbDevice, UInt16* vid, UInt16* pid)
@@ -116,36 +110,12 @@ void HPMPrivate::deviceRemoved(io_iterator_t iterator)
     }
 }
 
-/****************************************************************************
- * HotPlugMonitor
- ****************************************************************************/
-
-HotPlugMonitor::HotPlugMonitor(QObject* parent)
-    : QThread(parent)
-    , d_ptr(new HPMPrivate(this))
-    , m_run(false)
+void HPMPrivate::run()
 {
-}
-
-HotPlugMonitor::~HotPlugMonitor()
-{
-    delete d_ptr;
-    d_ptr = NULL;
-}
-
-void HotPlugMonitor::stop()
-{
-    CFRunLoopStop(d_ptr->loop);
-    while (isRunning() == true)
-        usleep(10);
-}
-
-void HotPlugMonitor::run()
-{
-    mach_port_t             masterPort = 0;
-    IONotificationPortRef   notifyPort = 0;
-    io_iterator_t           rawAddedIter = 0;
-    io_iterator_t           rawRemovedIter = 0;
+    mach_port_t masterPort = 0;
+    IONotificationPortRef notifyPort = 0;
+    io_iterator_t rawAddedIter = 0;
+    io_iterator_t rawRemovedIter = 0;
 
     // Create an IOMasterPort for accessing IOKit
     kern_return_t kr = IOMasterPort(MACH_PORT_NULL, &masterPort);
@@ -168,40 +138,40 @@ void HotPlugMonitor::run()
     matchingDict = (CFMutableDictionaryRef) CFRetain(matchingDict);
 
     // Store the thread's run loop context
-    d_ptr->loop = CFRunLoopGetCurrent();
+    loop = CFRunLoopGetCurrent();
     // New notification port
     notifyPort = IONotificationPortCreate(masterPort);
 
     CFRunLoopSourceRef runLoopSource = IONotificationPortGetRunLoopSource(notifyPort);
-    CFRunLoopAddSource(d_ptr->loop, runLoopSource, kCFRunLoopDefaultMode);
+    CFRunLoopAddSource(loop, runLoopSource, kCFRunLoopDefaultMode);
 
     // Listen to device add notifications
     kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOFirstMatchNotification,
                                           matchingDict,
                                           onRawDeviceAdded,
-                                          (void*) d_ptr,
+                                          (void*) this,
                                           &rawAddedIter);
     if (kr != kIOReturnSuccess)
         qFatal("Unable to add notification for device additions");
 
     // Iterate over set of matching devices to access already-present devices
     // and to arm the notification.
-    onRawDeviceAdded(d_ptr, rawAddedIter);
+    onRawDeviceAdded(this, rawAddedIter);
 
     // Listen to device removal notifications
     kr = IOServiceAddMatchingNotification(notifyPort,
                                           kIOTerminatedNotification,
                                           matchingDict,
                                           onRawDeviceRemoved,
-                                          (void*) d_ptr,
+                                          (void*) this,
                                           &rawRemovedIter);
     if (kr != kIOReturnSuccess)
         qFatal("Unable to add notification for device termination");
 
     // Iterate over set of matching devices to release each one and to
     // arm the notification.
-    onRawDeviceRemoved(d_ptr, rawRemovedIter);
+    onRawDeviceRemoved(this, rawRemovedIter);
 
     // No longer needed
     mach_port_deallocate(mach_task_self(), masterPort);

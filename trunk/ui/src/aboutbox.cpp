@@ -44,6 +44,7 @@ AboutBox::AboutBox(QWidget* parent) : QDialog (parent)
     connect(m_contributors, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(slotItemClicked()));
     m_contributors->clear();
+    m_contributors->addItem("janek3");
     m_contributors->addItem("Klaus Weidenbach");
     m_contributors->addItem("Stefan Krumm");
     m_contributors->addItem(QByteArray::fromPercentEncoding("Christian S%fchs"));

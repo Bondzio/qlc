@@ -40,6 +40,7 @@
 #include "mastertimer.h"
 #include "outputmap.h"
 #include "dmxsource.h"
+#include "qlcmacros.h"
 #include "function.h"
 #include "doc.h"
 
@@ -235,40 +236,44 @@ void MasterTimer::run()
     free(sleepTime);
     free(remainingTime);
 }
+
 #else /* WIN32 */
+#define TARGET_RESOLUTION_MS 1
+
 void MasterTimer::run()
 {
-    /* This timer implementation requires 64bit support from compiler.
-       (Not 64bit processor architecture, though.) */
-    LARGE_INTEGER freq;
-    LARGE_INTEGER start;
-    LARGE_INTEGER lap;
-    LONGLONG target;
+    /* Find out the smallest possible timer tick in milliseconds */
+    TIMECAPS ptc;
+    MMRESULT result = timeGetDevCaps(&ptc, sizeof(TIMECAPS));
+    if (result != TIMERR_NOERROR)
+    {
+        qWarning() << Q_FUNC_INFO << "Unable to query system timer resolution.";
+        m_running = false;
+        return;
+    }
 
-    /* Calculate the target time that should be waited before each event */
-    QueryPerformanceFrequency(&freq);
-    target = freq.QuadPart / frequency();
+    /* Adjust system timer to operate on its minimum tick period */
+    UINT systemTimerResolution = MIN(MAX(ptc.wPeriodMin, TARGET_RESOLUTION_MS), ptc.wPeriodMax);
+    result = timeBeginPeriod(systemTimerResolution);
+    if (result != TIMERR_NOERROR)
+    {
+        qWarning() << Q_FUNC_INFO << "Unable to adjust system timer resolution.";
+        m_running = false;
+        return;
+    }
 
+    QTime time;
+    time.start();
     while (m_running == true)
     {
-        /* Reset the timer and make the first check */
-        QueryPerformanceCounter(&start);
-        QueryPerformanceCounter(&lap);
+        while (time.elapsed() < (int) tick())
+            Sleep(1);
 
-        /* Loop here until $target ticks have passed */
-        while ((lap.QuadPart - start.QuadPart) < target)
-        {
-            /* Relinquish this thread's time slot, but don't sleep
-               because that would skew the timer at least 30ms. */
-            Sleep(0);
-
-            /* Check how many ticks have passed */
-            QueryPerformanceCounter(&lap);
-        }
-
-        /* Execute the next timer event */
         timerTick();
+        time.restart();
     }
+
+    timeEndPeriod(systemTimerResolution);
 }
 #endif
 

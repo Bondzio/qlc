@@ -28,6 +28,9 @@ unix:OLA_GIT    = /usr/src/ola    # OLA directories
 # Produce build targets to the source directory
 win32:DESTDIR  = ./
 
+# Don't whine about some imports
+win32:QMAKE_LFLAGS += -enable-auto-import
+
 #############################################################################
 # Installation paths
 #############################################################################

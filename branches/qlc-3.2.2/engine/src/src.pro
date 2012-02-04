@@ -66,6 +66,9 @@ HEADERS += bus.h \
            scene.h \
            scenevalue.h
 
+win32:HEADERS += mastertimer-win32.h
+unix:HEADERS  += mastertimer-unix.h
+
 # Fixture metadata
 SOURCES += qlccapability.cpp \
            qlcchannel.cpp \
@@ -100,6 +103,9 @@ SOURCES += bus.cpp \
            palettegenerator.cpp \
            scene.cpp \
            scenevalue.cpp
+
+win32:SOURCES += mastertimer-win32.cpp
+unix:SOURCES  += mastertimer-unix.cpp
 
 # Interfaces
 HEADERS += ../../plugins/interfaces/qlcinplugin.h \

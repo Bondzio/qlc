@@ -687,6 +687,27 @@ void VCButton_Test::input()
 
     btn.slotInputValueChanged(0, 0, 255);
     QCOMPARE(sc->m_stop, true);
+
+    // Test that blackout gets toggled thru ext input
+    btn.setAction(VCButton::Blackout);
+    btn.slotInputValueChanged(0, 0, 1);
+    QCOMPARE(m_doc->outputMap()->blackout(), true);
+    btn.slotInputValueChanged(0, 0, 0);
+    QCOMPARE(m_doc->outputMap()->blackout(), true);
+    btn.slotInputValueChanged(0, 0, 255);
+    QCOMPARE(m_doc->outputMap()->blackout(), false);
+    btn.slotInputValueChanged(0, 0, 0);
+    QCOMPARE(m_doc->outputMap()->blackout(), false);
+
+    // Test that panic gets toggled thru ext input
+    m_doc->masterTimer()->startFunction(sc);
+    QCOMPARE(m_doc->masterTimer()->runningFunctions(), 1);
+    m_doc->masterTimer()->start();
+    btn.setAction(VCButton::StopAll);
+    btn.slotInputValueChanged(0, 0, 1);
+    QTest::qWait(100);
+    QCOMPARE(m_doc->masterTimer()->runningFunctions(), 0);
+    m_doc->masterTimer()->stop();
 }
 
 void VCButton_Test::paint()

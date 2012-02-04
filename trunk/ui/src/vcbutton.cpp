@@ -413,13 +413,7 @@ void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
     QLCInputSource src(universe, channel);
     if (src == inputSource())
     {
-        if (m_action == Toggle && value > 0)
-        {
-            // Only toggle when the external button is pressed.
-            // Releasing the button does nothing.
-            pressFunction();
-        }
-        else if (m_action == Flash)
+        if (m_action == Flash)
         {
             // Keep the button depressed only while the external button is kept down.
             // Raise the button when the external button is raised.
@@ -427,6 +421,12 @@ void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar va
                 pressFunction();
             else if (isOn() == true && value == 0)
                 releaseFunction();
+        }
+        else if (value > 0)
+        {
+            // Only toggle when the external button is pressed.
+            // Releasing the button does nothing.
+            pressFunction();
         }
     }
 }

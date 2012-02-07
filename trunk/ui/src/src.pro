@@ -82,6 +82,7 @@ HEADERS += aboutbox.h \
            vcsliderproperties.h \
            vcsoloframe.h \
            vcspeeddial.h \
+           vcspeeddialproperties.h \
            vcwidget.h \
            vcwidgetproperties.h \
            vcxypad.h \
@@ -117,6 +118,7 @@ FORMS += aboutbox.ui \
          vcframeproperties.ui \
          vcproperties.ui \
          vcsliderproperties.ui \
+         vcspeeddialproperties.ui \
          vcxypadfixtureeditor.ui \
          vcxypadproperties.ui
 
@@ -178,6 +180,7 @@ SOURCES += aboutbox.cpp \
            vcsliderproperties.cpp \
            vcsoloframe.cpp \
            vcspeeddial.cpp \
+           vcspeeddialproperties.cpp \
            vcwidget.cpp \
            vcwidgetproperties.cpp \
            vcxypad.cpp \

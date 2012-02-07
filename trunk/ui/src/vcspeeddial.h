@@ -27,13 +27,8 @@
 #include "vcwidget.h"
 
 #define KXMLQLCVCSpeedDial "SpeedDial"
-
 #define KXMLQLCVCSpeedDialFunction "Function"
-
-#define KXMLQLCVCSpeedDialSpeedType "SpeedType"
-#define KXMLQLCVCSpeedDialSpeedTypeFadeIn "FadeIn"
-#define KXMLQLCVCSpeedDialSpeedTypeFadeOut "FadeOut"
-#define KXMLQLCVCSpeedDialSpeedTypeDuration "Duration"
+#define KXMLQLCVCSpeedDialSpeedTypes "SpeedTypes"
 
 class QDomDocument;
 class QDomElement;
@@ -76,11 +71,24 @@ public slots:
     /** @reimp */
     void slotModeChanged(Doc::Mode mode);
 
+    /*************************************************************************
+     * Properties
+     *************************************************************************/
+public:
+    /** @reimp */
+    void editProperties();
+
     /************************************************************************
      * Speed Type
      ************************************************************************/
 public:
-    enum SpeedType { FadeIn, FadeOut, Duration };
+    enum SpeedType
+    {
+        FadeIn   = 1 << 0,
+        FadeOut  = 1 << 1,
+        Duration = 1 << 2
+    };
+    Q_DECLARE_FLAGS(SpeedTypes, SpeedType)
 
     /**
      * Set the speed type that is to be controlled thru the dial. See
@@ -88,44 +96,29 @@ public:
      *
      * @param type The Speed type to control
      */
-    void setSpeedType(SpeedType type);
+    void setSpeedTypes(VCSpeedDial::SpeedTypes types);
 
     /**
      * Get the speed type that is controlled thru the dial.
      *
      * @return The speed type controlled by the dial
      */
-    SpeedType speedType() const;
-
-    /** Convert the given string into an enum SpeedType */
-    static VCSpeedDial::SpeedType stringToSpeedType(const QString& str);
-
-    /** Convert the given SpeedType into a string */
-    static QString speedTypeToString(VCSpeedDial::SpeedType type);
+    VCSpeedDial::SpeedTypes speedTypes() const;
 
 private:
-    SpeedType m_speedType;
+    SpeedTypes m_speedTypes;
 
     /************************************************************************
      * Functions
      ************************************************************************/
 public:
     /**
-     * Add a function, whose speed is controlled by the dial.
-     *
-     * @param id The ID of the function to control
+     * Set the set of functions that are controlled by the dial.
      */
-    void addFunction(quint32 id);
+    void setFunctions(const QSet <quint32> ids);
 
     /**
-     * Remove a function from the dial's controlled functions.
-     *
-     * @param id The ID of the function to remove
-     */
-    void removeFunction(quint32 id);
-
-    /**
-     * Get the set of functions that are controlled by the slider.
+     * Get the set of functions that are controlled by the dial.
      */
     QSet <quint32> functions() const;
 
@@ -150,5 +143,6 @@ public:
     /** @reimp */
     void postLoad();
 };
+Q_DECLARE_OPERATORS_FOR_FLAGS(VCSpeedDial::SpeedTypes)
 
 #endif

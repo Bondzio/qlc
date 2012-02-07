@@ -24,6 +24,7 @@
 #include <QLayout>
 #include <QDebug>
 
+#include "vcspeeddialproperties.h"
 #include "vcspeeddial.h"
 #include "speeddial.h"
 #include "qlcfile.h"
@@ -34,7 +35,7 @@
 
 VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
     : VCWidget(parent, doc)
-    , m_speedType(Duration)
+    , m_speedTypes(VCSpeedDial::Duration)
     , m_dial(NULL)
 {
     new QVBoxLayout(this);
@@ -44,6 +45,7 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
     layout()->addWidget(m_dial);
     connect(m_dial, SIGNAL(valueChanged(uint)), this, SLOT(slotDialValueChanged(uint)));
 
+    setCaption(tr("Duration"));
     slotModeChanged(doc->mode());
 }
 
@@ -76,10 +78,20 @@ bool VCSpeedDial::copyFrom(VCWidget* widget)
         return false;
 
     m_functions = dial->functions();
-    m_speedType = dial->speedType();
+    m_speedTypes = dial->speedTypes();
 
     /* Copy common stuff */
     return VCWidget::copyFrom(widget);
+}
+
+/*****************************************************************************
+ * Properties
+ *****************************************************************************/
+
+void VCSpeedDial::editProperties()
+{
+    VCSpeedDialProperties sdp(this, m_doc);
+    sdp.exec();
 }
 
 /*****************************************************************************
@@ -114,49 +126,23 @@ void VCSpeedDial::slotModeChanged(Doc::Mode mode)
  * Speed type
  ****************************************************************************/
 
-void VCSpeedDial::setSpeedType(VCSpeedDial::SpeedType type)
+void VCSpeedDial::setSpeedTypes(VCSpeedDial::SpeedTypes types)
 {
-    m_speedType = type;
+    m_speedTypes = types;
 }
 
-VCSpeedDial::SpeedType VCSpeedDial::speedType() const
+VCSpeedDial::SpeedTypes VCSpeedDial::speedTypes() const
 {
-    return m_speedType;
-}
-
-VCSpeedDial::SpeedType VCSpeedDial::stringToSpeedType(const QString& str)
-{
-    if (str == KXMLQLCVCSpeedDialSpeedTypeFadeIn)
-        return FadeIn;
-    else if (str == KXMLQLCVCSpeedDialSpeedTypeFadeOut)
-        return FadeOut;
-    else
-        return Duration;
-}
-
-QString VCSpeedDial::speedTypeToString(VCSpeedDial::SpeedType type)
-{
-    if (type == FadeIn)
-        return QString(KXMLQLCVCSpeedDialSpeedTypeFadeIn);
-    else if (type == FadeOut)
-        return QString(KXMLQLCVCSpeedDialSpeedTypeFadeOut);
-    else
-        return QString(KXMLQLCVCSpeedDialSpeedTypeDuration);
+    return m_speedTypes;
 }
 
 /****************************************************************************
  * Functions
  ****************************************************************************/
 
-void VCSpeedDial::addFunction(quint32 id)
+void VCSpeedDial::setFunctions(const QSet <quint32> ids)
 {
-    if (id != Function::invalidId())
-        m_functions << id;
-}
-
-void VCSpeedDial::removeFunction(quint32 id)
-{
-    m_functions.remove(id);
+    m_functions = ids;
 }
 
 QSet <quint32> VCSpeedDial::functions() const
@@ -171,19 +157,12 @@ void VCSpeedDial::slotDialValueChanged(uint ms)
         Function* function = m_doc->function(id);
         if (function != NULL)
         {
-            switch (m_speedType)
-            {
-            default:
-            case Duration:
+            if (m_speedTypes & Duration)
                 function->setDuration(ms);
-                break;
-            case FadeIn:
+            if (m_speedTypes & FadeIn)
                 function->setFadeInSpeed(ms);
-                break;
-            case FadeOut:
+            if (m_speedTypes & FadeOut)
                 function->setFadeOutSpeed(ms);
-                break;
-            }
         }
     }
 }
@@ -196,15 +175,14 @@ bool VCSpeedDial::loadXML(const QDomElement* root)
 {
     Q_ASSERT(root != NULL);
 
-    /* Caption */
-    QString caption = root->attribute(KXMLQLCVCCaption);
-    QString spdType = root->attribute(KXMLQLCVCSpeedDialSpeedType);
-
     if (root->tagName() != KXMLQLCVCSpeedDial)
     {
         qWarning() << Q_FUNC_INFO << "SpeedDial node not found";
         return false;
     }
+
+    setCaption(root->attribute(KXMLQLCVCCaption));
+    setSpeedTypes(VCSpeedDial::SpeedTypes(root->attribute(KXMLQLCVCSpeedDialSpeedTypes).toInt()));
 
     /* Children */
     QDomNode node = root->firstChild();
@@ -213,7 +191,7 @@ bool VCSpeedDial::loadXML(const QDomElement* root)
         QDomElement tag = node.toElement();
         if (tag.tagName() == KXMLQLCVCSpeedDialFunction)
         {
-            addFunction(tag.text().toUInt());
+            m_functions << tag.text().toUInt();
         }
         else if (tag.tagName() == KXMLQLCWindowState)
         {
@@ -235,9 +213,6 @@ bool VCSpeedDial::loadXML(const QDomElement* root)
         node = node.nextSibling();
     }
 
-    setCaption(caption);
-    setSpeedType(stringToSpeedType(spdType));
-
     return true;
 }
 
@@ -253,7 +228,7 @@ bool VCSpeedDial::saveXML(QDomDocument* doc, QDomElement* vc_root)
     root.setAttribute(KXMLQLCVCCaption, caption());
 
     /* Speed Type */
-    root.setAttribute(KXMLQLCVCSpeedDialSpeedType, speedTypeToString(speedType()));
+    root.setAttribute(KXMLQLCVCSpeedDialSpeedTypes, speedTypes());
 
     /* Window state */
     saveXMLWindowState(doc, &root);

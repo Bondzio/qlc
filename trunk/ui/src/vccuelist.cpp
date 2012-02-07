@@ -660,22 +660,3 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
 
     return true;
 }
-
-void VCCueList::postLoad()
-{
-    QList <QTreeWidgetItem*> destroyList;
-
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-
-        quint32 fid = item->text(KColumnID).toUInt();
-        Function* function = m_doc->function(fid);
-        if (function == NULL || function->type() != Function::Scene)
-            destroyList << item;
-    }
-
-    foreach (QTreeWidgetItem* item, destroyList)
-        delete item;
-}

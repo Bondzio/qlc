@@ -216,7 +216,6 @@ void VCCueListProperties::slotAddClicked()
 {
     /* Select functions */
     FunctionSelection fs(this, m_doc);
-    fs.setFilter(Function::Scene, true);
     if (fs.exec() == QDialog::Accepted)
     {
         int insertionPoint = m_list->topLevelItemCount();

@@ -50,14 +50,6 @@ class QString;
 #define KXMLQLCTrue "True"
 #define KXMLQLCFalse "False"
 
-// Generic window state tags
-#define KXMLQLCWindowState "WindowState"
-#define KXMLQLCWindowStateVisible "Visible"
-#define KXMLQLCWindowStateX "X"
-#define KXMLQLCWindowStateY "Y"
-#define KXMLQLCWindowStateWidth "Width"
-#define KXMLQLCWindowStateHeight "Height"
-
 class QLCFile
 {
 public:

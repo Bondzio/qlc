@@ -468,6 +468,12 @@ void VCCueList_Test::loadXML()
     f5.appendChild(f5Text);
     root.appendChild(f5);
 
+    // Make sure that nonexistent (id:31337) functions don't appear in the list
+    QDomElement f6 = xmldoc.createElement("Function");
+    QDomText f6Text = xmldoc.createTextNode(QString::number(31337));
+    f6.appendChild(f6Text);
+    root.appendChild(f6);
+
     QDomElement foo = xmldoc.createElement("Foobar");
     root.appendChild(foo);
 
@@ -498,16 +504,18 @@ void VCCueList_Test::loadXML()
     QCOMPARE(cl.font(), f);
 
     cl.postLoad();
-    QCOMPARE(cl.m_list->topLevelItemCount(), 3);
+    QCOMPARE(cl.m_list->topLevelItemCount(), 4);
     QCOMPARE(cl.m_list->topLevelItem(0)->text(0).toInt(), 1);
     QCOMPARE(cl.m_list->topLevelItem(1)->text(0).toInt(), 2);
     QCOMPARE(cl.m_list->topLevelItem(2)->text(0).toInt(), 3);
     QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
     QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
     QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s3->name());
+    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), c4->name());
     QCOMPARE(cl.m_list->topLevelItem(0)->text(2).toUInt(), s1->id());
     QCOMPARE(cl.m_list->topLevelItem(1)->text(2).toUInt(), s2->id());
     QCOMPARE(cl.m_list->topLevelItem(2)->text(2).toUInt(), s3->id());
+    QCOMPARE(cl.m_list->topLevelItem(3)->text(2).toUInt(), c4->id());
 
     root.setTagName("CueLits");
     QVERIFY(cl.loadXML(&root) == false);

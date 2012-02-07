@@ -20,6 +20,8 @@
 */
 
 #include <QCoreApplication>
+#include <QMetaObject>
+#include <QMetaMethod>
 #include <QDebug>
 
 #include "hotplugmonitor.h"
@@ -52,10 +54,16 @@ HotPlugMonitor::~HotPlugMonitor()
 
 void HotPlugMonitor::connectListener(QObject* listener)
 {
-    connect(instance(), SIGNAL(deviceAdded(uint,uint)),
-            listener, SLOT(slotDeviceAdded(uint,uint)));
-    connect(instance(), SIGNAL(deviceRemoved(uint,uint)),
-            listener, SLOT(slotDeviceRemoved(uint,uint)));
+    QByteArray added = QMetaObject::normalizedSignature("slotDeviceAdded(uint,uint)");
+    QByteArray removed = QMetaObject::normalizedSignature("slotDeviceRemoved(uint,uint)");
+
+    if (listener->metaObject()->indexOfMethod(added.constData()) != -1)
+        connect(instance(), SIGNAL(deviceAdded(uint,uint)),
+                listener, SLOT(slotDeviceAdded(uint,uint)));
+
+    if (listener->metaObject()->indexOfMethod(removed.constData()) != -1)
+        connect(instance(), SIGNAL(deviceRemoved(uint,uint)),
+                listener, SLOT(slotDeviceRemoved(uint,uint)));
 }
 
 HotPlugMonitor* HotPlugMonitor::instance()

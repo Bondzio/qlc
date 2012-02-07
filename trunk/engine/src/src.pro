@@ -1,5 +1,6 @@
 include(../../variables.pri)
 include(../../coverage.pri)
+include(../../hotplugmonitor/hotplugmonitor.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
@@ -12,8 +13,9 @@ QTPLUGIN =
 INCLUDEPATH += ../../plugins/interfaces
 win32:LIBS  += -lwinmm
 
-#INCLUDEPATH += ../../hotplugmonitor/src
-#LIBS        += -L../../hotplugmonitor/src -lhotplugmonitor
+DEPENDPATH  += ../../hotplugmonitor/src
+INCLUDEPATH += ../../hotplugmonitor/src
+LIBS        += -L../../hotplugmonitor/src -lhotplugmonitor
 
 #############################################################################
 # Installation

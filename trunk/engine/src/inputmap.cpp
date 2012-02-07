@@ -33,14 +33,14 @@
 #endif
 
 #include "qlcinputchannel.h"
+#include "hotplugmonitor.h"
 #include "qlcinputsource.h"
 #include "qlcinplugin.h"
+#include "inputpatch.h"
 #include "qlcconfig.h"
+#include "inputmap.h"
 #include "qlcfile.h"
 #include "qlci18n.h"
-
-#include "inputpatch.h"
-#include "inputmap.h"
 
 /*****************************************************************************
  * Initialization
@@ -327,6 +327,7 @@ bool InputMap::appendPlugin(QLCInPlugin* inputPlugin)
                 this, SLOT(slotConfigurationChanged()));
         connect(inputPlugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotValueChanged(quint32,quint32,uchar)));
+        HotPlugMonitor::connectListener(inputPlugin);
         emit pluginAdded(inputPlugin->name());
         return true;
     }

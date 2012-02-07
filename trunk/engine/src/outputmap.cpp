@@ -34,6 +34,7 @@
 #include "qlci18n.h"
 #include "qlcfile.h"
 
+#include "hotplugmonitor.h"
 #include "universearray.h"
 #include "outputpatch.h"
 #include "outputmap.h"
@@ -362,6 +363,7 @@ bool OutputMap::appendPlugin(QLCOutPlugin* outputPlugin)
         m_plugins.append(outputPlugin);
         connect(outputPlugin, SIGNAL(configurationChanged()),
                 this, SLOT(slotConfigurationChanged()));
+        HotPlugMonitor::connectListener(outputPlugin);
         emit pluginAdded(outputPlugin->name());
         return true;
     }

@@ -32,14 +32,14 @@
 #include <QList>
 #include <QtXml>
 
-#include "qlcfile.h"
-
 #include "vcframeproperties.h"
 #include "virtualconsole.h"
 #include "vcsoloframe.h"
+#include "vcspeeddial.h"
 #include "vccuelist.h"
 #include "vcbutton.h"
 #include "vcslider.h"
+#include "qlcfile.h"
 #include "vcframe.h"
 #include "vclabel.h"
 #include "vcxypad.h"
@@ -157,7 +157,7 @@ bool VCFrame::loadXML(const QDomElement* root)
             loadXMLWindowState(&tag, &x, &y, &w, &h, &visible);
             setGeometry(x, y, w, h);
         }
-        else if (tag.tagName() == KXMLQLCVCAppearance)
+        else if (tag.tagName() == KXMLQLCVCWidgetAppearance)
         {
             /* Frame appearance */
             loadXMLAppearance(&tag);
@@ -240,6 +240,15 @@ bool VCFrame::loadXML(const QDomElement* root)
                 delete cuelist;
             else
                 cuelist->show();
+        }
+        else if (tag.tagName() == KXMLQLCVCSpeedDial)
+        {
+            /* Create a new speed dial into its parent */
+            VCSpeedDial* dial = new VCSpeedDial(this, m_doc);
+            if (dial->loadXML(&tag) == false)
+                delete dial;
+            else
+                dial->show();
         }
         else
         {

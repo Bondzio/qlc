@@ -45,21 +45,6 @@ class QAction;
 class KeyBind;
 class QMenu;
 
-#define KXMLQLCVCAppearance "Appearance"
-#define KXMLQLCVCFrameStyle "FrameStyle"
-#define KXMLQLCVCForegroundColor "ForegroundColor"
-#define KXMLQLCVCBackgroundColor "BackgroundColor"
-#define KXMLQLCVCColorDefault "Default"
-#define KXMLQLCVCFont "Font"
-#define KXMLQLCVCFontDefault "Default"
-#define KXMLQLCVCBackgroundImage "BackgroundImage"
-#define KXMLQLCVCBackgroundImageNone "None"
-
-/** Frame styles */
-#define KFrameStyleSunken QFrame::StyledPanel | QFrame::Sunken
-#define KFrameStyleRaised QFrame::StyledPanel | QFrame::Raised
-#define KFrameStyleNone   QFrame::NoFrame
-
 class VirtualConsole : public QWidget
 {
     Q_OBJECT
@@ -170,6 +155,7 @@ protected:
     QAction* m_addButtonMatrixAction;
     QAction* m_addSliderAction;
     QAction* m_addSliderMatrixAction;
+    QAction* m_addSpeedDialAction;
     QAction* m_addXYPadAction;
     QAction* m_addCueListAction;
     QAction* m_addFrameAction;
@@ -224,6 +210,7 @@ public slots:
     void slotAddButtonMatrix();
     void slotAddSlider();
     void slotAddSliderMatrix();
+    void slotAddSpeedDial();
     void slotAddXYPad();
     void slotAddCueList();
     void slotAddFrame();

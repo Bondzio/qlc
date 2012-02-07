@@ -461,7 +461,7 @@ bool VCWidget::loadXMLAppearance(const QDomElement* root)
 
     Q_ASSERT(root != NULL);
 
-    if (root->tagName() != KXMLQLCVCAppearance)
+    if (root->tagName() != KXMLQLCVCWidgetAppearance)
     {
         qWarning() << Q_FUNC_INFO << "Appearance node not found!";
         return false;

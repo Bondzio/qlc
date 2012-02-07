@@ -46,6 +46,7 @@
 #include "addvcslidermatrix.h"
 #include "virtualconsole.h"
 #include "vcproperties.h"
+#include "vcspeeddial.h"
 #include "vcsoloframe.h"
 #include "mastertimer.h"
 #include "vcdockarea.h"
@@ -88,6 +89,7 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_addButtonMatrixAction(NULL)
     , m_addSliderAction(NULL)
     , m_addSliderMatrixAction(NULL)
+    , m_addSpeedDialAction(NULL)
     , m_addXYPadAction(NULL)
     , m_addCueListAction(NULL)
     , m_addFrameAction(NULL)
@@ -317,6 +319,9 @@ void VirtualConsole::initActions()
     m_addSliderMatrixAction = new QAction(QIcon(":/slidermatrix.png"), tr("New Slider Matrix"), this);
     connect(m_addSliderMatrixAction, SIGNAL(triggered(bool)), this, SLOT(slotAddSliderMatrix()));
 
+    m_addSpeedDialAction = new QAction(QIcon(":/knob.png"), tr("New Speed Dial"), this);
+    connect(m_addSpeedDialAction, SIGNAL(triggered(bool)), this, SLOT(slotAddSpeedDial()));
+
     m_addXYPadAction = new QAction(QIcon(":/xypad.png"), tr("New XY pad"), this);
     connect(m_addXYPadAction, SIGNAL(triggered(bool)), this, SLOT(slotAddXYPad()));
 
@@ -339,6 +344,7 @@ void VirtualConsole::initActions()
     m_addActionGroup->addAction(m_addButtonMatrixAction);
     m_addActionGroup->addAction(m_addSliderAction);
     m_addActionGroup->addAction(m_addSliderMatrixAction);
+    m_addActionGroup->addAction(m_addSpeedDialAction);
     m_addActionGroup->addAction(m_addXYPadAction);
     m_addActionGroup->addAction(m_addCueListAction);
     m_addActionGroup->addAction(m_addFrameAction);
@@ -466,6 +472,7 @@ void VirtualConsole::initMenuBar()
     m_addMenu->addSeparator();
     m_addMenu->addAction(m_addSliderAction);
     m_addMenu->addAction(m_addSliderMatrixAction);
+    m_addMenu->addAction(m_addSpeedDialAction);
     m_addMenu->addSeparator();
     m_addMenu->addAction(m_addXYPadAction);
     m_addMenu->addAction(m_addCueListAction);
@@ -541,6 +548,7 @@ void VirtualConsole::initMenuBar()
     m_toolbar->addAction(m_addButtonMatrixAction);
     m_toolbar->addAction(m_addSliderAction);
     m_toolbar->addAction(m_addSliderMatrixAction);
+    m_toolbar->addAction(m_addSpeedDialAction);
     m_toolbar->addAction(m_addXYPadAction);
     m_toolbar->addAction(m_addCueListAction);
     m_toolbar->addAction(m_addFrameAction);
@@ -800,6 +808,21 @@ void VirtualConsole::slotAddSliderMatrix()
     frame->move(parent->lastClickPoint());
     frame->setAllowChildren(false); // Don't allow more children
     m_selectedWidgets << frame;
+    updateActions();
+    m_doc->setModified();
+}
+
+void VirtualConsole::slotAddSpeedDial()
+{
+    VCWidget* parent(closestParent());
+    if (parent == NULL)
+        return;
+
+    VCSpeedDial* dial = new VCSpeedDial(parent, m_doc);
+    Q_ASSERT(dial != NULL);
+    dial->show();
+    dial->move(parent->lastClickPoint());
+    m_selectedWidgets << dial;
     updateActions();
     m_doc->setModified();
 }
@@ -1451,6 +1474,7 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
         m_addButtonMatrixAction->setShortcut(QKeySequence());
         m_addSliderAction->setShortcut(QKeySequence());
         m_addSliderMatrixAction->setShortcut(QKeySequence());
+        m_addSpeedDialAction->setShortcut(QKeySequence());
         m_addXYPadAction->setShortcut(QKeySequence());
         m_addCueListAction->setShortcut(QKeySequence());
         m_addFrameAction->setShortcut(QKeySequence());
@@ -1497,6 +1521,7 @@ void VirtualConsole::slotModeChanged(Doc::Mode mode)
         m_addButtonMatrixAction->setShortcut(QKeySequence("CTRL+SHIFT+M"));
         m_addSliderAction->setShortcut(QKeySequence("CTRL+SHIFT+S"));
         m_addSliderMatrixAction->setShortcut(QKeySequence("CTRL+SHIFT+I"));
+        m_addSpeedDialAction->setShortcut(QKeySequence("CTRL+SHIFT+D"));
         m_addXYPadAction->setShortcut(QKeySequence("CTRL+SHIFT+X"));
         m_addCueListAction->setShortcut(QKeySequence("CTRL+SHIFT+C"));
         m_addFrameAction->setShortcut(QKeySequence("CTRL+SHIFT+F"));

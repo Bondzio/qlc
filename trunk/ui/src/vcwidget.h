@@ -58,6 +58,13 @@ class QFile;
 #define KXMLQLCVCWidgetInputUniverse "Universe"
 #define KXMLQLCVCWidgetInputChannel "Channel"
 
+#define KXMLQLCWindowState "WindowState"
+#define KXMLQLCWindowStateVisible "Visible"
+#define KXMLQLCWindowStateX "X"
+#define KXMLQLCWindowStateY "Y"
+#define KXMLQLCWindowStateWidth "Width"
+#define KXMLQLCWindowStateHeight "Height"
+
 class VCWidget : public QWidget
 {
     Q_OBJECT

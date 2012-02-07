@@ -496,7 +496,7 @@ bool VCCueList::loadXML(const QDomElement* root)
             loadXMLWindowState(&tag, &x, &y, &w, &h, &visible);
             setGeometry(x, y, w, h);
         }
-        else if (tag.tagName() == KXMLQLCVCAppearance)
+        else if (tag.tagName() == KXMLQLCVCWidgetAppearance)
         {
             loadXMLAppearance(&tag);
         }

@@ -23,12 +23,14 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QToolButton>
+#include <QHeaderView>
 #include <QSettings>
 #include <QSplitter>
 #include <QGroupBox>
 #include <QTreeView>
 #include <QSpinBox>
 #include <QMdiArea>
+#include <QLayout>
 #include <QDebug>
 
 #include "grandmasterslider.h"

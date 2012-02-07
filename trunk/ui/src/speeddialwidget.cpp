@@ -20,44 +20,50 @@
 */
 
 #include <QSettings>
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QLayout>
 #include <QDebug>
 
 #include "speeddialwidget.h"
-#include "speedspinbox.h"
 #include "mastertimer.h"
+#include "speeddial.h"
 #include "apputil.h"
 
 #define SETTINGS_GEOMETRY "speeddialwidget/geometry"
 
 SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     : QWidget(parent, flags)
-    , m_fadeInPrev(0)
-    , m_fadeOutPrev(0)
-    , m_durationPrev(0)
-    , m_preventSignals(false)
+    , m_fadeIn(NULL)
+    , m_fadeOut(NULL)
+    , m_duration(NULL)
+    , m_optionalTextGroup(NULL)
+    , m_optionalTextEdit(NULL)
 {
-    setupUi(this);
+    new QVBoxLayout(this);
 
-    /* Spin boxes */
-    new QHBoxLayout(m_fadeInContainer);
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
-    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
-    m_fadeInContainer->layout()->setMargin(0);
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)), this, SLOT(slotFadeInSpinChanged(int)));
+    /* Create dials */
+    m_fadeIn = new SpeedDial(this);
+    m_fadeIn->setTitle(tr("Fade In"));
+    layout()->addWidget(m_fadeIn);
+    connect(m_fadeIn, SIGNAL(valueChanged(uint)), this, SIGNAL(fadeInChanged(uint)));
 
-    new QHBoxLayout(m_fadeOutContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
-    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
-    m_fadeOutContainer->layout()->setMargin(0);
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)), this, SLOT(slotFadeOutSpinChanged(int)));
+    m_fadeOut = new SpeedDial(this);
+    m_fadeOut->setTitle(tr("Fade Out"));
+    layout()->addWidget(m_fadeOut);
+    connect(m_fadeOut, SIGNAL(valueChanged(uint)), this, SIGNAL(fadeOutChanged(uint)));
 
-    new QHBoxLayout(m_durationContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
-    m_durationContainer->layout()->addWidget(m_durationSpin);
-    m_durationContainer->layout()->setMargin(0);
-    connect(m_durationSpin, SIGNAL(valueChanged(int)), this, SLOT(slotDurationSpinChanged(int)));
+    m_duration = new SpeedDial(this);
+    m_duration->setTitle(tr("Duration"));
+    layout()->addWidget(m_duration);
+    connect(m_duration, SIGNAL(valueChanged(uint)), this, SIGNAL(durationChanged(uint)));
 
     /* Optional text */
+    m_optionalTextGroup = new QGroupBox(this);
+    layout()->addWidget(m_optionalTextGroup);
+    new QVBoxLayout(m_optionalTextGroup);
+    m_optionalTextEdit = new QLineEdit(m_optionalTextGroup);
+    m_optionalTextGroup->layout()->addWidget(m_optionalTextEdit);
     m_optionalTextGroup->setVisible(false);
     connect(m_optionalTextEdit, SIGNAL(textEdited(const QString&)),
             this, SIGNAL(optionalTextEdited(const QString&)));
@@ -82,38 +88,32 @@ SpeedDialWidget::~SpeedDialWidget()
 
 void SpeedDialWidget::setFadeInSpeed(uint ms)
 {
-    m_preventSignals = true;
-    m_fadeInSpin->setValue(ms);
-    m_preventSignals = false;
+    m_fadeIn->setValue(ms);
 }
 
 uint SpeedDialWidget::fadeIn() const
 {
-    return m_fadeInSpin->value();
+    return m_fadeIn->value();
 }
 
 void SpeedDialWidget::setFadeOutSpeed(uint ms)
 {
-    m_preventSignals = true;
-    m_fadeOutSpin->setValue(ms);
-    m_preventSignals = false;
+    m_fadeOut->setValue(ms);
 }
 
 uint SpeedDialWidget::fadeOut() const
 {
-    return m_fadeOutSpin->value();
+    return m_fadeOut->value();
 }
 
 void SpeedDialWidget::setDuration(uint ms)
 {
-    m_preventSignals = true;
-    m_durationSpin->setValue(ms);
-    m_preventSignals = false;
+    m_duration->setValue(ms);
 }
 
 uint SpeedDialWidget::duration() const
 {
-    return m_durationSpin->value();
+    return m_duration->value();
 }
 
 /************************************************************************
@@ -140,57 +140,3 @@ QString SpeedDialWidget::optionalText() const
 {
     return m_optionalTextEdit->text();
 }
-
-/****************************************************************************
- * Private
- ****************************************************************************/
-
-int SpeedDialWidget::dialDiff(int value, int previous)
-{
-    int diff = value - previous;
-    if (diff < (-50))
-        diff = -1;
-    else if (diff > 50)
-        diff = 1;
-    return diff;
-}
-
-void SpeedDialWidget::slotFadeInDialChanged(int value)
-{
-    int add = dialDiff(value, m_fadeInPrev) * MasterTimer::tick();
-    m_fadeInSpin->setValue(m_fadeInSpin->value() + add);
-    m_fadeInPrev = value;
-}
-
-void SpeedDialWidget::slotFadeOutDialChanged(int value)
-{
-    int add = dialDiff(value, m_fadeOutPrev) * MasterTimer::tick();
-    m_fadeOutSpin->setValue(m_fadeOutSpin->value() + add);
-    m_fadeOutPrev = value;
-}
-
-void SpeedDialWidget::slotDurationDialChanged(int value)
-{
-    int add = dialDiff(value, m_durationPrev) * MasterTimer::tick();
-    m_durationSpin->setValue(m_durationSpin->value() + add);
-    m_durationPrev = value;
-}
-
-void SpeedDialWidget::slotFadeInSpinChanged(int value)
-{
-    if (m_preventSignals == false)
-        emit fadeInChanged(uint(value));
-}
-
-void SpeedDialWidget::slotFadeOutSpinChanged(int value)
-{
-    if (m_preventSignals == false)
-        emit fadeOutChanged(uint(value));
-}
-
-void SpeedDialWidget::slotDurationSpinChanged(int value)
-{
-    if (m_preventSignals == false)
-        emit durationChanged(uint(value));
-}
-

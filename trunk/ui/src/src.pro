@@ -65,6 +65,7 @@ HEADERS += aboutbox.h \
            selectinputchannel.h \
            simpledesk.h \
            simpledeskengine.h \
+           speeddial.h \
            speeddialwidget.h \
            speedspinbox.h \
            vcbutton.h \
@@ -110,7 +111,6 @@ FORMS += aboutbox.ui \
          sceneeditor.ui \
          scripteditor.ui \
          selectinputchannel.ui \
-         speeddialwidget.ui \
          vcbuttonproperties.ui \
          vccuelistproperties.ui \
          vcframeproperties.ui \
@@ -160,6 +160,7 @@ SOURCES += aboutbox.cpp \
            selectinputchannel.cpp \
            simpledesk.cpp \
            simpledeskengine.cpp \
+           speeddial.cpp \
            speeddialwidget.cpp \
            speedspinbox.cpp \
            vcbutton.cpp \

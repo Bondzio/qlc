@@ -23,11 +23,12 @@
 #define SPEEDDIALWIDGET_H
 
 #include <QWidget>
-#include "ui_speeddialwidget.h"
 
-class SpeedSpinBox;
+class SpeedDial;
+class QGroupBox;
+class QLineEdit;
 
-class SpeedDialWidget : public QWidget, public Ui_SpeedDialWidget
+class SpeedDialWidget : public QWidget
 {
     Q_OBJECT
 
@@ -53,6 +54,11 @@ signals:
     void fadeOutChanged(uint ms);
     void durationChanged(uint ms);
 
+private:
+    SpeedDial* m_fadeIn;
+    SpeedDial* m_fadeOut;
+    SpeedDial* m_duration;
+
     /************************************************************************
      * Optional text
      ************************************************************************/
@@ -67,34 +73,8 @@ signals:
     void optionalTextEdited(const QString& text);
 
 private:
-    QString m_optionalTextTitle;
-    QString m_optionalText;
-
-    /************************************************************************
-     * Private
-     ************************************************************************/
-private:
-    /** Calculate the value to add/subtract when a dial has been moved */
-    int dialDiff(int value, int previous);
-
-private slots:
-    void slotFadeInDialChanged(int value);
-    void slotFadeOutDialChanged(int value);
-    void slotDurationDialChanged(int value);
-
-    void slotFadeInSpinChanged(int value);
-    void slotFadeOutSpinChanged(int value);
-    void slotDurationSpinChanged(int value);
-
-private:
-    SpeedSpinBox* m_fadeInSpin;
-    SpeedSpinBox* m_fadeOutSpin;
-    SpeedSpinBox* m_durationSpin;
-    int m_fadeInPrev;
-    int m_fadeOutPrev;
-    int m_durationPrev;
-
-    bool m_preventSignals;
+    QGroupBox* m_optionalTextGroup;
+    QLineEdit* m_optionalTextEdit;
 };
 
 #endif

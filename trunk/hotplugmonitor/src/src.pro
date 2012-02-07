@@ -1,23 +1,22 @@
 include(../../variables.pri)
-include(../platform.pri)
 TEMPLATE = lib
 LANGUAGE = C++
 TARGET   = hotplugmonitor
-CONFIG  += staticlib
 
-CONFIG(udev) {
-    CONFIG    += link_pkgconfig
-    PKGCONFIG += libudev
+unix:!macx: {
     SOURCES   += hpmprivate-udev.cpp
     HEADERS   += hpmprivate-udev.h
+    CONFIG    += link_pkgconfig
+    PKGCONFIG += libudev
 }
 
-CONFIG(iokit) {
+macx: {
     SOURCES   += hpmprivate-iokit.cpp
     HEADERS   += hpmprivate-iokit.h
+    LIBS      += -framework IOKit -framework CoreFoundation
 }
 
-CONFIG(win32) {
+win32: {
     SOURCES += hpmprivate-win32.cpp
     HEADERS += hpmprivate-win32.h
 }

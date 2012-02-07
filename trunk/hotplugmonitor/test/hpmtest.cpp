@@ -4,15 +4,14 @@
 #include "hotplugmonitor.h"
 #include "hpmtest.h"
 
-HPMTest::HPMTest(HotPlugMonitor* mon)
-    : QWidget(0)
+HPMTest::HPMTest(QWidget* parent)
+    : QWidget(parent)
 {
     new QHBoxLayout(this);
     m_list = new QListWidget(this);
     layout()->addWidget(m_list);
 
-    connect(mon, SIGNAL(deviceAdded(uint,uint)), this, SLOT(slotDeviceAdded(uint,uint)));
-    connect(mon, SIGNAL(deviceRemoved(uint,uint)), this, SLOT(slotDeviceRemoved(uint,uint)));
+    HotPlugMonitor::connectListener(this);
 }
 
 HPMTest::~HPMTest()

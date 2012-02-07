@@ -39,16 +39,11 @@ class HotPlugMonitor : public QObject
     friend class HPMPrivate;
 
 public:
-    /** Create a new HotPlugMonitor for monitoring (USB) device additions/removals */
-    HotPlugMonitor(QObject* parent = 0);
+    /** Connect $listener to receive deviceAdded() and deviceRemoved() signals */
+    static void connectListener(QObject* listener);
+
+    /** Destructor */
     ~HotPlugMonitor();
-
-public slots:
-    /** Start receiving notifications. */
-    void start();
-
-    /** Stop sending hotplug notifications. */
-    void stop();
 
 signals:
     /** Emitted when a device with a specific VID/PID has been added to the system. */
@@ -57,12 +52,23 @@ signals:
     /** Emitted when a device with a specific VID/PID has been removed from the system. */
     void deviceRemoved(uint vid, uint pid);
 
+private slots:
+    /** Start receiving notifications. */
+    void start();
+
+    /** Stop sending hotplug notifications. */
+    void stop();
+
 private:
+    HotPlugMonitor(QObject* parent);
+    static HotPlugMonitor* instance();
+
     void emitDeviceAdded(uint vid, uint pid);
     void emitDeviceRemoved(uint vid, uint pid);
 
 private:
     HPMPrivate* d_ptr;
+    static HotPlugMonitor* s_instance;
 };
 
 #endif

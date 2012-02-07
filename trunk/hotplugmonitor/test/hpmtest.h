@@ -11,7 +11,7 @@ class HPMTest : public QWidget
     Q_OBJECT
 
 public:
-    HPMTest(HotPlugMonitor* mon);
+    HPMTest(QWidget* parent = 0);
     ~HPMTest();
 
 private slots:

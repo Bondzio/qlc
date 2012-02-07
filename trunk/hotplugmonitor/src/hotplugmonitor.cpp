@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QCoreApplication>
 #include <QDebug>
 
 #include "hotplugmonitor.h"
@@ -31,26 +32,53 @@
 #   include "hpmprivate-udev.h"
 #endif
 
+HotPlugMonitor* HotPlugMonitor::s_instance = NULL;
+
 HotPlugMonitor::HotPlugMonitor(QObject* parent)
     : QObject(parent)
     , d_ptr(new HPMPrivate(this))
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 HotPlugMonitor::~HotPlugMonitor()
 {
+    qDebug() << Q_FUNC_INFO;
+
     stop();
     delete d_ptr;
     d_ptr = NULL;
 }
 
+void HotPlugMonitor::connectListener(QObject* listener)
+{
+    connect(instance(), SIGNAL(deviceAdded(uint,uint)),
+            listener, SLOT(slotDeviceAdded(uint,uint)));
+    connect(instance(), SIGNAL(deviceRemoved(uint,uint)),
+            listener, SLOT(slotDeviceRemoved(uint,uint)));
+}
+
+HotPlugMonitor* HotPlugMonitor::instance()
+{
+    if (s_instance == NULL)
+    {
+        Q_ASSERT(QCoreApplication::instance() != NULL);
+        s_instance = new HotPlugMonitor(QCoreApplication::instance());
+        s_instance->start();
+    }
+
+    return s_instance;
+}
+
 void HotPlugMonitor::start()
 {
+    qDebug() << Q_FUNC_INFO;
     d_ptr->start();
 }
 
 void HotPlugMonitor::stop()
 {
+    qDebug() << Q_FUNC_INFO;
     d_ptr->stop();
 }
 

@@ -283,7 +283,7 @@
       <item>
        <widget class="QRadioButton" name="m_pingPong">
         <property name="toolTip">
-         <string>First run forwards, then backwards, again forwards, etc.</string>
+         <string>Switch direction at both ends</string>
         </property>
         <property name="text">
          <string>Ping Pong</string>
@@ -355,6 +355,9 @@
       </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="m_fadeInCheck">
+        <property name="toolTip">
+         <string>Use global fade in speed for all steps</string>
+        </property>
         <property name="text">
          <string>Fade In</string>
         </property>
@@ -362,6 +365,9 @@
       </item>
       <item row="1" column="0">
        <widget class="QCheckBox" name="m_fadeOutCheck">
+        <property name="toolTip">
+         <string>Use global fade out speed for all steps</string>
+        </property>
         <property name="text">
          <string>Fade Out</string>
         </property>
@@ -369,6 +375,9 @@
       </item>
       <item row="2" column="0">
        <widget class="QCheckBox" name="m_durationCheck">
+        <property name="toolTip">
+         <string>Use global duration for all steps (when applicable)</string>
+        </property>
         <property name="text">
          <string>Duration</string>
         </property>

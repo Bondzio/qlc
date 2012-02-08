@@ -94,6 +94,15 @@ public:
     bool removeStep(int index);
 
     /**
+     * Replace the step at the given $index with the new $step.
+     *
+     * @param step The new step to replace with
+     * @param index The index of the step to replace
+     * @return true if successful, otherwise false (index out of bounds)
+     */
+    bool replaceStep(const ChaserStep& step, int index);
+
+    /**
      * Clear the chaser's list of steps
      */
     void clear();
@@ -119,6 +128,24 @@ public slots:
 private:
     QList <ChaserStep> m_steps;
     QMutex m_stepListMutex;
+
+    /*********************************************************************
+     * Global speed override
+     *********************************************************************/
+public:
+    void setGlobalFadeIn(bool set);
+    bool isGlobalFadeIn() const;
+
+    void setGlobalFadeOut(bool set);
+    bool isGlobalFadeOut() const;
+
+    void setGlobalDuration(bool set);
+    bool isGlobalDuration() const;
+
+private:
+    bool m_globalFadeIn;
+    bool m_globalFadeOut;
+    bool m_globalDuration;
 
     /*********************************************************************
      * Save & Load

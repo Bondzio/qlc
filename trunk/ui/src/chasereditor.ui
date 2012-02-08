@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
-    <height>539</height>
+    <width>568</width>
+    <height>536</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,12 +41,15 @@
     </widget>
    </item>
    <item row="1" column="0" rowspan="10" colspan="3">
-    <widget class="QTreeWidget" name="m_list">
+    <widget class="QTreeWidget" name="m_tree">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>1</verstretch>
       </sizepolicy>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
      </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -60,6 +63,9 @@
      <property name="allColumnsShowFocus">
       <bool>true</bool>
      </property>
+     <property name="expandsOnDoubleClick">
+      <bool>false</bool>
+     </property>
      <column>
       <property name="text">
        <string>Step</string>
@@ -68,6 +74,21 @@
      <column>
       <property name="text">
        <string>Function</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Fade In</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Fade Out</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Duration</string>
       </property>
      </column>
     </widget>
@@ -320,30 +341,9 @@
    <item row="11" column="2">
     <widget class="QGroupBox" name="m_busGroup">
      <property name="title">
-      <string>Speed</string>
+      <string>Global Speed</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="m_fadeInLabel">
-        <property name="text">
-         <string>Fade In</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="m_fadeOutLabel">
-        <property name="text">
-         <string>Fade Out</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="m_durationLabel">
-        <property name="text">
-         <string>Duration</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QWidget" name="m_fadeInContainer" native="true"/>
       </item>
@@ -352,6 +352,27 @@
       </item>
       <item row="2" column="1">
        <widget class="QWidget" name="m_durationContainer" native="true"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="m_fadeInCheck">
+        <property name="text">
+         <string>Fade In</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="m_fadeOutCheck">
+        <property name="text">
+         <string>Fade Out</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="m_durationCheck">
+        <property name="text">
+         <string>Duration</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

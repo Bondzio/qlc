@@ -40,12 +40,15 @@ public:
      * Speed settings
      ************************************************************************/
 public:
+    void setFadeInEnabled(bool set);
     void setFadeInSpeed(uint ms);
     uint fadeIn() const;
 
+    void setFadeOutEnabled(bool set);
     void setFadeOutSpeed(uint ms);
     uint fadeOut() const;
 
+    void setDurationEnabled(bool set);
     void setDuration(uint ms);
     uint duration() const;
 

@@ -32,9 +32,9 @@ void ChaserStep_Test::initial()
 {
     ChaserStep step;
     QCOMPARE(step.fid, Function::invalidId());
-    QCOMPARE(step.fadeIn, Function::defaultSpeed());
-    QCOMPARE(step.fadeOut, Function::defaultSpeed());
-    QCOMPARE(step.duration, Function::defaultSpeed());
+    QCOMPARE(step.fadeIn, uint(0));
+    QCOMPARE(step.fadeOut, uint(0));
+    QCOMPARE(step.duration, uint(0));
 
     step = ChaserStep(1, 2, 3, 4);
     QCOMPARE(step.fid, quint32(1));

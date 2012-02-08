@@ -76,6 +76,9 @@ void Chaser_Test::initial()
     QVERIFY(c.id() == Function::invalidId());
     QVERIFY(c.m_runner == NULL);
     QCOMPARE(c.m_legacyHoldBus, Bus::invalid());
+    QCOMPARE(c.isGlobalFadeIn(), true);
+    QCOMPARE(c.isGlobalFadeOut(), true);
+    QCOMPARE(c.isGlobalDuration(), true);
 }
 
 void Chaser_Test::directionRunOrder()
@@ -123,44 +126,60 @@ void Chaser_Test::steps()
     QVERIFY(c.steps().size() == 0);
 
     /* Add a function with id "12" to the chaser */
-    c.addStep(12);
+    QVERIFY(c.addStep(12));
     QVERIFY(c.steps().size() == 1);
     QVERIFY(c.steps().at(0) == ChaserStep(12));
 
     /* Add another function in the middle */
-    c.addStep(ChaserStep(34));
+    QVERIFY(c.addStep(ChaserStep(34)));
     QVERIFY(c.steps().size() == 2);
     QVERIFY(c.steps().at(0) == ChaserStep(12));
     QVERIFY(c.steps().at(1) == ChaserStep(34));
 
     /* Must be able to add the same function multiple times */
-    c.addStep(ChaserStep(12));
+    QVERIFY(c.addStep(ChaserStep(12)));
     QVERIFY(c.steps().size() == 3);
     QVERIFY(c.steps().at(0) == ChaserStep(12));
     QVERIFY(c.steps().at(1) == ChaserStep(34));
     QVERIFY(c.steps().at(2) == ChaserStep(12));
 
+    /* Must be able to replace a step to another */
+    QVERIFY(c.replaceStep(ChaserStep(42), 1));
+    QVERIFY(c.steps().at(0) == ChaserStep(12));
+    QVERIFY(c.steps().at(1) == ChaserStep(42));
+    QVERIFY(c.steps().at(2) == ChaserStep(12));
+
+    /* Cannot replace a nonexistent step */
+    QVERIFY(c.replaceStep(ChaserStep(69), 5) == false);
+
     /* Removing a non-existent index should make no modifications */
     QVERIFY(c.removeStep(3) == false);
     QVERIFY(c.steps().size() == 3);
     QVERIFY(c.steps().at(0) == ChaserStep(12));
-    QVERIFY(c.steps().at(1) == ChaserStep(34));
+    QVERIFY(c.steps().at(1) == ChaserStep(42));
     QVERIFY(c.steps().at(2) == ChaserStep(12));
 
     /* Removing the last step should succeed */
     QVERIFY(c.removeStep(2) == true);
     QVERIFY(c.steps().size() == 2);
     QVERIFY(c.steps().at(0) == ChaserStep(12));
-    QVERIFY(c.steps().at(1) == ChaserStep(34));
+    QVERIFY(c.steps().at(1) == ChaserStep(42));
 
     /* Removing the first step should succeed */
     QVERIFY(c.removeStep(0) == true);
     QVERIFY(c.steps().size() == 1);
-    QVERIFY(c.steps().at(0) == ChaserStep(34));
+    QVERIFY(c.steps().at(0) == ChaserStep(42));
 
     /* Removing the only step should succeed */
     QVERIFY(c.removeStep(0) == true);
     QVERIFY(c.steps().size() == 0);
+
+    /* Step insertion */
+    QVERIFY(c.addStep(ChaserStep(1), 0));
+    QVERIFY(c.addStep(ChaserStep(2), 0));
+    QVERIFY(c.steps().size() == 2);
+    QVERIFY(c.steps().at(0) == ChaserStep(2));
+    QVERIFY(c.steps().at(1) == ChaserStep(1));
 }
 
 void Chaser_Test::clear()
@@ -318,6 +337,27 @@ void Chaser_Test::createCopy()
     QVERIFY(copy->steps().at(2) == ChaserStep(40));
 }
 
+void Chaser_Test::globalSpeeds()
+{
+    Doc doc(this);
+    Chaser c(&doc);
+
+    c.setGlobalFadeIn(false);
+    QCOMPARE(c.isGlobalFadeIn(), false);
+    c.setGlobalFadeIn(true);
+    QCOMPARE(c.isGlobalFadeIn(), true);
+
+    c.setGlobalFadeOut(false);
+    QCOMPARE(c.isGlobalFadeOut(), false);
+    c.setGlobalFadeOut(true);
+    QCOMPARE(c.isGlobalFadeOut(), true);
+
+    c.setGlobalDuration(false);
+    QCOMPARE(c.isGlobalDuration(), false);
+    c.setGlobalDuration(true);
+    QCOMPARE(c.isGlobalDuration(), true);
+}
+
 void Chaser_Test::loadSuccessLegacy()
 {
     QDomDocument doc;
@@ -433,6 +473,12 @@ void Chaser_Test::loadSuccess()
     s3.appendChild(s3Text);
     root.appendChild(s3);
 
+    QDomElement spd = doc.createElement("GlobalSpeed");
+    spd.setAttribute("FadeIn", "False");
+    spd.setAttribute("FadeOut", "True");
+    spd.setAttribute("Duration", "False");
+    root.appendChild(spd);
+
     // Unknown tag
     QDomElement foo = doc.createElement("Foo");
     foo.setAttribute("Number", 3);
@@ -450,9 +496,9 @@ void Chaser_Test::loadSuccess()
     QVERIFY(c.steps().size() == 3);
 
     QVERIFY(c.steps().at(0) == ChaserStep(87));
-    QCOMPARE(c.steps().at(0).fadeIn, Function::defaultSpeed());
-    QCOMPARE(c.steps().at(0).fadeOut, Function::defaultSpeed());
-    QCOMPARE(c.steps().at(0).duration, Function::defaultSpeed());
+    QCOMPARE(c.steps().at(0).fadeIn, uint(0));
+    QCOMPARE(c.steps().at(0).fadeOut, uint(0));
+    QCOMPARE(c.steps().at(0).duration, uint(0));
 
     QVERIFY(c.steps().at(1) == ChaserStep(50));
     QCOMPARE(c.steps().at(1).fadeIn, uint(600));
@@ -694,6 +740,7 @@ void Chaser_Test::save()
     c.addStep(ChaserStep(1));
     c.addStep(ChaserStep(0));
     c.addStep(ChaserStep(2));
+    c.setGlobalFadeOut(false);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("TestRoot");
@@ -702,7 +749,7 @@ void Chaser_Test::save()
     QVERIFY(root.firstChild().toElement().tagName() == "Function");
     QVERIFY(root.firstChild().toElement().attribute("Type") == "Chaser");
 
-    int run = 0, dir = 0, speed = 0, fids = 0;
+    int run = 0, dir = 0, speed = 0, fids = 0, globalspeed = 0;
 
     QDomNode node = root.firstChild().firstChild();
     while (node.isNull() == false)
@@ -732,6 +779,13 @@ void Chaser_Test::save()
         {
             speed++;
         }
+        else if (tag.tagName() == "GlobalSpeed")
+        {
+            QCOMPARE(tag.attribute("FadeIn"), QString("True"));
+            QCOMPARE(tag.attribute("FadeOut"), QString("False"));
+            QCOMPARE(tag.attribute("Duration"), QString("True"));
+            globalspeed++;
+        }
         else
         {
             QFAIL("Unhandled XML tag.");
@@ -740,10 +794,11 @@ void Chaser_Test::save()
         node = node.nextSibling();
     }
 
-    QVERIFY(speed == 1);
-    QVERIFY(dir == 1);
-    QVERIFY(run == 1);
-    QVERIFY(fids == 4);
+    QCOMPARE(speed, 1);
+    QCOMPARE(dir, 1);
+    QCOMPARE(run, 1);
+    QCOMPARE(fids, 4);
+    QCOMPARE(globalspeed, 1);
 }
 
 void Chaser_Test::tap()

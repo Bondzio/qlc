@@ -42,6 +42,7 @@ private slots:
     void functionRemoval();
     void copyFrom();
     void createCopy();
+    void globalSpeeds();
 
     void loadSuccessLegacy();
     void loadSuccess();

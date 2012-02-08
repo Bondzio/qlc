@@ -22,6 +22,7 @@
 #ifndef CHASEREDITOR_H
 #define CHASEREDITOR_H
 
+#include <QPointer>
 #include <QWidget>
 #include "ui_chasereditor.h"
 
@@ -33,6 +34,7 @@ class OutputMap;
 class ChaserStep;
 class MasterTimer;
 class SpeedSpinBox;
+class SpeedDialWidget;
 class QTreeWidgetItem;
 
 class ChaserEditor : public QWidget, public Ui_ChaserEditor
@@ -96,15 +98,30 @@ private slots:
     void slotFadeOutSpinChanged(int ms);
     void slotDurationSpinChanged(int ms);
 
+    void slotFadeInDialChanged(uint ms);
+    void slotFadeOutDialChanged(uint ms);
+    void slotDurationDialChanged(uint ms);
+
+    void slotFadeInChecked(bool state);
+    void slotFadeOutChecked(bool state);
+    void slotDurationChecked(bool state);
+
+private:
+    void updateSpeedDials();
+
 private:
     SpeedSpinBox* m_fadeInSpin;
     SpeedSpinBox* m_fadeOutSpin;
     SpeedSpinBox* m_durationSpin;
+    QPointer<SpeedDialWidget> m_speedDials;
 
     /************************************************************************
      * Utilities
      ************************************************************************/
 private:
+    /** Update the contents of the whole tree, clearing it first if $clear == true)*/
+    void updateTree(bool clear = false);
+
     /** Get the step at the given $item */
     ChaserStep stepAtItem(const QTreeWidgetItem* item) const;
 

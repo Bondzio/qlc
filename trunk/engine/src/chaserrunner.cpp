@@ -286,9 +286,20 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
     m_currentFunction = m_doc->function(step.fid);
     if (m_currentFunction != NULL && m_currentFunction->stopped() == true)
     {
+        // Use step-specific speed setting if global speed is set to default
+        uint fadeIn = m_fadeInSpeed;
+        if (fadeIn == Function::defaultSpeed())
+            fadeIn = step.fadeIn;
+        uint fadeOut = m_fadeOutSpeed;
+        if (fadeOut == Function::defaultSpeed())
+            fadeOut = step.fadeOut;
+        uint dur = m_duration;
+        if (dur == Function::defaultSpeed())
+            dur = step.duration;
+
         // Set intensity before starting the function. Otherwise the intensity
         // might momentarily jump too high.
         m_currentFunction->adjustIntensity(m_intensity);
-        m_currentFunction->start(timer, true, m_fadeInSpeed, m_fadeOutSpeed, m_duration);
+        m_currentFunction->start(timer, true, fadeIn, fadeOut, dur);
     }
 }

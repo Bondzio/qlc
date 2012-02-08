@@ -86,6 +86,11 @@ SpeedDialWidget::~SpeedDialWidget()
  * Speed settings
  ****************************************************************************/
 
+void SpeedDialWidget::setFadeInEnabled(bool enable)
+{
+    m_fadeIn->setEnabled(enable);
+}
+
 void SpeedDialWidget::setFadeInSpeed(uint ms)
 {
     m_fadeIn->setValue(ms);
@@ -96,6 +101,11 @@ uint SpeedDialWidget::fadeIn() const
     return m_fadeIn->value();
 }
 
+void SpeedDialWidget::setFadeOutEnabled(bool enable)
+{
+    m_fadeOut->setEnabled(enable);
+}
+
 void SpeedDialWidget::setFadeOutSpeed(uint ms)
 {
     m_fadeOut->setValue(ms);
@@ -104,6 +114,11 @@ void SpeedDialWidget::setFadeOutSpeed(uint ms)
 uint SpeedDialWidget::fadeOut() const
 {
     return m_fadeOut->value();
+}
+
+void SpeedDialWidget::setDurationEnabled(bool enable)
+{
+    m_duration->setEnabled(enable);
 }
 
 void SpeedDialWidget::setDuration(uint ms)

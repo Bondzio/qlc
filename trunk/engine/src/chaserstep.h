@@ -36,9 +36,7 @@ class ChaserStep
 public:
     /** Construct a new ChaserStep with the given attributes */
     ChaserStep(quint32 aFid = Function::invalidId(),
-               uint aFadeIn = Function::defaultSpeed(),
-               uint aFadeOut = Function::defaultSpeed(),
-               uint aDuration = Function::defaultSpeed());
+               uint aFadeIn = 0, uint aFadeOut = 0, uint aDuration = 0);
 
     /** Copy constructor */
     ChaserStep(const ChaserStep& cs);

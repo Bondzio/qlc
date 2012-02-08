@@ -57,6 +57,7 @@
 #include "efx.h"
 
 #define PROP_ID Qt::UserRole
+#define COL_NAME 0
 
 #define SETTINGS_SPLITTER "functionmanager/splitter"
 
@@ -85,7 +86,7 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
             this, SLOT(slotModeChanged(Doc::Mode)));
     updateTree();
 
-    m_tree->sortItems(0, Qt::AscendingOrder);
+    m_tree->sortItems(COL_NAME, Qt::AscendingOrder);
 
     connect(m_doc, SIGNAL(clearing()), this, SLOT(slotDocClearing()));
     connect(m_doc, SIGNAL(functionChanged(quint32)), this, SLOT(slotFunctionChanged(quint32)));
@@ -376,7 +377,7 @@ void FunctionManager::slotDelete()
 
     // Append functions' names to the message
     while (it.hasNext() == true)
-        msg += it.next()->text(0) + QString(", ");
+        msg += it.next()->text(COL_NAME) + QString(", ");
 
     // Ask for user's confirmation
     if (QMessageBox::question(this, tr("Delete Functions"), msg,
@@ -444,7 +445,7 @@ void FunctionManager::initTree()
     m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     m_tree->setSortingEnabled(true);
-    m_tree->sortByColumn(0, Qt::AscendingOrder);
+    m_tree->sortByColumn(COL_NAME, Qt::AscendingOrder);
 
     // Catch selection changes
     connect(m_tree, SIGNAL(itemSelectionChanged()),
@@ -466,17 +467,9 @@ void FunctionManager::updateFunctionItem(QTreeWidgetItem* item, const Function* 
 {
     Q_ASSERT(item != NULL);
     Q_ASSERT(function != NULL);
-
-    // This function is used to update the item whenever the function changes. Unless
-    // there's something to change from FunctionManager's point of view, don't do anything.
-    if (item->text(0) != function->name())
-        item->setText(0, function->name());
-
-    if (item->data(0, PROP_ID).toUInt() != function->id())
-    {
-        item->setIcon(0, functionIcon(function));
-        item->setData(0, PROP_ID, function->id());
-    }
+    item->setText(COL_NAME, function->name());
+    item->setIcon(COL_NAME, functionIcon(function));
+    item->setData(COL_NAME, PROP_ID, function->id());
 }
 
 QTreeWidgetItem* FunctionManager::parentItem(const Function* function)
@@ -488,7 +481,7 @@ QTreeWidgetItem* FunctionManager::parentItem(const Function* function)
     {
         QTreeWidgetItem* item = m_tree->topLevelItem(i);
         Q_ASSERT(item != NULL);
-        QVariant var = item->data(0, Qt::UserRole);
+        QVariant var = item->data(COL_NAME, Qt::UserRole);
         if (var.isValid() == false)
             continue;
         Function::Type type = (Function::Type) var.toInt();
@@ -498,9 +491,9 @@ QTreeWidgetItem* FunctionManager::parentItem(const Function* function)
 
     // Parent item for the given type doesn't exist yet so create one
     QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
-    item->setText(0, Function::typeToString(function->type()));
-    item->setIcon(0, functionIcon(function));
-    item->setData(0, Qt::UserRole, function->type());
+    item->setText(COL_NAME, Function::typeToString(function->type()));
+    item->setIcon(COL_NAME, functionIcon(function));
+    item->setData(COL_NAME, Qt::UserRole, function->type());
     item->setFlags(Qt::ItemIsEnabled);
     return item;
 }
@@ -510,7 +503,7 @@ quint32 FunctionManager::itemFunctionId(const QTreeWidgetItem* item) const
     if (item == NULL || item->parent() == NULL)
         return Function::invalidId();
     else
-        return item->data(0, PROP_ID).toUInt();
+        return item->data(COL_NAME, PROP_ID).toUInt();
 }
 
 QTreeWidgetItem* FunctionManager::functionItem(const Function* function)
@@ -647,7 +640,7 @@ void FunctionManager::addFunction(Function* function)
 
     /* Clear current selection and select only the new one */
     m_tree->clearSelection();
-    m_tree->sortItems(0, Qt::AscendingOrder);
+    m_tree->sortItems(COL_NAME, Qt::AscendingOrder);
     m_tree->scrollToItem(item);
     m_tree->setCurrentItem(item);
     item->setSelected(true);

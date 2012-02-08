@@ -128,6 +128,9 @@ void SimpleDesk::createAndShow(QWidget* parent, Doc* doc)
     sub->setWidget(s_instance);
     QWidget* window = area->addSubWindow(sub);
 
+    connect(area, SIGNAL(subWindowActivated(QMdiSubWindow*)),
+            s_instance, SLOT(slotSubWindowActivated(QMdiSubWindow*)));
+
     /* Set some common properties for the window and show it */
     window->setAttribute(Qt::WA_DeleteOnClose);
     window->setWindowIcon(QIcon(":/slider.png"));
@@ -768,7 +771,7 @@ void SimpleDesk::slotEditCueStackClicked()
     {
         if (m_speedDials == NULL)
         {
-            m_speedDials = new SpeedDialWidget(this, Qt::Tool);
+            m_speedDials = new SpeedDialWidget(this);
             m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
             connect(m_speedDials, SIGNAL(fadeInChanged(uint)),
                     this, SLOT(slotFadeInDialChanged(uint)));
@@ -864,6 +867,30 @@ void SimpleDesk::slotCueNameEdited(const QString& name)
     CueStack* cueStack = currentCueStack();
     if (selected.size() == 1)
         cueStack->setName(name, selected.first().row());
+}
+
+
+void SimpleDesk::slotSubWindowActivated(QMdiSubWindow* sub)
+{
+    QMdiSubWindow* mySub = qobject_cast<QMdiSubWindow*> (parentWidget());
+    Q_ASSERT(mySub != NULL);
+    if (sub == mySub)
+    {
+        // SimpleDesk has been activated
+        if (m_editCueStackButton->isChecked() == true)
+            slotEditCueStackClicked();
+    }
+    else if (sub != NULL)
+    {
+        // Another internal sub window has been activated
+        if (m_speedDials != NULL)
+            delete m_speedDials;
+        m_speedDials = NULL;
+    }
+    else
+    {
+        // Another application activated (not QLC)
+    }
 }
 
 /****************************************************************************

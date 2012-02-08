@@ -499,7 +499,7 @@ void ChaserEditor::updateSpeedDials()
     {
         if (m_speedDials == NULL)
         {
-            m_speedDials = new SpeedDialWidget(this, Qt::Tool);
+            m_speedDials = new SpeedDialWidget(this);
             m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
 
             connect(m_speedDials, SIGNAL(fadeInChanged(uint)),

@@ -75,6 +75,48 @@ void ChaserRunner::setDuration(uint ms)
     m_duration = ms;
 }
 
+uint ChaserRunner::currentFadeIn() const
+{
+    uint fadeIn = m_fadeInSpeed;
+    if (m_currentStep >= 0 && m_currentStep < m_steps.size() &&
+        fadeIn == Function::defaultSpeed())
+    {
+        ChaserStep step(m_steps.at(m_currentStep));
+        if (step.fadeIn != Function::defaultSpeed())
+            fadeIn = step.fadeIn;
+    }
+
+    return fadeIn;
+}
+
+uint ChaserRunner::currentFadeOut() const
+{
+    uint fadeOut = m_fadeOutSpeed;
+    if (m_currentStep >= 0 && m_currentStep < m_steps.size() &&
+        fadeOut == Function::defaultSpeed())
+    {
+        ChaserStep step(m_steps.at(m_currentStep));
+        if (step.fadeOut != Function::defaultSpeed())
+            fadeOut = step.fadeOut;
+    }
+
+    return fadeOut;
+}
+
+uint ChaserRunner::currentDuration() const
+{
+    uint dur = m_duration;
+    if (m_currentStep >= 0 && m_currentStep < m_steps.size() &&
+        dur == Function::defaultSpeed())
+    {
+        ChaserStep step(m_steps.at(m_currentStep));
+        if (step.duration != Function::defaultSpeed())
+            dur = step.duration;
+    }
+
+    return dur;
+}
+
 /****************************************************************************
  * Automatic stepping
  ****************************************************************************/
@@ -179,7 +221,8 @@ bool ChaserRunner::write(MasterTimer* timer, UniverseArray* universes)
         switchFunctions(timer);
         emit currentStepChanged(m_currentStep);
     }
-    else if ((isAutoStep() && m_elapsed >= m_duration) || m_next == true || m_previous == true)
+    else if (m_next == true || m_previous == true ||
+             (isAutoStep() && m_elapsed >= currentDuration()))
     {
         // Next step
         if (m_direction == Function::Forward)
@@ -286,20 +329,15 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
     m_currentFunction = m_doc->function(step.fid);
     if (m_currentFunction != NULL && m_currentFunction->stopped() == true)
     {
-        // Use step-specific speed setting if global speed is set to default
-        uint fadeIn = m_fadeInSpeed;
-        if (fadeIn == Function::defaultSpeed())
-            fadeIn = step.fadeIn;
-        uint fadeOut = m_fadeOutSpeed;
-        if (fadeOut == Function::defaultSpeed())
-            fadeOut = step.fadeOut;
-        uint dur = m_duration;
-        if (dur == Function::defaultSpeed())
-            dur = step.duration;
-
         // Set intensity before starting the function. Otherwise the intensity
         // might momentarily jump too high.
         m_currentFunction->adjustIntensity(m_intensity);
-        m_currentFunction->start(timer, true, fadeIn, fadeOut, dur);
+
+        // Start function using step-specific or global speed settings
+        m_currentFunction->start(timer,
+                                 true,
+                                 currentFadeIn(),
+                                 currentFadeOut(),
+                                 currentDuration());
     }
 }

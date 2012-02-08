@@ -60,6 +60,24 @@ public:
      */
     void setDuration(uint ms);
 
+    /**
+     * Get the currently active fade in value (either a global setting or
+     * associated with the current step).
+     */
+    uint currentFadeIn() const;
+
+    /**
+     * Get the currently active fade out value (either a global setting or
+     * associated with the current step).
+     */
+    uint currentFadeOut() const;
+
+    /**
+     * Get the currently active duration value (either a global setting or
+     * associated with the current step).
+     */
+    uint currentDuration() const;
+
 private:
     uint m_fadeInSpeed;
     uint m_fadeOutSpeed;

@@ -347,10 +347,7 @@ void Scene::write(MasterTimer* timer, UniverseArray* ua)
 
     // Fader has nothing to do. Stop.
     if (m_fader->channels().size() == 0)
-    {
-        qDebug() << "Stopping";
         stop();
-    }
 
     incrementElapsed();
 }

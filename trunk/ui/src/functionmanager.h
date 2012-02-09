@@ -29,6 +29,7 @@
 #include "doc.h"
 
 class QTreeWidgetItem;
+class QMdiSubWindow;
 class QActionGroup;
 class QTreeWidget;
 class QSplitter;
@@ -56,6 +57,10 @@ public:
     /** Normal public destructor */
     ~FunctionManager();
 
+signals:
+    /** Emitted when the FunctionManager's QMdiSubWindow is in/activated */
+    void functionManagerActive(bool active);
+
 protected:
     /** Protected constructor to prevent multiple instances. */
     FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
@@ -64,6 +69,7 @@ protected slots:
     void slotModeChanged(Doc::Mode mode);
     void slotDocClearing();
     void slotFunctionChanged(quint32 id);
+    void slotSubWindowActivated(QMdiSubWindow* sub);
 
 protected:
     static FunctionManager* s_instance;

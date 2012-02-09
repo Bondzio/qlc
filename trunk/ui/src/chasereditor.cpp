@@ -187,6 +187,20 @@ ChaserEditor::~ChaserEditor()
 {
 }
 
+void ChaserEditor::slotFunctionManagerActive(bool active)
+{
+    if (active == true)
+    {
+        updateSpeedDials();
+    }
+    else
+    {
+        if (m_speedDials != NULL)
+            delete m_speedDials;
+        m_speedDials = NULL;
+    }
+}
+
 void ChaserEditor::slotNameEdited(const QString& text)
 {
     m_chaser->setName(text);

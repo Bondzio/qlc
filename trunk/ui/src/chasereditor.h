@@ -49,6 +49,10 @@ public:
     ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc);
     ~ChaserEditor();
 
+public slots:
+    /** Listens to functionManagerActive() so that speed dial box can be hidden/shown */
+    void slotFunctionManagerActive(bool active);
+
 private slots:
     void slotNameEdited(const QString& text);
 

@@ -125,6 +125,9 @@ void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
     sub->setWidget(s_instance);
     QWidget* window = area->addSubWindow(sub);
 
+    connect(area, SIGNAL(subWindowActivated(QMdiSubWindow*)),
+            s_instance, SLOT(slotSubWindowActivated(QMdiSubWindow*)));
+
     /* Set some common properties for the window and show it */
     window->setAttribute(Qt::WA_DeleteOnClose);
     window->setWindowIcon(QIcon(":/function.png"));
@@ -165,6 +168,26 @@ void FunctionManager::slotFunctionChanged(quint32 id)
     QTreeWidgetItem* item = functionItem(function);
     if (item != NULL)
         updateFunctionItem(item, function);
+}
+
+void FunctionManager::slotSubWindowActivated(QMdiSubWindow* sub)
+{
+    QMdiSubWindow* mySub = qobject_cast<QMdiSubWindow*> (parentWidget());
+    Q_ASSERT(mySub != NULL);
+    if (sub == mySub)
+    {
+        // FunctionManager has been activated
+        emit functionManagerActive(true);
+    }
+    else if (sub != NULL)
+    {
+        // Another internal sub window has been activated
+        emit functionManagerActive(false);
+    }
+    else
+    {
+        // Another application activated (not QLC)
+    }
 }
 
 /*****************************************************************************
@@ -664,7 +687,12 @@ void FunctionManager::editFunction(Function* function)
     else if (function->type() == Function::Scene)
         editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
     else if (function->type() == Function::Chaser)
+    {
         editor = new ChaserEditor(m_splitter, qobject_cast<Chaser*> (function), m_doc);
+        // Chaser Editor needs to know this so it can hide/show its speed dial box
+        connect(this, SIGNAL(functionManagerActive(bool)),
+                editor, SLOT(slotFunctionManagerActive(bool)));
+    }
     else if (function->type() == Function::Collection)
         editor = new CollectionEditor(m_splitter, qobject_cast<Collection*> (function), m_doc);
     else if (function->type() == Function::EFX)

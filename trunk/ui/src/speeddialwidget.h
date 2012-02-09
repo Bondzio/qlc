@@ -28,15 +28,16 @@ class SpeedDial;
 class QGroupBox;
 class QLineEdit;
 
+#define SPEED_DIAL_FLAGS \
+    Qt::WindowFlags((Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::Window) \
+                       & (~Qt::WindowCloseButtonHint))
+
 class SpeedDialWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    SpeedDialWidget(QWidget* parent,
-                    Qt::WindowFlags flags = (Qt::WindowFlags)
-                        (Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::Window &
-                            (~Qt::WindowCloseButtonHint)));
+    SpeedDialWidget(QWidget* parent, Qt::WindowFlags = SPEED_DIAL_FLAGS);
     ~SpeedDialWidget();
 
     /************************************************************************

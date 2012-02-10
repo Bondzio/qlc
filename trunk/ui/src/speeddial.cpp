@@ -172,6 +172,12 @@ void SpeedDial::setValue(int ms)
     m_preventSignals = true;
     m_value = ms;
     setSpinValues(ms);
+
+    if (ms == Function::infiniteSpeed())
+        m_infiniteCheck->setChecked(true);
+    else
+        m_infiniteCheck->setChecked(false);
+
     m_preventSignals = false;
 }
 
@@ -186,18 +192,28 @@ int SpeedDial::value() const
 
 void SpeedDial::setSpinValues(int ms)
 {
-    ms = CLAMP(ms, 0, INT_MAX);
+    if (ms == Function::infiniteSpeed())
+    {
+        m_hrs->setValue(m_hrs->minimum());
+        m_min->setValue(m_min->minimum());
+        m_sec->setValue(m_sec->minimum());
+        m_ms->setValue(m_ms->minimum());
+    }
+    else
+    {
+        ms = CLAMP(ms, 0, INT_MAX);
 
-    m_hrs->setValue(ms / MS_PER_HOUR);
-    ms -= (m_hrs->value() * MS_PER_HOUR);
+        m_hrs->setValue(ms / MS_PER_HOUR);
+        ms -= (m_hrs->value() * MS_PER_HOUR);
 
-    m_min->setValue(ms / MS_PER_MINUTE);
-    ms -= (m_min->value() * MS_PER_MINUTE);
+        m_min->setValue(ms / MS_PER_MINUTE);
+        ms -= (m_min->value() * MS_PER_MINUTE);
 
-    m_sec->setValue(ms / MS_PER_SECOND);
-    ms -= (m_sec->value() * MS_PER_SECOND);
+        m_sec->setValue(ms / MS_PER_SECOND);
+        ms -= (m_sec->value() * MS_PER_SECOND);
 
-    m_ms->setValue(ms / MS_DIV);
+        m_ms->setValue(ms / MS_DIV);
+    }
 }
 
 int SpeedDial::spinValues() const
@@ -358,9 +374,17 @@ void SpeedDial::slotInfiniteChecked(bool state)
     m_ms->setEnabled(!state);
 
     if (state == true)
-        emit valueChanged(Function::infiniteSpeed());
+    {
+        m_value = Function::infiniteSpeed();
+        if (m_preventSignals == false)
+            emit valueChanged(Function::infiniteSpeed());
+    }
     else
-        emit valueChanged(m_value);
+    {
+        m_value = 0;
+        if (m_preventSignals == false)
+            emit valueChanged(Function::infiniteSpeed());
+    }
 }
 
 void SpeedDial::slotSpinFocusGained()

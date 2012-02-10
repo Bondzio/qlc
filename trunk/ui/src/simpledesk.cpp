@@ -773,12 +773,12 @@ void SimpleDesk::slotEditCueStackClicked()
         {
             m_speedDials = new SpeedDialWidget(this);
             m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
-            connect(m_speedDials, SIGNAL(fadeInChanged(uint)),
-                    this, SLOT(slotFadeInDialChanged(uint)));
-            connect(m_speedDials, SIGNAL(fadeOutChanged(uint)),
-                    this, SLOT(slotFadeOutDialChanged(uint)));
-            connect(m_speedDials, SIGNAL(durationChanged(uint)),
-                    this, SLOT(slotDurationDialChanged(uint)));
+            connect(m_speedDials, SIGNAL(fadeInChanged(int)),
+                    this, SLOT(slotFadeInDialChanged(int)));
+            connect(m_speedDials, SIGNAL(fadeOutChanged(int)),
+                    this, SLOT(slotFadeOutDialChanged(int)));
+            connect(m_speedDials, SIGNAL(durationChanged(int)),
+                    this, SLOT(slotDurationDialChanged(int)));
             connect(m_speedDials, SIGNAL(optionalTextEdited(const QString&)),
                     this, SLOT(slotCueNameEdited(const QString&)));
         }
@@ -829,7 +829,7 @@ void SimpleDesk::slotRecordCueClicked()
     updateCueStackButtons();
 }
 
-void SimpleDesk::slotFadeInDialChanged(uint ms)
+void SimpleDesk::slotFadeInDialChanged(int ms)
 {
     Q_ASSERT(m_cueStackView != NULL);
     Q_ASSERT(m_cueStackView->selectionModel() != NULL);
@@ -839,7 +839,7 @@ void SimpleDesk::slotFadeInDialChanged(uint ms)
         cueStack->setFadeInSpeed(ms, index.row());
 }
 
-void SimpleDesk::slotFadeOutDialChanged(uint ms)
+void SimpleDesk::slotFadeOutDialChanged(int ms)
 {
     Q_ASSERT(m_cueStackView != NULL);
     Q_ASSERT(m_cueStackView->selectionModel() != NULL);
@@ -849,7 +849,7 @@ void SimpleDesk::slotFadeOutDialChanged(uint ms)
         cueStack->setFadeOutSpeed(ms, index.row());
 }
 
-void SimpleDesk::slotDurationDialChanged(uint ms)
+void SimpleDesk::slotDurationDialChanged(int ms)
 {
     Q_ASSERT(m_cueStackView != NULL);
     Q_ASSERT(m_cueStackView->selectionModel() != NULL);

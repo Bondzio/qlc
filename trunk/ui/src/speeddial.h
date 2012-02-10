@@ -31,6 +31,14 @@ class QCheckBox;
 class QTimer;
 class QDial;
 
+/****************************************************************************
+ * FocusSpinBox
+ ****************************************************************************/
+
+/**
+ * This is a normal QSpinBox that is able to tell, thru a signal, when it
+ * gains the input focus (i.e. when it is clicked or tab-focused).
+ */
 class FocusSpinBox : public QSpinBox
 {
     Q_OBJECT
@@ -45,6 +53,10 @@ protected:
     void focusInEvent(QFocusEvent* event);
 };
 
+/****************************************************************************
+ * SpeedDial
+ ****************************************************************************/
+
 class SpeedDial : public QGroupBox
 {
     Q_OBJECT
@@ -54,11 +66,11 @@ public:
     SpeedDial(QWidget* parent);
     ~SpeedDial();
 
-    void setValue(uint ms);
-    uint value() const;
+    void setValue(int ms);
+    int value() const;
 
 signals:
-    void valueChanged(uint ms);
+    void valueChanged(int ms);
 
     /*************************************************************************
      * Private

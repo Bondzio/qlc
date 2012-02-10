@@ -158,9 +158,9 @@ private slots:
     void slotEditCueStackClicked();
     void slotRecordCueClicked();
 
-    void slotFadeInDialChanged(uint ms);
-    void slotFadeOutDialChanged(uint ms);
-    void slotDurationDialChanged(uint ms);
+    void slotFadeInDialChanged(int ms);
+    void slotFadeOutDialChanged(int ms);
+    void slotDurationDialChanged(int ms);
     void slotCueNameEdited(const QString& name);
 
     void slotSubWindowActivated(QMdiSubWindow* sub);

@@ -46,17 +46,17 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     m_fadeIn = new SpeedDial(this);
     m_fadeIn->setTitle(tr("Fade In"));
     layout()->addWidget(m_fadeIn);
-    connect(m_fadeIn, SIGNAL(valueChanged(uint)), this, SIGNAL(fadeInChanged(uint)));
+    connect(m_fadeIn, SIGNAL(valueChanged(int)), this, SIGNAL(fadeInChanged(int)));
 
     m_fadeOut = new SpeedDial(this);
     m_fadeOut->setTitle(tr("Fade Out"));
     layout()->addWidget(m_fadeOut);
-    connect(m_fadeOut, SIGNAL(valueChanged(uint)), this, SIGNAL(fadeOutChanged(uint)));
+    connect(m_fadeOut, SIGNAL(valueChanged(int)), this, SIGNAL(fadeOutChanged(int)));
 
     m_duration = new SpeedDial(this);
     m_duration->setTitle(tr("Duration"));
     layout()->addWidget(m_duration);
-    connect(m_duration, SIGNAL(valueChanged(uint)), this, SIGNAL(durationChanged(uint)));
+    connect(m_duration, SIGNAL(valueChanged(int)), this, SIGNAL(durationChanged(int)));
 
     /* Optional text */
     m_optionalTextGroup = new QGroupBox(this);
@@ -91,12 +91,12 @@ void SpeedDialWidget::setFadeInEnabled(bool enable)
     m_fadeIn->setEnabled(enable);
 }
 
-void SpeedDialWidget::setFadeInSpeed(uint ms)
+void SpeedDialWidget::setFadeInSpeed(int ms)
 {
     m_fadeIn->setValue(ms);
 }
 
-uint SpeedDialWidget::fadeIn() const
+int SpeedDialWidget::fadeIn() const
 {
     return m_fadeIn->value();
 }
@@ -106,12 +106,12 @@ void SpeedDialWidget::setFadeOutEnabled(bool enable)
     m_fadeOut->setEnabled(enable);
 }
 
-void SpeedDialWidget::setFadeOutSpeed(uint ms)
+void SpeedDialWidget::setFadeOutSpeed(int ms)
 {
     m_fadeOut->setValue(ms);
 }
 
-uint SpeedDialWidget::fadeOut() const
+int SpeedDialWidget::fadeOut() const
 {
     return m_fadeOut->value();
 }
@@ -121,12 +121,12 @@ void SpeedDialWidget::setDurationEnabled(bool enable)
     m_duration->setEnabled(enable);
 }
 
-void SpeedDialWidget::setDuration(uint ms)
+void SpeedDialWidget::setDuration(int ms)
 {
     m_duration->setValue(ms);
 }
 
-uint SpeedDialWidget::duration() const
+int SpeedDialWidget::duration() const
 {
     return m_duration->value();
 }

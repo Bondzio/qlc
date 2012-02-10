@@ -102,9 +102,9 @@ private slots:
     void slotFadeOutSpinChanged(int ms);
     void slotDurationSpinChanged(int ms);
 
-    void slotFadeInDialChanged(uint ms);
-    void slotFadeOutDialChanged(uint ms);
-    void slotDurationDialChanged(uint ms);
+    void slotFadeInDialChanged(int ms);
+    void slotFadeOutDialChanged(int ms);
+    void slotDurationDialChanged(int ms);
 
     void slotFadeInChecked(bool state);
     void slotFadeOutChecked(bool state);

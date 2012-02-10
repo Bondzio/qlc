@@ -30,6 +30,7 @@
 #include "speedspinbox.h"
 #include "mastertimer.h"
 #include "speeddial.h"
+#include "qlcmacros.h"
 #include "function.h"
 
 #define MS_PER_SECOND (1000)
@@ -37,11 +38,15 @@
 #define MS_PER_HOUR   (60 * MS_PER_MINUTE)
 
 #define THRESHOLD 10
-#define HRS_MAX   48
+#define HRS_MAX   (596 - 1) // INT_MAX can hold 596h 31m 23s 647ms
 #define MIN_MAX   59
 #define SEC_MAX   59
 #define MS_MAX    999
 #define MS_DIV    10
+
+/****************************************************************************
+ * FocusSpinBox
+ ****************************************************************************/
 
 FocusSpinBox::FocusSpinBox(QWidget* parent)
     : QSpinBox(parent)
@@ -53,6 +58,10 @@ void FocusSpinBox::focusInEvent(QFocusEvent* event)
     if (event->gotFocus() == true)
         emit focusGained();
 }
+
+/****************************************************************************
+ * SpeedDial
+ ****************************************************************************/
 
 SpeedDial::SpeedDial(QWidget* parent)
     : QGroupBox(parent)
@@ -158,15 +167,15 @@ SpeedDial::~SpeedDial()
 {
 }
 
-void SpeedDial::setValue(uint ms)
+void SpeedDial::setValue(int ms)
 {
     m_preventSignals = true;
-    m_value = (int) ms;
+    m_value = ms;
     setSpinValues(ms);
     m_preventSignals = false;
 }
 
-uint SpeedDial::value() const
+int SpeedDial::value() const
 {
     return m_value;
 }
@@ -177,6 +186,8 @@ uint SpeedDial::value() const
 
 void SpeedDial::setSpinValues(int ms)
 {
+    ms = CLAMP(ms, 0, INT_MAX);
+
     m_hrs->setValue(ms / MS_PER_HOUR);
     ms -= (m_hrs->value() * MS_PER_HOUR);
 
@@ -205,7 +216,7 @@ int SpeedDial::spinValues() const
         value = Function::infiniteSpeed();
     }
 
-    return value;
+    return CLAMP(value, 0, INT_MAX);
 }
 
 int SpeedDial::dialDiff(int value, int previous, int step)
@@ -264,6 +275,8 @@ void SpeedDial::slotDialChanged(int value)
             m_value += MS_PER_SECOND;
         else if (m_focus == m_min)
             m_value += MS_PER_MINUTE;
+
+        m_value = CLAMP(m_value, 0, INT_MAX);
         setSpinValues(m_value);
     }
     else if (newValue < m_focus->minimum())
@@ -277,16 +290,20 @@ void SpeedDial::slotDialChanged(int value)
             newValue -= MS_PER_SECOND;
         else if (m_focus == m_min)
             newValue -= MS_PER_MINUTE;
+
         if (newValue >= 0)
         {
-            setSpinValues(newValue);
             m_value = newValue;
+            m_value = CLAMP(m_value, 0, INT_MAX);
+            setSpinValues(m_value);
         }
     }
     else
     {
         // Normal value increment/decrement.
-        m_focus->setValue(newValue);
+        m_value = newValue;
+        m_value = CLAMP(m_value, 0, INT_MAX);
+        m_focus->setValue(m_value);
     }
 
     // Store the current value so it can be compared on the next pass to determine the
@@ -299,7 +316,7 @@ void SpeedDial::slotHoursChanged()
     if (m_preventSignals == false)
     {
         m_value = spinValues();
-        emit valueChanged(uint(m_value));
+        emit valueChanged(m_value);
     }
 }
 
@@ -308,7 +325,7 @@ void SpeedDial::slotMinutesChanged()
     if (m_preventSignals == false)
     {
         m_value = spinValues();
-        emit valueChanged(uint(m_value));
+        emit valueChanged(m_value);
     }
 }
 
@@ -317,7 +334,7 @@ void SpeedDial::slotSecondsChanged()
     if (m_preventSignals == false)
     {
         m_value = spinValues();
-        emit valueChanged(uint(m_value));
+        emit valueChanged(m_value);
     }
 }
 
@@ -326,7 +343,7 @@ void SpeedDial::slotMSChanged()
     if (m_preventSignals == false)
     {
         m_value = spinValues();
-        emit valueChanged(uint(m_value));
+        emit valueChanged(m_value);
     }
 }
 

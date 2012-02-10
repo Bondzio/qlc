@@ -460,7 +460,7 @@ void ChaserEditor::slotDurationChecked(bool state)
     updateSpeedDials();
 }
 
-void ChaserEditor::slotFadeInDialChanged(uint ms)
+void ChaserEditor::slotFadeInDialChanged(int ms)
 {
     foreach (QTreeWidgetItem* item, m_tree->selectedItems())
     {
@@ -472,7 +472,7 @@ void ChaserEditor::slotFadeInDialChanged(uint ms)
     }
 }
 
-void ChaserEditor::slotFadeOutDialChanged(uint ms)
+void ChaserEditor::slotFadeOutDialChanged(int ms)
 {
     foreach (QTreeWidgetItem* item, m_tree->selectedItems())
     {
@@ -484,7 +484,7 @@ void ChaserEditor::slotFadeOutDialChanged(uint ms)
     }
 }
 
-void ChaserEditor::slotDurationDialChanged(uint ms)
+void ChaserEditor::slotDurationDialChanged(int ms)
 {
     foreach (QTreeWidgetItem* item, m_tree->selectedItems())
     {
@@ -516,12 +516,12 @@ void ChaserEditor::updateSpeedDials()
             m_speedDials = new SpeedDialWidget(this);
             m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
 
-            connect(m_speedDials, SIGNAL(fadeInChanged(uint)),
-                    this, SLOT(slotFadeInDialChanged(uint)));
-            connect(m_speedDials, SIGNAL(fadeOutChanged(uint)),
-                    this, SLOT(slotFadeOutDialChanged(uint)));
-            connect(m_speedDials, SIGNAL(durationChanged(uint)),
-                    this, SLOT(slotDurationDialChanged(uint)));
+            connect(m_speedDials, SIGNAL(fadeInChanged(int)),
+                    this, SLOT(slotFadeInDialChanged(int)));
+            connect(m_speedDials, SIGNAL(fadeOutChanged(int)),
+                    this, SLOT(slotFadeOutDialChanged(int)));
+            connect(m_speedDials, SIGNAL(durationChanged(int)),
+                    this, SLOT(slotDurationDialChanged(int)));
 
             m_speedDials->show();
         }

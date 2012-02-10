@@ -46,21 +46,21 @@ public:
      ************************************************************************/
 public:
     void setFadeInEnabled(bool set);
-    void setFadeInSpeed(uint ms);
-    uint fadeIn() const;
+    void setFadeInSpeed(int ms);
+    int fadeIn() const;
 
     void setFadeOutEnabled(bool set);
-    void setFadeOutSpeed(uint ms);
-    uint fadeOut() const;
+    void setFadeOutSpeed(int ms);
+    int fadeOut() const;
 
     void setDurationEnabled(bool set);
-    void setDuration(uint ms);
-    uint duration() const;
+    void setDuration(int ms);
+    int duration() const;
 
 signals:
-    void fadeInChanged(uint ms);
-    void fadeOutChanged(uint ms);
-    void durationChanged(uint ms);
+    void fadeInChanged(int ms);
+    void fadeOutChanged(int ms);
+    void durationChanged(int ms);
 
 private:
     SpeedDial* m_fadeIn;

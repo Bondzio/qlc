@@ -24,30 +24,23 @@
 
 #include "speedspinbox.h"
 #include "mastertimer.h"
-#include "apputil.h"
 
-#define SINGLESTEP int(MasterTimer::tick())
-#define DEFAULT (0 - SINGLESTEP)
-#define INFINITE (DEFAULT - SINGLESTEP)
+#define INFINITY_STRING QChar(0x221E)
 
 SpeedSpinBox::SpeedSpinBox(SpeedSpinBox::LowLimit l, QWidget* parent)
     : QSpinBox(parent)
     , m_lowLimit(l)
 {
-    setSingleStep(SINGLESTEP);
+    setSingleStep(SPEEDSPINBOX_SINGLESTEP);
 
     switch (m_lowLimit)
     {
         case SpeedSpinBox::Infinite:
-            setRange(INFINITE, INT_MAX);
-            setValue(DEFAULT);
-            slotValueChanged(DEFAULT);
+            setRange(SPEEDSPINBOX_INFINITE_VALUE, INT_MAX);
+            setValue(0);
+            slotValueChanged(0);
             break;
-        case SpeedSpinBox::Default:
-            setRange(DEFAULT, INT_MAX);
-            setValue(DEFAULT);
-            slotValueChanged(DEFAULT);
-            break;
+
         default:
             setRange(0, INT_MAX);
             setValue(0);
@@ -64,41 +57,26 @@ SpeedSpinBox::~SpeedSpinBox()
 
 QString SpeedSpinBox::textFromValue(int value) const
 {
-    if (value == INFINITE)
-        return QString("Infinite");
-    else if (value == DEFAULT)
-        return QString("Default");
+    if (value == SPEEDSPINBOX_INFINITE_VALUE)
+        return INFINITY_STRING;
     else
-        return AppUtil::speedText(value);
+        return speedText(value);
 }
 
 void SpeedSpinBox::slotValueChanged(int value)
 {
-    if (value == INFINITE)
-    {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Base, QColor(255, 127, 127));
-        setPalette(pal);
+    if (value == SPEEDSPINBOX_INFINITE_VALUE)
         setToolTip(tr("Infinite"));
-    }
-    else if (value == DEFAULT)
-    {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Base, QColor(127, 255, 127));
-        setPalette(pal);
-        setToolTip(tr("Use default value"));
-    }
     else
-    {
-        setPalette(QApplication::palette());
-        setToolTip(tr("Seconds.MilliSeconds"));
-    }
+        setToolTip(tr("Seconds"));
 }
 
 int SpeedSpinBox::valueFromText(const QString& text) const
 {
-    double value = text.toDouble();
-    return value * 1000;
+    if (text == INFINITY_STRING)
+        return SPEEDSPINBOX_INFINITE_VALUE;
+    else
+        return text.toDouble() * 1000;
 }
 
 QValidator::State SpeedSpinBox::validate(QString& input, int& pos) const
@@ -111,3 +89,12 @@ QValidator::State SpeedSpinBox::validate(QString& input, int& pos) const
     else
         return QValidator::Invalid;
 }
+
+QString SpeedSpinBox::speedText(uint ms)
+{
+    if (ms == SPEEDSPINBOX_INFINITE_VALUE)
+        return INFINITY_STRING;
+    else
+        return QLocale::system().toString(qreal(ms) / qreal(1000), 'f', 2);
+}
+

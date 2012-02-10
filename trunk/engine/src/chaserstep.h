@@ -28,6 +28,11 @@
 class QDomDocument;
 class QDomElement;
 
+/**
+ * A ChaserStep encapsulates a function ID with fade in, fade out and duration
+ * speeds (in milliseconds). Thus, each step can optionally use step-specific
+ * speeds if the user so wishes.
+ */
 class ChaserStep
 {
     /************************************************************************

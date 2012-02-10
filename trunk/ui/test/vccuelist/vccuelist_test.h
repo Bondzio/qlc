@@ -36,7 +36,7 @@ private slots:
     void cleanup();
 
     void initial();
-    void appendClear();
+    void chaser();
     void functionRemoved();
     void functionChanged();
     void keySequences();

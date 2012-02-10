@@ -29,6 +29,7 @@
 #include <QIcon>
 
 #include "cuestackmodel.h"
+#include "speedspinbox.h"
 #include "cuestack.h"
 #include "apputil.h"
 
@@ -189,7 +190,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].fadeInSpeed();
             if (ms > 0)
-                var = QVariant(AppUtil::speedText(ms));
+                var = QVariant(SpeedSpinBox::speedText(ms));
             else
                 var = QVariant();
             break;
@@ -198,7 +199,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].fadeOutSpeed();
             if (ms > 0)
-                var = QVariant(AppUtil::speedText(ms));
+                var = QVariant(SpeedSpinBox::speedText(ms));
             else
                 var = QVariant();
             break;
@@ -207,7 +208,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].duration();
             if (ms > 0)
-                var = QVariant(AppUtil::speedText(ms));
+                var = QVariant(SpeedSpinBox::speedText(ms));
             else
                 var = QVariant();
             break;

@@ -167,8 +167,11 @@ QList <ChaserStep> Chaser::steps() const
 void Chaser::slotFunctionRemoved(quint32 fid)
 {
     m_stepListMutex.lock();
-    m_steps.removeAll(ChaserStep(fid));
+    int count = m_steps.removeAll(ChaserStep(fid));
     m_stepListMutex.unlock();
+
+    if (count > 0)
+        emit changed(this->id());
 }
 
 /*****************************************************************************
@@ -360,10 +363,48 @@ void Chaser::tap()
  * Running
  *****************************************************************************/
 
+ChaserRunner* Chaser::createRunner(Chaser* self, Doc* doc)
+{
+    if (self == NULL || doc == NULL)
+        return NULL;
+
+    // Use global speeds only if they have been enabled
+    uint fadeIn = Function::defaultSpeed();
+    if (self->isGlobalFadeIn() == true)
+        fadeIn = self->fadeInSpeed();
+    uint fadeOut = Function::defaultSpeed();
+    if (self->isGlobalFadeOut() == true)
+        fadeOut = self->fadeOutSpeed();
+    uint dur = Function::defaultSpeed();
+    if (self->isGlobalDuration() == true)
+        dur = self->duration();
+
+    // These override* variables are set only if a chaser is started by another function
+    if (self->overrideFadeInSpeed() != defaultSpeed())
+        fadeIn = self->overrideFadeInSpeed();
+    if (self->overrideFadeOutSpeed() != defaultSpeed())
+        fadeOut = self->overrideFadeOutSpeed();
+    if (self->overrideDuration() != defaultSpeed())
+        dur = self->overrideDuration();
+
+    self->m_stepListMutex.lock();
+    ChaserRunner* runner = new ChaserRunner(doc,
+                                            self->steps(),
+                                            fadeIn,
+                                            fadeOut,
+                                            dur,
+                                            self->direction(),
+                                            self->runOrder(),
+                                            self->intensity(),
+                                            self);
+    self->m_stepListMutex.unlock();
+
+    return runner;
+}
+
 void Chaser::preRun(MasterTimer* timer)
 {
-    Q_ASSERT(m_runner == NULL);
-
+/*
     // Use global speeds only if they have been enabled
     uint fadeIn = Function::defaultSpeed();
     if (isGlobalFadeIn() == true)
@@ -387,7 +428,9 @@ void Chaser::preRun(MasterTimer* timer)
     m_runner = new ChaserRunner(doc(), steps(), fadeIn, fadeOut, dur,
                                 direction(), runOrder(), intensity());
     m_stepListMutex.unlock();
-
+*/
+    Q_ASSERT(m_runner == NULL);
+    m_runner = createRunner(this, doc());
     Function::preRun(timer);
 }
 

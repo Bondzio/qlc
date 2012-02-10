@@ -60,44 +60,13 @@ VCCueListProperties::VCCueListProperties(VCCueList* cueList, Doc* doc)
     m_nameEdit->setText(cueList->caption());
     m_nameEdit->setSelection(0, cueList->caption().length());
 
+    /* Chaser */
+    m_chaserId = Function::invalidId();
+    updateChaserName();
+
     /* Connections */
-    connect(m_addButton, SIGNAL(clicked()),
-            this, SLOT(slotAddClicked()));
-    connect(m_removeButton, SIGNAL(clicked()),
-            this, SLOT(slotRemoveClicked()));
-    connect(m_raiseButton, SIGNAL(clicked()),
-            this, SLOT(slotRaiseClicked()));
-    connect(m_lowerButton, SIGNAL(clicked()),
-            this, SLOT(slotLowerClicked()));
-
-    /* Put all cues into the tree widget */
-    QTreeWidgetItemIterator it(m_cueList->m_list);
-    while (*it != NULL)
-    {
-        QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-        item->setText(KColumnNumber, QString("%1")
-                      .arg(m_list->indexOfTopLevelItem(item) + 1));
-        item->setText(KColumnName, (*it)->text(KColumnName));
-        item->setText(KColumnID, (*it)->text(KColumnID));
-        ++it;
-    }
-
-    m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
-
-    m_cutAction = new QAction(QIcon(":/editcut.png"), tr("Cut"), this);
-    m_cutButton->setDefaultAction(m_cutAction);
-    m_cutAction->setShortcut(QKeySequence(QKeySequence::Cut));
-    connect(m_cutAction, SIGNAL(triggered(bool)), this, SLOT(slotCutClicked()));
-
-    m_copyAction = new QAction(QIcon(":/editcopy.png"), tr("Copy"), this);
-    m_copyButton->setDefaultAction(m_copyAction);
-    m_copyAction->setShortcut(QKeySequence(QKeySequence::Copy));
-    connect(m_copyAction, SIGNAL(triggered(bool)), this, SLOT(slotCopyClicked()));
-
-    m_pasteAction = new QAction(QIcon(":/editpaste.png"), tr("Paste"), this);
-    m_pasteButton->setDefaultAction(m_pasteAction);
-    m_pasteAction->setShortcut(QKeySequence(QKeySequence::Paste));
-    connect(m_pasteAction, SIGNAL(triggered(bool)), this, SLOT(slotPasteClicked()));
+    connect(m_chaserAttachButton, SIGNAL(clicked()), this, SLOT(slotChaserAttachClicked()));
+    connect(m_chaserDetachButton, SIGNAL(clicked()), this, SLOT(slotChaserDetachClicked()));
 
     /************************************************************************
      * Next Cue page
@@ -172,17 +141,11 @@ VCCueListProperties::~VCCueListProperties()
 
 void VCCueListProperties::accept()
 {
+    /* Name */
     m_cueList->setCaption(m_nameEdit->text());
 
-    /* Replace existing list of cues */
-    m_cueList->clear();
-
-    QTreeWidgetItemIterator it(m_list);
-    while (*it != NULL)
-    {
-        m_cueList->append((*it)->text(KColumnID).toUInt());
-        ++it;
-    }
+    /* Chaser */
+    m_cueList->setChaser(m_chaserId);
 
     /* Key sequences */
     m_cueList->setNextKeySequence(m_nextKeySequence);
@@ -212,180 +175,31 @@ void VCCueListProperties::slotTabChanged()
  * Cues
  ****************************************************************************/
 
-void VCCueListProperties::slotAddClicked()
+void VCCueListProperties::slotChaserAttachClicked()
 {
-    /* Select functions */
     FunctionSelection fs(this, m_doc);
-    if (fs.exec() == QDialog::Accepted)
+    fs.setMultiSelection(false);
+    fs.setFilter(Function::Chaser, true);
+    if (fs.exec() == QDialog::Accepted && fs.selection().size() > 0)
     {
-        int insertionPoint = m_list->topLevelItemCount();
-        QTreeWidgetItem* item = m_list->currentItem();
-        if (item != NULL)
-            insertionPoint = m_list->indexOfTopLevelItem(item);
-
-        /* Append selected functions */
-        QListIterator <quint32> it(fs.selection());
-        while (it.hasNext() == true)
-        {
-            Function* function = m_doc->function(it.next());
-            item = new QTreeWidgetItem;
-            updateFunctionItem(item, function);
-            m_list->insertTopLevelItem(insertionPoint++, item);
-        }
-
-        m_list->setCurrentItem(item);
-        updateStepNumbers();
+        m_chaserId = fs.selection().first();
+        updateChaserName();
     }
 }
 
-void VCCueListProperties::slotRemoveClicked()
+void VCCueListProperties::slotChaserDetachClicked()
 {
-    slotCutClicked();
-    m_clipboard.clear();
+    m_chaserId = Function::invalidId();
+    updateChaserName();
 }
 
-void VCCueListProperties::slotRaiseClicked()
+void VCCueListProperties::updateChaserName()
 {
-    QList <QTreeWidgetItem*> items(m_list->selectedItems());
-    QListIterator <QTreeWidgetItem*> it(items);
-
-    // Check, whether even one of the items would "bleed" over the edge and
-    // cancel the operation if that is the case.
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item(it.next());
-        int index = m_list->indexOfTopLevelItem(item);
-        if (index == 0)
-            return;
-    }
-
-    // Move the items
-    it.toFront();
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item(it.next());
-        int index = m_list->indexOfTopLevelItem(item);
-        m_list->takeTopLevelItem(index);
-        m_list->insertTopLevelItem(index - 1, item);
-    }
-
-    updateStepNumbers();
-
-    // Select the moved items
-    it.toFront();
-    while (it.hasNext() == true)
-        it.next()->setSelected(true);
-}
-
-void VCCueListProperties::slotLowerClicked()
-{
-    QList <QTreeWidgetItem*> items(m_list->selectedItems());
-    QListIterator <QTreeWidgetItem*> it(items);
-
-    // Check, whether even one of the items would "bleed" over the edge and
-    // cancel the operation if that is the case.
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item(it.next());
-        int index = m_list->indexOfTopLevelItem(item);
-        if (index == m_list->topLevelItemCount() - 1)
-            return;
-    }
-
-    // Move the items
-    it.toBack();
-    while (it.hasPrevious() == true)
-    {
-        QTreeWidgetItem* item(it.previous());
-        int index = m_list->indexOfTopLevelItem(item);
-        m_list->takeTopLevelItem(index);
-        m_list->insertTopLevelItem(index + 1, item);
-    }
-
-    updateStepNumbers();
-
-    // Select the items
-    it.toFront();
-    while (it.hasNext() == true)
-        it.next()->setSelected(true);
-}
-
-void VCCueListProperties::slotCutClicked()
-{
-    m_clipboard.clear();
-    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
-    while (it.hasNext() == true)
-    {
-        QTreeWidgetItem* item(it.next());
-        m_clipboard << quint32(item->text(KColumnID).toUInt());
-        delete item;
-    }
-
-    m_list->setCurrentItem(NULL);
-    updateStepNumbers();
-}
-
-void VCCueListProperties::slotCopyClicked()
-{
-    m_clipboard.clear();
-    QListIterator <QTreeWidgetItem*> it(m_list->selectedItems());
-    while (it.hasNext() == true)
-        m_clipboard << quint32(it.next()->text(KColumnID).toUInt());
-}
-
-void VCCueListProperties::slotPasteClicked()
-{
-    if (m_clipboard.isEmpty() == true)
-        return;
-
-    int insertionPoint = 0;
-    QTreeWidgetItem* currentItem = m_list->currentItem();
-    if (currentItem != NULL)
-    {
-        insertionPoint = m_list->indexOfTopLevelItem(currentItem);
-        currentItem->setSelected(false);
-    }
+    Function* function = m_doc->function(m_chaserId);
+    if (function == NULL)
+        m_chaserEdit->setText(tr("No function"));
     else
-    {
-        insertionPoint = CLAMP(0, 0, m_list->topLevelItemCount() - 1);
-    }
-
-    QListIterator <quint32> it(m_clipboard);
-    while (it.hasNext() == true)
-    {
-        quint32 fid(it.next());
-        Function* function = m_doc->function(fid);
-        if (function == NULL)
-            continue;
-
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        m_list->insertTopLevelItem(insertionPoint, item);
-        updateFunctionItem(item, function);
-        item->setSelected(true);
-        insertionPoint = CLAMP(m_list->indexOfTopLevelItem(item) + 1, 0, m_list->topLevelItemCount() - 1);
-    }
-
-    updateStepNumbers();
-}
-
-void VCCueListProperties::updateFunctionItem(QTreeWidgetItem* item, const Function* function)
-{
-    Q_ASSERT(item != NULL);
-    Q_ASSERT(function != NULL);
-
-    item->setText(KColumnNumber, QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
-    item->setText(KColumnName, function->name());
-    item->setText(KColumnID, QString("%1").arg(function->id()));
-}
-
-void VCCueListProperties::updateStepNumbers()
-{
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-        item->setText(KColumnNumber, QString("%1").arg(i + 1));
-    }
+        m_chaserEdit->setText(function->name());
 }
 
 /****************************************************************************

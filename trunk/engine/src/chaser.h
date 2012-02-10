@@ -171,6 +171,16 @@ public:
      * Running
      *********************************************************************/
 public:
+    /**
+     * Create a ChaserRunner object from the given Chaser. The chaser's
+     * step mutex is locked & unlocked in this method.
+     *
+     * @param self The parent Chaser function to create a runner for
+     * @param doc The engine object
+     * @return NULL if unsuccessful, otherwise a new ChaserRunner*
+     */
+    static ChaserRunner* createRunner(Chaser* self, Doc* doc);
+
     /** @reimpl */
     void preRun(MasterTimer* timer);
 

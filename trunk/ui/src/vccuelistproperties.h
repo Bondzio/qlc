@@ -55,32 +55,17 @@ public slots:
 protected:
     VCCueList* m_cueList;
     Doc* m_doc;
-    OutputMap* m_outputMap;
-    InputMap* m_inputMap;
-    MasterTimer* m_masterTimer;
 
     /************************************************************************
      * Cues
      ************************************************************************/
 protected slots:
-    void slotAddClicked();
-    void slotRemoveClicked();
-    void slotRaiseClicked();
-    void slotLowerClicked();
-
-    void slotCutClicked();
-    void slotCopyClicked();
-    void slotPasteClicked();
+    void slotChaserAttachClicked();
+    void slotChaserDetachClicked();
 
 private:
-    void updateFunctionItem(QTreeWidgetItem* item, const Function* function);
-    void updateStepNumbers();
-
-private:
-    QList <quint32> m_clipboard;
-    QAction* m_cutAction;
-    QAction* m_copyAction;
-    QAction* m_pasteAction;
+    void updateChaserName();
+    quint32 m_chaserId;
 
     /************************************************************************
      * Next Cue

@@ -25,6 +25,7 @@
 #include <QDebug>
 
 #include "vcspeeddialproperties.h"
+#include "speedspinbox.h"
 #include "vcspeeddial.h"
 #include "speeddial.h"
 #include "qlcfile.h"

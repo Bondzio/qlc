@@ -27,8 +27,6 @@
 #include <QDebug>
 #include <QtXml>
 
-#include "qlcfile.h"
-
 #include "vccuelistproperties.h"
 #include "virtualconsole.h"
 #include "chaserrunner.h"
@@ -37,11 +35,13 @@
 #include "vccuelist.h"
 #include "function.h"
 #include "inputmap.h"
+#include "qlcfile.h"
+#include "chaser.h"
 #include "doc.h"
 
-#define KColumnNumber 0
-#define KColumnName   1
-#define KColumnID     2
+#define COL_NUM  0
+#define COL_NAME 1
+#define PROP_ID  Qt::UserRole
 #define HYSTERESIS 3 // Hysteresis for next/previous external input
 
 const quint8 VCCueList::nextInputSourceId = 0;
@@ -49,6 +49,7 @@ const quint8 VCCueList::previousInputSourceId = 1;
 const quint8 VCCueList::stopInputSourceId = 2;
 
 VCCueList::VCCueList(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
+    , m_chaser(Function::invalidId())
     , m_runner(NULL)
     , m_stop(false)
 {
@@ -60,18 +61,18 @@ VCCueList::VCCueList(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
     layout()->setSpacing(2);
 
     /* Create a list for scenes (cues) */
-    m_list = new QTreeWidget(this);
-    layout()->addWidget(m_list);
-    m_list->setSelectionMode(QAbstractItemView::SingleSelection);
-    m_list->setAlternatingRowColors(true);
-    m_list->setAllColumnsShowFocus(true);
-    m_list->setRootIsDecorated(false);
-    m_list->setItemsExpandable(false);
-    m_list->header()->setSortIndicatorShown(false);
-    m_list->header()->setClickable(false);
-    m_list->header()->setMovable(false);
-    m_list->header()->setResizeMode(QHeaderView::ResizeToContents);
-    connect(m_list, SIGNAL(itemActivated(QTreeWidgetItem*,int)),
+    m_tree = new QTreeWidget(this);
+    layout()->addWidget(m_tree);
+    m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_tree->setAlternatingRowColors(true);
+    m_tree->setAllColumnsShowFocus(true);
+    m_tree->setRootIsDecorated(false);
+    m_tree->setItemsExpandable(false);
+    m_tree->header()->setSortIndicatorShown(false);
+    m_tree->header()->setClickable(false);
+    m_tree->header()->setMovable(false);
+    m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
+    connect(m_tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)),
             this, SLOT(slotItemActivated(QTreeWidgetItem*)));
 
     /* Create a stop button */
@@ -125,13 +126,7 @@ bool VCCueList::copyFrom(VCWidget* widget)
         return false;
 
     /* Function list contents */
-    clear();
-    for (int i = 0; i < cuelist->m_list->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = cuelist->m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-        append(item->text(KColumnID).toUInt());
-    }
+    setChaser(cuelist->chaser());
 
     /* Key sequence */
     setNextKeySequence(cuelist->nextKeySequence());
@@ -146,54 +141,58 @@ bool VCCueList::copyFrom(VCWidget* widget)
  * Cue list
  *****************************************************************************/
 
-void VCCueList::clear()
+void VCCueList::setChaser(quint32 id)
 {
-    m_list->clear();
+    Chaser* chaser = qobject_cast<Chaser*> (m_doc->function(id));
+    if (chaser == NULL)
+        m_chaser = Function::invalidId();
+    else
+        m_chaser = id;
+    updateStepList();
 }
 
-void VCCueList::append(quint32 fid)
+quint32 VCCueList::chaser() const
 {
-    Function* function = m_doc->function(fid);
-    if (function == NULL)
+    return m_chaser;
+}
+
+void VCCueList::updateStepList()
+{
+    m_tree->clear();
+
+    Chaser* chaser = qobject_cast<Chaser*> (m_doc->function(m_chaser));
+    if (chaser == NULL)
         return;
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(m_list);
-    item->setText(KColumnNumber, QString("%1").arg(m_list->indexOfTopLevelItem(item) + 1));
-    item->setText(KColumnName, function->name());
-    item->setText(KColumnID, QString("%1").arg(fid));
+    QListIterator <ChaserStep> it(chaser->steps());
+    while (it.hasNext() == true)
+    {
+        ChaserStep step(it.next());
+
+        Function* function = m_doc->function(step.fid);
+        Q_ASSERT(function != NULL);
+
+        QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
+        int index = m_tree->indexOfTopLevelItem(item) + 1;
+        item->setText(COL_NUM, QString("%1").arg(index));
+        item->setText(COL_NAME, function->name());
+        item->setData(COL_NUM, PROP_ID, function->id());
+    }
 }
 
 void VCCueList::slotFunctionRemoved(quint32 fid)
 {
-    /* Find all items matching the destroyed function ID and remove them */
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    if (fid == m_chaser)
     {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-
-        if (item->text(KColumnID).toUInt() == fid)
-        {
-            delete item;
-            // Item count reduced by one, don't skip to the next item just yet
-            i--;
-        }
+        setChaser(Function::invalidId());
+        updateStepList();
     }
 }
 
 void VCCueList::slotFunctionChanged(quint32 fid)
 {
-    Function* function = m_doc->function(fid);
-    Q_ASSERT(function != NULL);
-
-    /* Find all items matching the changed function ID and update them */
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-
-        if (item->text(KColumnID).toUInt() == fid)
-            item->setText(KColumnName, function->name());
-    }
+    if (fid == m_chaser)
+        updateStepList();
 }
 
 void VCCueList::slotNextCue()
@@ -218,7 +217,7 @@ void VCCueList::slotPreviousCue()
     /* Create the runner only when the first/last cue is engaged. */
     m_mutex.lock();
     if (m_runner == NULL)
-        createRunner(m_list->topLevelItemCount() - 1); // Start from end
+        createRunner(m_tree->topLevelItemCount() - 1); // Start from end
     else
         m_runner->previous();
     m_mutex.unlock();
@@ -235,16 +234,16 @@ void VCCueList::slotStop()
     m_mutex.unlock();
 
     /* Start from the beginning */
-    m_list->setCurrentItem(NULL);
+    m_tree->setCurrentItem(NULL);
 }
 
 void VCCueList::slotCurrentStepChanged(int stepNumber)
 {
-    Q_ASSERT(stepNumber < m_list->topLevelItemCount() && stepNumber >= 0);
-    QTreeWidgetItem* item = m_list->topLevelItem(stepNumber);
+    Q_ASSERT(stepNumber < m_tree->topLevelItemCount() && stepNumber >= 0);
+    QTreeWidgetItem* item = m_tree->topLevelItem(stepNumber);
     Q_ASSERT(item != NULL);
-    m_list->scrollToItem(item, QAbstractItemView::PositionAtCenter);
-    m_list->setCurrentItem(item);
+    m_tree->scrollToItem(item, QAbstractItemView::PositionAtCenter);
+    m_tree->setCurrentItem(item);
 }
 
 void VCCueList::slotItemActivated(QTreeWidgetItem* item)
@@ -254,9 +253,9 @@ void VCCueList::slotItemActivated(QTreeWidgetItem* item)
 
     m_mutex.lock();
     if (m_runner == NULL)
-        createRunner(m_list->indexOfTopLevelItem(item));
+        createRunner(m_tree->indexOfTopLevelItem(item));
     else
-        m_runner->setCurrentStep(m_list->indexOfTopLevelItem(item));
+        m_runner->setCurrentStep(m_tree->indexOfTopLevelItem(item));
     m_mutex.unlock();
 }
 
@@ -264,23 +263,14 @@ void VCCueList::createRunner(int startIndex)
 {
     Q_ASSERT(m_runner == NULL);
 
-    QList <ChaserStep> steps;
-
-    for (int i = 0; i < m_list->topLevelItemCount(); i++)
+    Chaser* chaser = qobject_cast<Chaser*> (m_doc->function(m_chaser));
+    if (chaser != NULL)
     {
-        QTreeWidgetItem* item = m_list->topLevelItem(i);
-        Q_ASSERT(item != NULL);
-
-        quint32 fid = item->text(KColumnID).toUInt();
-        steps << ChaserStep(fid);
+        m_runner = Chaser::createRunner(chaser, m_doc);
+        m_runner->setCurrentStep(startIndex);
+        connect(m_runner, SIGNAL(currentStepChanged(int)),
+                this, SLOT(slotCurrentStepChanged(int)));
     }
-
-    //! @todo speeds
-    m_runner = new ChaserRunner(m_doc, steps, 0, 0, 0,
-                                Function::Forward, Function::Loop, 1.0, this, startIndex);
-    m_runner->setAutoStep(false);
-    connect(m_runner, SIGNAL(currentStepChanged(int)),
-            this, SLOT(slotCurrentStepChanged(int)));
 }
 
 /*****************************************************************************
@@ -428,7 +418,7 @@ void VCCueList::setCaption(const QString& text)
 
     QStringList list;
     list << tr("Number") << text;
-    m_list->setHeaderLabels(list);
+    m_tree->setHeaderLabels(list);
 }
 
 void VCCueList::slotModeChanged(Doc::Mode mode)
@@ -437,7 +427,7 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
     {
         Q_ASSERT(m_runner == NULL);
         m_doc->masterTimer()->registerDMXSource(this);
-        m_list->setEnabled(true);
+        m_tree->setEnabled(true);
     }
     else
     {
@@ -447,11 +437,11 @@ void VCCueList::slotModeChanged(Doc::Mode mode)
             delete m_runner;
         m_runner = NULL;
         m_mutex.unlock();
-        m_list->setEnabled(false);
+        m_tree->setEnabled(false);
     }
 
     /* Always start from the beginning */
-    m_list->setCurrentItem(NULL);
+    m_tree->setCurrentItem(NULL);
 
     VCWidget::slotModeChanged(mode);
 }
@@ -469,6 +459,8 @@ void VCCueList::editProperties()
 
 bool VCCueList::loadXML(const QDomElement* root)
 {
+    QList <quint32> legacyStepList;
+
     QDomNode node;
     QDomElement tag;
     QString str;
@@ -579,9 +571,14 @@ bool VCCueList::loadXML(const QDomElement* root)
         {
             setNextKeySequence(QKeySequence(tag.text()));
         }
+        else if (tag.tagName() == KXMLQLCVCCueListChaser)
+        {
+            setChaser(tag.text().toUInt());
+        }
         else if (tag.tagName() == KXMLQLCVCCueListFunction)
         {
-            append(tag.text().toUInt());
+            // Collect legacy file format steps into a list
+            legacyStepList << tag.text().toUInt();
         }
         else
         {
@@ -589,6 +586,37 @@ bool VCCueList::loadXML(const QDomElement* root)
         }
 
         node = node.nextSibling();
+    }
+
+    if (legacyStepList.isEmpty() == false)
+    {
+        /* Construct a new chaser from legacy step functions and use that chaser */
+        Chaser* chaser = new Chaser(m_doc);
+        chaser->setName(caption());
+
+        // Legacy cue lists relied on individual functions' timings
+        chaser->setGlobalFadeIn(false);
+        chaser->setGlobalFadeOut(false);
+        chaser->setGlobalDuration(false);
+
+        foreach (quint32 id, legacyStepList)
+        {
+            Function* function = m_doc->function(id);
+            if (function == NULL)
+                continue;
+
+            // Legacy cuelists relied on individual functions' fadein/out speed and
+            // infinite duration.
+            ChaserStep step(id,
+                            function->fadeInSpeed(),
+                            function->fadeOutSpeed(),
+                            Function::infiniteSpeed());
+            chaser->addStep(step);
+        }
+
+        // Add the chaser to Doc and attach it to the cue list
+        m_doc->addFunction(chaser);
+        setChaser(chaser->id());
     }
 
     return true;
@@ -612,18 +640,11 @@ bool VCCueList::saveXML(QDomDocument* doc, QDomElement* vc_root)
     /* Caption */
     root.setAttribute(KXMLQLCVCCaption, caption());
 
-    /* Cues */
-    QTreeWidgetItemIterator it(m_list);
-    while (*it != NULL)
-    {
-        tag = doc->createElement(KXMLQLCVCCueListFunction);
-        root.appendChild(tag);
-
-        text = doc->createTextNode((*it)->text(KColumnID));
-        tag.appendChild(text);
-
-        ++it;
-    }
+    /* Chaser */
+    tag = doc->createElement(KXMLQLCVCCueListChaser);
+    root.appendChild(tag);
+    text = doc->createTextNode(QString::number(chaser()));
+    tag.appendChild(text);
 
     /* Next cue */
     tag = doc->createElement(KXMLQLCVCCueListNext);

@@ -92,13 +92,17 @@ protected:
      * Cue list
      *************************************************************************/
 public:
-    /** Clear cue list contents */
-    void clear();
+    /** Set the chaser function that is used as cue list steps */
+    void setChaser(quint32 fid);
 
-    /** Append a function to the cue list */
-    void append(quint32 fid);
+    /** Get the chaser function that is used as cue list steps */
+    quint32 chaser() const;
 
-protected slots:
+private:
+    /** Update the list of steps */
+    void updateStepList();
+
+private slots:
     /** Removes destroyed functions from the list */
     void slotFunctionRemoved(quint32 fid);
 
@@ -121,12 +125,13 @@ protected slots:
         pressing the key binding or clicking an item with mouse) */
     void slotItemActivated(QTreeWidgetItem* item);
 
-protected:
+private:
     /** Create the runner that writes cue values to universes */
     void createRunner(int startIndex = -1);
 
-protected:
-    QTreeWidget* m_list;
+private:
+    quint32 m_chaser;
+    QTreeWidget* m_tree;
     QPushButton* m_stopButton;
 
     ChaserRunner* m_runner;
@@ -168,7 +173,7 @@ public:
 protected slots:
     void slotKeyPressed(const QKeySequence& keySequence);
 
-protected:
+private:
     QKeySequence m_nextKeySequence;
     QKeySequence m_previousKeySequence;
     QKeySequence m_stopKeySequence;
@@ -201,7 +206,10 @@ public:
      * Load & Save
      *************************************************************************/
 public:
+    /** @reimp */
     bool loadXML(const QDomElement* root);
+
+    /** @reimp */
     bool saveXML(QDomDocument* doc, QDomElement* vc_root);
 };
 

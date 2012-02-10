@@ -23,9 +23,27 @@
 #define SPEEDDIAL_H
 
 #include <QGroupBox>
+#include <QSpinBox>
 
-class SpeedSpinBox;
+class QToolButton;
+class QFocusEvent;
+class QCheckBox;
+class QTimer;
 class QDial;
+
+class FocusSpinBox : public QSpinBox
+{
+    Q_OBJECT
+
+public:
+    FocusSpinBox(QWidget* parent = 0);
+
+signals:
+    void focusGained();
+
+protected:
+    void focusInEvent(QFocusEvent* event);
+};
 
 class SpeedDial : public QGroupBox
 {
@@ -46,21 +64,38 @@ signals:
      * Private
      *************************************************************************/
 private:
+    void setSpinValues(int ms);
+    int spinValues() const;
+
     /** Calculate the value to add/subtract when a dial has been moved */
-    int dialDiff(int value, int previous);
+    int dialDiff(int value, int previous, int step);
 
 private slots:
-    /** Catch dial value changes */
+    void slotPlusMinus();
+    void slotPlusMinusTimeout();
     void slotDialChanged(int value);
-
-    /** Catch spin value changes */
-    void slotSpinChanged(int value);
+    void slotHoursChanged();
+    void slotMinutesChanged();
+    void slotSecondsChanged();
+    void slotMSChanged();
+    void slotInfiniteChecked(bool state);
+    void slotSpinFocusGained();
 
 private:
+    QTimer* m_timer;
     QDial* m_dial;
-    SpeedSpinBox* m_spin;
+    QToolButton* m_plus;
+    QToolButton* m_minus;
+    FocusSpinBox* m_hrs;
+    FocusSpinBox* m_min;
+    FocusSpinBox* m_sec;
+    FocusSpinBox* m_ms;
+    QCheckBox* m_infiniteCheck;
+    FocusSpinBox* m_focus;
+
     int m_previousDialValue;
     bool m_preventSignals;
+    int m_value;
 };
 
 #endif

@@ -101,12 +101,3 @@ QStyle* AppUtil::saneStyle()
 
     return s_saneStyle;
 }
-
-/*****************************************************************************
- * Conversion
- *****************************************************************************/
-
-QString AppUtil::speedText(uint ms)
-{
-    return QLocale::system().toString(qreal(ms) / qreal(1000), 'f', 2);
-}

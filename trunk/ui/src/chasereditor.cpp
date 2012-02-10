@@ -103,7 +103,7 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     m_fadeOutSpin->setEnabled(m_chaser->isGlobalFadeOut());
 
     new QHBoxLayout(m_durationContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
+    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Infinite, m_durationContainer);
     m_durationContainer->layout()->addWidget(m_durationSpin);
     m_durationContainer->layout()->setMargin(0);
     m_durationSpin->setValue(m_chaser->duration());
@@ -589,17 +589,17 @@ void ChaserEditor::updateItem(QTreeWidgetItem* item, const ChaserStep& step)
     item->setText(COL_NAME, function->name());
 
     if (m_fadeInCheck->isChecked() == false)
-        item->setText(COL_FADEIN, AppUtil::speedText(step.fadeIn));
+        item->setText(COL_FADEIN, SpeedSpinBox::speedText(step.fadeIn));
     else
         item->setText(COL_FADEIN, QString());
 
     if (m_fadeOutCheck->isChecked() == false)
-        item->setText(COL_FADEOUT, AppUtil::speedText(step.fadeOut));
+        item->setText(COL_FADEOUT, SpeedSpinBox::speedText(step.fadeOut));
     else
         item->setText(COL_FADEOUT, QString());
 
     if (m_durationCheck->isChecked() == false)
-        item->setText(COL_DURATION, AppUtil::speedText(step.duration));
+        item->setText(COL_DURATION, SpeedSpinBox::speedText(step.duration));
     else
         item->setText(COL_DURATION, QString());
 }

@@ -25,16 +25,22 @@
 #include <QDoubleSpinBox>
 #include <QValidator>
 
+#define SPEEDSPINBOX_SINGLESTEP int(MasterTimer::tick())
+#define SPEEDSPINBOX_INFINITE_VALUE (0 - SPEEDSPINBOX_SINGLESTEP)
+
 class SpeedSpinBox : public QSpinBox
 {
     Q_OBJECT
 public:
-    enum LowLimit { Infinite, Default, Zero };
+    enum LowLimit { Infinite, Zero };
 
     SpeedSpinBox(LowLimit l, QWidget* parent = 0);
     ~SpeedSpinBox();
 
     QValidator::State validate(QString& input, int& pos) const;
+
+    /** Convert $ms milliseconds to QString(seconds.milliseconds) */
+    static QString speedText(uint ms);
 
 protected:
     QString textFromValue(int value) const;

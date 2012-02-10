@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>488</width>
-    <height>491</height>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,53 +36,35 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="Cues">
+     <widget class="QWidget" name="CueList">
       <attribute name="title">
-       <string>Cues</string>
+       <string>Cue List</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0" rowspan="10">
-        <widget class="QTreeWidget" name="m_list">
-         <property name="toolTip">
-          <string>List of scenes that can be activated with this cue list</string>
+       <item row="0" column="0">
+        <widget class="QLabel" name="m_chaserLabel">
+         <property name="text">
+          <string>Chaser</string>
          </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="rootIsDecorated">
-          <bool>false</bool>
-         </property>
-         <property name="itemsExpandable">
-          <bool>false</bool>
-         </property>
-         <property name="allColumnsShowFocus">
-          <bool>true</bool>
-         </property>
-         <property name="expandsOnDoubleClick">
-          <bool>false</bool>
-         </property>
-         <column>
-          <property name="text">
-           <string>Number</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Scene</string>
-          </property>
-         </column>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QToolButton" name="m_addButton">
+        <widget class="QLineEdit" name="m_chaserEdit">
          <property name="toolTip">
-          <string>Add scene(s) to the cue list</string>
+          <string>The chaser function to use as cue list</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QToolButton" name="m_chaserAttachButton">
+         <property name="toolTip">
+          <string>Choose the chaser function to use as the steps for the cue list</string>
          </property>
          <property name="text">
-          <string notr="true">...</string>
+          <string>...</string>
          </property>
          <property name="icon">
           <iconset resource="qlcui.qrc">
@@ -96,13 +78,13 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QToolButton" name="m_removeButton">
+       <item row="0" column="3">
+        <widget class="QToolButton" name="m_chaserDetachButton">
          <property name="toolTip">
-          <string>Remove selected scene(s) from the cue list</string>
+          <string>Detach current chaser from the cue list</string>
          </property>
          <property name="text">
-          <string notr="true">...</string>
+          <string>...</string>
          </property>
          <property name="icon">
           <iconset resource="qlcui.qrc">
@@ -116,132 +98,18 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QToolButton" name="m_raiseButton">
-         <property name="toolTip">
-          <string>Raise the selected scene</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/up.png</normaloff>:/up.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QToolButton" name="m_lowerButton">
-         <property name="toolTip">
-          <string>Lower the selected scene</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/down.png</normaloff>:/down.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="1">
+       <item row="1" column="0" colspan="4">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>49</height>
+           <width>428</width>
+           <height>169</height>
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="5" column="1">
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QToolButton" name="m_cutButton">
-         <property name="toolTip">
-          <string>Cut the selected scenes from their current positions</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/editcut.png</normaloff>:/editcut.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
-        <widget class="QToolButton" name="m_copyButton">
-         <property name="toolTip">
-          <string>Copy the selected scenes</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/editcopy.png</normaloff>:/editcopy.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
-        <widget class="QToolButton" name="m_pasteButton">
-         <property name="toolTip">
-          <string>Paste scenes from the clipboard to the currently selected position</string>
-         </property>
-         <property name="text">
-          <string notr="true">...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qlcui.qrc">
-           <normaloff>:/editpaste.png</normaloff>:/editpaste.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="Line" name="line_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>

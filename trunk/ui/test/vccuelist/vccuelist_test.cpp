@@ -39,10 +39,12 @@
 #include "qlcfixturedefcache.h"
 #include "qlcinputsource.h"
 #include "vccuelist_test.h"
+#include "chaserstep.h"
 #include "outputmap.h"
 #include "inputmap.h"
 #include "chaser.h"
 #include "scene.h"
+#include "efx.h"
 #include "doc.h"
 #undef private
 #undef protected
@@ -51,6 +53,42 @@ static const QKeySequence keySequenceA(Qt::Key_A);
 static const QKeySequence keySequenceB(Qt::Key_B);
 static const QKeySequence keySequenceC(Qt::Key_C);
 static const QKeySequence keySequenceD(Qt::Key_D);
+
+static Chaser* createChaser(Doc* doc)
+{
+    Fixture* fxi = new Fixture(doc);
+    fxi->setChannels(1);
+    doc->addFixture(fxi);
+
+    Scene* s1 = new Scene(doc);
+    s1->setName("First");
+    s1->setValue(fxi->id(), 0, 255);
+    doc->addFunction(s1);
+
+    Scene* s2 = new Scene(doc);
+    s2->setName("Second");
+    s2->setValue(fxi->id(), 0, 127);
+    doc->addFunction(s2);
+
+    Scene* s3 = new Scene(doc);
+    s3->setName("Third");
+    s3->setValue(fxi->id(), 0, 64);
+    doc->addFunction(s3);
+
+    Scene* s4 = new Scene(doc);
+    s4->setName("Fourth");
+    s4->setValue(fxi->id(), 0, 32);
+    doc->addFunction(s4);
+
+    Chaser* c = new Chaser(doc);
+    c->addStep(ChaserStep(s1->id()));
+    c->addStep(ChaserStep(s2->id()));
+    c->addStep(ChaserStep(s3->id()));
+    c->addStep(ChaserStep(s4->id()));
+    doc->addFunction(c);
+
+    return c;
+}
 
 void VCCueList_Test::initTestCase()
 {
@@ -82,11 +120,12 @@ void VCCueList_Test::initial()
     QCOMPARE(cl.caption(), tr("Cue list"));
     QCOMPARE(cl.size(), QSize(200, 200));
     QVERIFY(cl.m_runner == NULL);
-    QVERIFY(cl.m_list != NULL);
-    QCOMPARE(cl.m_list->isEnabled(), false);
-    QCOMPARE(cl.m_list->topLevelItemCount(), 0);
-    QCOMPARE(cl.m_list->selectionMode(), QAbstractItemView::SingleSelection);
-    QCOMPARE(cl.m_list->rootIsDecorated(), false);
+    QVERIFY(cl.m_tree != NULL);
+    QCOMPARE(cl.m_tree->isEnabled(), false);
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 0);
+    QCOMPARE(cl.m_tree->selectionMode(), QAbstractItemView::SingleSelection);
+    QCOMPARE(cl.m_tree->rootIsDecorated(), false);
+    QCOMPARE(cl.chaser(), Function::invalidId());
 
     QCOMPARE(cl.m_nextLatestValue, quint32(0));
     QCOMPARE(cl.m_previousLatestValue, quint32(0));
@@ -101,147 +140,56 @@ void VCCueList_Test::initial()
     QVERIFY(cl.inputSource(VCCueList::stopInputSourceId).isValid() == false);
 }
 
-void VCCueList_Test::appendClear()
+void VCCueList_Test::chaser()
 {
     QWidget w;
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
     VCCueList cl(&w, m_doc);
+    Chaser* c = createChaser(m_doc);
 
-    cl.append(INT_MAX - 1);
-    QCOMPARE(cl.m_list->topLevelItemCount(), 0);
+    // Try to put a non-chaser as the chaser
+    cl.setChaser(c->steps().first().fid);
+    QCOMPARE(cl.chaser(), Function::invalidId());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 0);
 
-    cl.append(s1->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 1);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(1));
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2), QString::number(s1->id()));
-
-    cl.append(s2->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 2);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(1));
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2), QString::number(s1->id()));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0), QString::number(2));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
-
-    // Same step can exist multiple times
-    cl.append(s2->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 3);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(1));
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2), QString::number(s1->id()));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0), QString::number(2));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(0), QString::number(3));
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(2), QString::number(s2->id()));
-
-    cl.clear();
-    QCOMPARE(cl.m_list->topLevelItemCount(), 0);
-    QVERIFY(m_doc->function(s1->id()) == s1); // Function must not be deleted
-    QVERIFY(m_doc->function(s2->id()) == s2); // Function must not be deleted
+    // Put a real chaser as the chaser
+    cl.setChaser(c->id());
+    QCOMPARE(cl.chaser(), c->id());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 4);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(0), QString("1"));
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(0), QString("2"));
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(0), QString("3"));
+    QCOMPARE(cl.m_tree->topLevelItem(3)->text(0), QString("4"));
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(1), QString("First"));
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(1), QString("Second"));
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(1), QString("Third"));
+    QCOMPARE(cl.m_tree->topLevelItem(3)->text(1), QString("Fourth"));
 }
 
 void VCCueList_Test::functionRemoved()
 {
     QWidget w;
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
     VCCueList cl(&w, m_doc);
+    Chaser* c = createChaser(m_doc);
+    cl.setChaser(c->id());
 
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s1->id());
-    cl.append(s2->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 4);
+    // Chaser members are removed from list
+    m_doc->deleteFunction(c->steps().first().fid);
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 3);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(0), QString("1"));
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(0), QString("2"));
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(0), QString("3"));
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(1), QString("Second"));
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(1), QString("Third"));
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(1), QString("Fourth"));
 
-    m_doc->deleteFunction(s1->id());
-    s1 = NULL;
-    QCOMPARE(cl.m_list->topLevelItemCount(), 2);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(2));
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2), QString::number(s2->id()));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0), QString::number(4));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
-
-    m_doc->deleteFunction(s3->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 2);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0), QString::number(2));
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2), QString::number(s2->id()));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0), QString::number(4));
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2), QString::number(s2->id()));
-
-    m_doc->deleteFunction(s2->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 0);
+    // Chaser is removed completely
+    m_doc->deleteFunction(c->id());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 0);
+    QCOMPARE(cl.chaser(), Function::invalidId());
 }
 
 void VCCueList_Test::functionChanged()
 {
-    QWidget w;
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
-    VCCueList cl(&w, m_doc);
-
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s1->id());
-    cl.append(s2->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 4);
-
-    QSignalSpy spy(s1, SIGNAL(changed(quint32)));
-    s1->setName("There can only be one");
-    QCOMPARE(spy.size(), 1);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), s2->name());
-
-    s2->setName("Says who?");
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), s2->name());
-
-    s3->setName("Pssht. Third's the charm.");
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), s2->name());
 }
 
 void VCCueList_Test::keySequences()
@@ -267,35 +215,18 @@ void VCCueList_Test::keySequences()
 
 void VCCueList_Test::copy()
 {
-    QWidget w;
-
     // Input sources are tested by VCWidget tests. No point testing here.
 
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
+    QWidget w;
     VCFrame parent(&w, m_doc);
-
     VCCueList cl(&parent, m_doc);
+    Chaser* c = createChaser(m_doc);
+
+    cl.setChaser(c->id());
     cl.setCaption("Wheeee");
     cl.setNextKeySequence(QKeySequence(keySequenceB));
     cl.setPreviousKeySequence(QKeySequence(keySequenceA));
     cl.setStopKeySequence(QKeySequence(keySequenceC));
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 5);
 
     VCCueList* cl2 = qobject_cast<VCCueList*> (cl.createCopy(&parent));
     QVERIFY(cl2 != NULL);
@@ -303,21 +234,18 @@ void VCCueList_Test::copy()
     QCOMPARE(cl2->nextKeySequence(), QKeySequence(keySequenceB));
     QCOMPARE(cl2->previousKeySequence(), QKeySequence(keySequenceA));
     QCOMPARE(cl2->stopKeySequence(), QKeySequence(keySequenceC));
-    QCOMPARE(cl2->m_list->topLevelItemCount(), 5);
-    QCOMPARE(cl2->m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl2->m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl2->m_list->topLevelItem(2)->text(1), s1->name());
-    QCOMPARE(cl2->m_list->topLevelItem(3)->text(1), s2->name());
-    QCOMPARE(cl2->m_list->topLevelItem(4)->text(1), s3->name());
+    QCOMPARE(cl2->chaser(), c->id());
+    QCOMPARE(cl2->m_tree->topLevelItemCount(), 4);
 
     VCCueList cl3(&parent, m_doc);
     cl3.copyFrom(NULL);
-    QCOMPARE(cl3.m_list->topLevelItemCount(), 0);
+    QCOMPARE(cl3.m_tree->topLevelItemCount(), 0);
     QCOMPARE(cl3.caption(), tr("Cue list"));
 
     cl.copyFrom(&cl3);
     QCOMPARE(cl.caption(), cl3.caption());
-    QCOMPARE(cl.m_list->topLevelItemCount(), 0);
+    QCOMPARE(cl.chaser(), Function::invalidId());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 0);
     QCOMPARE(cl.nextKeySequence(), QKeySequence());
     QCOMPARE(cl.previousKeySequence(), QKeySequence());
     QCOMPARE(cl.stopKeySequence(), QKeySequence());
@@ -328,37 +256,23 @@ void VCCueList_Test::copy()
 void VCCueList_Test::modeChange()
 {
     QWidget w;
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
     VCFrame parent(&w, m_doc);
     VCCueList cl(&parent, m_doc);
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
+    Chaser* c = createChaser(m_doc);
+    cl.setChaser(c->id());
 
     m_doc->setMode(Doc::Operate);
     QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 1);
     QCOMPARE(m_doc->masterTimer()->m_dmxSourceList[0], &cl);
     QVERIFY(cl.m_runner == NULL);
-    QVERIFY(cl.m_list->isEnabled() == true);
+    QVERIFY(cl.m_tree->isEnabled() == true);
 
     cl.createRunner();
 
     m_doc->setMode(Doc::Design);
     QCOMPARE(m_doc->masterTimer()->m_dmxSourceList.size(), 0);
     QVERIFY(cl.m_runner == NULL);
-    QVERIFY(cl.m_list->isEnabled() == false);
+    QVERIFY(cl.m_tree->isEnabled() == false);
 }
 
 void VCCueList_Test::loadXML()
@@ -479,19 +393,15 @@ void VCCueList_Test::loadXML()
 
     VCCueList cl(&w, m_doc);
     QVERIFY(cl.loadXML(&root) == true);
-    QCOMPARE(cl.m_list->topLevelItemCount(), 4);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0).toInt(), 1);
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0).toInt(), 2);
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(0).toInt(), 3);
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(0).toInt(), 4);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s3->name());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), c4->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2).toUInt(), s1->id());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2).toUInt(), s2->id());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(2).toUInt(), s3->id());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(2).toUInt(), c4->id());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 4);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(0).toInt(), 1);
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(0).toInt(), 2);
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(0).toInt(), 3);
+    QCOMPARE(cl.m_tree->topLevelItem(3)->text(0).toInt(), 4);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(1), s1->name());
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(1), s2->name());
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(1), s3->name());
+    QCOMPARE(cl.m_tree->topLevelItem(3)->text(1), c4->name());
     QCOMPARE(cl.inputSource(VCCueList::nextInputSourceId), QLCInputSource(0, 1));
     QCOMPARE(cl.nextKeySequence(), QKeySequence(keySequenceD));
     QCOMPARE(cl.inputSource(VCCueList::previousInputSourceId), QLCInputSource(2, 3));
@@ -504,18 +414,14 @@ void VCCueList_Test::loadXML()
     QCOMPARE(cl.font(), f);
 
     cl.postLoad();
-    QCOMPARE(cl.m_list->topLevelItemCount(), 4);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(0).toInt(), 1);
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(0).toInt(), 2);
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(0).toInt(), 3);
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(1), s1->name());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(1), s2->name());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(1), s3->name());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(1), c4->name());
-    QCOMPARE(cl.m_list->topLevelItem(0)->text(2).toUInt(), s1->id());
-    QCOMPARE(cl.m_list->topLevelItem(1)->text(2).toUInt(), s2->id());
-    QCOMPARE(cl.m_list->topLevelItem(2)->text(2).toUInt(), s3->id());
-    QCOMPARE(cl.m_list->topLevelItem(3)->text(2).toUInt(), c4->id());
+    QCOMPARE(cl.m_tree->topLevelItemCount(), 4);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(0).toInt(), 1);
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(0).toInt(), 2);
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(0).toInt(), 3);
+    QCOMPARE(cl.m_tree->topLevelItem(0)->text(1), s1->name());
+    QCOMPARE(cl.m_tree->topLevelItem(1)->text(1), s2->name());
+    QCOMPARE(cl.m_tree->topLevelItem(2)->text(1), s3->name());
+    QCOMPARE(cl.m_tree->topLevelItem(3)->text(1), c4->name());
 
     root.setTagName("CueLits");
     QVERIFY(cl.loadXML(&root) == false);
@@ -524,23 +430,10 @@ void VCCueList_Test::loadXML()
 void VCCueList_Test::saveXML()
 {
     QWidget w;
-
     VCCueList cl(&w, m_doc);
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
+    Chaser* c = createChaser(m_doc);
+    cl.setChaser(c->id());
 
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
     cl.setCaption("Testing");
     cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
     cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
@@ -553,7 +446,7 @@ void VCCueList_Test::saveXML()
     QDomElement root = xmldoc.createElement("TestRoot");
     xmldoc.appendChild(root);
 
-    int function = 0, next = 0, nextKey = 0, nextInput = 0, previous = 0, previousKey = 0,
+    int chaser = 0, next = 0, nextKey = 0, nextInput = 0, previous = 0, previousKey = 0,
         previousInput = 0, stop = 0, stopKey = 0, stopInput = 0, wstate = 0, appearance = 0;
 
     QVERIFY(cl.saveXML(&xmldoc, &root) == true);
@@ -565,12 +458,14 @@ void VCCueList_Test::saveXML()
     while (node.isNull() == false)
     {
         QDomElement tag = node.toElement();
-        if (tag.tagName() == "Function")
+        if (tag.tagName() == "Chaser")
         {
-            function++;
-            QVERIFY(tag.text() == QString::number(s1->id()) ||
-                    tag.text() == QString::number(s2->id()) ||
-                    tag.text() == QString::number(s3->id()));
+            QCOMPARE(tag.text().toUInt(), c->id());
+            chaser++;
+        }
+        else if (tag.tagName() == "Function")
+        {
+            QFAIL("Function node should not be written anymore!");
         }
         else if (tag.tagName() == "Next")
         {
@@ -665,7 +560,7 @@ void VCCueList_Test::saveXML()
         node = node.nextSibling();
     }
 
-    QCOMPARE(function, 3);
+    QCOMPARE(chaser, 1);
     QCOMPARE(next, 1);
     QCOMPARE(nextKey, 1);
     QCOMPARE(nextInput, 1);
@@ -683,40 +578,22 @@ void VCCueList_Test::nextPrevious()
 {
     QWidget w;
 
-    Fixture* fxi = new Fixture(m_doc);
-    fxi->setChannels(1);
-    m_doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    s1->setValue(fxi->id(), 0, 255);
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    s2->setValue(fxi->id(), 0, 127);
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    s3->setValue(fxi->id(), 0, 64);
-    m_doc->addFunction(s3);
-
-    Scene* s4 = new Scene(m_doc);
-    s4->setName("The fourth one");
-    s4->setValue(fxi->id(), 0, 32);
-    m_doc->addFunction(s4);
-
     VCCueList cl(&w, m_doc);
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
-    cl.append(s4->id());
+    Chaser* c = createChaser(m_doc);
+    c->setGlobalDuration(true);
+    c->setDuration(Function::infiniteSpeed());
+    cl.setChaser(c->id());
+    QCOMPARE(c->steps().size(), 4);
+    Scene* s1 = qobject_cast<Scene*> (m_doc->function(c->steps()[0].fid));
+    Scene* s2 = qobject_cast<Scene*> (m_doc->function(c->steps()[1].fid));
+    Scene* s3 = qobject_cast<Scene*> (m_doc->function(c->steps()[2].fid));
+    Scene* s4 = qobject_cast<Scene*> (m_doc->function(c->steps()[3].fid));
+    Q_ASSERT(s1 && s2 && s3 && s4);
 
     // Not in operate mode, check for crashes
     cl.slotNextCue();
     cl.slotPreviousCue();
-    cl.slotItemActivated(cl.m_list->topLevelItem(2));
+    cl.slotItemActivated(cl.m_tree->topLevelItem(2));
     QVERIFY(cl.m_runner == NULL);
 
     // Switch mode
@@ -814,43 +691,23 @@ void VCCueList_Test::nextPrevious()
 void VCCueList_Test::manualActivation()
 {
     QWidget w;
-
-    Fixture* fxi = new Fixture(m_doc);
-    fxi->setChannels(1);
-    m_doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    s1->setValue(fxi->id(), 0, 255);
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    s2->setValue(fxi->id(), 0, 127);
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    s3->setValue(fxi->id(), 0, 64);
-    m_doc->addFunction(s3);
-
-    Scene* s4 = new Scene(m_doc);
-    s4->setName("The fourth one");
-    s4->setValue(fxi->id(), 0, 32);
-    m_doc->addFunction(s4);
-
     VCCueList cl(&w, m_doc);
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
-    cl.append(s4->id());
+    Chaser* c = createChaser(m_doc);
+    c->setGlobalDuration(true);
+    c->setDuration(Function::infiniteSpeed());
+    cl.setChaser(c->id());
+    Scene* s1 = qobject_cast<Scene*> (m_doc->function(c->steps()[0].fid));
+    Scene* s2 = qobject_cast<Scene*> (m_doc->function(c->steps()[1].fid));
+    Scene* s3 = qobject_cast<Scene*> (m_doc->function(c->steps()[2].fid));
+    Scene* s4 = qobject_cast<Scene*> (m_doc->function(c->steps()[3].fid));
+    Q_ASSERT(s1 && s2 && s3 && s4);
 
     // Switch mode
     m_doc->setMode(Doc::Operate);
     MasterTimer* timer = m_doc->masterTimer();
 
     QVERIFY(cl.m_runner == NULL);
-    cl.slotItemActivated(cl.m_list->topLevelItem(2));
+    cl.slotItemActivated(cl.m_tree->topLevelItem(2));
     QVERIFY(cl.m_runner != NULL);
     timer->timerTick();
     QCOMPARE(timer->runningFunctions(), 1);
@@ -863,7 +720,7 @@ void VCCueList_Test::manualActivation()
     QCOMPARE(timer->m_functionList[0], s3);
 
     // Same item
-    cl.slotItemActivated(cl.m_list->topLevelItem(2));
+    cl.slotItemActivated(cl.m_tree->topLevelItem(2));
     timer->timerTick();
     QCOMPARE(timer->runningFunctions(), 1);
     QCOMPARE(timer->m_functionList[0], s3);
@@ -875,7 +732,7 @@ void VCCueList_Test::manualActivation()
     QCOMPARE(timer->m_functionList[0], s3);
 
     // Another item
-    cl.slotItemActivated(cl.m_list->topLevelItem(0));
+    cl.slotItemActivated(cl.m_tree->topLevelItem(0));
     timer->timerTick();
     QCOMPARE(timer->runningFunctions(), 2); // DMX sources are run after functions, so
     QCOMPARE(timer->m_functionList[0], s3); // the function will be removed in the next
@@ -904,36 +761,12 @@ void VCCueList_Test::manualActivation()
 void VCCueList_Test::keyboardNextPrevious()
 {
     QWidget w;
-
-    Fixture* fxi = new Fixture(m_doc);
-    fxi->setChannels(1);
-    m_doc->addFixture(fxi);
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    s1->setValue(fxi->id(), 0, 255);
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    s2->setValue(fxi->id(), 0, 127);
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    s3->setValue(fxi->id(), 0, 64);
-    m_doc->addFunction(s3);
-
-    Scene* s4 = new Scene(m_doc);
-    s4->setName("The fourth one");
-    s4->setValue(fxi->id(), 0, 32);
-    m_doc->addFunction(s4);
-
     VCCueList cl(&w, m_doc);
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
-    cl.append(s4->id());
+    Chaser* c = createChaser(m_doc);
+    c->setGlobalDuration(true);
+    c->setDuration(Function::infiniteSpeed());
+    cl.setChaser(c->id());
+
     cl.setNextKeySequence(QKeySequence(keySequenceB));
     cl.setPreviousKeySequence(QKeySequence(keySequenceA));
     cl.setStopKeySequence(QKeySequence(keySequenceD));
@@ -946,70 +779,54 @@ void VCCueList_Test::keyboardNextPrevious()
     cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 0);
 
     // Next keyboard key
     cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 1);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 1);
 
     // Unrecognized keyboard key
     cl.slotKeyPressed(QKeySequence(QKeySequence::SelectAll));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 1);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 1);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 1);
 
     // Previous keyboard key
     cl.slotKeyPressed(QKeySequence(keySequenceA));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 0);
 
     // Previous keyboard key
     cl.slotKeyPressed(QKeySequence(keySequenceA));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 3);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 3);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 3);
 
     // Next keyboard key
     cl.slotKeyPressed(QKeySequence(keySequenceB));
     timer->timerTick();
     QCOMPARE(cl.m_runner->currentStep(), 0);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), 0);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), 0);
 
     // Stop
     cl.slotKeyPressed(QKeySequence(keySequenceD));
     timer->timerTick();
     QVERIFY(cl.m_runner == NULL);
-    QCOMPARE(cl.m_list->indexOfTopLevelItem(cl.m_list->currentItem()), -1);
+    QCOMPARE(cl.m_tree->indexOfTopLevelItem(cl.m_tree->currentItem()), -1);
 }
 
 void VCCueList_Test::input()
 {
     QWidget w;
-
-    Scene* s1 = new Scene(m_doc);
-    s1->setName("The first");
-    m_doc->addFunction(s1);
-
-    Scene* s2 = new Scene(m_doc);
-    s2->setName("Another one");
-    m_doc->addFunction(s2);
-
-    Scene* s3 = new Scene(m_doc);
-    s3->setName("The third one");
-    m_doc->addFunction(s3);
-
-    Scene* s4 = new Scene(m_doc);
-    s4->setName("The fourth one");
-    m_doc->addFunction(s4);
-
     VCCueList cl(&w, m_doc);
-    cl.append(s1->id());
-    cl.append(s2->id());
-    cl.append(s3->id());
-    cl.append(s4->id());
+    Chaser* c = createChaser(m_doc);
+    c->setGlobalDuration(true);
+    c->setDuration(Function::infiniteSpeed());
+    cl.setChaser(c->id());
+
     cl.setInputSource(QLCInputSource(0, 1), VCCueList::nextInputSourceId);
     cl.setInputSource(QLCInputSource(2, 3), VCCueList::previousInputSourceId);
     cl.setInputSource(QLCInputSource(4, 5), VCCueList::stopInputSourceId);

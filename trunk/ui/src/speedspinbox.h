@@ -24,9 +24,10 @@
 
 #include <QDoubleSpinBox>
 #include <QValidator>
+#include "function.h"
 
 #define SPEEDSPINBOX_SINGLESTEP int(MasterTimer::tick())
-#define SPEEDSPINBOX_INFINITE_VALUE (0 - SPEEDSPINBOX_SINGLESTEP)
+#define SPEEDSPINBOX_INFINITE_VALUE Function::infiniteSpeed()
 
 class SpeedSpinBox : public QSpinBox
 {

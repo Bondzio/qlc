@@ -383,7 +383,7 @@ void SpeedDial::slotInfiniteChecked(bool state)
     {
         m_value = 0;
         if (m_preventSignals == false)
-            emit valueChanged(Function::infiniteSpeed());
+            emit valueChanged(0);
     }
 }
 

@@ -45,14 +45,17 @@ public:
      * Speed settings
      ************************************************************************/
 public:
+    void setFadeInTitle(const QString& title);
     void setFadeInEnabled(bool set);
     void setFadeInSpeed(int ms);
     int fadeIn() const;
 
+    void setFadeOutTitle(const QString& title);
     void setFadeOutEnabled(bool set);
     void setFadeOutSpeed(int ms);
     int fadeOut() const;
 
+    void setDurationTitle(const QString& title);
     void setDurationEnabled(bool set);
     void setDuration(int ms);
     int duration() const;

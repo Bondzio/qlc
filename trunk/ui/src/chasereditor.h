@@ -111,6 +111,7 @@ private slots:
     void slotDurationChecked(bool state);
 
 private:
+    void createSpeedDials();
     void updateSpeedDials();
 
 private:

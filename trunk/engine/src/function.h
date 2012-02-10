@@ -320,6 +320,9 @@ public:
     static uint defaultSpeed();
     static uint infiniteSpeed();
 
+    /** Pretty-print the given speed into a QString */
+    static QString speedToString(uint ms);
+
 protected:
     /** Load the contents of a speed node */
     bool loadXMLSpeed(const QDomElement& speedRoot);

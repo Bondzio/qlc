@@ -85,4 +85,8 @@
 #define SCALE(x, src_min, src_max, dest_min, dest_max) \
     ((x - src_min) * (dest_max / (src_max - src_min)))
 
+#define MS_PER_SECOND (1000)                //! Milliseconds in a second
+#define MS_PER_MINUTE (60 * MS_PER_SECOND)  //! Milliseconds in a minute
+#define MS_PER_HOUR   (60 * MS_PER_MINUTE)  //! Milliseconds in an hour
+
 #endif

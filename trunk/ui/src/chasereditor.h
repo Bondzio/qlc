@@ -33,7 +33,6 @@ class InputMap;
 class OutputMap;
 class ChaserStep;
 class MasterTimer;
-class SpeedSpinBox;
 class SpeedDialWidget;
 class QTreeWidgetItem;
 
@@ -98,10 +97,6 @@ private slots:
      * Speed
      ************************************************************************/
 private slots:
-    void slotFadeInSpinChanged(int ms);
-    void slotFadeOutSpinChanged(int ms);
-    void slotDurationSpinChanged(int ms);
-
     void slotFadeInDialChanged(int ms);
     void slotFadeOutDialChanged(int ms);
     void slotDurationDialChanged(int ms);
@@ -115,9 +110,6 @@ private:
     void updateSpeedDials();
 
 private:
-    SpeedSpinBox* m_fadeInSpin;
-    SpeedSpinBox* m_fadeOutSpin;
-    SpeedSpinBox* m_durationSpin;
     QPointer<SpeedDialWidget> m_speedDials;
 
     /************************************************************************

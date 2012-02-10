@@ -344,15 +344,6 @@
       <string>Global Speed</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="QWidget" name="m_fadeInContainer" native="true"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QWidget" name="m_fadeOutContainer" native="true"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QWidget" name="m_durationContainer" native="true"/>
-      </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="m_fadeInCheck">
         <property name="toolTip">
@@ -380,6 +371,27 @@
         </property>
         <property name="text">
          <string>Duration</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="m_fadeInEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="m_fadeOutEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="m_durationEdit">
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

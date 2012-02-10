@@ -33,10 +33,6 @@
 #include "qlcmacros.h"
 #include "function.h"
 
-#define MS_PER_SECOND (1000)
-#define MS_PER_MINUTE (60 * MS_PER_SECOND)
-#define MS_PER_HOUR   (60 * MS_PER_MINUTE)
-
 #define THRESHOLD 10
 #define HRS_MAX   (596 - 1) // INT_MAX can hold 596h 31m 23s 647ms
 #define MIN_MAX   59
@@ -118,6 +114,7 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_hrs->setSuffix("h");
     m_hrs->setButtonSymbols(QSpinBox::NoButtons);
     m_hrs->setFixedSize(QSize(40, 30));
+    m_hrs->setToolTip(tr("Hours"));
     hbox->addWidget(m_hrs);
     connect(m_hrs, SIGNAL(valueChanged(int)), this, SLOT(slotHoursChanged()));
     connect(m_hrs, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
@@ -127,6 +124,7 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_min->setSuffix("m");
     m_min->setButtonSymbols(QSpinBox::NoButtons);
     m_min->setFixedSize(QSize(40, 30));
+    m_min->setToolTip(tr("Minutes"));
     hbox->addWidget(m_min);
     connect(m_min, SIGNAL(valueChanged(int)), this, SLOT(slotMinutesChanged()));
     connect(m_min, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
@@ -136,6 +134,7 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_sec->setSuffix("s");
     m_sec->setButtonSymbols(QSpinBox::NoButtons);
     m_sec->setFixedSize(QSize(40, 30));
+    m_sec->setToolTip(tr("Seconds"));
     hbox->addWidget(m_sec);
     connect(m_sec, SIGNAL(valueChanged(int)), this, SLOT(slotSecondsChanged()));
     connect(m_sec, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
@@ -146,6 +145,7 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_ms->setPrefix(".");
     m_ms->setButtonSymbols(QSpinBox::NoButtons);
     m_ms->setFixedSize(QSize(40, 30));
+    m_ms->setToolTip(tr("Milliseconds"));
     hbox->addWidget(m_ms);
     connect(m_ms, SIGNAL(valueChanged(int)), this, SLOT(slotMSChanged()));
     connect(m_ms, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
@@ -173,7 +173,7 @@ void SpeedDial::setValue(int ms)
     m_value = ms;
     setSpinValues(ms);
 
-    if (ms == Function::infiniteSpeed())
+    if (ms == (int) Function::infiniteSpeed())
         m_infiniteCheck->setChecked(true);
     else
         m_infiniteCheck->setChecked(false);
@@ -192,7 +192,7 @@ int SpeedDial::value() const
 
 void SpeedDial::setSpinValues(int ms)
 {
-    if (ms == Function::infiniteSpeed())
+    if (ms == (int) Function::infiniteSpeed())
     {
         m_hrs->setValue(m_hrs->minimum());
         m_min->setValue(m_min->minimum());

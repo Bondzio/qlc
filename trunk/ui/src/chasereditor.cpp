@@ -33,7 +33,6 @@
 
 #include "functionselection.h"
 #include "speeddialwidget.h"
-#include "speedspinbox.h"
 #include "chasereditor.h"
 #include "mastertimer.h"
 #include "chaserstep.h"
@@ -86,35 +85,17 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     m_nameEdit->setSelection(0, m_nameEdit->text().length());
 
     /* Speed */
-    new QHBoxLayout(m_fadeInContainer);
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
-    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
-    m_fadeInContainer->layout()->setMargin(0);
-    m_fadeInSpin->setValue(m_chaser->fadeInSpeed());
-    m_fadeInSpin->setButtonSymbols(QSpinBox::NoButtons);
-    m_fadeInSpin->setReadOnly(true);
     m_fadeInCheck->setChecked(m_chaser->isGlobalFadeIn());
-    m_fadeInSpin->setEnabled(m_chaser->isGlobalFadeIn());
+    m_fadeInEdit->setText(Function::speedToString(m_chaser->fadeInSpeed()));
+    m_fadeInEdit->setEnabled(m_chaser->isGlobalFadeIn());
 
-    new QHBoxLayout(m_fadeOutContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
-    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
-    m_fadeOutContainer->layout()->setMargin(0);
-    m_fadeOutSpin->setValue(m_chaser->fadeOutSpeed());
-    m_fadeOutSpin->setButtonSymbols(QSpinBox::NoButtons);
-    m_fadeOutSpin->setReadOnly(true);
     m_fadeOutCheck->setChecked(m_chaser->isGlobalFadeOut());
-    m_fadeOutSpin->setEnabled(m_chaser->isGlobalFadeOut());
+    m_fadeOutEdit->setText(Function::speedToString(m_chaser->fadeOutSpeed()));
+    m_fadeOutEdit->setEnabled(m_chaser->isGlobalFadeOut());
 
-    new QHBoxLayout(m_durationContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Infinite, m_durationContainer);
-    m_durationContainer->layout()->addWidget(m_durationSpin);
-    m_durationContainer->layout()->setMargin(0);
-    m_durationSpin->setValue(m_chaser->duration());
-    m_durationSpin->setButtonSymbols(QSpinBox::NoButtons);
-    m_durationSpin->setReadOnly(true);
     m_durationCheck->setChecked(m_chaser->isGlobalDuration());
-    m_durationSpin->setEnabled(m_chaser->isGlobalDuration());
+    m_durationEdit->setText(Function::speedToString(m_chaser->duration()));
+    m_durationEdit->setEnabled(m_chaser->isGlobalDuration());
 
     /* Running order */
     switch (m_chaser->runOrder())
@@ -154,12 +135,6 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     connect(m_lower, SIGNAL(clicked()),
             this, SLOT(slotLowerClicked()));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeInSpinChanged(int)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeOutSpinChanged(int)));
-    connect(m_durationSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotDurationSpinChanged(int)));
     connect(m_fadeInCheck, SIGNAL(toggled(bool)),
             this, SLOT(slotFadeInChecked(bool)));
     connect(m_fadeOutCheck, SIGNAL(toggled(bool)),
@@ -431,24 +406,9 @@ void ChaserEditor::slotBackwardClicked()
  * Speed
  ****************************************************************************/
 
-void ChaserEditor::slotFadeInSpinChanged(int ms)
-{
-    m_chaser->setFadeInSpeed(ms);
-}
-
-void ChaserEditor::slotFadeOutSpinChanged(int ms)
-{
-    m_chaser->setFadeOutSpeed(ms);
-}
-
-void ChaserEditor::slotDurationSpinChanged(int ms)
-{
-    m_chaser->setDuration(ms);
-}
-
 void ChaserEditor::slotFadeInChecked(bool state)
 {
-    m_fadeInSpin->setEnabled(state);
+    m_fadeInEdit->setEnabled(state);
     m_chaser->setGlobalFadeIn(state);
     updateTree();
     updateSpeedDials();
@@ -456,7 +416,7 @@ void ChaserEditor::slotFadeInChecked(bool state)
 
 void ChaserEditor::slotFadeOutChecked(bool state)
 {
-    m_fadeOutSpin->setEnabled(state);
+    m_fadeOutEdit->setEnabled(state);
     m_chaser->setGlobalFadeOut(state);
     updateTree();
     updateSpeedDials();
@@ -464,7 +424,7 @@ void ChaserEditor::slotFadeOutChecked(bool state)
 
 void ChaserEditor::slotDurationChecked(bool state)
 {
-    m_durationSpin->setEnabled(state);
+    m_durationEdit->setEnabled(state);
     m_chaser->setGlobalDuration(state);
     updateTree();
     updateSpeedDials();
@@ -486,7 +446,7 @@ void ChaserEditor::slotFadeInDialChanged(int ms)
     else
     {
         m_chaser->setFadeInSpeed(ms);
-        m_fadeInSpin->setValue(ms);
+        m_fadeInEdit->setText(Function::speedToString(ms));
     }
 }
 
@@ -506,7 +466,7 @@ void ChaserEditor::slotFadeOutDialChanged(int ms)
     else
     {
         m_chaser->setFadeOutSpeed(ms);
-        m_fadeOutSpin->setValue(ms);
+        m_fadeOutEdit->setText(Function::speedToString(ms));
     }
 }
 
@@ -526,7 +486,7 @@ void ChaserEditor::slotDurationDialChanged(int ms)
     else
     {
         m_chaser->setDuration(ms);
-        m_durationSpin->setValue(ms);
+        m_durationEdit->setText(Function::speedToString(ms));
     }
 }
 
@@ -659,17 +619,17 @@ void ChaserEditor::updateItem(QTreeWidgetItem* item, const ChaserStep& step)
     item->setText(COL_NAME, function->name());
 
     if (m_fadeInCheck->isChecked() == false)
-        item->setText(COL_FADEIN, SpeedSpinBox::speedText(step.fadeIn));
+        item->setText(COL_FADEIN, Function::speedToString(step.fadeIn));
     else
         item->setText(COL_FADEIN, QString());
 
     if (m_fadeOutCheck->isChecked() == false)
-        item->setText(COL_FADEOUT, SpeedSpinBox::speedText(step.fadeOut));
+        item->setText(COL_FADEOUT, Function::speedToString(step.fadeOut));
     else
         item->setText(COL_FADEOUT, QString());
 
     if (m_durationCheck->isChecked() == false)
-        item->setText(COL_DURATION, SpeedSpinBox::speedText(step.duration));
+        item->setText(COL_DURATION, Function::speedToString(step.duration));
     else
         item->setText(COL_DURATION, QString());
 }

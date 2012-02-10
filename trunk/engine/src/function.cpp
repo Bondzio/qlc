@@ -391,6 +391,39 @@ uint Function::overrideDuration() const
     return m_overrideDuration;
 }
 
+QString Function::speedToString(uint ms)
+{
+    QString str;
+    if (ms == infiniteSpeed())
+    {
+        str = QChar(0x221E); // Infinity symbol
+    }
+    else
+    {
+        uint h, m, s;
+
+        h = ms / MS_PER_HOUR;
+        ms -= (h * MS_PER_HOUR);
+
+        m = ms / MS_PER_MINUTE;
+        ms -= (m * MS_PER_MINUTE);
+
+        s = ms / MS_PER_SECOND;
+        ms -= (s * MS_PER_SECOND);
+
+        if (h != 0)
+            str += QString("%1h").arg(h, 2, 10, QChar('0'));
+        if (m != 0)
+            str += QString("%1m").arg(m, 2, 10, QChar('0'));
+        if (s != 0)
+            str += QString("%1s").arg(s, 2, 10, QChar('0'));
+        if (ms != 0)
+            str += QString(".%1").arg(ms / 10, 2, 10, QChar('0'));
+    }
+
+    return str;
+}
+
 void Function::tap()
 {
     // Round the elapsed time to the nearest full MasterTimer::tick().

@@ -144,7 +144,6 @@ SpeedDial::SpeedDial(QWidget* parent)
 
     m_ms = new FocusSpinBox(this);
     m_ms->setRange(0, MS_MAX / MS_DIV);
-    m_ms->setSingleStep(MasterTimer::tick() / MS_DIV);
     m_ms->setPrefix(".");
     m_ms->setButtonSymbols(QSpinBox::NoButtons);
     m_ms->setFixedSize(QSize(40, 30));

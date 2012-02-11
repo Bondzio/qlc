@@ -20,12 +20,14 @@
 */
 
 #include <QFocusEvent>
+#include <QPushButton>
 #include <QToolButton>
 #include <QCheckBox>
 #include <QLayout>
 #include <QTimer>
 #include <QDebug>
 #include <QDial>
+#include <QTime>
 
 #include "speedspinbox.h"
 #include "mastertimer.h"
@@ -74,9 +76,11 @@ SpeedDial::SpeedDial(QWidget* parent)
     , m_previousDialValue(0)
     , m_preventSignals(false)
     , m_value(0)
+    , m_tapTime(new QTime(QTime::currentTime()))
 {
     QVBoxLayout* vbox = new QVBoxLayout(this);
     vbox->setContentsMargins(0, 0, 0, 0);
+    vbox->setSpacing(0);
 
     QHBoxLayout* hbox = new QHBoxLayout;
     hbox->setContentsMargins(0, 0, 0, 0);
@@ -152,10 +156,21 @@ SpeedDial::SpeedDial(QWidget* parent)
     connect(m_ms, SIGNAL(valueChanged(int)), this, SLOT(slotMSChanged()));
     connect(m_ms, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
 
+    hbox = new QHBoxLayout;
+    hbox->setContentsMargins(0, 0, 0, 0);
+    hbox->setSpacing(0);
+    vbox->addLayout(hbox);
+
     m_infiniteCheck = new QCheckBox(this);
     m_infiniteCheck->setText(tr("Infinite"));
-    vbox->addWidget(m_infiniteCheck);
+    hbox->addWidget(m_infiniteCheck);
     connect(m_infiniteCheck, SIGNAL(toggled(bool)), this, SLOT(slotInfiniteChecked(bool)));
+
+    m_tap = new QPushButton(tr("Tap"), this);
+    m_tap->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    hbox->addWidget(m_tap);
+    hbox->setAlignment(m_tap, Qt::AlignRight);
+    connect(m_tap, SIGNAL(clicked()), this, SLOT(slotTapClicked()));
 
     m_focus = m_ms;
     m_dial->setRange(m_focus->minimum(), m_focus->maximum());
@@ -163,10 +178,14 @@ SpeedDial::SpeedDial(QWidget* parent)
 
     m_timer->setInterval(TIMER_HOLD);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotPlusMinusTimeout()));
+
+    m_tapTime->start();
 }
 
 SpeedDial::~SpeedDial()
 {
+    delete m_tapTime;
+    m_tapTime = NULL;
 }
 
 void SpeedDial::setValue(int ms)
@@ -376,6 +395,7 @@ void SpeedDial::slotInfiniteChecked(bool state)
     m_min->setEnabled(!state);
     m_sec->setEnabled(!state);
     m_ms->setEnabled(!state);
+    m_tap->setEnabled(!state);
 
     if (state == true)
     {
@@ -397,4 +417,11 @@ void SpeedDial::slotSpinFocusGained()
     Q_ASSERT(m_focus != NULL);
     m_dial->setRange(m_focus->minimum(), m_focus->maximum());
     m_dial->setSingleStep(m_focus->singleStep());
+}
+
+void SpeedDial::slotTapClicked()
+{
+    m_value = m_tapTime->elapsed();
+    setSpinValues(m_value);
+    m_tapTime->restart();
 }

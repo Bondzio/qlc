@@ -25,11 +25,13 @@
 #include <QGroupBox>
 #include <QSpinBox>
 
+class QPushButton;
 class QToolButton;
 class QFocusEvent;
 class QCheckBox;
 class QTimer;
 class QDial;
+class QTime;
 
 /****************************************************************************
  * FocusSpinBox
@@ -92,6 +94,7 @@ private slots:
     void slotMSChanged();
     void slotInfiniteChecked(bool state);
     void slotSpinFocusGained();
+    void slotTapClicked();
 
 private:
     QTimer* m_timer;
@@ -103,11 +106,14 @@ private:
     FocusSpinBox* m_sec;
     FocusSpinBox* m_ms;
     QCheckBox* m_infiniteCheck;
+    QPushButton* m_tap;
     FocusSpinBox* m_focus;
 
     int m_previousDialValue;
     bool m_preventSignals;
     int m_value;
+
+    QTime* m_tapTime;
 };
 
 #endif

@@ -40,6 +40,9 @@
 #define MS_MAX    999
 #define MS_DIV    10
 
+#define TIMER_HOLD   250
+#define TIMER_REPEAT 10
+
 /****************************************************************************
  * FocusSpinBox
  ****************************************************************************/
@@ -159,7 +162,7 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_dial->setRange(m_focus->minimum(), m_focus->maximum());
     m_dial->setSingleStep(m_focus->singleStep());
 
-    m_timer->setInterval(25);
+    m_timer->setInterval(TIMER_HOLD);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotPlusMinusTimeout()));
 }
 
@@ -250,7 +253,7 @@ void SpeedDial::slotPlusMinus()
     if (m_minus->isDown() == true || m_plus->isDown() == true)
     {
         slotPlusMinusTimeout();
-        m_timer->start();
+        m_timer->start(TIMER_HOLD);
     }
     else
     {
@@ -266,6 +269,7 @@ void SpeedDial::slotPlusMinusTimeout()
             m_dial->setValue(m_dial->maximum()); // Wrap around
         else
             m_dial->setValue(m_dial->value() - m_dial->singleStep()); // Normal increment
+        m_timer->start(TIMER_REPEAT);
     }
     else if (m_plus->isDown() == true)
     {
@@ -273,6 +277,7 @@ void SpeedDial::slotPlusMinusTimeout()
             m_dial->setValue(m_dial->minimum()); // Wrap around
         else
             m_dial->setValue(m_dial->value() + m_dial->singleStep()); // Normal increment
+        m_timer->start(TIMER_REPEAT);
     }
 }
 

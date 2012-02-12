@@ -31,6 +31,7 @@
 #include "apputil.h"
 
 #define SETTINGS_GEOMETRY "speeddialwidget/geometry"
+#define SETTINGS_DIRECTION "speeddialwidget/direction"
 
 SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     : QWidget(parent, flags)
@@ -40,7 +41,15 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     , m_optionalTextGroup(NULL)
     , m_optionalTextEdit(NULL)
 {
-    new QVBoxLayout(this);
+    QSettings settings;
+    QVariant var;
+
+    /* Layout with customizable direction */
+    var = settings.value(SETTINGS_DIRECTION);
+    if (var.isValid() == true)
+        new QBoxLayout(QBoxLayout::Direction(var.toInt()), this);
+    else
+        new QVBoxLayout(this);
 
     /* Create dials */
     m_fadeIn = new SpeedDial(this);
@@ -69,8 +78,7 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
             this, SIGNAL(optionalTextEdited(const QString&)));
 
     /* Position */
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
+    var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         this->restoreGeometry(var.toByteArray());
     AppUtil::ensureWidgetIsVisible(this);

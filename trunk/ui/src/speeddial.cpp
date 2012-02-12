@@ -78,20 +78,14 @@ SpeedDial::SpeedDial(QWidget* parent)
     , m_value(0)
     , m_tapTime(new QTime(QTime::currentTime()))
 {
-    QVBoxLayout* vbox = new QVBoxLayout(this);
-    vbox->setContentsMargins(0, 0, 0, 0);
-    vbox->setSpacing(0);
-
-    QHBoxLayout* hbox = new QHBoxLayout;
-    hbox->setContentsMargins(0, 0, 0, 0);
-    hbox->setSpacing(0);
-    vbox->addLayout(hbox);
+    QGridLayout* grid = new QGridLayout(this);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setSpacing(0);
 
     m_minus = new QToolButton(this);
     m_minus->setIconSize(QSize(32, 32));
     m_minus->setIcon(QIcon(":/edit_remove.png"));
-    hbox->addWidget(m_minus);
-    hbox->setAlignment(m_minus, Qt::AlignVCenter | Qt::AlignLeft);
+    grid->addWidget(m_minus, 0, 0, Qt::AlignVCenter | Qt::AlignLeft);
     connect(m_minus, SIGNAL(pressed()), this, SLOT(slotPlusMinus()));
     connect(m_minus, SIGNAL(released()), this, SLOT(slotPlusMinus()));
 
@@ -99,30 +93,22 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_dial->setWrapping(true);
     m_dial->setNotchesVisible(true);
     m_dial->setTracking(true);
-    hbox->addWidget(m_dial);
-    vbox->setAlignment(m_dial, Qt::AlignHCenter);
+    grid->addWidget(m_dial, 0, 1, 1, 2, Qt::AlignHCenter);
     connect(m_dial, SIGNAL(valueChanged(int)), this, SLOT(slotDialChanged(int)));
 
     m_plus = new QToolButton(this);
     m_plus->setIconSize(QSize(32, 32));
     m_plus->setIcon(QIcon(":/edit_add.png"));
-    hbox->addWidget(m_plus);
-    hbox->setAlignment(m_plus, Qt::AlignVCenter | Qt::AlignRight);
+    grid->addWidget(m_plus, 0, 3, Qt::AlignVCenter | Qt::AlignRight);
     connect(m_plus, SIGNAL(pressed()), this, SLOT(slotPlusMinus()));
     connect(m_plus, SIGNAL(released()), this, SLOT(slotPlusMinus()));
-
-    hbox = new QHBoxLayout;
-    hbox->setContentsMargins(0, 0, 0, 0);
-    hbox->setSpacing(0);
-    vbox->addLayout(hbox);
 
     m_hrs = new FocusSpinBox(this);
     m_hrs->setRange(0, HRS_MAX);
     m_hrs->setSuffix("h");
     m_hrs->setButtonSymbols(QSpinBox::NoButtons);
-    m_hrs->setFixedSize(QSize(40, 30));
     m_hrs->setToolTip(tr("Hours"));
-    hbox->addWidget(m_hrs);
+    grid->addWidget(m_hrs, 1, 0);
     connect(m_hrs, SIGNAL(valueChanged(int)), this, SLOT(slotHoursChanged()));
     connect(m_hrs, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
 
@@ -130,9 +116,8 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_min->setRange(0, MIN_MAX);
     m_min->setSuffix("m");
     m_min->setButtonSymbols(QSpinBox::NoButtons);
-    m_min->setFixedSize(QSize(40, 30));
     m_min->setToolTip(tr("Minutes"));
-    hbox->addWidget(m_min);
+    grid->addWidget(m_min, 1, 1);
     connect(m_min, SIGNAL(valueChanged(int)), this, SLOT(slotMinutesChanged()));
     connect(m_min, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
 
@@ -140,9 +125,8 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_sec->setRange(0, SEC_MAX);
     m_sec->setSuffix("s");
     m_sec->setButtonSymbols(QSpinBox::NoButtons);
-    m_sec->setFixedSize(QSize(40, 30));
     m_sec->setToolTip(tr("Seconds"));
-    hbox->addWidget(m_sec);
+    grid->addWidget(m_sec, 1, 2);
     connect(m_sec, SIGNAL(valueChanged(int)), this, SLOT(slotSecondsChanged()));
     connect(m_sec, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
 
@@ -150,26 +134,18 @@ SpeedDial::SpeedDial(QWidget* parent)
     m_ms->setRange(0, MS_MAX / MS_DIV);
     m_ms->setPrefix(".");
     m_ms->setButtonSymbols(QSpinBox::NoButtons);
-    m_ms->setFixedSize(QSize(40, 30));
     m_ms->setToolTip(tr("Milliseconds"));
-    hbox->addWidget(m_ms);
+    grid->addWidget(m_ms, 1, 3);
     connect(m_ms, SIGNAL(valueChanged(int)), this, SLOT(slotMSChanged()));
     connect(m_ms, SIGNAL(focusGained()), this, SLOT(slotSpinFocusGained()));
 
-    hbox = new QHBoxLayout;
-    hbox->setContentsMargins(0, 0, 0, 0);
-    hbox->setSpacing(0);
-    vbox->addLayout(hbox);
-
     m_infiniteCheck = new QCheckBox(this);
     m_infiniteCheck->setText(tr("Infinite"));
-    hbox->addWidget(m_infiniteCheck);
+    grid->addWidget(m_infiniteCheck, 2, 0, 1, 2);
     connect(m_infiniteCheck, SIGNAL(toggled(bool)), this, SLOT(slotInfiniteChecked(bool)));
 
     m_tap = new QPushButton(tr("Tap"), this);
-    m_tap->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    hbox->addWidget(m_tap);
-    hbox->setAlignment(m_tap, Qt::AlignRight);
+    grid->addWidget(m_tap, 2, 2, 1, 2);
     connect(m_tap, SIGNAL(clicked()), this, SLOT(slotTapClicked()));
 
     m_focus = m_ms;

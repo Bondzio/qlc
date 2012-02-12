@@ -388,14 +388,14 @@ void SpeedDial::slotMSChanged()
 
 void SpeedDial::slotInfiniteChecked(bool state)
 {
-    m_minus->setVisible(!state);
-    m_dial->setVisible(!state);
-    m_plus->setVisible(!state);
-    m_hrs->setVisible(!state);
-    m_min->setVisible(!state);
-    m_sec->setVisible(!state);
-    m_ms->setVisible(!state);
-    m_tap->setVisible(!state);
+    m_minus->setEnabled(!state);
+    m_dial->setEnabled(!state);
+    m_plus->setEnabled(!state);
+    m_hrs->setEnabled(!state);
+    m_min->setEnabled(!state);
+    m_sec->setEnabled(!state);
+    m_ms->setEnabled(!state);
+    m_tap->setEnabled(!state);
 
     if (state == true)
     {

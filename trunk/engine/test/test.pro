@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
+CONFIG  += ordered
 SUBDIRS += bus
 SUBDIRS += chaser
 SUBDIRS += chaserrunner
@@ -46,3 +47,4 @@ SUBDIRS += universearray
 # Stubs
 SUBDIRS += inputpluginstub
 SUBDIRS += outputpluginstub
+

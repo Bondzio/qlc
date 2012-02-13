@@ -11,10 +11,11 @@ APPVERSION = 3.3.0
 #############################################################################
 
 CONFIG         += warn_on
+CONFIG         += ordered # Build everything in the order specified in .pro files
 macx:CONFIG    -= app_bundle # Let QLC construct the .app bundle
 
-CONFIG        -= release # Enable this when making a release
-CONFIG        += debug   # Disable this when making a release
+CONFIG         -= release # Enable this when making a release
+CONFIG         += debug   # Disable this when making a release
 
 # Disable these if you don't want to see SVN revision in the About Box
 unix:REVISION = $$system(svn info | grep "Revision" | sed 's/Revision://')

@@ -334,10 +334,11 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
         m_currentFunction->adjustIntensity(m_intensity);
 
         // Start function using step-specific or global speed settings
-        m_currentFunction->start(timer,
-                                 true,
-                                 currentFadeIn(),
-                                 currentFadeOut(),
-                                 currentDuration());
+        // Don't override duration because that would mess up everything when
+        // a chaser/cuelist starts another chaser. Overriding the duration with
+        // the current chaser's duration would mean that only the first step is
+        // run from the sub-chaser. If the subfunction is an RGBMatrix or EFX,
+        // the step duration probably isb not the wanted subfunction speed, either
+        m_currentFunction->start(timer, true, currentFadeIn(), currentFadeOut());
     }
 }

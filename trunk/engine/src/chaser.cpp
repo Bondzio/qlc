@@ -395,8 +395,10 @@ ChaserRunner* Chaser::createRunner(Chaser* self, Doc* doc)
                                             dur,
                                             self->direction(),
                                             self->runOrder(),
-                                            self->intensity(),
-                                            self);
+                                            self->intensity());
+    Q_ASSERT(runner != NULL);
+    runner->moveToThread(QCoreApplication::instance()->thread());
+    runner->setParent(self);
     self->m_stepListMutex.unlock();
 
     return runner;
@@ -404,31 +406,6 @@ ChaserRunner* Chaser::createRunner(Chaser* self, Doc* doc)
 
 void Chaser::preRun(MasterTimer* timer)
 {
-/*
-    // Use global speeds only if they have been enabled
-    uint fadeIn = Function::defaultSpeed();
-    if (isGlobalFadeIn() == true)
-        fadeIn = fadeInSpeed();
-    uint fadeOut = Function::defaultSpeed();
-    if (isGlobalFadeOut() == true)
-        fadeOut = fadeOutSpeed();
-    uint dur = Function::defaultSpeed();
-    if (isGlobalDuration() == true)
-        dur = duration();
-
-    // These override* variables are set only if a chaser is started by another function
-    if (overrideFadeInSpeed() != defaultSpeed())
-        fadeIn = overrideFadeInSpeed();
-    if (overrideFadeOutSpeed() != defaultSpeed())
-        fadeOut = overrideFadeOutSpeed();
-    if (overrideDuration() != defaultSpeed())
-        dur = overrideDuration();
-
-    m_stepListMutex.lock();
-    m_runner = new ChaserRunner(doc(), steps(), fadeIn, fadeOut, dur,
-                                direction(), runOrder(), intensity());
-    m_stepListMutex.unlock();
-*/
     Q_ASSERT(m_runner == NULL);
     m_runner = createRunner(this, doc());
     Function::preRun(timer);

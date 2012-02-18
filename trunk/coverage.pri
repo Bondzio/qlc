@@ -1,4 +1,4 @@
-unix:CONFIG(coverage) {
+CONFIG(coverage) {
     # Code coverage measurement with gcov
     QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
     LIBS += -lgcov

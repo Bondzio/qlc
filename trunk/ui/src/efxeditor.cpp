@@ -453,7 +453,7 @@ void EFXEditor::removeFixtureItem(EFXFixture* ef)
 
 void EFXEditor::slotNameEdited(const QString &text)
 {
-    m_efx->setName(m_nameEdit->text());
+    m_efx->setName(text);
 }
 
 void EFXEditor::slotFixtureItemChanged(QTreeWidgetItem* item, int column)

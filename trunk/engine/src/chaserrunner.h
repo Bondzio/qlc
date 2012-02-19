@@ -31,6 +31,7 @@ class UniverseArray;
 class FadeChannel;
 class ChaserStep;
 class Function;
+class Chaser;
 class Doc;
 
 class ChaserRunner : public QObject
@@ -38,73 +39,31 @@ class ChaserRunner : public QObject
     Q_OBJECT
 
 public:
-    ChaserRunner(Doc* doc, QList <ChaserStep> steps,
-                 uint fadeInSpeed, uint fadeOutSpeed, uint duration,
-                 Function::Direction direction, Function::RunOrder runOrder,
-                 qreal intensity = 1.0, QObject* parent = NULL, int startIndex = -1);
+    ChaserRunner(const Doc* doc, const Chaser* chaser);
     ~ChaserRunner();
+
+private slots:
+    void slotChaserChanged();
 
 private:
     const Doc* m_doc;
-    const QList <ChaserStep> m_steps;
-    const Function::Direction m_originalDirection;
-    const Function::RunOrder m_runOrder;
+    const Chaser* m_chaser;
 
     /************************************************************************
-     * Speed adjustment
+     * Speed
      ************************************************************************/
 public:
-    /**
-     * Adjust the step duration. Can be used to adjust run-time duration,
-     * for example when tapping.
-     */
-    void setDuration(uint ms);
-
-    /**
-     * Get the currently active fade in value (either a global setting or
-     * associated with the current step).
-     */
+    /** Get the currently active fade in value (See Chaser::SpeedMode) */
     uint currentFadeIn() const;
 
-    /**
-     * Get the currently active fade out value (either a global setting or
-     * associated with the current step).
-     */
+    /** Get the currently active fade out value (See Chaser::SpeedMode) */
     uint currentFadeOut() const;
 
-    /**
-     * Get the currently active duration value (either a global setting or
-     * associated with the current step).
-     */
+    /** Get the currently active duration value (See Chaser::SpeedMode) */
     uint currentDuration() const;
 
 private:
-    uint m_fadeInSpeed;
-    uint m_fadeOutSpeed;
-    uint m_duration;
-
-    /************************************************************************
-     * Automatic stepping
-     ************************************************************************/
-public:
-    /**
-     * Enables automatic stepping if $auto is true; otherwise automatic
-     * stepping is disabled and the only way to skip to next/previous step is
-     * thru next() and previous() methods.
-     *
-     * @param auto Enable/disable automatic stepping
-     */
-    void setAutoStep(bool autoStep);
-
-    /**
-     * Check, if automatic stepping is enabled (default = true).
-     *
-     * @return true if automatic stepping is enabled, otherwise false.
-     */
-    bool isAutoStep() const;
-
-private:
-    bool m_autoStep;
+    bool m_updateOverrideSpeeds;
 
     /************************************************************************
      * Step control
@@ -121,7 +80,8 @@ public:
     void previous();
 
     /**
-     * Set the current step number.
+     * Set the NEW current step number. The value of m_currentStep is changed
+     * on the next call to write().
      *
      * @param step Step number to set
      */

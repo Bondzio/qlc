@@ -101,9 +101,9 @@ private slots:
     void slotFadeOutDialChanged(int ms);
     void slotDurationDialChanged(int ms);
 
-    void slotFadeInChecked(bool state);
-    void slotFadeOutChecked(bool state);
-    void slotDurationChecked(bool state);
+    void slotFadeInToggled();
+    void slotFadeOutToggled();
+    void slotDurationToggled();
 
 private:
     void createSpeedDials();

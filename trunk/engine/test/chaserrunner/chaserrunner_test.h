@@ -25,6 +25,7 @@
 #include <QObject>
 #include "qlcfixturedefcache.h"
 
+class Chaser;
 class Scene;
 class Doc;
 
@@ -39,9 +40,11 @@ private slots:
     void cleanup();
 
     void initial();
-    void speed();
     void nextPrevious();
-    void autoStep();
+    void currentFadeIn();
+    void currentFadeOut();
+    void currentDuration();
+
     void roundCheckSingleShotForward();
     void roundCheckSingleShotBackward();
     void roundCheckLoopForward();
@@ -72,6 +75,7 @@ private:
     Scene* m_scene1;
     Scene* m_scene2;
     Scene* m_scene3;
+    Chaser* m_chaser;
 };
 
 #endif

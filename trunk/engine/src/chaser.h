@@ -130,22 +130,31 @@ private:
     QMutex m_stepListMutex;
 
     /*********************************************************************
-     * Global speed override
+     * Speed modes
      *********************************************************************/
 public:
-    void setGlobalFadeIn(bool set);
-    bool isGlobalFadeIn() const;
+    enum SpeedMode {
+        Default, //! Use step function's own speed setting
+        Common,  //! Impose a common chaser-specific speed to all steps
+        PerStep  //! Impose a step-specific speed to each step
+    };
 
-    void setGlobalFadeOut(bool set);
-    bool isGlobalFadeOut() const;
+    void setFadeInMode(SpeedMode mode);
+    SpeedMode fadeInMode() const;
 
-    void setGlobalDuration(bool set);
-    bool isGlobalDuration() const;
+    void setFadeOutMode(SpeedMode mode);
+    SpeedMode fadeOutMode() const;
+
+    void setDurationMode(SpeedMode mode);
+    SpeedMode durationMode() const;
+
+    static QString speedModeToString(SpeedMode mode);
+    static SpeedMode stringToSpeedMode(const QString& str);
 
 private:
-    bool m_globalFadeIn;
-    bool m_globalFadeOut;
-    bool m_globalDuration;
+    SpeedMode m_fadeInMode;
+    SpeedMode m_fadeOutMode;
+    SpeedMode m_durationMode;
 
     /*********************************************************************
      * Save & Load

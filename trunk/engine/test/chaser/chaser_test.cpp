@@ -76,9 +76,9 @@ void Chaser_Test::initial()
     QVERIFY(c.id() == Function::invalidId());
     QVERIFY(c.m_runner == NULL);
     QCOMPARE(c.m_legacyHoldBus, Bus::invalid());
-    QCOMPARE(c.isGlobalFadeIn(), true);
-    QCOMPARE(c.isGlobalFadeOut(), true);
-    QCOMPARE(c.isGlobalDuration(), true);
+    QCOMPARE(c.fadeInMode(), Chaser::Default);
+    QCOMPARE(c.fadeOutMode(), Chaser::Default);
+    QCOMPARE(c.durationMode(), Chaser::Common);
 }
 
 void Chaser_Test::directionRunOrder()
@@ -337,25 +337,40 @@ void Chaser_Test::createCopy()
     QVERIFY(copy->steps().at(2) == ChaserStep(40));
 }
 
-void Chaser_Test::globalSpeeds()
+void Chaser_Test::speedModes()
 {
-    Doc doc(this);
-    Chaser c(&doc);
+    Chaser c(m_doc);
 
-    c.setGlobalFadeIn(false);
-    QCOMPARE(c.isGlobalFadeIn(), false);
-    c.setGlobalFadeIn(true);
-    QCOMPARE(c.isGlobalFadeIn(), true);
+    c.setFadeInMode(Chaser::Default);
+    QCOMPARE(c.fadeInMode(), Chaser::Default);
+    c.setFadeInMode(Chaser::Common);
+    QCOMPARE(c.fadeInMode(), Chaser::Common);
+    c.setFadeInMode(Chaser::PerStep);
+    QCOMPARE(c.fadeInMode(), Chaser::PerStep);
 
-    c.setGlobalFadeOut(false);
-    QCOMPARE(c.isGlobalFadeOut(), false);
-    c.setGlobalFadeOut(true);
-    QCOMPARE(c.isGlobalFadeOut(), true);
+    c.setFadeOutMode(Chaser::Default);
+    QCOMPARE(c.fadeOutMode(), Chaser::Default);
+    c.setFadeOutMode(Chaser::Common);
+    QCOMPARE(c.fadeOutMode(), Chaser::Common);
+    c.setFadeOutMode(Chaser::PerStep);
+    QCOMPARE(c.fadeOutMode(), Chaser::PerStep);
 
-    c.setGlobalDuration(false);
-    QCOMPARE(c.isGlobalDuration(), false);
-    c.setGlobalDuration(true);
-    QCOMPARE(c.isGlobalDuration(), true);
+    c.setDurationMode(Chaser::Default);
+    QCOMPARE(c.durationMode(), Chaser::Default);
+    c.setDurationMode(Chaser::Common);
+    QCOMPARE(c.durationMode(), Chaser::Common);
+    c.setDurationMode(Chaser::PerStep);
+    QCOMPARE(c.durationMode(), Chaser::PerStep);
+
+    QCOMPARE(Chaser::speedModeToString(Chaser::Default), QString("Default"));
+    QCOMPARE(Chaser::speedModeToString(Chaser::Common), QString("Common"));
+    QCOMPARE(Chaser::speedModeToString(Chaser::PerStep), QString("PerStep"));
+    QCOMPARE(Chaser::speedModeToString(Chaser::SpeedMode(12345)), QString("Default"));
+
+    QCOMPARE(Chaser::stringToSpeedMode("Default"), Chaser::Default);
+    QCOMPARE(Chaser::stringToSpeedMode("Common"), Chaser::Common);
+    QCOMPARE(Chaser::stringToSpeedMode("PerStep"), Chaser::PerStep);
+    QCOMPARE(Chaser::stringToSpeedMode("Foobar"), Chaser::Default);
 }
 
 void Chaser_Test::loadSuccessLegacy()
@@ -473,10 +488,10 @@ void Chaser_Test::loadSuccess()
     s3.appendChild(s3Text);
     root.appendChild(s3);
 
-    QDomElement spd = doc.createElement("GlobalSpeed");
-    spd.setAttribute("FadeIn", "False");
-    spd.setAttribute("FadeOut", "True");
-    spd.setAttribute("Duration", "False");
+    QDomElement spd = doc.createElement("SpeedModes");
+    spd.setAttribute("FadeIn", "Common");
+    spd.setAttribute("FadeOut", "Default");
+    spd.setAttribute("Duration", "PerStep");
     root.appendChild(spd);
 
     // Unknown tag
@@ -491,6 +506,9 @@ void Chaser_Test::loadSuccess()
     QVERIFY(c.fadeInSpeed() == 42);
     QVERIFY(c.fadeOutSpeed() == 69);
     QVERIFY(c.duration() == 1337);
+    QCOMPARE(c.fadeInMode(), Chaser::Common);
+    QCOMPARE(c.fadeOutMode(), Chaser::Default);
+    QCOMPARE(c.durationMode(), Chaser::PerStep);
     QVERIFY(c.direction() == Chaser::Backward);
     QVERIFY(c.runOrder() == Chaser::SingleShot);
     QVERIFY(c.steps().size() == 3);
@@ -740,7 +758,9 @@ void Chaser_Test::save()
     c.addStep(ChaserStep(1));
     c.addStep(ChaserStep(0));
     c.addStep(ChaserStep(2));
-    c.setGlobalFadeOut(false);
+    c.setFadeInMode(Chaser::Default);
+    c.setFadeOutMode(Chaser::PerStep);
+    c.setDurationMode(Chaser::Common);
 
     QDomDocument doc;
     QDomElement root = doc.createElement("TestRoot");
@@ -749,7 +769,7 @@ void Chaser_Test::save()
     QVERIFY(root.firstChild().toElement().tagName() == "Function");
     QVERIFY(root.firstChild().toElement().attribute("Type") == "Chaser");
 
-    int run = 0, dir = 0, speed = 0, fids = 0, globalspeed = 0;
+    int run = 0, dir = 0, speed = 0, fids = 0, speedmodes = 0;
 
     QDomNode node = root.firstChild().firstChild();
     while (node.isNull() == false)
@@ -779,12 +799,12 @@ void Chaser_Test::save()
         {
             speed++;
         }
-        else if (tag.tagName() == "GlobalSpeed")
+        else if (tag.tagName() == "SpeedModes")
         {
-            QCOMPARE(tag.attribute("FadeIn"), QString("True"));
-            QCOMPARE(tag.attribute("FadeOut"), QString("False"));
-            QCOMPARE(tag.attribute("Duration"), QString("True"));
-            globalspeed++;
+            QCOMPARE(tag.attribute("FadeIn"), QString("Default"));
+            QCOMPARE(tag.attribute("FadeOut"), QString("PerStep"));
+            QCOMPARE(tag.attribute("Duration"), QString("Common"));
+            speedmodes++;
         }
         else
         {
@@ -795,10 +815,10 @@ void Chaser_Test::save()
     }
 
     QCOMPARE(speed, 1);
+    QCOMPARE(speedmodes, 1);
     QCOMPARE(dir, 1);
     QCOMPARE(run, 1);
     QCOMPARE(fids, 4);
-    QCOMPARE(globalspeed, 1);
 }
 
 void Chaser_Test::tap()

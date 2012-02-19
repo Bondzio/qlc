@@ -354,11 +354,6 @@ uint Function::fadeInSpeed() const
     return m_fadeInSpeed;
 }
 
-uint Function::overrideFadeInSpeed() const
-{
-    return m_overrideFadeInSpeed;
-}
-
 void Function::setFadeOutSpeed(uint ms)
 {
     m_fadeOutSpeed = ms;
@@ -370,11 +365,6 @@ uint Function::fadeOutSpeed() const
     return m_fadeOutSpeed;
 }
 
-uint Function::overrideFadeOutSpeed() const
-{
-    return m_overrideFadeOutSpeed;
-}
-
 void Function::setDuration(uint ms)
 {
     m_duration = ms;
@@ -384,6 +374,31 @@ void Function::setDuration(uint ms)
 uint Function::duration() const
 {
     return m_duration;
+}
+
+void Function::setOverrideFadeInSpeed(uint ms)
+{
+    m_overrideFadeInSpeed = ms;
+}
+
+uint Function::overrideFadeInSpeed() const
+{
+    return m_overrideFadeInSpeed;
+}
+
+void Function::setOverrideFadeOutSpeed(uint ms)
+{
+    m_overrideFadeOutSpeed = ms;
+}
+
+uint Function::overrideFadeOutSpeed() const
+{
+    return m_overrideFadeOutSpeed;
+}
+
+void Function::setOverrideDuration(uint ms)
+{
+    m_overrideDuration = ms;
 }
 
 uint Function::overrideDuration() const
@@ -417,8 +432,8 @@ QString Function::speedToString(uint ms)
             str += QString("%1m").arg(m, 2, 10, QChar('0'));
         if (s != 0)
             str += QString("%1s").arg(s, 2, 10, QChar('0'));
-        if (ms != 0)
-            str += QString(".%1").arg(ms / 10, 2, 10, QChar('0'));
+        // Always display .ms
+        str += QString(".%1").arg(ms / 10, 2, 10, QChar('0'));
     }
 
     return str;

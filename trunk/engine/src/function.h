@@ -298,20 +298,35 @@ public:
 
     /** Get the fade in time in milliseconds */
     uint fadeInSpeed() const;
-    uint overrideFadeInSpeed() const;
 
     /** Set the fade out time in milliseconds */
     void setFadeOutSpeed(uint ms);
 
     /** Get the fade out time in milliseconds */
     uint fadeOutSpeed() const;
-    uint overrideFadeOutSpeed() const;
 
     /** Set the duration in milliseconds */
     void setDuration(uint ms);
 
     /** Get the duration in milliseconds */
     uint duration() const;
+
+    /** Set the override fade in speed (done by chaser in Common speed mode) */
+    void setOverrideFadeInSpeed(uint ms);
+
+    /** Get the override fade in speed */
+    uint overrideFadeInSpeed() const;
+
+    /** Set the override fade out speed (done by chaser in Common speed mode) */
+    void setOverrideFadeOutSpeed(uint ms);
+
+    /** Get the override fade out speed */
+    uint overrideFadeOutSpeed() const;
+
+    /** Set the override duration */
+    void setOverrideDuration(uint ms);
+
+    /** Get the override duration */
     uint overrideDuration() const;
 
     /** Set the function's speed by tapping it */

@@ -594,10 +594,10 @@ bool VCCueList::loadXML(const QDomElement* root)
         Chaser* chaser = new Chaser(m_doc);
         chaser->setName(caption());
 
-        // Legacy cue lists relied on individual functions' timings
-        chaser->setGlobalFadeIn(false);
-        chaser->setGlobalFadeOut(false);
-        chaser->setGlobalDuration(false);
+        // Legacy cue lists relied on individual functions' timings and a common hold time
+        chaser->setFadeInMode(Chaser::Default);
+        chaser->setFadeOutMode(Chaser::Default);
+        chaser->setDurationMode(Chaser::Common);
 
         foreach (quint32 id, legacyStepList)
         {
@@ -606,11 +606,8 @@ bool VCCueList::loadXML(const QDomElement* root)
                 continue;
 
             // Legacy cuelists relied on individual functions' fadein/out speed and
-            // infinite duration.
-            ChaserStep step(id,
-                            function->fadeInSpeed(),
-                            function->fadeOutSpeed(),
-                            Function::infiniteSpeed());
+            // infinite duration. So don't touch them at all.
+            ChaserStep step(id);
             chaser->addStep(step);
         }
 

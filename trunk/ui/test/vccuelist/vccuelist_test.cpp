@@ -580,7 +580,6 @@ void VCCueList_Test::nextPrevious()
 
     VCCueList cl(&w, m_doc);
     Chaser* c = createChaser(m_doc);
-    c->setGlobalDuration(true);
     c->setDuration(Function::infiniteSpeed());
     cl.setChaser(c->id());
     QCOMPARE(c->steps().size(), 4);
@@ -693,7 +692,6 @@ void VCCueList_Test::manualActivation()
     QWidget w;
     VCCueList cl(&w, m_doc);
     Chaser* c = createChaser(m_doc);
-    c->setGlobalDuration(true);
     c->setDuration(Function::infiniteSpeed());
     cl.setChaser(c->id());
     Scene* s1 = qobject_cast<Scene*> (m_doc->function(c->steps()[0].fid));
@@ -757,13 +755,11 @@ void VCCueList_Test::manualActivation()
     QCOMPARE(timer->m_functionList[0], s1);
 }
 
-
 void VCCueList_Test::keyboardNextPrevious()
 {
     QWidget w;
     VCCueList cl(&w, m_doc);
     Chaser* c = createChaser(m_doc);
-    c->setGlobalDuration(true);
     c->setDuration(Function::infiniteSpeed());
     cl.setChaser(c->id());
 
@@ -823,7 +819,6 @@ void VCCueList_Test::input()
     QWidget w;
     VCCueList cl(&w, m_doc);
     Chaser* c = createChaser(m_doc);
-    c->setGlobalDuration(true);
     c->setDuration(Function::infiniteSpeed());
     cl.setChaser(c->id());
 

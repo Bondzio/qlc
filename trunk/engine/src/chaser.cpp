@@ -37,7 +37,10 @@
 #include "doc.h"
 #include "bus.h"
 
-#define KXMLQLCChaserGlobalSpeed "GlobalSpeed"
+#define KXMLQLCChaserSpeedModes "SpeedModes"
+#define KXMLQLCChaserSpeedModeCommon "Common"
+#define KXMLQLCChaserSpeedModePerStep "PerStep"
+#define KXMLQLCChaserSpeedModeDefault "Default"
 
 /*****************************************************************************
  * Initialization
@@ -46,9 +49,9 @@
 Chaser::Chaser(Doc* doc)
     : Function(doc, Function::Chaser)
     , m_legacyHoldBus(Bus::invalid())
-    , m_globalFadeIn(true)
-    , m_globalFadeOut(true)
-    , m_globalDuration(true)
+    , m_fadeInMode(Default)
+    , m_fadeOutMode(Default)
+    , m_durationMode(Common)
     , m_runner(NULL)
 {
     setName(tr("New Chaser"));
@@ -86,12 +89,14 @@ bool Chaser::copyFrom(const Function* function)
     if (chaser == NULL)
         return false;
 
+    // Copy chaser stuff
     m_steps.clear();
     m_steps = chaser->m_steps;
-    m_globalFadeIn = chaser->m_globalFadeIn;
-    m_globalFadeOut = chaser->m_globalFadeOut;
-    m_globalDuration = chaser->m_globalDuration;
+    m_fadeInMode = chaser->m_fadeInMode;
+    m_fadeOutMode = chaser->m_fadeOutMode;
+    m_durationMode = chaser->m_durationMode;
 
+    // Copy common function stuff
     return Function::copyFrom(function);
 }
 
@@ -175,40 +180,60 @@ void Chaser::slotFunctionRemoved(quint32 fid)
 }
 
 /*****************************************************************************
- * Global speed override
+ * Speed modes
  *****************************************************************************/
 
-void Chaser::setGlobalFadeIn(bool set)
+void Chaser::setFadeInMode(Chaser::SpeedMode mode)
 {
-    m_globalFadeIn = set;
+    m_fadeInMode = mode;
     emit changed(this->id());
 }
 
-bool Chaser::isGlobalFadeIn() const
+Chaser::SpeedMode Chaser::fadeInMode() const
 {
-    return m_globalFadeIn;
+    return m_fadeInMode;
 }
 
-void Chaser::setGlobalFadeOut(bool set)
+void Chaser::setFadeOutMode(Chaser::SpeedMode mode)
 {
-    m_globalFadeOut = set;
+    m_fadeOutMode = mode;
     emit changed(this->id());
 }
 
-bool Chaser::isGlobalFadeOut() const
+Chaser::SpeedMode Chaser::fadeOutMode() const
 {
-    return m_globalFadeOut;
+    return m_fadeOutMode;
 }
 
-void Chaser::setGlobalDuration(bool set)
+void Chaser::setDurationMode(Chaser::SpeedMode mode)
 {
-    m_globalDuration = set;
+    m_durationMode = mode;
     emit changed(this->id());
 }
 
-bool Chaser::isGlobalDuration() const
+Chaser::SpeedMode Chaser::durationMode() const
 {
-    return m_globalDuration;
+    return m_durationMode;
+}
+
+QString Chaser::speedModeToString(Chaser::SpeedMode mode)
+{
+    if (mode == Common)
+        return KXMLQLCChaserSpeedModeCommon;
+    else if (mode == PerStep)
+        return KXMLQLCChaserSpeedModePerStep;
+    else
+        return KXMLQLCChaserSpeedModeDefault;
+}
+
+Chaser::SpeedMode Chaser::stringToSpeedMode(const QString& str)
+{
+    if (str == KXMLQLCChaserSpeedModeCommon)
+        return Common;
+    else if (str == KXMLQLCChaserSpeedModePerStep)
+        return PerStep;
+    else
+        return Default;
 }
 
 /*****************************************************************************
@@ -241,11 +266,11 @@ bool Chaser::saveXML(QDomDocument* doc, QDomElement* wksp_root)
     /* Run order */
     saveXMLRunOrder(doc, &root);
 
-    /* Global speed */
-    QDomElement spd = doc->createElement(KXMLQLCChaserGlobalSpeed);
-    spd.setAttribute(KXMLQLCFunctionSpeedFadeIn, isGlobalFadeIn() ? KXMLQLCTrue : KXMLQLCFalse);
-    spd.setAttribute(KXMLQLCFunctionSpeedFadeOut, isGlobalFadeOut() ? KXMLQLCTrue : KXMLQLCFalse);
-    spd.setAttribute(KXMLQLCFunctionSpeedDuration, isGlobalDuration() ? KXMLQLCTrue : KXMLQLCFalse);
+    /* Speed modes */
+    QDomElement spd = doc->createElement(KXMLQLCChaserSpeedModes);
+    spd.setAttribute(KXMLQLCFunctionSpeedFadeIn, speedModeToString(fadeInMode()));
+    spd.setAttribute(KXMLQLCFunctionSpeedFadeOut, speedModeToString(fadeOutMode()));
+    spd.setAttribute(KXMLQLCFunctionSpeedDuration, speedModeToString(durationMode()));
     root.appendChild(spd);
 
     /* Steps */
@@ -297,11 +322,18 @@ bool Chaser::loadXML(const QDomElement& root)
         {
             loadXMLRunOrder(tag);
         }
-        else if (tag.tagName() == KXMLQLCChaserGlobalSpeed)
+        else if (tag.tagName() == KXMLQLCChaserSpeedModes)
         {
-            setGlobalFadeIn(tag.attribute(KXMLQLCFunctionSpeedFadeIn) == KXMLQLCTrue);
-            setGlobalFadeOut(tag.attribute(KXMLQLCFunctionSpeedFadeOut) == KXMLQLCTrue);
-            setGlobalDuration(tag.attribute(KXMLQLCFunctionSpeedDuration) == KXMLQLCTrue);
+            QString str;
+
+            str = tag.attribute(KXMLQLCFunctionSpeedFadeIn);
+            setFadeInMode(stringToSpeedMode(str));
+
+            str = tag.attribute(KXMLQLCFunctionSpeedFadeOut);
+            setFadeOutMode(stringToSpeedMode(str));
+
+            str = tag.attribute(KXMLQLCFunctionSpeedDuration);
+            setDurationMode(stringToSpeedMode(str));
         }
         else if (tag.tagName() == KXMLQLCFunctionStep)
         {
@@ -353,10 +385,7 @@ void Chaser::tap()
 {
     Function::tap();
     if (m_runner != NULL)
-    {
-        m_runner->setDuration(duration());
         m_runner->next();
-    }
 }
 
 /*****************************************************************************
@@ -368,38 +397,10 @@ ChaserRunner* Chaser::createRunner(Chaser* self, Doc* doc)
     if (self == NULL || doc == NULL)
         return NULL;
 
-    // Use global speeds only if they have been enabled
-    uint fadeIn = Function::defaultSpeed();
-    if (self->isGlobalFadeIn() == true)
-        fadeIn = self->fadeInSpeed();
-    uint fadeOut = Function::defaultSpeed();
-    if (self->isGlobalFadeOut() == true)
-        fadeOut = self->fadeOutSpeed();
-    uint dur = Function::defaultSpeed();
-    if (self->isGlobalDuration() == true)
-        dur = self->duration();
-
-    // These override* variables are set only if a chaser is started by another function
-    if (self->overrideFadeInSpeed() != defaultSpeed())
-        fadeIn = self->overrideFadeInSpeed();
-    if (self->overrideFadeOutSpeed() != defaultSpeed())
-        fadeOut = self->overrideFadeOutSpeed();
-    if (self->overrideDuration() != defaultSpeed())
-        dur = self->overrideDuration();
-
-    self->m_stepListMutex.lock();
-    ChaserRunner* runner = new ChaserRunner(doc,
-                                            self->steps(),
-                                            fadeIn,
-                                            fadeOut,
-                                            dur,
-                                            self->direction(),
-                                            self->runOrder(),
-                                            self->intensity());
+    ChaserRunner* runner = new ChaserRunner(doc, self);
     Q_ASSERT(runner != NULL);
     runner->moveToThread(QCoreApplication::instance()->thread());
     runner->setParent(self);
-    self->m_stepListMutex.unlock();
 
     return runner;
 }

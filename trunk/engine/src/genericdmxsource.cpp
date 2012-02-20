@@ -28,6 +28,7 @@
 
 GenericDMXSource::GenericDMXSource(Doc* doc)
     : m_doc(doc)
+    , m_outputEnabled(false)
 {
     Q_ASSERT(m_doc != NULL);
     m_doc->masterTimer()->registerDMXSource(this);
@@ -54,13 +55,23 @@ void GenericDMXSource::unset(quint32 fxi, quint32 ch)
     m_mutex.unlock();
 }
 
+void GenericDMXSource::setOutputEnabled(bool enable)
+{
+    m_outputEnabled = enable;
+}
+
+bool GenericDMXSource::isOutputEnabled() const
+{
+    return m_outputEnabled;
+}
+
 void GenericDMXSource::writeDMX(MasterTimer* timer, UniverseArray* ua)
 {
     Q_UNUSED(timer);
 
     m_mutex.lock();
     QMutableMapIterator <QPair<quint32,quint32>,uchar> it(m_values);
-    while (it.hasNext() == true)
+    while (it.hasNext() == true && m_outputEnabled == true)
     {
         it.next();
 

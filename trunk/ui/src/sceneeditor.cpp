@@ -109,6 +109,20 @@ void SceneEditor::init()
                                     tr("Copy current values to all fixtures"), this);
     m_colorToolAction = new QAction(QIcon(":/color.png"),
                                     tr("Color tool for CMY/RGB-capable fixtures"), this);
+    m_blindAction = new QAction(QIcon(":/blind.png"),
+                                      tr("Don't write values to universe when editing"), this);
+
+    m_blindAction->setCheckable(true);
+    if (m_doc->mode() == Doc::Operate)
+    {
+        m_blindAction->setChecked(true);
+        m_source->setOutputEnabled(false);
+    }
+    else
+    {
+        m_blindAction->setChecked(false);
+        m_source->setOutputEnabled(true);
+    }
 
     connect(m_enableCurrentAction, SIGNAL(triggered(bool)),
             this, SLOT(slotEnableCurrent()));
@@ -122,6 +136,8 @@ void SceneEditor::init()
             this, SLOT(slotCopyToAll()));
     connect(m_colorToolAction, SIGNAL(triggered(bool)),
             this, SLOT(slotColorTool()));
+    connect(m_blindAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotBlindToggled(bool)));
 
     /* Toolbar */
     QToolBar* toolBar = new QToolBar(this);
@@ -134,6 +150,8 @@ void SceneEditor::init()
     toolBar->addAction(m_copyToAllAction);
     toolBar->addSeparator();
     toolBar->addAction(m_colorToolAction);
+    toolBar->addSeparator();
+    toolBar->addAction(m_blindAction);
 
     /* Tab widget */
     connect(m_tab, SIGNAL(currentChanged(int)),
@@ -360,6 +378,12 @@ void SceneEditor::slotColorTool()
             }
         }
     }
+}
+
+void SceneEditor::slotBlindToggled(bool state)
+{
+    if (m_source != NULL)
+        m_source->setOutputEnabled(!state);
 }
 
 bool SceneEditor::isColorToolAvailable()

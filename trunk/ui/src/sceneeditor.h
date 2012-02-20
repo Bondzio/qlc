@@ -75,6 +75,7 @@ private slots:
     void slotPaste();
     void slotCopyToAll();
     void slotColorTool();
+    void slotBlindToggled(bool state);
 
 private:
     bool isColorToolAvailable();
@@ -87,6 +88,8 @@ private:
     QAction* m_pasteAction;
     QAction* m_copyToAllAction;
     QAction* m_colorToolAction;
+
+    QAction* m_blindAction;
 
     /*********************************************************************
      * General tab

@@ -49,6 +49,12 @@ public:
     /** Unset the value of a fixture channel */
     void unset(quint32 fxi, quint32 ch);
 
+    /** Enable/disable output */
+    void setOutputEnabled(bool enable);
+
+    /** Check, whether output is enabled */
+    bool isOutputEnabled() const;
+
     /** @reimp */
     void writeDMX(MasterTimer* timer, UniverseArray* ua);
 
@@ -56,6 +62,7 @@ private:
     Doc* m_doc;
     QMutex m_mutex;
     QMap <QPair<quint32,quint32>,uchar> m_values;
+    bool m_outputEnabled;
 };
 
 #endif

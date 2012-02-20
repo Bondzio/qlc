@@ -65,6 +65,7 @@ HEADERS += bus.h \
            fixture.h \
            fixturegroup.h \
            function.h \
+           genericdmxsource.h \
            genericfader.h \
            grouphead.h \
            inputmap.h \
@@ -117,6 +118,7 @@ SOURCES += bus.cpp \
            fixture.cpp \
            fixturegroup.cpp \
            function.cpp \
+           genericdmxsource.cpp \
            genericfader.cpp \
            grouphead.cpp \
            inputmap.cpp \

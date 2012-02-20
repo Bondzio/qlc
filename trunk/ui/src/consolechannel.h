@@ -32,135 +32,84 @@
 class QContextMenuEvent;
 class QIntValidator;
 class QToolButton;
-class QVBoxLayout;
-class QLineEdit;
+class QSpinBox;
 class QSlider;
 class QLabel;
 class QMenu;
 
-class MasterTimer;
 class QLCChannel;
-class OutputMap;
-class Fixture;
 class Doc;
 
-class ConsoleChannel : public QGroupBox, public DMXSource
+class ConsoleChannel : public QGroupBox
 {
     Q_OBJECT
     Q_DISABLE_COPY(ConsoleChannel)
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
-    ConsoleChannel(QWidget *parent, Doc* doc, quint32 fixtureID, quint32 channel);
+    ConsoleChannel(QWidget *parent, Doc* doc, quint32 fixture, quint32 channel);
     ~ConsoleChannel();
 
-    /** The relative channel number that the ConsoleChannel instance controls */
-    quint32 channel() const;
-
-protected:
-    /** Initialize the UI */
+private:
     void init();
+
+    /*************************************************************************
+     * Fixture & Channel
+     *************************************************************************/
+public:
+    /** Get the fixture that this channel belongs to */
+    quint32 fixture() const;
+
+    /** Get the channel number within $m_fixture that this channel controls */
+    quint32 channel() const;
 
 private:
     Doc* m_doc;
-
+    quint32 m_fixture;
     quint32 m_channel;
-    quint32 m_fixtureID;
-    Fixture* m_fixture;
 
-    /*********************************************************************
-     * Menu
-     *********************************************************************/
-protected slots:
-    void slotContextMenuTriggered(QAction* action);
-
-protected:
-    /** Open a context menu */
-    void contextMenuEvent(QContextMenuEvent*);
-
-    /** Initialize the context menu */
-    void initMenu();
-
-    /** Initialize the context menu for fixtures with capabilities */
-    void initCapabilityMenu(const QLCChannel* ch);
-
-    /** Set button background colour for RGB/CMY/generic intensity channels */
-    void setIntensityButton(const QLCChannel* ch);
-
-protected:
-    const QIcon colorIcon(const QString& name);
-
-protected:
-    QMenu* m_menu;
-
-    /*********************************************************************
+    /*************************************************************************
      * Value
-     *********************************************************************/
+     *************************************************************************/
 public:
-    /** Get the channel's value */
-    int sliderValue() const;
-
-    /** Enable/disable DMX value output */
-    void setOutputDMX(bool state);
-
-    /** Emulate the user dragging the value slider */
+    /** Set the channel's current value */
     void setValue(uchar value);
 
+    /** Get the channel's current value */
+    uchar value() const;
+
 private slots:
-    /** Value edit box was edited */
-    void slotValueEdited(const QString& text);
-
-    /** Slider value was changed */
-    void slotValueChange(int value);
-
-    /** Check state has changed */
+    void slotSpinChanged(int value);
+    void slotSliderChanged(int value);
     void slotChecked(bool state);
-
-protected:
-    uchar m_value;
-    bool m_valueChanged;
-    QMutex m_valueChangedMutex;
-    bool m_outputDMX;
 
 signals:
     void valueChanged(quint32 fxi, quint32 channel, uchar value);
     void checked(quint32 fxi, quint32 channel, bool state);
 
-    /*********************************************************************
-     * DMXSource
-     *********************************************************************/
-public:
-    /** @reimp */
-    void writeDMX(MasterTimer* timer, UniverseArray* universes);
-
-public slots:
-    void slotFixtureChanged(quint32 fixtureID);
-
-protected:
-    quint32 m_universeAddress;
-    QLCChannel::Group m_group;
-
-    /*********************************************************************
-     * Enable/disable
-     *********************************************************************/
-public:
-    /** Enable/disable the channel */
-    void enable(bool state);
-
-    /** Set, whether the channel can be manually checked/enabled */
-    void setCheckable(bool checkable);
-
-    /*********************************************************************
-     * Widgets
-     *********************************************************************/
-protected:
+private:
     QToolButton* m_presetButton;
-    QIntValidator* m_validator;
-    QLineEdit* m_valueEdit;
-    QSlider* m_valueSlider;
-    QLabel* m_numberLabel;
+    QSpinBox* m_spin;
+    QSlider* m_slider;
+    QLabel* m_label;
+
+    /*************************************************************************
+     * Menu
+     *************************************************************************/
+private slots:
+    void slotContextMenuTriggered(QAction* action);
+
+private:
+    void contextMenuEvent(QContextMenuEvent*);
+    void initMenu();
+    void initCapabilityMenu(const QLCChannel* ch);
+    void setIntensityButton(const QLCChannel* ch);
+    static QIcon colorIcon(const QString& name);
+
+private:
+    QMenu* m_menu;
 };
 
 #endif

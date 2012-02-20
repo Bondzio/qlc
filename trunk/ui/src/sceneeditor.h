@@ -30,6 +30,7 @@
 #include "fixture.h"
 #include "scene.h"
 
+class GenericDMXSource;
 class SpeedSpinBox;
 class MasterTimer;
 class OutputMap;
@@ -52,6 +53,7 @@ public:
 private:
     Doc* m_doc;
     Scene* m_scene; // The Scene that is being edited
+    GenericDMXSource* m_source;
 
 private:
     void init();

@@ -69,11 +69,8 @@ protected:
      * Channels
      *********************************************************************/
 public:
-    /** Set channel group boxes to have/not have a checkbox */
-    void setChannelsCheckable(bool checkable);
-
-    /** Set all channels enabled/disabled */
-    void enableAllChannels(bool enable);
+    /** Set channels' check state (UINT_MAX to set all) */
+    void setChecked(bool state, quint32 channel = UINT_MAX);
 
     /** Enable/disable DMX output when sliders are dragged */
     void setOutputDMX(bool state);
@@ -87,29 +84,25 @@ public:
     /** Set all channel's values */
     void setValues(const QList <SceneValue>& list);
 
-    /** Get a console channel instance for the given channel (first ch is
-        always number zero, so these are not DMX channels) */
-    ConsoleChannel* channel(quint32 ch);
+    /** Set the value of one channel (doesn't enable it) */
+    void setValue(quint32 ch, uchar value);
+
+    /** Get the value of one channel (regardless of whether it's enabled) */
+    uchar value(quint32 ch) const;
 
 signals:
+    /** Emitted when the value of a channel object changes */
     void valueChanged(quint32 fxi, quint32 channel, uchar value);
+
+    /** Emitted when a channel's check state is changed */
     void checked(quint32 fxi, quint32 channel, bool state);
 
-protected:
-    bool m_channelsCheckable;
+private:
+    /** Get a console channel instance for the given relative channel */
+    ConsoleChannel* channel(quint32 ch) const;
+
+private:
     QList<ConsoleChannel*> m_channels;
-
-    /*********************************************************************
-     * External input
-     *********************************************************************/
-public:
-    void enableExternalInput(bool enable);
-
-protected slots:
-    void slotInputValueChanged(quint32 uni, quint32 ch, uchar value);
-
-protected:
-    bool m_externalInputEnabled;
 };
 
 #endif

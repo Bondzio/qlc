@@ -23,7 +23,7 @@
 #include <QIntValidator>
 #include <QVBoxLayout>
 #include <QToolButton>
-#include <QLineEdit>
+#include <QSpinBox>
 #include <QSlider>
 #include <QLabel>
 #include <QMenu>
@@ -41,136 +41,104 @@
 #include "universearray.h"
 #include "consolechannel.h"
 
-#define CMARGIN_LEFT      1
-#define CMARGIN_TOP       1
-#define CMARGIN_TOP_CHECK 15 /* Leave some space for the check box */
-#define CMARGIN_RIGHT     1
-#define CMARGIN_BOTTOM    1
-
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, quint32 fixtureID,
-                               quint32 channel)
+ConsoleChannel::ConsoleChannel(QWidget* parent, Doc* doc, quint32 fixture, quint32 channel)
     : QGroupBox(parent)
     , m_doc(doc)
+    , m_fixture(fixture)
+    , m_channel(channel)
+    , m_presetButton(NULL)
+    , m_spin(NULL)
+    , m_slider(NULL)
+    , m_label(NULL)
+    , m_menu(NULL)
 {
     Q_ASSERT(doc != NULL);
-
-    /* Set the class name as the object name */
-    setObjectName(ConsoleChannel::staticMetaObject.className());
-
-    Q_ASSERT(fixtureID != Fixture::invalidId());
-    m_fixtureID = fixtureID;
-
-    // Check that we have an actual fixture
-    m_fixture = m_doc->fixture(m_fixtureID);
-    Q_ASSERT(m_fixture != NULL);
-
-    // Check that the given channel is valid
+    Q_ASSERT(fixture != Fixture::invalidId());
     Q_ASSERT(channel != QLCChannel::invalid());
-    Q_ASSERT(channel < m_fixture->channels());
-    m_channel = channel;
 
-    m_value = 0;
-    m_valueChanged = false;
-    m_menu = NULL;
-    m_outputDMX = true;
-
-    m_presetButton = NULL;
-    m_validator = NULL;
-    m_valueEdit = NULL;
-    m_valueSlider = NULL;
-    m_numberLabel = NULL;
-
-    m_group = QLCChannel::NoGroup;
-    m_universeAddress = UINT_MAX;
-
-    setMinimumWidth(50);
-    setMaximumWidth(50);
     init();
-
     setStyle(AppUtil::saneStyle());
 }
 
 ConsoleChannel::~ConsoleChannel()
 {
-    m_valueChangedMutex.lock();
-    m_outputDMX = false;
-    m_doc->masterTimer()->unregisterDMXSource(this);
-    m_valueChangedMutex.unlock();
 }
 
 void ConsoleChannel::init()
 {
     setCheckable(true);
 
-    new QVBoxLayout(this);
-    layout()->setAlignment(Qt::AlignHCenter);
-    layout()->setContentsMargins(CMARGIN_LEFT, CMARGIN_TOP_CHECK,
-                                 CMARGIN_RIGHT, CMARGIN_BOTTOM);
+    Fixture* fxi = m_doc->fixture(m_fixture);
+    Q_ASSERT(fxi != NULL);
 
-    /* Create a button only if its menu has sophisticated contents */
-    if (m_fixture->fixtureDef() != NULL && m_fixture->fixtureMode() != NULL)
+    new QVBoxLayout(this);
+    layout()->setSpacing(0);
+    layout()->setContentsMargins(0, 0, 0, 0);
+
+    /* Create a preset button only if its menu has sophisticated contents */
+    if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)
     {
         m_presetButton = new QToolButton(this);
         m_presetButton->setStyle(AppUtil::saneStyle());
-        m_presetButton->setIconSize(QSize(26, 26));
+        m_presetButton->setIconSize(QSize(32, 32));
         m_presetButton->setMinimumSize(QSize(32, 32));
         layout()->addWidget(m_presetButton);
         layout()->setAlignment(m_presetButton, Qt::AlignHCenter);
         initMenu();
     }
 
-    m_valueEdit = new QLineEdit(this);
-    m_valueEdit->setText(QString::number(0));
-    layout()->addWidget(m_valueEdit);
-    m_valueEdit->setAlignment(Qt::AlignCenter);
-    m_validator = new QIntValidator(0, UCHAR_MAX, this);
-    m_valueEdit->setValidator(m_validator);
-    m_valueEdit->setMinimumSize(QSize(1, 1));
+    /* Value edit */
+    m_spin = new QSpinBox(this);
+    m_spin->setRange(0, UCHAR_MAX);
+    m_spin->setValue(0);
+    m_spin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    layout()->addWidget(m_spin);
+    m_spin->setAlignment(Qt::AlignCenter);
+    m_spin->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    m_valueSlider = new QSlider(this);
-    m_valueSlider->setStyle(AppUtil::saneStyle());
-    layout()->addWidget(m_valueSlider);
-    m_valueSlider->setInvertedAppearance(false);
-    m_valueSlider->setRange(0, UCHAR_MAX);
-    m_valueSlider->setPageStep(1);
-    m_valueSlider->setSizePolicy(QSizePolicy::Preferred,
-                                 QSizePolicy::Expanding);
+    /* Value slider */
+    m_slider = new QSlider(this);
+    m_slider->setStyle(AppUtil::saneStyle());
+    layout()->addWidget(m_slider);
+    m_slider->setInvertedAppearance(false);
+    m_slider->setRange(0, UCHAR_MAX);
+    m_slider->setPageStep(1);
+    m_slider->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    m_numberLabel = new QLabel(this);
-    layout()->addWidget(m_numberLabel);
-    m_numberLabel->setAlignment(Qt::AlignCenter);
+    /* Channel number label */
+    m_label = new QLabel(this);
+    layout()->addWidget(m_label);
+    m_label->setAlignment(Qt::AlignCenter);
+    m_label->setText(QString::number(m_channel + 1));
 
-    // Generic fixtures don't have channel objects
-    const QLCChannel* ch = m_fixture->channel(m_channel);
-    if (ch != NULL)
-        setToolTip(QString("%1").arg(ch->name()));
+    /* Set tooltip */
+    if (fxi->isDimmer() == true)
+    {
+        setToolTip(tr("Intensity"));
+    }
     else
-        setToolTip(tr("Level"));
+    {
+        const QLCChannel* ch = fxi->channel(m_channel);
+        Q_ASSERT(ch != NULL);
+        setToolTip(QString("%1").arg(ch->name()));
+    }
 
-    // Set channel label
-    m_numberLabel->setText(QString::number(m_channel + 1));
-
-    connect(m_valueEdit, SIGNAL(textEdited(const QString&)),
-            this, SLOT(slotValueEdited(const QString&)));
-    connect(m_valueSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(slotValueChange(int)));
-
-    // Listen to fixture changes so channel & group are updated when they change
-    connect(m_doc, SIGNAL(fixtureChanged(quint32)),
-            this, SLOT(slotFixtureChanged(quint32)));
-
-    // Listen to internal checked state changes
+    connect(m_spin, SIGNAL(valueChanged(int)), this, SLOT(slotSpinChanged(int)));
+    connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderChanged(int)));
     connect(this, SIGNAL(toggled(bool)), this, SLOT(slotChecked(bool)));
+}
 
-    // Grab channel & group for writeDMX
-    slotFixtureChanged(m_fixtureID);
+/*****************************************************************************
+ * Fixture & Channel
+ *****************************************************************************/
 
-    /* Register this object as a source of DMX data */
-    m_doc->masterTimer()->registerDMXSource(this);
+quint32 ConsoleChannel::fixture() const
+{
+    return m_fixture;
 }
 
 quint32 ConsoleChannel::channel() const
@@ -179,17 +147,52 @@ quint32 ConsoleChannel::channel() const
 }
 
 /*****************************************************************************
+ * Value
+ *****************************************************************************/
+
+void ConsoleChannel::setValue(uchar value)
+{
+    m_slider->setValue(int(value));
+}
+
+uchar ConsoleChannel::value() const
+{
+    return uchar(m_slider->value());
+}
+
+void ConsoleChannel::slotSpinChanged(int value)
+{
+    if (value != m_slider->value())
+        m_slider->setValue(value);
+
+    emit valueChanged(m_fixture, m_channel, value);
+}
+
+void ConsoleChannel::slotSliderChanged(int value)
+{
+    if (value != m_spin->value())
+        m_spin->setValue(value);
+}
+
+void ConsoleChannel::slotChecked(bool state)
+{
+    emit checked(m_fixture, m_channel, state);
+
+    // Emit the current value also when turning the channel back on
+    if (state == true)
+        emit valueChanged(m_fixture, m_channel, m_slider->value());
+}
+
+/*****************************************************************************
  * Menu
  *****************************************************************************/
 
 void ConsoleChannel::initMenu()
 {
-    const QLCChannel* ch;
-    QAction* action;
+    Fixture* fxi = m_doc->fixture(fixture());
+    Q_ASSERT(fxi != NULL);
 
-    Q_ASSERT(m_fixture != NULL);
-
-    ch = m_fixture->channel(m_channel);
+    const QLCChannel* ch = fxi->channel(m_channel);
     Q_ASSERT(ch != NULL);
 
     // Get rid of a possible previous menu
@@ -244,14 +247,13 @@ void ConsoleChannel::initMenu()
         break;
     }
 
-    action = m_menu->addAction(m_presetButton->icon(), ch->name());
+    QAction* action = m_menu->addAction(m_presetButton->icon(), ch->name());
     m_menu->setTitle(ch->name());
     action->setEnabled(false);
     m_menu->addSeparator();
 
-    // Initialize the preset menu only for normal fixtures,
-    // i.e. not for Generic dimmer fixtures
-    if (m_fixture->fixtureDef() != NULL && m_fixture->fixtureMode() != NULL)
+    // Initialize the preset menu only for intelligent fixtures
+    if (fxi->isDimmer() == false)
         initCapabilityMenu(ch);
 }
 
@@ -370,7 +372,7 @@ void ConsoleChannel::initCapabilityMenu(const QLCChannel* ch)
     m_presetButton->setMenu(m_menu);
 }
 
-const QIcon ConsoleChannel::colorIcon(const QString& name)
+QIcon ConsoleChannel::colorIcon(const QString& name)
 {
     /* Return immediately with a rainbow icon -- if appropriate */
     if (name.toLower().contains("rainbow") ||
@@ -462,131 +464,4 @@ void ConsoleChannel::slotContextMenuTriggered(QAction* action)
 
     // The menuitem's data contains a valid DMX value
     setValue(action->data().toInt());
-}
-
-/*****************************************************************************
- * Value
- *****************************************************************************/
-
-int ConsoleChannel::sliderValue() const
-{
-    return m_valueSlider->value();
-}
-
-void ConsoleChannel::setOutputDMX(bool state)
-{
-    m_outputDMX = state;
-}
-
-void ConsoleChannel::setValue(uchar value)
-{
-    m_valueSlider->setValue(static_cast<int> (value));
-}
-
-void ConsoleChannel::slotValueEdited(const QString& text)
-{
-    setValue(text.toInt());
-}
-
-void ConsoleChannel::slotValueChange(int value)
-{
-    // Regardless of whether the value has changed or not, write it to the edit field
-    m_valueEdit->setText(QString("%1").arg(value));
-
-    if (m_value != value)
-    {
-        // Use a mutex for m_valueChanged so that the latest value
-        // is really written in writeDMX()
-        m_valueChangedMutex.lock();
-        m_valueChanged = true;
-        m_value = value;
-        m_valueChangedMutex.unlock();
-
-        emit valueChanged(m_fixtureID, m_channel, value);
-    }
-}
-
-void ConsoleChannel::slotChecked(bool state)
-{
-    emit checked(m_fixtureID, m_channel, state);
-
-    // Emit the current value also when turning the channel back on
-    if (state == true)
-        emit valueChanged(m_fixtureID, m_channel, m_value);
-}
-
-/*****************************************************************************
- * DMXSource
- *****************************************************************************/
-
-void ConsoleChannel::writeDMX(MasterTimer* timer, UniverseArray* universes)
-{
-    Q_UNUSED(timer);
-
-    m_valueChangedMutex.lock();
-
-    if (m_group == QLCChannel::Intensity || m_valueChanged == true)
-        universes->write(m_universeAddress, m_value, m_group);
-
-    m_valueChanged = false;
-    m_valueChangedMutex.unlock();
-}
-
-void ConsoleChannel::slotFixtureChanged(quint32 fixtureID)
-{
-    if (fixtureID != m_fixtureID)
-        return;
-
-    m_valueChangedMutex.lock();
-
-    const QLCChannel* qlcch = m_fixture->channel(m_channel);
-    if (qlcch == NULL)
-    {
-        this->deleteLater();
-    }
-    else
-    {
-        // Store group and absolute address for writeDMX since the Fixture and
-        // QLCChannel instances can get deleted while context is in writeDMX().
-        m_group = qlcch->group();
-        m_universeAddress = m_fixture->universeAddress() + m_channel;
-    }
-
-    m_valueChangedMutex.unlock();
-}
-
-/*****************************************************************************
- * Enable/disable
- *****************************************************************************/
-
-void ConsoleChannel::enable(bool state)
-{
-    setChecked(state);
-
-    UniverseArray* ua = m_doc->outputMap()->claimUniverses();
-    m_value = ua->preGMValues()[m_fixture->universeAddress() + m_channel];
-    m_doc->outputMap()->releaseUniverses(false);
-}
-
-void ConsoleChannel::setCheckable(bool checkable)
-{
-    if (layout() != NULL)
-    {
-        if (checkable == true)
-        {
-            layout()->setContentsMargins(CMARGIN_LEFT,
-                                         CMARGIN_TOP_CHECK,
-                                         CMARGIN_RIGHT,
-                                         CMARGIN_BOTTOM);
-        }
-        else
-        {
-            layout()->setContentsMargins(CMARGIN_LEFT,
-                                         CMARGIN_TOP,
-                                         CMARGIN_RIGHT,
-                                         CMARGIN_BOTTOM);
-        }
-    }
-
-    QGroupBox::setCheckable(checkable);
 }

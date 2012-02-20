@@ -76,6 +76,7 @@ private slots:
     void slotCopyToAll();
     void slotColorTool();
     void slotBlindToggled(bool state);
+    void slotModeChanged(Doc::Mode mode);
 
 private:
     bool isColorToolAvailable();

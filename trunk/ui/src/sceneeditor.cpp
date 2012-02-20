@@ -109,8 +109,7 @@ void SceneEditor::init()
                                     tr("Copy current values to all fixtures"), this);
     m_colorToolAction = new QAction(QIcon(":/color.png"),
                                     tr("Color tool for CMY/RGB-capable fixtures"), this);
-    m_blindAction = new QAction(QIcon(":/blind.png"),
-                                      tr("Don't write values to universe when editing"), this);
+    m_blindAction = new QAction(QIcon(":/blind.png"), tr("Toggle blind mode"), this);
 
     m_blindAction->setCheckable(true);
     if (m_doc->mode() == Doc::Operate)
@@ -136,8 +135,10 @@ void SceneEditor::init()
             this, SLOT(slotCopyToAll()));
     connect(m_colorToolAction, SIGNAL(triggered(bool)),
             this, SLOT(slotColorTool()));
-    connect(m_blindAction, SIGNAL(triggered(bool)),
+    connect(m_blindAction, SIGNAL(toggled(bool)),
             this, SLOT(slotBlindToggled(bool)));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
+            this, SLOT(slotModeChanged(Doc::Mode)));
 
     /* Toolbar */
     QToolBar* toolBar = new QToolBar(this);
@@ -382,8 +383,16 @@ void SceneEditor::slotColorTool()
 
 void SceneEditor::slotBlindToggled(bool state)
 {
-    if (m_source != NULL)
-        m_source->setOutputEnabled(!state);
+    Q_ASSERT(m_source != NULL);
+    m_source->setOutputEnabled(!state);
+}
+
+void SceneEditor::slotModeChanged(Doc::Mode mode)
+{
+    if (mode == Doc::Operate)
+        m_blindAction->setChecked(true);
+    else
+        m_blindAction->setChecked(false);
 }
 
 bool SceneEditor::isColorToolAvailable()

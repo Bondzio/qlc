@@ -44,7 +44,6 @@ FixtureConsole::FixtureConsole(QWidget* parent, Doc* doc)
 {
     Q_ASSERT(doc != NULL);
     new QHBoxLayout(this);
-    layout()->setContentsMargins(0, 0, 15, 0);
 }
 
 FixtureConsole::~FixtureConsole()

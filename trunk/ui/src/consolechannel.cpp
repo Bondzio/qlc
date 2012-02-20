@@ -76,8 +76,8 @@ void ConsoleChannel::init()
     Q_ASSERT(fxi != NULL);
 
     new QVBoxLayout(this);
-    layout()->setSpacing(0);
-    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->setSpacing(2);
+    layout()->setContentsMargins(2, 2, 2, 2);
 
     /* Create a preset button only if its menu has sophisticated contents */
     if (fxi->fixtureDef() != NULL && fxi->fixtureMode() != NULL)

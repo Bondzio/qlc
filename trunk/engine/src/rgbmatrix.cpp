@@ -333,8 +333,8 @@ void RGBMatrix::postRun(MasterTimer* timer, UniverseArray* universes)
     Q_UNUSED(timer);
     Q_UNUSED(universes);
 
-    Q_ASSERT(m_fader != NULL);
-    delete m_fader;
+    if (m_fader != NULL)
+        delete m_fader; // Might be NULL if there's no fixture group
     m_fader = NULL;
 
     Function::postRun(timer, universes);

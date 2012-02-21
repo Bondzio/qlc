@@ -25,6 +25,7 @@
 #include <QDomNode>
 #include <QDomText>
 #include <QDebug>
+#include <QTime>
 #include <cmath>
 #include <QDir>
 
@@ -51,6 +52,7 @@ RGBMatrix::RGBMatrix(Doc* doc)
     , m_monoColor(Qt::red)
     , m_fader(NULL)
     , m_step(0)
+    , m_roundTime(new QTime)
 {
     setName(tr("New RGB Matrix"));
     setDuration(500);
@@ -62,6 +64,8 @@ RGBMatrix::RGBMatrix(Doc* doc)
 RGBMatrix::~RGBMatrix()
 {
     setAlgorithm(NULL);
+    delete m_roundTime;
+    m_roundTime = NULL;
 }
 
 /****************************************************************************
@@ -270,12 +274,11 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 
 void RGBMatrix::tap()
 {
-    Function::tap();
-
     if (stopped() == false)
     {
         FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
-        if (grp != NULL)
+        // Filter out taps that are too close to each other
+        if (grp != NULL && m_roundTime->elapsed() >= (duration() / 4))
             roundCheck(grp->size());
     }
 }
@@ -297,6 +300,8 @@ void RGBMatrix::preRun(MasterTimer* timer)
         else
             m_step = m_algorithm->rgbMapStepCount(grp->size());
     }
+
+    m_roundTime->start();
 
     Function::preRun(timer);
 }
@@ -405,6 +410,7 @@ void RGBMatrix::roundCheck(const QSize& size)
         }
     }
 
+    m_roundTime->restart();
     resetElapsed();
 }
 

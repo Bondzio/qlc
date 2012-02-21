@@ -35,6 +35,7 @@
 class FixtureGroup;
 class GenericFader;
 class FadeChannel;
+class QTime;
 class QDir;
 
 class RGBMatrix : public Function
@@ -135,6 +136,7 @@ private:
     Function::Direction m_direction;
     GenericFader* m_fader;
     int m_step;
+    QTime* m_roundTime;
 };
 
 #endif

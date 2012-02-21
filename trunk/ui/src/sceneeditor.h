@@ -50,6 +50,9 @@ public:
     SceneEditor(QWidget* parent, Scene* scene, Doc* doc);
     ~SceneEditor();
 
+public slots:
+    void slotFunctionManagerActive(bool active);
+
 private:
     Doc* m_doc;
     Scene* m_scene; // The Scene that is being edited
@@ -80,6 +83,7 @@ private slots:
 
 private:
     bool isColorToolAvailable();
+    void createSpeedDials();
 
 private:
     QAction* m_enableCurrentAction;

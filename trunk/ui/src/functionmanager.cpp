@@ -685,11 +685,14 @@ void FunctionManager::editFunction(Function* function)
     if (function == NULL)
         editor = NULL;
     else if (function->type() == Function::Scene)
+    {
         editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
+        connect(this, SIGNAL(functionManagerActive(bool)),
+                editor, SLOT(slotFunctionManagerActive(bool)));
+    }
     else if (function->type() == Function::Chaser)
     {
         editor = new ChaserEditor(m_splitter, qobject_cast<Chaser*> (function), m_doc);
-        // Chaser Editor needs to know this so it can hide/show its speed dial box
         connect(this, SIGNAL(functionManagerActive(bool)),
                 editor, SLOT(slotFunctionManagerActive(bool)));
     }

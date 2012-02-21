@@ -66,6 +66,7 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
     , m_scene(scene)
     , m_source(new GenericDMXSource(doc))
     , m_initFinished(false)
+    , m_speedDials(NULL)
     , m_currentTab(KTabGeneral)
 {
     Q_ASSERT(doc != NULL);
@@ -92,6 +93,21 @@ SceneEditor::~SceneEditor()
 {
     delete m_source;
     m_source = NULL;
+}
+
+void SceneEditor::slotFunctionManagerActive(bool active)
+{
+    if (active == true)
+    {
+        if (m_speedDials == NULL)
+            createSpeedDials();
+    }
+    else
+    {
+        if (m_speedDials != NULL)
+            delete m_speedDials;
+        m_speedDials = NULL;
+    }
 }
 
 void SceneEditor::init()
@@ -188,15 +204,7 @@ void SceneEditor::init()
         setSceneValue(scv);
     }
 
-    m_speedDials = new SpeedDialWidget(this);
-    m_speedDials->setWindowTitle(m_scene->name());
-    m_speedDials->setFadeInSpeed(m_scene->fadeInSpeed());
-    m_speedDials->setFadeOutSpeed(m_scene->fadeOutSpeed());
-    m_speedDials->setDurationEnabled(false);
-    m_speedDials->setDurationVisible(false);
-    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
-    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
-    m_speedDials->show();
+    createSpeedDials();
 }
 
 void SceneEditor::setSceneValue(const SceneValue& scv)
@@ -424,6 +432,20 @@ bool SceneEditor::isColorToolAvailable()
     {
         return false;
     }
+}
+
+void SceneEditor::createSpeedDials()
+{
+    Q_ASSERT(m_speedDials == NULL);
+    m_speedDials = new SpeedDialWidget(this);
+    m_speedDials->setWindowTitle(m_scene->name());
+    m_speedDials->setFadeInSpeed(m_scene->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_scene->fadeOutSpeed());
+    m_speedDials->setDurationEnabled(false);
+    m_speedDials->setDurationVisible(false);
+    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
+    m_speedDials->show();
 }
 
 /*****************************************************************************

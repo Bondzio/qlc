@@ -532,8 +532,20 @@ void RGBMatrixEditor::slotFixtureGroupRemoved()
 
 void RGBMatrixEditor::slotFixtureGroupChanged(quint32 id)
 {
-    if (id != m_mtx->fixtureGroup())
-        return;
-
-    slotFixtureGroupActivated(m_fixtureGroupCombo->currentIndex());
+    if (id == m_mtx->fixtureGroup())
+    {
+        // Update the whole chain -> maybe the fixture layout has changed
+        fillFixtureGroupCombo();
+        slotFixtureGroupActivated(m_fixtureGroupCombo->currentIndex());
+    }
+    else
+    {
+        // Just change the name of the group, nothing else is interesting at this point
+        int index = m_fixtureGroupCombo->findData(id);
+        if (index != -1)
+        {
+            FixtureGroup* grp = m_doc->fixtureGroup(id);
+            m_fixtureGroupCombo->setItemText(index, grp->name());
+        }
+    }
 }

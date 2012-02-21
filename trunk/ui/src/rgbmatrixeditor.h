@@ -48,9 +48,13 @@ public:
     RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc);
     ~RGBMatrixEditor();
 
+public slots:
+    void slotFunctionManagerActive(bool active);
+
 private:
     void init();
 
+    void createSpeedDials();
     void fillPatternCombo();
     void fillFixtureGroupCombo();
     void fillAnimationCombo();

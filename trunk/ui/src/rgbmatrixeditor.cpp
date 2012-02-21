@@ -55,6 +55,7 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
     , m_mtx(mtx)
+    , m_speedDials(NULL)
     , m_scene(new QGraphicsScene(this))
     , m_previewTimer(new QTimer(this))
     , m_previewIterator(0)
@@ -91,6 +92,21 @@ RGBMatrixEditor::~RGBMatrixEditor()
         m_mtx->stopAndWait();
 }
 
+void RGBMatrixEditor::slotFunctionManagerActive(bool active)
+{
+    if (active == true)
+    {
+        if (m_speedDials == NULL)
+            createSpeedDials();
+    }
+    else
+    {
+        if (m_speedDials != NULL)
+            delete m_speedDials;
+        m_speedDials = NULL;
+    }
+}
+
 void RGBMatrixEditor::init()
 {
     /* Name */
@@ -124,18 +140,9 @@ void RGBMatrixEditor::init()
         break;
     }
 
-    /* Speed */
-    m_speedDials = new SpeedDialWidget(this);
-    m_speedDials->setWindowTitle(m_mtx->name());
-    m_speedDials->show();
-
     fillPatternCombo();
     fillFixtureGroupCombo();
     fillAnimationCombo();
-
-    m_speedDials->setFadeInSpeed(m_mtx->fadeInSpeed());
-    m_speedDials->setFadeOutSpeed(m_mtx->fadeOutSpeed());
-    m_speedDials->setDuration(m_mtx->duration());
 
     QPixmap pm(100, 26);
     pm.fill(m_mtx->monoColor());
@@ -166,11 +173,6 @@ void RGBMatrixEditor::init()
     connect(m_forward, SIGNAL(clicked()), this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()), this, SLOT(slotBackwardClicked()));
 
-    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
-    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
-    connect(m_speedDials, SIGNAL(durationChanged(int)), this, SLOT(slotDurationChanged(int)));
-    connect(m_speedDials, SIGNAL(durationTapped()), this, SLOT(slotDurationTapped()));
-
     // Test slots
     connect(m_testButton, SIGNAL(clicked(bool)),
             this, SLOT(slotTestClicked()));
@@ -180,6 +182,22 @@ void RGBMatrixEditor::init()
     m_previewTimer->start(MasterTimer::tick());
 
     updateExtraOptions();
+    createSpeedDials();
+}
+
+void RGBMatrixEditor::createSpeedDials()
+{
+    Q_ASSERT(m_speedDials == NULL);
+    m_speedDials = new SpeedDialWidget(this);
+    m_speedDials->setWindowTitle(m_mtx->name());
+    m_speedDials->show();
+    m_speedDials->setFadeInSpeed(m_mtx->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_mtx->fadeOutSpeed());
+    m_speedDials->setDuration(m_mtx->duration());
+    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
+    connect(m_speedDials, SIGNAL(durationChanged(int)), this, SLOT(slotDurationChanged(int)));
+    connect(m_speedDials, SIGNAL(durationTapped()), this, SLOT(slotDurationTapped()));
 }
 
 void RGBMatrixEditor::fillPatternCombo()

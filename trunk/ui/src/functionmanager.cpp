@@ -681,10 +681,11 @@ void FunctionManager::editFunction(Function* function)
     editor = NULL;
     Q_ASSERT(m_splitter->count() == 1);
 
-    // Choose the editor by the selected function's type
     if (function == NULL)
-        editor = NULL;
-    else if (function->type() == Function::Scene)
+        return;
+
+    // Choose the editor by the selected function's type
+    if (function->type() == Function::Scene)
     {
         editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
         connect(this, SIGNAL(functionManagerActive(bool)),
@@ -697,15 +698,27 @@ void FunctionManager::editFunction(Function* function)
                 editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::Collection)
+    {
         editor = new CollectionEditor(m_splitter, qobject_cast<Collection*> (function), m_doc);
+    }
     else if (function->type() == Function::EFX)
+    {
         editor = new EFXEditor(m_splitter, qobject_cast<EFX*> (function), m_doc);
+    }
     else if (function->type() == Function::RGBMatrix)
+    {
         editor = new RGBMatrixEditor(m_splitter, qobject_cast<RGBMatrix*> (function), m_doc);
+        connect(this, SIGNAL(functionManagerActive(bool)),
+                editor, SLOT(slotFunctionManagerActive(bool)));
+    }
     else if (function->type() == Function::Script)
+    {
         editor = new ScriptEditor(m_splitter, qobject_cast<Script*> (function), m_doc);
+    }
     else
+    {
         editor = NULL;
+    }
 
     // Show the editor
     if (editor != NULL)

@@ -383,9 +383,8 @@ void Chaser::postLoad()
 
 void Chaser::tap()
 {
-    Function::tap();
-    if (m_runner != NULL)
-        m_runner->next();
+    if (m_runner != NULL && durationMode() == Common)
+        m_runner->tap();
 }
 
 /*****************************************************************************

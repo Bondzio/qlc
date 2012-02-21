@@ -20,6 +20,7 @@
 */
 
 #include <QDebug>
+#include <QTime>
 
 #include "universearray.h"
 #include "chaserrunner.h"
@@ -46,6 +47,7 @@ ChaserRunner::ChaserRunner(const Doc* doc, const Chaser* chaser)
     , m_previous(false)
     , m_currentStep(0)
     , m_newCurrent(-1)
+    , m_roundTime(new QTime)
     , m_intensity(1.0)
 {
     Q_ASSERT(chaser != NULL);
@@ -59,6 +61,8 @@ ChaserRunner::ChaserRunner(const Doc* doc, const Chaser* chaser)
 
 ChaserRunner::~ChaserRunner()
 {
+    delete m_roundTime;
+    m_roundTime = NULL;
 }
 
 /****************************************************************************
@@ -192,6 +196,12 @@ void ChaserRunner::previous()
     m_previous = true;
 }
 
+void ChaserRunner::tap()
+{
+    if (m_roundTime->elapsed() >= (currentDuration() / 4))
+        next();
+}
+
 void ChaserRunner::setCurrentStep(int step)
 {
     if (step >= 0 && step < m_chaser->steps().size())
@@ -221,6 +231,8 @@ void ChaserRunner::reset()
     m_next = false;
     m_previous = false;
     m_currentFunction = NULL;
+
+    m_roundTime->start();
 }
 
 /****************************************************************************
@@ -399,4 +411,6 @@ void ChaserRunner::switchFunctions(MasterTimer* timer)
         // the step duration probably isb not the wanted subfunction speed, either
         m_currentFunction->start(timer, true, currentFadeIn(), currentFadeOut());
     }
+
+    m_roundTime->restart();
 }

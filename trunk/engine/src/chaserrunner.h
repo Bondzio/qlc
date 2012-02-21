@@ -32,6 +32,7 @@ class FadeChannel;
 class ChaserStep;
 class Function;
 class Chaser;
+class QTime;
 class Doc;
 
 class ChaserRunner : public QObject
@@ -80,6 +81,11 @@ public:
     void previous();
 
     /**
+     * Produce a tap event to the runner, possibly producing a next() call.
+     */
+    void tap();
+
+    /**
      * Set the NEW current step number. The value of m_currentStep is changed
      * on the next call to write().
      *
@@ -111,6 +117,7 @@ private:
     bool m_previous;                 //! If true, skips to the previous step when write is called
     int m_currentStep;               //! Current step in m_steps
     int m_newCurrent;                //! Manually set the current step
+    QTime* m_roundTime;              //! Counts the time between steps
 
     /************************************************************************
      * Intensity

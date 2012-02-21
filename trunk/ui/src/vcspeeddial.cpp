@@ -44,7 +44,8 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
 
     m_dial = new SpeedDial(this);
     layout()->addWidget(m_dial);
-    connect(m_dial, SIGNAL(valueChanged(uint)), this, SLOT(slotDialValueChanged(uint)));
+    connect(m_dial, SIGNAL(valueChanged(int)), this, SLOT(slotDialValueChanged(int)));
+    connect(m_dial, SIGNAL(tapped()), this, SLOT(slotDialTapped()));
 
     setCaption(tr("Duration"));
     slotModeChanged(doc->mode());
@@ -151,7 +152,7 @@ QSet <quint32> VCSpeedDial::functions() const
     return m_functions;
 }
 
-void VCSpeedDial::slotDialValueChanged(uint ms)
+void VCSpeedDial::slotDialValueChanged(int ms)
 {
     foreach (quint32 id, m_functions)
     {
@@ -164,6 +165,19 @@ void VCSpeedDial::slotDialValueChanged(uint ms)
                 function->setFadeInSpeed(ms);
             if (m_speedTypes & FadeOut)
                 function->setFadeOutSpeed(ms);
+        }
+    }
+}
+
+void VCSpeedDial::slotDialTapped()
+{
+    foreach (quint32 id, m_functions)
+    {
+        Function* function = m_doc->function(id);
+        if (function != NULL)
+        {
+            if (m_speedTypes & Duration)
+                function->tap();
         }
     }
 }

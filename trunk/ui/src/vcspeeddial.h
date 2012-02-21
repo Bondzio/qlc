@@ -124,7 +124,10 @@ public:
 
 private slots:
     /** Catch dial value changes and patch them to controlled functions */
-    void slotDialValueChanged(uint ms);
+    void slotDialValueChanged(int ms);
+
+    /** Catch dial tap button clicks and patch them to controlled functions */
+    void slotDialTapped();
 
 private:
     QSet <quint32> m_functions;

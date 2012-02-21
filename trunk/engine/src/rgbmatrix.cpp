@@ -268,6 +268,18 @@ bool RGBMatrix::saveXML(QDomDocument* doc, QDomElement* wksp_root)
  * Running
  ****************************************************************************/
 
+void RGBMatrix::tap()
+{
+    Function::tap();
+
+    if (stopped() == false)
+    {
+        FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
+        if (grp != NULL)
+            roundCheck(grp->size());
+    }
+}
+
 void RGBMatrix::preRun(MasterTimer* timer)
 {
     Q_UNUSED(timer);

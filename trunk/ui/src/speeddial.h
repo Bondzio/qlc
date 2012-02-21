@@ -73,6 +73,7 @@ public:
 
 signals:
     void valueChanged(int ms);
+    void tapped();
 
     /*************************************************************************
      * Private

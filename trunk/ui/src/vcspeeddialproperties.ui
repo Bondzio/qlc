@@ -149,7 +149,7 @@
          <string>Adjust selected functions' duration</string>
         </property>
         <property name="text">
-         <string>Duration</string>
+         <string>Duration (+ tap)</string>
         </property>
        </widget>
       </item>

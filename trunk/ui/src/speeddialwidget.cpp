@@ -57,16 +57,19 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     m_fadeIn->setTitle(tr("Fade In"));
     layout()->addWidget(m_fadeIn);
     connect(m_fadeIn, SIGNAL(valueChanged(int)), this, SIGNAL(fadeInChanged(int)));
+    connect(m_fadeIn, SIGNAL(tapped()), this, SIGNAL(fadeInTapped()));
 
     m_fadeOut = new SpeedDial(this);
     m_fadeOut->setTitle(tr("Fade Out"));
     layout()->addWidget(m_fadeOut);
     connect(m_fadeOut, SIGNAL(valueChanged(int)), this, SIGNAL(fadeOutChanged(int)));
+    connect(m_fadeOut, SIGNAL(tapped()), this, SIGNAL(fadeOutTapped()));
 
     m_duration = new SpeedDial(this);
     m_duration->setTitle(tr("Duration"));
     layout()->addWidget(m_duration);
     connect(m_duration, SIGNAL(valueChanged(int)), this, SIGNAL(durationChanged(int)));
+    connect(m_duration, SIGNAL(tapped()), this, SIGNAL(durationTapped()));
 
     /* Optional text */
     m_optionalTextGroup = new QGroupBox(this);

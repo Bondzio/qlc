@@ -110,6 +110,9 @@ public:
      ************************************************************************/
 public:
     /** @reimpl */
+    void tap();
+
+    /** @reimpl */
     void preRun(MasterTimer* timer);
 
     /** @reimpl */

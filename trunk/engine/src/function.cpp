@@ -75,7 +75,6 @@ Function::Function(Doc* doc, Type t)
     , m_intensity(1.0)
 {
     Q_ASSERT(doc != NULL);
-    m_tapTime.start();
 }
 
 Function::~Function()
@@ -441,15 +440,6 @@ QString Function::speedToString(uint ms)
 
 void Function::tap()
 {
-    // Round the elapsed time to the nearest full MasterTimer::tick().
-    // i.e. 501ms = 500ms, 509ms = 500ms, 510ms = 520ms and 519ms = 520ms, given that
-    // MasterTimer::tick() == 20ms
-    uint remainder = m_tapTime.elapsed() % MasterTimer::tick();
-    m_duration = m_tapTime.elapsed() - remainder;
-    if (remainder >= (MasterTimer::tick() / 2))
-        m_duration += MasterTimer::tick();
-    m_overrideDuration = m_duration;
-    m_tapTime.restart();
 }
 
 bool Function::loadXMLSpeed(const QDomElement& speedRoot)

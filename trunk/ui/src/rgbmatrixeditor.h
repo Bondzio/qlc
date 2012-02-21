@@ -80,6 +80,7 @@ private slots:
     void slotFadeInChanged(int ms);
     void slotFadeOutChanged(int ms);
     void slotDurationChanged(int ms);
+    void slotDurationTapped();
 
     void slotTestClicked();
     void slotRestartTest();

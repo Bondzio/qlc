@@ -169,6 +169,7 @@ void RGBMatrixEditor::init()
     connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
     connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
     connect(m_speedDials, SIGNAL(durationChanged(int)), this, SLOT(slotDurationChanged(int)));
+    connect(m_speedDials, SIGNAL(durationTapped()), this, SLOT(slotDurationTapped()));
 
     // Test slots
     connect(m_testButton, SIGNAL(clicked(bool)),
@@ -458,6 +459,11 @@ void RGBMatrixEditor::slotFadeOutChanged(int ms)
 void RGBMatrixEditor::slotDurationChanged(int ms)
 {
     m_mtx->setDuration(ms);
+}
+
+void RGBMatrixEditor::slotDurationTapped()
+{
+    m_mtx->tap();
 }
 
 void RGBMatrixEditor::slotTestClicked()

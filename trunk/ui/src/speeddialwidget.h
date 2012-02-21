@@ -63,8 +63,13 @@ public:
 
 signals:
     void fadeInChanged(int ms);
+    void fadeInTapped();
+
     void fadeOutChanged(int ms);
+    void fadeOutTapped();
+
     void durationChanged(int ms);
+    void durationTapped();
 
 private:
     SpeedDial* m_fadeIn;

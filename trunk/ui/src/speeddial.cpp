@@ -404,4 +404,5 @@ void SpeedDial::slotTapClicked()
         m_value += MS_DIV;
     setSpinValues(m_value);
     m_tapTime->restart();
+    emit tapped();
 }

@@ -397,7 +397,11 @@ void SpeedDial::slotSpinFocusGained()
 
 void SpeedDial::slotTapClicked()
 {
-    m_value = m_tapTime->elapsed();
+    // Round the elapsed time to the nearest full 10th ms.
+    int remainder = m_tapTime->elapsed() % MS_DIV;
+    m_value = m_tapTime->elapsed() - remainder;
+    if (remainder >= (MS_DIV / 2))
+        m_value += MS_DIV;
     setSpinValues(m_value);
     m_tapTime->restart();
 }

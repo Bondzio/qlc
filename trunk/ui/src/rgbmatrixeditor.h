@@ -84,6 +84,9 @@ private slots:
     void slotTestClicked();
     void slotRestartTest();
     void slotModeChanged(Doc::Mode mode);
+    void slotFixtureGroupAdded();
+    void slotFixtureGroupRemoved();
+    void slotFixtureGroupChanged(quint32 id);
 
 private:
     Doc* m_doc;

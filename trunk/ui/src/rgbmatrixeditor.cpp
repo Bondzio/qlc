@@ -72,6 +72,9 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
 
     connect(m_previewTimer, SIGNAL(timeout()), this, SLOT(slotPreviewTimeout()));
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
+    connect(m_doc, SIGNAL(fixtureGroupAdded(quint32)), this, SLOT(slotFixtureGroupAdded()));
+    connect(m_doc, SIGNAL(fixtureGroupRemoved(quint32)), this, SLOT(slotFixtureGroupRemoved()));
+    connect(m_doc, SIGNAL(fixtureGroupChanged(quint32)), this, SLOT(slotFixtureGroupChanged(quint32)));
 
     init();
 
@@ -514,4 +517,23 @@ void RGBMatrixEditor::slotModeChanged(Doc::Mode mode)
         m_previewTimer->start();
         m_testButton->setEnabled(true);
     }
+}
+
+void RGBMatrixEditor::slotFixtureGroupAdded()
+{
+    fillFixtureGroupCombo();
+}
+
+void RGBMatrixEditor::slotFixtureGroupRemoved()
+{
+    fillFixtureGroupCombo();
+    slotFixtureGroupActivated(m_fixtureGroupCombo->currentIndex());
+}
+
+void RGBMatrixEditor::slotFixtureGroupChanged(quint32 id)
+{
+    if (id != m_mtx->fixtureGroup())
+        return;
+
+    slotFixtureGroupActivated(m_fixtureGroupCombo->currentIndex());
 }

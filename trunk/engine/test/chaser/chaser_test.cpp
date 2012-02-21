@@ -846,13 +846,11 @@ void Chaser_Test::tap()
     QVERIFY(c->m_runner != NULL);
     QCOMPARE(c->duration(), uint(0));
     c->write(m_doc->masterTimer(), NULL);
+    QCOMPARE(c->m_runner->m_next, false);
     c->tap();
-    QTest::qWait(500);
+    QTest::qWait(MasterTimer::tick());
     c->tap();
     QCOMPARE(c->m_runner->m_next, true);
-    // Different OSs and different loads produce different results. But the exact
-    // value is not important here, just check that the value is altered.
-    QVERIFY(c->duration() >= uint(500 - 20) && c->duration() <= uint(500 + 20));
 }
 
 void Chaser_Test::preRun()

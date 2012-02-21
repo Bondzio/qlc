@@ -32,6 +32,7 @@
 #include <QDebug>
 
 #include "fixtureselection.h"
+#include "speeddialwidget.h"
 #include "rgbmatrixeditor.h"
 #include "speedspinbox.h"
 #include "rgbmatrix.h"
@@ -124,31 +125,17 @@ void RGBMatrixEditor::init()
     }
 
     /* Speed */
-    new QHBoxLayout(m_fadeInContainer);
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
-    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
-    m_fadeInContainer->layout()->setMargin(0);
-    m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
-
-    new QHBoxLayout(m_fadeOutContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
-    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
-    m_fadeOutContainer->layout()->setMargin(0);
-    m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
-
-    new QHBoxLayout(m_durationContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
-    m_durationContainer->layout()->addWidget(m_durationSpin);
-    m_durationContainer->layout()->setMargin(0);
-    m_durationSpin->setValue(m_mtx->duration());
+    m_speedDials = new SpeedDialWidget(this);
+    m_speedDials->setWindowTitle(m_mtx->name());
+    m_speedDials->show();
 
     fillPatternCombo();
     fillFixtureGroupCombo();
     fillAnimationCombo();
 
-    m_fadeInSpin->setValue(m_mtx->fadeInSpeed());
-    m_fadeOutSpin->setValue(m_mtx->fadeOutSpeed());
-    m_durationSpin->setValue(m_mtx->duration());
+    m_speedDials->setFadeInSpeed(m_mtx->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_mtx->fadeOutSpeed());
+    m_speedDials->setDuration(m_mtx->duration());
 
     QPixmap pm(100, 26);
     pm.fill(m_mtx->monoColor());
@@ -179,12 +166,9 @@ void RGBMatrixEditor::init()
     connect(m_forward, SIGNAL(clicked()), this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()), this, SLOT(slotBackwardClicked()));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeInSpinChanged(int)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeOutSpinChanged(int)));
-    connect(m_durationSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotDurationSpinChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
+    connect(m_speedDials, SIGNAL(durationChanged(int)), this, SLOT(slotDurationChanged(int)));
 
     // Test slots
     connect(m_testButton, SIGNAL(clicked(bool)),
@@ -349,6 +333,7 @@ void RGBMatrixEditor::slotPreviewTimeout()
 void RGBMatrixEditor::slotNameEdited(const QString& text)
 {
     m_mtx->setName(text);
+    m_speedDials->setWindowTitle(text);
 }
 
 void RGBMatrixEditor::slotPatternActivated(const QString& text)
@@ -460,17 +445,17 @@ void RGBMatrixEditor::slotBackwardClicked()
     m_mtx->setDirection(Function::Backward);
 }
 
-void RGBMatrixEditor::slotFadeInSpinChanged(int ms)
+void RGBMatrixEditor::slotFadeInChanged(int ms)
 {
     m_mtx->setFadeInSpeed(ms);
 }
 
-void RGBMatrixEditor::slotFadeOutSpinChanged(int ms)
+void RGBMatrixEditor::slotFadeOutChanged(int ms)
 {
     m_mtx->setFadeOutSpeed(ms);
 }
 
-void RGBMatrixEditor::slotDurationSpinChanged(int ms)
+void RGBMatrixEditor::slotDurationChanged(int ms)
 {
     m_mtx->setDuration(ms);
 }

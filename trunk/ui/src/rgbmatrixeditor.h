@@ -30,8 +30,8 @@
 #include "qlcpoint.h"
 #include "doc.h"
 
+class SpeedDialWidget;
 class QGraphicsScene;
-class SpeedSpinBox;
 class RGBMatrix;
 class QTimer;
 class Doc;
@@ -77,9 +77,9 @@ private slots:
     void slotForwardClicked();
     void slotBackwardClicked();
 
-    void slotFadeInSpinChanged(int ms);
-    void slotFadeOutSpinChanged(int ms);
-    void slotDurationSpinChanged(int ms);
+    void slotFadeInChanged(int ms);
+    void slotFadeOutChanged(int ms);
+    void slotDurationChanged(int ms);
 
     void slotTestClicked();
     void slotRestartTest();
@@ -95,9 +95,7 @@ private:
     QList <RGBScript> m_scripts;
     QList <RGBMap> m_previewMaps;
 
-    SpeedSpinBox* m_fadeInSpin;
-    SpeedSpinBox* m_fadeOutSpin;
-    SpeedSpinBox* m_durationSpin;
+    SpeedDialWidget* m_speedDials;
 
     QGraphicsScene* m_scene;
     QTimer* m_previewTimer;

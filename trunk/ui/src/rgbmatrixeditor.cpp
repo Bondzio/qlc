@@ -80,6 +80,8 @@ RGBMatrixEditor::RGBMatrixEditor(QWidget* parent, RGBMatrix* mtx, Doc* doc)
 
     init();
 
+    slotModeChanged(m_doc->mode());
+
     // Set focus to the editor
     m_nameEdit->setFocus();
 }

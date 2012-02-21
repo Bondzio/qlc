@@ -51,7 +51,6 @@ private slots:
     void save();
     void customMenu();
     void toggle();
-    void tap();
     void flash();
     void input();
     void paint();

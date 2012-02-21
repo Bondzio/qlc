@@ -57,6 +57,7 @@ public:
 
     void setDurationTitle(const QString& title);
     void setDurationEnabled(bool set);
+    void setDurationVisible(bool set);
     void setDuration(int ms);
     int duration() const;
 

@@ -31,7 +31,7 @@
 #include "scene.h"
 
 class GenericDMXSource;
-class SpeedSpinBox;
+class SpeedDialWidget;
 class MasterTimer;
 class OutputMap;
 class InputMap;
@@ -110,13 +110,11 @@ private slots:
     void slotEnableAll();
     void slotDisableAll();
 
-    void slotFadeInSpinChanged(int ms);
-    void slotFadeOutSpinChanged(int ms);
+    void slotFadeInChanged(int ms);
+    void slotFadeOutChanged(int ms);
 
 private:
-    SpeedSpinBox* m_fadeInSpin;
-    SpeedSpinBox* m_fadeOutSpin;
-    SpeedSpinBox* m_durationSpin;
+    SpeedDialWidget* m_speedDials;
 
     /*********************************************************************
      * Fixture tabs

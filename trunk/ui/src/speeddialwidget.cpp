@@ -43,13 +43,14 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
 {
     QSettings settings;
     QVariant var;
+    QBoxLayout* lay = NULL;
 
     /* Layout with customizable direction */
     var = settings.value(SETTINGS_DIRECTION);
     if (var.isValid() == true)
-        new QBoxLayout(QBoxLayout::Direction(var.toInt()), this);
+        lay = new QBoxLayout(QBoxLayout::Direction(var.toInt()), this);
     else
-        new QVBoxLayout(this);
+        lay = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
     /* Create dials */
     m_fadeIn = new SpeedDial(this);
@@ -76,6 +77,8 @@ SpeedDialWidget::SpeedDialWidget(QWidget* parent, Qt::WindowFlags flags)
     m_optionalTextGroup->setVisible(false);
     connect(m_optionalTextEdit, SIGNAL(textEdited(const QString&)),
             this, SIGNAL(optionalTextEdited(const QString&)));
+
+    lay->addStretch();
 
     /* Position */
     var = settings.value(SETTINGS_GEOMETRY);
@@ -142,6 +145,11 @@ void SpeedDialWidget::setDurationTitle(const QString& title)
 void SpeedDialWidget::setDurationEnabled(bool enable)
 {
     m_duration->setEnabled(enable);
+}
+
+void SpeedDialWidget::setDurationVisible(bool set)
+{
+    m_duration->setVisible(set);
 }
 
 void SpeedDialWidget::setDuration(int ms)

@@ -33,9 +33,9 @@
 
 #include "genericdmxsource.h"
 #include "fixtureselection.h"
+#include "speeddialwidget.h"
 #include "fixtureconsole.h"
 #include "qlcfixturedef.h"
-#include "speedspinbox.h"
 #include "sceneeditor.h"
 #include "mastertimer.h"
 #include "qlcchannel.h"
@@ -169,24 +169,7 @@ void SceneEditor::init()
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
 
-    /* Speeds */
-    new QHBoxLayout(m_fadeInContainer);
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
-    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
-    m_fadeInContainer->layout()->setMargin(0);
-    m_fadeInSpin->setValue(m_scene->fadeInSpeed());
-
-    new QHBoxLayout(m_fadeOutContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
-    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
-    m_fadeOutContainer->layout()->setMargin(0);
-    m_fadeOutSpin->setValue(m_scene->fadeOutSpeed());
-
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeInSpinChanged(int)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeOutSpinChanged(int)));
-
+    // Fixtures & tabs
     QListIterator <SceneValue> it(m_scene->values());
     while (it.hasNext() == true)
     {
@@ -204,6 +187,16 @@ void SceneEditor::init()
 
         setSceneValue(scv);
     }
+
+    m_speedDials = new SpeedDialWidget(this);
+    m_speedDials->setWindowTitle(m_scene->name());
+    m_speedDials->setFadeInSpeed(m_scene->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_scene->fadeOutSpeed());
+    m_speedDials->setDurationEnabled(false);
+    m_speedDials->setDurationVisible(false);
+    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
+    m_speedDials->show();
 }
 
 void SceneEditor::setSceneValue(const SceneValue& scv)
@@ -513,6 +506,7 @@ void SceneEditor::removeFixtureItem(Fixture* fixture)
 void SceneEditor::slotNameEdited(const QString& name)
 {
     m_scene->setName(name);
+    m_speedDials->setWindowTitle(m_scene->name());
 }
 
 void SceneEditor::slotAddFixtureClicked()
@@ -592,12 +586,12 @@ void SceneEditor::slotDisableAll()
     }
 }
 
-void SceneEditor::slotFadeInSpinChanged(int ms)
+void SceneEditor::slotFadeInChanged(int ms)
 {
     m_scene->setFadeInSpeed(ms);
 }
 
-void SceneEditor::slotFadeOutSpinChanged(int ms)
+void SceneEditor::slotFadeOutChanged(int ms)
 {
     m_scene->setFadeOutSpeed(ms);
 }

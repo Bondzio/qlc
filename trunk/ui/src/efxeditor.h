@@ -31,8 +31,8 @@
 #include "efx.h"
 #include "doc.h"
 
+class SpeedDialWidget;
 class EFXPreviewArea;
-class SpeedSpinBox;
 class Doc;
 
 class EFXEditor : public QWidget, public Ui_EFXEditor
@@ -46,6 +46,9 @@ class EFXEditor : public QWidget, public Ui_EFXEditor
 public:
     EFXEditor(QWidget* parent, EFX* efx, Doc* doc);
     ~EFXEditor();
+
+public slots:
+    void slotFunctionManagerActive(bool active);
 
 private:
     Doc* m_doc;
@@ -84,6 +87,7 @@ private:
     void addFixtureItem(EFXFixture* ef);
     void updateIntensityColumn(QTreeWidgetItem* item, EFXFixture* ef);
     void removeFixtureItem(EFXFixture* ef);
+    void createSpeedDials();
 
 private slots:
     void slotNameEdited(const QString &text);
@@ -98,14 +102,12 @@ private slots:
     void slotSerialRadioToggled(bool state);
     void slotAsymmetricRadioToggled(bool state);
 
-    void slotFadeInSpinChanged(int ms);
-    void slotFadeOutSpinChanged(int ms);
-    void slotDurationSpinChanged(int ms);
+    void slotFadeInChanged(int ms);
+    void slotFadeOutChanged(int ms);
+    void slotDurationChanged(int ms);
 
 private:
-    SpeedSpinBox* m_fadeInSpin;
-    SpeedSpinBox* m_fadeOutSpin;
-    SpeedSpinBox* m_durationSpin;
+    SpeedDialWidget* m_speedDials;
 
     /*********************************************************************
      * Movement page

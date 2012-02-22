@@ -704,6 +704,8 @@ void FunctionManager::editFunction(Function* function)
     else if (function->type() == Function::EFX)
     {
         editor = new EFXEditor(m_splitter, qobject_cast<EFX*> (function), m_doc);
+        connect(this, SIGNAL(functionManagerActive(bool)),
+                editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::RGBMatrix)
     {

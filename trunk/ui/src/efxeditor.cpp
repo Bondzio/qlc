@@ -37,6 +37,7 @@
 #include "qlcchannel.h"
 
 #include "fixtureselection.h"
+#include "speeddialwidget.h"
 #include "efxpreviewarea.h"
 #include "speedspinbox.h"
 #include "efxeditor.h"
@@ -61,6 +62,9 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
     , m_efx(efx)
+    , m_previewArea(NULL)
+    , m_points(NULL)
+    , m_speedDials(NULL)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(efx != NULL);
@@ -76,6 +80,8 @@ EFXEditor::EFXEditor(QWidget* parent, EFX* efx, Doc* doc)
     connect(&m_testTimer, SIGNAL(timeout()), this, SLOT(slotRestartTest()));
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
 
+    createSpeedDials();
+
     // Set focus to the editor
     m_nameEdit->setFocus();
 }
@@ -86,26 +92,23 @@ EFXEditor::~EFXEditor()
         m_efx->stopAndWait();
 }
 
+void EFXEditor::slotFunctionManagerActive(bool active)
+{
+    if (active == true)
+    {
+        if (m_speedDials == NULL)
+            createSpeedDials();
+    }
+    else
+    {
+        if (m_speedDials != NULL)
+            delete m_speedDials;
+        m_speedDials = NULL;
+    }
+}
+
 void EFXEditor::initGeneralPage()
 {
-    new QHBoxLayout(m_fadeInContainer);
-    m_fadeInSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeInContainer);
-    m_fadeInContainer->layout()->addWidget(m_fadeInSpin);
-    m_fadeInContainer->layout()->setMargin(0);
-    m_fadeInSpin->setValue(m_efx->fadeInSpeed());
-
-    new QHBoxLayout(m_fadeOutContainer);
-    m_fadeOutSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_fadeOutContainer);
-    m_fadeOutContainer->layout()->addWidget(m_fadeOutSpin);
-    m_fadeOutContainer->layout()->setMargin(0);
-    m_fadeOutSpin->setValue(m_efx->fadeOutSpeed());
-
-    new QHBoxLayout(m_durationContainer);
-    m_durationSpin = new SpeedSpinBox(SpeedSpinBox::Zero, m_durationContainer);
-    m_durationContainer->layout()->addWidget(m_durationSpin);
-    m_durationContainer->layout()->setMargin(0);
-    m_durationSpin->setValue(m_efx->duration());
-
     connect(m_nameEdit, SIGNAL(textEdited(const QString&)),
             this, SLOT(slotNameEdited(const QString&)));
 
@@ -129,13 +132,6 @@ void EFXEditor::initGeneralPage()
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotAsymmetricRadioToggled(bool)));
 
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeInSpinChanged(int)));
-    connect(m_fadeOutSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotFadeOutSpinChanged(int)));
-    connect(m_durationSpin, SIGNAL(valueChanged(int)),
-            this, SLOT(slotDurationSpinChanged(int)));
-
     // Test slots
     connect(m_testButton, SIGNAL(clicked()),
             this, SLOT(slotTestClicked()));
@@ -148,8 +144,6 @@ void EFXEditor::initGeneralPage()
     connect(m_serialRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotRestartTest()));
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
-            this, SLOT(slotRestartTest()));
-    connect(m_fadeInSpin, SIGNAL(valueChanged(int)),
             this, SLOT(slotRestartTest()));
 
     /* Set the EFX's name to the name field */
@@ -451,9 +445,25 @@ void EFXEditor::removeFixtureItem(EFXFixture* ef)
     updateIndices(from, m_tree->topLevelItemCount() - 1);
 }
 
+void EFXEditor::createSpeedDials()
+{
+    Q_ASSERT(m_speedDials == NULL);
+    m_speedDials = new SpeedDialWidget(this);
+    m_speedDials->setWindowTitle(m_efx->name());
+    m_speedDials->show();
+    m_speedDials->setFadeInSpeed(m_efx->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_efx->fadeOutSpeed());
+    m_speedDials->setDuration(m_efx->duration());
+    connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
+    connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
+    connect(m_speedDials, SIGNAL(durationChanged(int)), this, SLOT(slotDurationChanged(int)));
+    connect(m_speedDials, SIGNAL(durationTapped()), this, SLOT(slotDurationTapped()));
+}
+
 void EFXEditor::slotNameEdited(const QString &text)
 {
     m_efx->setName(text);
+    m_speedDials->setWindowTitle(text);
 }
 
 void EFXEditor::slotFixtureItemChanged(QTreeWidgetItem* item, int column)
@@ -662,17 +672,18 @@ void EFXEditor::slotAsymmetricRadioToggled(bool state)
         m_efx->setPropagationMode(EFX::Asymmetric);
 }
 
-void EFXEditor::slotFadeInSpinChanged(int ms)
+void EFXEditor::slotFadeInChanged(int ms)
 {
     m_efx->setFadeInSpeed(ms);
+    slotRestartTest();
 }
 
-void EFXEditor::slotFadeOutSpinChanged(int ms)
+void EFXEditor::slotFadeOutChanged(int ms)
 {
     m_efx->setFadeOutSpeed(ms);
 }
 
-void EFXEditor::slotDurationSpinChanged(int ms)
+void EFXEditor::slotDurationChanged(int ms)
 {
     m_efx->setDuration(ms);
 }

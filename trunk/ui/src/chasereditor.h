@@ -25,8 +25,8 @@
 #include <QPointer>
 #include <QWidget>
 #include "ui_chasereditor.h"
+#include "doc.h"
 
-class Doc;
 class Chaser;
 class Function;
 class InputMap;
@@ -111,6 +111,17 @@ private:
 
 private:
     QPointer<SpeedDialWidget> m_speedDials;
+
+    /************************************************************************
+     * Test
+     ************************************************************************/
+private slots:
+    void slotRestartTest();
+    void slotTestToggled(bool state);
+    void slotTestPreviousClicked();
+    void slotTestNextClicked();
+    void slotModeChanged(Doc::Mode mode);
+    void slotTestFunctionStopped();
 
     /************************************************************************
      * Utilities

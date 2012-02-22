@@ -378,13 +378,25 @@ void Chaser::postLoad()
 }
 
 /*****************************************************************************
- * Speed
+ * Next/Previous
  *****************************************************************************/
 
 void Chaser::tap()
 {
     if (m_runner != NULL && durationMode() == Common)
         m_runner->tap();
+}
+
+void Chaser::previous()
+{
+    if (m_runner != NULL)
+        m_runner->previous();
+}
+
+void Chaser::next()
+{
+    if (m_runner != NULL)
+        m_runner->next();
 }
 
 /*****************************************************************************

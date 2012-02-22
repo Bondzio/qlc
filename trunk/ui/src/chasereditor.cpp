@@ -195,13 +195,25 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
             this, SLOT(slotForwardClicked()));
     connect(m_backward, SIGNAL(clicked()),
             this, SLOT(slotBackwardClicked()));
+    connect(m_forward, SIGNAL(clicked()),
+            this, SLOT(slotRestartTest()));
+    connect(m_backward, SIGNAL(clicked()),
+            this, SLOT(slotRestartTest()));
 
     connect(m_tree, SIGNAL(itemSelectionChanged()),
             this, SLOT(slotItemSelectionChanged()));
 
+    connect(m_testButton, SIGNAL(toggled(bool)), this, SLOT(slotTestToggled(bool)));
+    connect(m_testPreviousButton, SIGNAL(clicked()), this, SLOT(slotTestPreviousClicked()));
+    connect(m_testNextButton, SIGNAL(clicked()), this, SLOT(slotTestNextClicked()));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
+    connect(m_chaser, SIGNAL(stopped(quint32)), this, SLOT(slotTestFunctionStopped()));
+
     updateTree(true);
     updateClipboardButtons();
     updateSpeedDials();
+
+    slotModeChanged(m_doc->mode());
 
     // Set focus to the editor
     m_nameEdit->setFocus();
@@ -685,6 +697,66 @@ void ChaserEditor::updateSpeedDials()
         m_speedDials->setDurationTitle(duration);
         break;
     }
+}
+
+/****************************************************************************
+ * Test
+ ****************************************************************************/
+
+void ChaserEditor::slotRestartTest()
+{
+    if (m_testButton->isChecked() == true)
+    {
+        // Toggle off, toggle on. Derp.
+        m_testButton->click();
+        m_testButton->click();
+    }
+}
+
+void ChaserEditor::slotTestToggled(bool state)
+{
+    m_testPreviousButton->setEnabled(state);
+    m_testNextButton->setEnabled(state);
+
+    if (state == true)
+    {
+        if (m_chaser->stopped() == true)
+            m_chaser->start(m_doc->masterTimer());
+    }
+    else
+    {
+        if (m_chaser->stopped() == false)
+            m_chaser->stopAndWait();
+    }
+}
+
+void ChaserEditor::slotTestPreviousClicked()
+{
+    m_chaser->previous();
+}
+
+void ChaserEditor::slotTestNextClicked()
+{
+    m_chaser->next();
+}
+
+void ChaserEditor::slotModeChanged(Doc::Mode mode)
+{
+    if (mode == Doc::Operate)
+    {
+        m_testButton->setEnabled(false);
+        if (m_testButton->isChecked() == true)
+            m_chaser->stop();
+    }
+    else
+    {
+        m_testButton->setEnabled(true);
+    }
+}
+
+void ChaserEditor::slotTestFunctionStopped()
+{
+    m_testButton->setChecked(false);
 }
 
 /****************************************************************************

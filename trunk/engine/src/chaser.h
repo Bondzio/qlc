@@ -170,11 +170,17 @@ public:
     void postLoad();
 
     /*********************************************************************
-     * Speed
+     * Next/Previous
      *********************************************************************/
 public:
     /** @reimpl */
     void tap();
+
+    /** Skip to the previous step */
+    void previous();
+
+    /** Skip to the next step */
+    void next();
 
     /*********************************************************************
      * Running

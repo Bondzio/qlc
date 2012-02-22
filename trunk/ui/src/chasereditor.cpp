@@ -223,6 +223,9 @@ ChaserEditor::~ChaserEditor()
     if (m_speedDials != NULL)
         delete m_speedDials;
     m_speedDials = NULL;
+
+    if (m_testButton->isChecked() == true)
+        m_chaser->stopAndWait();
 }
 
 void ChaserEditor::slotFunctionManagerActive(bool active)

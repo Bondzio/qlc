@@ -69,6 +69,7 @@ protected slots:
     void slotModeChanged(Doc::Mode mode);
     void slotDocClearing();
     void slotFunctionChanged(quint32 id);
+    void slotFunctionAdded(quint32 id);
     void slotSubWindowActivated(QMdiSubWindow* sub);
 
 protected:
@@ -81,6 +82,9 @@ protected:
 public:
     /** Update all functions to function tree */
     void updateTree();
+
+    /** Select the function with the given ID */
+    void selectFunction(quint32 id);
 
 private:
     /** Init the splitter view */
@@ -117,6 +121,7 @@ private slots:
 private:
     QSplitter* m_splitter;
     QTreeWidget* m_tree;
+    bool m_ignoreSignals;
 
     /*********************************************************************
      * Menus, toolbar & actions

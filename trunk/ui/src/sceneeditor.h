@@ -33,9 +33,11 @@
 class GenericDMXSource;
 class SpeedDialWidget;
 class MasterTimer;
+class QComboBox;
 class OutputMap;
 class InputMap;
 class QAction;
+class Chaser;
 class Doc;
 
 class SceneEditor : public QWidget, public Ui_SceneEditor
@@ -79,22 +81,26 @@ private slots:
     void slotCopyToAll();
     void slotColorTool();
     void slotBlindToggled(bool state);
+    void slotRecord();
+    void slotChaserComboActivated(int index);
     void slotModeChanged(Doc::Mode mode);
 
 private:
     bool isColorToolAvailable();
     void createSpeedDials();
+    Chaser* selectedChaser() const;
 
 private:
     QAction* m_enableCurrentAction;
     QAction* m_disableCurrentAction;
-
     QAction* m_copyAction;
     QAction* m_pasteAction;
     QAction* m_copyToAllAction;
     QAction* m_colorToolAction;
-
     QAction* m_blindAction;
+    QAction* m_recordAction;
+
+    QComboBox* m_chaserCombo;
 
     /*********************************************************************
      * General tab

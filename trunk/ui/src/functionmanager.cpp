@@ -70,6 +70,21 @@ FunctionManager* FunctionManager::s_instance = NULL;
 FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     : QWidget(parent, flags)
     , m_doc(doc)
+    , m_splitter(NULL)
+    , m_tree(NULL)
+    , m_ignoreSignals(false)
+    , m_toolbar(NULL)
+    , m_actionGroup(NULL)
+    , m_addSceneAction(NULL)
+    , m_addChaserAction(NULL)
+    , m_addCollectionAction(NULL)
+    , m_addEFXAction(NULL)
+    , m_addRGBMatrixAction(NULL)
+    , m_addScriptAction(NULL)
+    , m_wizardAction(NULL)
+    , m_cloneAction(NULL)
+    , m_deleteAction(NULL)
+    , m_selectAllAction(NULL)
 {
     Q_ASSERT(doc != NULL);
 
@@ -90,6 +105,7 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
 
     connect(m_doc, SIGNAL(clearing()), this, SLOT(slotDocClearing()));
     connect(m_doc, SIGNAL(functionChanged(quint32)), this, SLOT(slotFunctionChanged(quint32)));
+    connect(m_doc, SIGNAL(functionAdded(quint32)), this, SLOT(slotFunctionAdded(quint32)));
 
     QSettings settings;
     QVariant var = settings.value(SETTINGS_SPLITTER);
@@ -168,6 +184,19 @@ void FunctionManager::slotFunctionChanged(quint32 id)
     QTreeWidgetItem* item = functionItem(function);
     if (item != NULL)
         updateFunctionItem(item, function);
+}
+
+void FunctionManager::slotFunctionAdded(quint32 id)
+{
+    if (m_ignoreSignals == true)
+        return;
+
+    Function* function = m_doc->function(id);
+    if (function == NULL)
+        return;
+
+    QTreeWidgetItem* item = new QTreeWidgetItem(parentItem(function));
+    updateFunctionItem(item, function);
 }
 
 void FunctionManager::slotSubWindowActivated(QMdiSubWindow* sub)
@@ -295,85 +324,55 @@ void FunctionManager::initToolbar()
 void FunctionManager::slotAddScene()
 {
     Function* f = new Scene(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotAddChaser()
 {
     Function* f = new Chaser(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotAddCollection()
 {
     Function* f = new Collection(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotAddEFX()
 {
     Function* f = new EFX(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotAddRGBMatrix()
 {
     Function* f = new RGBMatrix(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotAddScript()
 {
     Function* f = new Script(m_doc);
-    if (m_doc->addFunction(f) == true)
-    {
-        addFunction(f);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
-    }
+    m_ignoreSignals = true;
+    m_doc->addFunction(f);
+    m_ignoreSignals = false;
+    addFunction(f);
 }
 
 void FunctionManager::slotWizard()
@@ -484,6 +483,16 @@ void FunctionManager::updateTree()
     m_tree->clear();
     foreach (Function* function, m_doc->functions())
         updateFunctionItem(new QTreeWidgetItem(parentItem(function)), function);
+}
+
+void FunctionManager::selectFunction(quint32 id)
+{
+    Function* function = m_doc->function(id);
+    if (function == NULL)
+        return;
+    QTreeWidgetItem* item = functionItem(function);
+    if (item != NULL)
+        m_tree->setCurrentItem(item);
 }
 
 void FunctionManager::updateFunctionItem(QTreeWidgetItem* item, const Function* function)

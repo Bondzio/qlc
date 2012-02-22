@@ -26,6 +26,8 @@
 #include <QToolButton>
 #include <QScrollArea>
 #include <QTabWidget>
+#include <QComboBox>
+#include <QSettings>
 #include <QToolBar>
 #include <QLayout>
 #include <QLabel>
@@ -34,14 +36,17 @@
 #include "genericdmxsource.h"
 #include "fixtureselection.h"
 #include "speeddialwidget.h"
+#include "functionmanager.h"
 #include "fixtureconsole.h"
 #include "qlcfixturedef.h"
 #include "sceneeditor.h"
 #include "mastertimer.h"
 #include "qlcchannel.h"
+#include "chaserstep.h"
 #include "outputmap.h"
 #include "inputmap.h"
 #include "fixture.h"
+#include "chaser.h"
 #include "scene.h"
 #include "doc.h"
 
@@ -59,6 +64,8 @@
 #define RED "red"
 #define GREEN "green"
 #define BLUE "blue"
+
+#define SETTINGS_CHASER "sceneeditor/chaser"
 
 SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
     : QWidget(parent)
@@ -93,6 +100,10 @@ SceneEditor::~SceneEditor()
 {
     delete m_source;
     m_source = NULL;
+
+    QSettings settings;
+    quint32 id = m_chaserCombo->itemData(m_chaserCombo->currentIndex()).toUInt();
+    settings.setValue(SETTINGS_CHASER, id);
 }
 
 void SceneEditor::slotFunctionManagerActive(bool active)
@@ -125,8 +136,12 @@ void SceneEditor::init()
                                     tr("Copy current values to all fixtures"), this);
     m_colorToolAction = new QAction(QIcon(":/color.png"),
                                     tr("Color tool for CMY/RGB-capable fixtures"), this);
-    m_blindAction = new QAction(QIcon(":/blind.png"), tr("Toggle blind mode"), this);
+    m_blindAction = new QAction(QIcon(":/blind.png"),
+                                tr("Toggle blind mode"), this);
+    m_recordAction = new QAction(QIcon(":/record.png"),
+                                 tr("Clone this scene and append as a new step to the selected chaser"), this);
 
+    // Blind initial state
     m_blindAction->setCheckable(true);
     if (m_doc->mode() == Doc::Operate)
     {
@@ -139,6 +154,32 @@ void SceneEditor::init()
         m_source->setOutputEnabled(true);
     }
 
+    // Chaser combo init
+    quint32 selectId = Function::invalidId();
+    QSettings settings;
+    QVariant var = settings.value(SETTINGS_CHASER);
+    if (var.isValid() == true)
+        selectId = var.toUInt();
+    m_chaserCombo = new QComboBox(this);
+    m_chaserCombo->addItem(tr("None"), Function::invalidId());
+    slotChaserComboActivated(0);
+    QListIterator <Function*> fit(m_doc->functions());
+    while (fit.hasNext() == true)
+    {
+        Function* function(fit.next());
+        if (function->type() == Function::Chaser)
+        {
+            m_chaserCombo->addItem(function->name(), function->id());
+            if (function->id() == selectId)
+            {
+                int index = m_chaserCombo->count() - 1;
+                m_chaserCombo->setCurrentIndex(index);
+                slotChaserComboActivated(index);
+            }
+        }
+    }
+
+    // Connections
     connect(m_enableCurrentAction, SIGNAL(triggered(bool)),
             this, SLOT(slotEnableCurrent()));
     connect(m_disableCurrentAction, SIGNAL(triggered(bool)),
@@ -153,6 +194,10 @@ void SceneEditor::init()
             this, SLOT(slotColorTool()));
     connect(m_blindAction, SIGNAL(toggled(bool)),
             this, SLOT(slotBlindToggled(bool)));
+    connect(m_recordAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotRecord()));
+    connect(m_chaserCombo, SIGNAL(activated(int)),
+            this, SLOT(slotChaserComboActivated(int)));
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
             this, SLOT(slotModeChanged(Doc::Mode)));
 
@@ -169,6 +214,9 @@ void SceneEditor::init()
     toolBar->addAction(m_colorToolAction);
     toolBar->addSeparator();
     toolBar->addAction(m_blindAction);
+    toolBar->addSeparator();
+    toolBar->addAction(m_recordAction);
+    toolBar->addWidget(m_chaserCombo);
 
     /* Tab widget */
     connect(m_tab, SIGNAL(currentChanged(int)),
@@ -396,6 +444,32 @@ void SceneEditor::slotModeChanged(Doc::Mode mode)
         m_blindAction->setChecked(false);
 }
 
+void SceneEditor::slotRecord()
+{
+    Chaser* chaser = selectedChaser();
+    if (chaser == NULL)
+        return;
+
+    QString name = chaser->name() + QString(" - %1").arg(chaser->steps().size() + 1);
+    Scene* clone = new Scene(m_doc);
+    clone->copyFrom(m_scene);
+    clone->setName(name);
+    m_doc->addFunction(clone);
+    chaser->addStep(ChaserStep(clone->id()));
+
+    // Switch to the cloned scene
+    FunctionManager::instance()->selectFunction(clone->id());
+}
+
+void SceneEditor::slotChaserComboActivated(int index)
+{
+    quint32 id = m_chaserCombo->itemData(index).toUInt();
+    if (id == Function::invalidId())
+        m_recordAction->setEnabled(false);
+    else
+        m_recordAction->setEnabled(true);
+}
+
 bool SceneEditor::isColorToolAvailable()
 {
     Fixture* fxi;
@@ -446,6 +520,15 @@ void SceneEditor::createSpeedDials()
     connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
     connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
     m_speedDials->show();
+}
+
+Chaser* SceneEditor::selectedChaser() const
+{
+    QVariant var = m_chaserCombo->itemData(m_chaserCombo->currentIndex());
+    if (var.isValid() == false)
+        return NULL;
+    else
+        return qobject_cast<Chaser*> (m_doc->function(var.toUInt()));
 }
 
 /*****************************************************************************

@@ -475,6 +475,9 @@
    </item>
    <item row="13" column="0" colspan="3">
     <widget class="QPushButton" name="m_testButton">
+     <property name="toolTip">
+      <string>See what the chaser does when it is run</string>
+     </property>
      <property name="text">
       <string>Test Run</string>
      </property>
@@ -488,6 +491,9 @@
      <property name="enabled">
       <bool>false</bool>
      </property>
+     <property name="toolTip">
+      <string>Skip to the next step</string>
+     </property>
      <property name="text">
       <string>Next</string>
      </property>
@@ -497,6 +503,9 @@
     <widget class="QPushButton" name="m_testPreviousButton">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Skip to the previous step</string>
      </property>
      <property name="text">
       <string>Previous</string>

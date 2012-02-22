@@ -325,6 +325,9 @@
    </item>
    <item row="4" column="0" colspan="3">
     <widget class="QPushButton" name="m_testButton">
+     <property name="toolTip">
+      <string>See what the RGB Matrix does when it is run</string>
+     </property>
      <property name="text">
       <string>Test Run</string>
      </property>

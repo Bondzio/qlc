@@ -207,7 +207,6 @@ ChaserEditor::ChaserEditor(QWidget* parent, Chaser* chaser, Doc* doc)
     connect(m_testPreviousButton, SIGNAL(clicked()), this, SLOT(slotTestPreviousClicked()));
     connect(m_testNextButton, SIGNAL(clicked()), this, SLOT(slotTestNextClicked()));
     connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged(Doc::Mode)));
-    connect(m_chaser, SIGNAL(stopped(quint32)), this, SLOT(slotTestFunctionStopped()));
 
     updateTree(true);
     updateClipboardButtons();
@@ -754,9 +753,29 @@ void ChaserEditor::slotModeChanged(Doc::Mode mode)
     }
 }
 
-void ChaserEditor::slotTestFunctionStopped()
+bool ChaserEditor::interruptRunning()
 {
-    m_testButton->setChecked(false);
+    if (m_chaser->stopped() == false)
+    {
+        m_chaser->stopAndWait();
+        m_testButton->setChecked(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void ChaserEditor::continueRunning(bool running)
+{
+    if (running == true)
+    {
+        if (m_doc->mode() == Doc::Operate)
+            m_chaser->start(m_doc->masterTimer());
+        else
+            m_testButton->click();
+    }
 }
 
 /****************************************************************************
@@ -863,12 +882,18 @@ void ChaserEditor::updateChaserContents()
 {
     Q_ASSERT(m_chaser != NULL);
 
+    // Stop running while modifying chaser contents
+    bool running = interruptRunning();
+
     m_chaser->clear();
     for (int i = 0; i < m_tree->topLevelItemCount(); i++)
     {
         ChaserStep step = stepAtIndex(i);
         m_chaser->addStep(step);
     }
+
+    // Continue running if appropriate
+    continueRunning(running);
 }
 
 void ChaserEditor::updateClipboardButtons()

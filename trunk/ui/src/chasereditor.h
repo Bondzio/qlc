@@ -121,7 +121,10 @@ private slots:
     void slotTestPreviousClicked();
     void slotTestNextClicked();
     void slotModeChanged(Doc::Mode mode);
-    void slotTestFunctionStopped();
+
+private:
+    bool interruptRunning();
+    void continueRunning(bool running);
 
     /************************************************************************
      * Utilities

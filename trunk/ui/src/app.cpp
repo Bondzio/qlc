@@ -66,6 +66,7 @@ App::App()
     , m_area(NULL)
     , m_progressDialog(NULL)
     , m_doc(NULL)
+    , m_kioskMode(false)
 
     , m_fileNewAction(NULL)
     , m_fileOpenAction(NULL)
@@ -219,7 +220,7 @@ void App::closeEvent(QCloseEvent* e)
 {
     int result = 0;
 
-    if (m_doc->mode() == Doc::Operate)
+    if (m_doc->mode() == Doc::Operate && m_kioskMode == false)
     {
         QMessageBox::warning(this,
                              tr("Cannot exit in Operate mode"),
@@ -229,7 +230,7 @@ void App::closeEvent(QCloseEvent* e)
         return;
     }
 
-    if (m_doc->isModified() == true)
+    if (m_doc->isModified() == true && m_kioskMode == false)
     {
         result = QMessageBox::information(this, tr("Close"),
                                           tr("Do you wish to save the current workspace " \
@@ -254,6 +255,18 @@ void App::closeEvent(QCloseEvent* e)
     }
     else
     {
+        if (m_kioskMode == true)
+        {
+            result = QMessageBox::warning(this, tr("Close the application?"),
+                                          tr("Do you wish to close the application?"),
+                                          QMessageBox::Yes, QMessageBox::No);
+            if (result == QMessageBox::No)
+            {
+                e->ignore();
+                return;
+            }
+        }
+
         e->accept();
     }
 }
@@ -355,6 +368,23 @@ void App::slotDocModified(bool state)
 /*****************************************************************************
  * Main application Mode
  *****************************************************************************/
+
+void App::enableKioskMode()
+{
+    m_kioskMode = true;
+    m_doc->setMode(Doc::Operate);
+    m_toolbar->setVisible(false);
+    m_area->removeSubWindow(FixtureManager::instance()->parentWidget());
+    m_area->removeSubWindow(FunctionManager::instance()->parentWidget());
+    m_area->removeSubWindow(OutputManager::instance()->parentWidget());
+    m_area->removeSubWindow(InputManager::instance()->parentWidget());
+    m_area->removeSubWindow(SimpleDesk::instance()->parentWidget());
+
+    // This is just plain stupid but for some reason, deleting sub windows makes m_area
+    // go back to SubWindowView.
+    m_area->setViewMode(QMdiArea::SubWindowView);
+    m_area->setViewMode(QMdiArea::TabbedView);
+}
 
 void App::slotModeOperate()
 {
@@ -777,6 +807,10 @@ void App::slotControlFullScreen()
     {
         wstate = windowState();
         showFullScreen();
+
+        // In case slotControlFullScreen() is called programmatically (from main.cpp)
+        if (m_controlFullScreenAction->isChecked() == false)
+            m_controlFullScreenAction->setChecked(true);
     }
 }
 

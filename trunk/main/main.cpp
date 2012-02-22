@@ -27,6 +27,7 @@
 #include <QLocale>
 #include <QString>
 #include <QDebug>
+#include <QTimer>
 #include <QHash>
 #include <QDir>
 
@@ -54,6 +55,12 @@ namespace QLCArgs
      * has been done, but before switching to operate mode (if applicable)
      */
     QString workspace;
+
+    /** If true, enables kiosk-mode (Operate mode locked, only virtual console) */
+    bool kioskMode = false;
+
+    /** If true, opens the application in full screen mode */
+    bool fullScreen = false;
 
     /**
      * Debug output level
@@ -99,11 +106,13 @@ void printUsage()
     cout << "Usage:";
     cout << "  qlc [options]" << endl;
     cout << "Options:" << endl;
+    cout << "  -d or --debug <level>\t\tSet debug output level (0-3, see QtMsgType)" << endl;
+    cout << "  -f or --fullscreen\t\tStart the application in fullscreen mode" << endl;
+    cout << "  -h or --help\t\t\tPrint this help" << endl;
+    cout << "  -k or --kiosk\t\t\tEnable kiosk mode (only virtual console in forced operate mode)" << endl;
+    cout << "  -l or --locale <locale>\tForce a locale for translation" << endl;
     cout << "  -o or --open <file>\t\tOpen the specified workspace file" << endl;
     cout << "  -p or --operate\t\tStart in operate mode" << endl;
-    cout << "  -l or --locale <locale>\tForce a locale for translation" << endl;
-    cout << "  -d or --debug <level>\t\tSet debug output level (0-3, see QtMsgType)" << endl;
-    cout << "  -h or --help\t\t\tPrint this help" << endl;
     cout << "  -v or --version\t\tPrint version information" << endl;
     cout << endl;
 }
@@ -156,6 +165,16 @@ bool parseArgs(int argc, char **argv)
         {
             QLCArgs::debugLevel = QtMsgType(QString(argv[++i]).toInt());
         }
+        else if (::strcmp(argv[i], "-k") == 0 ||
+                 ::strcmp(argv[i], "--kiosk") == 0)
+        {
+            QLCArgs::kioskMode = true;
+        }
+        else if (::strcmp(argv[i], "-f") == 0 ||
+                 ::strcmp(argv[i], "--fullscreen") == 0)
+        {
+            QLCArgs::fullScreen = true;
+        }
     }
 
     return true;
@@ -203,6 +222,10 @@ int main(int argc, char** argv)
         app.loadXML(QLCArgs::workspace);
     if (QLCArgs::operate == true)
         app.slotModeOperate();
+    if (QLCArgs::kioskMode == true)
+        app.enableKioskMode();
+    if (QLCArgs::fullScreen == true)
+        QTimer::singleShot(0, &app, SLOT(slotControlFullScreen()));
 
     return qapp.exec();
 }

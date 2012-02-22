@@ -96,11 +96,17 @@ private:
     /*********************************************************************
      * Main operating mode
      *********************************************************************/
+public:
+    void enableKioskMode();
+
 public slots:
     void slotModeOperate();
     void slotModeDesign();
     void slotModeToggle();
     void slotModeChanged(Doc::Mode mode);
+
+private:
+    bool m_kioskMode;
 
     /*********************************************************************
      * Actions and toolbar

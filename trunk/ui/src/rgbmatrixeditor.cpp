@@ -90,7 +90,7 @@ RGBMatrixEditor::~RGBMatrixEditor()
 {
     m_previewTimer->stop();
 
-    if (m_mtx->stopped() == false)
+    if (m_testButton->isChecked() == true)
         m_mtx->stopAndWait();
 }
 
@@ -517,7 +517,7 @@ void RGBMatrixEditor::slotModeChanged(Doc::Mode mode)
 {
     if (mode == Doc::Operate)
     {
-        if (m_mtx->stopped() == false)
+        if (m_testButton->isChecked() == true)
             m_mtx->stopAndWait();
         m_testButton->setChecked(false);
         m_previewTimer->stop();

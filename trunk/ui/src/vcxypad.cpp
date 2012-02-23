@@ -105,6 +105,7 @@ VCXYPad::VCXYPad(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 
 VCXYPad::~VCXYPad()
 {
+    m_doc->masterTimer()->unregisterDMXSource(this);
 }
 
 /*****************************************************************************

@@ -99,6 +99,7 @@ VCCueList::VCCueList(QWidget* parent, Doc* doc) : VCWidget(parent, doc)
 
 VCCueList::~VCCueList()
 {
+    m_doc->masterTimer()->unregisterDMXSource(this);
 }
 
 /*****************************************************************************

@@ -370,9 +370,11 @@ void App::slotDocModified(bool state)
 
 void App::enableKioskMode()
 {
+    // Turn on operate mode
     m_kioskMode = true;
     m_doc->setMode(Doc::Operate);
-    m_toolbar->setVisible(false);
+
+    // No need for these
     m_area->removeSubWindow(FixtureManager::instance()->parentWidget());
     m_area->removeSubWindow(FunctionManager::instance()->parentWidget());
     m_area->removeSubWindow(OutputManager::instance()->parentWidget());
@@ -380,9 +382,13 @@ void App::enableKioskMode()
     m_area->removeSubWindow(SimpleDesk::instance()->parentWidget());
 
     // This is just plain stupid but for some reason, deleting sub windows makes m_area
-    // go back to SubWindowView.
+    // go back to SubWindowView. So, force the tabbed view with VC as the only tab.
     m_area->setViewMode(QMdiArea::SubWindowView);
     m_area->setViewMode(QMdiArea::TabbedView);
+
+    // No need for the toolbar
+    delete m_toolbar;
+    m_toolbar = NULL;
 }
 
 void App::slotModeOperate()
@@ -533,7 +539,7 @@ void App::initToolBar()
 void App::slotToolBarVisibilityChanged(bool visible)
 {
     // Don't allow hiding the main toolbar
-    if (visible == false)
+    if (visible == false && m_toolbar != NULL)
         m_toolbar->show();
 }
 

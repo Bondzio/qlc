@@ -79,7 +79,6 @@ SpeedDial::SpeedDial(QWidget* parent)
     , m_tapTime(new QTime(QTime::currentTime()))
 {
     QGridLayout* grid = new QGridLayout(this);
-    grid->setContentsMargins(0, 0, 0, 0);
     grid->setSpacing(0);
 
     m_minus = new QToolButton(this);

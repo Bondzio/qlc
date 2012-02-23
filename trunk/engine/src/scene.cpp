@@ -49,6 +49,7 @@ Scene::Scene(Doc* doc) : Function(doc, Function::Scene)
 
 Scene::~Scene()
 {
+    m_values.clear();
 }
 
 /*****************************************************************************

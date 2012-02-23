@@ -110,7 +110,7 @@ App::~App()
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
     // Ensure that we're not in operate mode
-    slotModeDesign();
+    m_doc->setMode(Doc::Design);
 
     if (Monitor::instance() != NULL)
         delete Monitor::instance();

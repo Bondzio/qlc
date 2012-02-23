@@ -57,10 +57,10 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
 
 Doc::~Doc()
 {
-    clearContents();
-
     delete m_masterTimer;
     m_masterTimer = NULL;
+
+    clearContents();
 
     m_outputMap->saveDefaults();
     delete m_outputMap;

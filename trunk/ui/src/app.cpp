@@ -109,6 +109,9 @@ App::~App()
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
+    // Ensure that we're not in operate mode
+    slotModeDesign();
+
     if (Monitor::instance() != NULL)
         delete Monitor::instance();
 
@@ -130,7 +133,6 @@ App::~App()
     if (SimpleDesk::instance() != NULL)
         delete SimpleDesk::instance();
 
-    // Delete doc
     if (m_doc != NULL)
         delete m_doc;
     m_doc = NULL;

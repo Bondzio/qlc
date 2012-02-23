@@ -40,7 +40,6 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
     , m_dial(NULL)
 {
     new QVBoxLayout(this);
-    layout()->setMargin(0);
 
     m_dial = new SpeedDial(this);
     layout()->addWidget(m_dial);

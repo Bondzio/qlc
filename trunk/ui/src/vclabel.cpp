@@ -162,7 +162,7 @@ void VCLabel::paintEvent(QPaintEvent* e)
         enabled = true;
 
     QPainter painter(this);
-    style()->drawItemText(&painter, rect(), Qt::AlignCenter, palette(),
+    style()->drawItemText(&painter, rect(), Qt::AlignCenter | Qt::TextWordWrap, palette(),
                           enabled, caption(), foregroundRole());
     painter.end();
 

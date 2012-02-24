@@ -107,7 +107,12 @@ App::App()
 App::~App()
 {
     QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
+
+    // Don't save kiosk-mode window geometry because that will screw things up
+    if (m_kioskMode == false)
+        settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
+    else
+        settings.setValue(SETTINGS_GEOMETRY, QVariant());
 
     if (Monitor::instance() != NULL)
         delete Monitor::instance();

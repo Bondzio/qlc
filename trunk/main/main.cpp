@@ -110,9 +110,9 @@ void printUsage()
     cout << "Usage:";
     cout << "  qlc [options]" << endl;
     cout << "Options:" << endl;
-    cout << "  -c or --closebutton <x,y,w,h>\t\tPlace a close button in virtual console (only when -k is specified)" << endl;
+    cout << "  -c or --closebutton <x,y,w,h>\tPlace a close button in virtual console (only when -k is specified)" << endl;
     cout << "  -d or --debug <level>\t\tSet debug output level (0-3, see QtMsgType)" << endl;
-    cout << "  -f or --fullscreen <mode>\t\tStart the application in fullscreen mode (either 'normal' or 'resize')" << endl;
+    cout << "  -f or --fullscreen <method>\tStart the application in fullscreen mode (method is either 'normal' or 'resize')" << endl;
     cout << "  -h or --help\t\t\tPrint this help" << endl;
     cout << "  -k or --kiosk\t\t\tEnable kiosk mode (only virtual console in forced operate mode)" << endl;
     cout << "  -l or --locale <locale>\tForce a locale for translation" << endl;
@@ -130,62 +130,16 @@ void printUsage()
  *
  * @return true to continue with application launch; otherwise false
  */
-bool parseArgs(int argc, char **argv)
+bool parseArgs()
 {
-    QLCArgs::operate = false;
-
-    for (int i = 1; i < argc; i++)
+    QStringListIterator it(QCoreApplication::arguments());
+    while (it.hasNext() == true)
     {
-        if (::strcmp(argv[i], "-v") == 0 ||
-            ::strcmp(argv[i], "--version") == 0)
+        QString arg(it.next());
+
+        if (arg == "-c" || arg == "--closebutton" && it.hasNext() == true)
         {
-            /* Don't print anything, since version is always
-               printed before anything else. Just make the app
-               exit by returning false. */
-            return false;
-        }
-        else if (::strcmp(argv[i], "-h") == 0 ||
-                 ::strcmp(argv[i], "--help") == 0)
-        {
-            printUsage();
-            return false;
-        }
-        else if (::strcmp(argv[i], "-p") == 0 ||
-                 ::strcmp(argv[i], "--operate") == 0)
-        {
-            QLCArgs::operate = true;
-        }
-        else if (::strcmp(argv[i], "-o") == 0 ||
-                 ::strcmp(argv[i], "--open") == 0)
-        {
-            QLCArgs::workspace = QString(argv[++i]);
-        }
-        else if (::strcmp(argv[i], "-l") == 0 ||
-                 ::strcmp(argv[i], "--locale") == 0)
-        {
-            QLCi18n::setDefaultLocale(QString(argv[++i]));
-        }
-        else if (::strcmp(argv[i], "-d") == 0 ||
-                 ::strcmp(argv[i], "--debug") == 0)
-        {
-            QLCArgs::debugLevel = QtMsgType(QString(argv[++i]).toInt());
-        }
-        else if (::strcmp(argv[i], "-k") == 0 ||
-                 ::strcmp(argv[i], "--kiosk") == 0)
-        {
-            QLCArgs::kioskMode = true;
-        }
-        else if (::strcmp(argv[i], "-f") == 0 ||
-                 ::strcmp(argv[i], "--fullscreen") == 0)
-        {
-            QLCArgs::fullScreen = true;
-            if (argc >= i + 2 && ::strcmp(argv[i+1], "resize") == 0)
-                QLCArgs::fullScreenResize = true;
-        }
-        else if (::strcmp(argv[i], "-c") == 0 ||
-                 ::strcmp(argv[i], "--closebutton") == 0 && argc >= i + 2)
-        {
-            QString str(argv[i+1]);
+            QString str(it.next());
             QStringList parts = str.split(",");
             if (parts.size() == 4)
             {
@@ -194,6 +148,47 @@ bool parseArgs(int argc, char **argv)
                 if (rect.isValid() == true)
                     QLCArgs::closeButtonRect = rect;
             }
+        }
+        else if (arg == "-d" || arg == "--debug")
+        {
+            if (it.hasNext() == true)
+                QLCArgs::debugLevel = QtMsgType(it.peekNext().toInt());
+        }
+        else if (arg == "-f" || arg == "--fullscreen")
+        {
+            QLCArgs::fullScreen = true;
+            if (it.hasNext() == true && it.peekNext() == "resize")
+                QLCArgs::fullScreenResize = true;
+        }
+        else if (arg == "-h" || arg == "--help")
+        {
+            printUsage();
+            return false;
+        }
+        else if (arg == "-k" || arg == "--kiosk")
+        {
+            QLCArgs::kioskMode = true;
+        }
+        else if (arg == "-l" || arg == "--locale")
+        {
+            if (it.hasNext() == true)
+                QLCi18n::setDefaultLocale(it.next());
+        }
+        else if (arg == "-o" || arg == "--open")
+        {
+            if (it.hasNext() == true)
+                QLCArgs::workspace = it.next();
+        }
+        else if (arg == "-p" || arg == "--operate")
+        {
+            QLCArgs::operate = true;
+        }
+        else if (arg == "-v" || arg == "--version")
+        {
+            /* Don't print anything, since version is always
+               printed before anything else. Just make the app
+               exit by returning false. */
+            return false;
         }
     }
 
@@ -225,7 +220,7 @@ int main(int argc, char** argv)
     printVersion();
 
     /* Parse command-line arguments */
-    if (parseArgs(argc, argv) == false)
+    if (parseArgs() == false)
         return 0;
 
     /* Load translation for main application */

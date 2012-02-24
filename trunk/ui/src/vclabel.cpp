@@ -19,7 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QInputDialog>
 #include <QPaintEvent>
+#include <QLineEdit>
 #include <QPainter>
 #include <QString>
 #include <QDebug>
@@ -64,6 +66,19 @@ VCWidget* VCLabel::createCopy(VCWidget* parent)
     }
 
     return label;
+}
+
+/*****************************************************************************
+ * Properties
+ *****************************************************************************/
+
+void VCLabel::editProperties()
+{
+    bool ok = false;
+    QString text = QInputDialog::getText(NULL, tr("Rename Label"), tr("Caption:"),
+                                         QLineEdit::Normal, caption(), &ok);
+    if (ok == true)
+        setCaption(text);
 }
 
 /*****************************************************************************
@@ -153,4 +168,3 @@ void VCLabel::paintEvent(QPaintEvent* e)
 
     VCWidget::paintEvent(e);
 }
-

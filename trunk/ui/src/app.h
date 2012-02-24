@@ -98,6 +98,7 @@ private:
      *********************************************************************/
 public:
     void enableKioskMode();
+    void createKioskCloseButton(const QRect& rect);
 
 public slots:
     void slotModeOperate();

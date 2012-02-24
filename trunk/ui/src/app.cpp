@@ -391,6 +391,16 @@ void App::enableKioskMode()
     m_toolbar = NULL;
 }
 
+void App::createKioskCloseButton(const QRect& rect)
+{
+    QPushButton* btn = new QPushButton(VirtualConsole::instance()->contents());
+    btn->setIcon(QIcon(":/exit.png"));
+    btn->setToolTip(tr("Exit"));
+    btn->setGeometry(rect);
+    connect(btn, SIGNAL(clicked()), this, SLOT(close()));
+    btn->show();
+}
+
 void App::slotModeOperate()
 {
     m_doc->setMode(Doc::Operate);

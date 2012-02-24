@@ -62,6 +62,9 @@ namespace QLCArgs
     /** If true, opens the application in full screen mode */
     bool fullScreen = false;
 
+    /** If not null, defines the place for a close button that in virtual console */
+    QRect closeButtonRect = QRect();
+
     /**
      * Debug output level
      */
@@ -106,6 +109,7 @@ void printUsage()
     cout << "Usage:";
     cout << "  qlc [options]" << endl;
     cout << "Options:" << endl;
+    cout << "  -c or --closebutton <x,y,w,h>\t\tPlace a close button in virtual console (only when -k is specified)" << endl;
     cout << "  -d or --debug <level>\t\tSet debug output level (0-3, see QtMsgType)" << endl;
     cout << "  -f or --fullscreen\t\tStart the application in fullscreen mode" << endl;
     cout << "  -h or --help\t\t\tPrint this help" << endl;
@@ -175,6 +179,18 @@ bool parseArgs(int argc, char **argv)
         {
             QLCArgs::fullScreen = true;
         }
+        else if (::strcmp(argv[i], "-c") == 0 ||
+                 ::strcmp(argv[i], "--closebutton") == 0 && argc >= i + 2)
+        {
+            QString str(argv[i+1]);
+            QStringList parts = str.split(",");
+            if (parts.size() == 4)
+            {
+                QRect rect(parts[0].toInt(), parts[1].toInt(), parts[2].toInt(), parts[3].toInt());
+                if (rect.isValid() == true)
+                    QLCArgs::closeButtonRect = rect;
+            }
+        }
     }
 
     return true;
@@ -226,6 +242,8 @@ int main(int argc, char** argv)
         app.enableKioskMode();
     if (QLCArgs::fullScreen == true)
         QTimer::singleShot(0, &app, SLOT(slotControlFullScreen()));
+    if (QLCArgs::kioskMode == true && QLCArgs::closeButtonRect.isValid() == true)
+        app.createKioskCloseButton(QLCArgs::closeButtonRect);
 
     return qapp.exec();
 }

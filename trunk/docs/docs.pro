@@ -36,6 +36,7 @@ docs.files = \
              selectfunction.html \
              selectfixture.html \
              selectinputchannel.html \
+             simpledesk.html \
              tutorial.html \
              tutorial.png \
              udmxoutput.html \

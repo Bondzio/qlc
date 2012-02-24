@@ -127,6 +127,7 @@ public slots:
 
     void slotControlMonitor();
     void slotControlFullScreen();
+    void slotControlFullScreen(bool usingGeometry);
     void slotControlBlackout();
     void slotBlackoutChanged(bool state);
     void slotControlPanic();

@@ -829,6 +829,19 @@ void App::slotControlFullScreen()
     }
 }
 
+void App::slotControlFullScreen(bool usingGeometry)
+{
+    if (usingGeometry == true)
+    {
+        QDesktopWidget dw;
+        setGeometry(dw.availableGeometry());
+    }
+    else
+    {
+        slotControlFullScreen();
+    }
+}
+
 /*****************************************************************************
  * Help action slots
  *****************************************************************************/

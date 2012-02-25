@@ -23,6 +23,7 @@
 #define EFXEDITOR_H
 
 #include <QPolygon>
+#include <QPointer>
 #include <QWidget>
 #include <QFrame>
 #include <QTimer>
@@ -107,7 +108,7 @@ private slots:
     void slotDurationChanged(int ms);
 
 private:
-    SpeedDialWidget* m_speedDials;
+    QPointer<SpeedDialWidget> m_speedDials;
 
     /*********************************************************************
      * Movement page

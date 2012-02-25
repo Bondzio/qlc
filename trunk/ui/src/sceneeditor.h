@@ -22,6 +22,7 @@
 #ifndef SCENEEDITOR_H
 #define SCENEEDITOR_H
 
+#include <QPointer>
 #include <QWidget>
 #include <QList>
 #include <QMap>
@@ -124,7 +125,7 @@ private slots:
     void slotFadeOutChanged(int ms);
 
 private:
-    SpeedDialWidget* m_speedDials;
+    QPointer<SpeedDialWidget> m_speedDials;
 
     /*********************************************************************
      * Fixture tabs

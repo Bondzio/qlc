@@ -98,6 +98,9 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
 
 SceneEditor::~SceneEditor()
 {
+    delete m_speedDials;
+    m_speedDials = NULL;
+
     delete m_source;
     m_source = NULL;
 
@@ -146,12 +149,14 @@ void SceneEditor::init()
     if (m_doc->mode() == Doc::Operate)
     {
         m_blindAction->setChecked(true);
-        m_source->setOutputEnabled(false);
+        if (m_source != NULL)
+            m_source->setOutputEnabled(false);
     }
     else
     {
         m_blindAction->setChecked(false);
-        m_source->setOutputEnabled(true);
+        if (m_source != NULL)
+            m_source->setOutputEnabled(true);
     }
 
     // Chaser combo init
@@ -432,8 +437,8 @@ void SceneEditor::slotColorTool()
 
 void SceneEditor::slotBlindToggled(bool state)
 {
-    Q_ASSERT(m_source != NULL);
-    m_source->setOutputEnabled(!state);
+    if (m_source != NULL)
+        m_source->setOutputEnabled(!state);
 }
 
 void SceneEditor::slotModeChanged(Doc::Mode mode)
@@ -510,7 +515,9 @@ bool SceneEditor::isColorToolAvailable()
 
 void SceneEditor::createSpeedDials()
 {
-    Q_ASSERT(m_speedDials == NULL);
+    if (m_speedDials != NULL)
+        return;
+
     m_speedDials = new SpeedDialWidget(this);
     m_speedDials->setWindowTitle(m_scene->name());
     m_speedDials->setFadeInSpeed(m_scene->fadeInSpeed());
@@ -611,7 +618,8 @@ void SceneEditor::removeFixtureItem(Fixture* fixture)
 void SceneEditor::slotNameEdited(const QString& name)
 {
     m_scene->setName(name);
-    m_speedDials->setWindowTitle(m_scene->name());
+    if (m_speedDials != NULL)
+        m_speedDials->setWindowTitle(m_scene->name());
 }
 
 void SceneEditor::slotAddFixtureClicked()

@@ -72,7 +72,6 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     , m_doc(doc)
     , m_splitter(NULL)
     , m_tree(NULL)
-    , m_ignoreSignals(false)
     , m_toolbar(NULL)
     , m_actionGroup(NULL)
     , m_addSceneAction(NULL)
@@ -188,9 +187,6 @@ void FunctionManager::slotFunctionChanged(quint32 id)
 
 void FunctionManager::slotFunctionAdded(quint32 id)
 {
-    if (m_ignoreSignals == true)
-        return;
-
     Function* function = m_doc->function(id);
     if (function == NULL)
         return;
@@ -324,55 +320,73 @@ void FunctionManager::initToolbar()
 void FunctionManager::slotAddScene()
 {
     Function* f = new Scene(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotAddChaser()
 {
     Function* f = new Chaser(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotAddCollection()
 {
     Function* f = new Collection(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotAddEFX()
 {
     Function* f = new EFX(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotAddRGBMatrix()
 {
     Function* f = new RGBMatrix(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotAddScript()
 {
     Function* f = new Script(m_doc);
-    m_ignoreSignals = true;
-    m_doc->addFunction(f);
-    m_ignoreSignals = false;
-    addFunction(f);
+    if (m_doc->addFunction(f) == true)
+    {
+        QTreeWidgetItem* item = functionItem(f);
+        Q_ASSERT(item != NULL);
+        m_tree->scrollToItem(item);
+        m_tree->setCurrentItem(item);
+    }
 }
 
 void FunctionManager::slotWizard()
@@ -658,27 +672,6 @@ void FunctionManager::copyFunction(quint32 fid)
         QMessageBox::critical(this, tr("Function creation failed"),
                               tr("Unable to create new function."));
     }
-}
-
-void FunctionManager::addFunction(Function* function)
-{
-    Q_ASSERT(function != NULL);
-
-    /* Create a new item for the function */
-    QTreeWidgetItem* parent = parentItem(function);
-    QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-    updateFunctionItem(item, function);
-    parent->setExpanded(true);
-
-    /* Clear current selection and select only the new one */
-    m_tree->clearSelection();
-    m_tree->sortItems(COL_NAME, Qt::AscendingOrder);
-    m_tree->scrollToItem(item);
-    m_tree->setCurrentItem(item);
-    item->setSelected(true);
-
-    /* Start editing immediately */
-    editFunction(function);
 }
 
 void FunctionManager::editFunction(Function* function)

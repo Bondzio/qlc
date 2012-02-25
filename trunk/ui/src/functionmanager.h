@@ -121,7 +121,6 @@ private slots:
 private:
     QSplitter* m_splitter;
     QTreeWidget* m_tree;
-    bool m_ignoreSignals;
 
     /*********************************************************************
      * Menus, toolbar & actions
@@ -168,9 +167,6 @@ protected:
 protected:
     /** Create a copy of the given function */
     void copyFunction(quint32 fid);
-
-    /** Add a new function */
-    void addFunction(Function* function);
 
     /** Open an editor for the given function */
     void editFunction(Function* function);

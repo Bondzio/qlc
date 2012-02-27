@@ -40,7 +40,6 @@
 
 #define KColumnName 0
 #define KColumnCaps 1
-#define KColumnID   2
 
 FunctionWizard::FunctionWizard(QWidget* parent, Doc* doc)
     : QDialog(parent)
@@ -92,100 +91,6 @@ void FunctionWizard::accept()
     if (m_shutterCheck->isChecked() == true)
         pal.createShutters();
 
-    if (m_intensityCheck->isChecked() == true)
-    {
-        QList <Scene*> sceneList;
-
-        // Random chaser
-        sceneList = IntensityGenerator::randomScenes(fixtures(), m_doc,
-                                    QDateTime::currentDateTime().toTime_t());
-        if (sceneList.size() > 0)
-        {
-            int i = 0;
-            Chaser* chaser = new Chaser(m_doc);
-            chaser->setName(tr("Random Multi"));
-            m_doc->addFunction(chaser);
-            foreach (Scene* scene, sceneList)
-            {
-                scene->setName(tr("Random Step %1").arg(++i));
-                m_doc->addFunction(scene);
-#warning Duration missing
-                chaser->addStep(ChaserStep(scene->id()));
-            }
-        }
-
-        // Forward & Backward Sequence chasers
-        sceneList = IntensityGenerator::sequenceScenes(fixtures(), m_doc);
-        if (sceneList.size() > 0)
-        {
-            int i = 0;
-            Chaser* fw = new Chaser(m_doc);
-            fw->setName(tr("Sequence Forward"));
-            m_doc->addFunction(fw);
-
-            Chaser* bw = new Chaser(m_doc);
-            bw->setName(tr("Sequence Backward"));
-            bw->setDirection(Function::Backward);
-            m_doc->addFunction(bw);
-
-            foreach (Scene* scene, sceneList)
-            {
-                scene->setName(tr("Sequence Step %1").arg(++i));
-                m_doc->addFunction(scene);
-#warning Duration missing
-                fw->addStep(ChaserStep(scene->id()));
-                bw->addStep(ChaserStep(scene->id()));
-            }
-        }
-
-        // Single-channel sequence chaser (use sequence scene list)
-        if (sceneList.size() > 0)
-        {
-            Chaser* chaser = new Chaser(m_doc);
-            chaser->setName(tr("Random Single"));
-            m_doc->addFunction(chaser);
-
-            while (sceneList.isEmpty() == false)
-            {
-                Scene* scene = sceneList.takeAt(rand() % sceneList.size());
-#warning Duration missing
-                chaser->addStep(ChaserStep(scene->id()));
-            }
-        }
-
-        // Even/Odd chaser
-        sceneList = IntensityGenerator::evenOddScenes(fixtures(), m_doc);
-        if (sceneList.size() == 2)
-        {
-            Chaser* chaser = new Chaser(m_doc);
-            chaser->setName(tr("Even/Odd"));
-            m_doc->addFunction(chaser);
-            sceneList[0]->setName(tr("Odd"));
-            m_doc->addFunction(sceneList[0]);
-            sceneList[1]->setName(tr("Even"));
-            m_doc->addFunction(sceneList[1]);
-#warning Duration missing
-            chaser->addStep(ChaserStep(sceneList[0]->id()));
-            chaser->addStep(ChaserStep(sceneList[1]->id()));
-        }
-
-        // Full/Zero chaser
-        sceneList = IntensityGenerator::fullZeroScenes(fixtures(), m_doc);
-        if (sceneList.size() == 2)
-        {
-            Chaser* chaser = new Chaser(m_doc);
-            chaser->setName(tr("Full/Zero"));
-            m_doc->addFunction(chaser);
-            sceneList[0]->setName(tr("Full"));
-            m_doc->addFunction(sceneList[0]);
-            sceneList[1]->setName(tr("Zero"));
-            m_doc->addFunction(sceneList[1]);
-#warning Duration missing
-            chaser->addStep(ChaserStep(sceneList[0]->id()));
-            chaser->addStep(ChaserStep(sceneList[1]->id()));
-        }
-    }
-
     QDialog::accept();
 }
 
@@ -200,7 +105,7 @@ void FunctionWizard::addFixture(quint32 fxi_id)
 
     QTreeWidgetItem* item = new QTreeWidgetItem(m_fixtureTree);
     item->setText(KColumnName, fxi->name());
-    item->setData(KColumnID, Qt::UserRole, fxi_id);
+    item->setData(KColumnName, Qt::UserRole, fxi_id);
 
     QStringList caps;
     if (!PaletteGenerator::findChannels(fxi, QLCChannel::Colour).isEmpty())
@@ -211,9 +116,6 @@ void FunctionWizard::addFixture(quint32 fxi_id)
 
     if (!PaletteGenerator::findChannels(fxi, QLCChannel::Shutter).isEmpty())
         caps << QLCChannel::groupToString(QLCChannel::Shutter);
-
-    if (IntensityGenerator::intensityChannel(fxi) != QLCChannel::invalid() || fxi->isDimmer())
-        caps << QLCChannel::groupToString(QLCChannel::Intensity);
 
     item->setText(KColumnCaps, caps.join(", "));
 }
@@ -226,7 +128,7 @@ QList <Fixture*> FunctionWizard::fixtures() const
         QTreeWidgetItem* item(m_fixtureTree->topLevelItem(i));
         Q_ASSERT(item != NULL);
 
-        quint32 id = item->data(KColumnID, Qt::UserRole).toInt();
+        quint32 id = item->data(KColumnName, Qt::UserRole).toInt();
         Fixture* fxi = m_doc->fixture(id);
         Q_ASSERT(fxi != NULL);
 
@@ -244,7 +146,7 @@ QList <quint32> FunctionWizard::fixtureIds() const
         QTreeWidgetItem* item(m_fixtureTree->topLevelItem(i));
         Q_ASSERT(item != NULL);
 
-        list << item->data(KColumnID, Qt::UserRole).toInt();
+        list << item->data(KColumnName, Qt::UserRole).toInt();
     }
 
     return list;

@@ -189,7 +189,9 @@ void RGBMatrixEditor::init()
 
 void RGBMatrixEditor::createSpeedDials()
 {
-    Q_ASSERT(m_speedDials == NULL);
+    if (m_speedDials != NULL)
+        return;
+
     m_speedDials = new SpeedDialWidget(this);
     m_speedDials->setWindowTitle(m_mtx->name());
     m_speedDials->show();
@@ -354,7 +356,8 @@ void RGBMatrixEditor::slotPreviewTimeout()
 void RGBMatrixEditor::slotNameEdited(const QString& text)
 {
     m_mtx->setName(text);
-    m_speedDials->setWindowTitle(text);
+    if (m_speedDials != NULL)
+        m_speedDials->setWindowTitle(text);
 }
 
 void RGBMatrixEditor::slotPatternActivated(const QString& text)

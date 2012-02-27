@@ -79,7 +79,7 @@ void qlcMessageHandler(QtMsgType type, const char* msg)
 {
     if (type >= QLCArgs::debugLevel)
     {
-        fprintf(stderr, msg);
+        fprintf(stderr, "%s", msg);
         fprintf(stderr, "\n");
         fflush(stderr);
     }
@@ -137,7 +137,7 @@ bool parseArgs()
     {
         QString arg(it.next());
 
-        if (arg == "-c" || arg == "--closebutton" && it.hasNext() == true)
+        if ((arg == "-c" || arg == "--closebutton") && it.hasNext() == true)
         {
             QString str(it.next());
             QStringList parts = str.split(",");

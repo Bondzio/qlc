@@ -312,8 +312,8 @@ void RGBMatrixEditor::slotPreviewTimeout()
     if (m_mtx->duration() <= 0)
         return;
 
-    m_previewIterator = (m_previewIterator + MasterTimer::tick()) % m_mtx->duration();
-    if (m_previewIterator == 0)
+    m_previewIterator += MasterTimer::tick();
+    if (m_previewIterator >= m_mtx->duration())
     {
         if (m_mtx->direction() == Function::Forward)
         {
@@ -327,6 +327,8 @@ void RGBMatrixEditor::slotPreviewTimeout()
             if (m_previewStep < 0)
                 m_previewStep = m_previewMaps.size() - 1;
         }
+
+        m_previewIterator = 0;
     }
 
     RGBMap map;

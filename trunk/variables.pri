@@ -10,9 +10,12 @@ APPVERSION = 3.3.0
 # Compiler & linker configuration
 #############################################################################
 
+# Treat all compiler warnings as errors
+QMAKE_CXXFLAGS += -Werror
 CONFIG         += warn_on
-CONFIG         += ordered # Build everything in the order specified in .pro files
-macx:CONFIG    -= app_bundle # Let QLC construct the .app bundle
+
+# Build everything in the order specified in .pro files
+CONFIG         += ordered
 
 CONFIG         -= release # Enable this when making a release
 CONFIG         += debug   # Disable this when making a release
@@ -24,13 +27,16 @@ unix:APPVERSION = $$APPVERSION-r$$REVISION
 unix:OLA_GIT    = /usr/src/ola    # OLA directories
 
 #macx:CONFIG   += x86 ppc  # Build universal binaries (Leopard only)
-#CONFIG        += coverage # Unit test coverage measurement
+macx:CONFIG    -= app_bundle # Let QLC construct the .app bundle
 
 # Produce build targets to the source directory
 win32:DESTDIR  = ./
 
 # Don't whine about some imports
 win32:QMAKE_LFLAGS += -enable-auto-import
+
+# Enable unit test coverage measurement ('qmake CONFIG+=coverage' works, too)
+#CONFIG        += coverage
 
 #############################################################################
 # Installation paths

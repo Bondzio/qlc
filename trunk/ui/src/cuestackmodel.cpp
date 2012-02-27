@@ -29,9 +29,8 @@
 #include <QIcon>
 
 #include "cuestackmodel.h"
-#include "speedspinbox.h"
 #include "cuestack.h"
-#include "apputil.h"
+#include "function.h"
 
 #define MIMEDATA_ROOT       "MimeData"
 #define MIMEDATA_DRAGINDEX  "DragIndex"
@@ -190,7 +189,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].fadeInSpeed();
             if (ms > 0)
-                var = QVariant(SpeedSpinBox::speedText(ms));
+                var = QVariant(Function::speedToString(ms));
             else
                 var = QVariant();
             break;
@@ -199,7 +198,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].fadeOutSpeed();
             if (ms > 0)
-                var = QVariant(SpeedSpinBox::speedText(ms));
+                var = QVariant(Function::speedToString(ms));
             else
                 var = QVariant();
             break;
@@ -208,7 +207,7 @@ QVariant CueStackModel::data(const QModelIndex& index, int role) const
         {
             uint ms = m_cueStack->cues()[index.row()].duration();
             if (ms > 0)
-                var = QVariant(SpeedSpinBox::speedText(ms));
+                var = QVariant(Function::speedToString(ms));
             else
                 var = QVariant();
             break;

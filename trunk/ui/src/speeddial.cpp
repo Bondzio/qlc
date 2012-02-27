@@ -29,7 +29,6 @@
 #include <QDial>
 #include <QTime>
 
-#include "speedspinbox.h"
 #include "mastertimer.h"
 #include "speeddial.h"
 #include "qlcmacros.h"

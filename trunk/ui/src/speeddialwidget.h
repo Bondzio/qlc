@@ -23,7 +23,6 @@
 #define SPEEDDIALWIDGET_H
 
 #include <QWidget>
-#include "speedspinbox.h"
 
 class SpeedDial;
 class QGroupBox;

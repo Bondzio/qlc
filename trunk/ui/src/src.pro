@@ -67,7 +67,6 @@ HEADERS += aboutbox.h \
            simpledeskengine.h \
            speeddial.h \
            speeddialwidget.h \
-           speedspinbox.h \
            vcbutton.h \
            vcbuttonproperties.h \
            vccuelist.h \
@@ -165,7 +164,6 @@ SOURCES += aboutbox.cpp \
            simpledeskengine.cpp \
            speeddial.cpp \
            speeddialwidget.cpp \
-           speedspinbox.cpp \
            vcbutton.cpp \
            vcbuttonproperties.cpp \
            vccuelist.cpp \

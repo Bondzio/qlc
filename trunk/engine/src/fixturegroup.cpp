@@ -107,7 +107,6 @@ QString FixtureGroup::name() const
 
 void FixtureGroup::assignFixture(quint32 id, const QLCPoint& pt)
 {
-#warning This will not work correcly for multi-head fixtures (like dimmers)
     Fixture* fxi = doc()->fixture(id);
     Q_ASSERT(fxi != NULL);
     for (int i = 0; i < fxi->heads(); i++)

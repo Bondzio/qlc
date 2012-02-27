@@ -105,7 +105,7 @@ private:
 
     QGraphicsScene* m_scene;
     QTimer* m_previewTimer;
-    int m_previewIterator;
+    uint m_previewIterator;
     int m_previewStep;
     QHash <QLCPoint,QGraphicsItem*> m_previewHash;
 };

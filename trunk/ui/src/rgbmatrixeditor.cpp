@@ -34,7 +34,6 @@
 #include "fixtureselection.h"
 #include "speeddialwidget.h"
 #include "rgbmatrixeditor.h"
-#include "speedspinbox.h"
 #include "rgbmatrix.h"
 #include "rgbitem.h"
 #include "rgbtext.h"

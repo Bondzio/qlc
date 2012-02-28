@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = genericfader_test
 
-QT      += testlib
+QT      += testlib xml script
 CONFIG  -= app_bundle
 
 DEPENDPATH   += ../../src

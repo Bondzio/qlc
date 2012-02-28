@@ -5,6 +5,7 @@ TEMPLATE = lib
 LANGUAGE = C++
 TARGET   = inputpluginstub
 
+QT          += xml script
 CONFIG      += plugin
 INCLUDEPATH += ../../../plugins/interfaces
 DEPENDPATH  += ../../../plugins/interfaces

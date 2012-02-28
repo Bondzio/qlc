@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = vcwidgetproperties_test
 
-QT += testlib gui xml
+QT += testlib gui xml script
 
 INCLUDEPATH += ../../../plugins/interfaces
 INCLUDEPATH += ../../src

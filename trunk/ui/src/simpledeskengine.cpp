@@ -67,7 +67,7 @@ void SimpleDeskEngine::clearContents()
     foreach (CueStack* cs, m_cueStacks.values())
     {
         cs->stop();
-        while (cs->isStarted() == true);
+        while (cs->isStarted() == true) { /* NOP */ }
     }
 
     m_mutex.lock();

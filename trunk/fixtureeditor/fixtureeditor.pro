@@ -5,7 +5,7 @@ LANGUAGE = C++
 TARGET   = qlc-fixtureeditor
 
 CONFIG += qt
-QT     += xml
+QT     += xml script
 
 INCLUDEPATH += ../plugins/interfaces
 

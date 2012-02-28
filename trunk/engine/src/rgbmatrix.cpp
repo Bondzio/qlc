@@ -278,7 +278,7 @@ void RGBMatrix::tap()
     {
         FixtureGroup* grp = doc()->fixtureGroup(fixtureGroup());
         // Filter out taps that are too close to each other
-        if (grp != NULL && m_roundTime->elapsed() >= (duration() / 4))
+        if (grp != NULL && uint(m_roundTime->elapsed()) >= (duration() / 4))
             roundCheck(grp->size());
     }
 }

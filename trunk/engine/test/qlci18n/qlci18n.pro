@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = qlci18n_test
 
-QT      += testlib xml
+QT      += testlib xml script
 CONFIG  -= app_bundle
 
 DEPENDPATH   += ../../src

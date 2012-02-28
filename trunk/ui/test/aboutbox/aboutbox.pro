@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = aboutbox_test
 
-QT      += testlib gui xml
+QT      += testlib gui xml script
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../../engine/src

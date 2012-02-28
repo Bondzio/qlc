@@ -68,7 +68,8 @@ static const int KChannelsColumnPointer  ( 2 );
 
 static const int KModesColumnName     ( 0 );
 static const int KModesColumnChannels ( 1 );
-static const int KModesColumnPointer  ( 2 );
+static const int KModesColumnHeads    ( 2 );
+static const int KModesColumnPointer  ( 3 );
 
 static const int KMenuEdit ( 0 );
 static const int KMenuCopy ( 1 );
@@ -881,8 +882,11 @@ void QLCFixtureEditor::updateModeItem(const QLCFixtureMode* mode,
     Q_ASSERT(item != NULL);
 
     item->setText(KModesColumnName, mode->name());
-    item->setText(KModesColumnChannels,
-                  QString("%1").arg(mode->channels().size()));
+    item->setText(KModesColumnChannels, QString::number(mode->channels().size()));
+    if (mode->heads().size() > 0)
+        item->setText(KModesColumnHeads, QString::number(mode->heads().size()));
+    else
+        item->setText(KModesColumnHeads, QString());
 
     /* Store the mode pointer to the list as a string */
     item->setText(KModesColumnPointer,

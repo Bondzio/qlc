@@ -384,6 +384,11 @@
            <string>Channels</string>
           </property>
          </column>
+         <column>
+          <property name="text">
+           <string>Heads</string>
+          </property>
+         </column>
         </widget>
        </item>
        <item row="0" column="1">

@@ -27,6 +27,7 @@ fixtures.files += Chauvet-Hurricane-Haze-2.qxf
 fixtures.files += Chauvet-LEDSplash-Jr.qxf
 fixtures.files += Chauvet-LEDrain64.qxf
 fixtures.files += Chauvet-Q-Spot-260-LED.qxf
+fixtures.files += Chauvet-SlimPAR-56.qxf
 fixtures.files += Chauvet-Vue-3.1.qxf
 fixtures.files += Chauvet-Vue-6.1.qxf
 fixtures.files += Elation-Color-Spot-150.qxf

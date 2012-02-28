@@ -145,6 +145,10 @@ void EFXEditor::initGeneralPage()
     connect(m_asymmetricRadio, SIGNAL(toggled(bool)),
             this, SLOT(slotRestartTest()));
 
+    // Doc
+    connect(m_doc, SIGNAL(fixtureRemoved(quint32)), this, SLOT(slotFixtureRemoved()));
+    connect(m_doc, SIGNAL(fixtureChanged(quint32)), this, SLOT(slotFixtureChanged()));
+
     /* Set the EFX's name to the name field */
     m_nameEdit->setText(m_efx->name());
     m_nameEdit->setSelection(0, m_nameEdit->text().length());
@@ -153,9 +157,7 @@ void EFXEditor::initGeneralPage()
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     /* Put all of the EFX's fixtures to the tree view */
-    QListIterator <EFXFixture*> it(m_efx->fixtures());
-    while (it.hasNext() == true)
-        addFixtureItem(it.next());
+    updateFixtureTree();
 
     /* Set propagation mode */
     if (m_efx->propagationMode() == EFX::Serial)
@@ -331,6 +333,14 @@ void EFXEditor::continueRunning(bool running)
 /*****************************************************************************
  * General page
  *****************************************************************************/
+
+void EFXEditor::updateFixtureTree()
+{
+    m_tree->clear();
+    QListIterator <EFXFixture*> it(m_efx->fixtures());
+    while (it.hasNext() == true)
+        addFixtureItem(it.next());
+}
 
 QTreeWidgetItem* EFXEditor::fixtureItem(EFXFixture* ef)
 {
@@ -685,6 +695,18 @@ void EFXEditor::slotFadeOutChanged(int ms)
 void EFXEditor::slotDurationChanged(int ms)
 {
     m_efx->setDuration(ms);
+}
+
+void EFXEditor::slotFixtureRemoved()
+{
+    // EFX already catches fixture removals so just update the list
+    updateFixtureTree();
+}
+
+void EFXEditor::slotFixtureChanged()
+{
+    // Update the tree in case fixture's name changes
+    updateFixtureTree();
 }
 
 /*****************************************************************************

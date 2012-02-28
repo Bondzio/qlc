@@ -82,6 +82,7 @@ private:
      * General page
      *********************************************************************/
 private:
+    void updateFixtureTree();
     QTreeWidgetItem* fixtureItem(EFXFixture* ef);
     const QList <EFXFixture*> selectedFixtures() const;
     void updateIndices(int from, int to);
@@ -106,6 +107,9 @@ private slots:
     void slotFadeInChanged(int ms);
     void slotFadeOutChanged(int ms);
     void slotDurationChanged(int ms);
+
+    void slotFixtureRemoved();
+    void slotFixtureChanged();
 
 private:
     QPointer<SpeedDialWidget> m_speedDials;

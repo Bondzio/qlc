@@ -21,6 +21,7 @@
 
 #include <QMdiSubWindow>
 #include <QDomDocument>
+#include <QInputDialog>
 #include <QDomElement>
 #include <QToolButton>
 #include <QHeaderView>
@@ -269,6 +270,12 @@ void SimpleDesk::initRightSide()
     hbox->addWidget(m_nextCueButton);
 
     hbox->addStretch();
+
+    m_cloneCueStackButton = new QToolButton(this);
+    m_cloneCueStackButton->setIcon(QIcon(":/editcopy.png"));
+    m_cloneCueStackButton->setIconSize(QSize(32, 32));
+    m_cloneCueStackButton->setToolTip(tr("Clone cue stack"));
+    hbox->addWidget(m_cloneCueStackButton);
 
     m_editCueStackButton = new QToolButton(this);
     m_editCueStackButton->setIcon(QIcon(":/edit.png"));
@@ -558,6 +565,7 @@ void SimpleDesk::initCueStack()
     connect(m_previousCueButton, SIGNAL(clicked()), this, SLOT(slotPreviousCueClicked()));
     connect(m_nextCueButton, SIGNAL(clicked()), this, SLOT(slotNextCueClicked()));
     connect(m_stopCueStackButton, SIGNAL(clicked()), this, SLOT(slotStopCueStackClicked()));
+    connect(m_cloneCueStackButton, SIGNAL(clicked()), this, SLOT(slotCloneCueStackClicked()));
     connect(m_editCueStackButton, SIGNAL(clicked()), this, SLOT(slotEditCueStackClicked()));
     connect(m_recordCueButton, SIGNAL(clicked()), this, SLOT(slotRecordCueClicked()));
 
@@ -760,6 +768,39 @@ void SimpleDesk::slotStopCueStackClicked()
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
     cueStack->stop();
+}
+
+void SimpleDesk::slotCloneCueStackClicked()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QStringList items;
+    for (uint i = 0; i < m_playbacksPerPage; i++)
+    {
+        if (i != m_selectedPlayback)
+            items << QString::number(i + 1);
+    }
+
+    bool ok = false;
+    QString text = QInputDialog::getItem(this, tr("Clone Cue Stack"), tr("Clone To Playback#"),
+                                         items, 0, false, &ok);
+    if (ok == false)
+        return;
+
+    uint pb = text.toUInt() - 1;
+    CueStack* cs = m_engine->cueStack(m_selectedPlayback);
+    CueStack* clone = m_engine->cueStack(pb);
+    Q_ASSERT(cs != NULL);
+    Q_ASSERT(clone != NULL);
+
+    while (clone->cues().size() > 0)
+        clone->removeCue(0);
+
+    QListIterator <Cue> it(cs->cues());
+    while (it.hasNext() == true)
+        clone->appendCue(it.next());
+
+    slotSelectPlayback(pb);
 }
 
 void SimpleDesk::slotEditCueStackClicked()

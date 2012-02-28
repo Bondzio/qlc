@@ -155,6 +155,7 @@ private slots:
     void slotPreviousCueClicked();
     void slotNextCueClicked();
     void slotStopCueStackClicked();
+    void slotCloneCueStackClicked();
     void slotEditCueStackClicked();
     void slotRecordCueClicked();
 
@@ -170,6 +171,7 @@ private:
     QToolButton* m_previousCueButton;
     QToolButton* m_nextCueButton;
     QToolButton* m_stopCueStackButton;
+    QToolButton* m_cloneCueStackButton;
     QToolButton* m_editCueStackButton;
     QToolButton* m_recordCueButton;
     QTreeView* m_cueStackView;

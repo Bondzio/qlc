@@ -73,7 +73,6 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     , m_splitter(NULL)
     , m_tree(NULL)
     , m_toolbar(NULL)
-    , m_actionGroup(NULL)
     , m_addSceneAction(NULL)
     , m_addChaserAction(NULL)
     , m_addCollectionAction(NULL)
@@ -96,8 +95,7 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     initSplitterView();
     updateActionStatus();
 
-    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)),
-            this, SLOT(slotModeChanged(Doc::Mode)));
+    connect(m_doc, SIGNAL(modeChanged(Doc::Mode)), this, SLOT(slotModeChanged()));
     updateTree();
 
     m_tree->sortItems(COL_NAME, Qt::AscendingOrder);
@@ -152,26 +150,16 @@ void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
     sub->setSystemMenu(NULL);
 }
 
-void FunctionManager::slotModeChanged(Doc::Mode mode)
+void FunctionManager::slotModeChanged()
 {
-    /* Disable completely when in operate mode */
-    if (mode == Doc::Operate)
-    {
-        m_toolbar->setEnabled(false);
-        m_actionGroup->setEnabled(false);
-    }
-    else
-    {
-        m_toolbar->setEnabled(true);
-        m_actionGroup->setEnabled(true);
-    }
+    updateActionStatus();
 }
 
 void FunctionManager::slotDocClearing()
 {
-    m_tree->clear();
     if (currentEditor() != NULL)
         delete currentEditor();
+    m_tree->clear();
 }
 
 void FunctionManager::slotFunctionChanged(quint32 id)
@@ -221,55 +209,46 @@ void FunctionManager::slotSubWindowActivated(QMdiSubWindow* sub)
 
 void FunctionManager::initActions()
 {
-    m_actionGroup = new QActionGroup(this);
-
     /* Manage actions */
     m_addSceneAction = new QAction(QIcon(":/scene.png"),
                                    tr("New &scene"), this);
     m_addSceneAction->setShortcut(QKeySequence("CTRL+S"));
-    m_actionGroup->addAction(m_addSceneAction);
     connect(m_addSceneAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddScene()));
 
     m_addChaserAction = new QAction(QIcon(":/chaser.png"),
                                     tr("New c&haser"), this);
     m_addChaserAction->setShortcut(QKeySequence("CTRL+H"));
-    m_actionGroup->addAction(m_addChaserAction);
     connect(m_addChaserAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddChaser()));
 
     m_addCollectionAction = new QAction(QIcon(":/collection.png"),
                                         tr("New c&ollection"), this);
     m_addCollectionAction->setShortcut(QKeySequence("CTRL+O"));
-    m_actionGroup->addAction(m_addCollectionAction);
     connect(m_addCollectionAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddCollection()));
 
     m_addEFXAction = new QAction(QIcon(":/efx.png"),
                                  tr("New E&FX"), this);
     m_addEFXAction->setShortcut(QKeySequence("CTRL+F"));
-    m_actionGroup->addAction(m_addEFXAction);
     connect(m_addEFXAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddEFX()));
 
     m_addRGBMatrixAction = new QAction(QIcon(":/rgbmatrix.png"),
                                  tr("New &RGB Matrix"), this);
     m_addRGBMatrixAction->setShortcut(QKeySequence("CTRL+R"));
-    m_actionGroup->addAction(m_addRGBMatrixAction);
     connect(m_addRGBMatrixAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddRGBMatrix()));
 
     m_addScriptAction = new QAction(QIcon(":/script.png"),
                                  tr("New scrip&t"), this);
     m_addScriptAction->setShortcut(QKeySequence("CTRL+T"));
-    m_actionGroup->addAction(m_addScriptAction);
     connect(m_addScriptAction, SIGNAL(triggered(bool)),
             this, SLOT(slotAddScript()));
 
     m_wizardAction = new QAction(QIcon(":/wizard.png"),
                                  tr("Function Wizard"), this);
     m_wizardAction->setShortcut(QKeySequence("CTRL+A"));
-    m_actionGroup->addAction(m_wizardAction);
     connect(m_wizardAction, SIGNAL(triggered(bool)),
             this, SLOT(slotWizard()));
 
@@ -277,21 +256,18 @@ void FunctionManager::initActions()
     m_cloneAction = new QAction(QIcon(":/editcopy.png"),
                                 tr("&Clone"), this);
     m_cloneAction->setShortcut(QKeySequence("CTRL+C"));
-    m_actionGroup->addAction(m_cloneAction);
     connect(m_cloneAction, SIGNAL(triggered(bool)),
             this, SLOT(slotClone()));
 
     m_deleteAction = new QAction(QIcon(":/editdelete.png"),
                                  tr("&Delete"), this);
     m_deleteAction->setShortcut(QKeySequence("Delete"));
-    m_actionGroup->addAction(m_deleteAction);
     connect(m_deleteAction, SIGNAL(triggered(bool)),
             this, SLOT(slotDelete()));
 
     m_selectAllAction = new QAction(QIcon(":/selectall.png"),
                                     tr("Select &all"), this);
     m_selectAllAction->setShortcut(QKeySequence("CTRL+A"));
-    m_actionGroup->addAction(m_selectAllAction);
     connect(m_selectAllAction, SIGNAL(triggered(bool)),
             this, SLOT(slotSelectAll()));
 }
@@ -442,15 +418,18 @@ void FunctionManager::updateActionStatus()
         /* At least one function has been selected, so
            editing is possible. */
         m_cloneAction->setEnabled(true);
-        m_deleteAction->setEnabled(true);
         m_selectAllAction->setEnabled(true);
+        if (m_doc->mode() == Doc::Operate)
+            m_deleteAction->setEnabled(false);
+        else
+            m_deleteAction->setEnabled(true);
     }
     else
     {
         /* No functions selected */
         m_cloneAction->setEnabled(false);
-        m_deleteAction->setEnabled(false);
         m_selectAllAction->setEnabled(false);
+        m_deleteAction->setEnabled(false);
     }
 }
 

@@ -30,7 +30,6 @@
 
 class QTreeWidgetItem;
 class QMdiSubWindow;
-class QActionGroup;
 class QTreeWidget;
 class QSplitter;
 class QToolBar;
@@ -66,7 +65,7 @@ protected:
     FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
 protected slots:
-    void slotModeChanged(Doc::Mode mode);
+    void slotModeChanged();
     void slotDocClearing();
     void slotFunctionChanged(quint32 id);
     void slotFunctionAdded(quint32 id);
@@ -148,15 +147,14 @@ protected:
 protected:
     QToolBar* m_toolbar;
 
-    QActionGroup* m_actionGroup;
     QAction* m_addSceneAction;
     QAction* m_addChaserAction;
     QAction* m_addCollectionAction;
     QAction* m_addEFXAction;
     QAction* m_addRGBMatrixAction;
     QAction* m_addScriptAction;
-    QAction* m_wizardAction;
 
+    QAction* m_wizardAction;
     QAction* m_cloneAction;
     QAction* m_deleteAction;
     QAction* m_selectAllAction;

@@ -198,7 +198,7 @@ void ChaserRunner::previous()
 
 void ChaserRunner::tap()
 {
-    if (m_roundTime->elapsed() >= (currentDuration() / 4))
+    if (uint(m_roundTime->elapsed()) >= (currentDuration() / 4))
         next();
 }
 

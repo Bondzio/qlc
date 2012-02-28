@@ -46,37 +46,26 @@
 
 #define KSettingsGeometry "editmode/geometry"
 
-#define KChannelsColumnNumber 0
-#define KChannelsColumnName 1
-#define KChannelsColumnPointer 2
+#define PROP_PTR Qt::UserRole
+#define COL_NUM  0
+#define COL_NAME 1
 
-EditMode::EditMode(QWidget* parent, QLCFixtureMode* mode) : QDialog(parent)
+EditMode::EditMode(QWidget* parent, QLCFixtureMode* mode)
+    : QDialog(parent)
+    , m_mode(new QLCFixtureMode(mode->fixtureDef(), mode))
 {
     Q_ASSERT(mode != NULL);
-
-    /* Edit the given mode */
-    m_mode = new QLCFixtureMode(mode->fixtureDef(), mode);
-
     setupUi(this);
     init();
-    loadDefaults();
-
-    QAction* action = new QAction(this);
-    action->setShortcut(QKeySequence(QKeySequence::Close));
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
-    addAction(action);
 }
 
-EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef) : QDialog(parent)
+EditMode::EditMode(QWidget* parent, QLCFixtureDef* fixtureDef)
+    : QDialog(parent)
+    , m_mode(new QLCFixtureMode(fixtureDef))
 {
     Q_ASSERT(fixtureDef != NULL);
-
-    /* Create a new mode for the given fixture */
-    m_mode = new QLCFixtureMode(fixtureDef);
-
     setupUi(this);
     init();
-    loadDefaults();
 }
 
 EditMode::~EditMode()
@@ -85,14 +74,6 @@ EditMode::~EditMode()
     settings.setValue(KSettingsGeometry, saveGeometry());
 
     delete m_mode;
-}
-
-void EditMode::loadDefaults()
-{
-    QSettings settings;
-    QVariant var = settings.value(KSettingsGeometry);
-    if (var.isValid() == true)
-        restoreGeometry(var.toByteArray());
 }
 
 void EditMode::init()
@@ -150,6 +131,18 @@ void EditMode::init()
 
     m_powerConsumptionSpin->setValue(physical.powerConsumption());
     m_dmxConnectorCombo->setEditText(physical.dmxConnector());
+
+    // Close shortcut
+    QAction* action = new QAction(this);
+    action->setShortcut(QKeySequence(QKeySequence::Close));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(reject()));
+    addAction(action);
+
+    // Geometry
+    QSettings settings;
+    QVariant var = settings.value(KSettingsGeometry);
+    if (var.isValid() == true)
+        restoreGeometry(var.toByteArray());
 }
 
 /****************************************************************************
@@ -215,7 +208,7 @@ void EditMode::slotRemoveChannelClicked()
         if (item == NULL)
             item = m_channelList->itemBelow(m_channelList->currentItem());
         if (item != NULL)
-            select = item->text(KChannelsColumnName);
+            select = item->text(COL_NAME);
 
         // Remove the channel and the listview item
         m_mode->removeChannel(ch);
@@ -284,12 +277,9 @@ void EditMode::refreshChannelList()
 
         QString str;
         str.sprintf("%.3d", (i + 1));
-        item->setText(KChannelsColumnNumber, str);
-        item->setText(KChannelsColumnName, ch->name());
-
-        // Store the channel pointer to the listview as a string
-        str.sprintf("%lu", (unsigned long) ch);
-        item->setText(KChannelsColumnPointer, str);
+        item->setText(COL_NUM, str);
+        item->setText(COL_NAME, ch->name());
+        item->setData(COL_NAME, PROP_PTR, (qulonglong) ch);
     }
 }
 
@@ -301,7 +291,7 @@ QLCChannel* EditMode::currentChannel()
     // Convert the string-form ulong to a QLCChannel pointer and return it
     item = m_channelList->currentItem();
     if (item != NULL)
-        ch = (QLCChannel*) item->text(KChannelsColumnPointer).toULong();
+        ch = (QLCChannel*) item->data(COL_NAME, PROP_PTR).toULongLong();
 
     return ch;
 }
@@ -311,7 +301,7 @@ void EditMode::selectChannel(const QString &name)
     QTreeWidgetItemIterator it(m_channelList);
     while (*it != NULL)
     {
-        if ((*it)->text(KChannelsColumnName) == name)
+        if ((*it)->text(COL_NAME) == name)
         {
             m_channelList->setCurrentItem((*it));
             break;

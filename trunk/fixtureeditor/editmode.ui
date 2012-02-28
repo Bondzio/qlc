@@ -31,7 +31,7 @@
    <item>
     <widget class="QTabWidget" name="m_tab">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_channels">
       <attribute name="title">
@@ -68,6 +68,9 @@
         <layout class="QVBoxLayout">
          <item>
           <widget class="QToolButton" name="m_addChannelButton">
+           <property name="toolTip">
+            <string>Add channel(s) to this mode</string>
+           </property>
            <property name="text">
             <string notr="true">...</string>
            </property>
@@ -85,6 +88,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="m_removeChannelButton">
+           <property name="toolTip">
+            <string>Remove the selected channel</string>
+           </property>
            <property name="text">
             <string notr="true">...</string>
            </property>
@@ -102,6 +108,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="m_raiseChannelButton">
+           <property name="toolTip">
+            <string>Raise the selected channel</string>
+           </property>
            <property name="text">
             <string notr="true">...</string>
            </property>
@@ -119,6 +128,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="m_lowerChannelButton">
+           <property name="toolTip">
+            <string>Lower the selected channel</string>
+           </property>
            <property name="text">
             <string notr="true">...</string>
            </property>
@@ -188,6 +200,9 @@
        <layout class="QVBoxLayout" name="_2">
         <item>
          <widget class="QToolButton" name="m_addHeadButton">
+          <property name="toolTip">
+           <string>Compose a new head</string>
+          </property>
           <property name="text">
            <string notr="true">...</string>
           </property>
@@ -205,6 +220,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="m_removeHeadButton">
+          <property name="toolTip">
+           <string>Remove the selected head</string>
+          </property>
           <property name="text">
            <string notr="true">...</string>
           </property>
@@ -222,6 +240,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="m_editHeadButton">
+          <property name="toolTip">
+           <string>Edit the channels that belong to the selected head</string>
+          </property>
           <property name="text">
            <string>...</string>
           </property>
@@ -239,6 +260,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="m_raiseHeadButton">
+          <property name="toolTip">
+           <string>Raise the selected head</string>
+          </property>
           <property name="text">
            <string notr="true">...</string>
           </property>
@@ -256,6 +280,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="m_lowerHeadButton">
+          <property name="toolTip">
+           <string>Lower the selected head</string>
+          </property>
           <property name="text">
            <string notr="true">...</string>
           </property>

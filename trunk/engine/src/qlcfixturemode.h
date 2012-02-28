@@ -25,6 +25,7 @@
 #include <QString>
 #include <QList>
 
+#include "qlcfixturehead.h"
 #include "qlcfixturedef.h"
 #include "qlcphysical.h"
 #include "qlcchannel.h"

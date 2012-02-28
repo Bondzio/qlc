@@ -62,30 +62,24 @@
 extern App* _app;
 extern int errno;
 
-static const int KChannelsColumnName     ( 0 );
-static const int KChannelsColumnGroup    ( 1 );
-static const int KChannelsColumnPointer  ( 2 );
+#define PROP_PTR Qt::UserRole
 
-static const int KModesColumnName     ( 0 );
-static const int KModesColumnChannels ( 1 );
-static const int KModesColumnHeads    ( 2 );
-static const int KModesColumnPointer  ( 3 );
+#define CH_COL_NAME 0
+#define CH_COL_GRP  1
 
-static const int KMenuEdit ( 0 );
-static const int KMenuCopy ( 1 );
-static const int KMenuPaste ( 3 );
-static const int KMenuRemove ( 4 );
+#define MODE_COL_NAME 0
+#define MODE_COL_CHS  1
+#define MODE_COL_HEAD 2
 
-#define KSettingsGeometry "fixtureeditor/geometry"
+#define SETTINGS_GEOMETRY "fixtureeditor/geometry"
 
-QLCFixtureEditor::QLCFixtureEditor(QWidget* parent,
-                                   QLCFixtureDef* fixtureDef,
-                                   const QString& fileName) : QWidget(parent)
+QLCFixtureEditor::QLCFixtureEditor(QWidget* parent, QLCFixtureDef* fixtureDef,
+                                   const QString& fileName)
+    : QWidget(parent)
+    , m_fixtureDef(fixtureDef)
+    , m_fileName(fileName)
+    , m_modified(false)
 {
-    m_fixtureDef = fixtureDef;
-    m_fileName = fileName;
-    m_modified = false;
-
     setupUi(this);
     init();
     setCaption();
@@ -100,7 +94,7 @@ QLCFixtureEditor::QLCFixtureEditor(QWidget* parent,
     slotClipboardChanged();
 
     QSettings settings;
-    QVariant var = settings.value(KSettingsGeometry);
+    QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         parentWidget()->restoreGeometry(var.toByteArray());
 }
@@ -108,7 +102,7 @@ QLCFixtureEditor::QLCFixtureEditor(QWidget* parent,
 QLCFixtureEditor::~QLCFixtureEditor()
 {
     QSettings settings;
-    settings.setValue(KSettingsGeometry, parentWidget()->saveGeometry());
+    settings.setValue(SETTINGS_GEOMETRY, parentWidget()->saveGeometry());
 
     delete m_fixtureDef;
     m_fixtureDef = NULL;
@@ -548,28 +542,21 @@ void QLCFixtureEditor::refreshChannelList()
     /* Fill channels list */
     QListIterator <QLCChannel*> it(m_fixtureDef->channels());
     while (it.hasNext() == true)
-    {
-        updateChannelItem(it.next(),
-                          new QTreeWidgetItem(m_channelList));
-    }
+        updateChannelItem(it.next(), new QTreeWidgetItem(m_channelList));
 
     slotChannelListSelectionChanged(m_channelList->currentItem());
 }
 
-void QLCFixtureEditor::updateChannelItem(const QLCChannel* channel,
-        QTreeWidgetItem* item)
+void QLCFixtureEditor::updateChannelItem(const QLCChannel* channel, QTreeWidgetItem* item)
 {
     QString str;
 
     Q_ASSERT(channel != NULL);
     Q_ASSERT(item != NULL);
 
-    item->setText(KChannelsColumnName, channel->name());
-    item->setText(KChannelsColumnGroup, QLCChannel::groupToString(channel->group()));
-
-    /* Store the channel pointer to the listview as a string */
-    str.sprintf("%lu", (unsigned long) channel);
-    item->setText(KChannelsColumnPointer, str);
+    item->setText(CH_COL_NAME, channel->name());
+    item->setText(CH_COL_GRP, QLCChannel::groupToString(channel->group()));
+    item->setData(CH_COL_NAME, PROP_PTR, (qulonglong) channel);
 
     /* Destroy the existing list of children */
     QList <QTreeWidgetItem*> children(item->takeChildren());
@@ -584,7 +571,7 @@ void QLCFixtureEditor::updateChannelItem(const QLCChannel* channel,
         Q_ASSERT(cap != NULL);
 
         QTreeWidgetItem* capitem = new QTreeWidgetItem(item);
-        capitem->setText(KChannelsColumnName,
+        capitem->setText(CH_COL_NAME,
                          QString("[%1-%2]: %3").arg(cap->min())
                          .arg(cap->max()).arg(cap->name()));
         capitem->setFlags(0); /* No selection etc. */
@@ -648,8 +635,7 @@ void QLCFixtureEditor::slotChannelListContextMenuRequested()
             ch->setGroup(QLCChannel::stringToGroup(selectedAction->text()));
         node = m_channelList->currentItem();
         if (node != NULL)
-            node->setText(KChannelsColumnGroup,
-                          selectedAction->text());
+            node->setText(CH_COL_GRP, selectedAction->text());
         setModified();
     }
 }
@@ -662,7 +648,7 @@ QLCChannel* QLCFixtureEditor::currentChannel()
     // Convert the string-form ulong to a QLCChannel pointer and return it
     item = m_channelList->currentItem();
     if (item != NULL)
-        ch = (QLCChannel*) item->text(KChannelsColumnPointer).toULong();
+        ch = (QLCChannel*) item->data(CH_COL_NAME, PROP_PTR).toULongLong();
 
     return ch;
 }
@@ -717,8 +703,7 @@ void QLCFixtureEditor::slotAddMode()
                 QTreeWidgetItem* item;
                 QLCFixtureMode* mode;
 
-                mode = new QLCFixtureMode(m_fixtureDef,
-                                          em.mode());
+                mode = new QLCFixtureMode(m_fixtureDef, em.mode());
                 item = new QTreeWidgetItem(m_modeList);
 
                 m_fixtureDef->addMode(mode);
@@ -881,16 +866,13 @@ void QLCFixtureEditor::updateModeItem(const QLCFixtureMode* mode,
     Q_ASSERT(mode != NULL);
     Q_ASSERT(item != NULL);
 
-    item->setText(KModesColumnName, mode->name());
-    item->setText(KModesColumnChannels, QString::number(mode->channels().size()));
+    item->setText(MODE_COL_NAME, mode->name());
+    item->setData(MODE_COL_NAME, PROP_PTR, (qulonglong) mode);
+    item->setText(MODE_COL_CHS, QString::number(mode->channels().size()));
     if (mode->heads().size() > 0)
-        item->setText(KModesColumnHeads, QString::number(mode->heads().size()));
+        item->setText(MODE_COL_HEAD, QString::number(mode->heads().size()));
     else
-        item->setText(KModesColumnHeads, QString());
-
-    /* Store the mode pointer to the list as a string */
-    item->setText(KModesColumnPointer,
-                  QString("%1").arg((unsigned long) mode));
+        item->setText(MODE_COL_HEAD, QString());
 
     /* Destroy the existing list of children */
     QList <QTreeWidgetItem*> children(item->takeChildren());
@@ -904,8 +886,8 @@ void QLCFixtureEditor::updateModeItem(const QLCFixtureMode* mode,
         Q_ASSERT(ch != NULL);
 
         QTreeWidgetItem* chitem = new QTreeWidgetItem(item);
-        chitem->setText(KModesColumnName, ch->name());
-        chitem->setText(KModesColumnChannels, QString("%1").arg(i + 1));
+        chitem->setText(MODE_COL_NAME, ch->name());
+        chitem->setText(MODE_COL_CHS, QString("%1").arg(i + 1));
         chitem->setFlags(0); /* No selection etc. */
     }
 }
@@ -918,7 +900,7 @@ QLCFixtureMode* QLCFixtureEditor::currentMode()
     // Convert the string-form ulong to a QLCChannel pointer and return it
     item = m_modeList->currentItem();
     if (item != NULL)
-        mode = (QLCFixtureMode*) item->text(KModesColumnPointer).toULong();
+        mode = (QLCFixtureMode*) item->data(MODE_COL_NAME, PROP_PTR).toULongLong();
 
     return mode;
 }

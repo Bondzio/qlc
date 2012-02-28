@@ -639,17 +639,8 @@ void FunctionManager::copyFunction(quint32 fid)
     if (copy != NULL)
     {
         copy->setName(tr("Copy of %1").arg(function->name()));
-
-        /* Create a new item for the copied function */
-        QTreeWidgetItem* parent = parentItem(function);
-        QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-        updateFunctionItem(item, copy);
-        parent->setExpanded(true);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Function creation failed"),
-                              tr("Unable to create new function."));
+        QTreeWidgetItem* item = functionItem(copy);
+        m_tree->setCurrentItem(item);
     }
 }
 

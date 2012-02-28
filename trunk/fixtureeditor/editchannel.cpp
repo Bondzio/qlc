@@ -41,12 +41,12 @@
 #include "util.h"
 #include "app.h"
 
-#define KSettingsGeometry "editchannel/geometry"
+#define SETTINGS_GEOMETRY "editchannel/geometry"
+#define PROP_PTR Qt::UserRole
 
-#define KColumnMin 0
-#define KColumnMax 1
-#define KColumnName 2
-#define KColumnPointer 3
+#define COL_MIN  0
+#define COL_MAX  1
+#define COL_NAME 2
 
 EditChannel::EditChannel(QWidget* parent, QLCChannel* channel)
     : QDialog(parent)
@@ -62,7 +62,7 @@ EditChannel::EditChannel(QWidget* parent, QLCChannel* channel)
     addAction(action);
 
     QSettings settings;
-    QVariant var = settings.value(KSettingsGeometry);
+    QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
 }
@@ -70,7 +70,7 @@ EditChannel::EditChannel(QWidget* parent, QLCChannel* channel)
 EditChannel::~EditChannel()
 {
     QSettings settings;
-    settings.setValue(KSettingsGeometry, saveGeometry());
+    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
     if (m_channel != NULL)
         delete m_channel;
@@ -372,21 +372,20 @@ void EditChannel::refreshCapabilities()
 
         // Min
         str.sprintf("%.3d", cap->min());
-        item->setText(KColumnMin, str);
+        item->setText(COL_MIN, str);
 
         // Max
         str.sprintf("%.3d", cap->max());
-        item->setText(KColumnMax, str);
+        item->setText(COL_MAX, str);
 
         // Name
-        item->setText(KColumnName, cap->name());
+        item->setText(COL_NAME, cap->name());
 
-        // Store the capability pointer to the listview as a string
-        str.sprintf("%lu", (unsigned long) cap);
-        item->setText(KColumnPointer, str);
+        // Pointer
+        item->setData(COL_NAME, PROP_PTR, (qulonglong) cap);
     }
 
-    m_capabilityList->sortItems(KColumnMin, Qt::AscendingOrder);
+    m_capabilityList->sortItems(COL_MIN, Qt::AscendingOrder);
 
     slotCapabilityListSelectionChanged(m_capabilityList->currentItem());
 }
@@ -399,7 +398,7 @@ QLCCapability* EditChannel::currentCapability()
     // Convert the string-form ulong to a QLCChannel pointer and return it
     item = m_capabilityList->currentItem();
     if (item != NULL)
-        cap = (QLCCapability*) item->text(KColumnPointer).toULong();
+        cap = (QLCCapability*) item->data(COL_NAME, PROP_PTR).toULongLong();
 
     return cap;
 }

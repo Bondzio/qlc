@@ -1,3 +1,14 @@
+qlc (3.2.2) stable; urgency=low
+
+  * Prevent virtual console button clicks thru bound keyboard keys in Design mode
+    to prevent crashing.
+  * Fixed MasterTimer on Windows to use A LOT LESS CPU by using the TimerQueue service.
+  * Removed the reconnect button in I/O patch editors because it caused a crash at times.
+  * Added a config dialog to the Enttec plugin giving users the possibility to choose
+    which protocol to use on which device.
+
+ -- Heikki Junnila <hjunnila@users.sourceforge.net>  Sat, 10 Mar 2012 16:00:10 +0200
+
 qlc (3.2.1) stable; urgency=low
 
   * Fixed ChaserRunner's PingPong bug

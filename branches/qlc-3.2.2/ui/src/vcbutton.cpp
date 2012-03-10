@@ -528,16 +528,8 @@ void VCButton::slotKeyReleased(const QKeySequence& keySequence)
  * External input
  *****************************************************************************/
 
-void VCButton::slotInputValueChanged(quint32 universe,
-                                     quint32 channel,
-                                     uchar value)
+void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
-    Q_UNUSED(value);
-
-    /* Don't allow operation during design mode */
-    if (mode() == Doc::Design)
-        return;
-
     if (universe == m_inputUniverse && channel == m_inputChannel)
     {
         if (m_action == Toggle && value > 0)
@@ -661,6 +653,10 @@ qreal VCButton::intensityAdjustment() const
 
 void VCButton::pressFunction()
 {
+    /* Don't allow operation during design mode */
+    if (mode() == Doc::Design)
+        return;
+
     Function* f = NULL;
     if (m_action == Toggle)
     {
@@ -691,11 +687,13 @@ void VCButton::pressFunction()
 
 void VCButton::releaseFunction()
 {
-    Function* f = NULL;
+    /* Don't allow operation during design mode */
+    if (mode() == Doc::Design)
+        return;
 
     if (m_action == Flash && isOn() == true)
     {
-        f = m_doc->function(m_function);
+        Function* f = m_doc->function(m_function);
         if (f != NULL)
             f->unFlash(m_masterTimer);
     }

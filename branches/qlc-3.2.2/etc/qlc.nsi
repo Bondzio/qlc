@@ -1,5 +1,5 @@
 Name "Q Light Controller"
-OutFile "qlc-3.2.1.exe"
+OutFile "qlc-3.2.2.exe"
 InstallDir C:\QLC
 RequestExecutionLevel user
 ;--------------------------------
@@ -107,4 +107,6 @@ Section "Uninstall"
 
 	DeleteRegKey HKCR ".qxf"
 	DeleteRegKey HKCR "QLightControllerFixture.Document"
+	
+	DeleteRegKey HKCU "Software\qlc"
 SectionEnd

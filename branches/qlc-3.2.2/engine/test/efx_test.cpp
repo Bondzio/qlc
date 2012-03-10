@@ -2414,7 +2414,8 @@ void EFX_Test::preRun()
 {
     Doc* doc = new Doc(this, m_cache);
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    OutputMapStub oms(this);
+    MasterTimerStub timer(this, &oms, ua);
 
     EFX* e = new EFX(doc);
     e->setName("Test EFX");

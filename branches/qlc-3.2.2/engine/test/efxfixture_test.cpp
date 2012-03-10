@@ -25,6 +25,7 @@
 
 #include "mastertimer_stub.h"
 #include "efxfixture_test.h"
+#include "outputmap_stub.h"
 #include "scene_stub.h"
 
 #include "universearray.h"
@@ -468,7 +469,8 @@ void EFXFixture_Test::setPoint16bit()
 void EFXFixture_Test::nextStepLoop()
 {
     UniverseArray array(512 * 4);
-    MasterTimerStub mts(this, NULL, array);
+    OutputMapStub oms(this);
+    MasterTimerStub mts(this, &oms, array);
 
     EFX e(m_doc);
     Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
@@ -514,7 +516,8 @@ void EFXFixture_Test::nextStepLoop()
 void EFXFixture_Test::nextStepSingleShot()
 {
     UniverseArray array(512 * 4);
-    MasterTimerStub mts(this, NULL, array);
+    OutputMapStub oms(this);
+    MasterTimerStub mts(this, &oms, array);
 
     EFX e(m_doc);
     Bus::instance()->setValue(e.busID(), 50); /* 50 steps */
@@ -564,7 +567,8 @@ void EFXFixture_Test::nextStepSingleShot()
 void EFXFixture_Test::start()
 {
     UniverseArray array(512 * 4);
-    MasterTimerStub mts(this, NULL, array);
+    OutputMapStub oms(this);
+    MasterTimerStub mts(this, &oms, array);
 
     EFX e(m_doc);
     EFXFixture* ef = new EFXFixture(&e);
@@ -597,7 +601,8 @@ void EFXFixture_Test::start()
 void EFXFixture_Test::stop()
 {
     UniverseArray array(512 * 4);
-    MasterTimerStub mts(this, NULL, array);
+    OutputMapStub oms(this);
+    MasterTimerStub mts(this, &oms, array);
 
     EFX e(m_doc);
     EFXFixture* ef = new EFXFixture(&e);

@@ -24,6 +24,7 @@
 
 #include "mastertimer_stub.h"
 #include "collection_test.h"
+#include "outputmap_stub.h"
 
 #define protected public
 #include "collection.h"
@@ -472,7 +473,8 @@ void Collection_Test::write()
     c->arm();
 
     UniverseArray uni(1);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    OutputMapStub oms(this);
+    MasterTimerStub* mts = new MasterTimerStub(this, &oms, uni);
 
     /* Collection starts all of its members immediately when it is started
        itself. */
@@ -564,7 +566,8 @@ void Collection_Test::stopNotOwnChildren()
     c->arm();
 
     UniverseArray uni(512);
-    MasterTimerStub* mts = new MasterTimerStub(this, NULL, uni);
+    OutputMapStub oms(this);
+    MasterTimerStub* mts = new MasterTimerStub(this, &oms, uni);
 
     QVERIFY(c->stopped() == true);
     mts->startFunction(c, false);

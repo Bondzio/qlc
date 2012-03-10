@@ -23,6 +23,7 @@
 #include <QtXml>
 
 #include "mastertimer_stub.h"
+#include "outputmap_stub.h"
 #include "universearray.h"
 #include "chaser_test.h"
 #include "fixture.h"
@@ -757,7 +758,8 @@ void Chaser_Test::preRun()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    OutputMapStub oms(this);
+    MasterTimerStub timer(this, &oms, ua);
 
     c->arm();
     c->m_runner->m_elapsed = 31337;
@@ -779,7 +781,8 @@ void Chaser_Test::write()
     c->addStep(s1->id());
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    OutputMapStub oms(this);
+    MasterTimerStub timer(this, &oms, ua);
 
     c->arm();
     c->preRun(&timer);
@@ -803,7 +806,8 @@ void Chaser_Test::postRun()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    OutputMapStub oms(this);
+    MasterTimerStub timer(this, &oms, ua);
 
     c->arm();
     c->preRun(&timer);
@@ -822,7 +826,8 @@ void Chaser_Test::adjustIntensity()
     m_doc->addFunction(c);
 
     UniverseArray ua(512);
-    MasterTimerStub timer(this, NULL, ua);
+    OutputMapStub oms(this);
+    MasterTimerStub timer(this, &oms, ua);
 
     c->arm();
     c->adjustIntensity(0.5);

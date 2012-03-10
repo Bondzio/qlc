@@ -11,6 +11,7 @@ QMAKE_LIBDIR += ../ui/src
 QMAKE_LIBDIR += ../engine/src
 LIBS         += -lqlcengine
 LIBS         += -lqlcui
+QT           += xml
 
 SOURCES      += main.cpp
 win32:RC_FILE = main.rc

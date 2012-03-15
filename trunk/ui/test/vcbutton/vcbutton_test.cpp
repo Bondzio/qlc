@@ -546,6 +546,7 @@ void VCButton_Test::flash()
 
     QSignalSpy spy(sc, SIGNAL(flashing(quint32,bool)));
 
+    m_doc->setMode(Doc::Operate);
     btn.slotKeyPressed(QKeySequence(keySequenceB));
     QCOMPARE(m_doc->masterTimer()->m_functionList.size(), 0);
     QCOMPARE(btn.isOn(), true);
@@ -562,6 +563,8 @@ void VCButton_Test::flash()
 
     btn.slotFunctionFlashing(sc->id() + 1, true);
     QCOMPARE(btn.isOn(), false);
+
+    m_doc->setMode(Doc::Design);
 }
 
 void VCButton_Test::input()

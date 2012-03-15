@@ -404,12 +404,6 @@ void VCButton::slotKeyReleased(const QKeySequence& keySequence)
 
 void VCButton::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
 {
-    Q_UNUSED(value);
-
-    /* Don't allow operation during design mode */
-    if (mode() == Doc::Design)
-        return;
-
     QLCInputSource src(universe, channel);
     if (src == inputSource())
     {
@@ -511,6 +505,10 @@ qreal VCButton::intensityAdjustment() const
 
 void VCButton::pressFunction()
 {
+    /* Don't allow pressing during design mode */
+    if (mode() == Doc::Design)
+        return;
+
     Function* f = NULL;
     if (m_action == Toggle)
     {
@@ -563,11 +561,13 @@ void VCButton::pressFunction()
 
 void VCButton::releaseFunction()
 {
-    Function* f = NULL;
+    /* Don't allow operation during design mode */
+    if (mode() == Doc::Design)
+        return;
 
     if (m_action == Flash && isOn() == true)
     {
-        f = m_doc->function(m_function);
+        Function* f = m_doc->function(m_function);
         if (f != NULL)
             f->unFlash(m_doc->masterTimer());
     }

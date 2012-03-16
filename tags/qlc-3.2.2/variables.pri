@@ -4,7 +4,7 @@
 
 APPNAME    = Q Light Controller
 FXEDNAME   = Fixture Definition Editor
-APPVERSION = 3.2.1
+APPVERSION = 3.2.2
 
 #############################################################################
 # Compiler & linker configuration
@@ -14,8 +14,8 @@ QMAKE_CXXFLAGS += -Werror
 CONFIG         += warn_on
 macx:CONFIG    -= app_bundle # Let QLC construct the .app bundle
 
-CONFIG        -= release # Enable this when making a release on win32
-CONFIG        += debug   # Disable this when making a release on win32
+CONFIG        += release # Enable this when making a release on win32
+CONFIG        -= debug   # Disable this when making a release on win32
 
 # Disable these if you don't want to see SVN revision in the About Box
 # unix:REVISION = $$system(svn info | grep "Revision" | sed 's/Revision://')

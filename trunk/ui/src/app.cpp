@@ -66,7 +66,6 @@ App::App()
     , m_area(NULL)
     , m_progressDialog(NULL)
     , m_doc(NULL)
-    , m_kioskMode(false)
 
     , m_fileNewAction(NULL)
     , m_fileOpenAction(NULL)
@@ -109,7 +108,7 @@ App::~App()
     QSettings settings;
 
     // Don't save kiosk-mode window geometry because that will screw things up
-    if (m_kioskMode == false)
+    if (m_doc->isKiosk() == false)
         settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
     else
         settings.setValue(SETTINGS_GEOMETRY, QVariant());
@@ -224,7 +223,7 @@ void App::closeEvent(QCloseEvent* e)
 {
     int result = 0;
 
-    if (m_doc->mode() == Doc::Operate && m_kioskMode == false)
+    if (m_doc->mode() == Doc::Operate && m_doc->isKiosk() == false)
     {
         QMessageBox::warning(this,
                              tr("Cannot exit in Operate mode"),
@@ -234,7 +233,7 @@ void App::closeEvent(QCloseEvent* e)
         return;
     }
 
-    if (m_doc->isModified() == true && m_kioskMode == false)
+    if (m_doc->isModified() == true && m_doc->isKiosk() == false)
     {
         result = QMessageBox::information(this, tr("Close"),
                                           tr("Do you wish to save the current workspace " \
@@ -259,7 +258,7 @@ void App::closeEvent(QCloseEvent* e)
     }
     else
     {
-        if (m_kioskMode == true)
+        if (m_doc->isKiosk() == true)
         {
             result = QMessageBox::warning(this, tr("Close the application?"),
                                           tr("Do you wish to close the application?"),
@@ -376,7 +375,7 @@ void App::slotDocModified(bool state)
 void App::enableKioskMode()
 {
     // Turn on operate mode
-    m_kioskMode = true;
+    m_doc->setKiosk(true);
     m_doc->setMode(Doc::Operate);
 
     // No need for these

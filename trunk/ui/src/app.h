@@ -106,9 +106,6 @@ public slots:
     void slotModeToggle();
     void slotModeChanged(Doc::Mode mode);
 
-private:
-    bool m_kioskMode;
-
     /*********************************************************************
      * Actions and toolbar
      *********************************************************************/

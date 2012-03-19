@@ -47,6 +47,7 @@ Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     , m_masterTimer(new MasterTimer(this))
     , m_inputMap(new InputMap(this, inputUniverses))
     , m_mode(Design)
+    , m_kiosk(false)
     , m_latestFixtureId(0)
     , m_latestFixtureGroupId(0)
     , m_latestFunctionId(0)
@@ -62,11 +63,13 @@ Doc::~Doc()
 
     clearContents();
 
-    m_outputMap->saveDefaults();
+    if (isKiosk() == false)
+        m_outputMap->saveDefaults();
     delete m_outputMap;
     m_outputMap = NULL;
 
-    m_inputMap->saveDefaults();
+    if (isKiosk() == false)
+        m_inputMap->saveDefaults();
     delete m_inputMap;
     m_inputMap = NULL;
 
@@ -175,6 +178,16 @@ void Doc::setMode(Doc::Mode mode)
 Doc::Mode Doc::mode() const
 {
     return m_mode;
+}
+
+void Doc::setKiosk(bool state)
+{
+    m_kiosk = state;
+}
+
+bool Doc::isKiosk() const
+{
+    return m_kiosk;
 }
 
 /*****************************************************************************

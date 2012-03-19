@@ -103,14 +103,29 @@ public:
         Operate = 1  //! Running allowed, editing disabled
     };
 
+    /** Change the main operating mode. See enum Mode for more information. */
     void setMode(Mode mode);
+
+    /** Get the main operating mode. See enum Mode for more information. */
     Mode mode() const;
 
+    /**
+     * Enable/disable kiosk mode. This doesn't do practically anything by itself.
+     * It's mostly a convenient helper for engine components to detect if kiosk
+     * mode is on.
+     */
+    void setKiosk(bool kiosk);
+
+    /** Check, if kiosk mode is enabled or not. */
+    bool isKiosk() const;
+
 signals:
+    /** Tells that the current operating mode has changed */
     void modeChanged(Doc::Mode mode);
 
 protected:
     Mode m_mode;
+    bool m_kiosk;
 
     /*********************************************************************
      * Modified status

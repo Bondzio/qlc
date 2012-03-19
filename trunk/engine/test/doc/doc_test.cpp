@@ -91,6 +91,7 @@ void Doc_Test::defaults()
     QVERIFY(m_doc->m_fixtures.size() == 0);
     QVERIFY(m_doc->m_latestFunctionId == 0);
     QVERIFY(m_doc->m_functions.size() == 0);
+    QVERIFY(m_doc->isKiosk() == false);
 }
 
 void Doc_Test::mode()
@@ -106,6 +107,9 @@ void Doc_Test::mode()
     QCOMPARE(spy.size(), 2);
     m_doc->setMode(Doc::Design);
     QCOMPARE(spy.size(), 2);
+
+    m_doc->setKiosk(true);
+    QVERIFY(m_doc->isKiosk() == true);
 }
 
 void Doc_Test::createFixtureId()

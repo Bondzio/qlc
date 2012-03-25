@@ -594,10 +594,11 @@ void SimpleDesk::replaceCurrentCue()
     CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
     Q_ASSERT(cueStack != NULL);
 
-    QModelIndex index = m_cueStackView->currentIndex();
-    if (index.isValid() == true)
+    QItemSelectionModel* selectionModel = m_cueStackView->selectionModel();
+    if (selectionModel->hasSelection() == true)
     {
         // Replace current cue values
+        QModelIndex index = m_cueStackView->currentIndex();
         QString name = cueStack->cues().at(index.row()).name();
         Cue cue = m_engine->cue();
         cue.setName(name);
@@ -699,7 +700,7 @@ void SimpleDesk::slotCueStackStopped(uint stack)
         slider->setValue(0);
     updateCueStackButtons();
 }
-
+#include <QPushButton>
 void SimpleDesk::slotCueStackSelectionChanged()
 {
     qDebug() << Q_FUNC_INFO;
@@ -710,8 +711,14 @@ void SimpleDesk::slotCueStackSelectionChanged()
 
     updateCueStackButtons();
 
+    // Destroy the existing delete icon
+    if (m_cueDeleteIconIndex.isValid() == true)
+        m_cueStackView->setIndexWidget(m_cueDeleteIconIndex, NULL);
+    m_cueDeleteIconIndex = QModelIndex();
+
     if (m_editCueStackButton->isChecked() == true)
     {
+        CueStack* cueStack = currentCueStack();
         if (selected.size() == 0)
         {
             resetUniverseSliders();
@@ -720,10 +727,6 @@ void SimpleDesk::slotCueStackSelectionChanged()
         else if (selected.size() == 1)
         {
             m_universeGroup->setEnabled(true);
-
-            CueStack* cueStack = m_engine->cueStack(m_selectedPlayback);
-            Q_ASSERT(cueStack != NULL);
-
             QModelIndex index = selected.first();
             if (index.row() >= 0 && index.row() < cueStack->cues().size())
             {
@@ -736,6 +739,22 @@ void SimpleDesk::slotCueStackSelectionChanged()
         {
             m_universeGroup->setEnabled(false);
             resetUniverseSliders();
+        }
+
+        // Put a delete button on the first selected item
+        if (selected.size() > 0)
+        {
+            QModelIndex index = selected.first();
+            if (index.row() >= 0 && index.row() < cueStack->cues().size())
+            {
+                QPushButton* btn = new QPushButton(m_cueStackView);
+                btn->setFlat(true);
+                btn->setFixedSize(m_cueStackView->sizeHintForIndex(index));
+                btn->setIcon(QIcon(":/delete.png"));
+                m_cueStackView->setIndexWidget(index, btn);
+                m_cueDeleteIconIndex = index;
+                connect(btn, SIGNAL(clicked()), this, SLOT(slotDeleteCueClicked()));
+            }
         }
     }
     else
@@ -868,6 +887,19 @@ void SimpleDesk::slotRecordCueClicked()
     selModel->setCurrentIndex(itemModel->index(index, firstCol), QItemSelectionModel::Current);
 
     updateCueStackButtons();
+}
+
+void SimpleDesk::slotDeleteCueClicked()
+{
+    Q_ASSERT(m_cueStackView != NULL);
+    Q_ASSERT(m_cueStackView->selectionModel() != NULL);
+    QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
+    CueStack* cueStack = currentCueStack();
+    Q_ASSERT(cueStack != NULL);
+    QList <int> indexes;
+    foreach (QModelIndex index, selected)
+        indexes << index.row();
+    cueStack->removeCues(indexes);
 }
 
 void SimpleDesk::slotFadeInDialChanged(int ms)

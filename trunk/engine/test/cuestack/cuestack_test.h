@@ -35,12 +35,15 @@ private slots:
     void init();
 
     void initial();
+    void name();
     void speeds();
     void appendCue();
     void insertCue();
     void replaceCue();
     void currentIndex();
     void removeCue();
+    void removeCues();
+
     void load();
     void save();
     void flash();

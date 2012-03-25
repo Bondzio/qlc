@@ -102,6 +102,9 @@ public:
     /** Remove the cue at the given $index */
     void removeCue(int index);
 
+    /** Remove cues from the given $indexes */
+    void removeCues(const QList <int>& indexes);
+
     /** Get a list of all cues */
     QList <Cue> cues() const;
 

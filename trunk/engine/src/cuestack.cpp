@@ -222,6 +222,36 @@ void CueStack::removeCue(int index)
     m_mutex.unlock();
 }
 
+void CueStack::removeCues(const QList <int>& indexes)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    // Sort the list so that the items can be removed in reverse order.
+    // This way, the indices are always correct.
+    QList <int> indexList = indexes;
+    qSort(indexList.begin(), indexList.end());
+
+    m_mutex.lock();
+    QListIterator <int> it(indexList);
+    it.toBack();
+    while (it.hasPrevious() == true)
+    {
+        int index(it.previous());
+        if (index >= 0 && index < m_cues.size())
+        {
+            m_cues.removeAt(index);
+            emit removed(index);
+
+            if (index < m_currentIndex)
+            {
+                m_currentIndex--;
+                emit currentCueChanged(m_currentIndex);
+            }
+        }
+    }
+    m_mutex.unlock();
+}
+
 QList <Cue> CueStack::cues() const
 {
     return m_cues;

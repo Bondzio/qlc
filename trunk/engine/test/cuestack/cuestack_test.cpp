@@ -64,6 +64,7 @@ void CueStack_Test::init()
 void CueStack_Test::initial()
 {
     CueStack cs(m_doc);
+    QCOMPARE(cs.name(), QString());
     QCOMPARE(cs.fadeInSpeed(), uint(0));
     QCOMPARE(cs.fadeOutSpeed(), uint(0));
     QCOMPARE(cs.duration(), uint(UINT_MAX));
@@ -78,6 +79,18 @@ void CueStack_Test::initial()
     QCOMPARE(cs.m_previous, false);
     QCOMPARE(cs.m_next, false);
     QCOMPARE(cs.doc(), m_doc);
+}
+
+void CueStack_Test::name()
+{
+    CueStack cs(m_doc);
+    QSignalSpy spy(&cs, SIGNAL(changed(int)));
+
+    cs.setName("Foo");
+    QCOMPARE(cs.name(), QString("Foo"));
+    QCOMPARE(spy.size(), 1);
+    QCOMPARE(spy[0].size(), 1);
+    QCOMPARE(spy[0][0].toInt(), -1);
 }
 
 void CueStack_Test::speeds()
@@ -353,6 +366,47 @@ void CueStack_Test::removeCue()
     QCOMPARE(cs.cues().size(), 0);
 
     cs.removeCue(0);
+    QCOMPARE(cs.cues().size(), 0);
+}
+
+void CueStack_Test::removeCues()
+{
+    CueStack cs(m_doc);
+    cs.appendCue(Cue("One"));
+    cs.appendCue(Cue("Two"));
+    cs.appendCue(Cue("Three"));
+    cs.appendCue(Cue("Four"));
+    cs.appendCue(Cue("Five"));
+    QCOMPARE(cs.cues().size(), 5);
+    cs.setCurrentIndex(4);
+
+    cs.removeCues(QList <int>());
+    QCOMPARE(cs.cues().size(), 5);
+    QCOMPARE(cs.currentIndex(), 4);
+
+    cs.removeCues(QList <int>() << 5);
+    QCOMPARE(cs.cues().size(), 5);
+    QCOMPARE(cs.currentIndex(), 4);
+
+    cs.removeCues(QList <int>() << 3);
+    QCOMPARE(cs.cues().size(), 4);
+    QCOMPARE(cs.currentIndex(), 3); // currentIndex-- because a cue before it was removed
+    QCOMPARE(cs.cues().at(0).name(), QString("One"));
+    QCOMPARE(cs.cues().at(1).name(), QString("Two"));
+    QCOMPARE(cs.cues().at(2).name(), QString("Three"));
+    QCOMPARE(cs.cues().at(3).name(), QString("Five"));
+
+    cs.removeCues(QList <int>() << 2 << 0);
+    QCOMPARE(cs.cues().size(), 2);
+    QCOMPARE(cs.currentIndex(), 1); // currentIndex-- times two because two cue before it were removed
+    QCOMPARE(cs.cues().at(0).name(), QString("Two"));
+    QCOMPARE(cs.cues().at(1).name(), QString("Five"));
+
+    cs.removeCues(QList <int>() << 0 << 1);
+    QCOMPARE(cs.cues().size(), 0);
+    QCOMPARE(cs.currentIndex(), 0);
+
+    cs.removeCues(QList <int>() << 0 << 100 << 1000);
     QCOMPARE(cs.cues().size(), 0);
 }
 

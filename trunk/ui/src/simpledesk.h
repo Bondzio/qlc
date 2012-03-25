@@ -22,6 +22,7 @@
 #ifndef SIMPLEDESK_H
 #define SIMPLEDESK_H
 
+#include <QModelIndex>
 #include <QPointer>
 #include <QWidget>
 #include <QList>
@@ -158,6 +159,7 @@ private slots:
     void slotCloneCueStackClicked();
     void slotEditCueStackClicked();
     void slotRecordCueClicked();
+    void slotDeleteCueClicked();
 
     void slotFadeInDialChanged(int ms);
     void slotFadeOutDialChanged(int ms);
@@ -176,6 +178,7 @@ private:
     QToolButton* m_recordCueButton;
     QTreeView* m_cueStackView;
     QPointer<SpeedDialWidget> m_speedDials;
+    QModelIndex m_cueDeleteIconIndex;
 
     /*********************************************************************
      * Load & Save

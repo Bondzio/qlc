@@ -31,7 +31,7 @@
 void RGBScript_Test::initial()
 {
     RGBScript script;
-    QVERIFY(script.m_engine != NULL);
+    QVERIFY(script.s_engine == NULL);
     QCOMPARE(script.m_apiVersion, 0);
     QCOMPARE(script.m_fileName, QString());
     QCOMPARE(script.m_contents, QString());

@@ -42,20 +42,20 @@ QDir RGBScript::s_customScriptDirectory = QDir(QString(), QString("*.js"),
                                                QDir::Name | QDir::IgnoreCase,
                                                QDir::Files);
 
+QScriptEngine* RGBScript::s_engine = NULL;
+
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
 RGBScript::RGBScript()
     : RGBAlgorithm()
-    , m_engine(new QScriptEngine)
     , m_apiVersion(0)
 {
 }
 
 RGBScript::RGBScript(const RGBScript& s)
     : RGBAlgorithm()
-    , m_engine(new QScriptEngine)
     , m_fileName(s.m_fileName)
     , m_contents(s.m_contents)
     , m_apiVersion(0)
@@ -126,15 +126,20 @@ QString RGBScript::fileName() const
 
 bool RGBScript::evaluate()
 {
+    // Create the script engine when it's first needed
+    if (s_engine == NULL)
+        s_engine = new QScriptEngine(QCoreApplication::instance());
+    Q_ASSERT(s_engine != NULL);
+
     m_rgbMap = QScriptValue();
     m_rgbMapStepCount = QScriptValue();
     m_apiVersion = 0;
-    m_script = m_engine->evaluate(m_contents, m_fileName);
-    if (m_engine->hasUncaughtException() == true)
+    m_script = s_engine->evaluate(m_contents, m_fileName);
+    if (s_engine->hasUncaughtException() == true)
     {
         QString msg("%1: %2");
-        qWarning() << msg.arg(m_fileName).arg(m_engine->uncaughtException().toString());
-        foreach (QString s, m_engine->uncaughtExceptionBacktrace())
+        qWarning() << msg.arg(m_fileName).arg(s_engine->uncaughtException().toString());
+        foreach (QString s, s_engine->uncaughtExceptionBacktrace())
             qDebug() << s;
         return false;
     }

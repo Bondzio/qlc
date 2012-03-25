@@ -61,7 +61,7 @@ public:
     bool evaluate();
 
 private:
-    QScriptEngine* m_engine;        //! The engine that runs the script
+    static QScriptEngine* s_engine; //! The engine that runs all scripts
     QString m_fileName;             //! The file name that contains this script
     QString m_contents;             //! The file's contents
 

@@ -62,23 +62,92 @@ private:
      * Name
      ************************************************************************/
 public:
+    /**
+     * Set either the name of the CueStack itself ($index = -1) or a Cue at
+     * the given index ($index > -1).
+     *
+     * @param name The name to set
+     * @param index -1 to set the name of the CueStack, anything else to set
+     *              the name of a specific cue.
+     */
     void setName(const QString& name, int index = -1);
+
+    /**
+     * Get either the name of the CueStack itself ($index = -1) or a Cue at
+     * the given index ($index > -1).
+     *
+     * @param index -1 to get the name of the CueStack, anything else to get
+     *              the name of a specific cue.
+     * @return The name of the CueStack or a specific cue
+     */
     QString name(int index = -1) const;
 
 private:
+    /** The name of the CueStack */
     QString m_name;
 
     /************************************************************************
      * Speed
      ************************************************************************/
 public:
+    /**
+     * Set the fade in speed, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param ms The fade in speed in milliseconds
+     * @param index -1 to set the fade in speed for the CueStack or anything else
+     *              to set the fade in speed for a specific cue.
+     */
     void setFadeInSpeed(uint ms, int index = -1);
+
+    /**
+     * Get the fade in speed, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param index -1 to get the fade in speed for the CueStack or anything else
+     *              to get the fade in speed for a specific cue.
+     * @return The fade in speed in milliseconds
+     */
     uint fadeInSpeed(int index = -1) const;
 
+    /**
+     * Set the fade out speed, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param ms The fade out speed in milliseconds
+     * @param index -1 to set the fade out speed for the CueStack or anything else
+     *              to set the fade out speed for a specific cue.
+     */
     void setFadeOutSpeed(uint ms, int index = -1);
+
+    /**
+     * Get the fade out speed, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param index -1 to get the fade out speed for the CueStack or anything else
+     *              to get the fade out speed for a specific cue.
+     * @return The fade out speed in milliseconds
+     */
     uint fadeOutSpeed(int index = -1) const;
 
+    /**
+     * Set the duration, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param ms The duration in milliseconds
+     * @param index -1 to set the duration for the CueStack or anything else
+     *              to set the duration for a specific cue.
+     */
     void setDuration(uint ms, int index = -1);
+
+    /**
+     * Get the duration, either for the CueStack ($index = -1) or for a
+     * specific cue at the given index ($index > -1).
+     *
+     * @param index -1 to get the duration for the CueStack or anything else
+     *              to get the duration for a specific cue.
+     * @return The duration in milliseconds
+     */
     uint duration(int index = -1) const;
 
 private:

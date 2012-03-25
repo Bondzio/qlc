@@ -153,6 +153,8 @@ bool parseArgs()
         {
             if (it.hasNext() == true)
                 QLCArgs::debugLevel = QtMsgType(it.peekNext().toInt());
+            else
+                QLCArgs::debugLevel = QtMsgType(0);
         }
         else if (arg == "-f" || arg == "--fullscreen")
         {

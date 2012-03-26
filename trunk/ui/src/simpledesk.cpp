@@ -25,6 +25,7 @@
 #include <QDomElement>
 #include <QToolButton>
 #include <QHeaderView>
+#include <QPushButton>
 #include <QSettings>
 #include <QSplitter>
 #include <QGroupBox>
@@ -700,7 +701,7 @@ void SimpleDesk::slotCueStackStopped(uint stack)
         slider->setValue(0);
     updateCueStackButtons();
 }
-#include <QPushButton>
+
 void SimpleDesk::slotCueStackSelectionChanged()
 {
     qDebug() << Q_FUNC_INFO;

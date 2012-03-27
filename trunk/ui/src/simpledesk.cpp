@@ -749,6 +749,7 @@ void SimpleDesk::slotCueStackSelectionChanged()
             if (index.row() >= 0 && index.row() < cueStack->cues().size())
             {
                 QPushButton* btn = new QPushButton(m_cueStackView);
+                btn->setToolTip(tr("Delete cue"));
                 btn->setFlat(true);
                 btn->setFixedSize(m_cueStackView->sizeHintForIndex(index));
                 btn->setIcon(QIcon(":/delete.png"));

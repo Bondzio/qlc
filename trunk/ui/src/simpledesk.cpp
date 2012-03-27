@@ -895,12 +895,25 @@ void SimpleDesk::slotDeleteCueClicked()
     Q_ASSERT(m_cueStackView != NULL);
     Q_ASSERT(m_cueStackView->selectionModel() != NULL);
     QModelIndexList selected(m_cueStackView->selectionModel()->selectedRows());
+    QModelIndex current = m_cueStackView->selectionModel()->currentIndex();
     CueStack* cueStack = currentCueStack();
     Q_ASSERT(cueStack != NULL);
     QList <int> indexes;
     foreach (QModelIndex index, selected)
         indexes << index.row();
     cueStack->removeCues(indexes);
+
+    // Select an item ~at the current index
+    QAbstractItemModel* model = m_cueStackView->model();
+    if (model->hasIndex(current.row(), 0) == true)
+    {
+        m_cueStackView->setCurrentIndex(current);
+    }
+    else if (model->rowCount() != 0)
+    {
+        QModelIndex index = model->index(model->rowCount() - 1, 0);
+        m_cueStackView->setCurrentIndex(index);
+    }
 }
 
 void SimpleDesk::slotFadeInDialChanged(int ms)

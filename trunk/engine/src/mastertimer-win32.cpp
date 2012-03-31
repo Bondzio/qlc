@@ -36,14 +36,16 @@
 /****************************************************************************
  * Timer callback
  ****************************************************************************/
-
-static void masterTimerWin32Callback(void* lpParameter, BOOLEAN TimerOrWaitFired)
+extern "C"
 {
-    Q_UNUSED(TimerOrWaitFired);
+    void CALLBACK masterTimerWin32Callback(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
+    {
+        Q_UNUSED(TimerOrWaitFired);
 
-    MasterTimerPrivate* mtp = (MasterTimerPrivate*) lpParameter;
-    Q_ASSERT(mtp != NULL);
-    mtp->timerTick();
+        MasterTimerPrivate* mtp = (MasterTimerPrivate*) lpParameter;
+        Q_ASSERT(mtp != NULL);
+        mtp->timerTick();
+    }
 }
 
 /****************************************************************************
@@ -91,7 +93,7 @@ void MasterTimerPrivate::start()
                                     NULL,
                                     (WAITORTIMERCALLBACK) masterTimerWin32Callback,
                                     this,
-                                    m_masterTimer->tick(),
+                                    0,
                                     m_masterTimer->tick(),
                                     WT_EXECUTELONGFUNCTION);
     if (!ok)

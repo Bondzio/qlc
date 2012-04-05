@@ -20,6 +20,7 @@
 */
 
 #include "vcspeeddialproperties.h"
+#include "selectinputchannel.h"
 #include "functionselection.h"
 #include "vcspeeddial.h"
 #include "doc.h"
@@ -52,6 +53,16 @@ VCSpeedDialProperties::VCSpeedDialProperties(VCSpeedDial* dial, Doc* doc)
         m_fadeOutCheck->setChecked(true);
     if (dial->speedTypes() & VCSpeedDial::Duration)
         m_durationCheck->setChecked(true);
+
+    /* Absolute input */
+    m_absoluteMinSpin->setValue(m_dial->absoluteValueMin() / 1000);
+    m_absoluteMaxSpin->setValue(m_dial->absoluteValueMax() / 1000);
+    m_absoluteInputSource = m_dial->inputSource(VCSpeedDial::absoluteInputSourceId);
+
+    /* Tap input */
+    m_tapInputSource = m_dial->inputSource(VCSpeedDial::tapInputSourceId);
+
+    updateInputSources();
 }
 
 VCSpeedDialProperties::~VCSpeedDialProperties()
@@ -76,8 +87,18 @@ void VCSpeedDialProperties::accept()
         types |= VCSpeedDial::Duration;
     m_dial->setSpeedTypes(types);
 
+    /* Input sources */
+    m_dial->setAbsoluteValueRange(m_absoluteMinSpin->value() * 1000,
+                                  m_absoluteMaxSpin->value() * 1000);
+    m_dial->setInputSource(m_absoluteInputSource, VCSpeedDial::absoluteInputSourceId);
+    m_dial->setInputSource(m_tapInputSource, VCSpeedDial::tapInputSourceId);
+
     QDialog::accept();
 }
+
+/****************************************************************************
+ * Functions page
+ ****************************************************************************/
 
 void VCSpeedDialProperties::slotAddClicked()
 {
@@ -123,5 +144,61 @@ void VCSpeedDialProperties::createFunctionItem(quint32 id)
         item->setText(COL_NAME, function->name());
         item->setText(COL_TYPE, function->typeString());
         item->setData(COL_NAME, PROP_ID, id);
+    }
+}
+
+/****************************************************************************
+ * Input page
+ ****************************************************************************/
+
+void VCSpeedDialProperties::updateInputSources()
+{
+    QString uniName;
+    QString chName;
+
+    // Absolute
+    if (m_doc->inputMap()->inputSourceNames(m_absoluteInputSource, uniName, chName) == false)
+    {
+        uniName = KInputNone;
+        chName = KInputNone;
+    }
+    m_absoluteInputUniverseEdit->setText(uniName);
+    m_absoluteInputChannelEdit->setText(chName);
+
+    // Tap
+    if (m_doc->inputMap()->inputSourceNames(m_tapInputSource, uniName, chName) == false)
+    {
+        uniName = KInputNone;
+        chName = KInputNone;
+    }
+    m_tapInputUniverseEdit->setText(uniName);
+    m_tapInputChannelEdit->setText(chName);
+}
+
+void VCSpeedDialProperties::slotAutoDetectAbsoluteInputSourceToggled()
+{
+}
+
+void VCSpeedDialProperties::slotChooseAbsoluteInputSourceClicked()
+{
+    SelectInputChannel sic(this, m_doc->inputMap());
+    if (sic.exec() == QDialog::Accepted)
+    {
+        m_absoluteInputSource = QLCInputSource(sic.universe(), sic.channel());
+        updateInputSources();
+    }
+}
+
+void VCSpeedDialProperties::slotAutoDetectTapInputSourceToggled()
+{
+}
+
+void VCSpeedDialProperties::slotChooseTapInputSourceClicked()
+{
+    SelectInputChannel sic(this, m_doc->inputMap());
+    if (sic.exec() == QDialog::Accepted)
+    {
+        m_tapInputSource = QLCInputSource(sic.universe(), sic.channel());
+        updateInputSources();
     }
 }

@@ -27,7 +27,11 @@
 #include "vcspeeddialproperties.h"
 #include "vcspeeddial.h"
 #include "speeddial.h"
+#include "qlcmacros.h"
 #include "qlcfile.h"
+
+const quint8 VCSpeedDial::absoluteInputSourceId = 0;
+const quint8 VCSpeedDial::tapInputSourceId = 1;
 
 /****************************************************************************
  * Initialization
@@ -37,6 +41,8 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
     : VCWidget(parent, doc)
     , m_speedTypes(VCSpeedDial::Duration)
     , m_dial(NULL)
+    , m_absoluteValueMin(0)
+    , m_absoluteValueMax(1000 * 10)
 {
     new QVBoxLayout(this);
 
@@ -180,6 +186,47 @@ void VCSpeedDial::slotDialTapped()
     }
 }
 
+/************************************************************************
+ * Input value change
+ ************************************************************************/
+
+void VCSpeedDial::slotInputValueChanged(quint32 universe, quint32 channel, uchar value)
+{
+    QLCInputSource src(universe, channel);
+    if (src == inputSource(tapInputSourceId))
+    {
+        if (value != 0)
+            m_dial->tap();
+    }
+    else if (src == inputSource(absoluteInputSourceId))
+    {
+        int ms = static_cast<int> (SCALE(qreal(value), qreal(0), qreal(255),
+                                         qreal(absoluteValueMin()),
+                                         qreal(absoluteValueMax())));
+        m_dial->setValue(ms, true);
+    }
+}
+
+/****************************************************************************
+ * Absolute value range
+ ****************************************************************************/
+
+void VCSpeedDial::setAbsoluteValueRange(uint min, uint max)
+{
+    m_absoluteValueMin = min;
+    m_absoluteValueMax = max;
+}
+
+uint VCSpeedDial::absoluteValueMin() const
+{
+    return m_absoluteValueMin;
+}
+
+uint VCSpeedDial::absoluteValueMax() const
+{
+    return m_absoluteValueMax;
+}
+
 /*****************************************************************************
  * Load & Save
  *****************************************************************************/
@@ -206,6 +253,59 @@ bool VCSpeedDial::loadXML(const QDomElement* root)
         {
             m_functions << tag.text().toUInt();
         }
+        else if (tag.tagName() == KXMLQLCVCSpeedDialAbsoluteValue)
+        {
+            // Value range
+            if (tag.hasAttribute(KXMLQLCVCSpeedDialAbsoluteValueMin) &&
+                tag.hasAttribute(KXMLQLCVCSpeedDialAbsoluteValueMax))
+            {
+                uint min = tag.attribute(KXMLQLCVCSpeedDialAbsoluteValueMin).toUInt();
+                uint max = tag.attribute(KXMLQLCVCSpeedDialAbsoluteValueMax).toUInt();
+                setAbsoluteValueRange(min, max);
+            }
+
+            // Input
+            QDomNode sub = node.firstChild();
+            while (sub.isNull() == false)
+            {
+                QDomElement subtag = sub.toElement();
+                if (subtag.tagName() == KXMLQLCVCWidgetInput)
+                {
+                    quint32 uni = QLCInputSource::invalidUniverse;
+                    quint32 ch = QLCInputSource::invalidChannel;
+                    if (loadXMLInput(subtag, &uni, &ch) == true)
+                        setInputSource(QLCInputSource(uni, ch), absoluteInputSourceId);
+                }
+                else
+                {
+                    qWarning() << Q_FUNC_INFO << "Unknown absolute value tag:" << tag.tagName();
+                }
+
+                sub = sub.nextSibling();
+            }
+        }
+        else if (tag.tagName() == KXMLQLCVCSpeedDialTap)
+        {
+            // Input
+            QDomNode sub = node.firstChild();
+            while (sub.isNull() == false)
+            {
+                QDomElement subtag = sub.toElement();
+                if (subtag.tagName() == KXMLQLCVCWidgetInput)
+                {
+                    quint32 uni = QLCInputSource::invalidUniverse;
+                    quint32 ch = QLCInputSource::invalidChannel;
+                    if (loadXMLInput(subtag, &uni, &ch) == true)
+                        setInputSource(QLCInputSource(uni, ch), tapInputSourceId);
+                }
+                else
+                {
+                    qWarning() << Q_FUNC_INFO << "Unknown tap tag:" << tag.tagName();
+                }
+
+                sub = sub.nextSibling();
+            }
+        }
         else if (tag.tagName() == KXMLQLCWindowState)
         {
             int x = 0, y = 0, w = 0, h = 0;
@@ -217,11 +317,10 @@ bool VCSpeedDial::loadXML(const QDomElement* root)
         {
             loadXMLAppearance(&tag);
         }
-        else if (tag.tagName() == KXMLQLCVCWidgetInput)
+        else
         {
-            loadXMLInput(&tag);
+            qWarning() << Q_FUNC_INFO << "Unknown speed dial tag:" << tag.tagName();
         }
-
 
         node = node.nextSibling();
     }
@@ -249,8 +348,17 @@ bool VCSpeedDial::saveXML(QDomDocument* doc, QDomElement* vc_root)
     /* Appearance */
     saveXMLAppearance(doc, &root);
 
-    /* External input */
-    saveXMLInput(doc, &root);
+    /* Absolute input */
+    QDomElement absInput = doc->createElement(KXMLQLCVCSpeedDialAbsoluteValue);
+    absInput.setAttribute(KXMLQLCVCSpeedDialAbsoluteValueMin, absoluteValueMin());
+    absInput.setAttribute(KXMLQLCVCSpeedDialAbsoluteValueMax, absoluteValueMax());
+    saveXMLInput(doc, &absInput, inputSource(absoluteInputSourceId));
+    root.appendChild(absInput);
+
+    /* Tap input */
+    QDomElement tap = doc->createElement(KXMLQLCVCSpeedDialTap);
+    saveXMLInput(doc, &tap, inputSource(tapInputSourceId));
+    root.appendChild(tap);
 
     /* Functions */
     foreach (quint32 id, m_functions)

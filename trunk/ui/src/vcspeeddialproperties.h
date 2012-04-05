@@ -24,6 +24,7 @@
 
 #include <QDialog>
 #include "ui_vcspeeddialproperties.h"
+#include "qlcinputsource.h"
 
 class VCSpeedDial;
 class Doc;
@@ -40,6 +41,13 @@ public slots:
     /** @reimp */
     void accept();
 
+private:
+    VCSpeedDial* m_dial;
+    Doc* m_doc;
+
+    /************************************************************************
+     * Functions page
+     ************************************************************************/
 private slots:
     void slotAddClicked();
     void slotRemoveClicked();
@@ -51,9 +59,21 @@ private:
     /** Create a tree item for the given function $id */
     void createFunctionItem(quint32 id);
 
+    /************************************************************************
+     * Input page
+     ************************************************************************/
 private:
-    VCSpeedDial* m_dial;
-    Doc* m_doc;
+    void updateInputSources();
+
+private slots:
+    void slotAutoDetectAbsoluteInputSourceToggled();
+    void slotChooseAbsoluteInputSourceClicked();
+    void slotAutoDetectTapInputSourceToggled();
+    void slotChooseTapInputSourceClicked();
+
+private:
+    QLCInputSource m_absoluteInputSource;
+    QLCInputSource m_tapInputSource;
 };
 
 #endif

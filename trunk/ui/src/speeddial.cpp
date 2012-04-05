@@ -162,9 +162,11 @@ SpeedDial::~SpeedDial()
     m_tapTime = NULL;
 }
 
-void SpeedDial::setValue(int ms)
+void SpeedDial::setValue(int ms, bool emitValue)
 {
-    m_preventSignals = true;
+    if (emitValue == false)
+        m_preventSignals = true;
+
     m_value = ms;
     setSpinValues(ms);
 
@@ -179,6 +181,11 @@ void SpeedDial::setValue(int ms)
 int SpeedDial::value() const
 {
     return m_value;
+}
+
+void SpeedDial::tap()
+{
+    m_tap->click();
 }
 
 /*****************************************************************************

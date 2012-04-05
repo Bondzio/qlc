@@ -29,6 +29,10 @@
 #define KXMLQLCVCSpeedDial "SpeedDial"
 #define KXMLQLCVCSpeedDialFunction "Function"
 #define KXMLQLCVCSpeedDialSpeedTypes "SpeedTypes"
+#define KXMLQLCVCSpeedDialAbsoluteValue "AbsoluteValue"
+#define KXMLQLCVCSpeedDialAbsoluteValueMin "Minimum"
+#define KXMLQLCVCSpeedDialAbsoluteValueMax "Maximum"
+#define KXMLQLCVCSpeedDialTap "Tap"
 
 class QDomDocument;
 class QDomElement;
@@ -38,6 +42,10 @@ class VCSpeedDial : public VCWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(VCSpeedDial)
+
+public:
+    static const quint8 absoluteInputSourceId;
+    static const quint8 tapInputSourceId;
 
     /************************************************************************
      * Initialization
@@ -132,6 +140,25 @@ private slots:
 private:
     QSet <quint32> m_functions;
     SpeedDial* m_dial;
+
+    /************************************************************************
+     * Input value change
+     ************************************************************************/
+protected slots:
+    /** @reimp */
+    void slotInputValueChanged(quint32 universe, quint32 channel, uchar value);
+
+    /************************************************************************
+     * Absolute value range
+     ************************************************************************/
+public:
+    void setAbsoluteValueRange(uint min, uint max);
+    uint absoluteValueMin() const;
+    uint absoluteValueMax() const;
+
+private:
+    uint m_absoluteValueMin;
+    uint m_absoluteValueMax;
 
     /*************************************************************************
      * Load & Save

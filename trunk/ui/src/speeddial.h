@@ -68,8 +68,19 @@ public:
     SpeedDial(QWidget* parent);
     ~SpeedDial();
 
-    void setValue(int ms);
+    /**
+     * Set the dial's current time value in milliseconds.
+     *
+     * @param ms Dial's value in milliseconds
+     * @param emitValue If false (default), calling this function will not
+     *                  cause the emission of valueChanged() signal with
+     *                  the new value. If true, the new value is emitted.
+     */
+    void setValue(int ms, bool emitValue = false);
     int value() const;
+
+    /** Produce a tap programmatically */
+    void tap();
 
 signals:
     void valueChanged(int ms);

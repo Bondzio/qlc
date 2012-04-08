@@ -22,24 +22,34 @@
 #include <QtTest>
 #include <QtXml>
 
+#define private public
+#include "outputpluginstub.h"
 #include "inputpatch_test.h"
-#include "inputpluginstub.h"
-#include "qlcinplugin.h"
-#include "qlcfile.h"
-
-/* Expose protected members to unit test */
-#define protected public
+#include "qlcoutplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
-#undef protected
+#include "qlcfile.h"
+#include "doc.h"
+#undef private
 
-#define TESTPLUGINDIR "../inputpluginstub"
+#define TESTPLUGINDIR "../outputpluginstub"
+
+void InputPatch_Test::initTestCase()
+{
+    m_doc = new Doc(this);
+}
+
+void InputPatch_Test::cleanupTestCase()
+{
+    delete m_doc;
+    m_doc = NULL;
+}
 
 void InputPatch_Test::defaults()
 {
-    InputPatch ip(this);
+    InputPatch ip(0, this);
     QVERIFY(ip.m_plugin == NULL);
-    QVERIFY(ip.m_input == QLCInPlugin::invalidInput());
+    QVERIFY(ip.m_input == QLCOutPlugin::invalidLine());
     QVERIFY(ip.m_profile == NULL);
     QVERIFY(ip.pluginName() == KInputNone);
     QVERIFY(ip.inputName() == KInputNone);
@@ -50,21 +60,16 @@ void InputPatch_Test::defaults()
 
 void InputPatch_Test::patch()
 {
-    InputMap im(this, 4);
-    QDir dir(TESTPLUGINDIR);
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));
-    im.loadPlugins(dir);
-    QVERIFY(im.m_plugins.size() > 0);
+    InputMap im(m_doc, 4);
 
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*> (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QLCInputProfile prof1;
     prof1.setManufacturer("Foo");
     prof1.setManufacturer("Bar");
 
-    InputPatch* ip = new InputPatch(this);
+    InputPatch* ip = new InputPatch(0, this);
     ip->set(stub, 0, false, &prof1);
     QVERIFY(ip->m_plugin == stub);
     QVERIFY(ip->m_input == 0);
@@ -72,8 +77,8 @@ void InputPatch_Test::patch()
     QVERIFY(ip->pluginName() == stub->name());
     QVERIFY(ip->inputName() == stub->inputs()[0]);
     QVERIFY(ip->profileName() == prof1.name());
-    QVERIFY(stub->m_openLines.size() == 1);
-    QVERIFY(stub->m_openLines.at(0) == 0);
+    QVERIFY(stub->m_openInputs.size() == 1);
+    QVERIFY(stub->m_openInputs.at(0) == 0);
     QVERIFY(ip->m_feedbackEnabled == false);
     QVERIFY(ip->feedbackEnabled() == false);
 
@@ -88,8 +93,8 @@ void InputPatch_Test::patch()
     QVERIFY(ip->pluginName() == stub->name());
     QVERIFY(ip->inputName() == stub->inputs()[3]);
     QVERIFY(ip->profileName() == prof2.name());
-    QVERIFY(stub->m_openLines.size() == 1);
-    QVERIFY(stub->m_openLines.at(0) == 3);
+    QVERIFY(stub->m_openInputs.size() == 1);
+    QVERIFY(stub->m_openInputs.at(0) == 3);
     QVERIFY(ip->m_feedbackEnabled == true);
     QVERIFY(ip->feedbackEnabled() == true);
 
@@ -100,13 +105,13 @@ void InputPatch_Test::patch()
     QVERIFY(ip->pluginName() == stub->name());
     QVERIFY(ip->inputName() == stub->inputs()[3]);
     QVERIFY(ip->profileName() == prof2.name());
-    QVERIFY(stub->m_openLines.size() == 1);
-    QVERIFY(stub->m_openLines.at(0) == 3);
+    QVERIFY(stub->m_openInputs.size() == 1);
+    QVERIFY(stub->m_openInputs.at(0) == 3);
     QVERIFY(ip->m_feedbackEnabled == true);
     QVERIFY(ip->feedbackEnabled() == true);
 
     delete ip;
-    QVERIFY(stub->m_openLines.size() == 0);
+    QVERIFY(stub->m_openInputs.size() == 0);
 }
 
 QTEST_APPLESS_MAIN(InputPatch_Test)

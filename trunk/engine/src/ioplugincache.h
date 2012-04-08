@@ -1,6 +1,6 @@
 /*
-  Q Light Controller - Unit test
-  inputmap_test.h
+  Q Light Controller
+  ioplugincache.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,39 +19,43 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef INPUTMAP_TEST_H
-#define INPUTMAP_TEST_H
+#ifndef IOPLUGINCACHE_H
+#define IOPLUGINCACHE_H
 
 #include <QObject>
+#include <QDir>
 
-class Doc;
-class InputMap_Test : public QObject
+class QLCOutPlugin;
+
+class IOPluginCache : public QObject
 {
     Q_OBJECT
 
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
+public:
+    IOPluginCache(QObject* parent);
+    ~IOPluginCache();
 
-    void initial();
-    void editorUniverse();
-    void pluginNames();
-    void pluginInputs();
-    void configurePlugin();
-    void pluginStatus();
-    void profiles();
-    void setPatch();
-    void feedBack();
-    void slotValueChanged();
+    /** Load plugins from the given directory. */
+    void load(const QDir& dir);
+
+    /** Get a list of available I/O plugins. */
+    QList <QLCOutPlugin*> plugins() const;
+
+    /** Get an I/O plugin by its name. */
+    QLCOutPlugin* plugin(const QString& name) const;
+
+    /** Get the system plugin directory. */
+    static QDir systemPluginDirectory();
+
+signals:
+    void pluginConfigurationChanged(QLCOutPlugin* plugin);
+    void pluginLoaded(const QString& name);
+
+private slots:
     void slotConfigurationChanged();
-    void loadInputProfiles();
-    void inputSourceNames();
-    void profileDirectories();
 
 private:
-    Doc* m_doc;
+    QList <QLCOutPlugin*> m_plugins;
 };
 
 #endif
-
-

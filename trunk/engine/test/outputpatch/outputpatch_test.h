@@ -24,14 +24,22 @@
 
 #include <QObject>
 
+class Doc;
+
 class OutputPatch_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
+    void initTestCase();
+    void cleanupTestCase();
+
     void defaults();
     void patch();
     void dump();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

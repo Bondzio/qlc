@@ -30,15 +30,13 @@
 #include "qlcinputprofile.h"
 
 class QLCInputSource;
-class QLCInPlugin;
-class InputPatch;
-class InputMap;
-
+class QLCOutPlugin;
 class QDomDocument;
 class QDomElement;
+class InputPatch;
+class Doc;
 
 #define KInputNone QObject::tr("None")
-
 #define KXMLQLCInputMap "InputMap"
 #define KXMLQLCInputMapEditorUniverse "EditorUniverse"
 
@@ -55,26 +53,18 @@ class InputMap : public QObject
      * Initialization
      *************************************************************************/
 public:
-    /**
-     * Create a new InputMap object, with the given amount of input
-     * universes.
-     */
-    InputMap(QObject* parent, quint32 universes);
+    InputMap(Doc* doc, quint32 universes);
+    ~InputMap();
 
-    /**
-     * Destroy an InputMap object
-     */
-    virtual ~InputMap();
+private:
+    Doc* doc() const;
 
     /*************************************************************************
      * Input data
      *************************************************************************/
 public slots:
-    /** Slot that catches input plugins' value changes */
-    void slotValueChanged(quint32 input, quint32 channel, uchar value);
-
     /** Slot that catches plugin configuration change notifications */
-    void slotConfigurationChanged();
+    void slotPluginConfigurationChanged(QLCOutPlugin* plugin);
 
 public:
     /** Send feedback value to the input profile e.g. to move a motorized
@@ -117,7 +107,7 @@ public:
      */
     static quint32 invalidChannel();
 
-protected:
+private:
     /** Total number of supported input universes */
     quint32 m_universes;
 
@@ -160,11 +150,11 @@ public:
      */
     quint32 mapping(const QString& pluginName, quint32 input) const;
 
-protected:
+private:
     /** Initialize the patch table */
     void initPatch();
 
-protected:
+private:
     /** Vector containing all active input plugins and the internal
         universes that they are associated to. */
     QVector <InputPatch*> m_patch;
@@ -173,13 +163,6 @@ protected:
      * Plugins
      *************************************************************************/
 public:
-    /**
-     * Load all input plugins from the given directory, using QDir filters.
-     *
-     * @param dir The directory to load plugins from
-     */
-    void loadPlugins(const QDir& dir);
-
     /**
      * Get a list of available input plugins as a string list
      * containing the plugins' names
@@ -220,39 +203,9 @@ public:
      */
     QString pluginStatus(const QString& pluginName, quint32 input);
 
-    /**
-     * Append the given plugin to our list of plugins. Will fail if
-     * a plugin with the same name already exists.
-     *
-     * @param inputPlugin The input plugin to append
-     * @return true if successful, otherwise false
-     */
-    bool appendPlugin(QLCInPlugin* inputPlugin);
-
-    /**
-     * Get the system default input plugin directory. The location varies
-     * greatly between platforms.
-     *
-     * @return System default input plugin directory.
-     */
-    static QDir systemPluginDirectory();
-
-protected:
-    /**
-     * Get a plugin instance by the plugin's name
-     *
-     * @param name The name of the plugin to search for
-     * @return QLCInPlugin or NULL
-     */
-    QLCInPlugin* plugin(const QString& name);
-
 signals:
     /** Notifies of a newly-added plugin */
     void pluginAdded(const QString& pluginName);
-
-protected:
-    /** List containing all available input plugins */
-    QList <QLCInPlugin*> m_plugins;
 
     /*************************************************************************
      * Input profiles
@@ -301,7 +254,7 @@ public:
      */
     static QDir userProfileDirectory();
 
-protected:
+private:
     /** List that contains all available profiles */
     QList <QLCInputProfile*> m_profiles;
 

@@ -24,14 +24,17 @@
 
 #include <QObject>
 
+class Doc;
+
 class OutputMap_Test : public QObject
 {
     Q_OBJECT
 
 private slots:
+    void initTestCase();
+    void cleanupTestCase();
+
     void initial();
-    void appendPlugin();
-    void notOutputPlugin();
     void setPatch();
     void claimReleaseDumpReset();
     void blackout();
@@ -42,6 +45,9 @@ private slots:
     void slotConfigurationChanged();
     void mapping();
     void pluginStatus();
+
+private:
+    Doc* m_doc;
 };
 
 #endif

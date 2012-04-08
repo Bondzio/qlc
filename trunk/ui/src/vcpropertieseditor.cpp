@@ -25,7 +25,7 @@
 
 #include "qlcinputprofile.h"
 #include "qlcinputchannel.h"
-#include "qlcinplugin.h"
+#include "qlcoutplugin.h"
 #include "qlcfile.h"
 
 #include "vcpropertieseditor.h"

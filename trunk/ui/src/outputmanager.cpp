@@ -78,14 +78,13 @@ OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFl
     m_tree->setHeaderLabels(columns);
 
     connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            this, SLOT(slotEditClicked()));
+            this, SLOT(slotCurrentItemChanged()));
 
     connect(m_outputMap, SIGNAL(pluginConfigurationChanged(const QString&)),
             this, SLOT(updateTree()));
 
     updateTree();
-    m_tree->setCurrentItem(m_tree->topLevelItem(0));
-    slotEditClicked();
+    slotCurrentItemChanged();
 
     QSettings settings;
     QVariant var = settings.value(SETTINGS_SPLITTER);
@@ -132,6 +131,7 @@ void OutputManager::updateTree()
     m_tree->clear();
     for (quint32 uni = 0; uni < m_outputMap->universes(); uni++)
         updateItem(new QTreeWidgetItem(m_tree), uni);
+    m_tree->setCurrentItem(m_tree->topLevelItem(0));
 }
 
 void OutputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
@@ -147,11 +147,15 @@ void OutputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
     item->setText(KColumnOutput, QString::number(op->output() + 1));
 }
 
-void OutputManager::slotEditClicked()
+void OutputManager::slotCurrentItemChanged()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
-        return;
+    {
+        m_tree->setCurrentItem(m_tree->topLevelItem(0));
+        item = m_tree->currentItem();
+    }
+    Q_ASSERT(item != NULL);
 
     if (currentEditor() != NULL)
         delete currentEditor();
@@ -159,7 +163,7 @@ void OutputManager::slotEditClicked()
     quint32 universe = item->text(KColumnUniverse).toUInt() - 1;
     QWidget* editor = new OutputPatchEditor(this, universe, m_outputMap);
     m_splitter->addWidget(editor);
-    connect(editor, SIGNAL(mappingChanged()), this, SLOT(updateTree()));
+    connect(editor, SIGNAL(mappingChanged()), this, SLOT(slotMappingChanged()));
     editor->show();
 }
 
@@ -170,4 +174,14 @@ QWidget* OutputManager::currentEditor() const
         return NULL;
     else
         return m_splitter->widget(1);
+}
+
+void OutputManager::slotMappingChanged()
+{
+    QTreeWidgetItem* item = m_tree->currentItem();
+    if (item != NULL)
+    {
+        uint universe = item->text(KColumnUniverse).toUInt() - 1;
+        updateItem(item, universe);
+    }
 }

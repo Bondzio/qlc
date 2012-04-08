@@ -19,17 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef WIN32
-#   define WIN32_LEAN_AND_MEAN
-#   include <Windows.h>
-#endif
-
 #include <QObject>
 #include <QDebug>
 #include <QtXml>
 
-#include "qlcinplugin.h"
-
+#include "qlcoutplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 
@@ -39,31 +33,36 @@
  * Initialization
  *****************************************************************************/
 
-InputPatch::InputPatch(QObject* parent) : QObject(parent)
+InputPatch::InputPatch(quint32 inputUniverse, QObject* parent)
+    : QObject(parent)
+    , m_inputUniverse(inputUniverse)
+    , m_plugin(NULL)
+    , m_input(QLCOutPlugin::invalidLine())
+    , m_profile(NULL)
+    , m_feedbackEnabled(true)
 {
     Q_ASSERT(parent != NULL);
-
-    m_plugin = NULL;
-    m_input = QLCInPlugin::invalidInput();
-    m_profile = NULL;
-    m_feedbackEnabled = true;
 }
 
 InputPatch::~InputPatch()
 {
     if (m_plugin != NULL)
-        m_plugin->close(m_input);
+        m_plugin->closeInput(m_input);
 }
 
 /*****************************************************************************
  * Properties
  *****************************************************************************/
 
-void InputPatch::set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
+void InputPatch::set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
                      QLCInputProfile* profile)
 {
-    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
-        m_plugin->close(m_input);
+    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
+    {
+        disconnect(m_plugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
+                   this, SLOT(slotValueChanged(quint32,quint32,uchar)));
+        m_plugin->closeInput(m_input);
+    }
 
     m_plugin = plugin;
     m_input = input;
@@ -71,25 +70,29 @@ void InputPatch::set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
     m_feedbackEnabled = enableFeedback;
 
     /* Open the assigned plugin input */
-    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
-        m_plugin->open(m_input);
+    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
+    {
+        connect(m_plugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
+                this, SLOT(slotValueChanged(quint32,quint32,uchar)));
+        m_plugin->openInput(m_input);
+    }
 }
 
 void InputPatch::reconnect()
 {
-    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput())
+    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
     {
-        m_plugin->close(m_input);
+        m_plugin->closeInput(m_input);
 #ifdef WIN32
         Sleep(GRACE_MS);
 #else
         usleep(GRACE_MS * 1000);
 #endif
-        m_plugin->open(m_input);
+        m_plugin->openInput(m_input);
     }
 }
 
-QLCInPlugin* InputPatch::plugin() const
+QLCOutPlugin* InputPatch::plugin() const
 {
     return m_plugin;
 }
@@ -107,12 +110,12 @@ quint32 InputPatch::input() const
     if (m_plugin != NULL && m_input < quint32(m_plugin->inputs().count()))
         return m_input;
     else
-        return QLCInPlugin::invalidInput();
+        return QLCOutPlugin::invalidLine();
 }
 
 QString InputPatch::inputName() const
 {
-    if (m_plugin != NULL && m_input != QLCInPlugin::invalidInput() &&
+    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine() &&
             m_input < quint32(m_plugin->inputs().count()))
         return m_plugin->inputs()[m_input];
     else
@@ -137,3 +140,10 @@ bool InputPatch::feedbackEnabled() const
     return m_feedbackEnabled;
 }
 
+void InputPatch::slotValueChanged(quint32 input, quint32 channel, uchar value)
+{
+    // In case we have several lines connected from the same plugin, emit only
+    // such values that belong to this particular patch.
+    if (input == m_input)
+        emit inputValueChanged(m_inputUniverse, channel, value);
+}

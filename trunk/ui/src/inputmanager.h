@@ -66,8 +66,8 @@ public slots:
     void updateTree();
 
 private:
-    /** Update the contents of an input patch to an item */
-    void updateItem(QTreeWidgetItem* item, InputPatch* patch, quint32 universe);
+    /** Update the contents of the input universe to the item */
+    void updateItem(QTreeWidgetItem* item, quint32 universe);
 
     /** Get the currently opened editor (if any) */
     QWidget* currentEditor() const;
@@ -80,8 +80,8 @@ private slots:
     /** Hides the small icon after a while ^^ */
     void slotTimerTimeout();
 
-    /** Displays the InputPatchEditor for currently selected universe */
-    void slotEditClicked();
+    /** Displays an editor for the currently selected universe */
+    void slotCurrentItemChanged();
 
     /** Updates the current item */
     void slotMappingChanged();

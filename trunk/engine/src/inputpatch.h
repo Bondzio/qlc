@@ -26,13 +26,7 @@
 
 #include "qlcinputprofile.h"
 
-class InputPatchEditor;
-class InputMapEditor;
-class QLCInPlugin;
-class InputMap;
-
-class QDomDocument;
-class QDomElement;
+class QLCOutPlugin;
 
 #define KXMLQLCInputPatchProfile "Profile"
 #define KXMLQLCInputPatchUniverse "Universe"
@@ -59,8 +53,12 @@ class InputPatch : public QObject
      * Initialization
      ************************************************************************/
 public:
-    InputPatch(QObject* parent);
+    InputPatch(quint32 inputUniverse, QObject* parent);
     virtual ~InputPatch();
+
+private:
+    /** The input universe that this patch is attached to */
+    const quint32 m_inputUniverse;
 
     /************************************************************************
      * Properties
@@ -74,14 +72,14 @@ public:
      * @param enableFeedback Enable or disable feedback thru a patch
      * @param profile An input profile for a patch (NULL for none)
      */
-    void set(QLCInPlugin* plugin, quint32 input, bool enableFeedback,
+    void set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
              QLCInputProfile* profile);
 
     /** Close & open the current plugin-input combination (if any) */
     void reconnect();
 
     /** The plugin instance that has been assigned to a patch */
-    QLCInPlugin* plugin() const;
+    QLCOutPlugin* plugin() const;
 
     /** Friendly name of the plugin assigned to a patch (empty if none) */
     QString pluginName() const;
@@ -101,8 +99,14 @@ public:
     /** Check if feedback data should be sent back to the plugin */
     bool feedbackEnabled() const;
 
-protected:
-    QLCInPlugin* m_plugin;
+signals:
+    void inputValueChanged(quint32 inputUniverse, quint32 channel, uchar value);
+
+private slots:
+    void slotValueChanged(quint32 input, quint32 channel, uchar value);
+
+private:
+    QLCOutPlugin* m_plugin;
     quint32 m_input;
     QLCInputProfile* m_profile;
     bool m_feedbackEnabled;

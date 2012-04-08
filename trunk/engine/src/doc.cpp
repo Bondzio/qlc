@@ -43,6 +43,7 @@
 Doc::Doc(QObject* parent, int outputUniverses, int inputUniverses)
     : QObject(parent)
     , m_fixtureDefCache(new QLCFixtureDefCache)
+    , m_ioPluginCache(new IOPluginCache(this))
     , m_outputMap(new OutputMap(this, outputUniverses))
     , m_masterTimer(new MasterTimer(this))
     , m_inputMap(new InputMap(this, inputUniverses))
@@ -72,6 +73,9 @@ Doc::~Doc()
         m_inputMap->saveDefaults();
     delete m_inputMap;
     m_inputMap = NULL;
+
+    delete m_ioPluginCache;
+    m_ioPluginCache = NULL;
 
     delete m_fixtureDefCache;
     m_fixtureDefCache = NULL;
@@ -123,6 +127,11 @@ void Doc::clearContents()
 QLCFixtureDefCache* Doc::fixtureDefCache() const
 {
     return m_fixtureDefCache;
+}
+
+IOPluginCache* Doc::ioPluginCache() const
+{
+    return m_ioPluginCache;
 }
 
 OutputMap* Doc::outputMap() const

@@ -28,30 +28,30 @@
 #include <QtXml>
 #include <QDir>
 
-#ifdef WIN32
-#   include <windows.h>
-#endif
-
 #include "qlcinputchannel.h"
 #include "hotplugmonitor.h"
 #include "qlcinputsource.h"
-#include "qlcinplugin.h"
+#include "qlcoutplugin.h"
 #include "inputpatch.h"
 #include "qlcconfig.h"
 #include "inputmap.h"
 #include "qlcfile.h"
 #include "qlci18n.h"
+#include "doc.h"
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-InputMap::InputMap(QObject*parent, quint32 universes) : QObject(parent)
+InputMap::InputMap(Doc* doc, quint32 universes)
+    : QObject(doc)
+    , m_universes(universes)
+    , m_editorUniverse(0)
 {
-    m_universes = universes;
-    m_editorUniverse = 0;
-
     initPatch();
+
+    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCOutPlugin*)),
+            this, SLOT(slotPluginConfigurationChanged(QLCOutPlugin*)));
 }
 
 InputMap::~InputMap()
@@ -65,11 +65,13 @@ InputMap::~InputMap()
         m_patch[i] = NULL;
     }
 
-    while (m_plugins.isEmpty() == false)
-        delete m_plugins.takeFirst();
-
     while (m_profiles.isEmpty() == false)
         delete m_profiles.takeFirst();
+}
+
+Doc* InputMap::doc() const
+{
+    return qobject_cast<Doc*> (parent());
 }
 
 /*****************************************************************************
@@ -108,22 +110,6 @@ quint32 InputMap::invalidChannel()
  * Input data
  *****************************************************************************/
 
-void InputMap::slotValueChanged(quint32 input, quint32 channel, uchar value)
-{
-    QLCInPlugin* plugin = qobject_cast<QLCInPlugin*> (QObject::sender());
-    if (plugin == NULL)
-        return;
-
-    for (quint32 i = 0; i < m_universes; i++)
-    {
-        if (m_patch[i]->plugin() == plugin &&
-                m_patch[i]->input() == input)
-        {
-            emit inputValueChanged(i, channel, value);
-        }
-    }
-}
-
 bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
 {
     if (universe >= quint32(m_patch.size()))
@@ -134,7 +120,7 @@ bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
 
     if (patch->plugin() != NULL && patch->feedbackEnabled() == true)
     {
-        patch->plugin()->feedBack(patch->input(), channel, value);
+        patch->plugin()->sendFeedBack(patch->input(), channel, value);
         return true;
     }
     else
@@ -143,12 +129,8 @@ bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
     }
 }
 
-void InputMap::slotConfigurationChanged()
+void InputMap::slotPluginConfigurationChanged(QLCOutPlugin* plugin)
 {
-    QLCInPlugin* plugin = qobject_cast<QLCInPlugin*> (QObject::sender());
-    if (plugin == NULL) // The signal comes from a plugin that isn't guaranteed to behave
-        return;
-
     for (quint32 i = 0; i < universes(); i++)
     {
         InputPatch* ip = patch(i);
@@ -167,7 +149,12 @@ void InputMap::slotConfigurationChanged()
 void InputMap::initPatch()
 {
     for (quint32 i = 0; i < m_universes; i++)
-        m_patch.insert(i, new InputPatch(this));
+    {
+        InputPatch* patch = new InputPatch(i, this);
+        m_patch.insert(i, patch);
+        connect(patch, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
+                this, SIGNAL(inputValueChanged(quint32,quint32,uchar)));
+    }
 }
 
 bool InputMap::setPatch(quint32 universe, const QString& pluginName,
@@ -183,8 +170,8 @@ bool InputMap::setPatch(quint32 universe, const QString& pluginName,
 
     /* Don't care if plugin or profile is NULL. It must be possible to
        clear the patch completely. */
-    m_patch[universe]->set(plugin(pluginName), input, enableFeedback,
-                           profile(profileName));
+    m_patch[universe]->set(doc()->ioPluginCache()->plugin(pluginName), input,
+                           enableFeedback, profile(profileName));
 
     return true;
 }
@@ -213,53 +200,9 @@ quint32 InputMap::mapping(const QString& pluginName, quint32 input) const
  * Plugins
  *****************************************************************************/
 
-void InputMap::loadPlugins(const QDir& dir)
-{
-    /* Check that we can access the directory */
-    if (dir.exists() == false || dir.isReadable() == false)
-        return;
-
-    /* Loop thru all files in the directory */
-    QStringListIterator it(dir.entryList());
-    while (it.hasNext() == true)
-    {
-        /* Attempt to load a plugin from the path */
-        QString fileName(it.next());
-        QString path = dir.absoluteFilePath(fileName);
-        QPluginLoader loader(path, this);
-        QLCInPlugin* p = qobject_cast<QLCInPlugin*> (loader.instance());
-        if (p != NULL)
-        {
-            /* Check for duplicates */
-            if (plugin(p->name()) == NULL)
-            {
-                /* New plugin. Append and init. */
-                qDebug() << "Input plugin" << p->name() << "from" << fileName;
-                p->init();
-                appendPlugin(p);
-                QLCi18n::loadTranslation(p->name().replace(" ", "_"));
-            }
-            else
-            {
-                /* Duplicate plugin. Unload it. */
-                qWarning() << Q_FUNC_INFO << "Discarded duplicate input plugin"
-                           << fileName;
-                loader.unload();
-            }
-        }
-        else
-        {
-            qWarning() << Q_FUNC_INFO << fileName
-                       << "doesn't contain a QLC input plugin:"
-                       << loader.errorString();
-            loader.unload();
-        }
-    }
-}
-
 QStringList InputMap::pluginNames()
 {
-    QListIterator <QLCInPlugin*> it(m_plugins);
+    QListIterator <QLCOutPlugin*> it(doc()->ioPluginCache()->plugins());
     QStringList list;
 
     while (it.hasNext() == true)
@@ -270,7 +213,7 @@ QStringList InputMap::pluginNames()
 
 QStringList InputMap::pluginInputs(const QString& pluginName)
 {
-    QLCInPlugin* ip = plugin(pluginName);
+    QLCOutPlugin* ip = doc()->ioPluginCache()->plugin(pluginName);
     if (ip == NULL)
         return QStringList();
     else
@@ -279,14 +222,14 @@ QStringList InputMap::pluginInputs(const QString& pluginName)
 
 void InputMap::configurePlugin(const QString& pluginName)
 {
-    QLCInPlugin* inputPlugin = plugin(pluginName);
+    QLCOutPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (inputPlugin != NULL)
         inputPlugin->configure();
 }
 
 bool InputMap::canConfigurePlugin(const QString& pluginName)
 {
-    QLCInPlugin* inputPlugin = plugin(pluginName);
+    QLCOutPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (inputPlugin != NULL)
         return inputPlugin->canConfigure();
     else
@@ -295,15 +238,15 @@ bool InputMap::canConfigurePlugin(const QString& pluginName)
 
 QString InputMap::pluginStatus(const QString& pluginName, quint32 input)
 {
-    QLCInPlugin* inputPlugin = NULL;
+    QLCOutPlugin* inputPlugin = NULL;
     QString info;
 
     if (pluginName.isEmpty() == false)
-        inputPlugin = plugin(pluginName);
+        inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
 
     if (inputPlugin != NULL)
     {
-        info = inputPlugin->infoText(input);
+        info = inputPlugin->inputInfo(input);
     }
     else
     {
@@ -314,59 +257,6 @@ QString InputMap::pluginStatus(const QString& pluginName, quint32 input)
     }
 
     return info;
-}
-
-bool InputMap::appendPlugin(QLCInPlugin* inputPlugin)
-{
-    Q_ASSERT(inputPlugin != NULL);
-
-    if (plugin(inputPlugin->name()) == NULL)
-    {
-        m_plugins.append(inputPlugin);
-        connect(inputPlugin, SIGNAL(configurationChanged()),
-                this, SLOT(slotConfigurationChanged()));
-        connect(inputPlugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
-                this, SLOT(slotValueChanged(quint32,quint32,uchar)));
-        HotPlugMonitor::connectListener(inputPlugin);
-        emit pluginAdded(inputPlugin->name());
-        return true;
-    }
-    else
-    {
-        qWarning() << Q_FUNC_INFO << "Input plugin" << inputPlugin->name()
-                   << "is already loaded. Skipping.";
-        return false;
-    }
-}
-
-QLCInPlugin* InputMap::plugin(const QString& name)
-{
-    QListIterator <QLCInPlugin*> it(m_plugins);
-
-    while (it.hasNext() == true)
-    {
-        QLCInPlugin* plugin = it.next();
-        if (plugin->name() == name)
-            return plugin;
-    }
-
-    return NULL;
-}
-
-QDir InputMap::systemPluginDirectory()
-{
-    QDir dir;
-#ifdef __APPLE__
-    dir.setPath(QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-                                   .arg(INPUTPLUGINDIR));
-#else
-    dir.setPath(INPUTPLUGINDIR);
-#endif
-
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));
-
-    return dir;
 }
 
 /*****************************************************************************

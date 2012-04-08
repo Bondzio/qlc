@@ -69,7 +69,7 @@ bool EnttecDMXUSBOut::rescanWidgets()
             m_inputs << widget;
             EnttecDMXUSBProRX* prorx = (EnttecDMXUSBProRX*) widget;
             connect(prorx, SIGNAL(valueChanged(quint32,quint32,uchar)),
-                    this, SLOT(slotValueChanged(quint32,quint32,uchar)));
+                    this, SIGNAL(valueChanged(quint32,quint32,uchar)));
         }
         else
         {
@@ -239,11 +239,6 @@ QString EnttecDMXUSBOut::inputInfo(quint32 input)
     str += QString("</HTML>");
 
     return str;
-}
-
-void EnttecDMXUSBOut::slotValueChanged(quint32 input, quint32 channel, uchar value)
-{
-    qDebug() << input << channel << value;
 }
 
 /****************************************************************************

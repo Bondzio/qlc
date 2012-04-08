@@ -22,16 +22,16 @@
 #include <QSignalSpy>
 #include <QtTest>
 
-#include "inputpluginstub.h"
+#define private public
+#include "outputpluginstub.h"
 #include "inputmap_test.h"
 #include "qlcinputsource.h"
-#include "qlcconfig.h"
-#include "qlcfile.h"
-
-#define protected public
 #include "inputpatch.h"
+#include "qlcconfig.h"
 #include "inputmap.h"
-#undef protected
+#include "qlcfile.h"
+#include "doc.h"
+#undef private
 
 #define TESTPLUGINDIR "../inputpluginstub"
 #define OUTPUT_TESTPLUGINDIR "../outputpluginstub"
@@ -46,15 +46,27 @@ static QDir testPluginDir()
     return dir;
 }
 
+void InputMap_Test::initTestCase()
+{
+    m_doc = new Doc(this);
+    m_doc->ioPluginCache()->load(testPluginDir());
+    QVERIFY(m_doc->ioPluginCache()->plugins().size() != 0);
+}
+
+void InputMap_Test::cleanupTestCase()
+{
+    delete m_doc;
+    m_doc = NULL;
+}
+
 void InputMap_Test::initial()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
     QVERIFY(im.universes() == 4);
     QVERIFY(im.m_universes == 4);
     QVERIFY(im.editorUniverse() == 0);
     QVERIFY(im.m_editorUniverse == 0);
     QVERIFY(im.m_patch.size() == 4);
-    QVERIFY(im.m_plugins.size() == 0);
     QVERIFY(im.pluginNames().size() == 0);
     QVERIFY(im.m_profiles.size() == 0);
     QVERIFY(im.profileNames().size() == 0);
@@ -62,7 +74,7 @@ void InputMap_Test::initial()
 
 void InputMap_Test::editorUniverse()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
     QVERIFY(im.editorUniverse() == 0);
     im.setEditorUniverse(3);
@@ -75,53 +87,14 @@ void InputMap_Test::editorUniverse()
     QVERIFY(im.editorUniverse() == 2);
 }
 
-void InputMap_Test::appendPlugin()
-{
-    InputMap im(this, 4);
-    QCOMPARE(im.m_plugins.size(), 0);
-
-    QSignalSpy spy(&im, SIGNAL(pluginAdded(const QString&)));
-
-    im.loadPlugins(testPluginDir());
-    QCOMPARE(im.m_plugins.size(), 1);
-    QCOMPARE(spy.size(), 1);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
-    QVERIFY(stub != NULL);
-
-    QCOMPARE(im.appendPlugin(stub), false);
-    QCOMPARE(im.plugin(stub->name()), stub);
-    QVERIFY(im.plugin("Foobar") == NULL);
-    QVERIFY(im.m_plugins.size() == 1);
-    QCOMPARE(im.plugin(stub->name()), stub);
-    QCOMPARE(spy.size(), 1);
-}
-
-void InputMap_Test::notInputPlugin()
-{
-    InputMap im(this, 4);
-    QCOMPARE(im.m_plugins.size(), 0);
-
-    // Loading should fail because the plugin is not an input plugin
-    QDir dir(testPluginDir());
-    dir.setPath(OUTPUT_TESTPLUGINDIR);
-    im.loadPlugins(dir);
-    QCOMPARE(im.m_plugins.size(), 0);
-
-    // Loading should fail because the engine lib is not a plugin at all
-    dir.setPath(ENGINEDIR);
-    im.loadPlugins(dir);
-    QCOMPARE(im.m_plugins.size(), 0);
-}
-
 void InputMap_Test::pluginNames()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
     QVERIFY(im.pluginNames().size() == 0);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QVERIFY(im.pluginNames().size() == 1);
@@ -130,13 +103,12 @@ void InputMap_Test::pluginNames()
 
 void InputMap_Test::pluginInputs()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
     QVERIFY(im.pluginInputs("Foo").size() == 0);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QVERIFY(im.pluginInputs(stub->name()).size() == 4);
@@ -145,13 +117,12 @@ void InputMap_Test::pluginInputs()
 
 void InputMap_Test::configurePlugin()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
     QCOMPARE(im.canConfigurePlugin("Foo"), false);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QCOMPARE(im.canConfigurePlugin("Foo"), false);
@@ -170,29 +141,27 @@ void InputMap_Test::configurePlugin()
 
 void InputMap_Test::pluginStatus()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    QVERIFY(im.pluginStatus("Foo", QLCInPlugin::invalidInput()).contains("Nothing selected"));
+    QVERIFY(im.pluginStatus("Foo", QLCOutPlugin::invalidLine()).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Bar", 0).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Baz", 1).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Xyzzy", 2).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("AYBABTU", 3).contains("Nothing selected"));
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
-    im.appendPlugin(stub);
-    QVERIFY(im.pluginStatus(stub->name(), QLCInPlugin::invalidInput()) == stub->infoText(QLCInPlugin::invalidInput()));
-    QVERIFY(im.pluginStatus(stub->name(), 0) == stub->infoText(0));
-    QVERIFY(im.pluginStatus(stub->name(), 1) == stub->infoText(1));
-    QVERIFY(im.pluginStatus(stub->name(), 2) == stub->infoText(2));
+    QVERIFY(im.pluginStatus(stub->name(), QLCOutPlugin::invalidLine()) == stub->inputInfo(QLCOutPlugin::invalidLine()));
+    QVERIFY(im.pluginStatus(stub->name(), 0) == stub->inputInfo(0));
+    QVERIFY(im.pluginStatus(stub->name(), 1) == stub->inputInfo(1));
+    QVERIFY(im.pluginStatus(stub->name(), 2) == stub->inputInfo(2));
 }
 
 void InputMap_Test::profiles()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
     QVERIFY(im.m_profiles.size() == 0);
 
     QLCInputProfile* prof = new QLCInputProfile();
@@ -217,11 +186,10 @@ void InputMap_Test::profiles()
 
 void InputMap_Test::setPatch()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QLCInputProfile* prof = new QLCInputProfile();
@@ -230,50 +198,50 @@ void InputMap_Test::setPatch()
     im.addProfile(prof);
 
     QVERIFY(im.patch(0)->plugin() == NULL);
-    QVERIFY(im.patch(0)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(0)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(0)->profile() == NULL);
     QVERIFY(im.patch(0)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 0) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
 
     QVERIFY(im.setPatch(0, "Foobar", 0, false, prof->name()) == true);
     QVERIFY(im.patch(0)->plugin() == NULL);
-    QVERIFY(im.patch(0)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(0)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(0)->profile() == prof);
     QVERIFY(im.patch(0)->feedbackEnabled() == false);
     QVERIFY(im.mapping(stub->name(), 0) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
@@ -286,19 +254,19 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 0) == 0);
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
@@ -311,7 +279,7 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 0) == 0);
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
@@ -323,7 +291,7 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCInPlugin::invalidInput());
+    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == 2);
@@ -334,11 +302,10 @@ void InputMap_Test::setPatch()
 
 void InputMap_Test::feedBack()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     im.setPatch(0, stub->name(), 0, true);
@@ -373,11 +340,10 @@ void InputMap_Test::feedBack()
 
 void InputMap_Test::slotValueChanged()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QVERIFY(im.setPatch(0, stub->name(), 0, false) == true);
@@ -417,11 +383,10 @@ void InputMap_Test::slotValueChanged()
 
 void InputMap_Test::slotConfigurationChanged()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    im.loadPlugins(testPluginDir());
-    QVERIFY(im.m_plugins.size() > 0);
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QSignalSpy spy(&im, SIGNAL(pluginConfigurationChanged(QString)));
@@ -433,7 +398,7 @@ void InputMap_Test::slotConfigurationChanged()
 
 void InputMap_Test::loadInputProfiles()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
     // No profiles in a nonexistent directory
     QDir dir("/path/to/a/nonexistent/place/beyond/this/universe");
@@ -462,10 +427,10 @@ void InputMap_Test::loadInputProfiles()
 
 void InputMap_Test::inputSourceNames()
 {
-    InputMap im(this, 4);
+    InputMap im(m_doc, 4);
 
-    im.loadPlugins(testPluginDir());
-    InputPluginStub* stub = static_cast<InputPluginStub*> (im.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*> (m_doc->ioPluginCache()->plugins().at(0));
+    QVERIFY(stub != NULL);
 
     QDir dir(PROFILEDIR);
     dir.setFilter(QDir::Files);
@@ -513,14 +478,6 @@ void InputMap_Test::profileDirectories()
     QVERIFY(dir.filter() & QDir::Files);
     QVERIFY(dir.nameFilters().contains(QString("*%1").arg(KExtInputProfile)));
     QVERIFY(dir.absolutePath().contains(USERINPUTPROFILEDIR));
-}
-
-void InputMap_Test::pluginDirectories()
-{
-    QDir dir = InputMap::systemPluginDirectory();
-    QVERIFY(dir.filter() & QDir::Files);
-    QVERIFY(dir.nameFilters().contains(QString("*%1").arg(KExtPlugin)));
-    QVERIFY(dir.absolutePath().contains(INPUTPLUGINDIR));
 }
 
 QTEST_APPLESS_MAIN(InputMap_Test)

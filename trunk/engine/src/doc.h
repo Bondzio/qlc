@@ -28,6 +28,7 @@
 #include <QMap>
 
 #include "qlcfixturedefcache.h"
+#include "ioplugincache.h"
 #include "fixturegroup.h"
 #include "mastertimer.h"
 #include "outputmap.h"
@@ -78,6 +79,9 @@ public:
     /** Get the fixture definition cache object */
     QLCFixtureDefCache* fixtureDefCache() const;
 
+    /** Get the I/O plugin cache object */
+    IOPluginCache* ioPluginCache() const;
+
     /** Get the DMX output map object */
     OutputMap* outputMap() const;
 
@@ -89,6 +93,7 @@ public:
 
 private:
     QLCFixtureDefCache* m_fixtureDefCache;
+    IOPluginCache* m_ioPluginCache;
     OutputMap* m_outputMap;
     MasterTimer* m_masterTimer;
     InputMap* m_inputMap;

@@ -29,17 +29,16 @@
 #include <QHash>
 #include <QDir>
 
-
+class OutputPatchEditor;
+class OutputMapEditor;
+class UniverseArray;
+class QLCOutPlugin;
 class QDomDocument;
 class QDomElement;
-class QString;
-
-class OutputMap;
 class OutputPatch;
-class QLCOutPlugin;
-class UniverseArray;
-class OutputMapEditor;
-class OutputPatchEditor;
+class OutputMap;
+class QString;
+class Doc;
 
 #define KOutputNone QObject::tr("None")
 #define KXMLQLCOutputMap "OutputMap"
@@ -58,7 +57,7 @@ public:
      *
      * @param universes Number of universes
      */
-    OutputMap(QObject* parent, quint32 universes);
+    OutputMap(Doc* doc, quint32 universes);
 
     /**
      * Destroy a OutputMap object
@@ -72,7 +71,11 @@ public:
      */
     void loadPlugins(const QDir& dir);
 
-protected:
+private:
+    /** Get the doc object */
+    Doc* doc() const;
+
+private:
     /** Total number of supported universes */
     quint32 m_universes;
 
@@ -109,7 +112,7 @@ signals:
      */
     void blackoutChanged(bool state);
 
-protected:
+private:
     /** Current blackout state */
     bool m_blackout;
 
@@ -156,7 +159,7 @@ signals:
     void universesWritten(const QByteArray& universes);
     void grandMasterValueChanged(uchar value);
 
-protected:
+private:
     /** The values of all universes */
     UniverseArray* m_universeArray;
 
@@ -169,7 +172,7 @@ protected:
     /*********************************************************************
      * Patch
      *********************************************************************/
-protected:
+private:
     /**
      * Initialize the patching table
      */
@@ -221,7 +224,7 @@ public:
      */
     quint32 mapping(const QString& pluginName, quint32 output) const;
 
-protected:
+private:
     /** Vector containing all active plugins */
     QVector <OutputPatch*> m_patch;
 
@@ -269,46 +272,13 @@ public:
      */
     QString pluginStatus(const QString& pluginName, quint32 output);
 
-    /**
-     * Append the given plugin to our list of plugins. Will fail if
-     * a plugin with the same name already exists.
-     *
-     * @param outputPlugin The output plugin to append
-     * @return true if successful, otherwise false
-     */
-    bool appendPlugin(QLCOutPlugin* outputPlugin);
-
-    /**
-     * Get the system default output plugin directory. The location varies
-     * greatly between platforms.
-     *
-     * @return System default output plugin directory.
-     */
-    static QDir systemPluginDirectory();
-
-protected:
-    /**
-     * Get a plugin instance by the plugin's name
-     *
-     * @param name The name of the plugin to search for
-     * @return QLCOutPlugin or NULL
-     */
-    QLCOutPlugin* plugin(const QString& name);
-
-protected slots:
-   /** Slot that catches plugin configuration change notifications */
-    void slotConfigurationChanged();
+private slots:
+   /** Slot that catches plugin configuration change notifications from UIPluginCache */
+    void slotPluginConfigurationChanged(QLCOutPlugin* plugin);
 
 signals:
     /** Notifies (OutputManager) of plugin configuration changes */
     void pluginConfigurationChanged(const QString& pluginName);
-
-    /** Notifies of a newly-added plugin */
-    void pluginAdded(const QString& pluginName);
-
-protected:
-    /** List containing all available plugins */
-    QList <QLCOutPlugin*> m_plugins;
 
     /*********************************************************************
      * Defaults

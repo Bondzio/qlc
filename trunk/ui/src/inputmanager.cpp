@@ -84,7 +84,7 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
     m_tree->setHeaderLabels(columns);
 
     connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            this, SLOT(slotEditClicked()));
+            this, SLOT(slotCurrentItemChanged()));
 
     /* Timer that clears the input data icon after a while */
     m_timer = new QTimer(this);
@@ -101,7 +101,7 @@ InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags 
 
     updateTree();
     m_tree->setCurrentItem(m_tree->topLevelItem(0));
-    slotEditClicked();
+    slotCurrentItemChanged();
 
     QSettings settings;
     QVariant var = settings.value(SETTINGS_SPLITTER);
@@ -150,27 +150,23 @@ void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
 void InputManager::updateTree()
 {
     m_tree->clear();
-    for (quint32 i = 0; i < m_inputMap->universes(); i++)
-    {
-        InputPatch* inputPatch = m_inputMap->patch(i);
-        Q_ASSERT(inputPatch != NULL);
-
-        QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
-        updateItem(item, inputPatch, i);
-    }
+    for (quint32 uni = 0; uni < m_inputMap->universes(); uni++)
+        updateItem(new QTreeWidgetItem(m_tree), uni);
+    m_tree->setCurrentItem(m_tree->topLevelItem(0));
 }
 
-void InputManager::updateItem(QTreeWidgetItem* item, InputPatch* ip,
-                              quint32 universe)
+void InputManager::updateItem(QTreeWidgetItem* item, quint32 universe)
 {
     Q_ASSERT(item != NULL);
+
+    InputPatch* ip = m_inputMap->patch(universe);
     Q_ASSERT(ip != NULL);
 
-    item->setText(KColumnUniverse, QString("%1").arg(universe + 1));
+    item->setText(KColumnUniverse, QString::number(universe + 1));
     item->setText(KColumnPlugin, ip->pluginName());
     item->setText(KColumnInput, ip->inputName());
     item->setText(KColumnProfile, ip->profileName());
-    item->setText(KColumnInputNum, QString("%1").arg(ip->input() + 1));
+    item->setText(KColumnInputNum, QString::number(ip->input() + 1));
 }
 
 QWidget* InputManager::currentEditor() const
@@ -209,11 +205,15 @@ void InputManager::slotTimerTimeout()
     }
 }
 
-void InputManager::slotEditClicked()
+void InputManager::slotCurrentItemChanged()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
-        return;
+    {
+        m_tree->setCurrentItem(m_tree->topLevelItem(0));
+        item = m_tree->currentItem();
+    }
+    Q_ASSERT(item != NULL);
 
     if (currentEditor() != NULL)
         delete currentEditor();
@@ -228,12 +228,9 @@ void InputManager::slotEditClicked()
 void InputManager::slotMappingChanged()
 {
     QTreeWidgetItem* item = m_tree->currentItem();
-    Q_ASSERT(item != NULL);
-
-    uint universe = item->text(KColumnUniverse).toUInt() - 1;
-
-    InputPatch* inputPatch = m_inputMap->patch(universe);
-    Q_ASSERT(inputPatch != NULL);
-
-    updateItem(item, inputPatch, universe);
+    if (item != NULL)
+    {
+        uint universe = item->text(KColumnUniverse).toUInt() - 1;
+        updateItem(item, universe);
+    }
 }

@@ -64,8 +64,11 @@ public slots:
     void updateTree();
 
 private slots:
-    /** Launches the editor */
-    void slotEditClicked();
+    /** Displays the editor */
+    void slotCurrentItemChanged();
+
+    /** Updates the current item */
+    void slotMappingChanged();
 
 private:
     /** Update the contents of an OutputPatch to an item */

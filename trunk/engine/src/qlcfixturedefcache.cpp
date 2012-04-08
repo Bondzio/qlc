@@ -113,7 +113,7 @@ bool QLCFixtureDefCache::addFixtureDef(QLCFixtureDef* fixtureDef)
 
 bool QLCFixtureDefCache::load(const QDir& dir)
 {
-    qDebug() << Q_FUNC_INFO << dir;
+    qDebug() << Q_FUNC_INFO << dir.path();
 
     if (dir.exists() == false || dir.isReadable() == false)
         return false;

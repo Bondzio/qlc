@@ -334,18 +334,17 @@ void App::initDoc()
     m_doc->fixtureDefCache()->load(QLCFixtureDefCache::userDefinitionDirectory());
     m_doc->fixtureDefCache()->load(QLCFixtureDefCache::systemDefinitionDirectory());
 
-    /* Load output plugins */
-    Q_ASSERT(m_doc->outputMap() != NULL);
-    connect(m_doc->outputMap(), SIGNAL(pluginAdded(const QString&)),
+    /* Load plugins */
+    connect(m_doc->ioPluginCache(), SIGNAL(pluginLoaded(const QString&)),
             this, SLOT(slotSetProgressText(const QString&)));
-    m_doc->outputMap()->loadPlugins(OutputMap::systemPluginDirectory());
+    m_doc->ioPluginCache()->load(IOPluginCache::systemPluginDirectory());
+
+    /* Restore outputmap settings */
+    Q_ASSERT(m_doc->outputMap() != NULL);
     m_doc->outputMap()->loadDefaults();
 
     /* Load input plugins & profiles */
     Q_ASSERT(m_doc->inputMap() != NULL);
-    connect(m_doc->inputMap(), SIGNAL(pluginAdded(const QString&)),
-            this, SLOT(slotSetProgressText(const QString&)));
-    m_doc->inputMap()->loadPlugins(InputMap::systemPluginDirectory());
     m_doc->inputMap()->loadProfiles(InputMap::userProfileDirectory());
     m_doc->inputMap()->loadProfiles(InputMap::systemProfileDirectory());
     m_doc->inputMap()->loadDefaults();

@@ -92,9 +92,6 @@ public:
     void sendFeedBack(quint32 input, quint32 channel, uchar value)
         { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
 
-private slots:
-    void slotValueChanged(quint32 input, quint32 channel, uchar value);
-
 private:
     QList <EnttecDMXUSBWidget*> m_inputs;
 

@@ -24,12 +24,7 @@
 
 #include <QObject>
 
-
-class QDomDocument;
-class QDomElement;
-
 class QLCOutPlugin;
-class OutputMap;
 
 #define KXMLQLCOutputPatch "Patch"
 #define KXMLQLCOutputPatchUniverse "Universe"
@@ -61,7 +56,7 @@ public:
     quint32 output() const;
     QString outputName() const;
 
-protected:
+private:
     QLCOutPlugin* m_plugin;
     quint32 m_output;
 

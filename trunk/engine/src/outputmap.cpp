@@ -29,29 +29,31 @@
 #include <QtXml>
 #include <QDir>
 
-#include "qlcoutplugin.h"
-#include "qlcconfig.h"
-#include "qlci18n.h"
-#include "qlcfile.h"
-
 #include "hotplugmonitor.h"
 #include "universearray.h"
+#include "qlcoutplugin.h"
 #include "outputpatch.h"
+#include "qlcconfig.h"
 #include "outputmap.h"
+#include "qlci18n.h"
+#include "qlcfile.h"
+#include "doc.h"
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-OutputMap::OutputMap(QObject* parent, quint32 universes) : QObject(parent)
+OutputMap::OutputMap(Doc* doc, quint32 universes)
+    : QObject(doc)
+    , m_universes(universes)
+    , m_blackout(false)
+    , m_universeArray(new UniverseArray(512 * universes))
+    , m_universeChanged(false)
 {
-    m_universes = universes;
-    m_blackout = false;
-    m_universeChanged = false;
-
-    m_universeArray = new UniverseArray(512 * universes);
-
     initPatch();
+
+    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCOutPlugin*)),
+            this, SLOT(slotPluginConfigurationChanged(QLCOutPlugin*)));
 }
 
 OutputMap::~OutputMap()
@@ -64,53 +66,11 @@ OutputMap::~OutputMap()
         delete m_patch[i];
         m_patch[i] = NULL;
     }
-
-    while (m_plugins.isEmpty() == false)
-        delete m_plugins.takeFirst();
 }
 
-void OutputMap::loadPlugins(const QDir& dir)
+Doc* OutputMap::doc() const
 {
-    /* Check that we can access the directory */
-    if (dir.exists() == false || dir.isReadable() == false)
-        return;
-
-    /* Loop thru all files in the directory */
-    QStringListIterator it(dir.entryList());
-    while (it.hasNext() == true)
-    {
-        /* Attempt to load a plugin from the path */
-        QString fileName(it.next());
-        QString path = dir.absoluteFilePath(fileName);
-        QPluginLoader loader(path, this);
-        QLCOutPlugin* p = qobject_cast<QLCOutPlugin*> (loader.instance());
-        if (p != NULL)
-        {
-            /* Check for duplicates */
-            if (plugin(p->name()) == NULL)
-            {
-                /* New plugin. Append and init. */
-                qDebug() << "Output plugin" << p->name() << "from" << fileName;
-                p->init();
-                appendPlugin(p);
-                QLCi18n::loadTranslation(p->name().replace(" ", "_"));
-            }
-            else
-            {
-                /* Duplicate plugin. Unload it. */
-                qWarning() << Q_FUNC_INFO << "Discarded duplicate output plugin"
-                           << path;
-                loader.unload();
-            }
-        }
-        else
-        {
-            qWarning() << Q_FUNC_INFO << fileName
-                       << "doesn't contain a QLC output plugin:"
-                       << loader.errorString();
-            loader.unload();
-        }
-    }
+    return qobject_cast<Doc*> (parent());
 }
 
 /*****************************************************************************
@@ -254,7 +214,7 @@ bool OutputMap::setPatch(quint32 universe, const QString& pluginName,
     }
 
     m_universeMutex.lock();
-    m_patch[universe]->set(plugin(pluginName), output);
+    m_patch[universe]->set(doc()->ioPluginCache()->plugin(pluginName), output);
     m_universeMutex.unlock();
 
     return true;
@@ -301,20 +261,16 @@ quint32 OutputMap::mapping(const QString& pluginName, quint32 output) const
 
 QStringList OutputMap::pluginNames()
 {
-    QListIterator <QLCOutPlugin*> it(m_plugins);
     QStringList list;
-
+    QListIterator <QLCOutPlugin*> it(doc()->ioPluginCache()->plugins());
     while (it.hasNext() == true)
         list.append(it.next()->name());
-
     return list;
 }
 
 QStringList OutputMap::pluginOutputs(const QString& pluginName)
 {
-    QLCOutPlugin* op = NULL;
-
-    op = plugin(pluginName);
+    QLCOutPlugin* op = doc()->ioPluginCache()->plugin(pluginName);
     if (op == NULL)
         return QStringList();
     else
@@ -323,15 +279,14 @@ QStringList OutputMap::pluginOutputs(const QString& pluginName)
 
 void OutputMap::configurePlugin(const QString& pluginName)
 {
-    qDebug() << Q_FUNC_INFO << pluginName;
-    QLCOutPlugin* outputPlugin = plugin(pluginName);
+    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
         outputPlugin->configure();
 }
 
 bool OutputMap::canConfigurePlugin(const QString& pluginName)
 {
-    QLCOutPlugin* outputPlugin = plugin(pluginName);
+    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
         return outputPlugin->canConfigure();
     else
@@ -340,7 +295,7 @@ bool OutputMap::canConfigurePlugin(const QString& pluginName)
 
 QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
 {
-    QLCOutPlugin* outputPlugin = plugin(pluginName);
+    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
     {
         return outputPlugin->outputInfo(output);
@@ -355,47 +310,8 @@ QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
     }
 }
 
-bool OutputMap::appendPlugin(QLCOutPlugin* outputPlugin)
+void OutputMap::slotPluginConfigurationChanged(QLCOutPlugin* plugin)
 {
-    Q_ASSERT(outputPlugin != NULL);
-
-    if (plugin(outputPlugin->name()) == NULL)
-    {
-        m_plugins.append(outputPlugin);
-        connect(outputPlugin, SIGNAL(configurationChanged()),
-                this, SLOT(slotConfigurationChanged()));
-        HotPlugMonitor::connectListener(outputPlugin);
-        emit pluginAdded(outputPlugin->name());
-        return true;
-    }
-    else
-    {
-        qWarning() << Q_FUNC_INFO << "Output plugin" << outputPlugin->name()
-                   << "is already loaded. Skipping";
-        return false;
-    }
-}
-
-QLCOutPlugin* OutputMap::plugin(const QString& name)
-{
-    QListIterator <QLCOutPlugin*> it(m_plugins);
-
-    while (it.hasNext() == true)
-    {
-        QLCOutPlugin* plugin = it.next();
-        if (plugin->name() == name)
-            return plugin;
-    }
-
-    return NULL;
-}
-
-void OutputMap::slotConfigurationChanged()
-{
-    QLCOutPlugin* plugin = qobject_cast<QLCOutPlugin*> (QObject::sender());
-    if (plugin == NULL) // The signal comes from a plugin that isn't guaranteed to behave
-        return;
-
     for (quint32 i = 0; i < universes(); i++)
     {
         OutputPatch* op = patch(i);
@@ -409,22 +325,6 @@ void OutputMap::slotConfigurationChanged()
     }
 
     emit pluginConfigurationChanged(plugin->name());
-}
-
-QDir OutputMap::systemPluginDirectory()
-{
-    QDir dir;
-#ifdef __APPLE__
-    dir.setPath(QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-                                   .arg(OUTPUTPLUGINDIR));
-#else
-    dir.setPath(OUTPUTPLUGINDIR);
-#endif
-
-    dir.setFilter(QDir::Files);
-    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));
-
-    return dir;
 }
 
 /*****************************************************************************

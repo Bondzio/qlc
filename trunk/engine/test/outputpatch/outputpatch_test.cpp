@@ -22,15 +22,14 @@
 #include <QtTest>
 #include <QtXml>
 
+#define private public
 #include "outputpluginstub.h"
 #include "outputpatch_test.h"
-#include "qlcfile.h"
-
-/* Expose protected members to unit test */
-#define protected public
 #include "outputpatch.h"
 #include "outputmap.h"
-#undef protected
+#include "qlcfile.h"
+#include "doc.h"
+#undef private
 
 #define TESTPLUGINDIR "../outputpluginstub"
 
@@ -40,6 +39,19 @@ static QDir testPluginDir()
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));
     return dir;
+}
+
+void OutputPatch_Test::initTestCase()
+{
+    m_doc = new Doc(this);
+    m_doc->ioPluginCache()->load(testPluginDir());
+    QVERIFY(m_doc->ioPluginCache()->plugins().size() != 0);
+}
+
+void OutputPatch_Test::cleanupTestCase()
+{
+    delete m_doc;
+    m_doc = NULL;
 }
 
 void OutputPatch_Test::defaults()
@@ -53,11 +65,10 @@ void OutputPatch_Test::defaults()
 
 void OutputPatch_Test::patch()
 {
-    OutputMap om(this, 4);
+    OutputMap om(m_doc, 4);
 
-    om.loadPlugins(testPluginDir());
-    QVERIFY(om.m_plugins.size() >= 1);
-    OutputPluginStub* stub = static_cast<OutputPluginStub*> (om.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     OutputPatch* op = new OutputPatch(this);
@@ -96,12 +107,11 @@ void OutputPatch_Test::dump()
     uni[169] = 50;
     uni[511] = 25;
 
-    OutputMap om(this, 4);
+    OutputMap om(m_doc, 4);
     OutputPatch* op = new OutputPatch(this);
 
-    om.loadPlugins(testPluginDir());
-    QVERIFY(om.m_plugins.size() >= 1);
-    OutputPluginStub* stub = static_cast<OutputPluginStub*> (om.m_plugins.at(0));
+    OutputPluginStub* stub = static_cast<OutputPluginStub*>
+                                (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     op->set(stub, 0);

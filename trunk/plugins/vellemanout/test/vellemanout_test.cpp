@@ -78,65 +78,65 @@ void VellemanOut_Test::openClose()
     VellemanOut vo;
     vo.init();
 
-    vo.open(3);
+    vo.openOutput(3);
     QVERIFY(vo.m_currentlyOpen == false);
-    vo.open(2);
+    vo.openOutput(2);
     QVERIFY(vo.m_currentlyOpen == false);
-    vo.open(1);
+    vo.openOutput(1);
     QVERIFY(vo.m_currentlyOpen == false);
 
-    vo.open(0);
+    vo.openOutput(0);
     QVERIFY(vo.m_currentlyOpen == true);
     QCOMPARE(_StartDeviceCalled, 1);
     QCOMPARE(_StopDeviceCalled, 0);
 
-    vo.open(0);
+    vo.openOutput(0);
     QVERIFY(vo.m_currentlyOpen == true);
     QCOMPARE(_StartDeviceCalled, 1);
     QCOMPARE(_StopDeviceCalled, 0);
 
-    vo.close(3);
+    vo.closeOutput(3);
     QVERIFY(vo.m_currentlyOpen == true);
-    vo.close(2);
+    vo.closeOutput(2);
     QVERIFY(vo.m_currentlyOpen == true);
-    vo.close(1);
+    vo.closeOutput(1);
     QVERIFY(vo.m_currentlyOpen == true);
 
-    vo.close(0);
+    vo.closeOutput(0);
     QVERIFY(vo.m_currentlyOpen == false);
     QCOMPARE(_StartDeviceCalled, 1);
     QCOMPARE(_StopDeviceCalled, 1);
 
-    vo.close(0);
+    vo.closeOutput(0);
     QVERIFY(vo.m_currentlyOpen == false);
     QCOMPARE(_StartDeviceCalled, 1);
     QCOMPARE(_StopDeviceCalled, 1);
 }
 
-void VellemanOut_Test::infoText()
+void VellemanOut_Test::outputInfo()
 {
     VellemanOut vo;
     vo.init();
 
     QString info;
-    info = vo.infoText(42);
+    info = vo.outputInfo(42);
     QVERIFY(info.startsWith(QString("<HTML><HEAD><TITLE>%1</TITLE></HEAD><BODY>").arg(vo.name())));
     QVERIFY(info.contains(tr("This plugin provides DMX output support")) == false);
     QVERIFY(info.contains("<H3>") == false);
     QVERIFY(info.endsWith("</BODY></HTML>"));
 
-    info = vo.infoText(QLCOutPlugin::invalidOutput());
+    info = vo.outputInfo(QLCOutPlugin::invalidLine());
     QVERIFY(info.startsWith(QString("<HTML><HEAD><TITLE>%1</TITLE></HEAD><BODY>").arg(vo.name())));
     QVERIFY(info.contains(tr("This plugin provides DMX output support")));
     QVERIFY(info.endsWith("</BODY></HTML>"));
 
-    info = vo.infoText(0);
+    info = vo.outputInfo(0);
     QVERIFY(info.startsWith(QString("<HTML><HEAD><TITLE>%1</TITLE></HEAD><BODY>").arg(vo.name())));
     QVERIFY(info.contains(vo.outputs()[0]));
     QVERIFY(info.endsWith("</BODY></HTML>"));
 }
 
-void VellemanOut_Test::outputDMX()
+void VellemanOut_Test::writeUniverse()
 {
     VellemanOut vo;
     vo.init();
@@ -150,16 +150,16 @@ void VellemanOut_Test::outputDMX()
     data[127] = 42;
     data[511] = 96;
 
-    vo.outputDMX(0, data);
+    vo.writeUniverse(0, data);
     QVERIFY(_ChannelCount == 0);
     QVERIFY(_SetAllData == NULL);
 
-    vo.open(0);
-    vo.outputDMX(1, data);
+    vo.openOutput(0);
+    vo.writeUniverse(1, data);
     QVERIFY(_ChannelCount == 0);
     QVERIFY(_SetAllData == NULL);
 
-    vo.outputDMX(0, data);
+    vo.writeUniverse(0, data);
     QVERIFY(_ChannelCount == data.size());
     QVERIFY(_SetAllData != NULL);
     QCOMPARE(_SetAllData[0], 0);

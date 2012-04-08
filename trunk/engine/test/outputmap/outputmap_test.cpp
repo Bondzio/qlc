@@ -110,33 +110,33 @@ void OutputMap_Test::setPatch()
 
     QVERIFY(om.setPatch(0, "Foobar", 0) == true);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
 
     QVERIFY(om.setPatch(4, stub->name(), 0) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
 
     QVERIFY(om.setPatch(4, stub->name(), 4) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidOutput());
+    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
 
     QVERIFY(om.setPatch(3, stub->name(), 0) == true);
     QVERIFY(om.patch(3)->plugin() == stub);
@@ -183,16 +183,16 @@ void OutputMap_Test::claimReleaseDumpReset()
     om.dumpUniverses();
 
     for (int i = 0; i < 512; i++)
-        QCOMPARE(stub->m_array.data()[i], 'a');
+        QCOMPARE(stub->m_universe.data()[i], 'a');
 
     for (int i = 512; i < 1024; i++)
-        QCOMPARE(stub->m_array.data()[i], 'b');
+        QCOMPARE(stub->m_universe.data()[i], 'b');
 
     for (int i = 1024; i < 1536; i++)
-        QCOMPARE(stub->m_array.data()[i], 'c');
+        QCOMPARE(stub->m_universe.data()[i], 'c');
 
     for (int i = 1536; i < 2048; i++)
-        QCOMPARE(stub->m_array.data()[i], 'd');
+        QCOMPARE(stub->m_universe.data()[i], 'd');
 
     om.resetUniverses();
     for (quint32 i = 0; i < 512 * om.universes(); i++)
@@ -230,47 +230,47 @@ void OutputMap_Test::blackout()
     om.dumpUniverses();
 
     for (int i = 0; i < 2048; i++)
-        QVERIFY(stub->m_array[i] == (char) 0);
+        QVERIFY(stub->m_universe[i] == (char) 0);
 
     om.setBlackout(true);
     QVERIFY(om.blackout() == true);
     om.dumpUniverses();
 
     for (int i = 0; i < 2048; i++)
-        QVERIFY(stub->m_array[i] == (char) 0);
+        QVERIFY(stub->m_universe[i] == (char) 0);
 
     om.toggleBlackout();
     QVERIFY(om.blackout() == false);
     om.dumpUniverses();
 
     for (int i = 0; i < 512; i++)
-        QVERIFY(stub->m_array[i] == 'a');
+        QVERIFY(stub->m_universe[i] == 'a');
     for (int i = 512; i < 1024; i++)
-        QVERIFY(stub->m_array[i] == 'b');
+        QVERIFY(stub->m_universe[i] == 'b');
     for (int i = 1024; i < 1536; i++)
-        QVERIFY(stub->m_array[i] == 'c');
+        QVERIFY(stub->m_universe[i] == 'c');
     for (int i = 1536; i < 2048; i++)
-        QVERIFY(stub->m_array[i] == 'd');
+        QVERIFY(stub->m_universe[i] == 'd');
 
     om.setBlackout(false);
     QVERIFY(om.blackout() == false);
     om.dumpUniverses();
 
     for (int i = 0; i < 512; i++)
-        QVERIFY(stub->m_array[i] == 'a');
+        QVERIFY(stub->m_universe[i] == 'a');
     for (int i = 512; i < 1024; i++)
-        QVERIFY(stub->m_array[i] == 'b');
+        QVERIFY(stub->m_universe[i] == 'b');
     for (int i = 1024; i < 1536; i++)
-        QVERIFY(stub->m_array[i] == 'c');
+        QVERIFY(stub->m_universe[i] == 'c');
     for (int i = 1536; i < 2048; i++)
-        QVERIFY(stub->m_array[i] == 'd');
+        QVERIFY(stub->m_universe[i] == 'd');
 
     om.toggleBlackout();
     QVERIFY(om.blackout() == true);
     om.dumpUniverses();
 
     for (int i = 0; i < 2048; i++)
-        QVERIFY(stub->m_array[i] == (char) 0);
+        QVERIFY(stub->m_universe[i] == (char) 0);
 }
 
 void OutputMap_Test::pluginNames()
@@ -374,7 +374,7 @@ void OutputMap_Test::mapping()
     OutputMap om(this, 4);
 
     for (quint32 i = 0; i < 20; i++)
-        QCOMPARE(om.mapping("Dummy Output", i), QLCOutPlugin::invalidOutput());
+        QCOMPARE(om.mapping("Dummy Output", i), QLCOutPlugin::invalidLine());
 
     om.loadPlugins(testPluginDir());
     QVERIFY(om.m_plugins.size() >= 1);
@@ -382,10 +382,10 @@ void OutputMap_Test::mapping()
     QVERIFY(stub != NULL);
 
     QVERIFY(om.setPatch(1, stub->name(), quint32(0)) == true);
-    QCOMPARE(om.mapping("Dummy Output", 0), QLCOutPlugin::invalidOutput());
+    QCOMPARE(om.mapping("Dummy Output", 0), QLCOutPlugin::invalidLine());
     QCOMPARE(om.mapping("Dummy Output", 1), OutputMap::invalidUniverse());
-    QCOMPARE(om.mapping("Dummy Output", 2), QLCOutPlugin::invalidOutput());
-    QCOMPARE(om.mapping("Dummy Output", 3), QLCOutPlugin::invalidOutput());
+    QCOMPARE(om.mapping("Dummy Output", 2), QLCOutPlugin::invalidLine());
+    QCOMPARE(om.mapping("Dummy Output", 3), QLCOutPlugin::invalidLine());
     QCOMPARE(om.mapping(stub->name(), 0), quint32(1));
     QCOMPARE(om.mapping(stub->name(), 1), OutputMap::invalidUniverse());
     QCOMPARE(om.mapping(stub->name(), 2), OutputMap::invalidUniverse());
@@ -396,7 +396,7 @@ void OutputMap_Test::pluginStatus()
 {
     OutputMap om(this, 4);
 
-    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidOutput()).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidLine()).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Bar", 0).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Baz", 1).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Xyzzy", 2).contains("Nothing selected"));
@@ -408,10 +408,10 @@ void OutputMap_Test::pluginStatus()
     QVERIFY(stub != NULL);
 
     om.appendPlugin(stub);
-    QVERIFY(om.pluginStatus(stub->name(), 4) == stub->infoText(QLCOutPlugin::invalidOutput()));
-    QVERIFY(om.pluginStatus(stub->name(), 0) == stub->infoText(0));
-    QVERIFY(om.pluginStatus(stub->name(), 1) == stub->infoText(1));
-    QVERIFY(om.pluginStatus(stub->name(), 2) == stub->infoText(2));
+    QVERIFY(om.pluginStatus(stub->name(), 4) == stub->outputInfo(QLCOutPlugin::invalidLine()));
+    QVERIFY(om.pluginStatus(stub->name(), 0) == stub->outputInfo(0));
+    QVERIFY(om.pluginStatus(stub->name(), 1) == stub->outputInfo(1));
+    QVERIFY(om.pluginStatus(stub->name(), 2) == stub->outputInfo(2));
 }
 
 QTEST_APPLESS_MAIN(OutputMap_Test)

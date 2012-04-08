@@ -60,7 +60,7 @@ EnttecDMXUSBOpen::~EnttecDMXUSBOpen()
 
 EnttecDMXUSBWidget::Type EnttecDMXUSBOpen::type() const
 {
-    return EnttecDMXUSBWidget::Open;
+    return EnttecDMXUSBWidget::OpenTX;
 }
 
 /****************************************************************************
@@ -72,7 +72,7 @@ bool EnttecDMXUSBOpen::open()
     if (EnttecDMXUSBWidget::open() == false)
         return close();
 
-    if (m_ftdi->clearRts() == false)
+    if (ftdi()->clearRts() == false)
         return close();
 
     start(QThread::TimeCriticalPriority);
@@ -152,19 +152,19 @@ void EnttecDMXUSBOpen::run()
         // Measure how much time passes during these calls
         time.restart();
 
-        if (m_ftdi->setBreak(true) == false)
+        if (ftdi()->setBreak(true) == false)
             goto framesleep;
 
         if (m_granularity == Good)
             usleep(DMX_BREAK);
 
-        if (m_ftdi->setBreak(false) == false)
+        if (ftdi()->setBreak(false) == false)
             goto framesleep;
 
         if (m_granularity == Good)
             usleep(DMX_MAB);
 
-        if (m_ftdi->write(m_universe) == false)
+        if (ftdi()->write(m_universe) == false)
             goto framesleep;
 
 framesleep:

@@ -26,8 +26,9 @@
 #include <QMap>
 
 #include "enttecdmxusbwidget.h"
+#include "enttecdmxusbprotx.h"
+#include "enttecdmxusbprorx.h"
 #include "enttecdmxusbopen.h"
-#include "enttecdmxusbpro.h"
 #include "qlcftdi.h"
 
 QLCFTDI::QLCFTDI(const QString& serial, const QString& name, quint32 id)
@@ -74,14 +75,21 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
         if (types.contains(ser) == true)
         {
             // Force a widget with a specific serial to either type
-            switch (EnttecDMXUSBWidget::Type(types[ser].toInt()))
+            EnttecDMXUSBWidget::Type type = (EnttecDMXUSBWidget::Type) types[ser].toInt();
+            switch (type)
             {
-            case EnttecDMXUSBWidget::Open:
-                widgetList << new EnttecDMXUSBOpen(serial, name, 0);
+            case EnttecDMXUSBWidget::OpenTX:
+                widgetList << new EnttecDMXUSBOpen(serial, name);
                 break;
+            case EnttecDMXUSBWidget::ProRX:
+            {
+                EnttecDMXUSBProRX* prorx = new EnttecDMXUSBProRX(serial, name, widgetList.size());
+                widgetList << prorx;
+                break;
+            }
             default:
-            case EnttecDMXUSBWidget::Pro:
-                widgetList << new EnttecDMXUSBPro(serial, name, 0);
+            case EnttecDMXUSBWidget::ProTX:
+                widgetList << new EnttecDMXUSBProTX(serial, name);
                 break;
             }
         }
@@ -92,8 +100,8 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
         }
         else
         {
-            /* This is probably a DMX USB Pro widget */
-            widgetList << new EnttecDMXUSBPro(serial, name, 0);
+            /* This is probably a DMX USB Pro widget in TX mode */
+            widgetList << new EnttecDMXUSBProTX(serial, name);
         }
 
         list = list->next;
@@ -245,23 +253,40 @@ bool QLCFTDI::write(const QByteArray& data)
     }
 }
 
-QByteArray QLCFTDI::read(int size)
+QByteArray QLCFTDI::read(int size, uchar* userBuffer)
 {
-    unsigned char* buffer = (unsigned char*) malloc(sizeof(unsigned char) * size);
+    uchar* buffer = NULL;
+
+    if (userBuffer == NULL)
+        buffer = (uchar*) malloc(sizeof(uchar) * size);
+    else
+        buffer = userBuffer;
     Q_ASSERT(buffer != NULL);
 
     QByteArray array;
     int read = ftdi_read_data(&m_handle, buffer, size);
-    if (read <= 0)
+    if (userBuffer != NULL)
     {
-        qWarning() << Q_FUNC_INFO << name() << ftdi_get_error_string(&m_handle);
+        for (int i = 0; i < read; i++)
+            array.append((char) buffer[i]);
     }
     else
     {
-        for (int i = 0; i < read; i++)
-            array.append(char(buffer[i]));
+        array.setRawData((char*) buffer, read);
     }
 
-    free(buffer);
+    if (userBuffer == NULL)
+        free(buffer);
+
     return array;
+}
+
+uchar QLCFTDI::readByte()
+{
+    uchar byte = 0;
+    int read = ftdi_read_data(&m_handle, &byte, 1);
+    if (read == 1)
+        return byte;
+    else
+        return 0;
 }

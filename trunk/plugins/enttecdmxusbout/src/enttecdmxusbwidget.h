@@ -30,16 +30,31 @@
 class EnttecDMXUSBWidget
 {
 public:
+    /**
+     * Construct a new EnttecDMXUSBWidget object.
+     *
+     * @param serial The widget's USB serial
+     * @param name The name of the widget
+     * @param id The ID of the device in FTD2XX (0 when libftdi is used)
+     */
     EnttecDMXUSBWidget(const QString& serial, const QString& name, quint32 id = 0);
     virtual ~EnttecDMXUSBWidget();
 
     /** Widget types */
-    enum Type { Pro, Open, Other };
+    enum Type
+    {
+        ProTX,  //! Enttec Pro widget using the TX side of the dongle
+        OpenTX, //! Enttec Open widget (only TX)
+        ProRX   //! Enttec Pro widget using the RX side of the dongle
+    };
 
     /** Get the type of the widget */
     virtual Type type() const = 0;
 
-protected:
+    /** Get the QLCFTDI instance */
+    QLCFTDI* ftdi() const;
+
+private:
     QLCFTDI* m_ftdi;
 
     /********************************************************************
@@ -98,17 +113,19 @@ public:
     virtual QString additionalInfo() const { return QString(); }
 
     /********************************************************************
-     * DMX operations
+     * Write universe
      ********************************************************************/
 public:
     /**
      * Send the given universe-ful of DMX data to widget. The universe must
      * be at least 25 bytes but no more than 513 bytes long.
      *
+     * The default implementation does nothing.
+     *
      * @param universe The DMX universe to send
      * @return true if the values were sent successfully, otherwise false
      */
-    virtual bool sendDMX(const QByteArray& universe) = 0;
+    virtual bool writeUniverse(const QByteArray& universe);
 };
 
 #endif

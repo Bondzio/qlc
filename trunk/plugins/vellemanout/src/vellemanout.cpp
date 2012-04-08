@@ -72,7 +72,7 @@ QString VellemanOut::name()
  * Outputs
  *****************************************************************************/
 
-void VellemanOut::open(quint32 output)
+void VellemanOut::openOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -84,7 +84,7 @@ void VellemanOut::open(quint32 output)
     }
 }
 
-void VellemanOut::close(quint32 output)
+void VellemanOut::closeOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -103,7 +103,7 @@ QStringList VellemanOut::outputs()
     return list;
 }
 
-QString VellemanOut::infoText(quint32 output)
+QString VellemanOut::outputInfo(quint32 output)
 {
     QString str;
 
@@ -113,7 +113,7 @@ QString VellemanOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidOutput())
+    if (output == QLCOutPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");
@@ -132,7 +132,7 @@ QString VellemanOut::infoText(quint32 output)
     return str;
 }
 
-void VellemanOut::outputDMX(quint32 output, const QByteArray& universe)
+void VellemanOut::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output != 0 || m_currentlyOpen == false)
         return;

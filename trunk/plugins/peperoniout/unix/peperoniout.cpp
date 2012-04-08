@@ -50,13 +50,13 @@ QString PeperoniOut::name()
  * Outputs
  *****************************************************************************/
 
-void PeperoniOut::open(quint32 output)
+void PeperoniOut::openOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->open();
 }
 
-void PeperoniOut::close(quint32 output)
+void PeperoniOut::closeOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->close();
@@ -73,7 +73,7 @@ QStringList PeperoniOut::outputs()
     return list;
 }
 
-QString PeperoniOut::infoText(quint32 output)
+QString PeperoniOut::outputInfo(quint32 output)
 {
     QString str;
 
@@ -83,7 +83,7 @@ QString PeperoniOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidOutput())
+    if (output == QLCOutPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");
@@ -101,7 +101,7 @@ QString PeperoniOut::infoText(quint32 output)
     return str;
 }
 
-void PeperoniOut::outputDMX(quint32 output, const QByteArray& universe)
+void PeperoniOut::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->outputDMX(universe);

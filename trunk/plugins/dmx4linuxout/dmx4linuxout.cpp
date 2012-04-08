@@ -50,7 +50,7 @@ QString DMX4LinuxOut::name()
  * Open/close
  *****************************************************************************/
 
-void DMX4LinuxOut::open(quint32 output)
+void DMX4LinuxOut::openOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -63,7 +63,7 @@ void DMX4LinuxOut::open(quint32 output)
     }
 }
 
-void DMX4LinuxOut::close(quint32 output)
+void DMX4LinuxOut::closeOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -80,7 +80,7 @@ QStringList DMX4LinuxOut::outputs()
     return list;
 }
 
-QString DMX4LinuxOut::infoText(quint32 output)
+QString DMX4LinuxOut::outputInfo(quint32 output)
 {
     QString str;
 
@@ -90,7 +90,7 @@ QString DMX4LinuxOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidOutput())
+    if (output == QLCOutPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");
@@ -109,7 +109,7 @@ QString DMX4LinuxOut::infoText(quint32 output)
     return str;
 }
 
-void DMX4LinuxOut::outputDMX(quint32 output, const QByteArray& universe)
+void DMX4LinuxOut::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output != 0 || m_file.isOpen() == false)
         return;

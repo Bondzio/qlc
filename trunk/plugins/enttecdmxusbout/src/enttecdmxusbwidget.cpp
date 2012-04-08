@@ -34,6 +34,11 @@ EnttecDMXUSBWidget::~EnttecDMXUSBWidget()
     m_ftdi = NULL;
 }
 
+QLCFTDI* EnttecDMXUSBWidget::ftdi() const
+{
+    return m_ftdi;
+}
+
 /****************************************************************************
  * Open & Close
  ****************************************************************************/
@@ -94,4 +99,14 @@ QString EnttecDMXUSBWidget::serial() const
 QString EnttecDMXUSBWidget::uniqueName() const
 {
     return QString("%1 (S/N: %2)").arg(name()).arg(serial());
+}
+
+/****************************************************************************
+ * Write universe
+ ****************************************************************************/
+
+bool EnttecDMXUSBWidget::writeUniverse(const QByteArray& universe)
+{
+    Q_UNUSED(universe);
+    return false;
 }

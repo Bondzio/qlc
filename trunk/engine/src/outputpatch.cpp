@@ -43,13 +43,13 @@ OutputPatch::OutputPatch(QObject* parent) : QObject(parent)
     Q_ASSERT(parent != NULL);
 
     m_plugin = NULL;
-    m_output = QLCOutPlugin::invalidOutput();
+    m_output = QLCOutPlugin::invalidLine();
 }
 
 OutputPatch::~OutputPatch()
 {
     if (m_plugin != NULL)
-        m_plugin->close(m_output);
+        m_plugin->closeOutput(m_output);
 }
 
 /****************************************************************************
@@ -58,27 +58,27 @@ OutputPatch::~OutputPatch()
 
 void OutputPatch::set(QLCOutPlugin* plugin, quint32 output)
 {
-    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
-        m_plugin->close(m_output);
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidLine())
+        m_plugin->closeOutput(m_output);
 
     m_plugin = plugin;
     m_output = output;
 
-    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
-        m_plugin->open(m_output);
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidLine())
+        m_plugin->openOutput(m_output);
 }
 
 void OutputPatch::reconnect()
 {
-    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidLine())
     {
-        m_plugin->close(m_output);
+        m_plugin->closeOutput(m_output);
 #ifdef WIN32
         Sleep(GRACE_MS);
 #else
         usleep(GRACE_MS * 1000);
 #endif
-        m_plugin->open(m_output);
+        m_plugin->openOutput(m_output);
     }
 }
 
@@ -97,7 +97,7 @@ QLCOutPlugin* OutputPatch::plugin() const
 
 QString OutputPatch::outputName() const
 {
-    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput() &&
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidLine() &&
         m_output < quint32(m_plugin->outputs().size()))
     {
         return m_plugin->outputs()[m_output];
@@ -113,7 +113,7 @@ quint32 OutputPatch::output() const
     if (m_plugin != NULL && m_output < quint32(m_plugin->outputs().size()))
         return m_output;
     else
-        return QLCOutPlugin::invalidOutput();
+        return QLCOutPlugin::invalidLine();
 }
 
 /*****************************************************************************
@@ -123,6 +123,6 @@ quint32 OutputPatch::output() const
 void OutputPatch::dump(const QByteArray& universe)
 {
     /* Don't do anything if there is no plugin and/or output line. */
-    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidOutput())
-        m_plugin->outputDMX(m_output, universe);
+    if (m_plugin != NULL && m_output != QLCOutPlugin::invalidLine())
+        m_plugin->writeUniverse(m_output, universe);
 }

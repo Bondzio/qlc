@@ -22,6 +22,7 @@
 #ifndef QLCOUTPLUGIN_H
 #define QLCOUTPLUGIN_H
 
+#include <QStringList>
 #include <QtPlugin>
 #include <QObject>
 #include <climits>
@@ -105,6 +106,9 @@ public:
      */
     virtual QString name() = 0;
 
+    /** Invalid input/output number */
+    static quint32 invalidLine() { return UINT_MAX; }
+
     /*************************************************************************
      * Outputs
      *************************************************************************/
@@ -117,7 +121,7 @@ public:
      *
      * @param output The output line to open
      */
-    virtual void open(quint32 output = 0) = 0;
+    virtual void openOutput(quint32 output) = 0;
 
     /**
      * Close the specified output line so that the plugin can stop
@@ -127,7 +131,7 @@ public:
      *
      * @param output The output line to close
      */
-    virtual void close(quint32 output = 0) = 0;
+    virtual void closeOutput(quint32 output) = 0;
 
     /**
      * Get a list of output lines' names. The names must be always in the
@@ -144,7 +148,7 @@ public:
      * @param output The output universe to write to
      * @param universe The universe data to write
      */
-    virtual void outputDMX(quint32 output, const QByteArray& universe) = 0;
+    virtual void writeUniverse(quint32 output, const QByteArray& universe) = 0;
 
     /**
      * Provide an information text to be displayed in the output manager.
@@ -157,10 +161,79 @@ public:
      *
      * @param output The output to get info from
      */
-    virtual QString infoText(quint32 output = QLCOutPlugin::invalidOutput()) = 0;
+    virtual QString outputInfo(quint32 output) = 0;
 
-    /** Invalid output number */
-    static quint32 invalidOutput() { return UINT_MAX; }
+    /*************************************************************************
+     * Inputs
+     *************************************************************************/
+public:
+    /**
+     * Open the specified input line so that the plugin can start sending input
+     * data from that line.
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     *
+     * @param input The input line to open
+     */
+    virtual void openInput(quint32 input) = 0;
+
+    /**
+     * Close the specified input line so that the plugin can stop sending input
+     * data from that line.
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     *
+     * @param input The input line to close
+     */
+    virtual void closeInput(quint32 input) = 0;
+
+    /**
+     * Get a list of input lines' names. The names must be always in the
+     * same order i.e. the first name is the name of input line number 0,
+     * the next one is input line number 1, etc.. These indices are used
+     * with open() and close().
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     *
+     * @return A list of available input names
+     */
+    virtual QStringList inputs() = 0;
+
+    /**
+     * Send a value back to an input line's channel. This method can be
+     * used for example to move motorized sliders with QLC sliders. If the
+     * hardware /that the plugin provides access to) doesn't support this,
+     * the implementation can be left empty.
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     *
+     * @param input The input line to send feedback to
+     * @param channel A channel in the input line to send feedback to
+     * @param value An input value to send back to the input channel
+     */
+    virtual void sendFeedBack(quint32 input, quint32 channel, uchar value) = 0;
+
+    /**
+     * Provide an information text to be displayed in the plugin manager
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     *
+     * @param input If specified, information for the given input line is
+     *              expected. Otherwise provides information for the plugin
+     */
+    virtual QString inputInfo(quint32 input) = 0;
+
+signals:
+    /**
+     * Tells that the value of a channel in an input line has changed and needs
+     * to be reacted to (if applicable). This is practically THE WAY for
+     * input plugins to provide input data to QLC.
+     *
+     * @param input The input line whose channel has changed value
+     * @param channel The channel that has changed its value
+     * @param value The newly-changed channel value
+     */
+    void valueChanged(quint32 input, quint32 channel, uchar value);
 
     /*************************************************************************
      * Configure

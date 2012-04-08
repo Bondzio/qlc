@@ -3,7 +3,7 @@
   udmxout.h
 
   Copyright (c)	Lutz Hillebrand
-		Heikki Junnila
+                Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -58,29 +58,50 @@ public:
      *********************************************************************/
 public:
     /** @reimp */
-    void open(quint32 output);
+    void openOutput(quint32 output);
 
     /** @reimp */
-    void close(quint32 output);
+    void closeOutput(quint32 output);
 
     /** @reimp */
     QStringList outputs();
 
     /** @reimp */
-    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
+    QString outputInfo(quint32 output);
 
     /** @reimp */
-    void outputDMX(quint32 output, const QByteArray& universe);
+    void writeUniverse(quint32 output, const QByteArray& universe);
 
+private:
     /** Attempt to find all uDMX devices */
     void rescanDevices();
 
     /** Get a UDMXDevice entry by its usbdev struct */
     UDMXDevice* device(struct usb_device* usbdev);
 
-protected:
+private:
     /** List of available devices */
     QList <UDMXDevice*> m_devices;
+
+    /*************************************************************************
+     * Inputs
+     *************************************************************************/
+public:
+    /** @reimp */
+    void openInput(quint32 input) { Q_UNUSED(input); }
+
+    /** @reimp */
+    void closeInput(quint32 input) { Q_UNUSED(input); }
+
+    /** @reimp */
+    QStringList inputs() { return QStringList(); }
+
+    /** @reimp */
+    QString inputInfo(quint32 input) { Q_UNUSED(input); return QString(); }
+
+    /** @reimp */
+    void sendFeedBack(quint32 input, quint32 channel, uchar value)
+        { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
 
     /*********************************************************************
      * Configuration

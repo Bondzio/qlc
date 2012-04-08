@@ -44,12 +44,16 @@ HEADERS += enttecdmxusbwidget.h \
            qlcftdi.h \
            enttecdmxusbout.h \
            enttecdmxusbpro.h \
+           enttecdmxusbprorx.h \
+           enttecdmxusbprotx.h \
            enttecdmxusbopen.h \
            enttecdmxusbconfig.h
 
 SOURCES += enttecdmxusbwidget.cpp \
            enttecdmxusbout.cpp \
            enttecdmxusbpro.cpp \
+           enttecdmxusbprorx.cpp \
+           enttecdmxusbprotx.cpp \
            enttecdmxusbopen.cpp \
            enttecdmxusbconfig.cpp
 

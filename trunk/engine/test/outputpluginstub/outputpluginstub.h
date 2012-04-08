@@ -51,23 +51,63 @@ public:
      *********************************************************************/
 public:
     /** @reimp */
-    void open(quint32 output = 0);
+    void openOutput(quint32 output);
 
     /** @reimp */
-    void close(quint32 output = 0);
+    void closeOutput(quint32 output);
 
     /** @reimp */
     QStringList outputs();
 
     /** @reimp */
-    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
+    QString outputInfo(quint32 output);
 
     /** @reimp */
-    void outputDMX(quint32 output, const QByteArray& universe);
+    void writeUniverse(quint32 output, const QByteArray& universe);
 
 public:
-    QList <quint32> m_openLines;
-    QByteArray m_array;
+    /** List of outputs that have been opened */
+    QList <quint32> m_openOutputs;
+
+    /** Fake universe buffer */
+    QByteArray m_universe;
+
+    /*********************************************************************
+     * Inputs
+     *********************************************************************/
+public:
+    /** @reimp */
+    void openInput(quint32 input);
+
+    /** @reimp */
+    void closeInput(quint32 input);
+
+    /** @reimp */
+    QStringList inputs();
+
+    /** @reimp */
+    QString inputInfo(quint32 input);
+
+    /** @reimp */
+    void sendFeedBack(quint32 input, quint32 channel, uchar value);
+
+    /** Tell the plugin to emit valueChanged signal */
+    void emitValueChanged(quint32 input, quint32 channel, uchar value) {
+        emit valueChanged(input, channel, value);
+    }
+
+public:
+    /** List of inputs that have been opened */
+    QList <quint32> m_openInputs;
+
+    /** $input of the latest call to feedBack() */
+    quint32 m_feedBackInput;
+
+    /** $channel of the latest call to feedBack() */
+    quint32 m_feedBackChannel;
+
+    /** $value of the latest call to feedBack() */
+    uchar m_feedBackValue;
 
     /*********************************************************************
      * Configuration

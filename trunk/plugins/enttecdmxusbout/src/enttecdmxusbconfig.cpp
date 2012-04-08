@@ -23,6 +23,7 @@
 #include <QHeaderView>
 #include <QTreeWidget>
 #include <QSettings>
+#include <QComboBox>
 #include <QLayout>
 #include <QDebug>
 #include <QTimer>
@@ -35,9 +36,8 @@
 
 #define COL_NAME   0
 #define COL_SERIAL 1
-#define COL_OPEN   2
-#define COL_PRO    3
-#define PROP_WIDGET Qt::UserRole
+#define COL_TYPE   2
+#define PROP_SERIAL "serial"
 
 EnttecDMXUSBConfig::EnttecDMXUSBConfig(EnttecDMXUSBOut* plugin, QWidget* parent)
     : QDialog(parent)
@@ -52,7 +52,7 @@ EnttecDMXUSBConfig::EnttecDMXUSBConfig(EnttecDMXUSBOut* plugin, QWidget* parent)
     setWindowTitle(plugin->name());
 
     QStringList header;
-    header << tr("Name") << tr("Serial") << QString("Open") << QString("Pro");
+    header << tr("Name") << tr("Serial") << QString("Mode");
     m_tree->setHeaderLabels(header);
     m_tree->setSelectionMode(QAbstractItemView::NoSelection);
     m_tree->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -66,8 +66,6 @@ EnttecDMXUSBConfig::EnttecDMXUSBConfig(EnttecDMXUSBOut* plugin, QWidget* parent)
     hbox->addWidget(m_closeButton);
     vbox->addLayout(hbox);
 
-    connect(m_tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
-            this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
     connect(m_refreshButton, SIGNAL(clicked()), this, SLOT(slotRefresh()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(accept()));
 
@@ -85,36 +83,20 @@ EnttecDMXUSBConfig::~EnttecDMXUSBConfig()
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 }
 
-void EnttecDMXUSBConfig::slotItemChanged(QTreeWidgetItem* item, int column)
+void EnttecDMXUSBConfig::slotTypeComboActivated(int index)
 {
-    if (m_ignoreItemChanged == true)
-        return;
+    QComboBox* combo = qobject_cast<QComboBox*> (QObject::sender());
+    Q_ASSERT(combo != NULL);
 
-    m_ignoreItemChanged = true;
-
-    if (column == COL_OPEN)
+    QVariant var = combo->property(PROP_SERIAL);
+    if (var.isValid() == true)
     {
-        if (item->checkState(column) == Qt::Checked)
-            item->setCheckState(COL_PRO, Qt::Unchecked);
-        else
-            item->setCheckState(COL_PRO, Qt::Checked);
+        EnttecDMXUSBWidget::Type type = (EnttecDMXUSBWidget::Type)
+                                            combo->itemData(index).toInt();
+        QMap <QString,QVariant> typeMap(QLCFTDI::typeMap());
+        typeMap[var.toString()] = type;
+        QLCFTDI::storeTypeMap(typeMap);
     }
-    else
-    {
-        if (item->checkState(column) == Qt::Checked)
-            item->setCheckState(COL_OPEN, Qt::Unchecked);
-        else
-            item->setCheckState(COL_OPEN, Qt::Checked);
-    }
-
-    QMap <QString,QVariant> typeMap(QLCFTDI::typeMap());
-    if (item->checkState(COL_OPEN) == Qt::Checked)
-        typeMap[item->text(COL_SERIAL)] = EnttecDMXUSBWidget::Open;
-    else
-        typeMap[item->text(COL_SERIAL)] = EnttecDMXUSBWidget::Pro;
-    QLCFTDI::storeTypeMap(typeMap);
-
-    m_ignoreItemChanged = false;
 
     QTimer::singleShot(0, this, SLOT(slotRefresh()));
 }
@@ -133,17 +115,24 @@ void EnttecDMXUSBConfig::slotRefresh()
         QTreeWidgetItem* item = new QTreeWidgetItem(m_tree);
         item->setText(COL_NAME, widget->name());
         item->setText(COL_SERIAL, widget->serial());
-        if (widget->type() == EnttecDMXUSBWidget::Open)
-        {
-            item->setCheckState(COL_OPEN, Qt::Checked);
-            item->setCheckState(COL_PRO, Qt::Unchecked);
-        }
-        else
-        {
-            item->setCheckState(COL_OPEN, Qt::Unchecked);
-            item->setCheckState(COL_PRO, Qt::Checked);
-        }
+        m_tree->setItemWidget(item, COL_TYPE, createTypeCombo(widget));
     }
 
     m_ignoreItemChanged = false;
+}
+
+QComboBox* EnttecDMXUSBConfig::createTypeCombo(EnttecDMXUSBWidget* widget)
+{
+    Q_ASSERT(widget != NULL);
+    QComboBox* combo = new QComboBox;
+    combo->setProperty(PROP_SERIAL, widget->serial());
+    combo->addItem(QString("Pro TX"), EnttecDMXUSBWidget::ProTX);
+    combo->addItem(QString("Open TX"), EnttecDMXUSBWidget::OpenTX);
+    combo->addItem(QString("Pro RX"), EnttecDMXUSBWidget::ProRX);
+    int index = combo->findData(widget->type());
+    combo->setCurrentIndex(index);
+
+    connect(combo, SIGNAL(activated(int)), this, SLOT(slotTypeComboActivated(int)));
+
+    return combo;
 }

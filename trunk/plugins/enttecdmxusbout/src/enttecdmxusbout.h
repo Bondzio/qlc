@@ -44,24 +44,59 @@ public:
     /** @reimp */
     QString name();
 
+    /** Find out what kinds of widgets there are currently connected */
+    bool rescanWidgets();
+
+    /** Get currently connected widgets (input & output) */
+    QList <EnttecDMXUSBWidget*> widgets() const;
+
     /************************************************************************
      * Outputs
      ************************************************************************/
 public:
     /** @reimp */
-    void open(quint32 output);
+    void openOutput(quint32 output);
 
     /** @reimp */
-    void close(quint32 output);
+    void closeOutput(quint32 output);
 
     /** @reimp */
     QStringList outputs();
 
     /** @reimp */
-    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
+    QString outputInfo(quint32 output);
 
     /** @reimp */
-    void outputDMX(quint32 output, const QByteArray& universe);
+    void writeUniverse(quint32 output, const QByteArray& universe);
+
+private:
+    QList <EnttecDMXUSBWidget*> m_outputs;
+
+    /*************************************************************************
+     * Inputs
+     *************************************************************************/
+public:
+    /** @reimp */
+    void openInput(quint32 input);
+
+    /** @reimp */
+    void closeInput(quint32 input);
+
+    /** @reimp */
+    QStringList inputs();
+
+    /** @reimp */
+    QString inputInfo(quint32 input);
+
+    /** @reimp */
+    void sendFeedBack(quint32 input, quint32 channel, uchar value)
+        { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
+
+private slots:
+    void slotValueChanged(quint32 input, quint32 channel, uchar value);
+
+private:
+    QList <EnttecDMXUSBWidget*> m_inputs;
 
     /********************************************************************
      * Configuration
@@ -72,20 +107,6 @@ public:
 
     /** @reimp */
     bool canConfigure();
-
-    /********************************************************************
-     * Devices (ENTTEC calls them "widgets" and so shall we)
-     ********************************************************************/
-public:
-    /** Attempt to find all connected devices */
-    bool rescanWidgets();
-
-    /** Get a list of widgets */
-    QList <EnttecDMXUSBWidget*> widgets() const;
-
-private:
-    /** Currently available devices */
-    QList <EnttecDMXUSBWidget*> m_widgets;
 };
 
 #endif

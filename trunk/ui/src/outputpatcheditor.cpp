@@ -106,11 +106,11 @@ void OutputPatchEditor::fillTree()
        to an input universe */
     QTreeWidgetItem* pitem = new QTreeWidgetItem(m_tree);
     pitem->setText(KColumnName, KOutputNone);
-    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
+    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidLine()));
     pitem->setFlags(pitem->flags() | Qt::ItemIsUserCheckable);
 
     /* Set "Nothing" selected if there is no valid output selected */
-    if (patch()->output() == QLCOutPlugin::invalidOutput())
+    if (patch()->output() == QLCOutPlugin::invalidLine())
         pitem->setCheckState(KColumnName, Qt::Checked);
     else
         pitem->setCheckState(KColumnName, Qt::Unchecked);
@@ -135,7 +135,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
         delete pitem->child(0);
 
     pitem->setText(KColumnName, pluginName);
-    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
+    pitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidLine()));
 
     /* Go thru available inputs provided by each plugin and put them as their
        parent plugin's leaf nodes */
@@ -177,7 +177,7 @@ void OutputPatchEditor::fillPluginItem(const QString& pluginName,
     {
         QTreeWidgetItem* iitem = new QTreeWidgetItem(pitem);
         iitem->setText(KColumnName, KOutputNone);
-        iitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidOutput()));
+        iitem->setText(KColumnOutput, QString::number(QLCOutPlugin::invalidLine()));
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsEnabled);
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsSelectable);
         iitem->setCheckState(KColumnName, Qt::Unchecked);
@@ -229,7 +229,7 @@ void OutputPatchEditor::slotCurrentItemChanged(QTreeWidgetItem* item)
         {
             /* Plugin node selected */
             plugin = item->text(KColumnName);
-            output = QLCOutPlugin::invalidOutput();
+            output = QLCOutPlugin::invalidLine();
         }
 
         info = m_outputMap->pluginStatus(plugin, output);
@@ -291,7 +291,7 @@ void OutputPatchEditor::slotItemChanged(QTreeWidgetItem* item)
     }
     else
     {
-        m_outputMap->setPatch(m_universe, QString(), QLCOutPlugin::invalidOutput());
+        m_outputMap->setPatch(m_universe, QString(), QLCOutPlugin::invalidLine());
     }
 
     emit mappingChanged();
@@ -318,11 +318,10 @@ void OutputPatchEditor::slotPluginConfigurationChanged(const QString& pluginName
 
 void OutputPatchEditor::slotConfigureClicked()
 {
-    QTreeWidgetItem* item;
     QString plugin;
 
     /* Find out the currently selected plugin */
-    item = m_tree->currentItem();
+    QTreeWidgetItem* item = m_tree->currentItem();
     if (item == NULL)
         return;
     else if (item->parent() != NULL)

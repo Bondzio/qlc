@@ -50,23 +50,43 @@ public:
      *************************************************************************/
 public:
     /** @reimp */
-    void open(quint32 output = 0);
+    void openOutput(quint32 output);
 
     /** @reimp */
-    void close(quint32 output = 0);
+    void closeOutput(quint32 output);
 
     /** @reimp */
     QStringList outputs();
 
     /** @reimp */
-    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
+    QString outputInfo(quint32 output);
 
     /** @reimp */
-    void outputDMX(quint32 output, const QByteArray& universe);
+    void writeUniverse(quint32 output, const QByteArray& universe);
 
 protected:
     bool m_currentlyOpen;
     qint32* m_values;
+
+    /*************************************************************************
+     * Inputs
+     *************************************************************************/
+public:
+    /** @reimp */
+    void openInput(quint32 input) { Q_UNUSED(input); }
+
+    /** @reimp */
+    void closeInput(quint32 input) { Q_UNUSED(input); }
+
+    /** @reimp */
+    QStringList inputs() { return QStringList(); }
+
+    /** @reimp */
+    QString inputInfo(quint32 input) { Q_UNUSED(input); return QString(); }
+
+    /** @reimp */
+    void sendFeedBack(quint32 input, quint32 channel, uchar value)
+        { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
 
     /*************************************************************************
      * Configuration

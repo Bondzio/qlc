@@ -88,7 +88,7 @@ void MIDIOut::slotDeviceAddedRemoved(const QString& name)
  * Outputs
  *****************************************************************************/
 
-void MIDIOut::open(quint32 output)
+void MIDIOut::openOutput(quint32 output)
 {
     MIDIDevice* dev = device(output);
     if (dev != NULL)
@@ -97,7 +97,7 @@ void MIDIOut::open(quint32 output)
         qDebug() << name() << "has no output number:" << output;
 }
 
-void MIDIOut::close(quint32 output)
+void MIDIOut::closeOutput(quint32 output)
 {
     MIDIDevice* dev = device(output);
     if (dev != NULL)
@@ -106,7 +106,7 @@ void MIDIOut::close(quint32 output)
         qDebug() << name() << "has no output number:" << output;
 }
 
-void MIDIOut::outputDMX(quint32 output, const QByteArray& universe)
+void MIDIOut::writeUniverse(quint32 output, const QByteArray& universe)
 {
     MIDIDevice* dev = device(output);
     if (dev != NULL)
@@ -125,7 +125,7 @@ QStringList MIDIOut::outputs()
     return list;
 }
 
-QString MIDIOut::infoText(quint32 output)
+QString MIDIOut::outputInfo(quint32 output)
 {
     QString str;
 
@@ -135,7 +135,7 @@ QString MIDIOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidOutput())
+    if (output == QLCOutPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");

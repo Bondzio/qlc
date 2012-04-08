@@ -292,7 +292,7 @@ quint32 OutputMap::mapping(const QString& pluginName, quint32 output) const
             return uni;
     }
 
-    return QLCOutPlugin::invalidOutput();
+    return QLCOutPlugin::invalidLine();
 }
 
 /*****************************************************************************
@@ -323,6 +323,7 @@ QStringList OutputMap::pluginOutputs(const QString& pluginName)
 
 void OutputMap::configurePlugin(const QString& pluginName)
 {
+    qDebug() << Q_FUNC_INFO << pluginName;
     QLCOutPlugin* outputPlugin = plugin(pluginName);
     if (outputPlugin != NULL)
         outputPlugin->configure();
@@ -342,7 +343,7 @@ QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
     QLCOutPlugin* outputPlugin = plugin(pluginName);
     if (outputPlugin != NULL)
     {
-        return outputPlugin->infoText(output);
+        return outputPlugin->outputInfo(output);
     }
     else
     {

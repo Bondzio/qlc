@@ -34,7 +34,7 @@ void OutputPluginStub::init()
 {
     m_configureCalled = 0;
     m_canConfigure = false;
-    m_array = QByteArray(int(4 * 512), char(0));
+    m_universe = QByteArray(int(4 * 512), char(0));
 }
 
 QString OutputPluginStub::name()
@@ -46,36 +46,70 @@ QString OutputPluginStub::name()
  * Outputs
  *****************************************************************************/
 
-void OutputPluginStub::open(quint32 output)
+void OutputPluginStub::openOutput(quint32 output)
 {
-    if (m_openLines.contains(output) == false && output < 4)
-        m_openLines.append(output);
+    if (m_openOutputs.contains(output) == false && output < 4)
+        m_openOutputs.append(output);
 }
 
-void OutputPluginStub::close(quint32 output)
+void OutputPluginStub::closeOutput(quint32 output)
 {
-    m_openLines.removeAll(output);
+    m_openOutputs.removeAll(output);
 }
 
 QStringList OutputPluginStub::outputs()
 {
     QStringList list;
-
     for (quint32 i = 0; i < 4; i++)
         list << QString("%1: Stub %1").arg(i + 1);
-
     return list;
 }
 
-QString OutputPluginStub::infoText(quint32 output)
+QString OutputPluginStub::outputInfo(quint32 output)
 {
     Q_UNUSED(output);
     return QString("This is a plugin stub for testing.");
 }
 
-void OutputPluginStub::outputDMX(quint32 output, const QByteArray& universe)
+void OutputPluginStub::writeUniverse(quint32 output, const QByteArray& universe)
 {
-    m_array = m_array.replace(output * 512, universe.size(), universe);
+    m_universe = m_universe.replace(output * 512, universe.size(), universe);
+}
+
+/*****************************************************************************
+ * Inputs
+ *****************************************************************************/
+
+void OutputPluginStub::openInput(quint32 input)
+{
+    if (m_openInputs.contains(input) == false && input < 4)
+        m_openInputs.append(input);
+}
+
+void OutputPluginStub::closeInput(quint32 input)
+{
+    m_openInputs.removeAll(input);
+}
+
+QStringList OutputPluginStub::inputs()
+{
+    QStringList list;
+    for (quint32 i = 0; i < 4; i++)
+        list << QString("%1: Stub %1").arg(i + 1);
+    return list;
+}
+
+QString OutputPluginStub::inputInfo(quint32 input)
+{
+    Q_UNUSED(input);
+    return QString("This is a plugin stub for testing.");
+}
+
+void OutputPluginStub::sendFeedBack(quint32 input, quint32 channel, uchar value)
+{
+    m_feedBackInput = input;
+    m_feedBackChannel = channel;
+    m_feedBackValue = value;
 }
 
 /*****************************************************************************

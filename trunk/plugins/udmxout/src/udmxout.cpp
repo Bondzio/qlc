@@ -3,7 +3,7 @@
   udmxout.cpp
 
   Copyright (c)	Lutz Hillebrand
-		Heikki Junnila
+                Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -58,13 +58,13 @@ QString UDMXOut::name()
  * Outputs
  *****************************************************************************/
 
-void UDMXOut::open(quint32 output)
+void UDMXOut::openOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->open();
 }
 
-void UDMXOut::close(quint32 output)
+void UDMXOut::closeOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->close();
@@ -81,7 +81,7 @@ QStringList UDMXOut::outputs()
     return list;
 }
 
-QString UDMXOut::infoText(quint32 output)
+QString UDMXOut::outputInfo(quint32 output)
 {
     QString str;
 
@@ -91,7 +91,7 @@ QString UDMXOut::infoText(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidOutput())
+    if (output == QLCOutPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");
@@ -109,7 +109,7 @@ QString UDMXOut::infoText(quint32 output)
     return str;
 }
 
-void UDMXOut::outputDMX(quint32 output, const QByteArray& universe)
+void UDMXOut::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->outputDMX(universe);

@@ -26,10 +26,8 @@
  * Initialization
  ****************************************************************************/
 
-EnttecDMXUSBPro::EnttecDMXUSBPro(const QString& serial, const QString& name,
-                                 quint32 id, QObject* parent)
-    : QObject(parent)
-    , EnttecDMXUSBWidget(serial, name, id)
+EnttecDMXUSBPro::EnttecDMXUSBPro(const QString& serial, const QString& name, quint32 id)
+    : EnttecDMXUSBWidget(serial, name, id)
 {
     // Bypass rts setting by calling parent class' open method
     if (EnttecDMXUSBWidget::open() == true)
@@ -41,11 +39,6 @@ EnttecDMXUSBPro::~EnttecDMXUSBPro()
 {
 }
 
-EnttecDMXUSBWidget::Type EnttecDMXUSBPro::type() const
-{
-    return EnttecDMXUSBWidget::Pro;
-}
-
 /****************************************************************************
  * Open & Close
  ****************************************************************************/
@@ -55,7 +48,7 @@ bool EnttecDMXUSBPro::open()
     if (EnttecDMXUSBWidget::open() == false)
         return close();
 
-    if (m_ftdi->clearRts() == false)
+    if (ftdi()->clearRts() == false)
         return close();
 
     return true;
@@ -73,17 +66,6 @@ QString EnttecDMXUSBPro::uniqueName() const
         return QString("%1 (S/N: %2)").arg(name()).arg(m_proSerial);
 }
 
-QString EnttecDMXUSBPro::additionalInfo() const
-{
-    QString info;
-
-    info += QString("<P>");
-    info += QString("<B>%1:</B> %2").arg(tr("Protocol")).arg("Enttec DMX USB Pro");
-    info += QString("</P>");
-
-    return info;
-}
-
 bool EnttecDMXUSBPro::extractSerial()
 {
     QByteArray request;
@@ -92,9 +74,9 @@ bool EnttecDMXUSBPro::extractSerial()
     request.append(char(0x00));
     request.append(char(0x00));
     request.append(char(0xe7));
-    if (m_ftdi->write(request) == true)
+    if (ftdi()->write(request) == true)
     {
-        QByteArray reply = m_ftdi->read(9);
+        QByteArray reply = ftdi()->read(9);
 
         /* Reply message is:
            { 0x7E 0x0A 0x04 0x00 0xNN, 0xNN, 0xNN, 0xNN 0xE7 }
@@ -122,34 +104,5 @@ bool EnttecDMXUSBPro::extractSerial()
     {
         qWarning() << Q_FUNC_INFO << name() << "will not accept serial request";
         return false;
-    }
-}
-
-/****************************************************************************
- * DMX Operations
- ****************************************************************************/
-
-bool EnttecDMXUSBPro::sendDMX(const QByteArray& universe)
-{
-    if (isOpen() == false)
-        return false;
-
-    QByteArray request(universe);
-    request.prepend(char(0x00)); // DMX start code (Which constitutes the + 1 below)
-    request.prepend(((universe.size() + 1) >> 8) & 0xff); // Data length MSB
-    request.prepend((universe.size() + 1) & 0xff); // Data length LSB
-    request.prepend(0x06); // Command
-    request.prepend(0x7e); // Start byte
-    request.append(0xe7); // Stop byte
-
-    /* Write "Output Only Send DMX Packet Request" message */
-    if (m_ftdi->write(request) == false)
-    {
-        qWarning() << Q_FUNC_INFO << name() << "will not accept DMX data";
-        return false;
-    }
-    else
-    {
-        return true;
     }
 }

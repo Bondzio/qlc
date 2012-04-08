@@ -144,8 +144,11 @@ public:
     /** Write data to a previously-opened line */
     bool write(const QByteArray& data);
 
-    /** Read data from a previously-opened line */
-    QByteArray read(int size);
+    /** Read data from a previously-opened line. Optionally provide own data buffer. */
+    QByteArray read(int size, uchar* buffer = NULL);
+
+    /** Read exactly one byte. */
+    uchar readByte();
 
 private:
 #ifdef FTD2XX

@@ -31,8 +31,8 @@ class VellemanOut_Test : public QObject
 private slots:
     void initial();
     void openClose();
-    void infoText();
-    void outputDMX();
+    void outputInfo();
+    void writeUniverse();
 };
 
 #endif

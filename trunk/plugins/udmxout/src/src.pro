@@ -6,6 +6,7 @@ TARGET   = udmxout
 
 CONFIG      += plugin
 INCLUDEPATH += ../../interfaces
+DEPENDPATH  += ../../interfaces
 unix:CONFIG      += link_pkgconfig
 unix:PKGCONFIG   += libusb
 

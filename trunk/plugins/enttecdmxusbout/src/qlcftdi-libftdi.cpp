@@ -281,12 +281,20 @@ QByteArray QLCFTDI::read(int size, uchar* userBuffer)
     return array;
 }
 
-uchar QLCFTDI::readByte()
+uchar QLCFTDI::readByte(bool* ok)
 {
     uchar byte = 0;
     int read = ftdi_read_data(&m_handle, &byte, 1);
     if (read == 1)
+    {
+        if (ok)
+            *ok = true;
         return byte;
+    }
     else
+    {
+        if (ok)
+            *ok = false;
         return 0;
+    }
 }

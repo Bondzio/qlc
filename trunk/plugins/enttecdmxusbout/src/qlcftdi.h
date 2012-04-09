@@ -147,8 +147,8 @@ public:
     /** Read data from a previously-opened line. Optionally provide own data buffer. */
     QByteArray read(int size, uchar* buffer = NULL);
 
-    /** Read exactly one byte. */
-    uchar readByte();
+    /** Read exactly one byte. $ok tells if a byte was read or not. */
+    uchar readByte(bool* ok = NULL);
 
 private:
 #ifdef FTD2XX

@@ -23,6 +23,7 @@
 #define ENTTECDMXUSBPRORX_H
 
 #include <QThread>
+#include <QMutex>
 #include "enttecdmxusbpro.h"
 
 class EnttecDMXUSBProRX : public QThread, public EnttecDMXUSBPro
@@ -73,6 +74,7 @@ private:
 
 private:
     bool m_running;
+    QMutex m_mutex;
     QByteArray m_universe;
 };
 

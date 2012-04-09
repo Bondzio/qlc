@@ -22,11 +22,6 @@
 #include <QDebug>
 #include "enttecdmxusbprorx.h"
 
-// FTD2XX will not produce full messages but a continuous flow of bytes,
-// so it's best to use the same approach for libftdi-based implementation
-// as well. Undef this to use the alternative approach (message at once).
-#define RX_BYTE_BY_BYTE
-
 EnttecDMXUSBProRX::EnttecDMXUSBProRX(const QString& serial, const QString& name,
                                      quint32 input, quint32 id)
     : QThread(NULL)
@@ -92,14 +87,9 @@ void EnttecDMXUSBProRX::stop()
 {
     qDebug() << Q_FUNC_INFO;
 
-    if (isRunning() == true)
-    {
-        m_running = false;
-        wait();
-    }
+    m_running = false;
+    wait();
 }
-
-#ifdef RX_BYTE_BY_BYTE // BYTE BY BYTE method
 
 void EnttecDMXUSBProRX::run()
 {
@@ -109,39 +99,55 @@ void EnttecDMXUSBProRX::run()
     ushort dataLength = 0;
 
     m_running = true;
-    while (m_running == true) {
-        while ( (byte = ftdi()->readByte()) != ENTTEC_PRO_START_OF_MSG) {
-            // Fast-forward until we find the start of the next message
+    while (m_running == true)
+    {
+        bool ok = false;
+        // Skip bytes until we find the start of the next message
+        if ( (byte = ftdi()->readByte(&ok)) != ENTTEC_PRO_START_OF_MSG)
+        {
+            // If nothing was read, sleep for a while
+            if (ok == false)
+                msleep(10);
+            continue;
         }
 
+        // Check that the message is a "DMX receive packet"
         byte = ftdi()->readByte();
-        if (byte != ENTTEC_PRO_RECV_DMX_PKT) {
+        if (byte != ENTTEC_PRO_RECV_DMX_PKT)
+        {
             qWarning() << Q_FUNC_INFO << "Got label:" << (uchar) byte
                        << "but expected:" << (uchar) ENTTEC_PRO_RECV_DMX_PKT;
             continue;
         }
 
+        // Get payload length
         dataLength = (ushort) ftdi()->readByte() | ((ushort) ftdi()->readByte() << 8);
 
+        // Check status bytes
         byte = ftdi()->readByte();
-        if (byte & char(0x01)) {
+        if (byte & char(0x01))
             qWarning() << Q_FUNC_INFO << "Widget receive queue overflowed";
-        } else if (byte & char(0x02)) {
+        else if (byte & char(0x02))
             qWarning() << Q_FUNC_INFO << "Widget receive overrun occurred";
-        }
 
+        // Check DMX startcode
         byte = ftdi()->readByte();
-        if (byte != char(0)) {
-            qWarning() << Q_FUNC_INFO << "Non-standard DMX startcode received:"
-                       << (uchar) byte;
-        }
+        if (byte != char(0))
+            qWarning() << Q_FUNC_INFO << "Non-standard DMX startcode received:" << (uchar) byte;
 
+        // Read payload bytes
         ushort i = 0;
-        for (i = 0; i < dataLength; i++) {
+        for (i = 0; i < dataLength; i++)
+        {
             byte = ftdi()->readByte();
-            if (byte == (uchar) ENTTEC_PRO_END_OF_MSG) {
+            if (byte == (uchar) ENTTEC_PRO_END_OF_MSG)
+            {
+                // Stop when the end of message is received
                 break;
-            } else if (byte != (uchar) m_universe[i]) {
+            }
+            else if (byte != (uchar) m_universe[i])
+            {
+                // Store and emit changed values
                 m_universe[i] = byte;
                 emit valueChanged(m_input, i, byte);
             }
@@ -150,63 +156,3 @@ void EnttecDMXUSBProRX::run()
 
     qDebug() << Q_FUNC_INFO << "end";
 }
-
-#else // MESSAGE AT ONCE method
-
-void EnttecDMXUSBProRX::run()
-{
-    qDebug() << Q_FUNC_INFO << "begin";
-
-    QByteArray ba(513, char(0));
-    ushort dataLength = 0;
-
-    m_running = true;
-    while (m_running == true)
-    {
-        QByteArray tmp = ftdi()->read(ba.size(), (uchar*) ba.data());
-        if (tmp.size() == 0)
-            continue;
-
-        if (ba[0] != ENTTEC_PRO_START_OF_MSG) {
-            qWarning() << Q_FUNC_INFO << "Got start byte:" << (uchar) ba[0]
-                       << "but expected:" << (uchar) ENTTEC_PRO_START_OF_MSG;
-            continue;
-        }
-
-        if (ba[1] != ENTTEC_PRO_RECV_DMX_PKT) {
-            qWarning() << Q_FUNC_INFO << "Got label:" << (uchar) ba[1]
-                       << "but expected:" << (uchar) ENTTEC_PRO_RECV_DMX_PKT;
-            continue;
-        }
-
-        dataLength = (ushort) ba[2] | ((ushort) ba[3] << 8);
-
-        if (ba[4] & char(0x01)) {
-            qWarning() << Q_FUNC_INFO << "Widget receive queue overflowed";
-        } else if (ba[1] & char(0x02)) {
-            qWarning() << Q_FUNC_INFO << "Widget receive overrun occurred";
-        }
-
-        if (ba[5] != char(0)) {
-            qWarning() << Q_FUNC_INFO << "Non-standard DMX startcode received:"
-                       << (uchar) ba[5];
-        }
-
-        if (ba[tmp.size() - 1] != ENTTEC_PRO_END_OF_MSG) {
-            qWarning() << Q_FUNC_INFO << "Got end byte:" << (uchar) ba[tmp.size() - 1]
-                       << "but expected:" << (uchar) ENTTEC_PRO_END_OF_MSG;
-        }
-
-        // Skip status & startcode from data, thus -2
-        for (int i = 0; i < dataLength - 2; i++) {
-            uchar byte = (uchar) ba[6 + i];
-            if (byte != m_universe[i]) {
-                m_universe[i] = byte;
-                emit valueChanged(m_input, i, byte);
-            }
-        }
-    }
-
-    qDebug() << Q_FUNC_INFO << "end";
-}
-#endif

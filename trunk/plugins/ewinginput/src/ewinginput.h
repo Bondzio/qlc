@@ -26,7 +26,7 @@
 #include <QStringList>
 #include <QList>
 
-#include "qlcinplugin.h"
+#include "qlcoutplugin.h"
 #include "ewing.h"
 
 class QUdpSocket;
@@ -35,14 +35,14 @@ class QUdpSocket;
  * EWingInput
  *****************************************************************************/
 
-class EWingInput : public QLCInPlugin
+class EWingInput : public QLCOutPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCInPlugin)
+    Q_INTERFACES(QLCOutPlugin)
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
     /** @reimp */
     void init();
@@ -56,29 +56,66 @@ public:
     /** Attempt to bind the socket to listen to EWing::UDPPort */
     void reBindSocket();
 
-    /*********************************************************************
-     * Inputs
-     *********************************************************************/
+    /*************************************************************************
+     * Outputs
+     *************************************************************************/
 public:
     /** @reimp */
-    void open(quint32 input = 0);
+    void openOutput(quint32 output) { Q_UNUSED(output); }
 
     /** @reimp */
-    void close(quint32 input = 0);
+    void closeOutput(quint32 output) { Q_UNUSED(output); }
+
+    /** @reimp */
+    QStringList outputs() { return QStringList(); }
+
+    /** @reimp */
+    void writeUniverse(quint32 output, const QByteArray& universe)
+        { Q_UNUSED(output); Q_UNUSED(universe); }
+
+    /** @reimp */
+    QString outputInfo(quint32 output) { Q_UNUSED(output); return QString(); }
+
+    /*************************************************************************
+     * Inputs
+     *************************************************************************/
+public:
+    /** @reimp */
+    void openInput(quint32 input);
+
+    /** @reimp */
+    void closeInput(quint32 input);
 
     /** @reimp */
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = QLCInPlugin::invalidInput());
+    QString inputInfo(quint32 input);
+
+    /** @reimp */
+    void sendFeedBack(quint32 input, quint32 channel, uchar value);
 
 signals:
     /** @reimp */
-    void valueChanged(quint32 line, quint32 channel, uchar value);
+    void valueChanged(quint32 input, quint32 channel, uchar value);
 
-    /*********************************************************************
+    /*************************************************************************
+     * Configuration
+     *************************************************************************/
+public:
+    /** @reimp */
+    void configure();
+
+    /** @reimp */
+    bool canConfigure();
+
+signals:
+    /** @reimp */
+    void configurationChanged();
+
+    /*************************************************************************
      * Devices
-     *********************************************************************/
+     *************************************************************************/
 protected:
     /**
      * Create a new wing object from the given datagram packet. Looks up
@@ -114,27 +151,6 @@ protected:
     QList <EWing*> m_devices;
     QUdpSocket* m_socket;
     QString m_errorString;
-
-    /*********************************************************************
-     * Configuration
-     *********************************************************************/
-public:
-    /** @reimp */
-    void configure();
-
-    /** @reimp */
-    bool canConfigure();
-
-signals:
-    /** @reimp */
-    void configurationChanged();
-
-    /*********************************************************************
-     * Feedback
-     *********************************************************************/
-public:
-    /** @reimp */
-    void feedBack(quint32 input, quint32 channel, uchar value);
 };
 
 #endif

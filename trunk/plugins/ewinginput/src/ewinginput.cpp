@@ -73,13 +73,13 @@ void EWingInput::reBindSocket()
  * Inputs
  *****************************************************************************/
 
-void EWingInput::open(quint32 input)
+void EWingInput::openInput(quint32 input)
 {
     Q_UNUSED(input);
     reBindSocket();
 }
 
-void EWingInput::close(quint32 input)
+void EWingInput::closeInput(quint32 input)
 {
     Q_UNUSED(input);
 }
@@ -87,15 +87,13 @@ void EWingInput::close(quint32 input)
 QStringList EWingInput::inputs()
 {
     QStringList list;
-
     QListIterator <EWing*> it(m_devices);
     while (it.hasNext() == true)
         list << it.next()->name();
-
     return list;
 }
 
-QString EWingInput::infoText(quint32 input)
+QString EWingInput::inputInfo(quint32 input)
 {
     QString str;
 
@@ -107,7 +105,7 @@ QString EWingInput::infoText(quint32 input)
 
     str += QString("<H3>%1</H3>").arg(name());
 
-    if (input == QLCInPlugin::invalidInput())
+    if (input == QLCOutPlugin::invalidLine())
     {
         /* Plugin or just an invalid input selected. Display generic
            information. */
@@ -143,6 +141,28 @@ QString EWingInput::infoText(quint32 input)
     str += QString("</HTML>");
 
     return str;
+}
+
+void EWingInput::sendFeedBack(quint32 input, quint32 channel, uchar value)
+{
+    EWing* ewing = device(input);
+    if (ewing != NULL)
+        ewing->feedBack(channel, value);
+}
+
+/*****************************************************************************
+ * Configuration
+ *****************************************************************************/
+
+void EWingInput::configure()
+{
+    reBindSocket();
+    emit configurationChanged();
+}
+
+bool EWingInput::canConfigure()
+{
+    return true;
 }
 
 /*****************************************************************************
@@ -267,32 +287,6 @@ void EWingInput::slotValueChanged(quint32 channel, uchar value)
 {
     EWing* wing = qobject_cast<EWing*> (QObject::sender());
     emit valueChanged(m_devices.indexOf(wing), channel, value);
-}
-
-/*****************************************************************************
- * Configuration
- *****************************************************************************/
-
-void EWingInput::configure()
-{
-    reBindSocket();
-    emit configurationChanged();
-}
-
-bool EWingInput::canConfigure()
-{
-    return true;
-}
-
-/*****************************************************************************
- * Feedback
- *****************************************************************************/
-
-void EWingInput::feedBack(quint32 input, quint32 channel, uchar value)
-{
-    EWing* ewing = device(input);
-    if (ewing != NULL)
-        ewing->feedBack(channel, value);
 }
 
 /*****************************************************************************

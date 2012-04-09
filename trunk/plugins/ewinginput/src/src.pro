@@ -32,7 +32,7 @@ SOURCES += ewinginput.cpp \
            eprogramwing.cpp \
            ewing.cpp
 
-HEADERS += ../../interfaces/qlcinplugin.h
+HEADERS += ../../interfaces/qlcoutplugin.h
 
 TRANSLATIONS += ENTTEC_Wing_Input_fi_FI.ts
 TRANSLATIONS += ENTTEC_Wing_Input_de_DE.ts
@@ -46,6 +46,6 @@ macx {
     include(../../../macx/nametool.pri)
 }
 
-target.path = $$INSTALLROOT/$$INPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
 INSTALLS   += target
 

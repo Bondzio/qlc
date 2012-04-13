@@ -24,6 +24,7 @@ fixtures.files += Chauvet-COLORado-1-Tour.qxf
 fixtures.files += Chauvet-DMX-Mega-Strobe-III.qxf
 fixtures.files += Chauvet-Hurricane-1800-Flex.qxf
 fixtures.files += Chauvet-Hurricane-Haze-2.qxf
+fixtures.files += Chauvet-LED-Splash-86b.qxf
 fixtures.files += Chauvet-LEDSplash-Jr.qxf
 fixtures.files += Chauvet-LEDrain64.qxf
 fixtures.files += Chauvet-Q-Spot-260-LED.qxf

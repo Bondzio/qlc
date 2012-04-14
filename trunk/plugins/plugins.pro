@@ -4,12 +4,13 @@ TEMPLATE = subdirs
 SUBDIRS              += enttecdmxusbout
 SUBDIRS              += peperoniout
 SUBDIRS              += udmxout
-SUBDIRS              += midiout
+SUBDIRS              += midi
+#SUBDIRS              += midiout
 #unix:SUBDIRS         += olaout
 !macx:!win32:SUBDIRS += dmx4linuxout
 !macx:SUBDIRS        += vellemanout
 
 # Input plugins
 SUBDIRS              += ewinginput
-SUBDIRS              += midiinput
+#SUBDIRS              += midiinput
 !macx:!win32:SUBDIRS += hidinput

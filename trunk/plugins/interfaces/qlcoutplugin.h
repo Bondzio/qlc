@@ -143,14 +143,6 @@ public:
     virtual QStringList outputs() = 0;
 
     /**
-     * Write a complete 512-channel DMX universe to the plugin.
-     *
-     * @param output The output universe to write to
-     * @param universe The universe data to write
-     */
-    virtual void writeUniverse(quint32 output, const QByteArray& universe) = 0;
-
-    /**
      * Provide an information text to be displayed in the output manager.
      * If @output is QLCOutPlugin::invalidOutput(), the info text contains info regarding
      * the whole plugin. Otherwise it contains info on the specific output.
@@ -162,6 +154,14 @@ public:
      * @param output The output to get info from
      */
     virtual QString outputInfo(quint32 output) = 0;
+
+    /**
+     * Write a complete 512-channel DMX universe to the plugin.
+     *
+     * @param output The output universe to write to
+     * @param universe The universe data to write
+     */
+    virtual void writeUniverse(quint32 output, const QByteArray& universe) = 0;
 
     /*************************************************************************
      * Inputs
@@ -198,20 +198,6 @@ public:
      * @return A list of available input names
      */
     virtual QStringList inputs() = 0;
-
-    /**
-     * Send a value back to an input line's channel. This method can be
-     * used for example to move motorized sliders with QLC sliders. If the
-     * hardware /that the plugin provides access to) doesn't support this,
-     * the implementation can be left empty.
-     *
-     * This is a pure virtual method that must be implemented by all plugins.
-     *
-     * @param input The input line to send feedback to
-     * @param channel A channel in the input line to send feedback to
-     * @param value An input value to send back to the input channel
-     */
-    virtual void sendFeedBack(quint32 input, quint32 channel, uchar value) = 0;
 
     /**
      * Provide an information text to be displayed in the plugin manager

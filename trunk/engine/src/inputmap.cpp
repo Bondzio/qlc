@@ -120,7 +120,10 @@ bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
 
     if (patch->plugin() != NULL && patch->feedbackEnabled() == true)
     {
-        patch->plugin()->sendFeedBack(patch->input(), channel, value);
+        //! @todo Feedback
+        //patch->plugin()->sendFeedBack(patch->input(), channel, value);
+        Q_UNUSED(channel);
+        Q_UNUSED(value);
         return true;
     }
     else

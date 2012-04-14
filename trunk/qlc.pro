@@ -13,7 +13,7 @@ SUBDIRS      += fixtureeditor
 SUBDIRS      += etc
 SUBDIRS      += docs
 macx:SUBDIRS += launcher
-SUBDIRS      += plugins
+#SUBDIRS      += plugins
 
 unix:!macx:DEBIAN_CLEAN    += debian/*.substvars debian/*.log debian/*.debhelper
 unix:!macx:DEBIAN_CLEAN    += debian/files debian/dirs

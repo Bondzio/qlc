@@ -22,6 +22,9 @@
 #ifndef COREMIDIOUTPUTDEVICE_H
 #define COREMIDIOUTPUTDEVICE_H
 
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreMIDI/CoreMIDI.h>
+
 #include "midioutputdevice.h"
 
 class CoreMidiOutputDevice : public MidiOutputDevice

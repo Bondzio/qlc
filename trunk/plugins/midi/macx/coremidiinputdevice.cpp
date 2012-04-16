@@ -19,8 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreMIDI/CoreMIDI.h>
 #include <QDebug>
 
 #include "coremidiinputdevice.h"
@@ -34,8 +32,6 @@ extern "C" {
 static void MidiInProc(const MIDIPacketList* pktList, void* readProcRefCon,
                        void* srcConnRefCon)
 {
-    qDebug() << Q_FUNC_INFO;
-
     Q_UNUSED(readProcRefCon);
 
     CoreMidiInputDevice* self = static_cast<CoreMidiInputDevice*>(srcConnRefCon);
@@ -138,13 +134,15 @@ void CoreMidiInputDevice::open()
         m_source = MIDIEntityGetSource(m_entity, 0);
         s = MIDIPortConnectSource(m_inPort, m_source, this);
         if (s != 0)
+        {
             qWarning() << Q_FUNC_INFO << "Unable to connect input port to source for"
                        << name() << ":" << s;
 
-        s = MIDIPortDispose(m_inPort);
-        if (s != 0)
-            qWarning() << "Unable to dispose of input port in" << name();
-        m_inPort = 0;
+            s = MIDIPortDispose(m_inPort);
+            if (s != 0)
+                qWarning() << "Unable to dispose of input port in" << name();
+            m_inPort = 0;
+        }
     }
 }
 
@@ -178,7 +176,5 @@ bool CoreMidiInputDevice::isOpen() const
 
 void CoreMidiInputDevice::emitValueChanged(uint channel, uchar value)
 {
-    qDebug() << Q_FUNC_INFO;
-
-    emit valueChanged(channel, value);
+    emit valueChanged(uid(), channel, value);
 }

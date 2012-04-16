@@ -19,46 +19,12 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreMIDI/CoreMIDI.h>
 #include <QDebug>
 
 #include "coremidioutputdevice.h"
 #include "coremidiinputdevice.h"
+#include "coremidienumerator.h"
 #include "midienumerator.h"
-
-/****************************************************************************
- * MIDIEnumeratorPrivate definition
- ****************************************************************************/
-
-class MidiEnumerator;
-class MidiEnumeratorPrivate
-{
-public:
-    MidiEnumeratorPrivate(MidiEnumerator* parent);
-    ~MidiEnumeratorPrivate();
-
-    static QString extractName(MIDIEntityRef entity);
-    static QVariant extractUID(MIDIEntityRef entity);
-    void rescan();
-
-    MidiOutputDevice* outputDevice(const QVariant& uid) const;
-    MidiInputDevice* inputDevice(const QVariant& uid) const;
-
-    QList <MidiOutputDevice*> outputDevices() const;
-    QList <MidiInputDevice*> inputDevices() const;
-
-private:
-    MidiEnumerator* m_parent;
-    MIDIClientRef m_client;
-
-    QList <MidiOutputDevice*> m_outputDevices;
-    QList <MidiInputDevice*> m_inputDevices;
-};
-
-/****************************************************************************
- * MIDIEnumeratorPrivate implementation
- ****************************************************************************/
 
 extern "C"
 {
@@ -70,7 +36,7 @@ extern "C"
 } // extern "C"
 
 MidiEnumeratorPrivate::MidiEnumeratorPrivate(MidiEnumerator* parent)
-    : m_parent(parent)
+    : QObject(parent)
     , m_client(NULL)
 {
     qDebug() << Q_FUNC_INFO;
@@ -169,9 +135,15 @@ void MidiEnumeratorPrivate::rescan()
             {
                 MidiOutputDevice* dev = outputDevice(uid);
                 if (dev == NULL)
-                    m_outputDevices << new CoreMidiOutputDevice(uid, name, entity, m_client, m_parent);
+                {
+                    CoreMidiOutputDevice* dev = new CoreMidiOutputDevice(
+                                            uid, name, entity, m_client, this);
+                    m_outputDevices << dev;
+                }
                 else
+                {
                     destroyOutputs.removeAll(dev);
+                }
             }
 
             ItemCount srcCount = MIDIEntityGetNumberOfSources(entity);
@@ -179,9 +151,18 @@ void MidiEnumeratorPrivate::rescan()
             {
                 MidiInputDevice* dev = inputDevice(uid);
                 if (dev == NULL)
-                    m_inputDevices << new CoreMidiInputDevice(uid, name, entity, m_client, m_parent);
+                {
+                    CoreMidiInputDevice* dev = new CoreMidiInputDevice(
+                                            uid, name, entity, m_client, this);
+                    m_inputDevices << dev;
+                    // Make MidiEnumerator emit the signal for us
+                    connect(dev, SIGNAL(valueChanged(QVariant,ushort,uchar)),
+                            parent(), SIGNAL(valueChanged(QVariant,ushort,uchar)));
+                }
                 else
+                {
                     destroyInputs.removeAll(dev);
+                }
             }
         }
     }

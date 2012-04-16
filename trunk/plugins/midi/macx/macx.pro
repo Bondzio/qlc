@@ -11,7 +11,8 @@ LIBS        += -framework CoreMIDI -framework CoreFoundation
 include(../common/common.pri)
 
 HEADERS += coremidiinputdevice.h \
-           coremidioutputdevice.h
+           coremidioutputdevice.h \
+           coremidienumerator.h
 
 SOURCES += coremidiinputdevice.cpp \
            coremidioutputdevice.cpp \

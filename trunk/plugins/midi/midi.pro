@@ -1,2 +1,4 @@
 TEMPLATE = subdirs
-macx:SUBDIRS += macx
+
+macx:SUBDIRS       += macx
+unix:!macx:SUBDIRS += alsa

@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  midienumerator.h
+  alsamidioutputdevice.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,37 +19,37 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef MIDIENUMERATOR_H
-#define MIDIENUMERATOR_H
+#ifndef ALSAMIDIOUTPUTDEVICE_H
+#define ALSAMIDIOUTPUTDEVICE_H
 
-#include <QObject>
-#include <QList>
+#include "midioutputdevice.h"
 
-class MidiEnumeratorPrivate;
-class MidiOutputDevice;
-class MidiInputDevice;
+struct _snd_seq;
+typedef _snd_seq snd_seq_t;
 
-class MidiEnumerator : public QObject
+struct snd_seq_addr;
+typedef snd_seq_addr snd_seq_addr_t;
+
+class AlsaMidiOutputDevice : public MidiOutputDevice
 {
-    Q_OBJECT
-
 public:
-    MidiEnumerator(QObject* parent = 0);
-    ~MidiEnumerator();
+    AlsaMidiOutputDevice(const QVariant& uid, const QString& name,
+                         const snd_seq_addr_t* address, snd_seq_t* alsa,
+                         QObject* parent);
+    virtual ~AlsaMidiOutputDevice();
 
-    void rescan();
+    void open();
+    void close();
+    bool isOpen() const;
 
-    QList <MidiOutputDevice*> outputDevices() const;
-    QList <MidiInputDevice*> inputDevices() const;
-
-    MidiOutputDevice* outputDevice(const QVariant& uid) const;
-    MidiInputDevice* inputDevice(const QVariant& uid) const;
-
-signals:
-    void valueChanged(const QVariant& uid, ushort channel, uchar value);
+    void writeChannel(ushort channel, uchar value);
+    void writeUniverse(const QByteArray& universe);
 
 private:
-    MidiEnumeratorPrivate* d_ptr;
+    snd_seq_t* m_alsa;
+    snd_seq_addr_t* m_address;
+    bool m_open;
+    QByteArray m_universe;
 };
 
 #endif

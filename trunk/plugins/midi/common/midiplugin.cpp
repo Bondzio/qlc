@@ -35,6 +35,8 @@ void MidiPlugin::init()
     qDebug() << Q_FUNC_INFO;
 
     m_enumerator = new MidiEnumerator(this);
+    connect(m_enumerator, SIGNAL(valueChanged(QVariant,ushort,uchar)),
+            this, SLOT(slotValueChanged(QVariant,ushort,uchar)));
     m_enumerator->rescan();
 }
 
@@ -216,6 +218,19 @@ MidiInputDevice* MidiPlugin::inputDevice(quint32 input) const
         return m_enumerator->inputDevices().at(input);
     else
         return NULL;
+}
+
+void MidiPlugin::slotValueChanged(const QVariant& uid, ushort channel, uchar value)
+{
+    for (int i = 0; i < m_enumerator->inputDevices().size(); i++)
+    {
+        MidiInputDevice* dev = m_enumerator->inputDevices().at(i);
+        if (dev->uid() == uid)
+        {
+            emit valueChanged(i, channel, value);
+            break;
+        }
+    }
 }
 
 /*****************************************************************************

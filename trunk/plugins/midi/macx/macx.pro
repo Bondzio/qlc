@@ -16,10 +16,3 @@ HEADERS += coremidiinputdevice.h \
 SOURCES += coremidiinputdevice.cpp \
            coremidioutputdevice.cpp \
            coremidienumerator.cpp
-
-# This must be after "TARGET = " and before target installation so that
-# install_name_tool can be run before target installation
-include(../../../macx/nametool.pri)
-
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
-INSTALLS   += target

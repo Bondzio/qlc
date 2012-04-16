@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  midienumerator.h
+  alsamidienumeratorprivate.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,37 +19,50 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef MIDIENUMERATOR_H
-#define MIDIENUMERATOR_H
+#ifndef ALSAMIDIENUMERATORPRIVATE_H
+#define ALSAMIDIENUMERATORPRIVATE_H
 
 #include <QObject>
 #include <QList>
 
-class MidiEnumeratorPrivate;
+class AlsaMidiInputThread;
 class MidiOutputDevice;
 class MidiInputDevice;
+class MidiEnumerator;
 
-class MidiEnumerator : public QObject
+struct _snd_seq;
+typedef _snd_seq snd_seq_t;
+
+struct snd_seq_addr;
+typedef snd_seq_addr snd_seq_addr_t;
+
+class MidiEnumeratorPrivate : public QObject
 {
     Q_OBJECT
 
 public:
-    MidiEnumerator(QObject* parent = 0);
-    ~MidiEnumerator();
+    MidiEnumeratorPrivate(MidiEnumerator* parent);
+    ~MidiEnumeratorPrivate();
 
+    MidiEnumerator* enumerator() const;
+
+    void initAlsa();
     void rescan();
-
-    QList <MidiOutputDevice*> outputDevices() const;
-    QList <MidiInputDevice*> inputDevices() const;
 
     MidiOutputDevice* outputDevice(const QVariant& uid) const;
     MidiInputDevice* inputDevice(const QVariant& uid) const;
 
-signals:
-    void valueChanged(const QVariant& uid, ushort channel, uchar value);
+    QList <MidiOutputDevice*> outputDevices() const;
+    QList <MidiInputDevice*> inputDevices() const;
 
 private:
-    MidiEnumeratorPrivate* d_ptr;
+    snd_seq_t* m_alsa;
+    snd_seq_addr_t* m_address;
+
+    QList <MidiOutputDevice*> m_outputDevices;
+    QList <MidiInputDevice*> m_inputDevices;
+
+    AlsaMidiInputThread* m_inputThread;
 };
 
 #endif

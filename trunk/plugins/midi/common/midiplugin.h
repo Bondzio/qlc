@@ -99,6 +99,10 @@ private:
     /** Get an output device by its output index */
     MidiInputDevice* inputDevice(quint32 input) const;
 
+private slots:
+    /** Catch MIDI input device valueChanged signals */
+    void slotValueChanged(const QVariant& uid, ushort channel, uchar value);
+
     /*************************************************************************
      * Configuration
      *************************************************************************/

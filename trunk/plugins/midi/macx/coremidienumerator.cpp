@@ -21,9 +21,9 @@
 
 #include <QDebug>
 
+#include "coremidienumeratorprivate.h"
 #include "coremidioutputdevice.h"
 #include "coremidiinputdevice.h"
-#include "coremidienumerator.h"
 #include "midienumerator.h"
 
 extern "C"

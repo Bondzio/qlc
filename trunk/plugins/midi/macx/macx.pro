@@ -12,7 +12,7 @@ include(../common/common.pri)
 
 HEADERS += coremidiinputdevice.h \
            coremidioutputdevice.h \
-           coremidienumerator.h
+           coremidienumeratorprivate.h
 
 SOURCES += coremidiinputdevice.cpp \
            coremidioutputdevice.cpp \

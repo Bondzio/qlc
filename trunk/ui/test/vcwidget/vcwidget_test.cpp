@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 #include <QtXml>
@@ -43,20 +42,17 @@
 void VCWidget_Test::initTestCase()
 {
     m_doc = NULL;
-    m_area = NULL;
 }
 
 void VCWidget_Test::init()
 {
     m_doc = new Doc(this);
-    m_area = new QMdiArea;
-    VirtualConsole::createAndShow(m_area, m_doc);
+    new VirtualConsole(NULL, m_doc);
 }
 
 void VCWidget_Test::cleanup()
 {
     delete VirtualConsole::instance();
-    delete m_area;
     delete m_doc;
 }
 
@@ -813,7 +809,7 @@ void VCWidget_Test::paint()
 
     // Just try to cover all local branches with this test
     StubWidget* stub = new StubWidget(vc->contents(), m_doc);
-    m_area->show();
+    VirtualConsole::instance()->show();
     stub->show();
     QTest::qWait(10);
 
@@ -845,7 +841,7 @@ void VCWidget_Test::mousePress()
     VirtualConsole* vc = VirtualConsole::instance();
     QVERIFY(vc != NULL);
 
-    m_area->show();
+    vc->show();
 
     StubWidget* stub = new StubWidget(vc->contents(), m_doc);
     stub->show();

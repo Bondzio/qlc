@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 #include <QtXml>
@@ -59,14 +58,12 @@ void VCXYPad_Test::initTestCase()
 
 void VCXYPad_Test::init()
 {
-    m_area = new QMdiArea;
-    VirtualConsole::createAndShow(m_area, m_doc);
+    new VirtualConsole(NULL, m_doc);
 }
 
 void VCXYPad_Test::cleanup()
 {
     delete VirtualConsole::instance();
-    delete m_area;
     m_doc->clearContents();
 }
 

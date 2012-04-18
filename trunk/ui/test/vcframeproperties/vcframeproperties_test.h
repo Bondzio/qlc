@@ -24,7 +24,6 @@
 
 #include <QObject>
 
-class QMdiArea;
 class Doc;
 class VCFrameProperties_Test : public QObject
 {
@@ -38,7 +37,6 @@ private slots:
     void initial();
 
 private:
-    QMdiArea* m_area;
     Doc* m_doc;
 };
 

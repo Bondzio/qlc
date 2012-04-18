@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 #include <QMenu>
@@ -44,22 +43,18 @@
 
 void VCFrame_Test::initTestCase()
 {
-    m_area = NULL;
     m_doc = NULL;
 }
 
 void VCFrame_Test::init()
 {
     m_doc = new Doc(this);
-    m_area = new QMdiArea;
-    VirtualConsole::createAndShow(m_area, m_doc);
-    QVERIFY(VirtualConsole::instance() != NULL);
+    new VirtualConsole(NULL, m_doc);
 }
 
 void VCFrame_Test::cleanup()
 {
     delete VirtualConsole::instance();
-    delete m_area;
     delete m_doc;
 }
 
@@ -342,12 +337,11 @@ void VCFrame_Test::handleWidgetSelection()
 
 void VCFrame_Test::mouseMoveEvent()
 {
-    QMdiArea w;
-
     // Well, there isn't much that can be checked here... Actual moving happens in VCWidget.
     QMouseEvent ev(QEvent::MouseButtonPress, QPoint(0, 0), Qt::LeftButton,
                    Qt::LeftButton, Qt::NoModifier);
 
+    QWidget w;
     VCFrame frame(&w, m_doc);
     QVERIFY(frame.isBottomFrame() == true);
     frame.move(QPoint(0, 0));

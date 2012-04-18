@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiArea>
 #include <QFrame>
 #include <QtTest>
 #include <QMenu>
@@ -46,20 +45,17 @@
 void VCLabel_Test::initTestCase()
 {
     m_doc = NULL;
-    m_area = NULL;
 }
 
 void VCLabel_Test::init()
 {
     m_doc = new Doc(this);
-    m_area = new QMdiArea;
-    VirtualConsole::createAndShow(m_area, m_doc);
+    new VirtualConsole(NULL, m_doc);
 }
 
 void VCLabel_Test::cleanup()
 {
     delete VirtualConsole::instance();
-    delete m_area;
     delete m_doc;
 }
 
@@ -176,12 +172,11 @@ void VCLabel_Test::saveXML()
 
 void VCLabel_Test::paintEvent()
 {
-    QMdiArea w;
-
     QPaintEvent ev(QRect(0, 0, 5, 5));
 
     // Checking the result of a paint event would have to compare individual pixels, which
     // I'm not gonna do. Just call all branches to try to find any crashes and that's it...
+    QWidget w;
     VCLabel label(&w, m_doc);
     label.paintEvent(&ev);
 

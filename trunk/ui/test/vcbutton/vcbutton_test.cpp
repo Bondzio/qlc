@@ -21,7 +21,6 @@
 
 #include <QDomDocument>
 #include <QDomElement>
-#include <QMdiArea>
 #include <QObject>
 #include <QtTest>
 #include <QMenu>
@@ -49,14 +48,12 @@ static const QKeySequence keySequenceB(Qt::Key_B);
 void VCButton_Test::initTestCase()
 {
     m_doc = NULL;
-    m_area = NULL;
 }
 
 void VCButton_Test::init()
 {
     m_doc = new Doc(this);
-    m_area = new QMdiArea;
-    VirtualConsole::createAndShow(m_area, m_doc);
+    new VirtualConsole(NULL, m_doc);
 
     Fixture* fxi = new Fixture(m_doc);
     fxi->setChannels(4);
@@ -66,7 +63,6 @@ void VCButton_Test::init()
 void VCButton_Test::cleanup()
 {
     delete VirtualConsole::instance();
-    delete m_area;
     delete m_doc;
 }
 

@@ -24,7 +24,6 @@
 
 #include <QObject>
 
-class QMdiArea;
 class Doc;
 class VCCueList_Test : public QObject
 {
@@ -53,7 +52,6 @@ private slots:
 
 private:
     Doc* m_doc;
-    QMdiArea* m_area;
 };
 
 #endif

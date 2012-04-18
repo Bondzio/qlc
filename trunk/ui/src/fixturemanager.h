@@ -51,16 +51,11 @@ class FixtureManager : public QWidget
      * Initialization
      ********************************************************************/
 public:
-    /** Get the monitor singleton instance. Can be NULL. */
-    static FixtureManager* instance();
-
-    /** Create or show the FixtureManager window. */
-    static void createAndShow(QWidget* parent, Doc* doc);
+    FixtureManager(QWidget* parent, Doc* doc);
     ~FixtureManager();
 
-private:
-    /** Protected constructor to prevent multiple instances. */
-    FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
+    /** Get the singleton instance */
+    static FixtureManager* instance();
 
 private:
     /** The singleton FixtureManager instance */

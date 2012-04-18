@@ -47,22 +47,15 @@ class FunctionManager : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    /** Get the FunctionManager singleton instance. Can be NULL. */
-    static FunctionManager* instance();
-
-    /** Create or show FunctionManager */
-    static void createAndShow(QWidget* parent, Doc* doc);
-
-    /** Normal public destructor */
+    FunctionManager(QWidget* parent, Doc* doc);
     ~FunctionManager();
+
+    /** Get the singleton instance */
+    static FunctionManager* instance();
 
 signals:
     /** Emitted when the FunctionManager's QMdiSubWindow is in/activated */
     void functionManagerActive(bool active);
-
-protected:
-    /** Protected constructor to prevent multiple instances. */
-    FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags = 0);
 
 protected slots:
     void slotModeChanged();
@@ -162,15 +155,17 @@ protected:
     /*********************************************************************
      * Helpers
      *********************************************************************/
-protected:
+private:
     /** Create a copy of the given function */
     void copyFunction(quint32 fid);
 
     /** Open an editor for the given function */
     void editFunction(Function* function);
 
-    /** Get the currently-active editor (or NULL if one doesn't exist) */
-    QWidget* currentEditor() const;
+    void deleteCurrentEditor();
+
+private:
+    QWidget* m_editor;
 };
 
 #endif

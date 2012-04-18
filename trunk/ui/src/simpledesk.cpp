@@ -31,7 +31,6 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QSpinBox>
-#include <QMdiArea>
 #include <QLayout>
 #include <QDebug>
 
@@ -74,6 +73,9 @@ SimpleDesk::SimpleDesk(QWidget* parent, Doc* doc)
     , m_speedDials(NULL)
 {
     qDebug() << Q_FUNC_INFO;
+    Q_ASSERT(s_instance == NULL);
+    s_instance = this;
+
     Q_ASSERT(doc != NULL);
 
     QSettings settings;
@@ -109,37 +111,13 @@ SimpleDesk::~SimpleDesk()
     Q_ASSERT(m_engine != NULL);
     delete m_engine;
     m_engine = NULL;
+
+    s_instance = NULL;
 }
 
 SimpleDesk* SimpleDesk::instance()
 {
     return s_instance;
-}
-
-void SimpleDesk::createAndShow(QWidget* parent, Doc* doc)
-{
-    qDebug() << Q_FUNC_INFO;
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    s_instance = new SimpleDesk(sub, doc);
-    sub->setWidget(s_instance);
-    QWidget* window = area->addSubWindow(sub);
-
-    connect(area, SIGNAL(subWindowActivated(QMdiSubWindow*)),
-            s_instance, SLOT(slotSubWindowActivated(QMdiSubWindow*)));
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/slider.png"));
-    window->setWindowTitle(tr("Simple Desk"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
 }
 
 void SimpleDesk::clearContents()
@@ -956,7 +934,6 @@ void SimpleDesk::slotCueNameEdited(const QString& name)
     if (selected.size() == 1)
         cueStack->setName(name, selected.first().row());
 }
-
 
 void SimpleDesk::slotSubWindowActivated(QMdiSubWindow* sub)
 {

@@ -56,21 +56,17 @@ class SimpleDesk : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    /** Get the SimpleDesk singleton instance. Can be NULL. */
-    static SimpleDesk* instance();
-
-    /** Create and/or show SimpleDesk */
-    static void createAndShow(QWidget* parent, Doc* doc);
-
-    /** Normal public destructor */
+    SimpleDesk(QWidget* parent, Doc* doc);
     ~SimpleDesk();
+
+    /** Get the singleton instance */
+    static SimpleDesk* instance();
 
     /** Start from scratch; clear everything */
     void clearContents();
 
 private:
     /** Private constructor to prevent multiple instances. */
-    SimpleDesk(QWidget* parent, Doc* doc);
 
     /** Initialize the simple desk engine */
     void initEngine();

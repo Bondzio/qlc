@@ -63,7 +63,7 @@
 
 App::App()
     : QMainWindow()
-    , m_area(NULL)
+    , m_tab(NULL)
     , m_progressDialog(NULL)
     , m_doc(NULL)
 
@@ -145,12 +145,9 @@ void App::init()
 
     setWindowIcon(QIcon(":/qlc.png"));
 
-    /* MDI Area */
-    m_area = new QMdiArea(this);
-    m_area->setViewMode(QMdiArea::TabbedView);
-    m_area->setTabPosition(QTabWidget::South);
-    //m_area->setDocumentMode(true);
-    setCentralWidget(m_area);
+    m_tab = new QTabWidget(this);
+    m_tab->setTabPosition(QTabWidget::South);
+    setCentralWidget(m_tab);
 
     QVariant var = settings.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
@@ -178,13 +175,19 @@ void App::init()
     // Main tool bar
     initToolBar();
 
-    // Primary UI views
-    FixtureManager::createAndShow(centralWidget(), m_doc);
-    FunctionManager::createAndShow(centralWidget(), m_doc);
-    VirtualConsole::createAndShow(centralWidget(), m_doc);
-    SimpleDesk::createAndShow(centralWidget(), m_doc);
-    OutputManager::createAndShow(centralWidget(), m_doc->outputMap());
-    InputManager::createAndShow(centralWidget(), m_doc->inputMap());
+    // Create primary views.
+    QWidget* w = new FixtureManager(m_tab, m_doc);
+    m_tab->addTab(w, QIcon(":/fixtures.png"), tr("Fixtures"));
+    w = new FunctionManager(m_tab, m_doc);
+    m_tab->addTab(w, QIcon(":/functions.png"), tr("Functions"));
+    w = new VirtualConsole(m_tab, m_doc);
+    m_tab->addTab(w, QIcon(":/virtualconsole.png"), tr("Virtual Console"));
+    w = new SimpleDesk(m_tab, m_doc);
+    m_tab->addTab(w, QIcon(":/simpledesk.png"), tr("Simple Desk"));
+    w = new OutputManager(m_tab, m_doc->outputMap());
+    m_tab->addTab(w, QIcon(":/outputs.png"), tr("Outputs"));
+    w = new InputManager(m_tab, m_doc->inputMap());
+    m_tab->addTab(w, QIcon(":/inputs.png"), tr("Inputs"));
 
     // Listen to blackout changes and toggle m_controlBlackoutAction
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));
@@ -199,21 +202,15 @@ void App::init()
 
 void App::setActiveWindow(const QString& name)
 {
-    Q_ASSERT(m_area != NULL);
-
     if (name.isEmpty() == true)
         return;
 
-    QListIterator <QMdiSubWindow*> it(m_area->subWindowList());
-    while (it.hasNext() == true)
+    for (int i = 0; i < m_tab->count(); i++)
     {
-        QMdiSubWindow* wnd(it.next());
-        Q_ASSERT(wnd != NULL);
-        Q_ASSERT(wnd->widget() != NULL);
-        if (wnd->widget()->metaObject()->className() == name)
+        QWidget* widget = m_tab->widget(i);
+        if (widget != NULL && widget->metaObject()->className() == name)
         {
-            m_area->setActiveSubWindow(wnd);
-            wnd->raise();
+            m_tab->setCurrentIndex(i);
             break;
         }
     }
@@ -378,16 +375,11 @@ void App::enableKioskMode()
     m_doc->setMode(Doc::Operate);
 
     // No need for these
-    m_area->removeSubWindow(FixtureManager::instance()->parentWidget());
-    m_area->removeSubWindow(FunctionManager::instance()->parentWidget());
-    m_area->removeSubWindow(OutputManager::instance()->parentWidget());
-    m_area->removeSubWindow(InputManager::instance()->parentWidget());
-    m_area->removeSubWindow(SimpleDesk::instance()->parentWidget());
-
-    // This is just plain stupid but for some reason, deleting sub windows makes m_area
-    // go back to SubWindowView. So, force the tabbed view with VC as the only tab.
-    m_area->setViewMode(QMdiArea::SubWindowView);
-    m_area->setViewMode(QMdiArea::TabbedView);
+    m_tab->removeTab(m_tab->indexOf(FixtureManager::instance()));
+    m_tab->removeTab(m_tab->indexOf(FunctionManager::instance()));
+    m_tab->removeTab(m_tab->indexOf(SimpleDesk::instance()));
+    m_tab->removeTab(m_tab->indexOf(OutputManager::instance()));
+    m_tab->removeTab(m_tab->indexOf(InputManager::instance()));
 
     // No need for the toolbar
     delete m_toolbar;
@@ -986,9 +978,9 @@ QFile::FileError App::saveXML(const QString& fileName)
         root = doc.documentElement();
 
         /* Currently active window */
-        QMdiSubWindow* sub = m_area->activeSubWindow();
-        if (sub != NULL && sub->widget() != NULL)
-            root.setAttribute(KXMLQLCWorkspaceWindow, sub->widget()->metaObject()->className());
+        QWidget* widget = m_tab->currentWidget();
+        if (widget != NULL)
+            root.setAttribute(KXMLQLCWorkspaceWindow, widget->metaObject()->className());
 
         /* Write engine components to the XML document */
         m_doc->saveXML(&doc, &root);

@@ -54,18 +54,11 @@ class VirtualConsole : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    /** Get the VC singleton instance. Can be NULL. */
-    static VirtualConsole* instance();
-
-    /** Create or show a VirtualConsole */
-    static void createAndShow(QWidget* parent, Doc* doc);
-
-    /** Public destructor */
+    VirtualConsole(QWidget* parent, Doc* doc);
     ~VirtualConsole();
 
-protected:
-    /** Protected constructor to prevent multiple instances */
-    VirtualConsole(QWidget* parent, Doc* doc);
+    /** Get the singleton instance */
+    static VirtualConsole* instance();
 
 protected:
     static VirtualConsole* s_instance;

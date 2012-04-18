@@ -41,18 +41,11 @@ class InputManager : public QWidget
      * Initialization
      *************************************************************************/
 public:
-    /** Get the InputManager singleton instance. Can be NULL. */
-    static InputManager* instance();
-
-    /** Create an instance with parent. Fails if s_instance is not NULL. */
-    static void createAndShow(QWidget* parent, InputMap* inputMap);
-
-    /** Normal public destructor */
+    InputManager(QWidget* parent, InputMap* inputMap);
     virtual ~InputManager();
 
-private:
-    /** Private constructor to prevent multiple instances. */
-    InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags flags = 0);
+    /** Get the singleton instance */
+    static InputManager* instance();
 
 private:
     static InputManager* s_instance;

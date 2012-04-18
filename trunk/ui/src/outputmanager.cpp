@@ -51,10 +51,13 @@ OutputManager* OutputManager::s_instance = NULL;
  * Initialization
  ****************************************************************************/
 
-OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFlags flags)
-    : QWidget(parent, flags)
+OutputManager::OutputManager(QWidget* parent, OutputMap* outputMap)
+    : QWidget(parent)
     , m_outputMap(outputMap)
 {
+    Q_ASSERT(s_instance == NULL);
+    s_instance = this;
+
     Q_ASSERT(outputMap != NULL);
 
     new QVBoxLayout(this);
@@ -97,33 +100,12 @@ OutputManager::~OutputManager()
     QSettings settings;
     settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
 
-    OutputManager::s_instance = NULL;
+    s_instance = NULL;
 }
 
 OutputManager* OutputManager::instance()
 {
     return s_instance;
-}
-
-void OutputManager::createAndShow(QWidget* parent, OutputMap* outputMap)
-{
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    s_instance = new OutputManager(sub, outputMap);
-    sub->setWidget(s_instance);
-    QWidget* window = area->addSubWindow(sub);
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/output.png"));
-    window->setWindowTitle(tr("Outputs"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
 }
 
 void OutputManager::updateTree()

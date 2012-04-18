@@ -89,12 +89,6 @@ RGBMatrixEditor::~RGBMatrixEditor()
 {
     m_previewTimer->stop();
 
-    // Delete speed dials manually since something causes a crash with them if deleted
-    // thru ~QObject ('this' is their parent object that auto-deletes its children).
-    // Maybe something in Qt itself???
-    if (m_speedDials != NULL)
-        delete m_speedDials;
-
     if (m_testButton->isChecked() == true)
         m_mtx->stopAndWait();
 }

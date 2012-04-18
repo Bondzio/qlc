@@ -76,6 +76,8 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
     , m_speedDials(NULL)
     , m_currentTab(KTabGeneral)
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(doc != NULL);
     Q_ASSERT(scene != NULL);
 
@@ -98,8 +100,7 @@ SceneEditor::SceneEditor(QWidget* parent, Scene* scene, Doc* doc)
 
 SceneEditor::~SceneEditor()
 {
-    delete m_speedDials;
-    m_speedDials = NULL;
+    qDebug() << Q_FUNC_INFO;
 
     delete m_source;
     m_source = NULL;
@@ -111,6 +112,8 @@ SceneEditor::~SceneEditor()
 
 void SceneEditor::slotFunctionManagerActive(bool active)
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (active == true)
     {
         if (m_speedDials == NULL)
@@ -515,6 +518,8 @@ bool SceneEditor::isColorToolAvailable()
 
 void SceneEditor::createSpeedDials()
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (m_speedDials != NULL)
         return;
 

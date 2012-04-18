@@ -20,7 +20,6 @@
 */
 
 #include <QTreeWidgetItem>
-#include <QMdiSubWindow>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -28,7 +27,6 @@
 #include <QMessageBox>
 #include <QToolButton>
 #include <QSplitter>
-#include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
 #include <QString>
@@ -73,8 +71,8 @@ FixtureManager* FixtureManager::s_instance = NULL;
  * Initialization
  *****************************************************************************/
 
-FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
-    : QWidget(parent, flags)
+FixtureManager::FixtureManager(QWidget* parent, Doc* doc)
+    : QWidget(parent)
     , m_doc(doc)
     , m_splitter(NULL)
     , m_tree(NULL)
@@ -88,6 +86,9 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
     , m_newGroupAction(NULL)
     , m_groupMenu(NULL)
 {
+    Q_ASSERT(s_instance == NULL);
+    s_instance = this;
+
     Q_ASSERT(doc != NULL);
 
     new QVBoxLayout(this);
@@ -127,32 +128,13 @@ FixtureManager::~FixtureManager()
     QSettings settings;
     settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
     FixtureManager::s_instance = NULL;
+
+    s_instance = NULL;
 }
 
 FixtureManager* FixtureManager::instance()
 {
     return s_instance;
-}
-
-void FixtureManager::createAndShow(QWidget* parent, Doc* doc)
-{
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    s_instance = new FixtureManager(sub, doc);
-    sub->setWidget(s_instance);
-    QWidget* window = area->addSubWindow(sub);
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/fixture.png"));
-    window->setWindowTitle(tr("Fixtures"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
 }
 
 /*****************************************************************************

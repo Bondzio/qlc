@@ -125,7 +125,7 @@ private slots:
     void slotFadeOutChanged(int ms);
 
 private:
-    QPointer<SpeedDialWidget> m_speedDials;
+    SpeedDialWidget* m_speedDials;
 
     /*********************************************************************
      * Fixture tabs

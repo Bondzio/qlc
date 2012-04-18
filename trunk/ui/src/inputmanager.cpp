@@ -56,10 +56,13 @@ InputManager* InputManager::s_instance = NULL;
  * Initialization
  ****************************************************************************/
 
-InputManager::InputManager(QWidget* parent, InputMap* inputMap, Qt::WindowFlags flags)
-    : QWidget(parent, flags)
+InputManager::InputManager(QWidget* parent, InputMap* inputMap)
+    : QWidget(parent)
     , m_inputMap(inputMap)
 {
+    Q_ASSERT(s_instance == NULL);
+    s_instance = this;
+
     Q_ASSERT(inputMap != NULL);
 
     /* Create a new layout for this widget */
@@ -114,33 +117,12 @@ InputManager::~InputManager()
     QSettings settings;
     settings.setValue(SETTINGS_SPLITTER, m_splitter->saveState());
 
-    InputManager::s_instance = NULL;
+    s_instance = NULL;
 }
 
 InputManager* InputManager::instance()
 {
     return s_instance;
-}
-
-void InputManager::createAndShow(QWidget* parent, InputMap* inputMap)
-{
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    s_instance = new InputManager(sub, inputMap);
-    sub->setWidget(s_instance);
-    QWidget* window = area->addSubWindow(sub);
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/input.png"));
-    window->setWindowTitle(tr("Inputs"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
 }
 
 /*****************************************************************************

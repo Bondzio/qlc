@@ -19,9 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QMdiSubWindow>
 #include <QTreeWidgetItemIterator>
 #include <QTreeWidgetItem>
-#include <QMdiSubWindow>
 #include <QInputDialog>
 #include <QTreeWidget>
 #include <QHeaderView>
@@ -30,10 +30,10 @@
 #include <QCheckBox>
 #include <QSplitter>
 #include <QSettings>
-#include <QMdiArea>
 #include <QToolBar>
 #include <QMenuBar>
 #include <QPixmap>
+#include <QDebug>
 #include <QMenu>
 #include <QList>
 #include <QIcon>
@@ -67,8 +67,8 @@ FunctionManager* FunctionManager::s_instance = NULL;
  * Initialization
  *****************************************************************************/
 
-FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flags)
-    : QWidget(parent, flags)
+FunctionManager::FunctionManager(QWidget* parent, Doc* doc)
+    : QWidget(parent)
     , m_doc(doc)
     , m_splitter(NULL)
     , m_tree(NULL)
@@ -83,7 +83,11 @@ FunctionManager::FunctionManager(QWidget* parent, Doc* doc, Qt::WindowFlags flag
     , m_cloneAction(NULL)
     , m_deleteAction(NULL)
     , m_selectAllAction(NULL)
+    , m_editor(NULL)
 {
+    Q_ASSERT(s_instance == NULL);
+    s_instance = this;
+
     Q_ASSERT(doc != NULL);
 
     new QVBoxLayout(this);
@@ -125,31 +129,6 @@ FunctionManager* FunctionManager::instance()
     return s_instance;
 }
 
-void FunctionManager::createAndShow(QWidget* parent, Doc* doc)
-{
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    /* Create an MDI window for X11 & Win32 */
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    s_instance = new FunctionManager(sub, doc);
-    sub->setWidget(s_instance);
-    QWidget* window = area->addSubWindow(sub);
-
-    connect(area, SIGNAL(subWindowActivated(QMdiSubWindow*)),
-            s_instance, SLOT(slotSubWindowActivated(QMdiSubWindow*)));
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/function.png"));
-    window->setWindowTitle(tr("Functions"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
-}
-
 void FunctionManager::slotModeChanged()
 {
     updateActionStatus();
@@ -157,8 +136,7 @@ void FunctionManager::slotModeChanged()
 
 void FunctionManager::slotDocClearing()
 {
-    if (currentEditor() != NULL)
-        delete currentEditor();
+    deleteCurrentEditor();
     m_tree->clear();
 }
 
@@ -398,8 +376,7 @@ void FunctionManager::slotDelete()
     {
         deleteSelectedFunctions();
         updateActionStatus();
-        if (currentEditor() != NULL)
-            delete currentEditor();
+        deleteCurrentEditor();
     }
 }
 
@@ -442,6 +419,11 @@ void FunctionManager::initSplitterView()
     m_splitter = new QSplitter(Qt::Horizontal, this);
     layout()->addWidget(m_splitter);
     initTree();
+
+    QWidget* container = new QWidget(this);
+    m_splitter->addWidget(container);
+    container->show();
+    container->setLayout(new QVBoxLayout);
 }
 
 void FunctionManager::initTree()
@@ -598,8 +580,7 @@ void FunctionManager::slotTreeSelectionChanged()
     }
     else
     {
-        if (currentEditor() != NULL)
-            delete currentEditor();
+        deleteCurrentEditor();
     }
 }
 
@@ -646,12 +627,7 @@ void FunctionManager::copyFunction(quint32 fid)
 
 void FunctionManager::editFunction(Function* function)
 {
-    // Destroy the existing editor, if it exists
-    QWidget* editor = currentEditor();
-    if (editor != NULL)
-        delete editor;
-    editor = NULL;
-    Q_ASSERT(m_splitter->count() == 1);
+    deleteCurrentEditor();
 
     if (function == NULL)
         return;
@@ -659,54 +635,55 @@ void FunctionManager::editFunction(Function* function)
     // Choose the editor by the selected function's type
     if (function->type() == Function::Scene)
     {
-        editor = new SceneEditor(m_splitter, qobject_cast<Scene*> (function), m_doc);
+        m_editor = new SceneEditor(m_splitter->widget(1), qobject_cast<Scene*> (function), m_doc);
         connect(this, SIGNAL(functionManagerActive(bool)),
-                editor, SLOT(slotFunctionManagerActive(bool)));
+                m_editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::Chaser)
     {
-        editor = new ChaserEditor(m_splitter, qobject_cast<Chaser*> (function), m_doc);
+        m_editor = new ChaserEditor(m_splitter->widget(1), qobject_cast<Chaser*> (function), m_doc);
         connect(this, SIGNAL(functionManagerActive(bool)),
-                editor, SLOT(slotFunctionManagerActive(bool)));
+                m_editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::Collection)
     {
-        editor = new CollectionEditor(m_splitter, qobject_cast<Collection*> (function), m_doc);
+        m_editor = new CollectionEditor(m_splitter->widget(1), qobject_cast<Collection*> (function), m_doc);
     }
     else if (function->type() == Function::EFX)
     {
-        editor = new EFXEditor(m_splitter, qobject_cast<EFX*> (function), m_doc);
+        m_editor = new EFXEditor(m_splitter->widget(1), qobject_cast<EFX*> (function), m_doc);
         connect(this, SIGNAL(functionManagerActive(bool)),
-                editor, SLOT(slotFunctionManagerActive(bool)));
+                m_editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::RGBMatrix)
     {
-        editor = new RGBMatrixEditor(m_splitter, qobject_cast<RGBMatrix*> (function), m_doc);
+        m_editor = new RGBMatrixEditor(m_splitter->widget(1), qobject_cast<RGBMatrix*> (function), m_doc);
         connect(this, SIGNAL(functionManagerActive(bool)),
-                editor, SLOT(slotFunctionManagerActive(bool)));
+                m_editor, SLOT(slotFunctionManagerActive(bool)));
     }
     else if (function->type() == Function::Script)
     {
-        editor = new ScriptEditor(m_splitter, qobject_cast<Script*> (function), m_doc);
+        m_editor = new ScriptEditor(m_splitter->widget(1), qobject_cast<Script*> (function), m_doc);
     }
     else
     {
-        editor = NULL;
+        m_editor = NULL;
     }
 
     // Show the editor
-    if (editor != NULL)
+    if (m_editor != NULL)
     {
-        m_splitter->addWidget(editor);
-        editor->show();
+        m_splitter->widget(1)->show();
+        m_splitter->widget(1)->layout()->addWidget(m_editor);
+        m_editor->show();
     }
 }
 
-QWidget* FunctionManager::currentEditor() const
+void FunctionManager::deleteCurrentEditor()
 {
-    Q_ASSERT(m_splitter != NULL);
-    if (m_splitter->count() < 2)
-        return NULL;
-    else
-        return m_splitter->widget(1);
+    if (m_editor != NULL)
+        m_editor->deleteLater();
+    m_editor = NULL;
+
+    m_splitter->widget(1)->hide();
 }

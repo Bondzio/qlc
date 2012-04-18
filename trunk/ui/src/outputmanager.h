@@ -39,18 +39,11 @@ class OutputManager : public QWidget
      * Initialization
      *********************************************************************/
 public:
-    /** Get the OutputManager singleton instance. Can be NULL. */
-    static OutputManager* instance();
-
-    /** Create or show OutputManager */
-    static void createAndShow(QWidget* parent, OutputMap* outputMap);
-
-    /** Normal public destructor */
+    OutputManager(QWidget* parent, OutputMap* outputMap);
     virtual ~OutputManager();
 
-private:
-    /** Protected constructor to prevent multiple instances. */
-    OutputManager(QWidget* parent, OutputMap* outputMap, Qt::WindowFlags flags = 0);
+    /** Get the singleton instance */
+    static OutputManager* instance();
 
 private:
     static OutputManager* s_instance;

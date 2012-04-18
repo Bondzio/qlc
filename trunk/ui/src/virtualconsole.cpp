@@ -135,10 +135,9 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_tapModifierDown(false)
 {
     Q_ASSERT(s_instance == NULL);
-    Q_ASSERT(doc != NULL);
-
-    /* Initialize the singleton */
     s_instance = this;
+
+    Q_ASSERT(doc != NULL);
 
     /* Main layout */
     new QHBoxLayout(this);
@@ -161,6 +160,8 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
 
     // Nothing is selected
     updateActions();
+
+    m_dockArea->refreshProperties();
 }
 
 VirtualConsole::~VirtualConsole()
@@ -173,31 +174,10 @@ VirtualConsole* VirtualConsole::instance()
     return s_instance;
 }
 
-void VirtualConsole::createAndShow(QWidget* parent, Doc* doc)
-{
-    /* Must not create more than one instance */
-    Q_ASSERT(s_instance == NULL);
-
-    QMdiArea* area = qobject_cast<QMdiArea*> (parent);
-    Q_ASSERT(area != NULL);
-    QMdiSubWindow* sub = new QMdiSubWindow;
-    VirtualConsole* vc = new VirtualConsole(sub, doc);
-    sub->setWidget(vc);
-    QWidget* window = area->addSubWindow(sub);
-
-    /* Set some common properties for the window and show it */
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->setWindowIcon(QIcon(":/virtualconsole.png"));
-    window->setWindowTitle(tr("Virtual Console"));
-    window->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    sub->setSystemMenu(NULL);
-    vc->dockArea()->refreshProperties();
-}
-
 /*****************************************************************************
  * Properties
  *****************************************************************************/
+
 VCProperties VirtualConsole::properties() const
 {
     return m_properties;

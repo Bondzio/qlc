@@ -20,7 +20,6 @@
 */
 
 #include <QDesktopWidget>
-#include <QMdiSubWindow>
 #include <QApplication>
 #include <QInputDialog>
 #include <QColorDialog>
@@ -32,7 +31,6 @@
 #include <QFontDialog>
 #include <QScrollArea>
 #include <QKeyEvent>
-#include <QMdiArea>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QString>

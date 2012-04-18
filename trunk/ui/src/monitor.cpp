@@ -19,14 +19,12 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiSubWindow>
 #include <QApplication>
 #include <QActionGroup>
 #include <QFontDialog>
 #include <QScrollArea>
 #include <QSpacerItem>
 #include <QByteArray>
-#include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
 #include <QFont>

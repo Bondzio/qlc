@@ -20,13 +20,11 @@
 */
 
 #include <QTreeWidgetItem>
-#include <QMdiSubWindow>
 #include <QTreeWidget>
 #include <QStringList>
 #include <QHeaderView>
 #include <QSettings>
 #include <QSplitter>
-#include <QMdiArea>
 #include <QToolBar>
 #include <QAction>
 #include <QDebug>

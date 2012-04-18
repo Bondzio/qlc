@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiSubWindow>
 #include <QDomDocument>
 #include <QInputDialog>
 #include <QDomElement>
@@ -935,27 +934,19 @@ void SimpleDesk::slotCueNameEdited(const QString& name)
         cueStack->setName(name, selected.first().row());
 }
 
-void SimpleDesk::slotSubWindowActivated(QMdiSubWindow* sub)
+void SimpleDesk::showEvent(QShowEvent* ev)
 {
-    QMdiSubWindow* mySub = qobject_cast<QMdiSubWindow*> (parentWidget());
-    Q_ASSERT(mySub != NULL);
-    if (sub == mySub)
-    {
-        // SimpleDesk has been activated
-        if (m_editCueStackButton->isChecked() == true)
-            slotEditCueStackClicked();
-    }
-    else if (sub != NULL)
-    {
-        // Another internal sub window has been activated
-        if (m_speedDials != NULL)
-            delete m_speedDials;
-        m_speedDials = NULL;
-    }
-    else
-    {
-        // Another application activated (not QLC)
-    }
+    if (m_editCueStackButton->isChecked() == true)
+        slotEditCueStackClicked();
+    QWidget::showEvent(ev);
+}
+
+void SimpleDesk::hideEvent(QHideEvent* ev)
+{
+    if (m_speedDials != NULL)
+        delete m_speedDials;
+    m_speedDials = NULL;
+    QWidget::hideEvent(ev);
 }
 
 /****************************************************************************

@@ -29,7 +29,6 @@
 #include "doc.h"
 
 class QTreeWidgetItem;
-class QMdiSubWindow;
 class QTreeWidget;
 class QSplitter;
 class QToolBar;
@@ -54,15 +53,21 @@ public:
     static FunctionManager* instance();
 
 signals:
-    /** Emitted when the FunctionManager's QMdiSubWindow is in/activated */
+    /** Emitted when the FunctionManager's tab is de/activated */
     void functionManagerActive(bool active);
+
+protected:
+    /** @reimp */
+    void showEvent(QShowEvent* ev);
+
+    /** @reimp */
+    void hideEvent(QHideEvent* ev);
 
 protected slots:
     void slotModeChanged();
     void slotDocClearing();
     void slotFunctionChanged(quint32 id);
     void slotFunctionAdded(quint32 id);
-    void slotSubWindowActivated(QMdiSubWindow* sub);
 
 protected:
     static FunctionManager* s_instance;

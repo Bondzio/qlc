@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QMdiSubWindow>
 #include <QTreeWidgetItemIterator>
 #include <QTreeWidgetItem>
 #include <QInputDialog>
@@ -161,24 +160,18 @@ void FunctionManager::slotFunctionAdded(quint32 id)
     updateFunctionItem(item, function);
 }
 
-void FunctionManager::slotSubWindowActivated(QMdiSubWindow* sub)
+void FunctionManager::showEvent(QShowEvent* ev)
 {
-    QMdiSubWindow* mySub = qobject_cast<QMdiSubWindow*> (parentWidget());
-    Q_ASSERT(mySub != NULL);
-    if (sub == mySub)
-    {
-        // FunctionManager has been activated
-        emit functionManagerActive(true);
-    }
-    else if (sub != NULL)
-    {
-        // Another internal sub window has been activated
-        emit functionManagerActive(false);
-    }
-    else
-    {
-        // Another application activated (not QLC)
-    }
+    qDebug() << Q_FUNC_INFO;
+    emit functionManagerActive(true);
+    QWidget::showEvent(ev);
+}
+
+void FunctionManager::hideEvent(QHideEvent* ev)
+{
+    qDebug() << Q_FUNC_INFO;
+    emit functionManagerActive(false);
+    QWidget::hideEvent(ev);
 }
 
 /*****************************************************************************
@@ -422,8 +415,9 @@ void FunctionManager::initSplitterView()
 
     QWidget* container = new QWidget(this);
     m_splitter->addWidget(container);
-    container->show();
     container->setLayout(new QVBoxLayout);
+    container->layout()->setContentsMargins(0, 0, 0, 0);
+    container->hide();
 }
 
 void FunctionManager::initTree()

@@ -34,7 +34,6 @@ class GrandMasterSlider;
 class SimpleDeskEngine;
 class SpeedDialWidget;
 class PlaybackSlider;
-class QMdiSubWindow;
 class QDomDocument;
 class QDomElement;
 class QToolButton;
@@ -162,7 +161,12 @@ private slots:
     void slotDurationDialChanged(int ms);
     void slotCueNameEdited(const QString& name);
 
-    void slotSubWindowActivated(QMdiSubWindow* sub);
+protected:
+    /** @reimp */
+    void showEvent(QShowEvent* ev);
+
+    /** @reimp */
+    void hideEvent(QHideEvent* ev);
 
 private:
     QGroupBox* m_cueStackGroup;

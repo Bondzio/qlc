@@ -20,7 +20,6 @@
 */
 
 #include <QTreeWidgetItem>
-#include <QMdiSubWindow>
 #include <QTreeWidget>
 #include <QHeaderView>
 #include <QStringList>
@@ -28,7 +27,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QSplitter>
-#include <QMdiArea>
 #include <QAction>
 #include <QTimer>
 #include <QDebug>

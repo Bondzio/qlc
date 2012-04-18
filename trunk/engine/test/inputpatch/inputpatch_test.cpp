@@ -34,9 +34,19 @@
 
 #define TESTPLUGINDIR "../outputpluginstub"
 
+static QDir testPluginDir()
+{
+    QDir dir(TESTPLUGINDIR);
+    dir.setFilter(QDir::Files);
+    dir.setNameFilters(QStringList() << QString("*%1").arg(KExtPlugin));
+    return dir;
+}
+
 void InputPatch_Test::initTestCase()
 {
     m_doc = new Doc(this);
+    m_doc->ioPluginCache()->load(testPluginDir());
+    QVERIFY(m_doc->ioPluginCache()->plugins().size() != 0);
 }
 
 void InputPatch_Test::cleanupTestCase()
@@ -62,6 +72,7 @@ void InputPatch_Test::patch()
 {
     InputMap im(m_doc, 4);
 
+    QCOMPARE(m_doc->ioPluginCache()->plugins().size(), 1);
     OutputPluginStub* stub = static_cast<OutputPluginStub*> (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 

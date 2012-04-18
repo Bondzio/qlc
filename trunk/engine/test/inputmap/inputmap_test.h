@@ -41,7 +41,6 @@ private slots:
     void pluginStatus();
     void profiles();
     void setPatch();
-    void feedBack();
     void slotValueChanged();
     void slotConfigurationChanged();
     void loadInputProfiles();

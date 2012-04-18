@@ -33,8 +33,8 @@
 #include "doc.h"
 #undef private
 
-#define TESTPLUGINDIR "../inputpluginstub"
-#define OUTPUT_TESTPLUGINDIR "../outputpluginstub"
+#define TESTPLUGINDIR "../outputpluginstub"
+#define OUTPUT_TESTPLUGINDIR "../inputpluginstub"
 #define ENGINEDIR "../../src"
 #define PROFILEDIR "../../../inputprofiles"
 
@@ -67,7 +67,7 @@ void InputMap_Test::initial()
     QVERIFY(im.editorUniverse() == 0);
     QVERIFY(im.m_editorUniverse == 0);
     QVERIFY(im.m_patch.size() == 4);
-    QVERIFY(im.pluginNames().size() == 0);
+    QVERIFY(im.pluginNames().size() == 1);
     QVERIFY(im.m_profiles.size() == 0);
     QVERIFY(im.profileNames().size() == 0);
 }
@@ -90,15 +90,8 @@ void InputMap_Test::editorUniverse()
 void InputMap_Test::pluginNames()
 {
     InputMap im(m_doc, 4);
-
-    QVERIFY(im.pluginNames().size() == 0);
-
-    OutputPluginStub* stub = static_cast<OutputPluginStub*>
-                                (m_doc->ioPluginCache()->plugins().at(0));
-    QVERIFY(stub != NULL);
-
-    QVERIFY(im.pluginNames().size() == 1);
-    QVERIFY(im.pluginNames().at(0) == stub->name());
+    QCOMPARE(im.pluginNames().size(), 1);
+    QCOMPARE(im.pluginNames().at(0), QString("Output Plugin Stub"));
 }
 
 void InputMap_Test::pluginInputs()
@@ -298,44 +291,6 @@ void InputMap_Test::setPatch()
 
     // Universe out of bounds
     QVERIFY(im.setPatch(im.universes(), stub->name(), 0, true) == false);
-}
-
-void InputMap_Test::feedBack()
-{
-    InputMap im(m_doc, 4);
-
-    OutputPluginStub* stub = static_cast<OutputPluginStub*>
-                                (m_doc->ioPluginCache()->plugins().at(0));
-    QVERIFY(stub != NULL);
-
-    im.setPatch(0, stub->name(), 0, true);
-
-    QVERIFY(im.feedBack(0, 39, 42) == true);
-    QVERIFY(stub->m_feedBackInput == 0);
-    QVERIFY(stub->m_feedBackChannel == 39);
-    QVERIFY(stub->m_feedBackValue == 42);
-
-    QVERIFY(im.feedBack(1, 2, 3) == false);
-    QVERIFY(stub->m_feedBackInput == 0);
-    QVERIFY(stub->m_feedBackChannel == 39);
-    QVERIFY(stub->m_feedBackValue == 42);
-
-    QVERIFY(im.feedBack(4, 2, 3) == false);
-    QVERIFY(stub->m_feedBackInput == 0);
-    QVERIFY(stub->m_feedBackChannel == 39);
-    QVERIFY(stub->m_feedBackValue == 42);
-
-    QVERIFY(im.feedBack(0, 2, 3) == true);
-    QVERIFY(stub->m_feedBackInput == 0);
-    QVERIFY(stub->m_feedBackChannel == 2);
-    QVERIFY(stub->m_feedBackValue == 3);
-
-    // Disable feedback
-    im.setPatch(0, stub->name(), 0, false);
-    QVERIFY(im.feedBack(0, 54, 12) == false);
-    QVERIFY(stub->m_feedBackInput == 0);
-    QVERIFY(stub->m_feedBackChannel == 2);
-    QVERIFY(stub->m_feedBackValue == 3);
 }
 
 void InputMap_Test::slotValueChanged()

@@ -249,15 +249,8 @@ void OutputMap_Test::blackout()
 void OutputMap_Test::pluginNames()
 {
     OutputMap om(m_doc, 4);
-
-    QVERIFY(om.pluginNames().size() == 0);
-
-    OutputPluginStub* stub = static_cast<OutputPluginStub*>
-                                (m_doc->ioPluginCache()->plugins().at(0));
-    QVERIFY(stub != NULL);
-
     QVERIFY(om.pluginNames().size() == 1);
-    QVERIFY(om.pluginNames().at(0) == stub->name());
+    QCOMPARE(om.pluginNames().at(0), QString("Output Plugin Stub"));
 }
 
 void OutputMap_Test::pluginOutputs()

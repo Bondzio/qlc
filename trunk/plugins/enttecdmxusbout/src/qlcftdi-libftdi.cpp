@@ -272,7 +272,7 @@ QByteArray QLCFTDI::read(int size, uchar* userBuffer)
     }
     else
     {
-        array.setRawData((char*) buffer, read);
+        array = QByteArray::fromRawData((char*) buffer, read);
     }
 
     if (userBuffer == NULL)

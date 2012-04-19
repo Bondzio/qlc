@@ -44,8 +44,6 @@ public:
     MidiEnumeratorPrivate(MidiEnumerator* parent);
     ~MidiEnumeratorPrivate();
 
-    MidiEnumerator* enumerator() const;
-
     void initAlsa();
     void rescan();
 

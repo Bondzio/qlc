@@ -39,8 +39,6 @@ public:
     MidiEnumeratorPrivate(MidiEnumerator* parent);
     ~MidiEnumeratorPrivate();
 
-    MidiEnumerator* enumerator() const;
-
     void rescan();
 
     static QString extractName(MIDIEntityRef entity);

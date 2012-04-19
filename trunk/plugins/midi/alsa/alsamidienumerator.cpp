@@ -60,11 +60,6 @@ MidiEnumeratorPrivate::~MidiEnumeratorPrivate()
     m_inputThread = NULL;
 }
 
-MidiEnumerator* MidiEnumeratorPrivate::enumerator() const
-{
-    return qobject_cast<MidiEnumerator*> (parent());
-}
-
 void MidiEnumeratorPrivate::initAlsa()
 {
     qDebug() << Q_FUNC_INFO;

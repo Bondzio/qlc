@@ -53,7 +53,7 @@ extern "C"
 
 VellemanOut::~VellemanOut()
 {
-    close(0);
+    closeOutput(0);
     delete [] m_values;
 }
 

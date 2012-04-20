@@ -1,6 +1,6 @@
-/*
+﻿/*
   Q Light Controller
-  alsamidiinputdevice.h
+  win32midiinputdevice.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,38 +19,30 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef ALSAMIDIINPUTDEVICE_H
-#define ALSAMIDIINPUTDEVICE_H
+#ifndef WIN32MIDIINPUTDEVICE_H
+#define WIN32MIDIINPUTDEVICE_H
+
+#include <Windows.h>
+#include <QObject>
 
 #include "midiinputdevice.h"
 
-struct _snd_seq;
-typedef _snd_seq snd_seq_t;
-
-struct snd_seq_addr;
-typedef snd_seq_addr snd_seq_addr_t;
-
-class AlsaMidiInputThread;
-
-class AlsaMidiInputDevice : public MidiInputDevice
+class Win32MidiInputDevice : public MidiInputDevice
 {
+    Q_OBJECT
+
 public:
-    AlsaMidiInputDevice(const QVariant& uid, const QString& name,
-                        const snd_seq_addr_t* address, snd_seq_t* alsa,
-                        AlsaMidiInputThread* thread, QObject* parent);
-    virtual ~AlsaMidiInputDevice();
+    Win32MidiInputDevice(const QVariant& uid, const QString& name, UINT id, QObject* parent = 0);
+    ~Win32MidiInputDevice();
 
     void open();
     void close();
     bool isOpen() const;
 
-    const snd_seq_addr_t* address() const;
-
 private:
-    snd_seq_t* m_alsa;
-    snd_seq_addr_t* m_address;
-    AlsaMidiInputThread* m_thread;
-    bool m_open;
+    UINT m_id;
+    HMIDIIN m_handle;
+    QByteArray m_universe;
 };
 
 #endif

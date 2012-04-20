@@ -30,3 +30,7 @@ MidiInputDevice::~MidiInputDevice()
 {
 }
 
+void MidiInputDevice::emitValueChanged(uint channel, uchar value)
+{
+    emit valueChanged(uid(), channel, value);
+}

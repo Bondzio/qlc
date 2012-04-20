@@ -38,8 +38,6 @@ public:
     void close();
     bool isOpen() const;
 
-    void emitValueChanged(uint channel, uchar value);
-
 private:
     MIDIClientRef m_client;
     MIDIEntityRef m_entity;

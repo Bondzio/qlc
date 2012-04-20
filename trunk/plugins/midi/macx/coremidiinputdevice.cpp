@@ -173,8 +173,3 @@ bool CoreMidiInputDevice::isOpen() const
     else
         return false;
 }
-
-void CoreMidiInputDevice::emitValueChanged(uint channel, uchar value)
-{
-    emit valueChanged(uid(), channel, value);
-}

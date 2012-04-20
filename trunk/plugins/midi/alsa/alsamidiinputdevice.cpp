@@ -84,8 +84,3 @@ const snd_seq_addr_t* AlsaMidiInputDevice::address() const
 {
     return m_address;
 }
-
-void AlsaMidiInputDevice::emitValueChanged(uint channel, uchar value)
-{
-    emit valueChanged(uid(), channel, value);
-}

@@ -32,6 +32,8 @@ public:
     MidiInputDevice(const QVariant& uid, const QString& name, QObject* parent = 0);
     virtual ~MidiInputDevice();
 
+    void emitValueChanged(uint channel, uchar value);
+
 signals:
     void valueChanged(const QVariant& uid, ushort channel, uchar value);
 };

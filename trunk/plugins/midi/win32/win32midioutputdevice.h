@@ -1,6 +1,6 @@
-/*
+﻿/*
   Q Light Controller
-  alsamidiinputdevice.h
+  win32midioutputdevice.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,38 +19,36 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef ALSAMIDIINPUTDEVICE_H
-#define ALSAMIDIINPUTDEVICE_H
+#ifndef WIN32MIDIOUTPUTDEVICE_H
+#define WIN32MIDIOUTPUTDEVICE_H
 
-#include "midiinputdevice.h"
+#include <Windows.h>
+#include <QObject>
 
-struct _snd_seq;
-typedef _snd_seq snd_seq_t;
+#include "midioutputdevice.h"
 
-struct snd_seq_addr;
-typedef snd_seq_addr snd_seq_addr_t;
-
-class AlsaMidiInputThread;
-
-class AlsaMidiInputDevice : public MidiInputDevice
+class Win32MidiOutputDevice : public MidiOutputDevice
 {
+    Q_OBJECT
+
 public:
-    AlsaMidiInputDevice(const QVariant& uid, const QString& name,
-                        const snd_seq_addr_t* address, snd_seq_t* alsa,
-                        AlsaMidiInputThread* thread, QObject* parent);
-    virtual ~AlsaMidiInputDevice();
+    Win32MidiOutputDevice(const QVariant& uid, const QString& name, UINT id, QObject* parent = 0);
+    ~Win32MidiOutputDevice();
 
     void open();
     void close();
     bool isOpen() const;
 
-    const snd_seq_addr_t* address() const;
+    void writeChannel(ushort channel, uchar value);
+    void writeUniverse(const QByteArray& universe);
 
 private:
-    snd_seq_t* m_alsa;
-    snd_seq_addr_t* m_address;
-    AlsaMidiInputThread* m_thread;
-    bool m_open;
+    void sendData(BYTE command, BYTE channel, BYTE value);
+
+private:
+    UINT m_id;
+    HMIDIOUT m_handle;
+    QByteArray m_universe;
 };
 
 #endif

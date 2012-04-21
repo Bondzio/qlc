@@ -30,7 +30,8 @@
  ****************************************************************************/
 
 PeperoniDevice::PeperoniDevice(QObject* parent, struct usbdmx_functions* usbdmx,
-                               int output) : QObject(parent)
+                               int output)
+    : QObject(parent)
 {
     Q_ASSERT(usbdmx != NULL);
 

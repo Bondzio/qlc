@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  peperoniout.cpp
+  peperoni.cpp
 
   Copyright (c)	Heikki Junnila
 
@@ -25,44 +25,44 @@
 #include <usb.h>
 
 #include "peperonidevice.h"
-#include "peperoniout.h"
+#include "peperoni.h"
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-PeperoniOut::~PeperoniOut()
+Peperoni::~Peperoni()
 {
 }
 
-void PeperoniOut::init()
+void Peperoni::init()
 {
     usb_init();
     rescanDevices();
 }
 
-QString PeperoniOut::name()
+QString Peperoni::name()
 {
-    return QString("Peperoni Output");
+    return QString("Peperoni");
 }
 
 /*****************************************************************************
  * Outputs
  *****************************************************************************/
 
-void PeperoniOut::openOutput(quint32 output)
+void Peperoni::openOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->open();
 }
 
-void PeperoniOut::closeOutput(quint32 output)
+void Peperoni::closeOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->close();
 }
 
-QStringList PeperoniOut::outputs()
+QStringList Peperoni::outputs()
 {
     QStringList list;
     int i = 1;
@@ -73,7 +73,7 @@ QStringList PeperoniOut::outputs()
     return list;
 }
 
-QString PeperoniOut::outputInfo(quint32 output)
+QString Peperoni::outputInfo(quint32 output)
 {
     QString str;
 
@@ -101,7 +101,7 @@ QString PeperoniOut::outputInfo(quint32 output)
     return str;
 }
 
-void PeperoniOut::writeUniverse(quint32 output, const QByteArray& universe)
+void Peperoni::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->outputDMX(universe);
@@ -111,7 +111,7 @@ void PeperoniOut::writeUniverse(quint32 output, const QByteArray& universe)
  * Configuration
  *****************************************************************************/
 
-void PeperoniOut::configure()
+void Peperoni::configure()
 {
     int r = QMessageBox::question(NULL, name(),
                                   tr("Do you wish to re-scan your hardware?"),
@@ -120,7 +120,7 @@ void PeperoniOut::configure()
         rescanDevices();
 }
 
-bool PeperoniOut::canConfigure()
+bool Peperoni::canConfigure()
 {
     return true;
 }
@@ -129,7 +129,7 @@ bool PeperoniOut::canConfigure()
  * Devices
  *****************************************************************************/
 
-void PeperoniOut::rescanDevices()
+void Peperoni::rescanDevices()
 {
     struct usb_device* dev;
     struct usb_bus* bus;
@@ -174,7 +174,7 @@ void PeperoniOut::rescanDevices()
     }
 }
 
-PeperoniDevice* PeperoniOut::device(struct usb_device* usbdev)
+PeperoniDevice* Peperoni::device(struct usb_device* usbdev)
 {
     QListIterator <PeperoniDevice*> it(m_devices);
     while (it.hasNext() == true)
@@ -191,4 +191,4 @@ PeperoniDevice* PeperoniOut::device(struct usb_device* usbdev)
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(peperoniout, PeperoniOut)
+Q_EXPORT_PLUGIN2(peperoni, Peperoni)

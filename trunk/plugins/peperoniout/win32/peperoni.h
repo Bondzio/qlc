@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  peperoniout.h
+  peperoni.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,11 +19,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef PEPERONIOUT_H
-#define PEPERONIOUT_H
+#ifndef PEPERONI_H
+#define PEPERONI_H
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <Windows.h>
 
 #include <QStringList>
 #include <QtPlugin>
@@ -35,13 +34,8 @@
 #define MAX_USBDMX_DEVICES 16
 
 class PeperoniDevice;
-class QString;
 
-/*****************************************************************************
- * PeperoniOut
- *****************************************************************************/
-
-class PeperoniOut : public QLCIOPlugin
+class Peperoni : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -51,7 +45,7 @@ class PeperoniOut : public QLCIOPlugin
      *************************************************************************/
 public:
     /** @reimp */
-    virtual ~PeperoniOut();
+    virtual ~Peperoni();
 
     /** @reimp */
     void init();

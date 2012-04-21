@@ -2,7 +2,7 @@ include (../../../variables.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = peperoniout
+TARGET   = peperoni
 
 INCLUDEPATH += peperoni
 INCLUDEPATH += ../../interfaces
@@ -11,21 +11,21 @@ CONFIG      += plugin
 
 # Headers
 HEADERS += peperoni/usbdmx-dynamic.h \
-           peperoniout.h \
-           peperonidevice.h
+           peperonidevice.h \
+           peperoni.h
 
 # Sources
 SOURCES += peperoni/usbdmx-dynamic.cpp \
-           peperoniout.cpp \
-           peperonidevice.cpp
+           peperonidevice.cpp \
+           peperoni.cpp
 
 HEADERS += ../../interfaces/qlcioplugin.h
 
-TRANSLATIONS += Peperoni_Output_fi_FI.ts
-TRANSLATIONS += Peperoni_Output_de_DE.ts
-TRANSLATIONS += Peperoni_Output_es_ES.ts
-TRANSLATIONS += Peperoni_Output_fr_FR.ts
-TRANSLATIONS += Peperoni_Output_it_IT.ts
+TRANSLATIONS += Peperoni_fi_FI.ts
+TRANSLATIONS += Peperoni_de_DE.ts
+TRANSLATIONS += Peperoni_es_ES.ts
+TRANSLATIONS += Peperoni_fr_FR.ts
+TRANSLATIONS += Peperoni_it_IT.ts
 
 # Installation
 target.path = $$INSTALLROOT/$$PLUGINDIR

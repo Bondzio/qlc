@@ -22,12 +22,9 @@
 #ifndef PEPERONIDEVICE_H
 #define PEPERONIDEVICE_H
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
+#include <Windows.h>
 #include <QObject>
 #include <QMutex>
-
 
 class PeperoniDevice : public QObject
 {

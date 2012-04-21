@@ -19,7 +19,7 @@ SOURCES += peperoni/usbdmx-dynamic.cpp \
            peperoniout.cpp \
            peperonidevice.cpp
 
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 
 TRANSLATIONS += Peperoni_Output_fi_FI.ts
 TRANSLATIONS += Peperoni_Output_de_DE.ts

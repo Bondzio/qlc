@@ -144,8 +144,7 @@ win32:SOURCES += mastertimer-win32.cpp
 unix:SOURCES  += mastertimer-unix.cpp
 
 # Interfaces
-HEADERS += ../../plugins/interfaces/qlcinplugin.h \
-           ../../plugins/interfaces/qlcoutplugin.h
+HEADERS += ../../plugins/interfaces/qlcioplugin.h
 
 #############################################################################
 # qlcconfig.h generation

@@ -125,7 +125,7 @@ void VellemanOut_Test::outputInfo()
     QVERIFY(info.contains("<H3>") == false);
     QVERIFY(info.endsWith("</BODY></HTML>"));
 
-    info = vo.outputInfo(QLCOutPlugin::invalidLine());
+    info = vo.outputInfo(QLCIOPlugin::invalidLine());
     QVERIFY(info.startsWith(QString("<HTML><HEAD><TITLE>%1</TITLE></HEAD><BODY>").arg(vo.name())));
     QVERIFY(info.contains(tr("This plugin provides DMX output support")));
     QVERIFY(info.endsWith("</BODY></HTML>"));

@@ -90,7 +90,7 @@ QString DMX4LinuxOut::outputInfo(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidLine())
+    if (output == QLCIOPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         str += QString("<P>");

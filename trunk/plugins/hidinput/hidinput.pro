@@ -7,7 +7,7 @@ TARGET   = hidinput
 INCLUDEPATH += ../interfaces
 CONFIG      += plugin
 
-# Input
+HEADERS += ../interfaces/qlcioplugin.h
 HEADERS += configurehidinput.h \
            hiddevice.h \
            hideventdevice.h \

@@ -18,4 +18,4 @@ TRANSLATIONS += DMX4Linux_Output_it_IT.ts
 
 HEADERS += dmx4linuxout.h
 SOURCES += dmx4linuxout.cpp
-HEADERS += ../interfaces/qlcoutplugin.h
+HEADERS += ../interfaces/qlcioplugin.h

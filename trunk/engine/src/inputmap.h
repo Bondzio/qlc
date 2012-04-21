@@ -30,7 +30,7 @@
 #include "qlcinputprofile.h"
 
 class QLCInputSource;
-class QLCOutPlugin;
+class QLCIOPlugin;
 class QDomDocument;
 class QDomElement;
 class InputPatch;
@@ -64,7 +64,7 @@ private:
      *************************************************************************/
 public slots:
     /** Slot that catches plugin configuration change notifications */
-    void slotPluginConfigurationChanged(QLCOutPlugin* plugin);
+    void slotPluginConfigurationChanged(QLCIOPlugin* plugin);
 
 public:
     /** Send feedback value to the input profile e.g. to move a motorized

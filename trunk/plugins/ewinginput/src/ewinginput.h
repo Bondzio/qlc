@@ -26,7 +26,7 @@
 #include <QStringList>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "ewing.h"
 
 class QUdpSocket;
@@ -35,10 +35,10 @@ class QUdpSocket;
  * EWingInput
  *****************************************************************************/
 
-class EWingInput : public QLCOutPlugin
+class EWingInput : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*************************************************************************
      * Initialization

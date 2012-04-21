@@ -21,7 +21,7 @@ win32 {
     SOURCES += libusb_dyn.c
 }
 
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 
 TRANSLATIONS += uDMX_Output_fi_FI.ts
 TRANSLATIONS += uDMX_Output_de_DE.ts

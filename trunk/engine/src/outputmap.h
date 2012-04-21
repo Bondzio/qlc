@@ -32,7 +32,7 @@
 class OutputPatchEditor;
 class OutputMapEditor;
 class UniverseArray;
-class QLCOutPlugin;
+class QLCIOPlugin;
 class QDomDocument;
 class QDomElement;
 class OutputPatch;
@@ -274,7 +274,7 @@ public:
 
 private slots:
    /** Slot that catches plugin configuration change notifications from UIPluginCache */
-    void slotPluginConfigurationChanged(QLCOutPlugin* plugin);
+    void slotPluginConfigurationChanged(QLCIOPlugin* plugin);
 
 signals:
     /** Notifies (OutputManager) of plugin configuration changes */

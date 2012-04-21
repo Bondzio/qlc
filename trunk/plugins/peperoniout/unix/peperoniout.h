@@ -26,7 +26,7 @@
 #include <QtPlugin>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 class PeperoniDevice;
 class QString;
@@ -35,10 +35,10 @@ class QString;
  * USBDMXOut
  *****************************************************************************/
 
-class PeperoniOut : public QLCOutPlugin
+class PeperoniOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*********************************************************************
      * Initialization
@@ -87,10 +87,6 @@ public:
 
     /** @reimp */
     QString inputInfo(quint32 input) { Q_UNUSED(input); return QString(); }
-
-    /** @reimp */
-    void sendFeedBack(quint32 input, quint32 channel, uchar value)
-        { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
 
     /*********************************************************************
      * Configuration

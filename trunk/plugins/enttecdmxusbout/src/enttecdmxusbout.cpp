@@ -126,7 +126,7 @@ QString EnttecDMXUSBOut::outputInfo(quint32 output)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (output == QLCOutPlugin::invalidLine())
+    if (output == QLCIOPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         if (m_outputs.size() == 0)
@@ -205,7 +205,7 @@ QString EnttecDMXUSBOut::inputInfo(quint32 input)
     str += QString("</HEAD>");
     str += QString("<BODY>");
 
-    if (input == QLCOutPlugin::invalidLine())
+    if (input == QLCIOPlugin::invalidLine())
     {
         str += QString("<H3>%1</H3>").arg(name());
         if (m_inputs.size() == 0)

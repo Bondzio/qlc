@@ -23,7 +23,6 @@
 
 #include "qlcinputchannel.h"
 #include "qlcinputsource.h"
-#include "qlcinplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 

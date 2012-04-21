@@ -30,9 +30,9 @@
 #include <QDebug>
 #include <QMenu>
 
-#include "qlcoutplugin.h"
 #include "outputpatcheditor.h"
 #include "outputmanager.h"
+#include "qlcioplugin.h"
 #include "outputpatch.h"
 #include "outputmap.h"
 

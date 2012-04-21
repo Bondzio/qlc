@@ -24,7 +24,7 @@
 
 #include <QObject>
 
-class QLCOutPlugin;
+class QLCIOPlugin;
 
 #define KXMLQLCOutputPatch "Patch"
 #define KXMLQLCOutputPatchUniverse "Universe"
@@ -47,17 +47,17 @@ public:
      * Plugin & output
      ********************************************************************/
 public:
-    void set(QLCOutPlugin* plugin, quint32 output);
+    void set(QLCIOPlugin* plugin, quint32 output);
     void reconnect();
 
-    QLCOutPlugin* plugin() const;
+    QLCIOPlugin* plugin() const;
     QString pluginName() const;
 
     quint32 output() const;
     QString outputName() const;
 
 private:
-    QLCOutPlugin* m_plugin;
+    QLCIOPlugin* m_plugin;
     quint32 m_output;
 
     /********************************************************************

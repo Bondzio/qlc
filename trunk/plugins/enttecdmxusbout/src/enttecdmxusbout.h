@@ -22,14 +22,14 @@
 #ifndef ENTTECDMXUSBOUT_H
 #define ENTTECDMXUSBOUT_H
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 class EnttecDMXUSBWidget;
 
-class EnttecDMXUSBOut : public QLCOutPlugin
+class EnttecDMXUSBOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /************************************************************************
      * Initialization

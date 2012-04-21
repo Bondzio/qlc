@@ -30,7 +30,7 @@
 #include <QMutex>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 #define MAX_USBDMX_DEVICES 16
 
@@ -41,10 +41,10 @@ class QString;
  * PeperoniOut
  *****************************************************************************/
 
-class PeperoniOut : public QLCOutPlugin
+class PeperoniOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*************************************************************************
      * Initialization

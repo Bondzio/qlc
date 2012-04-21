@@ -26,7 +26,7 @@
 #include <QStringList>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 class UDMXDevice;
 class QString;
@@ -35,10 +35,10 @@ class QString;
  * USBDMXOut
  *****************************************************************************/
 
-class UDMXOut : public QLCOutPlugin
+class UDMXOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*********************************************************************
      * Initialization

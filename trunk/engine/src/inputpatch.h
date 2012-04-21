@@ -26,7 +26,7 @@
 
 #include "qlcinputprofile.h"
 
-class QLCOutPlugin;
+class QLCIOPlugin;
 
 #define KXMLQLCInputPatchProfile "Profile"
 #define KXMLQLCInputPatchUniverse "Universe"
@@ -72,14 +72,14 @@ public:
      * @param enableFeedback Enable or disable feedback thru a patch
      * @param profile An input profile for a patch (NULL for none)
      */
-    void set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
+    void set(QLCIOPlugin* plugin, quint32 input, bool enableFeedback,
              QLCInputProfile* profile);
 
     /** Close & open the current plugin-input combination (if any) */
     void reconnect();
 
     /** The plugin instance that has been assigned to a patch */
-    QLCOutPlugin* plugin() const;
+    QLCIOPlugin* plugin() const;
 
     /** Friendly name of the plugin assigned to a patch (empty if none) */
     QString pluginName() const;
@@ -106,7 +106,7 @@ private slots:
     void slotValueChanged(quint32 input, quint32 channel, uchar value);
 
 private:
-    QLCOutPlugin* m_plugin;
+    QLCIOPlugin* m_plugin;
     quint32 m_input;
     QLCInputProfile* m_profile;
     bool m_feedbackEnabled;

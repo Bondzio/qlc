@@ -27,7 +27,7 @@
 #include <QDebug>
 #include <QtXml>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 
@@ -41,7 +41,7 @@ InputPatch::InputPatch(quint32 inputUniverse, QObject* parent)
     : QObject(parent)
     , m_inputUniverse(inputUniverse)
     , m_plugin(NULL)
-    , m_input(QLCOutPlugin::invalidLine())
+    , m_input(QLCIOPlugin::invalidLine())
     , m_profile(NULL)
     , m_feedbackEnabled(true)
 {
@@ -58,10 +58,10 @@ InputPatch::~InputPatch()
  * Properties
  *****************************************************************************/
 
-void InputPatch::set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
+void InputPatch::set(QLCIOPlugin* plugin, quint32 input, bool enableFeedback,
                      QLCInputProfile* profile)
 {
-    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
+    if (m_plugin != NULL && m_input != QLCIOPlugin::invalidLine())
     {
         disconnect(m_plugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
                    this, SLOT(slotValueChanged(quint32,quint32,uchar)));
@@ -74,7 +74,7 @@ void InputPatch::set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
     m_feedbackEnabled = enableFeedback;
 
     /* Open the assigned plugin input */
-    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
+    if (m_plugin != NULL && m_input != QLCIOPlugin::invalidLine())
     {
         connect(m_plugin, SIGNAL(valueChanged(quint32,quint32,uchar)),
                 this, SLOT(slotValueChanged(quint32,quint32,uchar)));
@@ -84,7 +84,7 @@ void InputPatch::set(QLCOutPlugin* plugin, quint32 input, bool enableFeedback,
 
 void InputPatch::reconnect()
 {
-    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine())
+    if (m_plugin != NULL && m_input != QLCIOPlugin::invalidLine())
     {
         m_plugin->closeInput(m_input);
 #ifdef WIN32
@@ -96,7 +96,7 @@ void InputPatch::reconnect()
     }
 }
 
-QLCOutPlugin* InputPatch::plugin() const
+QLCIOPlugin* InputPatch::plugin() const
 {
     return m_plugin;
 }
@@ -114,12 +114,12 @@ quint32 InputPatch::input() const
     if (m_plugin != NULL && m_input < quint32(m_plugin->inputs().count()))
         return m_input;
     else
-        return QLCOutPlugin::invalidLine();
+        return QLCIOPlugin::invalidLine();
 }
 
 QString InputPatch::inputName() const
 {
-    if (m_plugin != NULL && m_input != QLCOutPlugin::invalidLine() &&
+    if (m_plugin != NULL && m_input != QLCIOPlugin::invalidLine() &&
             m_input < quint32(m_plugin->inputs().count()))
         return m_plugin->inputs()[m_input];
     else

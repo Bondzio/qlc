@@ -27,7 +27,8 @@
 #include <QDebug>
 #include <QList>
 #include <ola/Logging.h>
-#include "qlcoutplugin.h"
+
+#include "qlcioplugin.h"
 #include "olaoutthread.h"
 
 class ConfigureOlaOut;
@@ -38,22 +39,23 @@ enum { K_UNIVERSE_COUNT = 4 };
 typedef QList<unsigned int> OutputList;
 
 // The OLA Output plugin
-class OLAOut : public QLCOutPlugin
+class OLAOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
+
     friend class ConfigureOlaOut;
 
 public:
     ~OLAOut();
     void init();
-    void open(quint32 output=0);
-    void close(quint32 output=0);
+    void open(quint32 output);
+    void close(quint32 output);
     QStringList outputs();
     QString name();
     void configure();
     bool canConfigure();
-    QString infoText(quint32 output = QLCOutPlugin::invalidOutput());
+    QString infoText(quint32 output);
 
     void outputDMX(quint32 output, const QByteArray& universe);
 

@@ -1,8 +1,8 @@
 INCLUDEPATH += ../../interfaces
 INCLUDEPATH += ../common
 DEPENDPATH  += ../common
-HEADERS     += ../../interfaces/qlcoutplugin.h
 
+HEADERS     += ../../interfaces/qlcioplugin.h
 HEADERS += ../common/mididevice.h \
            ../common/midiinputdevice.h \
            ../common/midioutputdevice.h \

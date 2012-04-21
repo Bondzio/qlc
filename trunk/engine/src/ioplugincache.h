@@ -25,7 +25,7 @@
 #include <QObject>
 #include <QDir>
 
-class QLCOutPlugin;
+class QLCIOPlugin;
 
 class IOPluginCache : public QObject
 {
@@ -39,23 +39,23 @@ public:
     void load(const QDir& dir);
 
     /** Get a list of available I/O plugins. */
-    QList <QLCOutPlugin*> plugins() const;
+    QList <QLCIOPlugin*> plugins() const;
 
     /** Get an I/O plugin by its name. */
-    QLCOutPlugin* plugin(const QString& name) const;
+    QLCIOPlugin* plugin(const QString& name) const;
 
     /** Get the system plugin directory. */
     static QDir systemPluginDirectory();
 
 signals:
-    void pluginConfigurationChanged(QLCOutPlugin* plugin);
+    void pluginConfigurationChanged(QLCIOPlugin* plugin);
     void pluginLoaded(const QString& name);
 
 private slots:
     void slotConfigurationChanged();
 
 private:
-    QList <QLCOutPlugin*> m_plugins;
+    QList <QLCIOPlugin*> m_plugins;
 };
 
 #endif

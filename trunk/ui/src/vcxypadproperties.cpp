@@ -26,7 +26,6 @@
 #include <QSettings>
 
 #include "qlcinputchannel.h"
-#include "qlcinplugin.h"
 #include "qlcchannel.h"
 
 #include "vcxypadfixtureeditor.h"

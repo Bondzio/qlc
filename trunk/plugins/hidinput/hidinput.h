@@ -25,7 +25,7 @@
 #include <QEvent>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 class HIDPoller;
 class HIDDevice;
@@ -52,10 +52,10 @@ public:
  * HIDInput
  *****************************************************************************/
 
-class HIDInput : public QLCOutPlugin
+class HIDInput : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     friend class ConfigureHIDInput;
     friend class HIDPoller;

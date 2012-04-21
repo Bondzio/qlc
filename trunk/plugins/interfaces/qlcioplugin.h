@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  qlcoutplugin.h
+  qlcioplugin.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef QLCOUTPLUGIN_H
-#define QLCOUTPLUGIN_H
+#ifndef QLCIOPLUGIN_H
+#define QLCIOPLUGIN_H
 
 #include <QStringList>
 #include <QtPlugin>
@@ -28,49 +28,28 @@
 #include <climits>
 
 /**
- * QLCOutPlugin is an interface for all output plugins. Output plugins provide
- * the means for QLC to actually output DMX data to fixtures, using DMX hard-
- * ware supported by various output plugins.
+ * QLCIOPlugin is an interface for all input/output plugins.
  *
- * Each plugin can be understood as an adaptation layer betwen QLC and an
- * interconnecting protocol used by a certain family of DMX (well, any
- * lighting protocol) dongles. For example, an FTDI output plugin provides
- * the means for QLC to control fixtures using, for example, an ENTTEC DMX
- * dongles. Each plugin must provide at least one output line for QLC in order
- * to work properly. Then again, if there are no such devices currently
+ * Each plugin must provide at least one output and/or input line in order
+ * to work at all. Then again, if there are no such devices currently
  * connected to the computer that would be supported by the plugin, the plugin
  * can choose to provide no lines at all (until the user plugs in a supported
  * device).
  *
- * When QLC has successfully loaded an output plugin, it will call init()
- * exactly once for each plugin. After that, it is assumed that either the
+ * When QLC has successfully loaded a plugin, it will call init() exactly
+ * once for that plugin. After that, it is assumed that either the
  * plugin auto-senses the devices it supports or the user must manually try
  * to search for new devices thru a custom configuration dialog that can be
  * opened with configure().
  *
  * Plugins should not leave any resources open unless open() is called. And
  * even then, the plugin should open only such resources that are needed for
- * the specific output line given in the call to open(). Respectively, when
- * close() is called, the plugin should relinquish all resources associated to
- * the closed output line (unless shared with other lines).
- *
- * Plugins have a name that is shown to users as a list item. Each output
- * line name, preceded by its index, is shown under the plugin name as a
- * selectable list entry. Therefore, these names should be descriptive, but
- * relatively short. Output line indices are shown on the UI as 1-based, but
- * they are still handled internally as 0-based.
- *
- * An info text can be fetched for each plugin with infoText(). If the output
- * parameter == QLCOutPlugin::invalidOutput(), the plugin should provide a brief status snippet
- * on its overall state. If the output line parameter is given, the plugin
- * should provide information concerning ONLY that particular output line.
- * This info is displayed to the user as-is.
- *
- * DMX data is written by QLC to plugins with writeData(). Complete 512-channel
- * universes are written at a time. Traffic from output plugins towards QLC is
- * not possible.
+ * the specific I/O line given in the call to openOutput() or openInput().
+ * Respectively, when closeOutput() or closeInput() is called, the plugin
+ * should relinquish all resources associated to the closed line (unless
+ * shared with other lines).
  */
-class QLCOutPlugin : public QObject
+class QLCIOPlugin : public QObject
 {
     Q_OBJECT
 
@@ -86,14 +65,14 @@ public:
      *
      * All plugins must implement their own destructors.
      */
-    virtual ~QLCOutPlugin() { /* NOP */ }
+    virtual ~QLCIOPlugin() { /* NOP */ }
 
     /**
      * Initialize the plugin. Since plugins cannot have a user-defined
      * constructor, any initialization prior to opening any HW must be
-     * done thru this second-stage initialization method. OutputMap calls
-     * this method for all plugins exactly once after loading, before
-     * calling any other method from the plugin.
+     * done thru this second-stage initialization method. This method is
+     * called exactly once after each plugin has been successfully loaded
+     * and before calling other plugin interface methods.
      *
      * This is a pure virtual method that must be implemented by all plugins.
      */
@@ -134,19 +113,17 @@ public:
     virtual void closeOutput(quint32 output) = 0;
 
     /**
-     * Get a list of output lines' names. The names must be always in the
+     * Get a list of output line names. The names must be always in the
      * same order i.e. the first name is the name of output line number 0,
      * the next one is output line number 1, etc..
      *
-     * @return Number of outputs provided by the plugin
+     * @return A list of available output names
      */
     virtual QStringList outputs() = 0;
 
     /**
-     * Provide an information text to be displayed in the output manager.
-     * If @output is QLCOutPlugin::invalidOutput(), the info text contains info regarding
-     * the whole plugin. Otherwise it contains info on the specific output.
-     * This information is meant to help users during output mapping.
+     * Provide an informational text regarding the specified output line.
+     * This text is shown to the user.
      *
      * This is a pure virtual method that must be implemented
      * in all plugins.
@@ -156,7 +133,8 @@ public:
     virtual QString outputInfo(quint32 output) = 0;
 
     /**
-     * Write a complete 512-channel DMX universe to the plugin.
+     * Write the contents of a DMX universe to the plugin. The size of the
+     * universe can be anything between 0 and 512.
      *
      * @param output The output universe to write to
      * @param universe The universe data to write
@@ -188,10 +166,10 @@ public:
     virtual void closeInput(quint32 input) = 0;
 
     /**
-     * Get a list of input lines' names. The names must be always in the
+     * Get a list of input line names. The names must be always in the
      * same order i.e. the first name is the name of input line number 0,
      * the next one is input line number 1, etc.. These indices are used
-     * with open() and close().
+     * with openInput() and closeInput().
      *
      * This is a pure virtual method that must be implemented by all plugins.
      *
@@ -200,7 +178,8 @@ public:
     virtual QStringList inputs() = 0;
 
     /**
-     * Provide an information text to be displayed in the plugin manager
+     * Provide an informational text regarding the specified input line.
+     * This text is shown to the user.
      *
      * This is a pure virtual method that must be implemented by all plugins.
      *
@@ -226,7 +205,7 @@ signals:
      *************************************************************************/
 public:
     /**
-     * Invoke a configuration dialog for the plugin
+     * Invoke a configuration dialog for the plugin.
      *
      * This is a pure virtual method that must be implemented by all plugins.
      * However, if there's nothing to configure (canConfigure() returns false),
@@ -236,8 +215,7 @@ public:
 
     /**
      * Check, whether calling configure() on a plugin has any effect. If this
-     * method returns false, the configuration button in OutputManager will be
-     * disabled.
+     * method returns false, the plugin cannot be configured by the user.
      *
      * This is a pure virtual method that must be implemented by all plugins.
      *
@@ -248,12 +226,12 @@ public:
 signals:
     /**
      * Tells that the plugin's configuration has changed. Usually this means
-     * that an output line has dis/appeared. Used by the OutputManager to
+     * that an I/O line has dis/appeared. Used by the OutputManager to
      * re-read the plugin's current configuration.
      */
     void configurationChanged();
 };
 
-Q_DECLARE_INTERFACE(QLCOutPlugin, "QLCOutPlugin")
+Q_DECLARE_INTERFACE(QLCIOPlugin, "QLCIOPlugin")
 
 #endif

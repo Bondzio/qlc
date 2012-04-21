@@ -136,7 +136,7 @@ void InputMap_Test::pluginStatus()
 {
     InputMap im(m_doc, 4);
 
-    QVERIFY(im.pluginStatus("Foo", QLCOutPlugin::invalidLine()).contains("Nothing selected"));
+    QVERIFY(im.pluginStatus("Foo", QLCIOPlugin::invalidLine()).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Bar", 0).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Baz", 1).contains("Nothing selected"));
     QVERIFY(im.pluginStatus("Xyzzy", 2).contains("Nothing selected"));
@@ -146,7 +146,7 @@ void InputMap_Test::pluginStatus()
                                 (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
-    QVERIFY(im.pluginStatus(stub->name(), QLCOutPlugin::invalidLine()) == stub->inputInfo(QLCOutPlugin::invalidLine()));
+    QVERIFY(im.pluginStatus(stub->name(), QLCIOPlugin::invalidLine()) == stub->inputInfo(QLCIOPlugin::invalidLine()));
     QVERIFY(im.pluginStatus(stub->name(), 0) == stub->inputInfo(0));
     QVERIFY(im.pluginStatus(stub->name(), 1) == stub->inputInfo(1));
     QVERIFY(im.pluginStatus(stub->name(), 2) == stub->inputInfo(2));
@@ -191,50 +191,50 @@ void InputMap_Test::setPatch()
     im.addProfile(prof);
 
     QVERIFY(im.patch(0)->plugin() == NULL);
-    QVERIFY(im.patch(0)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(0)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(0)->profile() == NULL);
     QVERIFY(im.patch(0)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 0) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(1)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(2)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(3)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
 
     QVERIFY(im.setPatch(0, "Foobar", 0, false, prof->name()) == true);
     QVERIFY(im.patch(0)->plugin() == NULL);
-    QVERIFY(im.patch(0)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(0)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(0)->profile() == prof);
     QVERIFY(im.patch(0)->feedbackEnabled() == false);
     QVERIFY(im.mapping(stub->name(), 0) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(1)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(2)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(3)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
@@ -247,19 +247,19 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 0) == 0);
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(1)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(2)->plugin() == NULL);
-    QVERIFY(im.patch(2)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(2)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(2)->profile() == NULL);
     QVERIFY(im.patch(2)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(3)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == InputMap::invalidUniverse());
@@ -272,7 +272,7 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 0) == 0);
 
     QVERIFY(im.patch(1)->plugin() == NULL);
-    QVERIFY(im.patch(1)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(1)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(1)->profile() == NULL);
     QVERIFY(im.patch(1)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 1) == InputMap::invalidUniverse());
@@ -284,7 +284,7 @@ void InputMap_Test::setPatch()
     QVERIFY(im.mapping(stub->name(), 2) == InputMap::invalidUniverse());
 
     QVERIFY(im.patch(3)->plugin() == NULL);
-    QVERIFY(im.patch(3)->input() == QLCOutPlugin::invalidLine());
+    QVERIFY(im.patch(3)->input() == QLCIOPlugin::invalidLine());
     QVERIFY(im.patch(3)->profile() == NULL);
     QVERIFY(im.patch(3)->feedbackEnabled() == true);
     QVERIFY(im.mapping(stub->name(), 3) == 2);

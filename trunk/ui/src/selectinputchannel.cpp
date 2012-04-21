@@ -23,11 +23,10 @@
 #include <QTreeWidget>
 #include <QDebug>
 
+#include "selectinputchannel.h"
 #include "qlcinputchannel.h"
 #include "qlcinputprofile.h"
-#include "qlcinplugin.h"
-
-#include "selectinputchannel.h"
+#include "qlcioplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 
@@ -122,7 +121,7 @@ void SelectInputChannel::fillTree()
         uniItem = new QTreeWidgetItem(m_tree);
         updateUniverseItem(uniItem, uni, patch);
 
-        if (patch->plugin() != NULL && patch->input() != QLCInPlugin::invalidInput())
+        if (patch->plugin() != NULL && patch->input() != QLCIOPlugin::invalidLine())
         {
             /* Add a manual option to each patched universe */
             chItem = new QTreeWidgetItem(uniItem);

@@ -34,7 +34,6 @@
 
 #include "inputpatcheditor.h"
 #include "inputmanager.h"
-#include "qlcinplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "apputil.h"

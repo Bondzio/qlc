@@ -105,13 +105,6 @@ QString OutputPluginStub::inputInfo(quint32 input)
     return QString("This is a plugin stub for testing.");
 }
 
-void OutputPluginStub::sendFeedBack(quint32 input, quint32 channel, uchar value)
-{
-    m_feedBackInput = input;
-    m_feedBackChannel = channel;
-    m_feedBackValue = value;
-}
-
 /*****************************************************************************
  * Configuration
  *****************************************************************************/

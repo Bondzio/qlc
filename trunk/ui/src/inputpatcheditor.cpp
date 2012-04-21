@@ -34,7 +34,7 @@
 #include <QDir>
 
 #include "qlcinputprofile.h"
-#include "qlcinplugin.h"
+#include "qlcioplugin.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
 
@@ -149,11 +149,11 @@ void InputPatchEditor::fillMappingTree()
        to an input universe */
     QTreeWidgetItem* pitem = new QTreeWidgetItem(m_mapTree);
     pitem->setText(KMapColumnName, KInputNone);
-    pitem->setText(KMapColumnInput, QString("%1").arg(QLCInPlugin::invalidInput()));
+    pitem->setText(KMapColumnInput, QString("%1").arg(QLCIOPlugin::invalidLine()));
     pitem->setFlags(pitem->flags() | Qt::ItemIsUserCheckable);
 
     /* Set "Nothing" selected if there is no valid input selected */
-    if (m_currentInput == QLCInPlugin::invalidInput())
+    if (m_currentInput == QLCIOPlugin::invalidLine())
         pitem->setCheckState(KMapColumnName, Qt::Checked);
     else
         pitem->setCheckState(KMapColumnName, Qt::Unchecked);
@@ -179,7 +179,7 @@ void InputPatchEditor::fillPluginItem(const QString& pluginName, QTreeWidgetItem
         delete pitem->child(0);
 
     pitem->setText(KMapColumnName, pluginName);
-    pitem->setText(KMapColumnInput, QString("%1").arg(QLCInPlugin::invalidInput()));
+    pitem->setText(KMapColumnInput, QString("%1").arg(QLCIOPlugin::invalidLine()));
 
     /* Go thru available inputs provided by each plugin and put
        them as their parent plugin's leaf nodes. */
@@ -224,7 +224,7 @@ void InputPatchEditor::fillPluginItem(const QString& pluginName, QTreeWidgetItem
     {
         iitem = new QTreeWidgetItem(pitem);
         iitem->setText(KMapColumnName, KInputNone);
-        iitem->setText(KMapColumnInput, QString("%1").arg(QLCInPlugin::invalidInput()));
+        iitem->setText(KMapColumnInput, QString("%1").arg(QLCIOPlugin::invalidLine()));
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsEnabled);
         iitem->setFlags(iitem->flags() & ~Qt::ItemIsSelectable);
         iitem->setCheckState(KMapColumnName, Qt::Unchecked);
@@ -256,7 +256,7 @@ void InputPatchEditor::slotMapCurrentItemChanged(QTreeWidgetItem* item)
         {
             /* Plugin node selected */
             plugin = item->text(KMapColumnName);
-            input = QLCInPlugin::invalidInput();
+            input = QLCIOPlugin::invalidLine();
         }
 
         info = m_inputMap->pluginStatus(plugin, input);
@@ -318,7 +318,7 @@ void InputPatchEditor::slotMapItemChanged(QTreeWidgetItem* item)
     else
     {
         m_currentPluginName = KInputNone;
-        m_currentInput = QLCInPlugin::invalidInput();
+        m_currentInput = QLCIOPlugin::invalidLine();
     }
 
     /* Apply the patch immediately so that input data can be used in the

@@ -20,7 +20,7 @@ win32: {
 
 HEADERS += vellemanout.h
 SOURCES += vellemanout.cpp
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 
 TRANSLATIONS += Velleman_Output_fi_FI.ts
 TRANSLATIONS += Velleman_Output_de_DE.ts

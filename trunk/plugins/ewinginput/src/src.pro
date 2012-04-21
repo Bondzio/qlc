@@ -32,7 +32,7 @@ SOURCES += ewinginput.cpp \
            eprogramwing.cpp \
            ewing.cpp
 
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 
 TRANSLATIONS += ENTTEC_Wing_Input_fi_FI.ts
 TRANSLATIONS += ENTTEC_Wing_Input_de_DE.ts

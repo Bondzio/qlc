@@ -35,7 +35,7 @@
 #include "qlcinputchannel.h"
 #include "hotplugmonitor.h"
 #include "qlcinputsource.h"
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "inputpatch.h"
 #include "qlcconfig.h"
 #include "inputmap.h"
@@ -54,8 +54,8 @@ InputMap::InputMap(Doc* doc, quint32 universes)
 {
     initPatch();
 
-    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCOutPlugin*)),
-            this, SLOT(slotPluginConfigurationChanged(QLCOutPlugin*)));
+    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCIOPlugin*)),
+            this, SLOT(slotPluginConfigurationChanged(QLCIOPlugin*)));
 }
 
 InputMap::~InputMap()
@@ -136,7 +136,7 @@ bool InputMap::feedBack(quint32 universe, quint32 channel, uchar value)
     }
 }
 
-void InputMap::slotPluginConfigurationChanged(QLCOutPlugin* plugin)
+void InputMap::slotPluginConfigurationChanged(QLCIOPlugin* plugin)
 {
     for (quint32 i = 0; i < universes(); i++)
     {
@@ -209,7 +209,7 @@ quint32 InputMap::mapping(const QString& pluginName, quint32 input) const
 
 QStringList InputMap::pluginNames()
 {
-    QListIterator <QLCOutPlugin*> it(doc()->ioPluginCache()->plugins());
+    QListIterator <QLCIOPlugin*> it(doc()->ioPluginCache()->plugins());
     QStringList list;
 
     while (it.hasNext() == true)
@@ -220,7 +220,7 @@ QStringList InputMap::pluginNames()
 
 QStringList InputMap::pluginInputs(const QString& pluginName)
 {
-    QLCOutPlugin* ip = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* ip = doc()->ioPluginCache()->plugin(pluginName);
     if (ip == NULL)
         return QStringList();
     else
@@ -229,14 +229,14 @@ QStringList InputMap::pluginInputs(const QString& pluginName)
 
 void InputMap::configurePlugin(const QString& pluginName)
 {
-    QLCOutPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (inputPlugin != NULL)
         inputPlugin->configure();
 }
 
 bool InputMap::canConfigurePlugin(const QString& pluginName)
 {
-    QLCOutPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* inputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (inputPlugin != NULL)
         return inputPlugin->canConfigure();
     else
@@ -245,7 +245,7 @@ bool InputMap::canConfigurePlugin(const QString& pluginName)
 
 QString InputMap::pluginStatus(const QString& pluginName, quint32 input)
 {
-    QLCOutPlugin* inputPlugin = NULL;
+    QLCIOPlugin* inputPlugin = NULL;
     QString info;
 
     if (pluginName.isEmpty() == false)

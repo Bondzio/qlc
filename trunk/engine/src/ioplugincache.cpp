@@ -29,7 +29,7 @@
 
 #include "hotplugmonitor.h"
 #include "ioplugincache.h"
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
 
@@ -62,7 +62,7 @@ void IOPluginCache::load(const QDir& dir)
         QString fileName(it.next());
         QString path = dir.absoluteFilePath(fileName);
         QPluginLoader loader(path, this);
-        QLCOutPlugin* ptr = qobject_cast<QLCOutPlugin*> (loader.instance());
+        QLCIOPlugin* ptr = qobject_cast<QLCIOPlugin*> (loader.instance());
         if (ptr != NULL)
         {
             /* Check for duplicates */
@@ -95,17 +95,17 @@ void IOPluginCache::load(const QDir& dir)
     }
 }
 
-QList <QLCOutPlugin*> IOPluginCache::plugins() const
+QList <QLCIOPlugin*> IOPluginCache::plugins() const
 {
     return m_plugins;
 }
 
-QLCOutPlugin* IOPluginCache::plugin(const QString& name) const
+QLCIOPlugin* IOPluginCache::plugin(const QString& name) const
 {
-    QListIterator <QLCOutPlugin*> it(m_plugins);
+    QListIterator <QLCIOPlugin*> it(m_plugins);
     while (it.hasNext() == true)
     {
-        QLCOutPlugin* ptr(it.next());
+        QLCIOPlugin* ptr(it.next());
         if (ptr->name() == name)
             return ptr;
     }
@@ -117,7 +117,7 @@ void IOPluginCache::slotConfigurationChanged()
 {
     qDebug() << Q_FUNC_INFO;
 
-    QLCOutPlugin* plugin = static_cast<QLCOutPlugin*> (QObject::sender());
+    QLCIOPlugin* plugin = static_cast<QLCIOPlugin*> (QObject::sender());
     if (plugin != NULL) // 3rd party plugins might not behave correctly
         emit pluginConfigurationChanged(plugin);
 }

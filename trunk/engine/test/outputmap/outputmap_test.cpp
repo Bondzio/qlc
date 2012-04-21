@@ -26,7 +26,7 @@
 #include "outputpluginstub.h"
 #include "outputmap_test.h"
 #include "universearray.h"
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "outputpatch.h"
 #include "outputmap.h"
 #include "qlcfile.h"
@@ -85,33 +85,33 @@ void OutputMap_Test::setPatch()
 
     QVERIFY(om.setPatch(0, "Foobar", 0) == true);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(0)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(1)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(2)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(3)->output() == QLCIOPlugin::invalidLine());
 
     QVERIFY(om.setPatch(4, stub->name(), 0) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(0)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(1)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(2)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(3)->output() == QLCIOPlugin::invalidLine());
 
     QVERIFY(om.setPatch(4, stub->name(), 4) == false);
     QVERIFY(om.patch(0)->plugin() == NULL);
-    QVERIFY(om.patch(0)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(0)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(1)->plugin() == NULL);
-    QVERIFY(om.patch(1)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(1)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(2)->plugin() == NULL);
-    QVERIFY(om.patch(2)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(2)->output() == QLCIOPlugin::invalidLine());
     QVERIFY(om.patch(3)->plugin() == NULL);
-    QVERIFY(om.patch(3)->output() == QLCOutPlugin::invalidLine());
+    QVERIFY(om.patch(3)->output() == QLCIOPlugin::invalidLine());
 
     QVERIFY(om.setPatch(3, stub->name(), 0) == true);
     QVERIFY(om.patch(3)->plugin() == stub);
@@ -335,17 +335,17 @@ void OutputMap_Test::mapping()
     OutputMap om(m_doc, 4);
 
     for (quint32 i = 0; i < 20; i++)
-        QCOMPARE(om.mapping("Dummy Output", i), QLCOutPlugin::invalidLine());
+        QCOMPARE(om.mapping("Dummy Output", i), QLCIOPlugin::invalidLine());
 
     OutputPluginStub* stub = static_cast<OutputPluginStub*>
                                 (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
     QVERIFY(om.setPatch(1, stub->name(), quint32(0)) == true);
-    QCOMPARE(om.mapping("Dummy Output", 0), QLCOutPlugin::invalidLine());
+    QCOMPARE(om.mapping("Dummy Output", 0), QLCIOPlugin::invalidLine());
     QCOMPARE(om.mapping("Dummy Output", 1), OutputMap::invalidUniverse());
-    QCOMPARE(om.mapping("Dummy Output", 2), QLCOutPlugin::invalidLine());
-    QCOMPARE(om.mapping("Dummy Output", 3), QLCOutPlugin::invalidLine());
+    QCOMPARE(om.mapping("Dummy Output", 2), QLCIOPlugin::invalidLine());
+    QCOMPARE(om.mapping("Dummy Output", 3), QLCIOPlugin::invalidLine());
     QCOMPARE(om.mapping(stub->name(), 0), quint32(1));
     QCOMPARE(om.mapping(stub->name(), 1), OutputMap::invalidUniverse());
     QCOMPARE(om.mapping(stub->name(), 2), OutputMap::invalidUniverse());
@@ -356,7 +356,7 @@ void OutputMap_Test::pluginStatus()
 {
     OutputMap om(m_doc, 4);
 
-    QVERIFY(om.pluginStatus("Foo", QLCOutPlugin::invalidLine()).contains("Nothing selected"));
+    QVERIFY(om.pluginStatus("Foo", QLCIOPlugin::invalidLine()).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Bar", 0).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Baz", 1).contains("Nothing selected"));
     QVERIFY(om.pluginStatus("Xyzzy", 2).contains("Nothing selected"));
@@ -366,7 +366,7 @@ void OutputMap_Test::pluginStatus()
                                 (m_doc->ioPluginCache()->plugins().at(0));
     QVERIFY(stub != NULL);
 
-    QVERIFY(om.pluginStatus(stub->name(), 4) == stub->outputInfo(QLCOutPlugin::invalidLine()));
+    QVERIFY(om.pluginStatus(stub->name(), 4) == stub->outputInfo(QLCIOPlugin::invalidLine()));
     QVERIFY(om.pluginStatus(stub->name(), 0) == stub->outputInfo(0));
     QVERIFY(om.pluginStatus(stub->name(), 1) == stub->outputInfo(1));
     QVERIFY(om.pluginStatus(stub->name(), 2) == stub->outputInfo(2));

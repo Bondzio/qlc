@@ -14,7 +14,7 @@ HEADERS += peperonidevice.h \
 SOURCES += peperonidevice.cpp \
            peperoniout.cpp
 
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 
 TRANSLATIONS += Peperoni_Output_fi_FI.ts
 TRANSLATIONS += Peperoni_Output_de_DE.ts

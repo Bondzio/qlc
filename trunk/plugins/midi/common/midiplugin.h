@@ -25,7 +25,7 @@
 #include <QStringList>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
 class ConfigureMIDIPlugin;
 class MidiOutputDevice;
@@ -33,10 +33,10 @@ class MidiInputDevice;
 class MidiEnumerator;
 class QString;
 
-class MidiPlugin : public QLCOutPlugin
+class MidiPlugin : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     friend class ConfigureMidiPlugin;
 

@@ -26,12 +26,12 @@
 #include <QString>
 #include <QList>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
-class OutputPluginStub : public QLCOutPlugin
+class OutputPluginStub : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*********************************************************************
      * Initialization
@@ -88,9 +88,6 @@ public:
     /** @reimp */
     QString inputInfo(quint32 input);
 
-    /** @reimp */
-    void sendFeedBack(quint32 input, quint32 channel, uchar value);
-
     /** Tell the plugin to emit valueChanged signal */
     void emitValueChanged(quint32 input, quint32 channel, uchar value) {
         emit valueChanged(input, channel, value);
@@ -99,15 +96,6 @@ public:
 public:
     /** List of inputs that have been opened */
     QList <quint32> m_openInputs;
-
-    /** $input of the latest call to feedBack() */
-    quint32 m_feedBackInput;
-
-    /** $channel of the latest call to feedBack() */
-    quint32 m_feedBackChannel;
-
-    /** $value of the latest call to feedBack() */
-    uchar m_feedBackValue;
 
     /*********************************************************************
      * Configuration

@@ -10,6 +10,7 @@ CONFIG      += plugin
 INCLUDEPATH += ../../../plugins/interfaces
 DEPENDPATH  += ../../../plugins/interfaces
 
-HEADERS += outputpluginstub.h \
-           ../../../plugins/interfaces/qlcoutplugin.h
+HEADERS += ../../../plugins/interfaces/qlcioplugin.h
+
+HEADERS += outputpluginstub.h
 SOURCES += outputpluginstub.cpp

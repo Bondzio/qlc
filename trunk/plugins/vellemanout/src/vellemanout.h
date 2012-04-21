@@ -24,13 +24,13 @@
 
 #include <QString>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "qlcmacros.h"
 
-class QLC_DECLSPEC VellemanOut : public QLCOutPlugin
+class QLC_DECLSPEC VellemanOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*************************************************************************
      * Initialization

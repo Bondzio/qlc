@@ -34,7 +34,6 @@
 #include "qlcinputprofile.h"
 #include "qlcinputchannel.h"
 #include "qlccapability.h"
-#include "qlcinplugin.h"
 #include "qlcchannel.h"
 
 #include "vcsliderproperties.h"

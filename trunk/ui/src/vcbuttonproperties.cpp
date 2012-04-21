@@ -32,7 +32,6 @@
 #include "qlcinputchannel.h"
 #include "qlcinputprofile.h"
 #include "qlcfixturedef.h"
-#include "qlcinplugin.h"
 
 #include "vcbuttonproperties.h"
 #include "selectinputchannel.h"

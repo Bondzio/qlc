@@ -25,7 +25,7 @@
 #define private public
 #include "outputpluginstub.h"
 #include "inputpatch_test.h"
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "inputpatch.h"
 #include "inputmap.h"
 #include "qlcfile.h"
@@ -59,7 +59,7 @@ void InputPatch_Test::defaults()
 {
     InputPatch ip(0, this);
     QVERIFY(ip.m_plugin == NULL);
-    QVERIFY(ip.m_input == QLCOutPlugin::invalidLine());
+    QVERIFY(ip.m_input == QLCIOPlugin::invalidLine());
     QVERIFY(ip.m_profile == NULL);
     QVERIFY(ip.pluginName() == KInputNone);
     QVERIFY(ip.inputName() == KInputNone);

@@ -31,7 +31,7 @@
 
 #include "hotplugmonitor.h"
 #include "universearray.h"
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 #include "outputpatch.h"
 #include "qlcconfig.h"
 #include "outputmap.h"
@@ -52,8 +52,8 @@ OutputMap::OutputMap(Doc* doc, quint32 universes)
 {
     initPatch();
 
-    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCOutPlugin*)),
-            this, SLOT(slotPluginConfigurationChanged(QLCOutPlugin*)));
+    connect(doc->ioPluginCache(), SIGNAL(pluginConfigurationChanged(QLCIOPlugin*)),
+            this, SLOT(slotPluginConfigurationChanged(QLCIOPlugin*)));
 }
 
 OutputMap::~OutputMap()
@@ -252,7 +252,7 @@ quint32 OutputMap::mapping(const QString& pluginName, quint32 output) const
             return uni;
     }
 
-    return QLCOutPlugin::invalidLine();
+    return QLCIOPlugin::invalidLine();
 }
 
 /*****************************************************************************
@@ -262,7 +262,7 @@ quint32 OutputMap::mapping(const QString& pluginName, quint32 output) const
 QStringList OutputMap::pluginNames()
 {
     QStringList list;
-    QListIterator <QLCOutPlugin*> it(doc()->ioPluginCache()->plugins());
+    QListIterator <QLCIOPlugin*> it(doc()->ioPluginCache()->plugins());
     while (it.hasNext() == true)
         list.append(it.next()->name());
     return list;
@@ -270,7 +270,7 @@ QStringList OutputMap::pluginNames()
 
 QStringList OutputMap::pluginOutputs(const QString& pluginName)
 {
-    QLCOutPlugin* op = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* op = doc()->ioPluginCache()->plugin(pluginName);
     if (op == NULL)
         return QStringList();
     else
@@ -279,14 +279,14 @@ QStringList OutputMap::pluginOutputs(const QString& pluginName)
 
 void OutputMap::configurePlugin(const QString& pluginName)
 {
-    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
         outputPlugin->configure();
 }
 
 bool OutputMap::canConfigurePlugin(const QString& pluginName)
 {
-    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
         return outputPlugin->canConfigure();
     else
@@ -295,7 +295,7 @@ bool OutputMap::canConfigurePlugin(const QString& pluginName)
 
 QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
 {
-    QLCOutPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
+    QLCIOPlugin* outputPlugin = doc()->ioPluginCache()->plugin(pluginName);
     if (outputPlugin != NULL)
     {
         return outputPlugin->outputInfo(output);
@@ -310,7 +310,7 @@ QString OutputMap::pluginStatus(const QString& pluginName, quint32 output)
     }
 }
 
-void OutputMap::slotPluginConfigurationChanged(QLCOutPlugin* plugin)
+void OutputMap::slotPluginConfigurationChanged(QLCIOPlugin* plugin)
 {
     for (quint32 i = 0; i < universes(); i++)
     {

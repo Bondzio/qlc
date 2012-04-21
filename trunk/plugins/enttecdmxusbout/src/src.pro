@@ -39,7 +39,7 @@ CONFIG(ftd2xx) {
     PKGCONFIG   += libftdi libusb
 }
 
-HEADERS += ../../interfaces/qlcoutplugin.h
+HEADERS += ../../interfaces/qlcioplugin.h
 HEADERS += enttecdmxusbwidget.h \
            qlcftdi.h \
            enttecdmxusbout.h \

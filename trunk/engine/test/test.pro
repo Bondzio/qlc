@@ -45,6 +45,4 @@ SUBDIRS += script
 SUBDIRS += universearray
 
 # Stubs
-SUBDIRS += inputpluginstub
 SUBDIRS += outputpluginstub
-

@@ -25,12 +25,12 @@
 #include <QString>
 #include <QFile>
 
-#include "qlcoutplugin.h"
+#include "qlcioplugin.h"
 
-class DMX4LinuxOut : public QLCOutPlugin
+class DMX4LinuxOut : public QLCIOPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCOutPlugin)
+    Q_INTERFACES(QLCIOPlugin)
 
     /*********************************************************************
      * Initialization

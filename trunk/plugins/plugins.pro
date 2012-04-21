@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS              += enttecdmxusbout
-SUBDIRS              += peperoniout
+SUBDIRS              += peperoni
 SUBDIRS              += udmxout
 SUBDIRS              += midi
 #unix:SUBDIRS         += olaout

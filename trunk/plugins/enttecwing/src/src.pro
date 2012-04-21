@@ -3,7 +3,7 @@ include(../../../coverage.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = ewinginput
+TARGET   = enttecwing
 
 INCLUDEPATH   += ../../interfaces
 CONFIG        += plugin
@@ -20,25 +20,25 @@ win32 {
 }
 
 # Input
-HEADERS += ewinginput.h \
-           eplaybackwing.h \
-           eshortcutwing.h \
-           eprogramwing.h \
-           ewing.h
+HEADERS += enttecwing.h \
+           playbackwing.h \
+           shortcutwing.h \
+           programwing.h \
+           wing.h
 
-SOURCES += ewinginput.cpp \
-           eplaybackwing.cpp \
-           eshortcutwing.cpp \
-           eprogramwing.cpp \
-           ewing.cpp
+SOURCES += enttecwing.cpp \
+           playbackwing.cpp \
+           shortcutwing.cpp \
+           programwing.cpp \
+           wing.cpp
 
 HEADERS += ../../interfaces/qlcioplugin.h
 
-TRANSLATIONS += ENTTEC_Wing_Input_fi_FI.ts
-TRANSLATIONS += ENTTEC_Wing_Input_de_DE.ts
-TRANSLATIONS += ENTTEC_Wing_Input_es_ES.ts
-TRANSLATIONS += ENTTEC_Wing_Input_fr_FR.ts
-TRANSLATIONS += ENTTEC_Wing_Input_it_IT.ts
+TRANSLATIONS += ENTTEC_Wing_fi_FI.ts
+TRANSLATIONS += ENTTEC_Wing_de_DE.ts
+TRANSLATIONS += ENTTEC_Wing_es_ES.ts
+TRANSLATIONS += ENTTEC_Wing_fr_FR.ts
+TRANSLATIONS += ENTTEC_Wing_it_IT.ts
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation
@@ -49,4 +49,3 @@ macx {
 # Installation
 target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
-

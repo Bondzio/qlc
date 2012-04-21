@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  eplaybackwing.h
+  playbackwing.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,21 +19,21 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef EPLAYBACKWING_H
-#define EPLAYBACKWING_H
+#ifndef PLAYBACKWING_H
+#define PLAYBACKWING_H
 
 #include <QHostAddress>
 #include <QByteArray>
 #include <QObject>
 
 #include "qlcmacros.h"
-#include "ewing.h"
+#include "wing.h"
 
 /****************************************************************************
- * EPlaybackWing
+ * PlaybackWing
  ****************************************************************************/
 
-class QLC_DECLSPEC EPlaybackWing : public EWing
+class QLC_DECLSPEC PlaybackWing : public Wing
 {
     Q_OBJECT
 
@@ -42,20 +42,20 @@ class QLC_DECLSPEC EPlaybackWing : public EWing
      ********************************************************************/
 public:
     /**
-     * Construct a new EPlaybackWing object. This object represents an
+     * Construct a new PlaybackWing object. This object represents an
      * ENTTEC Playback Wing at the given IP address.
      *
      * @param parent The parent object that owns the new wing object.
      * @param address The address of the physical wing board.
      * @param data A UDP datagram packet originating from a wing.
      */
-    EPlaybackWing(QObject* parent, const QHostAddress& address,
-                  const QByteArray& data);
+    PlaybackWing(QObject* parent, const QHostAddress& address,
+                 const QByteArray& data);
 
     /**
      * Destructor.
      */
-    ~EPlaybackWing();
+    ~PlaybackWing();
 
     /** @reimp */
     QString name() const;

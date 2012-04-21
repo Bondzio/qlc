@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  eprogramwing.h
+  programwing.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,21 +19,21 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef EPROGRAMWING_H
-#define EPROGRAMWING_H
+#ifndef PROGRAMWING_H
+#define PROGRAMWING_H
 
 #include <QHostAddress>
 #include <QByteArray>
 #include <QObject>
 
 #include "qlcmacros.h"
-#include "ewing.h"
+#include "wing.h"
 
 /****************************************************************************
- * EProgramWing
+ * ProgramWing
  ****************************************************************************/
 
-class QLC_DECLSPEC EProgramWing : public EWing
+class QLC_DECLSPEC ProgramWing : public Wing
 {
     Q_OBJECT
 
@@ -42,20 +42,20 @@ class QLC_DECLSPEC EProgramWing : public EWing
      ********************************************************************/
 public:
     /**
-     * Construct a new EProgramWing object. This object represents an
+     * Construct a new ProgramWing object. This object represents an
      * ENTTEC Program Wing at the given IP address.
      *
      * @param parent The parent object that owns the new wing object.
      * @param address The address of the physical wing board.
      * @param data A UDP datagram packet originating from a wing.
      */
-    EProgramWing(QObject* parent, const QHostAddress& address,
+    ProgramWing(QObject* parent, const QHostAddress& address,
                  const QByteArray& data);
 
     /**
      * Destructor.
      */
-    ~EProgramWing();
+    ~ProgramWing();
 
     /** @reimp */
     QString name() const;

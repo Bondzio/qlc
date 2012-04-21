@@ -64,7 +64,7 @@ done
 #############################################################################
 
 pushd .
-cd plugins/ewinginput/test
+cd plugins/enttecwing/test
 sh test.sh
 RESULT=$?
 if [ $RESULT != 0 ]; then

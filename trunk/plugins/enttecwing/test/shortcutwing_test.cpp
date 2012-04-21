@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeshortcutwing.cpp
+  shortcutwing_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,8 +24,8 @@
 #include <QByteArray>
 #include <QtTest>
 
-#include "eshortcutwing.h"
-#include "eshortcutwing_test.h"
+#include "shortcutwing.h"
+#include "shortcutwing_test.h"
 
 #define SHC_FIRMWARE 147
 #define SHC_FLAGS (1 << 7) /* Page Up */	\
@@ -35,7 +35,7 @@
 		| (1 << 0) /* Product (1=PLB, 2=SHC, 3=PGM) */	\
 		| (0 << 0) /* Product */
 
-QByteArray EShortcutWing_Test::data()
+QByteArray ShortcutWing_Test::data()
 {
     QByteArray data;
 
@@ -78,50 +78,50 @@ QByteArray EShortcutWing_Test::data()
     return data;
 }
 
-void EShortcutWing_Test::initTestCase()
+void ShortcutWing_Test::initTestCase()
 {
-    m_ewing = new EShortcutWing(this, QHostAddress::LocalHost, data());
-    QVERIFY(m_ewing != NULL);
+    m_wing = new ShortcutWing(this, QHostAddress::LocalHost, data());
+    QVERIFY(m_wing != NULL);
 }
 
-void EShortcutWing_Test::firmware()
+void ShortcutWing_Test::firmware()
 {
-    QVERIFY(m_ewing->firmware() == SHC_FIRMWARE);
+    QVERIFY(m_wing->firmware() == SHC_FIRMWARE);
 }
 
-void EShortcutWing_Test::address()
+void ShortcutWing_Test::address()
 {
-    QVERIFY(m_ewing->address() == QHostAddress::LocalHost);
+    QVERIFY(m_wing->address() == QHostAddress::LocalHost);
 }
 
-void EShortcutWing_Test::isOutputData()
+void ShortcutWing_Test::isOutputData()
 {
     QByteArray ba(data());
 
-    QVERIFY(EWing::isOutputData(ba) == true);
+    QVERIFY(Wing::isOutputData(ba) == true);
 
     ba[1] = 'I';
-    QVERIFY(EWing::isOutputData(ba) == false);
+    QVERIFY(Wing::isOutputData(ba) == false);
 }
 
-void EShortcutWing_Test::name()
+void ShortcutWing_Test::name()
 {
-    QCOMPARE(m_ewing->name(), QString("Shortcut ") + tr("at") + QString(" ")
+    QCOMPARE(m_wing->name(), QString("Shortcut ") + tr("at") + QString(" ")
              + QHostAddress(QHostAddress::LocalHost).toString());
 }
 
-void EShortcutWing_Test::infoText()
+void ShortcutWing_Test::infoText()
 {
-    QString str = QString("<B>%1</B>").arg(m_ewing->name());
+    QString str = QString("<B>%1</B>").arg(m_wing->name());
     str += QString("<P>");
     str += tr("Firmware version %1").arg(SHC_FIRMWARE);
     str += QString("<BR>");
     str += tr("Device is operating correctly.");
     str += QString("</P>");
-    QCOMPARE(m_ewing->infoText(), str);
+    QCOMPARE(m_wing->infoText(), str);
 }
 
-void EShortcutWing_Test::tooShortData()
+void ShortcutWing_Test::tooShortData()
 {
     // Just a stability check; nothing should happen if data is too short
     QByteArray foo;
@@ -138,14 +138,14 @@ void EShortcutWing_Test::tooShortData()
     foo.append(char(67));
     foo.append(char(89));
     foo.append(char(123));
-    m_ewing->parseData(foo);
+    m_wing->parseData(foo);
 }
 
-void EShortcutWing_Test::buttons_data()
+void ShortcutWing_Test::buttons_data()
 {
     QByteArray ba(data());
 
-    /* Create columns for a QByteArray that is fed to EWing::parseData()
+    /* Create columns for a QByteArray that is fed to Wing::parseData()
        on each row, the channel number to read and the value expected for
        that channel after each parseData() call. */
     QTest::addColumn<QByteArray> ("ba");
@@ -399,18 +399,18 @@ void EShortcutWing_Test::buttons_data()
     QTest::newRow("Button 59") << ba << 59 << 255;
 }
 
-void EShortcutWing_Test::buttons()
+void ShortcutWing_Test::buttons()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
     QFETCH(int, value);
 
-    m_ewing->parseData(ba);
-    QVERIFY(m_ewing->cacheValue(channel) == (unsigned char) value);
+    m_wing->parseData(ba);
+    QVERIFY(m_wing->cacheValue(channel) == (unsigned char) value);
 }
 
-void EShortcutWing_Test::cleanupTestCase()
+void ShortcutWing_Test::cleanupTestCase()
 {
-    delete m_ewing;
-    m_ewing = NULL;
+    delete m_wing;
+    m_wing = NULL;
 }

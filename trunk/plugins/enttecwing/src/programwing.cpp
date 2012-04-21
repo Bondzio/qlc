@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  eprogramwing.cpp
+  programwing.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,35 +24,35 @@
 #include <QByteArray>
 #include <QString>
 
-#include "eprogramwing.h"
+#include "programwing.h"
 
 /****************************************************************************
  * Program wing specifics
  ****************************************************************************/
 
-#define EWING_PROGRAM_BYTE_BUTTON 6
-#define EWING_PROGRAM_BUTTON_SIZE 9
+#define WING_PROGRAM_BYTE_BUTTON 6
+#define WING_PROGRAM_BUTTON_SIZE 9
 
-#define EWING_PROGRAM_BYTE_ENCODER 25
-#define EWING_PROGRAM_ENCODER_SIZE 3
+#define WING_PROGRAM_BYTE_ENCODER 25
+#define WING_PROGRAM_ENCODER_SIZE 3
 
 /** Should constitute up to 75 channels (with some unused ones in the middle) */
-#define EWING_PROGRAM_CHANNEL_COUNT (8 * EWING_PROGRAM_BUTTON_SIZE) \
-					+ EWING_PROGRAM_ENCODER_SIZE
+#define WING_PROGRAM_CHANNEL_COUNT (8 * WING_PROGRAM_BUTTON_SIZE) \
+					+ WING_PROGRAM_ENCODER_SIZE
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-EProgramWing::EProgramWing(QObject* parent, const QHostAddress& address,
-                           const QByteArray& data)
-        : EWing(parent, address, data)
+ProgramWing::ProgramWing(QObject* parent, const QHostAddress& address,
+                         const QByteArray& data)
+    : Wing(parent, address, data)
 {
-    m_values = QByteArray(EWING_PROGRAM_CHANNEL_COUNT, 0);
+    m_values = QByteArray(WING_PROGRAM_CHANNEL_COUNT, 0);
 
     m_channelMap[0] = 6;
     m_channelMap[1] = 5;
-    m_channelMap[2] = EWING_INVALID_CHANNEL;
+    m_channelMap[2] = WING_INVALID_CHANNEL;
     m_channelMap[3] = 4;
     m_channelMap[4] = 3;
     m_channelMap[5] = 2;
@@ -70,11 +70,11 @@ EProgramWing::EProgramWing(QObject* parent, const QHostAddress& address,
 
     m_channelMap[16] = 17;
     m_channelMap[17] = 16;
-    m_channelMap[18] = EWING_INVALID_CHANNEL;
-    m_channelMap[19] = EWING_INVALID_CHANNEL;
-    m_channelMap[20] = EWING_INVALID_CHANNEL;
-    m_channelMap[21] = EWING_INVALID_CHANNEL;
-    m_channelMap[22] = EWING_INVALID_CHANNEL;
+    m_channelMap[18] = WING_INVALID_CHANNEL;
+    m_channelMap[19] = WING_INVALID_CHANNEL;
+    m_channelMap[20] = WING_INVALID_CHANNEL;
+    m_channelMap[21] = WING_INVALID_CHANNEL;
+    m_channelMap[22] = WING_INVALID_CHANNEL;
     m_channelMap[23] = 15;
 
     m_channelMap[24] = 25;
@@ -122,7 +122,7 @@ EProgramWing::EProgramWing(QObject* parent, const QHostAddress& address,
     m_channelMap[62] = 52;
     m_channelMap[63] = 51;
 
-    m_channelMap[64] = EWING_INVALID_CHANNEL;
+    m_channelMap[64] = WING_INVALID_CHANNEL;
     m_channelMap[65] = 64;
     m_channelMap[66] = 63;
     m_channelMap[67] = 62;
@@ -141,7 +141,7 @@ EProgramWing::EProgramWing(QObject* parent, const QHostAddress& address,
     parseData(data);
 }
 
-EProgramWing::~EProgramWing()
+ProgramWing::~ProgramWing()
 {
 }
 
@@ -149,7 +149,7 @@ EProgramWing::~EProgramWing()
  * Wing data
  ****************************************************************************/
 
-QString EProgramWing::name() const
+QString ProgramWing::name() const
 {
     QString name("Program");
     name += QString(" ") + tr("at") + QString(" ");
@@ -162,14 +162,14 @@ QString EProgramWing::name() const
  * Input data
  ****************************************************************************/
 
-void EProgramWing::parseData(const QByteArray& data)
+void ProgramWing::parseData(const QByteArray& data)
 {
     char value;
     int size;
     int byte;
 
     /* Check that we can get all buttons from the packet */
-    size = EWING_PROGRAM_BYTE_BUTTON + EWING_PROGRAM_BUTTON_SIZE;
+    size = WING_PROGRAM_BYTE_BUTTON + WING_PROGRAM_BUTTON_SIZE;
     if (data.size() < size)
     {
         qWarning() << Q_FUNC_INFO << "Expected at least" << size
@@ -178,7 +178,7 @@ void EProgramWing::parseData(const QByteArray& data)
     }
 
     /* Read the state of each button */
-    for (byte = size - 1; byte >= EWING_PROGRAM_BYTE_BUTTON; byte--)
+    for (byte = size - 1; byte >= WING_PROGRAM_BYTE_BUTTON; byte--)
     {
         /* Each byte has 8 button values as binary bits */
         for (int bit = 7; bit >= 0; bit--)
@@ -201,7 +201,7 @@ void EProgramWing::parseData(const QByteArray& data)
     }
 
     /* Check that we can get all sliders from the packet */
-    size = EWING_PROGRAM_BYTE_ENCODER + EWING_PROGRAM_ENCODER_SIZE;
+    size = WING_PROGRAM_BYTE_ENCODER + WING_PROGRAM_ENCODER_SIZE;
     if (data.size() < size)
     {
         qWarning() << "Expected at least" << size
@@ -210,13 +210,13 @@ void EProgramWing::parseData(const QByteArray& data)
     }
 
     /* Read the direction of each encoder. 255 = CW, 1 = CCW, 0 = NOP. */
-    for (int encoder = 0; encoder < EWING_PROGRAM_ENCODER_SIZE; encoder++)
+    for (int encoder = 0; encoder < WING_PROGRAM_ENCODER_SIZE; encoder++)
     {
-        int channel = (EWING_PROGRAM_CHANNEL_COUNT -
-                       EWING_PROGRAM_ENCODER_SIZE) + encoder;
+        int channel = (WING_PROGRAM_CHANNEL_COUNT -
+                       WING_PROGRAM_ENCODER_SIZE) + encoder;
         unsigned char cvalue = cacheValue(m_channelMap[channel]);
 
-        value = data[EWING_PROGRAM_BYTE_ENCODER + encoder];
+        value = data[WING_PROGRAM_BYTE_ENCODER + encoder];
         if (value == char(255))
             setCacheValue(m_channelMap[channel], ++cvalue);
         else if (value == char(1))

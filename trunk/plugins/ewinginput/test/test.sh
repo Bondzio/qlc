@@ -1,4 +1,0 @@
-#!/bin/bash
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src \
-    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-    ./ewing_test

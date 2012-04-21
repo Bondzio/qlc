@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeshortcutwing.h
+  shortcutwing_test.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,18 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TESTESHORTCUTWING_H
-#define TESTESHORTCUTWING_H
+#ifndef SHORTCUTWING_TEST_H
+#define SHORTCUTWING_TEST_H
 
 #include <QByteArray>
 #include <QObject>
 
-class EShortcutWing;
-class EShortcutWing_Test : public QObject
+class ShortcutWing;
+class ShortcutWing_Test : public QObject
 {
     Q_OBJECT
 
-protected:
+private:
     QByteArray data();
 
 private slots:
@@ -49,7 +49,7 @@ private slots:
     void cleanupTestCase();
 
 private:
-    EShortcutWing* m_ewing;
+    ShortcutWing* m_wing;
 };
 
 #endif

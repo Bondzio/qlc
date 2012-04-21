@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  ewinginput.h
+  enttecwing.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,15 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef EWINGINPUT_H
-#define EWINGINPUT_H
+#ifndef ENTTECWING_H
+#define ENTTECWING_H
 
 #include <QHostAddress>
 #include <QStringList>
 #include <QList>
 
 #include "qlcioplugin.h"
-#include "ewing.h"
+#include "wing.h"
 
 class QUdpSocket;
 
@@ -35,7 +35,7 @@ class QUdpSocket;
  * EWingInput
  *****************************************************************************/
 
-class EWingInput : public QLCIOPlugin
+class EnttecWing : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -48,7 +48,7 @@ public:
     void init();
 
     /** @reimp */
-    virtual ~EWingInput();
+    virtual ~EnttecWing();
 
     /** @reimp */
     QString name();
@@ -119,36 +119,36 @@ signals:
 protected:
     /**
      * Create a new wing object from the given datagram packet. Looks up
-     * the exact wing type from data and creates an EPlaybackWing,
-     * EShortcutWing or an EProgramWing.
+     * the exact wing type from data and creates a PlaybackWing,
+     * a ShortcutWing or a ProgramWing.
      *
      * @param parent The parent object that owns the new wing object
      * @param address The address of the physical wing board
      * @param data A UDP datagram packet originating from a wing
      *
-     * @return A new EWing object or NULL if an error occurred
+     * @return A new Wing object or NULL if an error occurred
      */
-    static EWing* createWing(QObject* parent, const QHostAddress& address,
-                             const QByteArray& data);
+    static Wing* createWing(QObject* parent, const QHostAddress& address,
+                            const QByteArray& data);
 
     /** Find a specific device by its host address and type */
-    EWing* device(const QHostAddress& address, EWing::Type type);
+    Wing* device(const QHostAddress& address, Wing::Type type);
 
     /** Find a device by its index (input line) */
-    EWing* device(quint32 index);
+    Wing* device(quint32 index);
 
     /** Add a newly-created device to the plugin's list of devices */
-    void addDevice(EWing* device);
+    void addDevice(Wing* device);
 
     /** Remove a specific device from the plugin */
-    void removeDevice(EWing* device);
+    void removeDevice(Wing* device);
 
 protected slots:
     void slotReadSocket();
     void slotValueChanged(quint32 channel, uchar value);
 
 protected:
-    QList <EWing*> m_devices;
+    QList <Wing*> m_devices;
     QUdpSocket* m_socket;
     QString m_errorString;
 };

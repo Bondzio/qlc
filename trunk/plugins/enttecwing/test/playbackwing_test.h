@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  main.cpp
+  playbackwing_test.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,37 +19,40 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <QtTest>
+#ifndef PLAYBACKWING_TEST_H
+#define PLAYBACKWING_TEST_H
 
-#include "eplaybackwing_test.h"
-#include "eshortcutwing_test.h"
-#include "eprogramwing_test.h"
-#include "ewing_test.h"
+#include <QByteArray>
+#include <QObject>
 
-int main(int argc, char** argv)
+class PlaybackWing;
+class PlaybackWing_Test : public QObject
 {
-    QApplication qapp(argc, argv);
-    int r;
+    Q_OBJECT
 
-    EWing_Test ewi;
-    r = QTest::qExec(&ewi, argc, argv);
-    if (r != 0)
-        return r;
+private:
+    QByteArray data();
 
-    EPlaybackWing_Test epl;
-    r = QTest::qExec(&epl, argc, argv);
-    if (r != 0)
-        return r;
+private slots:
+    void initTestCase();
 
-    EShortcutWing_Test esh;
-    r = QTest::qExec(&esh, argc, argv);
-    if (r != 0)
-        return r;
+    void firmware();
+    void address();
+    void isOutputData();
+    void name();
+    void infoText();
+    void tooShortData();
 
-    EProgramWing_Test epr;
-    r = QTest::qExec(&epr, argc, argv);
-    if (r != 0)
-        return r;
+    void buttons_data();
+    void buttons();
 
-    return 0;
-}
+    void faders_data();
+    void faders();
+
+    void cleanupTestCase();
+
+private:
+    PlaybackWing* m_wing;
+};
+
+#endif

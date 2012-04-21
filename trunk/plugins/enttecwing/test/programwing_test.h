@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeprogramwing.
+  programwing_test.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,18 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TESTEPROGRAMWING_H
-#define TESTEPROGRAMWING_H
+#ifndef PROGRAMWING_TEST_H
+#define PROGRAMWING_TEST_H
 
 #include <QByteArray>
 #include <QObject>
 
-class EProgramWing;
-class EProgramWing_Test : public QObject
+class ProgramWing;
+class ProgramWing_Test : public QObject
 {
     Q_OBJECT
 
-protected:
+private:
     QByteArray data();
 
 private slots:
@@ -52,7 +52,7 @@ private slots:
     void cleanupTestCase();
 
 private:
-    EProgramWing* m_ewing;
+    ProgramWing* m_wing;
 };
 
 #endif

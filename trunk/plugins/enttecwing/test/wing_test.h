@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeplaybackwing.h
+  wing_test.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,40 +19,35 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TESTEPLAYBACKWING_H
-#define TESTEPLAYBACKWING_H
+#ifndef WING_TEST_H
+#define WING_TEST_H
 
-#include <QByteArray>
 #include <QObject>
+#include "wing.h"
 
-class EPlaybackWing;
-class EPlaybackWing_Test : public QObject
+class WingStub : public Wing
+{
+    Q_OBJECT
+public:
+    WingStub(QObject* parent, const QHostAddress& host, const QByteArray& ba);
+    ~WingStub();
+
+    QString name() const;
+    void parseData(const QByteArray& ba);
+};
+
+class Wing_Test : public QObject
 {
     Q_OBJECT
 
-protected:
-    QByteArray data();
-
 private slots:
-    void initTestCase();
-
-    void firmware();
-    void address();
+    void resolveType();
+    void resolveFirmware();
     void isOutputData();
-    void name();
-    void infoText();
-    void tooShortData();
-
-    void buttons_data();
-    void buttons();
-
-    void faders_data();
-    void faders();
-
-    void cleanupTestCase();
-
-private:
-    EPlaybackWing* m_ewing;
+    void initial();
+    void page();
+    void bcd();
+    void cache();
 };
 
 #endif

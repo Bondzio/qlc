@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  ewing.cpp
+  wing.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,39 +24,39 @@
 #include <QByteArray>
 #include <QString>
 
-#include "ewing.h"
+#include "wing.h"
 
 /** ENTTEC wings send data thru UDP port 3330 */
-const int EWing::UDPPort = 3330;
+const int Wing::UDPPort = 3330;
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-EWing::EWing(QObject* parent, const QHostAddress& address, const QByteArray& data)
+Wing::Wing(QObject* parent, const QHostAddress& address, const QByteArray& data)
     : QObject(parent)
 {
     m_address = address;
     m_type = resolveType(data);
     m_firmware = resolveFirmware(data);
-    m_page = EWING_PAGE_MIN;
+    m_page = WING_PAGE_MIN;
 }
 
-EWing::~EWing()
+Wing::~Wing()
 {
 }
 
-bool EWing::isOutputData(const QByteArray& data)
+bool Wing::isOutputData(const QByteArray& data)
 {
     /* Check, if there's enough bytes for the header */
-    if (data.size() < EWING_HEADER_SIZE)
+    if (data.size() < WING_HEADER_SIZE)
         return false;
 
-    QByteArray header(data.mid(EWING_BYTE_HEADER, EWING_HEADER_SIZE));
-    return (header == EWING_HEADER_OUTPUT);
+    QByteArray header(data.mid(WING_BYTE_HEADER, WING_HEADER_SIZE));
+    return (header == WING_HEADER_OUTPUT);
 }
 
-QString EWing::infoText() const
+QString Wing::infoText() const
 {
     QString str;
     str  = QString("<B>%1</B>").arg(name());
@@ -72,73 +72,73 @@ QString EWing::infoText() const
  * Wing data
  ****************************************************************************/
 
-QHostAddress EWing::address() const
+QHostAddress Wing::address() const
 {
     return m_address;
 }
 
-EWing::Type EWing::type() const
+Wing::Type Wing::type() const
 {
     return m_type;
 }
 
-uchar EWing::firmware() const
+uchar Wing::firmware() const
 {
     return m_firmware;
 }
 
-EWing::Type EWing::resolveType(const QByteArray& data)
+Wing::Type Wing::resolveType(const QByteArray& data)
 {
     /* Check, if there's enough bytes for wing flags */
-    if (data.size() < EWING_BYTE_FLAGS)
+    if (data.size() < WING_BYTE_FLAGS)
     {
         qWarning() << Q_FUNC_INFO
                    << "Unable to determine wing type."
-                   << "Expected at least" << EWING_BYTE_FLAGS
+                   << "Expected at least" << WING_BYTE_FLAGS
                    << "bytes but got only" << data.size();
         return Unknown;
     }
 
-    unsigned char flags = data[EWING_BYTE_FLAGS];
-    return EWing::Type(flags & EWING_FLAGS_MASK_TYPE);
+    unsigned char flags = data[WING_BYTE_FLAGS];
+    return Wing::Type(flags & WING_FLAGS_MASK_TYPE);
 }
 
-unsigned char EWing::resolveFirmware(const QByteArray& data)
+unsigned char Wing::resolveFirmware(const QByteArray& data)
 {
     /* Check, if there's enough bytes for wing flags */
-    if (data.size() < EWING_BYTE_FIRMWARE)
+    if (data.size() < WING_BYTE_FIRMWARE)
     {
         qWarning() << Q_FUNC_INFO
                    << "Unable to determine firmware version."
-                   << "Expected at least" << EWING_BYTE_FIRMWARE
+                   << "Expected at least" << WING_BYTE_FIRMWARE
                    << "bytes but got only" << data.size();
         return 0;
     }
 
-    return data[EWING_BYTE_FIRMWARE];
+    return data[WING_BYTE_FIRMWARE];
 }
 
 /****************************************************************************
  * Page
  ****************************************************************************/
 
-void EWing::nextPage()
+void Wing::nextPage()
 {
-    if (m_page == EWING_PAGE_MAX)
-        m_page = EWING_PAGE_MIN;
+    if (m_page == WING_PAGE_MAX)
+        m_page = WING_PAGE_MIN;
     else
         m_page++;
 }
 
-void EWing::previousPage()
+void Wing::previousPage()
 {
-    if (m_page == EWING_PAGE_MIN)
-        m_page = EWING_PAGE_MAX;
+    if (m_page == WING_PAGE_MIN)
+        m_page = WING_PAGE_MAX;
     else
         m_page--;
 }
 
-uchar EWing::page() const
+uchar Wing::page() const
 {
     return m_page;
 }
@@ -147,7 +147,7 @@ uchar EWing::page() const
  * Input data
  ****************************************************************************/
 
-uchar EWing::cacheValue(int channel)
+uchar Wing::cacheValue(int channel)
 {
     if (channel >= m_values.size())
         return 0;
@@ -155,25 +155,25 @@ uchar EWing::cacheValue(int channel)
         return m_values[channel];
 }
 
-void EWing::setCacheValue(int channel, uchar value)
+void Wing::setCacheValue(int channel, uchar value)
 {
     if (channel >= m_values.size())
         return;
 
-    if (channel != EWING_INVALID_CHANNEL && m_values[channel] != char(value))
+    if (channel != WING_INVALID_CHANNEL && m_values[channel] != char(value))
     {
         m_values[channel] = char(value);
         emit valueChanged(channel, value);
     }
 }
 
-void EWing::feedBack(quint32 channel, uchar value)
+void Wing::feedBack(quint32 channel, uchar value)
 {
     Q_UNUSED(channel);
     Q_UNUSED(value);
 }
 
-uchar EWing::toBCD(uchar number)
+uchar Wing::toBCD(uchar number)
 {
     uchar bcd = ((number / 10) & 0x0F) << 4;
     bcd |= (number % 10) & 0x0F;

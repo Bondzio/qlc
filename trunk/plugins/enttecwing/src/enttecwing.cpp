@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  ewinginput.cpp
+  enttecwing.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -23,17 +23,17 @@
 #include <QUdpSocket>
 #include <QDebug>
 
-#include "eplaybackwing.h"
-#include "eshortcutwing.h"
-#include "eprogramwing.h"
-#include "ewinginput.h"
-#include "ewing.h"
+#include "playbackwing.h"
+#include "shortcutwing.h"
+#include "programwing.h"
+#include "enttecwing.h"
+#include "wing.h"
 
 /*****************************************************************************
- * EWingInput Initialization
+ * Initialization
  *****************************************************************************/
 
-void EWingInput::init()
+void EnttecWing::init()
 {
     /* Create a new UDP socket and start listening to packets coming to
        any local address. */
@@ -42,23 +42,23 @@ void EWingInput::init()
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(slotReadSocket()));
 }
 
-EWingInput::~EWingInput()
+EnttecWing::~EnttecWing()
 {
     while (m_devices.isEmpty() == false)
         delete m_devices.takeFirst();
 }
 
-QString EWingInput::name()
+QString EnttecWing::name()
 {
-    return QString("ENTTEC Wing Input");
+    return QString("ENTTEC Wing");
 }
 
-void EWingInput::reBindSocket()
+void EnttecWing::reBindSocket()
 {
     if (m_socket->state() == QAbstractSocket::BoundState)
         m_socket->close();
 
-    if (m_socket->bind(QHostAddress::Any, EWing::UDPPort) == false)
+    if (m_socket->bind(QHostAddress::Any, Wing::UDPPort) == false)
     {
         m_errorString = m_socket->errorString();
         qWarning() << Q_FUNC_INFO << m_errorString;
@@ -73,27 +73,27 @@ void EWingInput::reBindSocket()
  * Inputs
  *****************************************************************************/
 
-void EWingInput::openInput(quint32 input)
+void EnttecWing::openInput(quint32 input)
 {
     Q_UNUSED(input);
     reBindSocket();
 }
 
-void EWingInput::closeInput(quint32 input)
+void EnttecWing::closeInput(quint32 input)
 {
     Q_UNUSED(input);
 }
 
-QStringList EWingInput::inputs()
+QStringList EnttecWing::inputs()
 {
     QStringList list;
-    QListIterator <EWing*> it(m_devices);
+    QListIterator <Wing*> it(m_devices);
     while (it.hasNext() == true)
         list << it.next()->name();
     return list;
 }
 
-QString EWingInput::inputInfo(quint32 input)
+QString EnttecWing::inputInfo(quint32 input)
 {
     QString str;
 
@@ -117,14 +117,14 @@ QString EWingInput::inputInfo(quint32 input)
         if (m_socket->state() != QAbstractSocket::BoundState)
         {
             str += QString("<P>");
-            str += tr("Unable to bind to UDP port %1:").arg(EWing::UDPPort);
+            str += tr("Unable to bind to UDP port %1:").arg(Wing::UDPPort);
             str += QString(" %1.").arg(m_errorString);
             str += QString("</P>");
         }
         else
         {
             str += QString("<P>");
-            str += tr("Listening to UDP port %1.").arg(EWing::UDPPort);
+            str += tr("Listening to UDP port %1.").arg(Wing::UDPPort);
             str += QString("</P>");
         }
     }
@@ -132,7 +132,7 @@ QString EWingInput::inputInfo(quint32 input)
     {
         /* A specific input line selected. Display its information if
            available. */
-        EWing* dev = device(input);
+        Wing* dev = device(input);
         if (dev != NULL)
             str += dev->infoText();
     }
@@ -143,24 +143,24 @@ QString EWingInput::inputInfo(quint32 input)
     return str;
 }
 
-void EWingInput::sendFeedBack(quint32 input, quint32 channel, uchar value)
+void EnttecWing::sendFeedBack(quint32 input, quint32 channel, uchar value)
 {
-    EWing* ewing = device(input);
-    if (ewing != NULL)
-        ewing->feedBack(channel, value);
+    Wing* wing = device(input);
+    if (wing != NULL)
+        wing->feedBack(channel, value);
 }
 
 /*****************************************************************************
  * Configuration
  *****************************************************************************/
 
-void EWingInput::configure()
+void EnttecWing::configure()
 {
     reBindSocket();
     emit configurationChanged();
 }
 
-bool EWingInput::canConfigure()
+bool EnttecWing::canConfigure()
 {
     return true;
 }
@@ -169,43 +169,40 @@ bool EWingInput::canConfigure()
  * Devices
  *****************************************************************************/
 
-EWing* EWingInput::createWing(QObject* parent, const QHostAddress& address,
+Wing* EnttecWing::createWing(QObject* parent, const QHostAddress& address,
                               const QByteArray& data)
 {
-    EWing* ewing;
+    Wing* wing = NULL;
 
     /* Check, that the message is from an ENTTEC Wing */
-    if (EWing::isOutputData(data) == false)
+    if (Wing::isOutputData(data) == false)
         return NULL;
 
-    switch (EWing::resolveType(data))
+    switch (Wing::resolveType(data))
     {
-    case EWing::Playback:
-        ewing = new EPlaybackWing(parent, address, data);
+    case Wing::Playback:
+        wing = new PlaybackWing(parent, address, data);
         break;
-
-    case EWing::Shortcut:
-        ewing = new EShortcutWing(parent, address, data);
+    case Wing::Shortcut:
+        wing = new ShortcutWing(parent, address, data);
         break;
-
-    case EWing::Program:
-        ewing = new EProgramWing(parent, address, data);
+    case Wing::Program:
+        wing = new ProgramWing(parent, address, data);
         break;
-
     default:
-        ewing = NULL;
+        wing = NULL;
         break;
     }
 
-    return ewing;
+    return wing;
 }
 
-EWing* EWingInput::device(const QHostAddress& address, EWing::Type type)
+Wing* EnttecWing::device(const QHostAddress& address, Wing::Type type)
 {
-    QListIterator <EWing*> it(m_devices);
+    QListIterator <Wing*> it(m_devices);
     while (it.hasNext() == true)
     {
-        EWing* dev = it.next();
+        Wing* dev = it.next();
         if (dev->address() == address && dev->type() == type)
             return dev;
     }
@@ -213,7 +210,7 @@ EWing* EWingInput::device(const QHostAddress& address, EWing::Type type)
     return NULL;
 }
 
-EWing* EWingInput::device(quint32 index)
+Wing* EnttecWing::device(quint32 index)
 {
     if (index < quint32(m_devices.count()))
         return m_devices.at(index);
@@ -221,13 +218,13 @@ EWing* EWingInput::device(quint32 index)
         return NULL;
 }
 
-static bool ewing_device_sort(const EWing* d1, const EWing* d2)
+static bool wing_device_sort(const Wing* d1, const Wing* d2)
 {
     /* Sort devices based on their addresses. Lexical sorting is enough. */
     return (d1->address().toString() < d2->address().toString());
 }
 
-void EWingInput::addDevice(EWing* device)
+void EnttecWing::addDevice(Wing* device)
 {
     Q_ASSERT(device != NULL);
 
@@ -240,12 +237,12 @@ void EWingInput::addDevice(EWing* device)
        between sessions they need to be sorted according to some
        (semi-)permanent criteria. Their addresses shouldn't change too
        often, so let's use that. */
-    qSort(m_devices.begin(), m_devices.end(), ewing_device_sort);
+    qSort(m_devices.begin(), m_devices.end(), wing_device_sort);
 
     emit configurationChanged();
 }
 
-void EWingInput::removeDevice(EWing* device)
+void EnttecWing::removeDevice(Wing* device)
 {
     Q_ASSERT(device != NULL);
     m_devices.removeAll(device);
@@ -254,20 +251,20 @@ void EWingInput::removeDevice(EWing* device)
     emit configurationChanged();
 }
 
-void EWingInput::slotReadSocket()
+void EnttecWing::slotReadSocket()
 {
     while (m_socket->hasPendingDatagrams() == true)
     {
         QHostAddress sender;
         QByteArray data;
-        EWing* wing;
+        Wing* wing;
 
         /* Read data from socket */
         data.resize(m_socket->pendingDatagramSize());
         m_socket->readDatagram(data.data(), data.size(), &sender);
 
         /* Check, whether we already have a device from this address */
-        wing = device(sender, EWing::resolveType(data));
+        wing = device(sender, Wing::resolveType(data));
         if (wing == NULL)
         {
             /* New address. Create a new device. */
@@ -283,9 +280,9 @@ void EWingInput::slotReadSocket()
     }
 }
 
-void EWingInput::slotValueChanged(quint32 channel, uchar value)
+void EnttecWing::slotValueChanged(quint32 channel, uchar value)
 {
-    EWing* wing = qobject_cast<EWing*> (QObject::sender());
+    Wing* wing = qobject_cast<Wing*> (QObject::sender());
     emit valueChanged(m_devices.indexOf(wing), channel, value);
 }
 
@@ -293,4 +290,4 @@ void EWingInput::slotValueChanged(quint32 channel, uchar value)
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(ewinginput, EWingInput)
+Q_EXPORT_PLUGIN2(enttecwing, EnttecWing)

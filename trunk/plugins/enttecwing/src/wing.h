@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  ewing.h
+  wing.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef EWING_H
-#define EWING_H
+#ifndef WING_H
+#define WING_H
 
 #include <QHostAddress>
 #include <QByteArray>
@@ -28,33 +28,33 @@
 
 #include "qlcmacros.h"
 
-#define EWING_INVALID_CHANNEL -1
+#define WING_INVALID_CHANNEL -1
 
 /****************************************************************************
  * Header data common to all wings
  ****************************************************************************/
 
-#define EWING_BYTE_HEADER   0 /* 4 bytes */
-#define EWING_HEADER_SIZE   4
-#define EWING_HEADER_OUTPUT "WODD"
-#define EWING_HEADER_INPUT  "WIDD"
-#define EWING_PAGE_MIN      0
-#define EWING_PAGE_MAX      99
+#define WING_BYTE_HEADER   0 /* 4 bytes */
+#define WING_HEADER_SIZE   4
+#define WING_HEADER_OUTPUT "WODD"
+#define WING_HEADER_INPUT  "WIDD"
+#define WING_PAGE_MIN      0
+#define WING_PAGE_MAX      99
 
 /****************************************************************************
  * Status data common to all wings
  ****************************************************************************/
 
-#define EWING_BYTE_FIRMWARE   4 /* Firmware version, 8bit value (0-255) */
+#define WING_BYTE_FIRMWARE   4 /* Firmware version, 8bit value (0-255) */
 
-#define EWING_BYTE_FLAGS      5 /* Wing flags */
-#define EWING_FLAGS_MASK_TYPE 0x3
+#define WING_BYTE_FLAGS      5 /* Wing flags */
+#define WING_FLAGS_MASK_TYPE 0x3
 
 /****************************************************************************
- * EWing
+ * Wing
  ****************************************************************************/
 
-class QLC_DECLSPEC EWing : public QObject
+class QLC_DECLSPEC Wing : public QObject
 {
     Q_OBJECT
 
@@ -75,20 +75,20 @@ public:
     };
 
     /**
-     * Construct a new EWing object. Since EWing contains pure virtual
-     * functions, the EWing class cannot be instantiated without
+     * Construct a new Wing object. Since Wing contains pure virtual
+     * functions, the Wing class cannot be instantiated without
      * inheritance.
      *
      * @param parent The parent object that owns the new wing object.
      * @param address The address of the physical wing board.
      * @param data A UDP datagram packet originating from a wing.
      */
-    EWing(QObject* parent, const QHostAddress& address, const QByteArray& data);
+    Wing(QObject* parent, const QHostAddress& address, const QByteArray& data);
 
     /**
      * Destructor.
      */
-    virtual ~EWing();
+    virtual ~Wing();
 
 public:
     /**

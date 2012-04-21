@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testewing.h
+  main.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -19,35 +19,37 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TESTEWING_H
-#define TESTEWING_H
+#include <QtTest>
 
-#include <QObject>
-#include "ewing.h"
+#include "playbackwing_test.h"
+#include "shortcutwing_test.h"
+#include "programwing_test.h"
+#include "wing_test.h"
 
-class EWingStub : public EWing
+int main(int argc, char** argv)
 {
-    Q_OBJECT
-public:
-    EWingStub(QObject* parent, const QHostAddress& host, const QByteArray& ba);
-    ~EWingStub();
+    QApplication qapp(argc, argv);
+    int r;
 
-    QString name() const;
-    void parseData(const QByteArray& ba);
-};
+    Wing_Test ewi;
+    r = QTest::qExec(&ewi, argc, argv);
+    if (r != 0)
+        return r;
 
-class EWing_Test : public QObject
-{
-    Q_OBJECT
+    PlaybackWing_Test epl;
+    r = QTest::qExec(&epl, argc, argv);
+    if (r != 0)
+        return r;
 
-private slots:
-    void resolveType();
-    void resolveFirmware();
-    void isOutputData();
-    void initial();
-    void page();
-    void bcd();
-    void cache();
-};
+    ShortcutWing_Test esh;
+    r = QTest::qExec(&esh, argc, argv);
+    if (r != 0)
+        return r;
 
-#endif
+    ProgramWing_Test epr;
+    r = QTest::qExec(&epr, argc, argv);
+    if (r != 0)
+        return r;
+
+    return 0;
+}

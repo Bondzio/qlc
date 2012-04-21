@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testewing.cpp
+  wing_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -22,37 +22,37 @@
 #include <QtTest>
 
 #define protected public
-#include "ewing.h"
+#include "wing.h"
 #undef protected
 
-#include "ewing_test.h"
+#include "wing_test.h"
 
-EWingStub::EWingStub(QObject* parent, const QHostAddress& host, const QByteArray& ba)
-    : EWing(parent, host, ba)
+WingStub::WingStub(QObject* parent, const QHostAddress& host, const QByteArray& ba)
+    : Wing(parent, host, ba)
 {
     Q_UNUSED(parent);
     Q_UNUSED(host);
     Q_UNUSED(ba);
 }
 
-EWingStub::~EWingStub()
+WingStub::~WingStub()
 {
 }
 
-QString EWingStub::name() const
+QString WingStub::name() const
 {
-    return QString("EWingStub");
+    return QString("WingStub");
 }
 
-void EWingStub::parseData(const QByteArray& ba)
+void WingStub::parseData(const QByteArray& ba)
 {
     Q_UNUSED(ba);
 }
 
-void EWing_Test::resolveType()
+void Wing_Test::resolveType()
 {
     QByteArray ba;
-    QCOMPARE(EWing::resolveType(ba), EWing::Unknown);
+    QCOMPARE(Wing::resolveType(ba), Wing::Unknown);
 
     ba.append(char(0x00));
     ba.append(char(0x00));
@@ -61,22 +61,22 @@ void EWing_Test::resolveType()
     ba.append(char(0x00));
     ba.append(char(0x00));
 
-    QCOMPARE(EWing::resolveType(ba), EWing::Unknown);
+    QCOMPARE(Wing::resolveType(ba), Wing::Unknown);
 
     ba[5] = char(0x01);
-    QCOMPARE(EWing::resolveType(ba), EWing::Playback);
+    QCOMPARE(Wing::resolveType(ba), Wing::Playback);
 
     ba[5] = char(0x02);
-    QCOMPARE(EWing::resolveType(ba), EWing::Shortcut);
+    QCOMPARE(Wing::resolveType(ba), Wing::Shortcut);
 
     ba[5] = char(0x03);
-    QCOMPARE(EWing::resolveType(ba), EWing::Program);
+    QCOMPARE(Wing::resolveType(ba), Wing::Program);
 }
 
-void EWing_Test::resolveFirmware()
+void Wing_Test::resolveFirmware()
 {
     QByteArray ba;
-    QCOMPARE(EWing::resolveFirmware(ba), uchar(0x00));
+    QCOMPARE(Wing::resolveFirmware(ba), uchar(0x00));
 
     ba.append(char(0x00));
     ba.append(char(0x00));
@@ -84,46 +84,46 @@ void EWing_Test::resolveFirmware()
     ba.append(char(0x00));
     ba.append(char(0x00));
 
-    QCOMPARE(EWing::resolveFirmware(ba), uchar(0x00));
+    QCOMPARE(Wing::resolveFirmware(ba), uchar(0x00));
 
     ba[4] = char(0x01);
-    QCOMPARE(EWing::resolveFirmware(ba), uchar(0x01));
+    QCOMPARE(Wing::resolveFirmware(ba), uchar(0x01));
 
     ba[4] = char(0x54);
-    QCOMPARE(EWing::resolveFirmware(ba), uchar(0x54));
+    QCOMPARE(Wing::resolveFirmware(ba), uchar(0x54));
 }
 
-void EWing_Test::isOutputData()
+void Wing_Test::isOutputData()
 {
     QByteArray ba;
-    QCOMPARE(EWing::isOutputData(ba), false);
+    QCOMPARE(Wing::isOutputData(ba), false);
 
     ba.append(char(0x00));
     ba.append(char(0x00));
     ba.append(char(0x00));
     ba.append(char(0x00));
-    QCOMPARE(EWing::isOutputData(ba), false);
+    QCOMPARE(Wing::isOutputData(ba), false);
 
     ba[0] = 'W';
     ba[1] = 'O';
     ba[2] = 'D';
     ba[3] = 'D';
-    QCOMPARE(EWing::isOutputData(ba), true);
+    QCOMPARE(Wing::isOutputData(ba), true);
 
     ba[0] = 'V';
     ba[1] = 'O';
     ba[2] = 'D';
     ba[3] = 'D';
-    QCOMPARE(EWing::isOutputData(ba), false);
+    QCOMPARE(Wing::isOutputData(ba), false);
 
     ba[0] = 'W';
     ba[1] = 'O';
     ba[2] = 'T';
     ba[3] = 'D';
-    QCOMPARE(EWing::isOutputData(ba), false);
+    QCOMPARE(Wing::isOutputData(ba), false);
 }
 
-void EWing_Test::initial()
+void Wing_Test::initial()
 {
     QHostAddress addr("192.168.1.5");
     QByteArray ba;
@@ -134,9 +134,9 @@ void EWing_Test::initial()
     ba.append(char(0x80));
     ba.append(char(0x02));
 
-    EWingStub es(this, addr, ba);
+    WingStub es(this, addr, ba);
     QCOMPARE(es.address(), addr);
-    QCOMPARE(es.type(), EWing::Shortcut);
+    QCOMPARE(es.type(), Wing::Shortcut);
     QCOMPARE(es.firmware(), uchar(0x80));
     QCOMPARE(es.page(), uchar(0));
 
@@ -144,11 +144,11 @@ void EWing_Test::initial()
     es.feedBack(0, 1);
 }
 
-void EWing_Test::page()
+void Wing_Test::page()
 {
     QHostAddress addr;
     QByteArray ba;
-    EWingStub es(this, addr, ba);
+    WingStub es(this, addr, ba);
 
     uchar i;
     for (i = 0; i < 99; i++)
@@ -173,20 +173,20 @@ void EWing_Test::page()
     QCOMPARE(es.page(), uchar(99));
 }
 
-void EWing_Test::bcd()
+void Wing_Test::bcd()
 {
-    QCOMPARE(EWing::toBCD(uchar(99)), uchar(0x99));
-    QCOMPARE(EWing::toBCD(uchar(17)), uchar(0x17));
-    QCOMPARE(EWing::toBCD(uchar(0)), uchar(0x00));
-    QCOMPARE(EWing::toBCD(uchar(1)), uchar(0x01));
-    QCOMPARE(EWing::toBCD(uchar(10)), uchar(0x10));
+    QCOMPARE(Wing::toBCD(uchar(99)), uchar(0x99));
+    QCOMPARE(Wing::toBCD(uchar(17)), uchar(0x17));
+    QCOMPARE(Wing::toBCD(uchar(0)), uchar(0x00));
+    QCOMPARE(Wing::toBCD(uchar(1)), uchar(0x01));
+    QCOMPARE(Wing::toBCD(uchar(10)), uchar(0x10));
 }
 
-void EWing_Test::cache()
+void Wing_Test::cache()
 {
     QHostAddress addr;
     QByteArray ba;
-    EWingStub es(this, addr, ba);
+    WingStub es(this, addr, ba);
     es.m_values = QByteArray(3, 0);
 
     es.setCacheValue(0, uchar(255));

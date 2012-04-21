@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeplaybackwing.cpp
+  playbackwing_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,8 +24,8 @@
 #include <QByteArray>
 #include <QtTest>
 
-#include "eplaybackwing.h"
-#include "eplaybackwing_test.h"
+#include "playbackwing.h"
+#include "playbackwing_test.h"
 
 #define PLB_FIRMWARE 192
 #define PLB_FLAGS (1 << 7) /* Page Up */	\
@@ -35,7 +35,7 @@
 		| (0 << 1) /* Product (1=PLB, 2=SHC, 3=PGM) */	\
 		| (1 << 0) /* Product */
 
-QByteArray EPlaybackWing_Test::data()
+QByteArray PlaybackWing_Test::data()
 {
     QByteArray data;
 
@@ -79,50 +79,50 @@ QByteArray EPlaybackWing_Test::data()
     return data;
 }
 
-void EPlaybackWing_Test::initTestCase()
+void PlaybackWing_Test::initTestCase()
 {
-    m_ewing = new EPlaybackWing(this, QHostAddress::LocalHost, data());
-    QVERIFY(m_ewing != NULL);
+    m_wing = new PlaybackWing(this, QHostAddress::LocalHost, data());
+    QVERIFY(m_wing != NULL);
 }
 
-void EPlaybackWing_Test::firmware()
+void PlaybackWing_Test::firmware()
 {
-    QVERIFY(m_ewing->firmware() == PLB_FIRMWARE);
+    QVERIFY(m_wing->firmware() == PLB_FIRMWARE);
 }
 
-void EPlaybackWing_Test::address()
+void PlaybackWing_Test::address()
 {
-    QVERIFY(m_ewing->address() == QHostAddress::LocalHost);
+    QVERIFY(m_wing->address() == QHostAddress::LocalHost);
 }
 
-void EPlaybackWing_Test::isOutputData()
+void PlaybackWing_Test::isOutputData()
 {
     QByteArray ba(data());
 
-    QVERIFY(EWing::isOutputData(ba) == true);
+    QVERIFY(Wing::isOutputData(ba) == true);
 
     ba[1] = 'I';
-    QVERIFY(EWing::isOutputData(ba) == false);
+    QVERIFY(Wing::isOutputData(ba) == false);
 }
 
-void EPlaybackWing_Test::name()
+void PlaybackWing_Test::name()
 {
-    QCOMPARE(m_ewing->name(), QString("Playback ") + tr("at") + QString(" ")
+    QCOMPARE(m_wing->name(), QString("Playback ") + tr("at") + QString(" ")
              + QHostAddress(QHostAddress::LocalHost).toString());
 }
 
-void EPlaybackWing_Test::infoText()
+void PlaybackWing_Test::infoText()
 {
-    QString str = QString("<B>%1</B>").arg(m_ewing->name());
+    QString str = QString("<B>%1</B>").arg(m_wing->name());
     str += QString("<P>");
     str += tr("Firmware version %1").arg(PLB_FIRMWARE);
     str += QString("<BR>");
     str += tr("Device is operating correctly.");
     str += QString("</P>");
-    QCOMPARE(m_ewing->infoText(), str);
+    QCOMPARE(m_wing->infoText(), str);
 }
 
-void EPlaybackWing_Test::tooShortData()
+void PlaybackWing_Test::tooShortData()
 {
     // Just a stability check; nothing should happen if data is too short
     QByteArray foo;
@@ -137,14 +137,14 @@ void EPlaybackWing_Test::tooShortData()
     foo.append(char(123));
     foo.append(char(45));
     foo.append(char(67));
-    m_ewing->parseData(foo);
+    m_wing->parseData(foo);
 }
 
-void EPlaybackWing_Test::buttons_data()
+void PlaybackWing_Test::buttons_data()
 {
     QByteArray ba(data());
 
-    /* Create columns for a QByteArray that is fed to EWing::parseData()
+    /* Create columns for a QByteArray that is fed to Wing::parseData()
        on each row, the channel number to read and the value expected for
        that channel after each parseData() call. */
     QTest::addColumn<QByteArray> ("ba");
@@ -286,17 +286,17 @@ void EPlaybackWing_Test::buttons_data()
     QTest::newRow("Button 31") << ba << 41 << 255;
 }
 
-void EPlaybackWing_Test::buttons()
+void PlaybackWing_Test::buttons()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
     QFETCH(int, value);
 
-    m_ewing->parseData(ba);
-    QVERIFY(m_ewing->cacheValue(channel) == (unsigned char) value);
+    m_wing->parseData(ba);
+    QVERIFY(m_wing->cacheValue(channel) == (unsigned char) value);
 }
 
-void EPlaybackWing_Test::faders_data()
+void PlaybackWing_Test::faders_data()
 {
     QByteArray ba(data());
 
@@ -326,18 +326,18 @@ void EPlaybackWing_Test::faders_data()
     QTest::newRow("Fader 9") << ba << 9 << 13;
 }
 
-void EPlaybackWing_Test::faders()
+void PlaybackWing_Test::faders()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
     QFETCH(int, value);
 
-    m_ewing->parseData(ba);
-    QVERIFY(m_ewing->cacheValue(channel) == (unsigned char) value);
+    m_wing->parseData(ba);
+    QVERIFY(m_wing->cacheValue(channel) == (unsigned char) value);
 }
 
-void EPlaybackWing_Test::cleanupTestCase()
+void PlaybackWing_Test::cleanupTestCase()
 {
-    delete m_ewing;
-    m_ewing = NULL;
+    delete m_wing;
+    m_wing = NULL;
 }

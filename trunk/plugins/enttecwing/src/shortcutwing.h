@@ -19,21 +19,21 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef ESHORTCUTWING_H
-#define ESHORTCUTWING_H
+#ifndef SHORTCUTWING_H
+#define SHORTCUTWING_H
 
 #include <QHostAddress>
 #include <QByteArray>
 #include <QObject>
 
 #include "qlcmacros.h"
-#include "ewing.h"
+#include "wing.h"
 
 /****************************************************************************
- * EShortcutWing
+ * ShortcutWing
  ****************************************************************************/
 
-class QLC_DECLSPEC EShortcutWing : public EWing
+class QLC_DECLSPEC ShortcutWing : public Wing
 {
     Q_OBJECT
 
@@ -42,20 +42,20 @@ class QLC_DECLSPEC EShortcutWing : public EWing
      ********************************************************************/
 public:
     /**
-     * Construct a new EShortcutWing object. This object represents an
+     * Construct a new ShortcutWing object. This object represents an
      * ENTTEC Shortcut Wing at the given IP address.
      *
      * @param parent The parent object that owns the new wing object.
      * @param address The address of the physical wing board.
      * @param data A UDP datagram packet originating from a wing.
      */
-    EShortcutWing(QObject* parent, const QHostAddress& address,
+    ShortcutWing(QObject* parent, const QHostAddress& address,
                   const QByteArray& data);
 
     /**
      * Destructor.
      */
-    ~EShortcutWing();
+    ~ShortcutWing();
 
     /** @reimp */
     QString name() const;

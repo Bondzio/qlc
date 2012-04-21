@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  testeprogramwing.cpp
+  programwing_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,8 +24,8 @@
 #include <QByteArray>
 #include <QTest>
 
-#include "eprogramwing.h"
-#include "eprogramwing_test.h"
+#include "programwing.h"
+#include "programwing_test.h"
 
 #define PRG_FIRMWARE 178
 #define PRG_FLAGS (1 << 7) /* Page Up */	\
@@ -35,7 +35,7 @@
 		| (1 << 1) /* Product (1=PLB, 2=SHC, 3=PGM) */	\
 		| (1 << 0) /* Product */
 
-QByteArray EProgramWing_Test::data()
+QByteArray ProgramWing_Test::data()
 {
     QByteArray data(28, 0);
     data[0] = 'W'; /* HEADER */
@@ -75,51 +75,51 @@ QByteArray EProgramWing_Test::data()
     return data;
 }
 
-void EProgramWing_Test::initTestCase()
+void ProgramWing_Test::initTestCase()
 {
-    m_ewing = new EProgramWing(this, QHostAddress::LocalHost, data());
-    QVERIFY(m_ewing != NULL);
-    QVERIFY(m_ewing->type() == EWing::Program);
+    m_wing = new ProgramWing(this, QHostAddress::LocalHost, data());
+    QVERIFY(m_wing != NULL);
+    QVERIFY(m_wing->type() == Wing::Program);
 }
 
-void EProgramWing_Test::firmware()
+void ProgramWing_Test::firmware()
 {
-    QVERIFY(m_ewing->firmware() == PRG_FIRMWARE);
+    QVERIFY(m_wing->firmware() == PRG_FIRMWARE);
 }
 
-void EProgramWing_Test::address()
+void ProgramWing_Test::address()
 {
-    QVERIFY(m_ewing->address() == QHostAddress::LocalHost);
+    QVERIFY(m_wing->address() == QHostAddress::LocalHost);
 }
 
-void EProgramWing_Test::isOutputData()
+void ProgramWing_Test::isOutputData()
 {
     QByteArray ba(data());
 
-    QVERIFY(EWing::isOutputData(ba) == true);
+    QVERIFY(Wing::isOutputData(ba) == true);
 
     ba[1] = 'I';
-    QVERIFY(EWing::isOutputData(ba) == false);
+    QVERIFY(Wing::isOutputData(ba) == false);
 }
 
-void EProgramWing_Test::name()
+void ProgramWing_Test::name()
 {
-    QCOMPARE(m_ewing->name(), QString("Program ") + tr("at") + QString(" ")
+    QCOMPARE(m_wing->name(), QString("Program ") + tr("at") + QString(" ")
              + QHostAddress(QHostAddress::LocalHost).toString());
 }
 
-void EProgramWing_Test::infoText()
+void ProgramWing_Test::infoText()
 {
-    QString str = QString("<B>%1</B>").arg(m_ewing->name());
+    QString str = QString("<B>%1</B>").arg(m_wing->name());
     str += QString("<P>");
     str += tr("Firmware version %1").arg(PRG_FIRMWARE);
     str += QString("<BR>");
     str += tr("Device is operating correctly.");
     str += QString("</P>");
-    QCOMPARE(m_ewing->infoText(), str);
+    QCOMPARE(m_wing->infoText(), str);
 }
 
-void EProgramWing_Test::tooShortData()
+void ProgramWing_Test::tooShortData()
 {
     // Just a stability check; nothing should happen if data is too short
     QByteArray foo;
@@ -139,7 +139,7 @@ void EProgramWing_Test::tooShortData()
     foo.append(char(89));
     foo.append(char(123));
     foo.append(char(45));
-    m_ewing->parseData(foo);
+    m_wing->parseData(foo);
 
     // Encoders
     foo.append(char(67));
@@ -155,14 +155,14 @@ void EProgramWing_Test::tooShortData()
     foo.append(char(123));
     foo.append(char(45));
     foo.append(char(67));
-    m_ewing->parseData(foo);
+    m_wing->parseData(foo);
 }
 
-void EProgramWing_Test::buttons_data()
+void ProgramWing_Test::buttons_data()
 {
     QByteArray ba(data());
 
-    /* Create columns for a QByteArray that is fed to EWing::parseData()
+    /* Create columns for a QByteArray that is fed to Wing::parseData()
        on each row, the channel number to read and the value expected for
        that channel after each parseData() call. */
     QTest::addColumn<QByteArray> ("ba");
@@ -454,17 +454,17 @@ void EProgramWing_Test::buttons_data()
     QTest::newRow("Button 64: Encoder 2") << ba << 64 << 255;
 }
 
-void EProgramWing_Test::buttons()
+void ProgramWing_Test::buttons()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
     QFETCH(int, value);
 
-    m_ewing->parseData(ba);
-    QCOMPARE(m_ewing->cacheValue(channel), (unsigned char) value);
+    m_wing->parseData(ba);
+    QCOMPARE(m_wing->cacheValue(channel), (unsigned char) value);
 }
 
-void EProgramWing_Test::encoders_data()
+void ProgramWing_Test::encoders_data()
 {
     QByteArray ba(data());
 
@@ -508,18 +508,18 @@ void EProgramWing_Test::encoders_data()
         QTest::newRow("Encoder 2 CCW") << ba << 67 << i;
 }
 
-void EProgramWing_Test::encoders()
+void ProgramWing_Test::encoders()
 {
     QFETCH(QByteArray, ba);
     QFETCH(int, channel);
     QFETCH(int, value);
 
-    m_ewing->parseData(ba);
-    QCOMPARE(int(m_ewing->cacheValue(channel)), value);
+    m_wing->parseData(ba);
+    QCOMPARE(int(m_wing->cacheValue(channel)), value);
 }
 
-void EProgramWing_Test::cleanupTestCase()
+void ProgramWing_Test::cleanupTestCase()
 {
-    delete m_ewing;
-    m_ewing = NULL;
+    delete m_wing;
+    m_wing = NULL;
 }

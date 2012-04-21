@@ -13,5 +13,5 @@ INCLUDEPATH += ../src
 DEPENDPATH  += ../src
 
 # Test sources
-HEADERS += vellemanout_test.h ../../interfaces/qlcoutplugin.h
+HEADERS += vellemanout_test.h ../../interfaces/qlcioplugin.h
 SOURCES += vellemanout_test.cpp

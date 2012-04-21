@@ -28,5 +28,5 @@ TRANSLATIONS += Peperoni_Output_fr_FR.ts
 TRANSLATIONS += Peperoni_Output_it_IT.ts
 
 # Installation
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

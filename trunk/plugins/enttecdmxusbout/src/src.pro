@@ -81,5 +81,5 @@ TRANSLATIONS += Enttec_DMX_USB_Output_it_IT.ts
 macx:include(../../../macx/nametool.pri)
 
 # Plugin installation
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

@@ -7,7 +7,7 @@ TARGET   = dmx4linuxout
 INCLUDEPATH += ../interfaces
 CONFIG      += plugin
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 
 TRANSLATIONS += DMX4Linux_Output_fi_FI.ts

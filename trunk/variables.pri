@@ -90,17 +90,7 @@ macx:USERFIXTUREDIR       = "Library/Application Support/QLC/Fixtures"
 # Plugins
 win32:PLUGINDIR      = Plugins
 unix:!macx:PLUGINDIR = $$LIBSDIR/qt4/plugins/qlc
-macx:PLUGINDIR       = PlugIns
-
-# Input Plugins
-win32:INPUTPLUGINDIR      = $$PLUGINDIR/Input
-unix:!macx:INPUTPLUGINDIR = $$PLUGINDIR/input
-macx:INPUTPLUGINDIR       = $$PLUGINDIR/Input
-
-# Output Plugins
-win32:OUTPUTPLUGINDIR      = $$PLUGINDIR/Output
-unix:!macx:OUTPUTPLUGINDIR = $$PLUGINDIR/output
-macx:OUTPUTPLUGINDIR       = $$PLUGINDIR/Output
+macx:PLUGINDIR       = Plugins
 
 # Translations
 win32:TRANSLATIONDIR      =

@@ -127,9 +127,9 @@ QDir IOPluginCache::systemPluginDirectory()
     QDir dir;
 #ifdef __APPLE__
     dir.setPath(QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-                                   .arg(OUTPUTPLUGINDIR));
+                                   .arg(PLUGINDIR));
 #else
-    dir.setPath(OUTPUTPLUGINDIR);
+    dir.setPath(PLUGINDIR);
 #endif
 
     dir.setFilter(QDir::Files);

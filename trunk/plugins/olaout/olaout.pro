@@ -49,5 +49,5 @@ macx {
 }
 
 # Installation
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

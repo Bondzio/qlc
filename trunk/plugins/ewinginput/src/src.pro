@@ -46,6 +46,7 @@ macx {
     include(../../../macx/nametool.pri)
 }
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+# Installation
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 

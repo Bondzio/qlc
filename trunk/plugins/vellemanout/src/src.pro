@@ -28,5 +28,5 @@ TRANSLATIONS += Velleman_Output_es_ES.ts
 TRANSLATIONS += Velleman_Output_fr_FR.ts
 TRANSLATIONS += Velleman_Output_it_IT.ts
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 win32:INSTALLS   += target

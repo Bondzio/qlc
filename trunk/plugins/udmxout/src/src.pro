@@ -34,7 +34,7 @@ TRANSLATIONS += uDMX_Output_it_IT.ts
 macx:include(../../../macx/nametool.pri)
 
 # Installation
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 
 # UDEV rule to make uDMX USB device readable & writable for users in Linux

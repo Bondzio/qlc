@@ -24,6 +24,6 @@ FORMS   += ../common/configuremidiplugin.ui
 # install_name_tool can be run before target installation
 macx:include(../../../macx/nametool.pri)
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 

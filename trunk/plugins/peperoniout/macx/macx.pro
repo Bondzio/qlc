@@ -23,5 +23,5 @@ HEADERS += ../../interfaces/qlcoutplugin.h
 # install_name_tool can be run before target installation
 include(../../../macx/nametool.pri)
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

@@ -22,7 +22,7 @@ TRANSLATIONS += Peperoni_Output_es_ES.ts
 TRANSLATIONS += Peperoni_Output_fr_FR.ts
 TRANSLATIONS += Peperoni_Output_it_IT.ts
 
-target.path = $$INSTALLROOT/$$OUTPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 
 # UDEV rule to make Peperoni USB devices readable & writable for users in Linux

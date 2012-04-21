@@ -24,6 +24,7 @@
 #include <QTranslator>
 #include <QMetaType>
 #include <QtGlobal>
+#include <QVariant>
 #include <QLocale>
 #include <QString>
 #include <QDebug>
@@ -207,6 +208,9 @@ int main(int argc, char** argv)
 {
     /* Create the Qt core application object */
     QApplication qapp(argc, argv);
+
+    /* At least MIDI plugin requires this so best to declare it here for everyone */
+    qRegisterMetaType<QVariant>("QVariant");
 
 #ifdef __APPLE__
     /* Load plugins from within the bundle ONLY */

@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  configurehidinput.h
+  hidpoller.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,15 +19,17 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef CONFIGUREHIDINPUT_H
-#define CONFIGUREHIDINPUT_H
+#ifndef HIDPOLLER_H
+#define HIDPOLLER_H
 
-#include "ui_configurehidinput.h"
+#include <QThread>
+#include <QMutex>
+#include <QMap>
 
-class HIDInput;
 class HIDDevice;
+class HID;
 
-class ConfigureHIDInput : public QDialog, public Ui_ConfigureHIDInput
+class HIDPoller : public QThread
 {
     Q_OBJECT
 
@@ -35,34 +37,33 @@ class ConfigureHIDInput : public QDialog, public Ui_ConfigureHIDInput
      * Initialization
      *********************************************************************/
 public:
-    ConfigureHIDInput(QWidget* parent, HIDInput* plugin);
-    virtual ~ConfigureHIDInput();
-
-protected:
-    HIDInput* m_plugin;
+    HIDPoller(HID* parent);
+    ~HIDPoller();
 
     /*********************************************************************
-     * Refresh
+     * Polled devices
      *********************************************************************/
-protected slots:
-    /**
-     * Invoke refresh for the interface list
-     */
-    void slotRefreshClicked();
-
-    /**
-     * Callback for HIDInput::deviceAdded() signals.
-     */
-    void slotDeviceAdded(HIDDevice* device);
-
-    /**
-     * Callback for HIDInput::deviceRemoved() signals.
-     */
-    void slotDeviceRemoved(HIDDevice* device);
+public:
+    bool addDevice(HIDDevice* device);
+    bool removeDevice(HIDDevice* device);
 
 protected:
-    /** Refresh the interface list */
-    void refreshList();
+    QMap <int, HIDDevice*> m_devices;
+    bool m_changed;
+    QMutex m_mutex;
+
+    /*********************************************************************
+     * Poller thread
+     *********************************************************************/
+public:
+    virtual void stop();
+
+protected:
+    virtual void run();
+    void readEvent(struct pollfd pfd);
+
+protected:
+    bool m_running;
 };
 
 #endif

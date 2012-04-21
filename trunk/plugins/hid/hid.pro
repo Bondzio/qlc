@@ -2,33 +2,33 @@ include(../../variables.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = hidinput
+TARGET   = hid
 
 INCLUDEPATH += ../interfaces
 CONFIG      += plugin
 
 HEADERS += ../interfaces/qlcioplugin.h
-HEADERS += configurehidinput.h \
+HEADERS += configurehid.h \
            hiddevice.h \
            hideventdevice.h \
-           hidinput.h \
+           hid.h \
            hidjsdevice.h \
            hidpoller.h
 
-FORMS += configurehidinput.ui
+FORMS += configurehid.ui
 
-SOURCES += configurehidinput.cpp \
+SOURCES += configurehid.cpp \
            hiddevice.cpp \
            hideventdevice.cpp \
-           hidinput.cpp \
+           hid.cpp \
            hidjsdevice.cpp \
            hidpoller.cpp
 
-TRANSLATIONS += HID_Input_fi_FI.ts
-TRANSLATIONS += HID_Input_de_DE.ts
-TRANSLATIONS += HID_Input_es_ES.ts
-TRANSLATIONS += HID_Input_fr_FR.ts
-TRANSLATIONS += HID_Input_it_IT.ts
+TRANSLATIONS += HID_fi_FI.ts
+TRANSLATIONS += HID_de_DE.ts
+TRANSLATIONS += HID_es_ES.ts
+TRANSLATIONS += HID_fr_FR.ts
+TRANSLATIONS += HID_it_IT.ts
 
 target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

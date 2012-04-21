@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  hidpoller.h
+  configurehid.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,17 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef HIDPOLLER_H
-#define HIDPOLLER_H
+#ifndef CONFIGUREHID_H
+#define CONFIGUREHID_H
 
-#include <QThread>
-#include <QMutex>
-#include <QMap>
+#include "ui_configurehid.h"
 
 class HIDDevice;
-class HIDInput;
+class HID;
 
-class HIDPoller : public QThread
+class ConfigureHID : public QDialog, public Ui_ConfigureHID
 {
     Q_OBJECT
 
@@ -37,33 +35,28 @@ class HIDPoller : public QThread
      * Initialization
      *********************************************************************/
 public:
-    HIDPoller(HIDInput* parent);
-    ~HIDPoller();
+    ConfigureHID(QWidget* parent, HID* plugin);
+    virtual ~ConfigureHID();
+
+private:
+    HID* m_plugin;
 
     /*********************************************************************
-     * Polled devices
+     * Refresh
      *********************************************************************/
-public:
-    bool addDevice(HIDDevice* device);
-    bool removeDevice(HIDDevice* device);
+private slots:
+    /** Invoke refresh for the interface list. */
+    void slotRefreshClicked();
 
-protected:
-    QMap <int, HIDDevice*> m_devices;
-    bool m_changed;
-    QMutex m_mutex;
+    /** Callback for HIDInput::deviceAdded() signals. */
+    void slotDeviceAdded(HIDDevice* device);
 
-    /*********************************************************************
-     * Poller thread
-     *********************************************************************/
-public:
-    virtual void stop();
+    /** Callback for HIDInput::deviceRemoved() signals. */
+    void slotDeviceRemoved(HIDDevice* device);
 
-protected:
-    virtual void run();
-    void readEvent(struct pollfd pfd);
-
-protected:
-    bool m_running;
+private:
+    /** Refresh the interface list */
+    void refreshList();
 };
 
 #endif

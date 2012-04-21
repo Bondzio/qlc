@@ -33,7 +33,7 @@
 #include "hiddevice.h"
 
 class HIDEventDevice;
-class HIDInput;
+class HID;
 
 /*****************************************************************************
  * HIDEventDevice
@@ -44,7 +44,7 @@ class HIDJsDevice : public HIDDevice
     Q_OBJECT
 
 public:
-    HIDJsDevice(HIDInput* parent, quint32 line, const QString& path);
+    HIDJsDevice(HID* parent, quint32 line, const QString& path);
     virtual ~HIDJsDevice();
 
 protected:

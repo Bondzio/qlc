@@ -25,8 +25,7 @@
 #include <QObject>
 #include <QFile>
 
-
-class HIDInput;
+class HID;
 
 /*****************************************************************************
  * HIDDevice
@@ -37,7 +36,7 @@ class HIDDevice : public QObject
     Q_OBJECT
 
 public:
-    HIDDevice(HIDInput* parent, quint32 line, const QString& path);
+    HIDDevice(HID* parent, quint32 line, const QString& path);
     virtual ~HIDDevice();
 
     /*************************************************************************

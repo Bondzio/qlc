@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  configurehidinput.cpp
+  configurehid.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -27,9 +27,9 @@
 #include <QTimer>
 #include <QDebug>
 
-#include "configurehidinput.h"
+#include "configurehid.h"
 #include "hiddevice.h"
-#include "hidinput.h"
+#include "hid.h"
 
 #define KColumnNumber  0
 #define KColumnName    1
@@ -38,7 +38,7 @@
  * Initialization
  *****************************************************************************/
 
-ConfigureHIDInput::ConfigureHIDInput(QWidget* parent, HIDInput* plugin)
+ConfigureHID::ConfigureHID(QWidget* parent, HID* plugin)
         : QDialog(parent)
 {
     Q_ASSERT(plugin != NULL);
@@ -60,7 +60,7 @@ ConfigureHIDInput::ConfigureHIDInput(QWidget* parent, HIDInput* plugin)
     refreshList();
 }
 
-ConfigureHIDInput::~ConfigureHIDInput()
+ConfigureHID::~ConfigureHID()
 {
 }
 
@@ -68,13 +68,13 @@ ConfigureHIDInput::~ConfigureHIDInput()
  * Interface refresh
  *****************************************************************************/
 
-void ConfigureHIDInput::slotRefreshClicked()
+void ConfigureHID::slotRefreshClicked()
 {
     Q_ASSERT(m_plugin != NULL);
     m_plugin->rescanDevices();
 }
 
-void ConfigureHIDInput::refreshList()
+void ConfigureHID::refreshList()
 {
     QString s;
 
@@ -95,12 +95,12 @@ void ConfigureHIDInput::refreshList()
     }
 }
 
-void ConfigureHIDInput::slotDeviceAdded(HIDDevice*)
+void ConfigureHID::slotDeviceAdded(HIDDevice*)
 {
     refreshList();
 }
 
-void ConfigureHIDInput::slotDeviceRemoved(HIDDevice* device)
+void ConfigureHID::slotDeviceRemoved(HIDDevice* device)
 {
     Q_ASSERT(device != NULL);
 

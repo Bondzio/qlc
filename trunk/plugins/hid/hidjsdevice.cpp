@@ -31,17 +31,17 @@
 
 #include "hidjsdevice.h"
 #include "qlcmacros.h"
-#include "hidinput.h"
+#include "hid.h"
 
-HIDJsDevice::HIDJsDevice(HIDInput* parent, quint32 line, const QString& path)
-        : HIDDevice(parent, line, path)
+HIDJsDevice::HIDJsDevice(HID* parent, quint32 line, const QString& path)
+    : HIDDevice(parent, line, path)
 {
     init();
 }
 
 HIDJsDevice::~HIDJsDevice()
 {
-    qobject_cast<HIDInput*> (parent())->removePollDevice(this);
+    qobject_cast<HID*> (parent())->removePollDevice(this);
 }
 
 void HIDJsDevice::init()

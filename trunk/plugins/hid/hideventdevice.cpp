@@ -29,7 +29,7 @@
 #include <QFile>
 
 #include "hideventdevice.h"
-#include "hidinput.h"
+#include "hid.h"
 
 /**
  * This macro is used to tell if "bit" is set in "array".
@@ -39,7 +39,7 @@
  */
 #define test_bit(bit, array)    (array[bit / 8] & (1 << (bit % 8)))
 
-HIDEventDevice::HIDEventDevice(HIDInput* parent, quint32 line,
+HIDEventDevice::HIDEventDevice(HID* parent, quint32 line,
                                const QString& path)
         : HIDDevice(parent, line, path)
 {
@@ -48,7 +48,7 @@ HIDEventDevice::HIDEventDevice(HIDInput* parent, quint32 line,
 
 HIDEventDevice::~HIDEventDevice()
 {
-    static_cast<HIDInput*> (parent())->removePollDevice(this);
+    static_cast<HID*> (parent())->removePollDevice(this);
 }
 
 void HIDEventDevice::init()
@@ -282,7 +282,7 @@ bool HIDEventDevice::readEvent()
            that we can switch context away from the
            poller thread and into the main application
            thread. This is caught in
-           HIDInput::customEvent(). */
+           HID::customEvent(). */
         e = new HIDInputEvent(this, m_line, ev.code, val, true);
         QApplication::postEvent(parent(), e);
 

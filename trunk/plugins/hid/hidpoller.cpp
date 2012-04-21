@@ -27,8 +27,8 @@
 
 #include "hiddevice.h"
 #include "hidpoller.h"
-#include "hidinput.h"
 #include "poll.h"
+#include "hid.h"
 
 #define KPollTimeout 1000
 
@@ -36,7 +36,8 @@
  * Initialization
  *****************************************************************************/
 
-HIDPoller::HIDPoller(HIDInput* parent) : QThread(parent)
+HIDPoller::HIDPoller(HID* parent)
+    : QThread(parent)
 {
     Q_ASSERT(parent != NULL);
     m_running = false;

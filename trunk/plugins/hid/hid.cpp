@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  hidinput.cpp
+  hid.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -25,10 +25,10 @@
 #include <QDebug>
 #include <QDir>
 
-#include "configurehidinput.h"
+#include "configurehid.h"
 #include "hidjsdevice.h"
 #include "hidpoller.h"
-#include "hidinput.h"
+#include "hid.h"
 
 /*****************************************************************************
  * HIDInputEvent
@@ -53,16 +53,16 @@ HIDInputEvent::~HIDInputEvent()
 }
 
 /*****************************************************************************
- * HIDInput Initialization
+ * HID Initialization
  *****************************************************************************/
 
-void HIDInput::init()
+void HID::init()
 {
     m_poller = new HIDPoller(this);
     rescanDevices();
 }
 
-HIDInput::~HIDInput()
+HID::~HID()
 {
     while (m_devices.isEmpty() == false)
         delete m_devices.takeFirst();
@@ -71,7 +71,7 @@ HIDInput::~HIDInput()
     delete m_poller;
 }
 
-QString HIDInput::name()
+QString HID::name()
 {
     return QString("HID");
 }
@@ -80,7 +80,7 @@ QString HIDInput::name()
  * Inputs
  *****************************************************************************/
 
-void HIDInput::openInput(quint32 input)
+void HID::openInput(quint32 input)
 {
     HIDDevice* dev = device(input);
     if (dev != NULL)
@@ -89,7 +89,7 @@ void HIDInput::openInput(quint32 input)
         qDebug() << name() << "has no input number:" << input;
 }
 
-void HIDInput::closeInput(quint32 input)
+void HID::closeInput(quint32 input)
 {
     HIDDevice* dev = device(input);
     if (dev != NULL)
@@ -98,7 +98,7 @@ void HIDInput::closeInput(quint32 input)
         qDebug() << name() << "has no input number:" << input;
 }
 
-QStringList HIDInput::inputs()
+QStringList HID::inputs()
 {
     QStringList list;
 
@@ -109,7 +109,7 @@ QStringList HIDInput::inputs()
     return list;
 }
 
-void HIDInput::customEvent(QEvent* event)
+void HID::customEvent(QEvent* event)
 {
     if (event->type() == _HIDInputEventType)
     {
@@ -123,7 +123,7 @@ void HIDInput::customEvent(QEvent* event)
     }
 }
 
-QString HIDInput::inputInfo(quint32 input)
+QString HID::inputInfo(quint32 input)
 {
     QString str;
 
@@ -162,13 +162,13 @@ QString HIDInput::inputInfo(quint32 input)
  * Configuration
  *****************************************************************************/
 
-void HIDInput::configure()
+void HID::configure()
 {
-    ConfigureHIDInput conf(NULL, this);
+    ConfigureHID conf(NULL, this);
     conf.exec();
 }
 
-bool HIDInput::canConfigure()
+bool HID::canConfigure()
 {
     return true;
 }
@@ -177,7 +177,7 @@ bool HIDInput::canConfigure()
  * Devices
  *****************************************************************************/
 
-void HIDInput::rescanDevices()
+void HID::rescanDevices()
 {
     quint32 line = 0;
 
@@ -226,7 +226,7 @@ void HIDInput::rescanDevices()
         removeDevice(destroyList.takeFirst());
 }
 
-HIDDevice* HIDInput::device(const QString& path)
+HIDDevice* HID::device(const QString& path)
 {
     QListIterator <HIDDevice*> it(m_devices);
 
@@ -240,7 +240,7 @@ HIDDevice* HIDInput::device(const QString& path)
     return NULL;
 }
 
-HIDDevice* HIDInput::device(quint32 index)
+HIDDevice* HID::device(quint32 index)
 {
     if (index < quint32(m_devices.count()))
         return m_devices.at(index);
@@ -248,7 +248,7 @@ HIDDevice* HIDInput::device(quint32 index)
         return NULL;
 }
 
-void HIDInput::addDevice(HIDDevice* device)
+void HID::addDevice(HIDDevice* device)
 {
     Q_ASSERT(device != NULL);
 
@@ -258,7 +258,7 @@ void HIDInput::addDevice(HIDDevice* device)
     emit configurationChanged();
 }
 
-void HIDInput::removeDevice(HIDDevice* device)
+void HID::removeDevice(HIDDevice* device)
 {
     Q_ASSERT(device != NULL);
 
@@ -275,13 +275,13 @@ void HIDInput::removeDevice(HIDDevice* device)
  * Device poller
  *****************************************************************************/
 
-void HIDInput::addPollDevice(HIDDevice* device)
+void HID::addPollDevice(HIDDevice* device)
 {
     Q_ASSERT(device != NULL);
     m_poller->addDevice(device);
 }
 
-void HIDInput::removePollDevice(HIDDevice* device)
+void HID::removePollDevice(HIDDevice* device)
 {
     Q_ASSERT(device != NULL);
     m_poller->removeDevice(device);
@@ -291,4 +291,4 @@ void HIDInput::removePollDevice(HIDDevice* device)
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(hidinput, HIDInput)
+Q_EXPORT_PLUGIN2(hid, HID)

@@ -8,4 +8,4 @@ SUBDIRS              += midi
 !macx:!win32:SUBDIRS += dmx4linux
 !macx:SUBDIRS        += vellemanout
 SUBDIRS              += ewinginput
-!macx:!win32:SUBDIRS += hidinput
+!macx:!win32:SUBDIRS += hid

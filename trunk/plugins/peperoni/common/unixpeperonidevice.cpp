@@ -182,10 +182,12 @@ void UnixPeperoniDevice::writeUniverse(const QByteArray& universe)
                              universe.size(), universe);
 
         /* Perform a bulk write */
+        int written = 0;
         r = libusb_bulk_transfer(m_handle,
                                  PEPERONI_BULK_OUT_ENDPOINT,
-                                 m_bulkBuffer.data(),
+                                 (uchar*) m_bulkBuffer.constData(),
                                  m_bulkBuffer.size(),
+                                 &written,
                                  50);
 
         if (r < 0)

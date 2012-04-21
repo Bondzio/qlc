@@ -516,6 +516,7 @@ void App::initToolBar()
     m_toolbar->setFloatable(false);
     m_toolbar->setMovable(false);
     m_toolbar->setAllowedAreas(Qt::TopToolBarArea);
+    m_toolbar->setContextMenuPolicy(Qt::CustomContextMenu);
     addToolBar(m_toolbar);
     m_toolbar->addAction(m_fileNewAction);
     m_toolbar->addAction(m_fileOpenAction);
@@ -537,15 +538,6 @@ void App::initToolBar()
     m_toolbar->addAction(m_controlBlackoutAction);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_modeToggleAction);
-
-    connect(m_toolbar, SIGNAL(visibilityChanged(bool)), this, SLOT(slotToolBarVisibilityChanged(bool)));
-}
-
-void App::slotToolBarVisibilityChanged(bool visible)
-{
-    // Don't allow hiding the main toolbar
-    if (visible == false && m_toolbar != NULL)
-        m_toolbar->show();
 }
 
 /*****************************************************************************

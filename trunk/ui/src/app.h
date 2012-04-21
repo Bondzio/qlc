@@ -115,8 +115,6 @@ private:
     bool handleFileError(QFile::FileError error);
 
 public slots:
-    void slotToolBarVisibilityChanged(bool visible);
-
     bool slotFileNew();
     QFile::FileError slotFileOpen();
     QFile::FileError slotFileSave();

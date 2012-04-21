@@ -53,6 +53,9 @@ public:
     QList <MidiOutputDevice*> outputDevices() const;
     QList <MidiInputDevice*> inputDevices() const;
 
+signals:
+    void configurationChanged();
+
 private:
     snd_seq_t* m_alsa;
     snd_seq_addr_t* m_address;

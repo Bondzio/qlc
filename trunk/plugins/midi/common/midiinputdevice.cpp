@@ -19,15 +19,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDebug>
 #include "midiinputdevice.h"
 
 MidiInputDevice::MidiInputDevice(const QVariant& uid, const QString& name, QObject* parent)
     : MidiDevice(uid, name, parent)
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 MidiInputDevice::~MidiInputDevice()
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 void MidiInputDevice::emitValueChanged(uint channel, uchar value)

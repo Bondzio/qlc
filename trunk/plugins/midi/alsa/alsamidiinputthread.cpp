@@ -238,10 +238,6 @@ void AlsaMidiInputThread::readEvent()
             data1 = ev->data.note.note;
             data2 = ev->data.note.velocity;
         }
-        else
-        {
-            qDebug() << "Unrecognized type" << ev->type;
-        }
 
         // ALSA API is a bit controversial on this. snd_seq_event_input() says
         // it ALLOCATES the event but snd_seq_free_event() says this is not
@@ -251,7 +247,8 @@ void AlsaMidiInputThread::readEvent()
 
         uint channel = 0;
         uchar value = 0;
-        if (QLCMIDIProtocol::midiToInput(cmd, data1, data2, device->midiChannel(), &channel, &value))
+        if (QLCMIDIProtocol::midiToInput(cmd, data1, data2, device->midiChannel(),
+                                         &channel, &value) == true)
         {
 /*
             if (channel == CHANNEL_OFFSET_MBC)

@@ -97,6 +97,7 @@ namespace QLCMIDIProtocol
  * MIDI channels
  ****************************************************************************/
 #define MAX_MIDI_DMX_CHANNELS   128
+#define MAX_MIDI_CHANNELS       16
 
 /****************************************************************************
  * MIDI commands with a MIDI channel (0-16)

@@ -66,8 +66,7 @@ static void MidiInProc(const MIDIPacketList* pktList, void* readProcRefCon,
             }
 
             // Convert the data to QLC input channel & value
-            if (QLCMIDIProtocol::midiToInput(cmd, data1, data2,
-                                             self->midiChannel(),
+            if (QLCMIDIProtocol::midiToInput(cmd, data1, data2, self->midiChannel(),
                                              &channel, &value) == true)
             {
                 // TODO: this MBC thing probably doesn't work...
@@ -76,10 +75,7 @@ static void MidiInProc(const MIDIPacketList* pktList, void* readProcRefCon,
                     if (self->incrementMBCCount() == false)
                         continue;
 */
-                // If message was parsed successfully, send an event downstream
                 self->emitValueChanged(channel, value);
-                //MIDIInputEvent* ev = new MIDIInputEvent(self, channel, value);
-                //QApplication::postEvent(self, ev);
             }
         }
 

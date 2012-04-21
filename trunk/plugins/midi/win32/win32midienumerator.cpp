@@ -125,10 +125,9 @@ void MidiEnumeratorPrivate::rescan()
         QString name = extractInputName(id);
         Win32MidiInputDevice* dev = new Win32MidiInputDevice(uid, name, id, this);
         m_inputDevices << dev;
-        // Make MidiEnumerator emit the signal for us
-        connect(dev, SIGNAL(valueChanged(QVariant,ushort,uchar)),
-                parent(), SIGNAL(valueChanged(QVariant,ushort,uchar)));
     }
+
+    emit configurationChanged();
 }
 
 MidiOutputDevice* MidiEnumeratorPrivate::outputDevice(const QVariant& uid) const
@@ -176,6 +175,7 @@ MidiEnumerator::MidiEnumerator(QObject* parent)
     , d_ptr(new MidiEnumeratorPrivate(this))
 {
     qDebug() << Q_FUNC_INFO;
+    connect(d_ptr, SIGNAL(configurationChanged()), this, SIGNAL(configurationChanged()));
 }
 
 MidiEnumerator::~MidiEnumerator()

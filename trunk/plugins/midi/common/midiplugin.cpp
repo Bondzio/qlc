@@ -21,6 +21,7 @@
 
 #include <QDebug>
 
+#include "configuremidiplugin.h"
 #include "midioutputdevice.h"
 #include "midiinputdevice.h"
 #include "midienumerator.h"
@@ -35,8 +36,8 @@ void MidiPlugin::init()
     qDebug() << Q_FUNC_INFO;
 
     m_enumerator = new MidiEnumerator(this);
-    connect(m_enumerator, SIGNAL(valueChanged(QVariant,ushort,uchar)),
-            this, SLOT(slotValueChanged(QVariant,ushort,uchar)));
+    connect(m_enumerator, SIGNAL(configurationChanged()),
+            this, SIGNAL(configurationChanged()));
     m_enumerator->rescan();
 }
 
@@ -149,8 +150,12 @@ void MidiPlugin::openInput(quint32 input)
     qDebug() << Q_FUNC_INFO;
 
     MidiInputDevice* dev = inputDevice(input);
-    if (dev != NULL)
+    if (dev != NULL && dev->isOpen() == false)
+    {
         dev->open();
+        connect(dev, SIGNAL(valueChanged(QVariant,ushort,uchar)),
+                this, SLOT(slotValueChanged(QVariant,ushort,uchar)));
+    }
 }
 
 void MidiPlugin::closeInput(quint32 input)
@@ -158,8 +163,12 @@ void MidiPlugin::closeInput(quint32 input)
     qDebug() << Q_FUNC_INFO;
 
     MidiInputDevice* dev = inputDevice(input);
-    if (dev != NULL)
+    if (dev != NULL && dev->isOpen() == true)
+    {
         dev->close();
+        disconnect(dev, SIGNAL(valueChanged(QVariant,ushort,uchar)),
+                   this, SLOT(slotValueChanged(QVariant,ushort,uchar)));
+    }
 }
 
 QStringList MidiPlugin::inputs()
@@ -227,6 +236,7 @@ void MidiPlugin::slotValueChanged(const QVariant& uid, ushort channel, uchar val
         MidiInputDevice* dev = m_enumerator->inputDevices().at(i);
         if (dev->uid() == uid)
         {
+            qDebug() << i << channel << value;
             emit valueChanged(i, channel, value);
             break;
         }
@@ -240,12 +250,14 @@ void MidiPlugin::slotValueChanged(const QVariant& uid, ushort channel, uchar val
 void MidiPlugin::configure()
 {
     qDebug() << Q_FUNC_INFO;
+    ConfigureMidiPlugin cmp(this);
+    cmp.exec();
 }
 
 bool MidiPlugin::canConfigure()
 {
     qDebug() << Q_FUNC_INFO;
-    return false;
+    return true;
 }
 
 /*****************************************************************************

@@ -50,6 +50,9 @@ public:
     QList <MidiOutputDevice*> outputDevices() const;
     QList <MidiInputDevice*> inputDevices() const;
 
+signals:
+    void configurationChanged();
+
 private:
     MIDIClientRef m_client;
     QList <MidiOutputDevice*> m_outputDevices;

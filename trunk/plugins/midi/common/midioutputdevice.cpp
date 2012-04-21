@@ -19,13 +19,16 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <QDebug>
 #include "midioutputdevice.h"
 
 MidiOutputDevice::MidiOutputDevice(const QVariant& uid, const QString& name, QObject* parent)
     : MidiDevice(uid, name, parent)
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 MidiOutputDevice::~MidiOutputDevice()
 {
+    qDebug() << Q_FUNC_INFO;
 }

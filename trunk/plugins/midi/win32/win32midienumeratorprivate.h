@@ -53,6 +53,9 @@ public:
     QList <MidiOutputDevice*> outputDevices() const;
     QList <MidiInputDevice*> inputDevices() const;
 
+signals:
+    void configurationChanged();
+
 private:
     QList <MidiOutputDevice*> m_outputDevices;
     QList <MidiInputDevice*> m_inputDevices;

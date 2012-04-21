@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  midienumerator.h
+  configuremidiplugin.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,37 +19,39 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef MIDIENUMERATOR_H
-#define MIDIENUMERATOR_H
+#ifndef CONFIGUREMIDIPLUGIN_H
+#define CONFIGUREMIDIPLUGIN_H
 
-#include <QObject>
-#include <QList>
+#include <QDialog>
 
-class MidiEnumeratorPrivate;
-class MidiOutputDevice;
-class MidiInputDevice;
+#include "ui_configuremidiplugin.h"
+#include "mididevice.h"
 
-class MidiEnumerator : public QObject
+class MidiPlugin;
+class QWidget;
+
+class ConfigureMidiPlugin : public QDialog, public Ui_ConfigureMidiPlugin
 {
     Q_OBJECT
 
 public:
-    MidiEnumerator(QObject* parent = 0);
-    ~MidiEnumerator();
+    ConfigureMidiPlugin(MidiPlugin* plugin, QWidget* parent = 0);
+    ~ConfigureMidiPlugin();
 
-    void rescan();
+public slots:
+    void slotRefresh();
 
-    QList <MidiOutputDevice*> outputDevices() const;
-    QList <MidiInputDevice*> inputDevices() const;
-
-    MidiOutputDevice* outputDevice(const QVariant& uid) const;
-    MidiInputDevice* inputDevice(const QVariant& uid) const;
-
-signals:
-    void configurationChanged();
+private slots:
+    void slotMidiChannelValueChanged(int index);
+    void slotModeActivated(int index);
+    void slotUpdateTree();
 
 private:
-    MidiEnumeratorPrivate* d_ptr;
+    QWidget* createMidiChannelWidget(int select);
+    QWidget* createModeWidget(MidiDevice::Mode mode);
+
+private:
+    MidiPlugin* m_plugin;
 };
 
 #endif

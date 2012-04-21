@@ -109,6 +109,7 @@ void MidiEnumeratorPrivate::rescan()
 {
     qDebug() << Q_FUNC_INFO;
 
+    bool changed = false;
     QList <MidiOutputDevice*> destroyOutputs(m_outputDevices);
     QList <MidiInputDevice*> destroyInputs(m_inputDevices);
 
@@ -139,6 +140,7 @@ void MidiEnumeratorPrivate::rescan()
                     CoreMidiOutputDevice* dev = new CoreMidiOutputDevice(
                                             uid, name, entity, m_client, this);
                     m_outputDevices << dev;
+                    changed = true;
                 }
                 else
                 {
@@ -155,9 +157,7 @@ void MidiEnumeratorPrivate::rescan()
                     CoreMidiInputDevice* dev = new CoreMidiInputDevice(
                                             uid, name, entity, m_client, this);
                     m_inputDevices << dev;
-                    // Make MidiEnumerator emit the signal for us
-                    connect(dev, SIGNAL(valueChanged(QVariant,ushort,uchar)),
-                            parent(), SIGNAL(valueChanged(QVariant,ushort,uchar)));
+                    changed = true;
                 }
                 else
                 {
@@ -171,13 +171,18 @@ void MidiEnumeratorPrivate::rescan()
     {
         m_outputDevices.removeAll(dev);
         delete dev;
+        changed = true;
     }
 
     foreach (MidiInputDevice* dev, destroyInputs)
     {
         m_inputDevices.removeAll(dev);
         delete dev;
+        changed = true;
     }
+
+    if (changed == true)
+        emit configurationChanged();
 }
 
 MidiOutputDevice* MidiEnumeratorPrivate::outputDevice(const QVariant& uid) const
@@ -225,6 +230,7 @@ MidiEnumerator::MidiEnumerator(QObject* parent)
     , d_ptr(new MidiEnumeratorPrivate(this))
 {
     qDebug() << Q_FUNC_INFO;
+    connect(d_ptr, SIGNAL(configurationChanged()), this, SIGNAL(configurationChanged()));
 }
 
 MidiEnumerator::~MidiEnumerator()

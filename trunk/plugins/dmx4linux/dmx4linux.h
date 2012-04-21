@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  dmx4linuxout.h
+  dmx4linux.h
 
   Copyright (c) Heikki Junnila
 
@@ -19,15 +19,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef DMX4LINUXOUT_H
-#define DMX4LINUXOUT_H
+#ifndef DMX4LINUX_H
+#define DMX4LINUX_H
 
 #include <QString>
 #include <QFile>
 
 #include "qlcioplugin.h"
 
-class DMX4LinuxOut : public QLCIOPlugin
+class DMX4Linux : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -37,7 +37,7 @@ class DMX4LinuxOut : public QLCIOPlugin
      *********************************************************************/
 public:
     /** @reimp */
-    virtual ~DMX4LinuxOut();
+    virtual ~DMX4Linux();
 
     /** @reimp */
     void init();

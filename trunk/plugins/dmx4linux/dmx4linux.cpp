@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  dmx4linuxout.cpp
+  dmx4linux.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -24,33 +24,33 @@
 #include <QDebug>
 #include <QFile>
 
-#include "dmx4linuxout.h"
+#include "dmx4linux.h"
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-DMX4LinuxOut::~DMX4LinuxOut()
+DMX4Linux::~DMX4Linux()
 {
     if (m_file.isOpen() == true)
         m_file.close();
 }
 
-void DMX4LinuxOut::init()
+void DMX4Linux::init()
 {
     m_file.setFileName("/dev/dmx");
 }
 
-QString DMX4LinuxOut::name()
+QString DMX4Linux::name()
 {
-    return QString("DMX4Linux Output");
+    return QString("DMX4Linux");
 }
 
 /*****************************************************************************
  * Open/close
  *****************************************************************************/
 
-void DMX4LinuxOut::openOutput(quint32 output)
+void DMX4Linux::openOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -63,7 +63,7 @@ void DMX4LinuxOut::openOutput(quint32 output)
     }
 }
 
-void DMX4LinuxOut::closeOutput(quint32 output)
+void DMX4Linux::closeOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -72,7 +72,7 @@ void DMX4LinuxOut::closeOutput(quint32 output)
     m_file.unsetError();
 }
 
-QStringList DMX4LinuxOut::outputs()
+QStringList DMX4Linux::outputs()
 {
     QStringList list;
     if (m_file.exists() == true)
@@ -80,7 +80,7 @@ QStringList DMX4LinuxOut::outputs()
     return list;
 }
 
-QString DMX4LinuxOut::outputInfo(quint32 output)
+QString DMX4Linux::outputInfo(quint32 output)
 {
     QString str;
 
@@ -109,7 +109,7 @@ QString DMX4LinuxOut::outputInfo(quint32 output)
     return str;
 }
 
-void DMX4LinuxOut::writeUniverse(quint32 output, const QByteArray& universe)
+void DMX4Linux::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output != 0 || m_file.isOpen() == false)
         return;
@@ -123,12 +123,12 @@ void DMX4LinuxOut::writeUniverse(quint32 output, const QByteArray& universe)
  * Configuration
  *****************************************************************************/
 
-void DMX4LinuxOut::configure()
+void DMX4Linux::configure()
 {
     /* NOP */
 }
 
-bool DMX4LinuxOut::canConfigure()
+bool DMX4Linux::canConfigure()
 {
     return false;
 }
@@ -137,4 +137,4 @@ bool DMX4LinuxOut::canConfigure()
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(dmx4linuxout, DMX4LinuxOut)
+Q_EXPORT_PLUGIN2(dmx4linux, DMX4Linux)

@@ -73,7 +73,7 @@ HIDInput::~HIDInput()
 
 QString HIDInput::name()
 {
-    return QString("H.I.D.");
+    return QString("HID");
 }
 
 /*****************************************************************************

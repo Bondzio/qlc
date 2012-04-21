@@ -25,6 +25,7 @@
 #include <QDebug>
 #include <QMap>
 
+#include "hiddevice.h"
 #include "hidpoller.h"
 #include "hidinput.h"
 #include "poll.h"

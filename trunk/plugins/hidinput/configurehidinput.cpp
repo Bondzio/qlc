@@ -28,6 +28,7 @@
 #include <QDebug>
 
 #include "configurehidinput.h"
+#include "hiddevice.h"
 #include "hidinput.h"
 
 #define KColumnNumber  0

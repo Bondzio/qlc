@@ -25,10 +25,10 @@
 #include <QEvent>
 #include <QList>
 
-#include "qlcinplugin.h"
+#include "qlcoutplugin.h"
 
-#include "hiddevice.h"
-#include "hidpoller.h"
+class HIDPoller;
+class HIDDevice;
 
 /*****************************************************************************
  * HIDInputEvent
@@ -52,10 +52,10 @@ public:
  * HIDInput
  *****************************************************************************/
 
-class HIDInput : public QLCInPlugin
+class HIDInput : public QLCOutPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QLCInPlugin)
+    Q_INTERFACES(QLCOutPlugin)
 
     friend class ConfigureHIDInput;
     friend class HIDPoller;
@@ -78,23 +78,43 @@ public:
      *********************************************************************/
 public:
     /** @reimp */
-    void open(quint32 input = 0);
+    void openInput(quint32 input);
 
     /** @reimp */
-    void close(quint32 input = 0);
+    void closeInput(quint32 input);
 
     /** @reimp */
     QStringList inputs();
 
     /** @reimp */
-    QString infoText(quint32 input = QLCInPlugin::invalidInput());
-
-signals:
-    /** @reimp */
-    void valueChanged(quint32 line, quint32 channel, uchar value);
+    QString inputInfo(quint32 input);
 
 protected:
     void customEvent(QEvent* event);
+
+    /*********************************************************************
+     * Outputs
+     *********************************************************************/
+public:
+    /** @reimp */
+    void openOutput(quint32 output) { Q_UNUSED(output); }
+
+    /** @reimp */
+    void closeOutput(quint32 output) { Q_UNUSED(output); }
+
+    /** @reimp */
+    QStringList outputs() { return QStringList(); }
+
+    /** @reimp */
+    QString outputInfo(quint32 output) { Q_UNUSED(output); return QString(); }
+
+    /** @reimp */
+    void writeChannel(quint32 output, quint32 channel, uchar value)
+        { Q_UNUSED(output); Q_UNUSED(channel); Q_UNUSED(value); }
+
+    /** @reimp */
+    void writeUniverse(quint32 output, const QByteArray& universe)
+        { Q_UNUSED(output); Q_UNUSED(universe); }
 
     /*********************************************************************
      * Configuration
@@ -109,13 +129,6 @@ public:
 signals:
     /** @reimp */
     void configurationChanged();
-
-    /*********************************************************************
-     * Feedback
-     *********************************************************************/
-public:
-    /** @reimp */
-    void feedBack(quint32 input, quint32 channel, uchar value);
 
     /*********************************************************************
      * Devices

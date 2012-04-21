@@ -73,7 +73,29 @@ HIDInput::~HIDInput()
 
 QString HIDInput::name()
 {
-    return QString("HID Input");
+    return QString("H.I.D.");
+}
+
+/*****************************************************************************
+ * Inputs
+ *****************************************************************************/
+
+void HIDInput::openInput(quint32 input)
+{
+    HIDDevice* dev = device(input);
+    if (dev != NULL)
+        addPollDevice(dev);
+    else
+        qDebug() << name() << "has no input number:" << input;
+}
+
+void HIDInput::closeInput(quint32 input)
+{
+    HIDDevice* dev = device(input);
+    if (dev != NULL)
+        removePollDevice(dev);
+    else
+        qDebug() << name() << "has no input number:" << input;
 }
 
 QStringList HIDInput::inputs()
@@ -85,28 +107,6 @@ QStringList HIDInput::inputs()
         list << it.next()->name();
 
     return list;
-}
-
-/*****************************************************************************
- * Inputs
- *****************************************************************************/
-
-void HIDInput::open(quint32 input)
-{
-    HIDDevice* dev = device(input);
-    if (dev != NULL)
-        addPollDevice(dev);
-    else
-        qDebug() << name() << "has no input number:" << input;
-}
-
-void HIDInput::close(quint32 input)
-{
-    HIDDevice* dev = device(input);
-    if (dev != NULL)
-        removePollDevice(dev);
-    else
-        qDebug() << name() << "has no input number:" << input;
 }
 
 void HIDInput::customEvent(QEvent* event)
@@ -123,7 +123,7 @@ void HIDInput::customEvent(QEvent* event)
     }
 }
 
-QString HIDInput::infoText(quint32 input)
+QString HIDInput::inputInfo(quint32 input)
 {
     QString str;
 
@@ -135,7 +135,7 @@ QString HIDInput::infoText(quint32 input)
 
     str += QString("<H3>%1</H3>").arg(name());
 
-    if (input == QLCInPlugin::invalidInput())
+    if (input == QLCOutPlugin::invalidLine())
     {
         /* Plugin or just an invalid input selected. Display generic
            information. */
@@ -171,17 +171,6 @@ void HIDInput::configure()
 bool HIDInput::canConfigure()
 {
     return true;
-}
-
-/*****************************************************************************
- * Feedback
- *****************************************************************************/
-
-void HIDInput::feedBack(quint32 input, quint32 channel, uchar value)
-{
-    Q_UNUSED(input);
-    Q_UNUSED(channel);
-    Q_UNUSED(value);
 }
 
 /*****************************************************************************

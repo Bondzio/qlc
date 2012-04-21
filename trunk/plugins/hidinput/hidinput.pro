@@ -30,5 +30,5 @@ TRANSLATIONS += HID_Input_es_ES.ts
 TRANSLATIONS += HID_Input_fr_FR.ts
 TRANSLATIONS += HID_Input_it_IT.ts
 
-target.path = $$INSTALLROOT/$$INPUTPLUGINDIR
+target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target

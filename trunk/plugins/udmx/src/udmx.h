@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  udmxout.h
+  udmx.h
 
   Copyright (c)	Lutz Hillebrand
                 Heikki Junnila
@@ -20,8 +20,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef UDMXOUT_H
-#define UDMXOUT_H
+#ifndef UDMX_H
+#define UDMX_H
 
 #include <QStringList>
 #include <QList>
@@ -29,13 +29,8 @@
 #include "qlcioplugin.h"
 
 class UDMXDevice;
-class QString;
 
-/*****************************************************************************
- * USBDMXOut
- *****************************************************************************/
-
-class UDMXOut : public QLCIOPlugin
+class UDMX : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -45,7 +40,7 @@ class UDMXOut : public QLCIOPlugin
      *********************************************************************/
 public:
     /** @reimp */
-    virtual ~UDMXOut();
+    virtual ~UDMX();
 
     /** @reimp */
     void init();
@@ -98,10 +93,6 @@ public:
 
     /** @reimp */
     QString inputInfo(quint32 input) { Q_UNUSED(input); return QString(); }
-
-    /** @reimp */
-    void sendFeedBack(quint32 input, quint32 channel, uchar value)
-        { Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); }
 
     /*********************************************************************
      * Configuration

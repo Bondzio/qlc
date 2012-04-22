@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  udmxout.cpp
+  udmx.cpp
 
   Copyright (c)	Lutz Hillebrand
                 Heikki Junnila
@@ -21,11 +21,10 @@
 */
 
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include "libusb_dyn.h"
+#   include <Windows.h>
+#   include "libusb_dyn.h"
 #else
-#include <usb.h>
+#   include <usb.h>
 #endif
 
 #include <QMessageBox>
@@ -33,44 +32,40 @@
 #include <QDebug>
 
 #include "udmxdevice.h"
-#include "udmxout.h"
+#include "udmx.h"
 
-/*****************************************************************************
- * Initialization
- *****************************************************************************/
-
-UDMXOut::~UDMXOut()
+UDMX::~UDMX()
 {
 }
 
-void UDMXOut::init()
+void UDMX::init()
 {
     usb_init();
     rescanDevices();
 }
 
-QString UDMXOut::name()
+QString UDMX::name()
 {
-    return QString("uDMX Output");
+    return QString("uDMX");
 }
 
 /*****************************************************************************
  * Outputs
  *****************************************************************************/
 
-void UDMXOut::openOutput(quint32 output)
+void UDMX::openOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->open();
 }
 
-void UDMXOut::closeOutput(quint32 output)
+void UDMX::closeOutput(quint32 output)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->close();
 }
 
-QStringList UDMXOut::outputs()
+QStringList UDMX::outputs()
 {
     QStringList list;
     int i = 1;
@@ -81,7 +76,7 @@ QStringList UDMXOut::outputs()
     return list;
 }
 
-QString UDMXOut::outputInfo(quint32 output)
+QString UDMX::outputInfo(quint32 output)
 {
     QString str;
 
@@ -109,13 +104,13 @@ QString UDMXOut::outputInfo(quint32 output)
     return str;
 }
 
-void UDMXOut::writeUniverse(quint32 output, const QByteArray& universe)
+void UDMX::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output < quint32(m_devices.size()))
         m_devices.at(output)->outputDMX(universe);
 }
 
-void UDMXOut::rescanDevices()
+void UDMX::rescanDevices()
 {
     struct usb_device* dev;
     struct usb_bus* bus;
@@ -133,9 +128,7 @@ void UDMXOut::rescanDevices()
         /* Iterate thru all devices in each bus */
         for (dev = bus->devices; dev != NULL; dev = dev->next)
         {
-            UDMXDevice* udev;
-
-            udev = device(dev);
+            UDMXDevice* udev = device(dev);
             if (udev != NULL)
             {
                 /* We already have this device and it's still
@@ -147,7 +140,7 @@ void UDMXOut::rescanDevices()
             else if (UDMXDevice::isUDMXDevice(dev) == true)
             {
                 /* This is a new device. Create and append. */
-                udev = new UDMXDevice(this, dev);
+                udev = new UDMXDevice(dev, this);
                 m_devices.append(udev);
             }
         }
@@ -162,7 +155,7 @@ void UDMXOut::rescanDevices()
     }
 }
 
-UDMXDevice* UDMXOut::device(struct usb_device* usbdev)
+UDMXDevice* UDMX::device(struct usb_device* usbdev)
 {
     QListIterator <UDMXDevice*> it(m_devices);
     while (it.hasNext() == true)
@@ -179,7 +172,7 @@ UDMXDevice* UDMXOut::device(struct usb_device* usbdev)
  * Configuration
  *****************************************************************************/
 
-void UDMXOut::configure()
+void UDMX::configure()
 {
     int r = QMessageBox::question(NULL, name(),
                                   tr("Do you wish to re-scan your hardware?"),
@@ -188,7 +181,7 @@ void UDMXOut::configure()
         rescanDevices();
 }
 
-bool UDMXOut::canConfigure()
+bool UDMX::canConfigure()
 {
     return true;
 }
@@ -197,4 +190,4 @@ bool UDMXOut::canConfigure()
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(udmxout, UDMXOut)
+Q_EXPORT_PLUGIN2(udmx, UDMX)

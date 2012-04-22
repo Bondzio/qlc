@@ -27,7 +27,6 @@
 
 struct usb_dev_handle;
 struct usb_device;
-class QString;
 
 class UDMXDevice : public QThread
 {
@@ -37,7 +36,7 @@ class UDMXDevice : public QThread
      * Initialization
      ********************************************************************/
 public:
-    UDMXDevice(QObject* parent, struct usb_device* device);
+    UDMXDevice(struct usb_device* device, QObject* parent = 0);
     virtual ~UDMXDevice();
 
     /** Find out, whether the given USB device is a uDMX device */

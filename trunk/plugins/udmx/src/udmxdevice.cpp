@@ -21,11 +21,10 @@
 */
 
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include "libusb_dyn.h"
+#   include <Windows.h>
+#   include "libusb_dyn.h"
 #else
-#include <usb.h>
+#   include <usb.h>
 #endif
 
 #include <QSettings>
@@ -46,7 +45,7 @@
  * Initialization
  ****************************************************************************/
 
-UDMXDevice::UDMXDevice(QObject* parent, struct usb_device* device)
+UDMXDevice::UDMXDevice(struct usb_device* device, QObject* parent)
     : QThread(parent)
     , m_device(device)
     , m_handle(NULL)

@@ -2,7 +2,7 @@ include(../../../variables.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = udmxout
+TARGET   = udmx
 
 CONFIG      += plugin
 INCLUDEPATH += ../../interfaces
@@ -11,10 +11,10 @@ unix:CONFIG      += link_pkgconfig
 unix:PKGCONFIG   += libusb
 
 HEADERS += udmxdevice.h \
-           udmxout.h
+           udmx.h
 
 SOURCES += udmxdevice.cpp \
-           udmxout.cpp
+           udmx.cpp
 
 win32 {
     HEADERS += libusb_dyn.h
@@ -23,11 +23,11 @@ win32 {
 
 HEADERS += ../../interfaces/qlcioplugin.h
 
-TRANSLATIONS += uDMX_Output_fi_FI.ts
-TRANSLATIONS += uDMX_Output_de_DE.ts
-TRANSLATIONS += uDMX_Output_es_ES.ts
-TRANSLATIONS += uDMX_Output_fr_FR.ts
-TRANSLATIONS += uDMX_Output_it_IT.ts
+TRANSLATIONS += uDMX_fi_FI.ts
+TRANSLATIONS += uDMX_de_DE.ts
+TRANSLATIONS += uDMX_es_ES.ts
+TRANSLATIONS += uDMX_fr_FR.ts
+TRANSLATIONS += uDMX_it_IT.ts
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation

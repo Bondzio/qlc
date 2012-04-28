@@ -110,6 +110,7 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
     // Allocate storage for list based on numDevices
     FT_DEVICE_LIST_INFO_NODE* devInfo = new FT_DEVICE_LIST_INFO_NODE[num];
 
+	// Get a map of user-forced serials and their types
     QMap <QString,QVariant> types(typeMap());
 
     // Get the device information list
@@ -118,9 +119,15 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
         for (DWORD i = 0; i < num; i++)
         {
             QString vendor, description, serial;
-
-            if (qlcftdi_get_strings(i, vendor, description, serial) != FT_OK)
-                continue;
+			FT_STATUS s = qlcftdi_get_strings(i, vendor, description, serial);
+            if (s != FT_OK || description.isEmpty() || serial.isEmpty())
+            {
+				// Seems that some otherwise working devices don't provide
+				// FT_PROGRAM_DATA struct used by qlcftdi_get_strings().
+				description = QString(devInfo[i].Description);
+				serial = QString(devInfo[i].SerialNumber);
+				vendor = QString();
+			}
 
             if (types.contains(serial) == true)
             {
@@ -141,7 +148,7 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
                     break;
                 }
             }
-            else if (vendor.toUpper().contains("FTDI") == true)
+            else if (vendor.toUpper().contains("FTDI") == true || vendor.isEmpty())
             {
                 /* This is probably an Open DMX USB widget */
                 list << new EnttecDMXUSBOpen(serial, description, i);

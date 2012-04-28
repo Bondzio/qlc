@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  vellemanout.cpp
+  velleman.cpp
 
   Copyright (c) Matthew Jaggard
 
@@ -29,8 +29,8 @@
 #   include <windows.h>
 #endif
 
-#include "vellemanout.h"
 #include "qlcmacros.h"
+#include "velleman.h"
 
 /*****************************************************************************
  * The Velleman interface for k8062d.dll
@@ -50,29 +50,28 @@ extern "C"
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
-
-VellemanOut::~VellemanOut()
+Velleman::~Velleman()
 {
     closeOutput(0);
     delete [] m_values;
 }
 
-void VellemanOut::init()
+void Velleman::init()
 {
     m_values = new qint32[512];
     m_currentlyOpen = false;
 }
 
-QString VellemanOut::name()
+QString Velleman::name()
 {
-    return QString("Velleman Output");
+    return QString("Velleman");
 }
 
 /*****************************************************************************
  * Outputs
  *****************************************************************************/
 
-void VellemanOut::openOutput(quint32 output)
+void Velleman::openOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -84,7 +83,7 @@ void VellemanOut::openOutput(quint32 output)
     }
 }
 
-void VellemanOut::closeOutput(quint32 output)
+void Velleman::closeOutput(quint32 output)
 {
     if (output != 0)
         return;
@@ -96,14 +95,14 @@ void VellemanOut::closeOutput(quint32 output)
     }
 }
 
-QStringList VellemanOut::outputs()
+QStringList Velleman::outputs()
 {
     QStringList list;
     list << QString("1: Velleman Device");
     return list;
 }
 
-QString VellemanOut::outputInfo(quint32 output)
+QString Velleman::outputInfo(quint32 output)
 {
     QString str;
 
@@ -132,7 +131,7 @@ QString VellemanOut::outputInfo(quint32 output)
     return str;
 }
 
-void VellemanOut::writeUniverse(quint32 output, const QByteArray& universe)
+void Velleman::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output != 0 || m_currentlyOpen == false)
         return;
@@ -148,11 +147,11 @@ void VellemanOut::writeUniverse(quint32 output, const QByteArray& universe)
  * Configuration
  *****************************************************************************/
 
-void VellemanOut::configure()
+void Velleman::configure()
 {
 }
 
-bool VellemanOut::canConfigure()
+bool Velleman::canConfigure()
 {
     return false;
 }
@@ -161,4 +160,4 @@ bool VellemanOut::canConfigure()
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(VellemanOut, VellemanOut)
+Q_EXPORT_PLUGIN2(velleman, Velleman)

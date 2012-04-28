@@ -1,8 +1,9 @@
 /*
   Q Light Controller
-  vellemanout.h
+  velleman.h
 
   Copyright (c) Matthew Jaggard
+                Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,15 +20,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef VELLEMANOUT_H
-#define VELLEMANOUT_H
+#ifndef VELLEMAN_H
+#define VELLEMAN_H
 
 #include <QString>
 
 #include "qlcioplugin.h"
 #include "qlcmacros.h"
 
-class QLC_DECLSPEC VellemanOut : public QLCIOPlugin
+class QLC_DECLSPEC Velleman : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -37,7 +38,7 @@ class QLC_DECLSPEC VellemanOut : public QLCIOPlugin
      *************************************************************************/
 public:
     /** @reimp */
-    virtual ~VellemanOut();
+    virtual ~Velleman();
 
     /** @reimp */
     void init();
@@ -46,7 +47,7 @@ public:
     QString name();
 
     /*************************************************************************
-     * Open/close
+     * Outputs
      *************************************************************************/
 public:
     /** @reimp */
@@ -64,7 +65,7 @@ public:
     /** @reimp */
     void writeUniverse(quint32 output, const QByteArray& universe);
 
-protected:
+private:
     bool m_currentlyOpen;
     qint32* m_values;
 

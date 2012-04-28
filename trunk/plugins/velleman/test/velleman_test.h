@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  vellemanout_test.cpp
+  velleman_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -19,12 +19,12 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef VELLEMANOUT_TEST_H
-#define VELLEMANOUT_TEST_H
+#ifndef VELLEMAN_TEST_H
+#define VELLEMAN_TEST_H
 
 #include <QObject>
 
-class VellemanOut_Test : public QObject
+class Velleman_Test : public QObject
 {
     Q_OBJECT
 

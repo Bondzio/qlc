@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  vellemanout_test.cpp
+  velleman_test.cpp
 
   Copyright (c) Heikki Junnila
 
@@ -21,10 +21,10 @@
 
 #include <QtTest>
 
-#include "vellemanout_test.h"
-#define protected public
-#include "vellemanout.h"
-#undef protected
+#define private public
+#include "velleman_test.h"
+#include "velleman.h"
+#undef private
 
 /****************************************************************************
  * Velleman mock
@@ -58,24 +58,24 @@ extern "C"
 }
 
 /****************************************************************************
- * VellemanOut tests
+ * Velleman tests
  ****************************************************************************/
 
-void VellemanOut_Test::initial()
+void Velleman_Test::initial()
 {
-    VellemanOut vo;
+    Velleman vo;
     vo.init();
     QVERIFY(vo.m_currentlyOpen == false);
     QVERIFY(vo.m_values != NULL);
-    QCOMPARE(vo.name(), QString("Velleman Output"));
+    QCOMPARE(vo.name(), QString("Velleman"));
     QCOMPARE(vo.outputs(), QStringList() << "1: Velleman Device");
     QVERIFY(vo.canConfigure() == false);
     vo.configure(); // Merely a crash test
 }
 
-void VellemanOut_Test::openClose()
+void Velleman_Test::openClose()
 {
-    VellemanOut vo;
+    Velleman vo;
     vo.init();
 
     vo.openOutput(3);
@@ -113,9 +113,9 @@ void VellemanOut_Test::openClose()
     QCOMPARE(_StopDeviceCalled, 1);
 }
 
-void VellemanOut_Test::outputInfo()
+void Velleman_Test::outputInfo()
 {
-    VellemanOut vo;
+    Velleman vo;
     vo.init();
 
     QString info;
@@ -136,9 +136,9 @@ void VellemanOut_Test::outputInfo()
     QVERIFY(info.endsWith("</BODY></HTML>"));
 }
 
-void VellemanOut_Test::writeUniverse()
+void Velleman_Test::writeUniverse()
 {
-    VellemanOut vo;
+    Velleman vo;
     vo.init();
 
     _StartDeviceCalled = 0;
@@ -175,4 +175,4 @@ void VellemanOut_Test::writeUniverse()
     QCOMPARE(_SetAllData[511], 96);
 }
 
-QTEST_MAIN(VellemanOut_Test)
+QTEST_MAIN(Velleman_Test)

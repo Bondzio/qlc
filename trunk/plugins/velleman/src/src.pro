@@ -3,7 +3,7 @@ include(../../../coverage.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = vellemanout
+TARGET   = velleman
 CONFIG  += plugin
 win32:DEFINES += QLC_EXPORT
 
@@ -18,15 +18,15 @@ win32: {
     LIBS        += -L$$K8062DDIR -lK8062D
 }
 
-HEADERS += vellemanout.h
-SOURCES += vellemanout.cpp
+HEADERS += velleman.h
+SOURCES += velleman.cpp
 HEADERS += ../../interfaces/qlcioplugin.h
 
-TRANSLATIONS += Velleman_Output_fi_FI.ts
-TRANSLATIONS += Velleman_Output_de_DE.ts
-TRANSLATIONS += Velleman_Output_es_ES.ts
-TRANSLATIONS += Velleman_Output_fr_FR.ts
-TRANSLATIONS += Velleman_Output_it_IT.ts
+TRANSLATIONS += Velleman_fi_FI.ts
+TRANSLATIONS += Velleman_de_DE.ts
+TRANSLATIONS += Velleman_es_ES.ts
+TRANSLATIONS += Velleman_fr_FR.ts
+TRANSLATIONS += Velleman_it_IT.ts
 
 target.path = $$INSTALLROOT/$$PLUGINDIR
 win32:INSTALLS   += target

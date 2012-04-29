@@ -16,6 +16,8 @@ win32: {
     # extract its contents under K8062DDIR below to compile this plugin.
     K8062DDIR    = C:/K8062D
     LIBS        += -L$$K8062DDIR -lK8062D
+} else {
+    SOURCES += velleman_mock.cpp
 }
 
 HEADERS += velleman.h
@@ -28,5 +30,6 @@ TRANSLATIONS += Velleman_es_ES.ts
 TRANSLATIONS += Velleman_fr_FR.ts
 TRANSLATIONS += Velleman_it_IT.ts
 
+# Installation only on Windows; Unix targets are built only for unit testing.
 target.path = $$INSTALLROOT/$$PLUGINDIR
 win32:INSTALLS   += target

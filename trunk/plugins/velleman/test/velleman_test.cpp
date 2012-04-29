@@ -30,32 +30,10 @@
  * Velleman mock
  ****************************************************************************/
 
-extern "C"
-{
-    static int _StartDeviceCalled = 0;
-    void StartDevice()
-    {
-        _StartDeviceCalled++;
-    }
-
-    static int _StopDeviceCalled = 0;
-    void StopDevice()
-    {
-        _StopDeviceCalled++;
-    }
-
-    static int _ChannelCount = 0;
-    void SetChannelCount(int32_t Count)
-    {
-        _ChannelCount = Count;
-    }
-
-    static int* _SetAllData = NULL;
-    void SetAllData(int32_t Data[])
-    {
-        _SetAllData = Data;
-    }
-}
+extern int _StartDeviceCalled;
+extern int _StopDeviceCalled;
+extern int _ChannelCount;
+extern int* _SetAllData;
 
 /****************************************************************************
  * Velleman tests

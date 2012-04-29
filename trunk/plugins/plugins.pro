@@ -6,6 +6,6 @@ SUBDIRS              += udmx
 SUBDIRS              += midi
 #unix:SUBDIRS         += olaout
 !macx:!win32:SUBDIRS += dmx4linux
-!macx:SUBDIRS        += velleman
+SUBDIRS              += velleman
 SUBDIRS              += enttecwing
 !macx:!win32:SUBDIRS += hid

@@ -68,6 +68,11 @@ QString Peperoni::name()
     return QString("Peperoni");
 }
 
+int Peperoni::capabilities() const
+{
+    return QLCIOPlugin::Output;
+}
+
 /*****************************************************************************
  * Outputs
  *****************************************************************************/

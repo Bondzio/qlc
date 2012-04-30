@@ -85,6 +85,16 @@ public:
      */
     virtual QString name() = 0;
 
+    /** Plugin's I/O capabilities */
+    enum Capability { Output = 0x1, Input = 0x2 };
+
+    /**
+     * Get plugin capabilities as an OR'ed bitmask
+     *
+     * This is a pure virtual method that must be implemented by all plugins.
+     */
+    virtual int capabilities() const = 0;
+
     /** Invalid input/output number */
     static quint32 invalidLine() { return UINT_MAX; }
 

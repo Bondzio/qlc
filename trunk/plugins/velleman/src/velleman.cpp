@@ -50,6 +50,7 @@ extern "C"
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
+
 Velleman::~Velleman()
 {
     closeOutput(0);
@@ -65,6 +66,11 @@ void Velleman::init()
 QString Velleman::name()
 {
     return QString("Velleman");
+}
+
+int Velleman::capabilities() const
+{
+    return QLCIOPlugin::Output;
 }
 
 /*****************************************************************************

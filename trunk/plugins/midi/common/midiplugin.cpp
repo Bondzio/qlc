@@ -54,6 +54,11 @@ QString MidiPlugin::name()
     return QString("MIDI");
 }
 
+int MidiPlugin::capabilities() const
+{
+    return QLCIOPlugin::Output | QLCIOPlugin::Input;
+}
+
 /*****************************************************************************
  * Outputs
  *****************************************************************************/

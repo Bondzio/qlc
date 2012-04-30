@@ -46,6 +46,11 @@ QString DMX4Linux::name()
     return QString("DMX4Linux");
 }
 
+int DMX4Linux::capabilities() const
+{
+    return QLCIOPlugin::Output;
+}
+
 /*****************************************************************************
  * Open/close
  *****************************************************************************/

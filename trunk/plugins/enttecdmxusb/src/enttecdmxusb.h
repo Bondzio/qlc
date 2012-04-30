@@ -44,6 +44,9 @@ public:
     /** @reimp */
     QString name();
 
+    /** @reimp */
+    int capabilities() const;
+
     /** Find out what kinds of widgets there are currently connected */
     bool rescanWidgets();
 

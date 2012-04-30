@@ -53,6 +53,11 @@ QString EnttecWing::name()
     return QString("ENTTEC Wing");
 }
 
+int EnttecWing::capabilities() const
+{
+    return QLCIOPlugin::Input;
+}
+
 void EnttecWing::reBindSocket()
 {
     if (m_socket->state() == QAbstractSocket::BoundState)

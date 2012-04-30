@@ -53,6 +53,11 @@ QString EnttecDMXUSB::name()
     return QString("Enttec DMX USB");
 }
 
+int EnttecDMXUSB::capabilities() const
+{
+    return QLCIOPlugin::Output | QLCIOPlugin::Input;
+}
+
 bool EnttecDMXUSB::rescanWidgets()
 {
     while (m_outputs.isEmpty() == false)

@@ -49,6 +49,11 @@ QString UDMX::name()
     return QString("uDMX");
 }
 
+int UDMX::capabilities() const
+{
+    return QLCIOPlugin::Output;
+}
+
 /*****************************************************************************
  * Outputs
  *****************************************************************************/

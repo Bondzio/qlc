@@ -53,6 +53,9 @@ public:
     /** @reimp */
     QString name();
 
+    /** @reimp */
+    int capabilities() const;
+
 private:
     MidiEnumerator* m_enumerator;
 

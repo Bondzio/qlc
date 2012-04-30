@@ -2,7 +2,7 @@ include (../../../variables.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = enttecdmxusbout
+TARGET   = enttecdmxusb
 
 CONFIG      += plugin
 QT          += gui core
@@ -40,17 +40,17 @@ CONFIG(ftd2xx) {
 }
 
 HEADERS += ../../interfaces/qlcioplugin.h
-HEADERS += enttecdmxusbwidget.h \
-           qlcftdi.h \
-           enttecdmxusbout.h \
+HEADERS += enttecdmxusb.h \
+           enttecdmxusbwidget.h \
            enttecdmxusbpro.h \
            enttecdmxusbprorx.h \
            enttecdmxusbprotx.h \
            enttecdmxusbopen.h \
-           enttecdmxusbconfig.h
+           enttecdmxusbconfig.h \
+           qlcftdi.h
 
-SOURCES += enttecdmxusbwidget.cpp \
-           enttecdmxusbout.cpp \
+SOURCES += enttecdmxusb.cpp \
+           enttecdmxusbwidget.cpp \
            enttecdmxusbpro.cpp \
            enttecdmxusbprorx.cpp \
            enttecdmxusbprotx.cpp \
@@ -70,11 +70,11 @@ unix:!macx {
     INSTALLS  += udev
 }
 
-TRANSLATIONS += Enttec_DMX_USB_Output_de_DE.ts
-TRANSLATIONS += Enttec_DMX_USB_Output_es_ES.ts
-TRANSLATIONS += Enttec_DMX_USB_Output_fi_FI.ts
-TRANSLATIONS += Enttec_DMX_USB_Output_fr_FR.ts
-TRANSLATIONS += Enttec_DMX_USB_Output_it_IT.ts
+TRANSLATIONS += Enttec_DMX_USB_de_DE.ts
+TRANSLATIONS += Enttec_DMX_USB_es_ES.ts
+TRANSLATIONS += Enttec_DMX_USB_fi_FI.ts
+TRANSLATIONS += Enttec_DMX_USB_fr_FR.ts
+TRANSLATIONS += Enttec_DMX_USB_it_IT.ts
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation

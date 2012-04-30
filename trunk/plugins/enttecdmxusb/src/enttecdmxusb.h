@@ -19,14 +19,14 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,$
 */
 
-#ifndef ENTTECDMXUSBOUT_H
-#define ENTTECDMXUSBOUT_H
+#ifndef ENTTECDMXUSB_H
+#define ENTTECDMXUSB_H
 
 #include "qlcioplugin.h"
 
 class EnttecDMXUSBWidget;
 
-class EnttecDMXUSBOut : public QLCIOPlugin
+class EnttecDMXUSB : public QLCIOPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QLCIOPlugin)
@@ -36,7 +36,7 @@ class EnttecDMXUSBOut : public QLCIOPlugin
      ************************************************************************/
 public:
     /** @reimp */
-    virtual ~EnttecDMXUSBOut();
+    virtual ~EnttecDMXUSB();
 
     /** @reimp */
     void init();

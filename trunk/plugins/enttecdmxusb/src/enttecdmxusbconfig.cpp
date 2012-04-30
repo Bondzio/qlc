@@ -30,7 +30,7 @@
 
 #include "enttecdmxusbconfig.h"
 #include "enttecdmxusbwidget.h"
-#include "enttecdmxusbout.h"
+#include "enttecdmxusb.h"
 
 #define SETTINGS_GEOMETRY "enttecdmxusbconfig/geometry"
 
@@ -39,7 +39,7 @@
 #define COL_TYPE   2
 #define PROP_SERIAL "serial"
 
-EnttecDMXUSBConfig::EnttecDMXUSBConfig(EnttecDMXUSBOut* plugin, QWidget* parent)
+EnttecDMXUSBConfig::EnttecDMXUSBConfig(EnttecDMXUSB* plugin, QWidget* parent)
     : QDialog(parent)
     , m_plugin(plugin)
     , m_tree(new QTreeWidget(this))

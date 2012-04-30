@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  enttecdmxusb.cpp
+  enttecdmx.cpp
 
   Copyright (C) Heikki Junnila
 
@@ -27,13 +27,13 @@
 #include "enttecdmxusbwidget.h"
 #include "enttecdmxusbprorx.h"
 #include "enttecdmxusbopen.h"
-#include "enttecdmxusbout.h"
+#include "enttecdmxusb.h"
 
 /****************************************************************************
  * Initialization
  ****************************************************************************/
 
-EnttecDMXUSBOut::~EnttecDMXUSBOut()
+EnttecDMXUSB::~EnttecDMXUSB()
 {
     while (m_outputs.isEmpty() == false)
         delete m_outputs.takeFirst();
@@ -42,18 +42,18 @@ EnttecDMXUSBOut::~EnttecDMXUSBOut()
         delete m_inputs.takeFirst();
 }
 
-void EnttecDMXUSBOut::init()
+void EnttecDMXUSB::init()
 {
     /* Search for new widgets */
     rescanWidgets();
 }
 
-QString EnttecDMXUSBOut::name()
+QString EnttecDMXUSB::name()
 {
-    return QString("Enttec DMX USB Output");
+    return QString("Enttec DMX USB");
 }
 
-bool EnttecDMXUSBOut::rescanWidgets()
+bool EnttecDMXUSB::rescanWidgets()
 {
     while (m_outputs.isEmpty() == false)
         delete m_outputs.takeFirst();
@@ -81,7 +81,7 @@ bool EnttecDMXUSBOut::rescanWidgets()
     return true;
 }
 
-QList <EnttecDMXUSBWidget*> EnttecDMXUSBOut::widgets() const
+QList <EnttecDMXUSBWidget*> EnttecDMXUSB::widgets() const
 {
     QList <EnttecDMXUSBWidget*> widgets;
     widgets << m_outputs;
@@ -93,19 +93,19 @@ QList <EnttecDMXUSBWidget*> EnttecDMXUSBOut::widgets() const
  * Outputs
  ****************************************************************************/
 
-void EnttecDMXUSBOut::openOutput(quint32 output)
+void EnttecDMXUSB::openOutput(quint32 output)
 {
     if (output < quint32(m_outputs.size()))
         m_outputs.at(output)->open();
 }
 
-void EnttecDMXUSBOut::closeOutput(quint32 output)
+void EnttecDMXUSB::closeOutput(quint32 output)
 {
     if (output < quint32(m_outputs.size()))
         m_outputs.at(output)->close();
 }
 
-QStringList EnttecDMXUSBOut::outputs()
+QStringList EnttecDMXUSB::outputs()
 {
     QStringList list;
     int i = 1;
@@ -116,7 +116,7 @@ QStringList EnttecDMXUSBOut::outputs()
     return list;
 }
 
-QString EnttecDMXUSBOut::outputInfo(quint32 output)
+QString EnttecDMXUSB::outputInfo(quint32 output)
 {
     QString str;
 
@@ -162,7 +162,7 @@ QString EnttecDMXUSBOut::outputInfo(quint32 output)
     return str;
 }
 
-void EnttecDMXUSBOut::writeUniverse(quint32 output, const QByteArray& universe)
+void EnttecDMXUSB::writeUniverse(quint32 output, const QByteArray& universe)
 {
     if (output < quint32(m_outputs.size()))
         m_outputs.at(output)->writeUniverse(universe);
@@ -172,19 +172,19 @@ void EnttecDMXUSBOut::writeUniverse(quint32 output, const QByteArray& universe)
  * Inputs
  ****************************************************************************/
 
-void EnttecDMXUSBOut::openInput(quint32 input)
+void EnttecDMXUSB::openInput(quint32 input)
 {
     if (input < quint32(m_inputs.size()))
         m_inputs.at(input)->open();
 }
 
-void EnttecDMXUSBOut::closeInput(quint32 input)
+void EnttecDMXUSB::closeInput(quint32 input)
 {
     if (input < quint32(m_inputs.size()))
         m_inputs.at(input)->close();
 }
 
-QStringList EnttecDMXUSBOut::inputs()
+QStringList EnttecDMXUSB::inputs()
 {
     QStringList list;
     int i = 1;
@@ -195,7 +195,7 @@ QStringList EnttecDMXUSBOut::inputs()
     return list;
 }
 
-QString EnttecDMXUSBOut::inputInfo(quint32 input)
+QString EnttecDMXUSB::inputInfo(quint32 input)
 {
     QString str;
 
@@ -245,7 +245,7 @@ QString EnttecDMXUSBOut::inputInfo(quint32 input)
  * Configuration
  ****************************************************************************/
 
-void EnttecDMXUSBOut::configure()
+void EnttecDMXUSB::configure()
 {
     qDebug() << Q_FUNC_INFO;
     EnttecDMXUSBConfig config(this);
@@ -253,7 +253,7 @@ void EnttecDMXUSBOut::configure()
     rescanWidgets();
 }
 
-bool EnttecDMXUSBOut::canConfigure()
+bool EnttecDMXUSB::canConfigure()
 {
     return true;
 }
@@ -262,4 +262,4 @@ bool EnttecDMXUSBOut::canConfigure()
  * Plugin export
  ****************************************************************************/
 
-Q_EXPORT_PLUGIN2(enttecdmxusbout, EnttecDMXUSBOut)
+Q_EXPORT_PLUGIN2(enttecdmxusb, EnttecDMXUSB)

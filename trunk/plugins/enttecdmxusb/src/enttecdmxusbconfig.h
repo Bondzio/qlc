@@ -26,7 +26,7 @@
 
 class EnttecDMXUSBWidget;
 class QTreeWidgetItem;
-class EnttecDMXUSBOut;
+class EnttecDMXUSB;
 class QPushButton;
 class QTreeWidget;
 class QComboBox;
@@ -36,7 +36,7 @@ class EnttecDMXUSBConfig : public QDialog
     Q_OBJECT
 
 public:
-    EnttecDMXUSBConfig(EnttecDMXUSBOut* plugin, QWidget* parent = 0);
+    EnttecDMXUSBConfig(EnttecDMXUSB* plugin, QWidget* parent = 0);
     ~EnttecDMXUSBConfig();
 
 private slots:
@@ -47,7 +47,7 @@ private:
     QComboBox* createTypeCombo(EnttecDMXUSBWidget* widget);
 
 private:
-    EnttecDMXUSBOut* m_plugin;
+    EnttecDMXUSB* m_plugin;
 
     QTreeWidget* m_tree;
     QPushButton* m_refreshButton;

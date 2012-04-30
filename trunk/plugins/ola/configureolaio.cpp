@@ -1,6 +1,6 @@
 /*
   Q Light Controller
-  configureolaout.cpp
+  configureolaio.cpp
 
   Copyright (C) Simon Newton,
                 Heikki Junnila
@@ -27,22 +27,21 @@
 #include <QString>
 #include <QTimer>
 
-#include "configureolaout.h"
-#include "olaout.h"
+#include "configureolaio.h"
+#include "olaio.h"
 
-static const unsigned int KColumnName = 0;
-static const unsigned int KColumnOutput = 1;
-
+#define COL_NAME 0
+#define COL_LINE 1
 
 /*****************************************************************************
  * Initialization
  *****************************************************************************/
 
-ConfigureOLAOut::ConfigureOLAOut(QWidget* parent, OLAOut* plugin)
-        : QDialog(parent)
+ConfigureOlaIO::ConfigureOlaIO(OlaIO* plugin, QWidget* parent)
+    : QDialog(parent)
+    , m_plugin(plugin)
 {
     Q_ASSERT(plugin != NULL);
-    m_plugin = plugin;
 
     setupUi(this);
     populateOutputList();
@@ -50,24 +49,20 @@ ConfigureOLAOut::ConfigureOLAOut(QWidget* parent, OLAOut* plugin)
     m_standaloneCheck->setChecked(m_plugin->isServerEmbedded());
 }
 
-ConfigureOLAOut::~ConfigureOLAOut()
+ConfigureOlaIO::~ConfigureOlaIO()
 {
     m_plugin->setServerEmbedded(m_standaloneCheck->isChecked());
 }
 
-/*****************************************************************************
- * Refresh
- *****************************************************************************/
-
-void ConfigureOLAOut::populateOutputList()
+void ConfigureOlaIO::populateOutputList()
 {
     m_listView->clear();
-    OutputList outputs = m_plugin->outputMapping();
 
+    QList <uint> outputs(m_plugin->outputMapping());
     for (int i = 0; i != outputs.size(); ++i)
     {
         QTreeWidgetItem* item = new QTreeWidgetItem(m_listView);
-        item->setText(KColumnName, QString("OLA Output %1").arg(i + 1));
-        item->setText(KColumnOutput, QString("%1").arg(outputs[i]));
+        item->setText(COL_NAME, QString("OLA Output %1").arg(i + 1));
+        item->setText(COL_LINE, QString("%1").arg(outputs[i]));
     }
 }

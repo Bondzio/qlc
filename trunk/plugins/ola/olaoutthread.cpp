@@ -24,6 +24,14 @@
 #include <ola/Callback.h>
 #include "olaoutthread.h"
 
+OlaOutThread::OlaOutThread()
+    : QThread()
+    , m_init_run(false)
+    , m_ss(NULL)
+    , m_pipe(NULL)
+    , m_client(NULL)
+{
+}
 
 /*
  * Clean up.

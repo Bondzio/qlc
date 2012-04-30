@@ -1,9 +1,9 @@
 /*
   Q Light Controller
-  olaout.cpp
+  olaio.cpp
 
-  Copyright (c) Heikki Junnila
-                Simon Newton
+  Copyright (c) Simon Newton
+                Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -21,15 +21,22 @@
 */
 
 #include <QApplication>
+#include <QSettings>
 #include <QString>
 #include <QDebug>
-#include <QSettings>
 
-#include "configureolaout.h"
-#include "olaout.h"
 #include "qlclogdestination.h"
+#include "configureolaio.h"
+#include "olaio.h"
 
-OLAOut::~OLAOut()
+#define SETTINGS_EMBEDDED "OlaIO/embedded"
+#define UNIVERSE_COUNT 4
+
+/****************************************************************************
+ * Initialization
+ ****************************************************************************/
+
+OlaIO::~OlaIO()
 {
     if (m_thread != NULL)
     {
@@ -39,139 +46,100 @@ OLAOut::~OLAOut()
     ola::InitLogging(ola::OLA_LOG_WARN, NULL);
 }
 
-/*
+/**
  * Start the plugin. It's hard to say if we want OLA running if there aren't
  * any output universes active.
  */
-void OLAOut::init()
+void OlaIO::init()
 {
     m_embedServer = false;
     m_thread = NULL;
     ola::InitLogging(ola::OLA_LOG_WARN, new ola::QLCLogDestination());
     // TODO: load this from a savefile at some point
-    for (unsigned int i = 1; i <= K_UNIVERSE_COUNT; ++i)
-        m_output_list.append(i);
+    for (unsigned int i = 1; i <= UNIVERSE_COUNT; ++i)
+        m_outputs.append(i);
 
+    bool es = false;
     QSettings settings;
-    bool es = settings.value("OLAOut/embedded").toBool();
+    QVariant var = settings.value(SETTINGS_EMBEDDED);
+    if (var.isValid() == true)
+        es = settings.value(SETTINGS_EMBEDDED).toBool();
+
     // Make sure the thread is started the first time round
     m_embedServer = !es;
     // This should load from the settings when it is made
     setServerEmbedded(es);
 }
 
-/*
- * Is the plugin currently running as a stand alone daemon
- */
-bool OLAOut::isServerEmbedded()
+QString OlaIO::name()
+{
+    return QString("OLA");
+}
+
+int OlaIO::capabilities() const
+{
+    return QLCIOPlugin::Output;
+}
+
+bool OlaIO::isServerEmbedded() const
 {
     return m_embedServer;
 }
 
-/*
- * Set whether or not to run as a standalone daemon
- */
-void OLAOut::setServerEmbedded(bool embedServer)
+void OlaIO::setServerEmbedded(bool embedServer)
 {
-    if (embedServer != m_embedServer) {
+    if (embedServer != m_embedServer)
+    {
         if (m_thread != NULL)
         {
             m_thread->stop();
             delete m_thread;
         }
+
         m_embedServer = embedServer;
         if (m_embedServer)
         {
             qWarning() << "olaout: running as embedded";
             m_thread = new OlaEmbeddedServer();
-        } else
+        }
+        else
         {
             m_thread = new OlaStandaloneClient();
         }
+
         if (!m_thread->start())
-        {
             qWarning() << "olaout: start thread failed";
-        }
+
         QSettings settings;
-        settings.setValue("OLAOut/embedded", m_embedServer);
+        settings.setValue(SETTINGS_EMBEDDED, m_embedServer);
     }
 }
 
-/*
- * Open a universe for output
- * @param output the universe id
- */
-void OLAOut::open(quint32 output)
+/****************************************************************************
+ * Outputs
+ ****************************************************************************/
+
+void OlaIO::openOutput(quint32 output)
 {
-    if (output >= K_UNIVERSE_COUNT)
-    {
-        qWarning() << "olaout: output " << output << " out of range";
-        return;
-    }
+    if (output >= UNIVERSE_COUNT)
+        qWarning() << Q_FUNC_INFO << "output" << output << "is out of range";
 }
 
-
-/*
- * Close this universe.
- * @param output the universe id
- */
-void OLAOut::close(quint32 output)
+void OlaIO::closeOutput(quint32 output)
 {
-    if (output >= K_UNIVERSE_COUNT)
-    {
-        qWarning() << "olaout: output " << output << " out of range";
-        return;
-    }
+    if (output >= UNIVERSE_COUNT)
+        qWarning() << Q_FUNC_INFO << "output" << output << "is out of range";
 }
 
-
-/*
- * Return a list of our outputs. For now we output on OLA universes 1 to
- * K_UNIVERSE_COUNT.
- */
-QStringList OLAOut::outputs()
+QStringList OlaIO::outputs()
 {
     QStringList list;
-    for (int i = 0; i < m_output_list.size(); ++i)
+    for (int i = 0; i < m_outputs.size(); ++i)
         list << QString("%1: OLA Universe %1").arg(i + 1);
     return list;
 }
 
-
-/*
- * The plugin name
- */
-QString OLAOut::name()
-{
-    return QString("OLA Output");
-}
-
-
-/*
- * Configure this plugin.
- * TODO: Add this.
- * Things we may want:
- *  - http server on/off
- *  - listen for other clients
- *  - universe ID
- *  - ola device patching
- */
-void OLAOut::configure()
-{
-    ConfigureOLAOut conf(NULL, this);
-    if (conf.exec() == QDialog::Accepted)
-        emit configurationChanged();
-}
-
-bool OLAOut::canConfigure()
-{
-    return true;
-}
-
-/*
- * The plugin description.
- */
-QString OLAOut::infoText(quint32 output)
+QString OlaIO::outputInfo(quint32 output)
 {
     QString str;
 
@@ -201,34 +169,44 @@ QString OLAOut::infoText(quint32 output)
     return str;
 }
 
-
-void OLAOut::outputDMX(quint32 output, const QByteArray& universe)
+void OlaIO::writeUniverse(quint32 output, const QByteArray& universe)
 {
-    if (output > K_UNIVERSE_COUNT || !m_thread)
+    if (output > UNIVERSE_COUNT || !m_thread)
         return;
-
-    m_thread->write_dmx(m_output_list[output], universe);
+    else
+        m_thread->write_dmx(m_outputs[output], universe);
 }
 
-/*
- * Return the output: universe mapping
- */
-const OutputList OLAOut::outputMapping() const
+QList <uint> OlaIO::outputMapping() const
 {
-    return m_output_list;
+    return m_outputs;
 }
 
-
-/*
- * Set the OLA universe for an output
- * @param output the id of the output to change
- * @param universe the OLA universe id
- */
-void OLAOut::setOutputUniverse(quint32 output, unsigned int universe)
+void OlaIO::setOutputUniverse(quint32 output, unsigned int universe)
 {
-    if (output > K_UNIVERSE_COUNT)
+    if (output > UNIVERSE_COUNT)
         return;
-    m_output_list[output] = universe;
+    m_outputs[output] = universe;
 }
 
-Q_EXPORT_PLUGIN2(olaout, OLAOut)
+/****************************************************************************
+ * Configuration
+ ****************************************************************************/
+
+void OlaIO::configure()
+{
+    ConfigureOlaIO conf(this, NULL);
+    conf.exec();
+    emit configurationChanged();
+}
+
+bool OlaIO::canConfigure()
+{
+    return true;
+}
+
+/****************************************************************************
+ * Plugin export
+ ****************************************************************************/
+
+Q_EXPORT_PLUGIN2(olaio, OlaIO)

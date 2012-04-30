@@ -2,7 +2,7 @@ include(../../variables.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = olaout
+TARGET   = olaio
 
 QT       += core gui
 CONFIG   += plugin
@@ -20,27 +20,26 @@ macx: {
 }
 
 # Forms
-FORMS += configureolaout.ui
+FORMS += configureolaio.ui
 
 # Headers
-HEADERS += olaout.h \
+HEADERS += ../interfaces/qlcioplugin.h
+HEADERS += olaio.h \
            olaoutthread.h \
-           configureolaout.h \
+           configureolaio.h \
            qlclogdestination.h
 
 # Source
-SOURCES += olaout.cpp \
+SOURCES += olaio.cpp \
            olaoutthread.cpp \
-           configureolaout.cpp \
+           configureolaio.cpp \
            qlclogdestination.cpp
 
-HEADERS += ../interfaces/qlcoutplugin.h
-
-TRANSLATIONS += OLA_Output_fi_FI.ts
-TRANSLATIONS += OLA_Output_de_DE.ts
-TRANSLATIONS += OLA_Output_es_ES.ts
-TRANSLATIONS += OLA_Output_fr_FR.ts
-TRANSLATIONS += OLA_Output_it_IT.ts
+TRANSLATIONS += OLA_fi_FI.ts
+TRANSLATIONS += OLA_de_DE.ts
+TRANSLATIONS += OLA_es_ES.ts
+TRANSLATIONS += OLA_fr_FR.ts
+TRANSLATIONS += OLA_it_IT.ts
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation

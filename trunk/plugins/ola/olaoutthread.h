@@ -2,8 +2,8 @@
   Q Light Controller
   olaoutthread.h
 
-  Copyright (c) Heikki Junnila
-                Simon Newton
+  Copyright (c) Simon Newton
+                Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -23,7 +23,8 @@
 #ifndef OLAOUTTHREAD_H
 #define OLAOUTTHREAD_H
 
-#include <qthread.h>
+#include <QThread>
+
 #include <ola/DmxBuffer.h>
 #include <ola/OlaClient.h>
 #include <ola/network/SelectServer.h>
@@ -39,7 +40,6 @@ typedef struct
     unsigned int universe;
     uchar data[K_UNIVERSE_SIZE];
 } dmx_data;
-
 
 /*
  * The OLA thread.
@@ -61,13 +61,10 @@ typedef struct
  *
  * OlaOut --pipe-> OlaOutThread --pipe-> OlaServer
  */
-class OlaOutThread : public QThread {
+class OlaOutThread : public QThread
+{
 public:
-    OlaOutThread():
-            m_init_run(false),
-            m_ss(NULL),
-            m_pipe(NULL),
-            m_client(NULL) {}
+    OlaOutThread();
     virtual ~OlaOutThread();
 
     void run();

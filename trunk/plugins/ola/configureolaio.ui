@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConfigureOLAOut</class>
- <widget class="QDialog" name="ConfigureOLAOut">
+ <class>ConfigureOlaIO</class>
+ <widget class="QDialog" name="ConfigureOlaIO">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>468</width>
-    <height>327</height>
+    <width>447</width>
+    <height>328</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configure OLA Output</string>
+   <string>Configure OLA I/O</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="3">
+   <item row="0" column="0" colspan="2">
     <widget class="QTreeWidget" name="m_listView">
      <column>
       <property name="text">
@@ -28,20 +28,20 @@
      </column>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="m_standaloneCheck">
+     <property name="text">
+      <string>Run standalone OLA daemon</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="m_standaloneCheck">
-     <property name="text">
-      <string>Run standalone OLA daemon</string>
+      <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
    </item>
@@ -52,7 +52,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ConfigureOLAOut</receiver>
+   <receiver>ConfigureOlaIO</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -68,7 +68,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ConfigureOLAOut</receiver>
+   <receiver>ConfigureOlaIO</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

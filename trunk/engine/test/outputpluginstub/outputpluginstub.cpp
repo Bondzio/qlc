@@ -42,6 +42,11 @@ QString OutputPluginStub::name()
     return QString("Output Plugin Stub");
 }
 
+int OutputPluginStub::capabilities() const
+{
+    return QLCIOPlugin::Output | QLCIOPlugin::Input;
+}
+
 /*****************************************************************************
  * Outputs
  *****************************************************************************/

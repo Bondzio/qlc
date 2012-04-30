@@ -209,12 +209,14 @@ quint32 InputMap::mapping(const QString& pluginName, quint32 input) const
 
 QStringList InputMap::pluginNames()
 {
-    QListIterator <QLCIOPlugin*> it(doc()->ioPluginCache()->plugins());
     QStringList list;
-
+    QListIterator <QLCIOPlugin*> it(doc()->ioPluginCache()->plugins());
     while (it.hasNext() == true)
-        list.append(it.next()->name());
-
+    {
+        QLCIOPlugin* plg(it.next());
+        if (plg->capabilities() & QLCIOPlugin::Input)
+            list << plg->name();
+    }
     return list;
 }
 

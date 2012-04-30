@@ -264,7 +264,11 @@ QStringList OutputMap::pluginNames()
     QStringList list;
     QListIterator <QLCIOPlugin*> it(doc()->ioPluginCache()->plugins());
     while (it.hasNext() == true)
-        list.append(it.next()->name());
+    {
+        QLCIOPlugin* plg(it.next());
+        if (plg->capabilities() & QLCIOPlugin::Output)
+            list << plg->name();
+    }
     return list;
 }
 

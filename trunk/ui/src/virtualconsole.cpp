@@ -1343,6 +1343,7 @@ void VirtualConsole::resetContents()
 
     Q_ASSERT(m_scrollArea != NULL);
     m_contents = new VCFrame(m_scrollArea, m_doc);
+    m_contents->setFrameStyle(0);
 
     /* Make the bottom frame as big as the screen */
     QDesktopWidget dw;

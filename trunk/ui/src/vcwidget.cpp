@@ -741,12 +741,9 @@ void VCWidget::resize(const QSize& size)
 {
     QSize sz(size);
 
-    // Force grid settings, if applicable
-    if (VirtualConsole::instance()->properties().isGridEnabled() == true)
-    {
-        sz.setWidth(size.width() - (size.width() % GRID_RESOLUTION));
-        sz.setHeight(size.height() - (size.height() % GRID_RESOLUTION));
-    }
+    // Force grid settings
+    sz.setWidth(size.width() - (size.width() % GRID_RESOLUTION));
+    sz.setHeight(size.height() - (size.height() % GRID_RESOLUTION));
 
     // Resize
     QWidget::resize(sz);
@@ -756,12 +753,9 @@ void VCWidget::move(const QPoint& point)
 {
     QPoint pt(point);
 
-    // Force grid settings, if applicable
-    if (VirtualConsole::instance()->properties().isGridEnabled() == true)
-    {
-        pt.setX(point.x() - (point.x() % GRID_RESOLUTION));
-        pt.setY(point.y() - (point.y() % GRID_RESOLUTION));
-    }
+    // Force grid settings
+    pt.setX(point.x() - (point.x() % GRID_RESOLUTION));
+    pt.setY(point.y() - (point.y() % GRID_RESOLUTION));
 
     // Don't move beyond left or right
     if (pt.x() < 0)

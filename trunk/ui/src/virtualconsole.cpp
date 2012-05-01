@@ -62,6 +62,8 @@
 #include <X11/Xlib.h>
 #endif
 
+#define SETTINGS_VC_SIZE "virtualconsole/size"
+
 VirtualConsole* VirtualConsole::s_instance = NULL;
 
 /****************************************************************************
@@ -121,7 +123,6 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
     , m_stackingLowerAction(NULL)
 
     , m_customMenu(NULL)
-    , m_toolsMenu(NULL)
     , m_editMenu(NULL)
     , m_addMenu(NULL)
 
@@ -267,11 +268,6 @@ QMenu* VirtualConsole::customMenu() const
     return m_customMenu;
 }
 
-QMenu* VirtualConsole::toolsMenu() const
-{
-    return m_toolsMenu;
-}
-
 QMenu* VirtualConsole::editMenu() const
 {
     return m_editMenu;
@@ -350,7 +346,7 @@ void VirtualConsole::initActions()
     m_editDeleteAction = new QAction(QIcon(":/editdelete.png"), tr("Delete"), this);
     connect(m_editDeleteAction, SIGNAL(triggered(bool)), this, SLOT(slotEditDelete()));
 
-    m_editPropertiesAction = new QAction(QIcon(":/configure.png"), tr("Widget Properties"), this);
+    m_editPropertiesAction = new QAction(QIcon(":/edit.png"), tr("Widget Properties"), this);
     connect(m_editPropertiesAction, SIGNAL(triggered(bool)), this, SLOT(slotEditProperties()));
 
     m_editRenameAction = new QAction(QIcon(":/editclear.png"), tr("Rename Widget"), this);
@@ -471,11 +467,6 @@ void VirtualConsole::initMenuBar()
     m_editMenu->addAction(m_editRenameAction);
     m_editMenu->addSeparator();
 
-    /* Tools menu */
-    m_toolsMenu = new QMenu(this);
-    m_toolsMenu->setTitle(tr("&Tools"));
-    m_toolsMenu->addAction(m_toolsSettingsAction);
-
     /* Background Menu */
     QMenu* bgMenu = new QMenu(m_editMenu);
     bgMenu->setTitle(tr("&Background"));
@@ -549,6 +540,8 @@ void VirtualConsole::initMenuBar()
     m_toolbar->addAction(m_bgImageAction);
     m_toolbar->addAction(m_fgColorAction);
     m_toolbar->addAction(m_fontAction);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_toolsSettingsAction);
 }
 
 void VirtualConsole::updateCustomMenu()
@@ -891,6 +884,7 @@ void VirtualConsole::slotToolsSettings()
     {
         m_properties = vcpe.properties();
         m_dockArea->refreshProperties();
+        contents()->resize(QSize(m_properties.sizeX(), m_properties.sizeY()));
         m_doc->setModified();
     }
 }
@@ -1345,9 +1339,9 @@ void VirtualConsole::resetContents()
     m_contents = new VCFrame(m_scrollArea, m_doc);
     m_contents->setFrameStyle(0);
 
-    /* Make the bottom frame as big as the screen */
-    QDesktopWidget dw;
-    contents()->setGeometry(dw.availableGeometry(this));
+    // Get virtual console size from properties
+    QSize size(m_properties.sizeX(), m_properties.sizeY());
+    contents()->resize(size);
     contents()->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     m_scrollArea->setWidget(contents());
 

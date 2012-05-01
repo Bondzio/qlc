@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>338</height>
+    <width>448</width>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,28 +25,60 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="m_keyboardGroup">
+        <widget class="QGroupBox" name="m_sizeGroup">
          <property name="title">
-          <string>Keyboard in operate mode</string>
+          <string>Virtual Console Size</string>
          </property>
-         <layout class="QVBoxLayout">
-          <item>
-           <widget class="QCheckBox" name="m_grabKeyboardCheck">
-            <property name="toolTip">
-             <string>Make virtual console to take exclusive keyboard control during operate mode</string>
-            </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Grab keyboard</string>
+             <string>Width</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QCheckBox" name="m_keyRepeatOffCheck">
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="m_sizeXSpin">
             <property name="toolTip">
-             <string>Prevent flickering when a keyboard hotkey has been pressed in operate mode</string>
+             <string>Widget grid layout X resolution</string>
             </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Turn off key repeat</string>
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="m_sizeYSpin">
+            <property name="toolTip">
+             <string>Widget grid layout X resolution</string>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="value">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -59,16 +91,16 @@
           <string>Use a grid layout for virtual console widgets</string>
          </property>
          <property name="title">
-          <string>Grid</string>
+          <string>Grid Spacing</string>
          </property>
          <property name="checkable">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Horizontal (X)</string>
+             <string>Horizontal</string>
             </property>
            </widget>
           </item>
@@ -91,7 +123,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Vertical (Y)</string>
+             <string>Vertical</string>
             </property>
            </widget>
           </item>
@@ -127,19 +159,6 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="1">
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>111</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="m_tapGroup">
          <property name="title">
@@ -155,6 +174,19 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item row="1" column="1" rowspan="2">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>111</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -456,62 +488,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_grabKeyboardCheck</sender>
-   <signal>clicked()</signal>
-   <receiver>VCPropertiesEditor</receiver>
-   <slot>slotGrabKeyboardClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>101</x>
-     <y>95</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>3</x>
-     <y>75</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_keyRepeatOffCheck</sender>
-   <signal>clicked()</signal>
-   <receiver>VCPropertiesEditor</receiver>
-   <slot>slotKeyRepeatOffClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>86</x>
-     <y>126</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>4</x>
-     <y>100</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_gridGroup</sender>
-   <signal>clicked()</signal>
-   <receiver>VCPropertiesEditor</receiver>
-   <slot>slotGridClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>381</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>401</x>
-     <y>49</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_gridXSpin</sender>
    <signal>valueChanged(int)</signal>
    <receiver>VCPropertiesEditor</receiver>
    <slot>slotGridXChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>426</x>
-     <y>97</y>
+     <x>397</x>
+     <y>89</y>
     </hint>
     <hint type="destinationlabel">
      <x>401</x>
@@ -526,8 +510,8 @@
    <slot>slotGridYChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>426</x>
-     <y>130</y>
+     <x>397</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
      <x>401</x>
@@ -542,8 +526,8 @@
    <slot>slotAutoDetectGrandMasterInputToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>81</y>
+     <x>282</x>
+     <y>253</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -558,8 +542,8 @@
    <slot>slotChooseGrandMasterInputClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>81</y>
+     <x>401</x>
+     <y>253</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -574,8 +558,8 @@
    <slot>slotGrandMasterIntensityToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>71</x>
-     <y>72</y>
+     <x>99</x>
+     <y>87</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
@@ -590,8 +574,8 @@
    <slot>slotGrandMasterReduceToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>72</y>
+     <x>344</x>
+     <y>87</y>
     </hint>
     <hint type="destinationlabel">
      <x>398</x>
@@ -606,8 +590,8 @@
    <slot>slotAutoDetectBlackoutInputToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>72</y>
+     <x>282</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -622,8 +606,8 @@
    <slot>slotChooseBlackoutInputClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>72</y>
+     <x>401</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -631,24 +615,49 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_sizeXSpin</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>VCPropertiesEditor</receiver>
+   <slot>slotSizeXChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>169</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>122</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_sizeYSpin</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>VCPropertiesEditor</receiver>
+   <slot>slotSizeYChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>slotGrabKeyboardClicked()</slot>
-  <slot>slotKeyRepeatOffClicked()</slot>
-  <slot>slotGridClicked()</slot>
   <slot>slotGridXChanged(int)</slot>
   <slot>slotGridYChanged(int)</slot>
-  <slot>slotFadeLimitsChanged()</slot>
-  <slot>slotHoldLimitsChanged()</slot>
   <slot>slotAutoDetectGrandMasterInputToggled(bool)</slot>
   <slot>slotChooseGrandMasterInputClicked()</slot>
-  <slot>slotAutoDetectFadeInputToggled(bool)</slot>
-  <slot>slotChooseFadeInputClicked()</slot>
-  <slot>slotAutoDetectHoldInputToggled(bool)</slot>
-  <slot>slotChooseHoldInputClicked()</slot>
   <slot>slotGrandMasterIntensityToggled(bool)</slot>
   <slot>slotGrandMasterReduceToggled(bool)</slot>
   <slot>slotAutoDetectBlackoutInputToggled(bool)</slot>
   <slot>slotChooseBlackoutInputClicked()</slot>
+  <slot>slotSizeXChanged(int)</slot>
+  <slot>slotSizeYChanged(int)</slot>
  </slots>
 </ui>

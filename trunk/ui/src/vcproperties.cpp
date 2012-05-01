@@ -36,12 +36,11 @@
  *****************************************************************************/
 
 VCProperties::VCProperties()
-    : m_gridEnabled(true)
-    , m_gridX(10)
+    : m_gridX(10)
     , m_gridY(10)
+    , m_sizeX(1920)
+    , m_sizeY(1080)
 
-    , m_keyRepeatOff(true)
-    , m_grabKeyboard(true)
     , m_tapModifier(Qt::ControlModifier)
 
     , m_gmChannelMode(UniverseArray::GMIntensity)
@@ -56,12 +55,11 @@ VCProperties::VCProperties()
 }
 
 VCProperties::VCProperties(const VCProperties& properties)
-    : m_gridEnabled(properties.m_gridEnabled)
-    , m_gridX(properties.m_gridX)
+    : m_gridX(properties.m_gridX)
     , m_gridY(properties.m_gridY)
+    , m_sizeX(properties.m_sizeX)
+    , m_sizeY(properties.m_sizeY)
 
-    , m_keyRepeatOff(properties.m_keyRepeatOff)
-    , m_grabKeyboard(properties.m_grabKeyboard)
     , m_tapModifier(properties.m_tapModifier)
 
     , m_gmChannelMode(properties.m_gmChannelMode)
@@ -82,16 +80,6 @@ VCProperties::~VCProperties()
 /*****************************************************************************
  * Grid
  *****************************************************************************/
-
-void VCProperties::setGridEnabled(bool enable)
-{
-    m_gridEnabled = enable;
-}
-
-bool VCProperties::isGridEnabled() const
-{
-    return m_gridEnabled;
-}
 
 void VCProperties::setGridX(int x)
 {
@@ -114,28 +102,32 @@ int VCProperties::gridY() const
 }
 
 /*****************************************************************************
- * Keyboard
+ * Size
  *****************************************************************************/
 
-void VCProperties::setKeyRepeatOff(bool set)
+void VCProperties::setSizeX(int x)
 {
-    m_keyRepeatOff = set;
+    m_sizeX = x;
 }
 
-bool VCProperties::isKeyRepeatOff() const
+int VCProperties::sizeX() const
 {
-    return m_keyRepeatOff;
+    return m_sizeX;
 }
 
-void VCProperties::setGrabKeyboard(bool grab)
+void VCProperties::setSizeY(int y)
 {
-    m_grabKeyboard = grab;
+    m_sizeY = y;
 }
 
-bool VCProperties::isGrabKeyboard() const
+int VCProperties::sizeY() const
 {
-    return m_grabKeyboard;
+    return m_sizeY;
 }
+
+/*****************************************************************************
+ * Keyboard
+ *****************************************************************************/
 
 void VCProperties::setTapModifier(Qt::KeyboardModifier mod)
 {
@@ -238,35 +230,28 @@ bool VCProperties::loadXML(const QDomElement& root)
         {
             /* Grid X resolution */
             str = tag.attribute(KXMLQLCVCPropertiesGridXResolution);
-            setGridX(str.toInt());
+            if (str.isEmpty() == false)
+                setGridX(str.toInt());
 
             /* Grid Y resolution */
             str = tag.attribute(KXMLQLCVCPropertiesGridYResolution);
-            setGridY(str.toInt());
+            if (str.isEmpty() == false)
+                setGridY(str.toInt());
+        }
+        else if (tag.tagName() == KXMLQLCVCPropertiesSize)
+        {
+            /* Width */
+            str = tag.attribute(KXMLQLCVCPropertiesSizeWidth);
+            if (str.isEmpty() == false)
+                setSizeX(str.toInt());
 
-            /* Grid enabled */
-            str = tag.attribute(KXMLQLCVCPropertiesGridEnabled);
-            if (str == KXMLQLCTrue)
-                setGridEnabled(true);
-            else
-                setGridEnabled(false);
+            /* Height */
+            str = tag.attribute(KXMLQLCVCPropertiesSizeHeight);
+            if (str.isEmpty() == false)
+                setSizeY(str.toInt());
         }
         else if (tag.tagName() == KXMLQLCVCPropertiesKeyboard)
         {
-            /* Keyboard grab */
-            str = tag.attribute(KXMLQLCVCPropertiesKeyboardGrab);
-            if (str == KXMLQLCTrue)
-                setGrabKeyboard(true);
-            else
-                setGrabKeyboard(false);
-
-            /* Key repeat */
-            str = tag.attribute(KXMLQLCVCPropertiesKeyboardRepeatOff);
-            if (str == KXMLQLCTrue)
-                setKeyRepeatOff(true);
-            else
-                setKeyRepeatOff(false);
-
             /* Tap modifier */
             str = tag.attribute(KXMLQLCVCPropertiesKeyboardTapModifier);
             if (str.isEmpty() == false)
@@ -329,28 +314,18 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
     tag = doc->createElement(KXMLQLCVCPropertiesGrid);
     tag.setAttribute(KXMLQLCVCPropertiesGridXResolution, QString("%1").arg(m_gridX));
     tag.setAttribute(KXMLQLCVCPropertiesGridYResolution, QString("%1").arg(m_gridY));
-    if (m_gridEnabled == true)
-        tag.setAttribute(KXMLQLCVCPropertiesGridEnabled, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCVCPropertiesGridEnabled, KXMLQLCFalse);
     prop_root.appendChild(tag);
 
-    /* Keyboard settings */
+    /* Size */
+    tag = doc->createElement(KXMLQLCVCPropertiesSize);
+    tag.setAttribute(KXMLQLCVCPropertiesSizeWidth, QString::number(m_gridX));
+    tag.setAttribute(KXMLQLCVCPropertiesSizeHeight, QString::number(m_gridY));
+    prop_root.appendChild(tag);
+
+    /* Keyboard */
     tag = doc->createElement(KXMLQLCVCPropertiesKeyboard);
     tag.setAttribute(KXMLQLCVCPropertiesKeyboardTapModifier, tapModifier());
     prop_root.appendChild(tag);
-
-    /* Grab keyboard */
-    if (m_grabKeyboard == true)
-        tag.setAttribute(KXMLQLCVCPropertiesKeyboardGrab, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCVCPropertiesKeyboardGrab, KXMLQLCFalse);
-
-    /* Key repeat off */
-    if (m_keyRepeatOff == true)
-        tag.setAttribute(KXMLQLCVCPropertiesKeyboardRepeatOff, KXMLQLCTrue);
-    else
-        tag.setAttribute(KXMLQLCVCPropertiesKeyboardRepeatOff, KXMLQLCFalse);
 
     /***********************
      * Grand Master slider *

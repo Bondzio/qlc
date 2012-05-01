@@ -183,7 +183,6 @@ protected:
 
 protected:
     QMenu* m_customMenu;
-    QMenu* m_toolsMenu;
     QMenu* m_editMenu;
     QMenu* m_addMenu;
 

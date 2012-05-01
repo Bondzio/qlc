@@ -38,13 +38,13 @@ class Doc;
 
 #define KXMLQLCVCProperties "Properties"
 #define KXMLQLCVCPropertiesGrid "Grid"
-#define KXMLQLCVCPropertiesGridEnabled "Enabled"
 #define KXMLQLCVCPropertiesGridXResolution "XResolution"
 #define KXMLQLCVCPropertiesGridYResolution "YResolution"
+#define KXMLQLCVCPropertiesSize "Size"
+#define KXMLQLCVCPropertiesSizeWidth "Width"
+#define KXMLQLCVCPropertiesSizeHeight "Height"
 
 #define KXMLQLCVCPropertiesKeyboard "Keyboard"
-#define KXMLQLCVCPropertiesKeyboardGrab "Grab"
-#define KXMLQLCVCPropertiesKeyboardRepeatOff "RepeatOff"
 #define KXMLQLCVCPropertiesKeyboardTapModifier "TapModifier"
 
 #define KXMLQLCVCPropertiesGrandMaster "GrandMaster"
@@ -73,9 +73,6 @@ public:
      * Grid
      *********************************************************************/
 public:
-    void setGridEnabled(bool enable);
-    bool isGridEnabled() const;
-
     void setGridX(int x);
     int gridX() const;
 
@@ -83,26 +80,27 @@ public:
     int gridY() const;
 
 private:
-    bool m_gridEnabled;
     int m_gridX;
     int m_gridY;
+
+    /*********************************************************************
+     * Size
+     *********************************************************************/
+public:
+    void setSizeX(int x);
+    int sizeX() const;
+
+    void setSizeY(int y);
+    int sizeY() const;
+
+private:
+    int m_sizeX;
+    int m_sizeY;
 
     /*********************************************************************
      * Keyboard
      *********************************************************************/
 public:
-    /** Set key repeat off during operate mode or not. */
-    void setKeyRepeatOff(bool set);
-
-    /** Check, if key repeat is off during operate mode. */
-    bool isKeyRepeatOff() const;
-
-    /** Grab keyboard in operate mode or not. */
-    void setGrabKeyboard(bool grab);
-
-    /** Check, if keyboard is grabbed in operate mode. */
-    bool isGrabKeyboard() const;
-
     /** Set the tap modifier key */
     void setTapModifier(Qt::KeyboardModifier mod);
 
@@ -110,8 +108,6 @@ public:
     Qt::KeyboardModifier tapModifier() const;
 
 private:
-    bool m_keyRepeatOff;
-    bool m_grabKeyboard;
     Qt::KeyboardModifier m_tapModifier;
 
     /*************************************************************************

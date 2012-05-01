@@ -61,11 +61,11 @@ private:
     void fillTapModifierCombo();
 
 protected slots:
-    void slotGrabKeyboardClicked();
-    void slotKeyRepeatOffClicked();
     void slotTapModifierActivated(int index);
 
-    void slotGridClicked();
+    void slotSizeXChanged(int value);
+    void slotSizeYChanged(int value);
+
     void slotGridXChanged(int value);
     void slotGridYChanged(int value);
 

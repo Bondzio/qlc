@@ -57,11 +57,10 @@ VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& prop
     m_properties = properties;
 
     /* General page */
-    m_gridGroup->setChecked(properties.isGridEnabled());
+    m_sizeXSpin->setValue(properties.sizeX());
+    m_sizeYSpin->setValue(properties.sizeY());
     m_gridXSpin->setValue(properties.gridX());
     m_gridYSpin->setValue(properties.gridY());
-    m_grabKeyboardCheck->setChecked(properties.isGrabKeyboard());
-    m_keyRepeatOffCheck->setChecked(properties.isKeyRepeatOff());
     fillTapModifierCombo();
 
     /* Grand Master page */
@@ -124,19 +123,14 @@ void VCPropertiesEditor::fillTapModifierCombo()
             this, SLOT(slotTapModifierActivated(int)));
 }
 
-void VCPropertiesEditor::slotGrabKeyboardClicked()
+void VCPropertiesEditor::slotSizeXChanged(int value)
 {
-    m_properties.setGrabKeyboard(m_grabKeyboardCheck->isChecked());
+    m_properties.setSizeX(value);
 }
 
-void VCPropertiesEditor::slotKeyRepeatOffClicked()
+void VCPropertiesEditor::slotSizeYChanged(int value)
 {
-    m_properties.setKeyRepeatOff(m_keyRepeatOffCheck->isChecked());
-}
-
-void VCPropertiesEditor::slotGridClicked()
-{
-    m_properties.setGridEnabled(m_gridGroup->isChecked());
+    m_properties.setSizeY(value);
 }
 
 void VCPropertiesEditor::slotGridXChanged(int value)

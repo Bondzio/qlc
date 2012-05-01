@@ -74,28 +74,26 @@ fi
 popd
 
 #############################################################################
-# Velleman Output tests
+# Velleman test
 #############################################################################
 
 if [ ${ARCH} != "Darwin" ]; then
     pushd .
-    cd plugins/vellemanout/test
-    DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
-	    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./vellemanout_test
+    cd plugins/velleman/test
+    ./test.sh
     RESULT=$?
     if [ $RESULT != 0 ]; then
-	    echo "Velleman Output unit test failed ($RESULT). Please fix before commit."
+	    echo "Velleman unit test failed ($RESULT). Please fix before commit."
 	    exit $RESULT
     fi
     popd
 fi
 
 #############################################################################
-# MIDI Input tests
+# MIDI tests
 #############################################################################
-# The whole MIDI input plugin will be deprecated soon...
 #pushd .
-#cd plugins/midiinput/common/test
+#cd plugins/midi/common/test
 #DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:../src \
 #	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../src ./common_test
 #RESULT=$?

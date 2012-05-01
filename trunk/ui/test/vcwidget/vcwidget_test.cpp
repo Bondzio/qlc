@@ -730,30 +730,28 @@ void VCWidget_Test::resize()
     parent.resize(QSize(200, 200));
 
     VCProperties prop = VirtualConsole::instance()->properties();
-    prop.setGridEnabled(false);
     VirtualConsole::instance()->m_properties = prop;
 
     stub.resize(QSize(25, 25));
     QCOMPARE(stub.size(), QSize(25, 25));
 
     stub.resize(QSize(26, 26));
-    QCOMPARE(stub.size(), QSize(26, 26));
+    QCOMPARE(stub.size(), QSize(25, 25));
 
     stub.resize(QSize(31, 30));
-    QCOMPARE(stub.size(), QSize(31, 30));
+    QCOMPARE(stub.size(), QSize(30, 30));
 
     // Allow resizing beyond parent's area
     stub.resize(QSize(250, 250));
     QCOMPARE(stub.size(), QSize(250, 250));
 
-    prop.setGridEnabled(true);
     VirtualConsole::instance()->m_properties = prop;
 
     stub.resize(QSize(25, 25));
-    QCOMPARE(stub.size(), QSize(20, 20));
+    QCOMPARE(stub.size(), QSize(25, 25));
 
     stub.resize(QSize(26, 26));
-    QCOMPARE(stub.size(), QSize(20, 20));
+    QCOMPARE(stub.size(), QSize(25, 25));
 
     stub.resize(QSize(31, 30));
     QCOMPARE(stub.size(), QSize(30, 30));
@@ -774,7 +772,6 @@ void VCWidget_Test::move()
     stub.resize(QSize(50, 50));
 
     VCProperties prop = VirtualConsole::instance()->properties();
-    prop.setGridEnabled(false);
     VirtualConsole::instance()->m_properties = prop;
 
     stub.move(QPoint(25, 25));
@@ -786,14 +783,13 @@ void VCWidget_Test::move()
     stub.move(QPoint(190, 190));
     QCOMPARE(stub.geometry(), QRect(150, 150, 50, 50));
 
-    prop.setGridEnabled(true);
     VirtualConsole::instance()->m_properties = prop;
 
     stub.move(QPoint(25, 25));
-    QCOMPARE(stub.geometry(), QRect(20, 20, 50, 50));
+    QCOMPARE(stub.geometry(), QRect(25, 25, 50, 50));
 
     stub.move(QPoint(26, 26));
-    QCOMPARE(stub.geometry(), QRect(20, 20, 50, 50));
+    QCOMPARE(stub.geometry(), QRect(25, 25, 50, 50));
 
     stub.move(QPoint(30, 30));
     QCOMPARE(stub.geometry(), QRect(30, 30, 50, 50));

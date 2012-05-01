@@ -884,7 +884,7 @@ void VirtualConsole::slotToolsSettings()
     {
         m_properties = vcpe.properties();
         m_dockArea->refreshProperties();
-        contents()->resize(QSize(m_properties.sizeX(), m_properties.sizeY()));
+        contents()->resize(m_properties.size());
         m_doc->setModified();
     }
 }
@@ -1340,7 +1340,7 @@ void VirtualConsole::resetContents()
     m_contents->setFrameStyle(0);
 
     // Get virtual console size from properties
-    QSize size(m_properties.sizeX(), m_properties.sizeY());
+    QSize size(m_properties.size());
     contents()->resize(size);
     contents()->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     m_scrollArea->setWidget(contents());

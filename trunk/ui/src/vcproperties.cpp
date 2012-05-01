@@ -36,10 +36,7 @@
  *****************************************************************************/
 
 VCProperties::VCProperties()
-    : m_gridX(10)
-    , m_gridY(10)
-    , m_sizeX(1920)
-    , m_sizeY(1080)
+    : m_size(QSize(1920, 1080))
 
     , m_tapModifier(Qt::ControlModifier)
 
@@ -47,18 +44,11 @@ VCProperties::VCProperties()
     , m_gmValueMode(UniverseArray::GMReduce)
     , m_gmInputUniverse(InputMap::invalidUniverse())
     , m_gmInputChannel(InputMap::invalidChannel())
-    , m_gmVisible(true)
-
-    , m_blackoutInputUniverse(InputMap::invalidUniverse())
-    , m_blackoutInputChannel(InputMap::invalidChannel())
 {
 }
 
 VCProperties::VCProperties(const VCProperties& properties)
-    : m_gridX(properties.m_gridX)
-    , m_gridY(properties.m_gridY)
-    , m_sizeX(properties.m_sizeX)
-    , m_sizeY(properties.m_sizeY)
+    : m_size(properties.m_size)
 
     , m_tapModifier(properties.m_tapModifier)
 
@@ -66,10 +56,6 @@ VCProperties::VCProperties(const VCProperties& properties)
     , m_gmValueMode(properties.m_gmValueMode)
     , m_gmInputUniverse(properties.m_gmInputUniverse)
     , m_gmInputChannel(properties.m_gmInputChannel)
-    , m_gmVisible(properties.m_gmVisible)
-
-    , m_blackoutInputUniverse(properties.m_blackoutInputUniverse)
-    , m_blackoutInputChannel(properties.m_blackoutInputChannel)
 {
 }
 
@@ -78,51 +64,17 @@ VCProperties::~VCProperties()
 }
 
 /*****************************************************************************
- * Grid
- *****************************************************************************/
-
-void VCProperties::setGridX(int x)
-{
-    m_gridX = x;
-}
-
-int VCProperties::gridX() const
-{
-    return m_gridX;
-}
-
-void VCProperties::setGridY(int y)
-{
-    m_gridY = y;
-}
-
-int VCProperties::gridY() const
-{
-    return m_gridY;
-}
-
-/*****************************************************************************
  * Size
  *****************************************************************************/
 
-void VCProperties::setSizeX(int x)
+void VCProperties::setSize(const QSize& size)
 {
-    m_sizeX = x;
+    m_size = size;
 }
 
-int VCProperties::sizeX() const
+QSize VCProperties::size() const
 {
-    return m_sizeX;
-}
-
-void VCProperties::setSizeY(int y)
-{
-    m_sizeY = y;
-}
-
-int VCProperties::sizeY() const
-{
-    return m_sizeY;
+    return m_size;
 }
 
 /*****************************************************************************
@@ -142,16 +94,6 @@ Qt::KeyboardModifier VCProperties::tapModifier() const
 /*****************************************************************************
  * Grand Master
  *****************************************************************************/
-
-void VCProperties::setGMVisible(bool v)
-{
-    m_gmVisible = v;
-}
-
-bool VCProperties::isGMVisible() const
-{
-    return m_gmVisible;
-}
 
 void VCProperties::setGrandMasterChannelMode(UniverseArray::GMChannelMode mode)
 {
@@ -190,26 +132,6 @@ quint32 VCProperties::grandMasterInputChannel() const
 }
 
 /*****************************************************************************
- * Blackout
- *****************************************************************************/
-
-void VCProperties::setBlackoutInputSource(quint32 universe, quint32 channel)
-{
-    m_blackoutInputUniverse = universe;
-    m_blackoutInputChannel = channel;
-}
-
-quint32 VCProperties::blackoutInputUniverse() const
-{
-    return m_blackoutInputUniverse;
-}
-
-quint32 VCProperties::blackoutInputChannel() const
-{
-    return m_blackoutInputChannel;
-}
-
-/*****************************************************************************
  * Load & Save
  *****************************************************************************/
 
@@ -226,29 +148,23 @@ bool VCProperties::loadXML(const QDomElement& root)
     while (node.isNull() == false)
     {
         QDomElement tag = node.toElement();
-        if (tag.tagName() == KXMLQLCVCPropertiesGrid)
+        if (tag.tagName() == KXMLQLCVCPropertiesSize)
         {
-            /* Grid X resolution */
-            str = tag.attribute(KXMLQLCVCPropertiesGridXResolution);
-            if (str.isEmpty() == false)
-                setGridX(str.toInt());
+            QSize sz;
 
-            /* Grid Y resolution */
-            str = tag.attribute(KXMLQLCVCPropertiesGridYResolution);
-            if (str.isEmpty() == false)
-                setGridY(str.toInt());
-        }
-        else if (tag.tagName() == KXMLQLCVCPropertiesSize)
-        {
             /* Width */
             str = tag.attribute(KXMLQLCVCPropertiesSizeWidth);
             if (str.isEmpty() == false)
-                setSizeX(str.toInt());
+                sz.setWidth(str.toInt());
 
             /* Height */
             str = tag.attribute(KXMLQLCVCPropertiesSizeHeight);
             if (str.isEmpty() == false)
-                setSizeY(str.toInt());
+                sz.setHeight(str.toInt());
+
+            /* Set size if both are valid */
+            if (sz.isValid() == true)
+                setSize(sz);
         }
         else if (tag.tagName() == KXMLQLCVCPropertiesKeyboard)
         {
@@ -262,9 +178,6 @@ bool VCProperties::loadXML(const QDomElement& root)
             quint32 universe = InputMap::invalidUniverse();
             quint32 channel = InputMap::invalidChannel();
 
-            str = tag.attribute(KXMLQLCVCPropertiesGrandMasterVisible);
-            setGMVisible((str == KXMLQLCTrue) ? true : false);
-
             str = tag.attribute(KXMLQLCVCPropertiesGrandMasterChannelMode);
             setGrandMasterChannelMode(UniverseArray::stringToGMChannelMode(str));
 
@@ -275,17 +188,10 @@ bool VCProperties::loadXML(const QDomElement& root)
             if (loadXMLInput(tag.firstChild().toElement(), &universe, &channel) == true)
                 setGrandMasterInputSource(universe, channel);
         }
-        else if (tag.tagName() == KXMLQLCVCPropertiesBlackout)
-        {
-            /* External input */
-            quint32 universe = InputMap::invalidUniverse();
-            quint32 channel = InputMap::invalidChannel();
-            if (loadXMLInput(tag.firstChild().toElement(), &universe, &channel) == true)
-                setBlackoutInputSource(universe, channel);
-        }
         else
         {
-            qWarning() << Q_FUNC_INFO << "Unknown virtual console property tag:" << tag.tagName();
+            qWarning() << Q_FUNC_INFO << "Unknown virtual console property tag:"
+                       << tag.tagName();
         }
 
         /* Next node */
@@ -310,16 +216,10 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
     prop_root = doc->createElement(KXMLQLCVCProperties);
     wksp_root->appendChild(prop_root);
 
-    /* Grid */
-    tag = doc->createElement(KXMLQLCVCPropertiesGrid);
-    tag.setAttribute(KXMLQLCVCPropertiesGridXResolution, QString("%1").arg(m_gridX));
-    tag.setAttribute(KXMLQLCVCPropertiesGridYResolution, QString("%1").arg(m_gridY));
-    prop_root.appendChild(tag);
-
     /* Size */
     tag = doc->createElement(KXMLQLCVCPropertiesSize);
-    tag.setAttribute(KXMLQLCVCPropertiesSizeWidth, QString::number(m_gridX));
-    tag.setAttribute(KXMLQLCVCPropertiesSizeHeight, QString::number(m_gridY));
+    tag.setAttribute(KXMLQLCVCPropertiesSizeWidth, QString::number(size().width()));
+    tag.setAttribute(KXMLQLCVCPropertiesSizeHeight, QString::number(size().height()));
     prop_root.appendChild(tag);
 
     /* Keyboard */
@@ -331,7 +231,6 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
      * Grand Master slider *
      ***********************/
     tag = doc->createElement(KXMLQLCVCPropertiesGrandMaster);
-    tag.setAttribute(KXMLQLCVCPropertiesGrandMasterVisible, (isGMVisible()) ? KXMLQLCTrue : KXMLQLCFalse);
     prop_root.appendChild(tag);
 
     /* Channel mode */
@@ -354,24 +253,6 @@ bool VCProperties::saveXML(QDomDocument* doc, QDomElement* wksp_root) const
                             QString("%1").arg(m_gmInputChannel));
     }
 
-    /************
-     * Blackout *
-     ************/
-    tag = doc->createElement(KXMLQLCVCPropertiesBlackout);
-    prop_root.appendChild(tag);
-
-    /* Grand Master external input */
-    if (m_blackoutInputUniverse != InputMap::invalidUniverse() &&
-        m_blackoutInputChannel != InputMap::invalidChannel())
-    {
-        subtag = doc->createElement(KXMLQLCVCPropertiesInput);
-        tag.appendChild(subtag);
-        subtag.setAttribute(KXMLQLCVCPropertiesInputUniverse,
-                            QString("%1").arg(m_blackoutInputUniverse));
-        subtag.setAttribute(KXMLQLCVCPropertiesInputChannel,
-                            QString("%1").arg(m_blackoutInputChannel));
-    }
-
     return true;
 }
 
@@ -381,10 +262,8 @@ bool VCProperties::loadXMLInput(const QDomElement& tag, quint32* universe, quint
     if (tag.tagName() != KXMLQLCVCPropertiesInput)
         return false;
 
-    QString str;
-
     /* Universe */
-    str = tag.attribute(KXMLQLCVCPropertiesInputUniverse);
+    QString str = tag.attribute(KXMLQLCVCPropertiesInputUniverse);
     if (str.isEmpty() == false)
         *universe = str.toUInt();
     else

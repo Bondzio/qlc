@@ -59,11 +59,6 @@ void VCDockArea::refreshProperties()
 {
     Q_ASSERT(m_gm != NULL);
     m_gm->refreshProperties();
-
-    if (VirtualConsole::instance()->properties().isGMVisible() == true)
-        show();
-    else
-        hide();
 }
 
 /*****************************************************************************

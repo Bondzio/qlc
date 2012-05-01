@@ -57,10 +57,8 @@ VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& prop
     m_properties = properties;
 
     /* General page */
-    m_sizeXSpin->setValue(properties.sizeX());
-    m_sizeYSpin->setValue(properties.sizeY());
-    m_gridXSpin->setValue(properties.gridX());
-    m_gridYSpin->setValue(properties.gridY());
+    m_sizeXSpin->setValue(properties.size().width());
+    m_sizeYSpin->setValue(properties.size().height());
     fillTapModifierCombo();
 
     /* Grand Master page */
@@ -87,9 +85,6 @@ VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& prop
     }
 
     updateGrandMasterInputSource();
-
-    /* Blackout page*/
-    updateBlackoutInputSource();
 }
 
 VCPropertiesEditor::~VCPropertiesEditor()
@@ -108,7 +103,11 @@ VCProperties VCPropertiesEditor::properties() const
 void VCPropertiesEditor::fillTapModifierCombo()
 {
     QList <int> mods;
-    mods << Qt::ShiftModifier << Qt::ControlModifier << Qt::AltModifier << Qt::MetaModifier;
+    mods << Qt::ShiftModifier;
+    mods << Qt::ControlModifier;
+    mods << Qt::AltModifier;
+    mods << Qt::MetaModifier;
+
     foreach (int mod, mods)
     {
         QKeySequence seq(mod);
@@ -125,22 +124,16 @@ void VCPropertiesEditor::fillTapModifierCombo()
 
 void VCPropertiesEditor::slotSizeXChanged(int value)
 {
-    m_properties.setSizeX(value);
+    QSize sz(m_properties.size());
+    sz.setWidth(value);
+    m_properties.setSize(sz);
 }
 
 void VCPropertiesEditor::slotSizeYChanged(int value)
 {
-    m_properties.setSizeY(value);
-}
-
-void VCPropertiesEditor::slotGridXChanged(int value)
-{
-    m_properties.setGridX(value);
-}
-
-void VCPropertiesEditor::slotGridYChanged(int value)
-{
-    m_properties.setGridY(value);
+    QSize sz(m_properties.size());
+    sz.setHeight(value);
+    m_properties.setSize(sz);
 }
 
 void VCPropertiesEditor::slotTapModifierActivated(int index)
@@ -216,61 +209,6 @@ void VCPropertiesEditor::updateGrandMasterInputSource()
     {
         m_gmInputUniverseEdit->setText(KInputNone);
         m_gmInputChannelEdit->setText(KInputNone);
-    }
-}
-
-/*****************************************************************************
- * Blackout page
- *****************************************************************************/
-
-void VCPropertiesEditor::slotAutoDetectBlackoutInputToggled(bool checked)
-{
-    if (checked == true)
-    {
-        connect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
-                this, SLOT(slotBlackoutInputValueChanged(quint32,quint32)));
-    }
-    else
-    {
-        disconnect(m_inputMap, SIGNAL(inputValueChanged(quint32,quint32,uchar)),
-                   this, SLOT(slotBlackoutInputValueChanged(quint32,quint32)));
-    }
-}
-
-void VCPropertiesEditor::slotBlackoutInputValueChanged(quint32 universe,
-                                                       quint32 channel)
-{
-    m_properties.setBlackoutInputSource(universe, channel);
-    updateBlackoutInputSource();
-}
-
-void VCPropertiesEditor::slotChooseBlackoutInputClicked()
-{
-    SelectInputChannel sic(this, m_inputMap);
-    if (sic.exec() == QDialog::Accepted)
-    {
-        m_properties.setBlackoutInputSource(sic.universe(), sic.channel());
-        updateBlackoutInputSource();
-    }
-}
-
-void VCPropertiesEditor::updateBlackoutInputSource()
-{
-    QString uniName;
-    QString chName;
-
-    if (inputSourceNames(m_properties.blackoutInputUniverse(),
-                         m_properties.blackoutInputChannel(),
-                         uniName, chName) == true)
-    {
-        /* Display the gathered information */
-        m_blackoutInputUniverseEdit->setText(uniName);
-        m_blackoutInputChannelEdit->setText(chName);
-    }
-    else
-    {
-        m_blackoutInputUniverseEdit->setText(KInputNone);
-        m_blackoutInputChannelEdit->setText(KInputNone);
     }
 }
 

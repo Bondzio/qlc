@@ -37,9 +37,6 @@ class Doc;
 #define KXMLQLCVirtualConsole "VirtualConsole"
 
 #define KXMLQLCVCProperties "Properties"
-#define KXMLQLCVCPropertiesGrid "Grid"
-#define KXMLQLCVCPropertiesGridXResolution "XResolution"
-#define KXMLQLCVCPropertiesGridYResolution "YResolution"
 #define KXMLQLCVCPropertiesSize "Size"
 #define KXMLQLCVCPropertiesSizeWidth "Width"
 #define KXMLQLCVCPropertiesSizeHeight "Height"
@@ -51,8 +48,6 @@ class Doc;
 #define KXMLQLCVCPropertiesGrandMasterVisible "Visible"
 #define KXMLQLCVCPropertiesGrandMasterChannelMode "ChannelMode"
 #define KXMLQLCVCPropertiesGrandMasterValueMode "ValueMode"
-
-#define KXMLQLCVCPropertiesBlackout "Blackout"
 
 #define KXMLQLCVCPropertiesInput "Input"
 #define KXMLQLCVCPropertiesInputUniverse "Universe"
@@ -70,32 +65,17 @@ public:
     ~VCProperties();
 
     /*********************************************************************
-     * Grid
-     *********************************************************************/
-public:
-    void setGridX(int x);
-    int gridX() const;
-
-    void setGridY(int y);
-    int gridY() const;
-
-private:
-    int m_gridX;
-    int m_gridY;
-
-    /*********************************************************************
      * Size
      *********************************************************************/
 public:
-    void setSizeX(int x);
-    int sizeX() const;
+    /** Set Virtual Console bottom frame size */
+    void setSize(const QSize& size);
 
-    void setSizeY(int y);
-    int sizeY() const;
+    /** Get Virtual Console bottom frame size */
+    QSize size() const;
 
 private:
-    int m_sizeX;
-    int m_sizeY;
+    QSize m_size;
 
     /*********************************************************************
      * Keyboard
@@ -114,12 +94,6 @@ private:
      * Grand Master
      *************************************************************************/
 public:
-    /** Set grand master visible/hidden */
-    void setGMVisible(bool visible);
-
-    /** Check if grand master slider is visible */
-    bool isGMVisible() const;
-
     void setGrandMasterChannelMode(UniverseArray::GMChannelMode mode);
     UniverseArray::GMChannelMode grandMasterChannelMode() const;
 
@@ -135,19 +109,6 @@ private:
     UniverseArray::GMValueMode m_gmValueMode;
     quint32 m_gmInputUniverse;
     quint32 m_gmInputChannel;
-    bool m_gmVisible;
-
-    /*************************************************************************
-     * Blackout
-     *************************************************************************/
-public:
-    void setBlackoutInputSource(quint32 universe, quint32 channel);
-    quint32 blackoutInputUniverse() const;
-    quint32 blackoutInputChannel() const;
-
-private:
-    quint32 m_blackoutInputUniverse;
-    quint32 m_blackoutInputChannel;
 
     /*************************************************************************
      * Load & Save

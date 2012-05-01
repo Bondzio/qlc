@@ -40,9 +40,9 @@ class VCPropertiesEditor : public QDialog, public Ui_VCPropertiesEditor
     Q_OBJECT
     Q_DISABLE_COPY(VCPropertiesEditor)
 
-    /*********************************************************************
+    /*************************************************************************
      * Initialization
-     *********************************************************************/
+     *************************************************************************/
 public:
     VCPropertiesEditor(QWidget* parent, const VCProperties& properties,
                        InputMap* inputMap);
@@ -50,53 +50,38 @@ public:
 
     VCProperties properties() const;
 
-protected:
+private:
     VCProperties m_properties;
     InputMap* m_inputMap;
 
-    /*********************************************************************
+    /*************************************************************************
      * Layout page
-     *********************************************************************/
+     *************************************************************************/
 private:
     void fillTapModifierCombo();
 
-protected slots:
-    void slotTapModifierActivated(int index);
-
+private slots:
     void slotSizeXChanged(int value);
     void slotSizeYChanged(int value);
-
-    void slotGridXChanged(int value);
-    void slotGridYChanged(int value);
+    void slotTapModifierActivated(int index);
 
     /*************************************************************************
      * Grand Master page
      *************************************************************************/
-protected slots:
+private slots:
     void slotGrandMasterIntensityToggled(bool checked);
     void slotGrandMasterReduceToggled(bool checked);
     void slotAutoDetectGrandMasterInputToggled(bool checked);
     void slotGrandMasterInputValueChanged(quint32 universe, quint32 channel);
     void slotChooseGrandMasterInputClicked();
 
-protected:
+private:
     void updateGrandMasterInputSource();
-
-    /*************************************************************************
-     * Blackout page
-     *************************************************************************/
-protected slots:
-    void slotAutoDetectBlackoutInputToggled(bool checked);
-    void slotBlackoutInputValueChanged(quint32 universe, quint32 channel);
-    void slotChooseBlackoutInputClicked();
-
-protected:
-    void updateBlackoutInputSource();
 
     /*************************************************************************
      * Input Source helper
      *************************************************************************/
-protected:
+private:
     bool inputSourceNames(quint32 universe, quint32 channel,
                           QString& uniName, QString& chName) const;
 };

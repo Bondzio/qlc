@@ -51,7 +51,7 @@
 #include "vcwidget.h"
 #include "doc.h"
 
-#define GRID_RESOLUTION 10
+#define GRID_RESOLUTION 5
 
 VCWidget::VCWidget(QWidget* parent, Doc* doc)
     : QWidget(parent)

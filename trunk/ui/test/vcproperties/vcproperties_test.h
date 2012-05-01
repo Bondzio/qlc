@@ -35,13 +35,10 @@ private slots:
 
     void initial();
     void copy();
-    void reset();
-    void loadXML();
-    void loadPropertiesHappy();
-    void loadPropertiesSad();
+    void loadXMLSad();
+    void loadXMLHappy();
     void loadXMLInput();
-    void saveXMLHappy();
-    void saveXMLSad();
+    void saveXML();
 
 private:
     Doc* m_doc;

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-ARCH=`uname`
-
 #############################################################################
 # Engine tests
 #############################################################################
@@ -65,7 +63,7 @@ done
 
 pushd .
 cd plugins/enttecwing/test
-sh test.sh
+./test.sh
 RESULT=$?
 if [ $RESULT != 0 ]; then
 	echo "${RESULT} Enttec wing unit tests failed. Please fix before commit."
@@ -77,17 +75,15 @@ popd
 # Velleman test
 #############################################################################
 
-if [ ${ARCH} != "Darwin" ]; then
-    pushd .
-    cd plugins/velleman/test
-    ./test.sh
-    RESULT=$?
-    if [ $RESULT != 0 ]; then
-	    echo "Velleman unit test failed ($RESULT). Please fix before commit."
-	    exit $RESULT
-    fi
-    popd
+pushd .
+cd plugins/velleman/test
+./test.sh
+RESULT=$?
+if [ $RESULT != 0 ]; then
+    echo "Velleman unit test failed ($RESULT). Please fix before commit."
+	exit $RESULT
 fi
+popd
 
 #############################################################################
 # MIDI tests

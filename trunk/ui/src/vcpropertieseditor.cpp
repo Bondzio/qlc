@@ -112,8 +112,11 @@ void VCPropertiesEditor::fillTapModifierCombo()
     {
         QKeySequence seq(mod);
         QString str(seq.toString(QKeySequence::NativeText));
+#ifndef __APPLE__
         m_tapModifierCombo->addItem(str.remove(QRegExp("\\W")).trimmed(), mod);
-
+#else
+        m_tapModifierCombo->addItem(str, mod);
+#endif
         if (mod == int(m_properties.tapModifier()))
             m_tapModifierCombo->setCurrentIndex(m_tapModifierCombo->count() - 1);
     }

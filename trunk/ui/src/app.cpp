@@ -177,17 +177,17 @@ void App::init()
 
     // Create primary views.
     QWidget* w = new FixtureManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/fixtures.png"), tr("Fixtures"));
+    m_tab->addTab(w, tr("Fixtures"));
     w = new FunctionManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/functions.png"), tr("Functions"));
+    m_tab->addTab(w, tr("Functions"));
     w = new VirtualConsole(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/virtualconsole.png"), tr("Virtual Console"));
+    m_tab->addTab(w, tr("Virtual Console"));
     w = new SimpleDesk(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/simpledesk.png"), tr("Simple Desk"));
+    m_tab->addTab(w, tr("Simple Desk"));
     w = new OutputManager(m_tab, m_doc->outputMap());
-    m_tab->addTab(w, QIcon(":/outputs.png"), tr("Outputs"));
+    m_tab->addTab(w, tr("Outputs"));
     w = new InputManager(m_tab, m_doc->inputMap());
-    m_tab->addTab(w, QIcon(":/inputs.png"), tr("Inputs"));
+    m_tab->addTab(w, tr("Inputs"));
 
     // Listen to blackout changes and toggle m_controlBlackoutAction
     connect(m_doc->outputMap(), SIGNAL(blackoutChanged(bool)), this, SLOT(slotBlackoutChanged(bool)));

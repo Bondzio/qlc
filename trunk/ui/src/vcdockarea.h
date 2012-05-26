@@ -42,9 +42,6 @@ public:
     VCDockArea(QWidget* parent, OutputMap* outputMap, InputMap* inputMap);
     ~VCDockArea();
 
-    /** Refresh slider properties */
-    void refreshProperties();
-
 signals:
     void visibilityChanged(bool isVisible);
 

@@ -130,6 +130,48 @@ void OutputMap::releaseUniverses(bool changed)
     m_universeMutex.unlock();
 }
 
+void OutputMap::setGrandMasterChannelMode(UniverseArray::GMChannelMode mode)
+{
+    bool changed = false;
+    UniverseArray* ua = claimUniverses();
+    if(ua->gMChannelMode() != mode)
+    {
+        ua->setGMChannelMode(mode);
+        changed = true;
+    }
+    releaseUniverses(changed);
+}
+
+UniverseArray::GMChannelMode OutputMap::grandMasterChannelMode()
+{
+    UniverseArray* ua = claimUniverses();
+    UniverseArray::GMChannelMode mode = ua->gMChannelMode();
+    releaseUniverses(false);
+    return mode;
+}
+
+void OutputMap::setGrandMasterValueMode(UniverseArray::GMValueMode mode)
+{
+    bool changed = false;
+    UniverseArray* ua = claimUniverses();
+    if(ua->gMValueMode() != mode)
+    {
+        ua->setGMValueMode(mode);
+        changed = true;
+    }
+    releaseUniverses(changed);
+
+    emit grandMasterValueModeChanged(mode);
+}
+
+UniverseArray::GMValueMode OutputMap::grandMasterValueMode()
+{
+    UniverseArray* ua = claimUniverses();
+    UniverseArray::GMValueMode mode = ua->gMValueMode();
+    releaseUniverses(false);
+    return mode;
+}
+
 void OutputMap::setGrandMasterValue(uchar value)
 {
     bool changed = false;
@@ -182,6 +224,11 @@ void OutputMap::resetUniverses()
     claimUniverses();
     m_universeArray->reset();
     releaseUniverses();
+
+    /* Reset Grand Master parameters */
+    setGrandMasterValue(255);
+    setGrandMasterValueMode(UniverseArray::GMReduce);
+    setGrandMasterChannelMode(UniverseArray::GMIntensity);
 }
 
 /*****************************************************************************

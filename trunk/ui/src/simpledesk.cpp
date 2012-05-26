@@ -200,7 +200,6 @@ void SimpleDesk::initLeftSide()
 
     m_grandMasterSlider = new GrandMasterSlider(this, m_doc->outputMap(), m_doc->inputMap());
     vbox->addWidget(m_grandMasterSlider);
-    m_grandMasterSlider->refreshProperties();
 
     grpLay->addLayout(vbox);
 

@@ -159,8 +159,6 @@ VirtualConsole::VirtualConsole(QWidget* parent, Doc* doc)
 
     // Nothing is selected
     updateActions();
-
-    m_dockArea->refreshProperties();
 }
 
 VirtualConsole::~VirtualConsole()
@@ -883,8 +881,9 @@ void VirtualConsole::slotToolsSettings()
     if (vcpe.exec() == QDialog::Accepted)
     {
         m_properties = vcpe.properties();
-        m_dockArea->refreshProperties();
         contents()->resize(m_properties.size());
+        m_doc->outputMap()->setGrandMasterChannelMode(m_properties.grandMasterChannelMode());
+        m_doc->outputMap()->setGrandMasterValueMode(m_properties.grandMasterValueMode());
         m_doc->setModified();
     }
 }
@@ -1365,6 +1364,12 @@ void VirtualConsole::resetContents()
 
     /* Update actions' enabled status */
     updateActions();
+
+    /* Reset all properties but size */
+    m_properties.setTapModifier(Qt::ControlModifier);
+    m_properties.setGrandMasterChannelMode(UniverseArray::GMIntensity);
+    m_properties.setGrandMasterValueMode(UniverseArray::GMReduce);
+    m_properties.setGrandMasterInputSource(InputMap::invalidUniverse(), InputMap::invalidChannel());
 }
 
 void VirtualConsole::initContents()
@@ -1588,4 +1593,11 @@ bool VirtualConsole::saveXML(QDomDocument* doc, QDomElement* wksp_root)
 void VirtualConsole::postLoad()
 {
     m_contents->postLoad();
+
+    /* apply GM values
+      this should probably be placed in another place, but at the moment m_properties
+      is just loaded in VirtualConsole */
+    m_doc->outputMap()->setGrandMasterValue(255);
+    m_doc->outputMap()->setGrandMasterValueMode(m_properties.grandMasterValueMode());
+    m_doc->outputMap()->setGrandMasterChannelMode(m_properties.grandMasterChannelMode());
 }

@@ -52,6 +52,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
 
     m_valueLabel = new QLabel(this);
     m_valueLabel->setAlignment(Qt::AlignHCenter);
+    m_valueLabel->setText("100");
     layout()->addWidget(m_valueLabel);
 
     m_slider = new QSlider(this);
@@ -61,6 +62,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     m_slider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout()->addWidget(m_slider);
     layout()->setAlignment(m_slider, Qt::AlignHCenter);
+    m_slider->setValue(255);
     connect(m_slider, SIGNAL(valueChanged(int)),
             this, SLOT(slotValueChanged(int)));
 
@@ -73,21 +75,39 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
     /* Listen to GM value changes */
     connect(m_outputMap, SIGNAL(grandMasterValueChanged(uchar)),
             this, SLOT(slotGrandMasterValueChanged(uchar)));
+    connect(m_outputMap, SIGNAL(grandMasterValueModeChanged(UniverseArray::GMValueMode)),
+            this, SLOT(slotGrandMasterValueModeChanged(UniverseArray::GMValueMode)));
 
     /* External input connection */
     connect(m_inputMap, SIGNAL(inputValueChanged(quint32, quint32, uchar)),
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
+
+    updateTooltip();
 }
 
 GrandMasterSlider::~GrandMasterSlider()
 {
 }
 
-void GrandMasterSlider::refreshProperties()
+void GrandMasterSlider::slotValueChanged(int value)
+{
+    // Update display value
+    updateDisplayValue();
+
+    // Avoid double calls triggered by slotGrandMasterValueChanged
+    int curval = m_outputMap->grandMasterValue();
+    if(value != curval)
+    {
+        // Write new grand master value to universes
+        m_outputMap->setGrandMasterValue(value);
+    }
+}
+
+void GrandMasterSlider::updateTooltip()
 {
     QString tooltip;
 
-    switch (VirtualConsole::instance()->properties().grandMasterValueMode())
+    switch (m_outputMap->grandMasterValueMode())
     {
         case UniverseArray::GMLimit:
             tooltip += tr("Grand Master <B>limits</B> the maximum value of");
@@ -99,7 +119,7 @@ void GrandMasterSlider::refreshProperties()
 
     tooltip += QString(" ");
 
-    switch (VirtualConsole::instance()->properties().grandMasterChannelMode())
+    switch (m_outputMap->grandMasterChannelMode())
     {
         case UniverseArray::GMIntensity:
             tooltip += tr("intensity channels");
@@ -110,34 +130,33 @@ void GrandMasterSlider::refreshProperties()
     }
 
     setToolTip(tooltip);
-
-    /* Set properties to UniverseArray */
-    m_slider->setValue(m_outputMap->grandMasterValue());
 }
 
-void GrandMasterSlider::slotValueChanged(int value)
+void GrandMasterSlider::updateDisplayValue()
 {
-    // Write new grand master value to universes
-    m_outputMap->setGrandMasterValue(value);
-
-    // Display value
+    int value = m_slider->value();
     QString str;
-    if (VirtualConsole::instance()->properties().grandMasterValueMode() == UniverseArray::GMLimit)
+    if (m_outputMap->grandMasterValueMode() == UniverseArray::GMLimit)
     {
         str = QString("%1").arg(value, 3, 10, QChar('0'));
     }
     else
     {
         int p = floor(((double(value) / double(UCHAR_MAX)) * double(100)) + 0.5);
-        str = QString("%1").arg(p, 3, 10, QChar('0'));
+        str = QString("%1").arg(p, 2, 10, QChar('0'));
     }
-
     m_valueLabel->setText(str);
 }
 
 void GrandMasterSlider::slotGrandMasterValueChanged(uchar value)
 {
     m_slider->setValue(value);
+}
+
+void GrandMasterSlider::slotGrandMasterValueModeChanged(UniverseArray::GMValueMode )
+{
+    updateTooltip();
+    updateDisplayValue();
 }
 
 /*****************************************************************************

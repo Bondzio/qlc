@@ -29,6 +29,8 @@
 #include <QHash>
 #include <QDir>
 
+#include "universearray.h"
+
 class OutputPatchEditor;
 class OutputMapEditor;
 class UniverseArray;
@@ -135,6 +137,26 @@ public:
     virtual void releaseUniverses(bool changed = true);
 
     /**
+     * Set grand master channel mode (intensity or all channels)
+     */
+    void setGrandMasterChannelMode(UniverseArray::GMChannelMode mode);
+
+    /**
+     * Get grand master channel mode (intensity or all channels)
+     */
+    UniverseArray::GMChannelMode grandMasterChannelMode();
+
+    /**
+     * Set grand master value mode (limit or reduce)
+     */
+    void setGrandMasterValueMode(UniverseArray::GMValueMode mode);
+
+    /**
+     * Set grand master value mode (limit or reduce)
+     */
+    UniverseArray::GMValueMode grandMasterValueMode();
+
+    /**
      * Set grand master value (0-255)
      */
     void setGrandMasterValue(uchar value);
@@ -158,6 +180,7 @@ public:
 signals:
     void universesWritten(const QByteArray& universes);
     void grandMasterValueChanged(uchar value);
+    void grandMasterValueModeChanged(UniverseArray::GMValueMode mode);
 
 private:
     /** The values of all universes */

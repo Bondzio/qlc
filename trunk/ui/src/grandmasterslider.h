@@ -24,6 +24,8 @@
 
 #include <QFrame>
 
+#include "../../engine/src/universearray.h"
+
 class OutputMap;
 class InputMap;
 class QSlider;
@@ -38,11 +40,14 @@ public:
     GrandMasterSlider(QWidget* parent, OutputMap* outputMap, InputMap* inputMap);
     virtual ~GrandMasterSlider();
 
-    void refreshProperties();
+private:
+    void updateTooltip();
+    void updateDisplayValue();
 
 protected slots:
     void slotValueChanged(int value);
     void slotGrandMasterValueChanged(uchar value);
+    void slotGrandMasterValueModeChanged(UniverseArray::GMValueMode );
 
 protected:
     QLabel* m_valueLabel;

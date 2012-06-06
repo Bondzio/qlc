@@ -47,7 +47,7 @@ private:
 protected slots:
     void slotValueChanged(int value);
     void slotGrandMasterValueChanged(uchar value);
-    void slotGrandMasterValueModeChanged(UniverseArray::GMValueMode );
+    void slotGrandMasterValueModeChanged(UniverseArray::GMValueMode mode);
 
 protected:
     QLabel* m_valueLabel;

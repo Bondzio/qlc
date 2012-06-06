@@ -52,7 +52,6 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
 
     m_valueLabel = new QLabel(this);
     m_valueLabel->setAlignment(Qt::AlignHCenter);
-    m_valueLabel->setText("100");
     layout()->addWidget(m_valueLabel);
 
     m_slider = new QSlider(this);
@@ -83,6 +82,7 @@ GrandMasterSlider::GrandMasterSlider(QWidget* parent, OutputMap* outputMap, Inpu
             this, SLOT(slotInputValueChanged(quint32, quint32, uchar)));
 
     updateTooltip();
+    updateDisplayValue();
 }
 
 GrandMasterSlider::~GrandMasterSlider()
@@ -143,7 +143,7 @@ void GrandMasterSlider::updateDisplayValue()
     else
     {
         int p = floor(((double(value) / double(UCHAR_MAX)) * double(100)) + 0.5);
-        str = QString("%1").arg(p, 2, 10, QChar('0'));
+        str = QString("%1%").arg(p, 2, 10, QChar('0'));
     }
     m_valueLabel->setText(str);
 }
@@ -153,8 +153,9 @@ void GrandMasterSlider::slotGrandMasterValueChanged(uchar value)
     m_slider->setValue(value);
 }
 
-void GrandMasterSlider::slotGrandMasterValueModeChanged(UniverseArray::GMValueMode )
+void GrandMasterSlider::slotGrandMasterValueModeChanged(UniverseArray::GMValueMode mode)
 {
+    Q_UNUSED(mode);
     updateTooltip();
     updateDisplayValue();
 }

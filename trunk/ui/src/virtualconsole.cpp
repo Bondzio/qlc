@@ -949,10 +949,7 @@ void VirtualConsole::slotEditPaste()
     Q_ASSERT(contents() != NULL);
 
     /* Select the parent that gets the cut clipboard contents */
-    if (m_selectedWidgets.size() == 0)
-        parent = contents();
-    else
-        parent = m_selectedWidgets.last();
+    parent = closestParent();
 
     /* Get the bounding rect for all selected widgets */
     QListIterator <VCWidget*> it(m_clipboard);
@@ -973,6 +970,8 @@ void VirtualConsole::slotEditPaste()
         {
             widget = it.next();
             Q_ASSERT(widget != NULL);
+            if (widget == parent)
+                continue;
 
             /* Get widget's relative pos to the bounding rect */
             QPoint p(widget->x() - bounds.x() + cp.x(),
@@ -995,6 +994,8 @@ void VirtualConsole::slotEditPaste()
         {
             widget = it.next();
             Q_ASSERT(widget != NULL);
+            if (widget == parent)
+                continue;
 
             /* Get widget's relative pos to the bounding rect */
             QPoint p(widget->x() - bounds.x() + cp.x(),

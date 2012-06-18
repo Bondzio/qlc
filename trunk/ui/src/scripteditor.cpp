@@ -132,6 +132,7 @@ void ScriptEditor::slotContentsChanged()
 {
     //! @todo: this might become quite heavy if there's a lot of content
     m_script->setData(m_document->toPlainText());
+    m_doc->setModified();
 }
 
 void ScriptEditor::slotAddStartFunction()

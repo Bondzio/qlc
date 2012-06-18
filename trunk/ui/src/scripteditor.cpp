@@ -147,7 +147,7 @@ void ScriptEditor::slotAddStartFunction()
         {
             Function* function = m_doc->function(id);
             Q_ASSERT(function != NULL);
-            QString cmd = QString("%1: %2 // %3\n").arg(Script::startFunctionCmd)
+            QString cmd = QString("%1:%2 // %3\n").arg(Script::startFunctionCmd)
                                                    .arg(id)
                                                    .arg(function->name());
             cursor.insertText(cmd);

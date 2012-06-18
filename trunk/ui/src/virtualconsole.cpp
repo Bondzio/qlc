@@ -664,8 +664,8 @@ void VirtualConsole::slotAddButton()
     Q_ASSERT(button != NULL);
     button->show();
     button->move(parent->lastClickPoint());
-    m_selectedWidgets << button;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(button, true);
     m_doc->setModified();
 }
 
@@ -722,8 +722,8 @@ void VirtualConsole::slotAddButtonMatrix()
     frame->show();
     frame->move(parent->lastClickPoint());
     frame->setAllowChildren(false); // Don't allow more children
-    m_selectedWidgets << frame;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(frame, true);
     m_doc->setModified();
 }
 
@@ -737,8 +737,8 @@ void VirtualConsole::slotAddSlider()
     Q_ASSERT(slider != NULL);
     slider->show();
     slider->move(parent->lastClickPoint());
-    m_selectedWidgets << slider;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(slider, true);
     m_doc->setModified();
 }
 
@@ -776,8 +776,8 @@ void VirtualConsole::slotAddSliderMatrix()
     frame->show();
     frame->move(parent->lastClickPoint());
     frame->setAllowChildren(false); // Don't allow more children
-    m_selectedWidgets << frame;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(frame, true);
     m_doc->setModified();
 }
 
@@ -791,8 +791,8 @@ void VirtualConsole::slotAddSpeedDial()
     Q_ASSERT(dial != NULL);
     dial->show();
     dial->move(parent->lastClickPoint());
-    m_selectedWidgets << dial;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(dial, true);
     m_doc->setModified();
 }
 
@@ -806,8 +806,8 @@ void VirtualConsole::slotAddXYPad()
     Q_ASSERT(xypad != NULL);
     xypad->show();
     xypad->move(parent->lastClickPoint());
-    m_selectedWidgets << xypad;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(xypad, true);
     m_doc->setModified();
 }
 
@@ -821,8 +821,8 @@ void VirtualConsole::slotAddCueList()
     Q_ASSERT(cuelist != NULL);
     cuelist->show();
     cuelist->move(parent->lastClickPoint());
-    m_selectedWidgets << cuelist;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(cuelist, true);
     m_doc->setModified();
 }
 
@@ -836,8 +836,8 @@ void VirtualConsole::slotAddFrame()
     Q_ASSERT(frame != NULL);
     frame->show();
     frame->move(parent->lastClickPoint());
-    m_selectedWidgets << frame;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(frame, true);
     m_doc->setModified();
 }
 
@@ -851,8 +851,8 @@ void VirtualConsole::slotAddSoloFrame()
     Q_ASSERT(soloframe != NULL);
     soloframe->show();
     soloframe->move(parent->lastClickPoint());
-    m_selectedWidgets << soloframe;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(soloframe, true);
     m_doc->setModified();
 }
 
@@ -866,8 +866,8 @@ void VirtualConsole::slotAddLabel()
     Q_ASSERT(label != NULL);
     label->show();
     label->move(parent->lastClickPoint());
-    m_selectedWidgets << label;
-    updateActions();
+    clearWidgetSelection();
+    setWidgetSelected(label, true);
     m_doc->setModified();
 }
 

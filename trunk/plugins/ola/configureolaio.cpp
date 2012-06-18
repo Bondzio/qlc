@@ -2,7 +2,7 @@
   Q Light Controller
   configureolaio.cpp
 
-  Copyright (C) Simon Newton,
+  Copyright (C) Simon Newton
                 Heikki Junnila
 
   This program is free software; you can redistribute it and/or

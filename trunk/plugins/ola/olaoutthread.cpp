@@ -2,8 +2,7 @@
   Q Light Controller
   olaoutthread.cpp
 
-  Copyright (c) Heikki Junnila
-                Simon Newton
+  Copyright (c) Simon Newton
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -118,7 +117,8 @@ int OlaOutThread::write_dmx(unsigned int universe, const QByteArray& data)
 /*
  * Called when the pipe used to communicate between QLC and OLA is closed
  */
-void OlaOutThread::pipe_closed() {
+void OlaOutThread::pipe_closed()
+{
     // We don't need to delete the socket here because that gets done in the
     // Destructor.
     m_ss->Terminate();
@@ -128,7 +128,8 @@ void OlaOutThread::pipe_closed() {
 /*
  * Called when there is data to be read on the pipe socket.
  */
-void OlaOutThread::new_pipe_data() {
+void OlaOutThread::new_pipe_data()
+{
     dmx_data data;
     unsigned int data_read;
     int ret = m_pipe->Receive((uint8_t*) &data, sizeof(data), data_read);
@@ -137,6 +138,7 @@ void OlaOutThread::new_pipe_data() {
         qCritical() << "olaout: socket receive failed";
         return;
     }
+
     m_buffer.Set(data.data, data_read - sizeof(data.universe));
     if (!m_client->SendDmx(data.universe, m_buffer))
         qWarning() << "olaout:: SendDmx() failed";
@@ -147,7 +149,8 @@ void OlaOutThread::new_pipe_data() {
  * Setup the OlaClient to communicate with the server.
  * @return true if the setup worked corectly.
  */
-bool OlaOutThread::setup_client(ola::io::ConnectedDescriptor *descriptor) {
+bool OlaOutThread::setup_client(ola::io::ConnectedDescriptor *descriptor)
+{
     if (!m_client)
     {
         m_client = new ola::OlaClient(descriptor);
@@ -167,7 +170,8 @@ bool OlaOutThread::setup_client(ola::io::ConnectedDescriptor *descriptor) {
 /*
  * Cleanup after the main destructor has run
  */
-void OlaStandaloneClient::cleanup() {
+void OlaStandaloneClient::cleanup()
+{
     if (m_tcp_socket)
     {
         if (m_ss)

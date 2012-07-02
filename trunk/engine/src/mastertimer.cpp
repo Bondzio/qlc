@@ -24,6 +24,7 @@
 #ifdef WIN32
 #   include "mastertimer-win32.h"
 #else
+#   include <unistd.h>
 #   include "mastertimer-unix.h"
 #endif
 

@@ -21,6 +21,8 @@
 
 #ifdef WIN32
 #	include <Windows.h>
+#else
+#   include <unistd.h>
 #endif
 
 #include <QCoreApplication>

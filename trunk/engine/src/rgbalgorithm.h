@@ -37,6 +37,8 @@ typedef QVector<QVector<uint> > RGBMap;
 class RGBAlgorithm
 {
 public:
+    virtual ~RGBAlgorithm() { /* NOP */ }
+
     enum Type
     {
         Text,

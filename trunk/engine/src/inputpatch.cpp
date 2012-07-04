@@ -20,7 +20,9 @@
 */
 
 #ifdef WIN32
-#	include <Windows.h>
+#   include <Windows.h>
+#else
+#   include <unistd.h>
 #endif
 
 #include <QObject>

@@ -64,7 +64,7 @@ bool OlaOutThread::start(Priority priority)
     if (!m_pipe)
     {
         // setup the pipe to recv dmx data on
-        m_pipe = new ola::io::LoopbackDescriptor();
+        m_pipe = new ola::network::LoopbackDescriptor();
         m_pipe->Init();
 
         m_pipe->SetOnData(ola::NewCallback(this, &OlaOutThread::new_pipe_data));
@@ -149,7 +149,7 @@ void OlaOutThread::new_pipe_data()
  * Setup the OlaClient to communicate with the server.
  * @return true if the setup worked corectly.
  */
-bool OlaOutThread::setup_client(ola::io::ConnectedDescriptor *descriptor)
+bool OlaOutThread::setup_client(ola::network::ConnectedDescriptor *descriptor)
 {
     if (!m_client)
     {
@@ -195,7 +195,7 @@ bool OlaStandaloneClient::init()
         return true;
 
     if (!m_ss)
-        m_ss = new ola::io::SelectServer();
+        m_ss = new ola::network::SelectServer();
 
     if (!m_tcp_socket)
     {
@@ -264,7 +264,7 @@ bool OlaEmbeddedServer::init()
     // setup the pipe socket used to communicate with the OlaServer
     if (!m_pipe_socket)
     {
-        m_pipe_socket = new ola::io::PipeDescriptor();
+        m_pipe_socket = new ola::network::PipeDescriptor();
         if (!m_pipe_socket->Init())
         {
             qWarning() << "olaout: pipe failed";

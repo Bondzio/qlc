@@ -116,7 +116,7 @@ QString EnttecDMXUSBOpen::additionalInfo() const
  * Thread
  ****************************************************************************/
 
-bool EnttecDMXUSBOpen::sendDMX(const QByteArray& universe)
+bool EnttecDMXUSBOpen::writeUniverse(const QByteArray& universe)
 {
     m_universe.replace(1, MIN(universe.size(), m_universe.size()), universe);
     return true;

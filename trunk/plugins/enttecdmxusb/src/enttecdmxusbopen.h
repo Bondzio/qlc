@@ -79,7 +79,7 @@ public:
      ************************************************************************/
 public:
     /** @reimp */
-    bool sendDMX(const QByteArray& universe);
+    bool writeUniverse(const QByteArray& universe);
 
 protected:
     enum TimerGranularity { Unknown, Good, Bad };

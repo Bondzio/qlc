@@ -62,7 +62,7 @@ private:
      ********************************************************************/
 public:
     /**
-     * Open widget for further operations, such as serial() and sendDMX()
+     * Open widget for further operations, such as serial() and writeUniverse()
      *
      * @return true if widget was opened successfully (or was already open)
      */

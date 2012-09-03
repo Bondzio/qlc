@@ -50,8 +50,10 @@ OutputPatchEditor::OutputPatchEditor(QWidget* parent, quint32 universe, OutputMa
 
     m_infoBrowser->setOpenExternalLinks(true);
 
+    // Make sure that patch exists
     OutputPatch* patch = outputMap->patch(m_universe);
     Q_ASSERT(patch != NULL);
+    Q_UNUSED(patch);
 
     /* Selection changes */
     connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),

@@ -691,10 +691,10 @@ void VCCueList_Test::manualActivation()
     c->setDuration(Function::infiniteSpeed());
     cl.setChaser(c->id());
     Scene* s1 = qobject_cast<Scene*> (m_doc->function(c->steps()[0].fid));
-    Scene* s2 = qobject_cast<Scene*> (m_doc->function(c->steps()[1].fid));
+    //Scene* s2 = qobject_cast<Scene*> (m_doc->function(c->steps()[1].fid));
     Scene* s3 = qobject_cast<Scene*> (m_doc->function(c->steps()[2].fid));
-    Scene* s4 = qobject_cast<Scene*> (m_doc->function(c->steps()[3].fid));
-    Q_ASSERT(s1 && s2 && s3 && s4);
+    //Scene* s4 = qobject_cast<Scene*> (m_doc->function(c->steps()[3].fid));
+    Q_ASSERT(s1 /*&& s2*/ && s3/* && s4*/);
 
     // Switch mode
     m_doc->setMode(Doc::Operate);

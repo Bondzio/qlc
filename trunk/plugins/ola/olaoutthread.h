@@ -27,7 +27,8 @@
 
 #include <ola/DmxBuffer.h>
 #include <ola/OlaClient.h>
-#include <ola/network/SelectServer.h>
+#include <ola/io/Descriptor.h>
+#include <ola/io/SelectServer.h>
 #include <ola/network/Socket.h>
 #include <olad/OlaDaemon.h>
 
@@ -75,14 +76,14 @@ public:
     void pipe_closed();
 
 protected:
-    bool setup_client(ola::network::ConnectedDescriptor *descriptor);
+    bool setup_client(ola::io::ConnectedDescriptor *descriptor);
     bool m_init_run;
-    ola::network::SelectServer *m_ss; // the select server
+    ola::io::SelectServer *m_ss; // the select server
 
 private:
     virtual bool init() = 0;
     virtual void cleanup() {};
-    ola::network::LoopbackDescriptor *m_pipe; // the pipe to get new dmx data on
+    ola::io::LoopbackDescriptor *m_pipe; // the pipe to get new dmx data on
     ola::OlaClient *m_client;
     dmx_data m_data;
     ola::DmxBuffer m_buffer;
@@ -102,7 +103,7 @@ public:
 private:
     bool init();
     void cleanup();
-    ola::network::TcpSocket *m_tcp_socket;
+    ola::network::TCPSocket *m_tcp_socket;
 };
 
 
@@ -121,7 +122,7 @@ private:
     bool init();
     void cleanup();
     ola::OlaDaemon *m_daemon;
-    ola::network::PipeDescriptor *m_pipe_socket;
+    ola::io::PipeDescriptor *m_pipe_socket;
 };
 
 #endif
